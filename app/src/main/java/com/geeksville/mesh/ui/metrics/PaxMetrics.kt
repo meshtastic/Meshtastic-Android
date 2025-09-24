@@ -60,7 +60,7 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
-import com.geeksville.mesh.util.formatUptime
+import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
 import java.text.DateFormat
 import java.util.Date

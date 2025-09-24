@@ -28,7 +28,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
@@ -59,6 +58,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.prefs.map.MapPrefs

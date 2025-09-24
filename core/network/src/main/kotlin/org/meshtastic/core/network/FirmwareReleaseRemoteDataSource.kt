@@ -19,7 +19,7 @@ package org.meshtastic.core.network
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.network.model.NetworkFirmwareReleases
+import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.service.ApiService
 import javax.inject.Inject
 

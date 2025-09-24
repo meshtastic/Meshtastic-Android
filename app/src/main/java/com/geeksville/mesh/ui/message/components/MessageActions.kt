@@ -39,8 +39,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.R
 
 @Composable

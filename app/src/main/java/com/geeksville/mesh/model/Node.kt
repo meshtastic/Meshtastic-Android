@@ -26,12 +26,12 @@ import com.geeksville.mesh.TelemetryProtos.DeviceMetrics
 import com.geeksville.mesh.TelemetryProtos.EnvironmentMetrics
 import com.geeksville.mesh.TelemetryProtos.PowerMetrics
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.util.GPSFormat
-import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
-import com.geeksville.mesh.util.latLongToMeter
 import com.geeksville.mesh.util.toDistanceString
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
+import org.meshtastic.core.model.util.GPSFormat
+import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
+import org.meshtastic.core.model.util.latLongToMeter
 
 @Suppress("MagicNumber")
 data class Node(
@@ -114,7 +114,7 @@ data class Node(
     // @return bearing to the other position in degrees
     fun bearing(o: Node?): Int? = when {
         validPosition == null || o?.validPosition == null -> null
-        else -> com.geeksville.mesh.util.bearing(latitude, longitude, o.latitude, o.longitude).toInt()
+        else -> org.meshtastic.core.model.util.bearing(latitude, longitude, o.latitude, o.longitude).toInt()
     }
 
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)

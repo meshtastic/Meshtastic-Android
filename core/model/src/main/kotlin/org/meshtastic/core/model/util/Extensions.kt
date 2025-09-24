@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.core.model.util
 
 import android.widget.EditText
-import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshProtos
+import org.meshtastic.core.model.BuildConfig
 
 /**
  * When printing strings to logs sometimes we want to print useful debugging information about users or positions. But
@@ -60,6 +60,7 @@ fun Any.toPIIString() = if (!BuildConfig.DEBUG) {
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
+@Suppress("MagicNumber")
 fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMillis()): String {
     val currentTime = (currentTimeMillis / 1000).toInt()
     val diffMin = (currentTime - lastSeenUnix) / 60

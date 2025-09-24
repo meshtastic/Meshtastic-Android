@@ -54,7 +54,6 @@ import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
-import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.common.components.CopyIconButton
@@ -70,6 +69,7 @@ import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
 import timber.log.Timber
 import java.net.MalformedURLException

@@ -47,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.UIViewModel
@@ -58,6 +57,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.R
 
 @Composable

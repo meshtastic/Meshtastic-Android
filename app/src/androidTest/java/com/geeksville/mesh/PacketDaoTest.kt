@@ -33,6 +33,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.model.DataPacket
 
 @RunWith(AndroidJUnit4::class)
 class PacketDaoTest {
@@ -40,25 +41,24 @@ class PacketDaoTest {
     private lateinit var nodeInfoDao: NodeInfoDao
     private lateinit var packetDao: PacketDao
 
-    private val myNodeInfo: MyNodeEntity = MyNodeEntity(
-        myNodeNum = 42424242,
-        model = null,
-        firmwareVersion = null,
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 1L,
-        messageTimeoutMsec = 5 * 60 * 1000,
-        minAppVersion = 1,
-        maxChannels = 8,
-        hasWifi = false,
-    )
+    private val myNodeInfo: MyNodeEntity =
+        MyNodeEntity(
+            myNodeNum = 42424242,
+            model = null,
+            firmwareVersion = null,
+            couldUpdate = false,
+            shouldUpdate = false,
+            currentPacketId = 1L,
+            messageTimeoutMsec = 5 * 60 * 1000,
+            minAppVersion = 1,
+            maxChannels = 8,
+            hasWifi = false,
+        )
 
-    private val myNodeNum: Int get() = myNodeInfo.myNodeNum
+    private val myNodeNum: Int
+        get() = myNodeInfo.myNodeNum
 
-    private val testContactKeys = listOf(
-        "0${DataPacket.ID_BROADCAST}",
-        "1!test1234",
-    )
+    private val testContactKeys = listOf("0${DataPacket.ID_BROADCAST}", "1!test1234")
 
     private fun generateTestPackets(myNodeNum: Int) = testContactKeys.flatMap { contactKey ->
         List(SAMPLE_SIZE) {
@@ -79,14 +79,13 @@ class PacketDaoTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         database = Room.inMemoryDatabaseBuilder(context, MeshtasticDatabase::class.java).build()
 
-        nodeInfoDao = database.nodeInfoDao().apply {
-            setMyNodeInfo(myNodeInfo)
-        }
+        nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
 
-        packetDao = database.packetDao().apply {
-            generateTestPackets(42424243).forEach { insert(it) }
-            generateTestPackets(myNodeNum).forEach { insert(it) }
-        }
+        packetDao =
+            database.packetDao().apply {
+                generateTestPackets(42424243).forEach { insert(it) }
+                generateTestPackets(myNodeNum).forEach { insert(it) }
+            }
     }
 
     @After

@@ -20,7 +20,6 @@ package com.geeksville.mesh.database
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.entity.MetadataEntity
@@ -28,7 +27,6 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
-import com.geeksville.mesh.util.onlineTimeThreshold
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,6 +38,8 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.onlineTimeThreshold
 import javax.inject.Inject
 import javax.inject.Singleton
 

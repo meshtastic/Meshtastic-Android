@@ -29,7 +29,6 @@ import com.geeksville.mesh.service.BLEConnectionClosing
 import com.geeksville.mesh.service.BLEException
 import com.geeksville.mesh.service.RadioNotConnectedException
 import com.geeksville.mesh.service.SafeBluetooth
-import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.exceptionReporter
 import com.geeksville.mesh.util.ignoreException
 import dagger.assisted.Assisted
@@ -37,6 +36,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import org.meshtastic.core.model.util.anonymize
 import java.lang.reflect.Method
 import java.util.UUID
 

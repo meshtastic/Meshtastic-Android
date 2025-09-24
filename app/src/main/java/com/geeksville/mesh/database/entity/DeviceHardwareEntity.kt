@@ -22,7 +22,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.network.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkDeviceHardware
 
 @Serializable
 @Entity(tableName = "device_hardware")

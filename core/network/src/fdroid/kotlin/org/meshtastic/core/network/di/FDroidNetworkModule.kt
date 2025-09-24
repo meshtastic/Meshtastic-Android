@@ -23,9 +23,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.BuildConfig
-import org.meshtastic.core.network.model.NetworkDeviceHardware
-import org.meshtastic.core.network.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.service.ApiService
 import javax.inject.Singleton
 

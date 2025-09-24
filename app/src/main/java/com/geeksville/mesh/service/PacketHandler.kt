@@ -17,11 +17,9 @@
 
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.BuildUtils.info
@@ -31,8 +29,6 @@ import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.util.toOneLineString
-import com.geeksville.mesh.util.toPIIString
 import dagger.Lazy
 import java8.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +36,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.toOneLineString
+import org.meshtastic.core.model.util.toPIIString
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit

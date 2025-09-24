@@ -15,15 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.model
 
 import android.graphics.Color
 import android.os.Parcelable
-import com.geeksville.mesh.util.anonymize
-import com.geeksville.mesh.util.bearing
-import com.geeksville.mesh.util.latLongToMeter
-import com.geeksville.mesh.util.onlineTimeThreshold
+import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.TelemetryProtos
 import kotlinx.parcelize.Parcelize
+import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.model.util.bearing
+import org.meshtastic.core.model.util.latLongToMeter
+import org.meshtastic.core.model.util.onlineTimeThreshold
 
 //
 // model objects that directly map to the corresponding protobufs
@@ -74,6 +77,7 @@ data class Position(
     val precisionBits: Int = 0,
 ) : Parcelable {
 
+    @Suppress("MagicNumber")
     companion object {
         // / Convert to a double representation of degrees
         fun degD(i: Int) = i * 1e-7
@@ -109,6 +113,7 @@ data class Position(
     fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
 
     // If GPS gives a crap position don't crash our app
+    @Suppress("MagicNumber")
     fun isValid(): Boolean = latitude != 0.0 &&
         longitude != 0.0 &&
         (latitude >= -90 && latitude <= 90.0) &&
@@ -128,6 +133,7 @@ data class DeviceMetrics(
     val uptimeSeconds: Int,
 ) : Parcelable {
     companion object {
+        @Suppress("MagicNumber")
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
     }
 
@@ -153,6 +159,7 @@ data class EnvironmentMetrics(
     val lux: Float? = null,
     val uvLux: Float? = null,
 ) : Parcelable {
+    @Suppress("MagicNumber")
     companion object {
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
 
@@ -189,6 +196,7 @@ data class NodeInfo(
     var hopsAway: Int = 0,
 ) : Parcelable {
 
+    @Suppress("MagicNumber")
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
             val r = (num and 0xFF0000) shr 16
@@ -204,6 +212,7 @@ data class NodeInfo(
     val voltage
         get() = deviceMetrics?.voltage
 
+    @Suppress("ImplicitDefaultLocale")
     val batteryStr
         get() = if (batteryLevel in 1..100) String.format("%d%%", batteryLevel) else ""
 
@@ -234,6 +243,7 @@ data class NodeInfo(
     }
 
     // / @return a nice human readable string for the distance, or null for unknown
+    @Suppress("MagicNumber")
     fun distanceStr(o: NodeInfo?, prefUnits: Int = 0) = distance(o)?.let { dist ->
         when {
             dist == 0 -> null // same point

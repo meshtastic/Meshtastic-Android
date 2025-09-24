@@ -18,8 +18,8 @@
 package org.meshtastic.core.network.service
 
 import de.jensklingenberg.ktorfit.http.GET
-import org.meshtastic.core.network.model.NetworkDeviceHardware
-import org.meshtastic.core.network.model.NetworkFirmwareReleases
+import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkFirmwareReleases
 
 interface ApiService {
     @GET("resource/deviceHardware")

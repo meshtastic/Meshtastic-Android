@@ -15,16 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.core.model.util
 
 import kotlin.math.ln
 
 object UnitConversions {
 
     @Suppress("MagicNumber")
-    fun celsiusToFahrenheit(celsius: Float): Float {
-        return (celsius * 1.8F) + 32
-    }
+    fun celsiusToFahrenheit(celsius: Float): Float = (celsius * 1.8F) + 32
 
     fun Float.toTempString(isFahrenheit: Boolean) = if (isFahrenheit) {
         val fahrenheit = celsiusToFahrenheit(this)
@@ -34,8 +32,8 @@ object UnitConversions {
     }
 
     /**
-     * Calculated the dew point based on the Magnus-Tetens approximation which is a widely used
-     * formula for calculating dew point temperature.
+     * Calculated the dew point based on the Magnus-Tetens approximation which is a widely used formula for calculating
+     * dew point temperature.
      */
     @Suppress("MagicNumber")
     fun calculateDewPoint(tempCelsius: Float, humidity: Float): Float {

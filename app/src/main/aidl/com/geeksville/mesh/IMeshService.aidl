@@ -2,11 +2,11 @@
 package com.geeksville.mesh;
 
 // Declare any non-default types here with import statements
-parcelable DataPacket;
-parcelable NodeInfo;
-parcelable MeshUser;
-parcelable Position;
-parcelable MyNodeInfo;
+import org.meshtastic.core.model.DataPacket;
+import org.meshtastic.core.model.NodeInfo;
+import org.meshtastic.core.model.MeshUser;
+import org.meshtastic.core.model.Position;
+import org.meshtastic.core.model.MyNodeInfo;
 
 /**
 This is the public android API for talking to meshtastic radios.

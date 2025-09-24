@@ -15,34 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.core.model
 
-import com.geeksville.mesh.android.Logging
+import timber.log.Timber
 
-/**
- * Provide structured access to parse and compare device version strings
- */
-data class DeviceVersion(val asString: String) : Comparable<DeviceVersion>, Logging {
+/** Provide structured access to parse and compare device version strings */
+data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     val asInt
-        get() = try {
-            verStringToInt(asString)
-        } catch (e: Exception) {
-            warn("Exception while parsing version '$asString', assuming version 0")
-            0
-        }
+        get() =
+            try {
+                verStringToInt(asString)
+            } catch (e: Exception) {
+                Timber.w("Exception while parsing version '$asString', assuming version 0")
+                0
+            }
 
     /**
-     * Convert a version string of the form 1.23.57 to a comparable integer of
-     * the form 12357.
+     * Convert a version string of the form 1.23.57 to a comparable integer of the form 12357.
      *
      * Or throw an exception if the string can not be parsed
      */
+    @Suppress("TooGenericExceptionThrown", "MagicNumber")
     private fun verStringToInt(s: String): Int {
         // Allow 1 to two digits per match
-        val match =
-            Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(s)
-                ?: throw Exception("Can't parse version $s")
+        val match = Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(s) ?: throw Exception("Can't parse version $s")
         val (major, minor, build) = match.destructured
         return major.toInt() * 10000 + minor.toInt() * 100 + build.toInt()
     }

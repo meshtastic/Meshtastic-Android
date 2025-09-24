@@ -25,7 +25,7 @@ import com.geeksville.mesh.database.entity.asEntity
 import dagger.Lazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.network.model.NetworkFirmwareRelease
+import org.meshtastic.core.model.NetworkFirmwareRelease
 import javax.inject.Inject
 
 class FirmwareReleaseLocalDataSource @Inject constructor(private val firmwareReleaseDaoLazy: Lazy<FirmwareReleaseDao>) {

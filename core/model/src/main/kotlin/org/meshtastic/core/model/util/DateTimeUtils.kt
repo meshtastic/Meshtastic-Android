@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.core.model.util
 
 import java.text.DateFormat
 import java.util.Date
@@ -58,7 +58,8 @@ private fun formatUptime(seconds: Long): String {
         "${hours}h".takeIf { hours > 0 },
         "${minutes}m".takeIf { minutes > 0 },
         "${secs}s".takeIf { secs > 0 },
-    ).joinToString(" ")
+    )
+        .joinToString(" ")
 }
 
 @Suppress("MagicNumber")

@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+@file:Suppress("MatchingDeclarationName")
+
+package org.meshtastic.core.model.util
 
 import android.annotation.SuppressLint
-import com.geeksville.mesh.Position
+import org.meshtastic.core.model.Position
 import java.util.Locale
 import kotlin.math.asin
 import kotlin.math.atan2
@@ -52,6 +54,7 @@ fun latLongToMeter(latitudeA: Double, longitudeA: Double, latitudeB: Double, lon
 }
 
 // Same as above, but takes Mesh Position proto.
+@Suppress("MagicNumber")
 fun positionToMeter(a: Position, b: Position): Double =
     latLongToMeter(a.latitude * 1e-7, a.longitude * 1e-7, b.latitude * 1e-7, b.longitude * 1e-7)
 
@@ -64,6 +67,7 @@ fun positionToMeter(a: Position, b: Position): Double =
  * @param lon2 Longitude of the second point
  * @return Bearing between the two points in degrees. A value of 0 means due north.
  */
+@Suppress("MagicNumber")
 fun bearing(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
     val lat1Rad = Math.toRadians(lat1)
     val lon1Rad = Math.toRadians(lon1)

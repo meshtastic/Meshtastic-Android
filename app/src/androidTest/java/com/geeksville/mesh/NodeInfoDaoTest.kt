@@ -26,7 +26,6 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
-import com.geeksville.mesh.util.onlineTimeThreshold
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -38,6 +37,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.model.util.onlineTimeThreshold
 
 @RunWith(AndroidJUnit4::class)
 class NodeInfoDaoTest {
@@ -48,129 +48,150 @@ class NodeInfoDaoTest {
     private val offlineNodeLastHeard = onlineThreshold - 30
     private val onlineNodeLastHeard = onlineThreshold + 20
 
-    private val unknownNode = NodeEntity(
-        num = 7,
-        user = user {
-            id = "!a1b2c3d4"
-            longName = "Meshtastic c3d4"
-            shortName = "c3d4"
-            hwModel = MeshProtos.HardwareModel.UNSET
-        },
-        longName = "Meshtastic c3d4",
-        shortName = null // Dao filter for includeUnknown
-    )
-
-    private val ourNode = NodeEntity(
-        num = 8,
-        user = user {
-            id = "+16508765308".format(8)
-            longName = "Kevin Mester"
-            shortName = "KLO"
-            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-            isLicensed = false
-        },
-        longName = "Kevin Mester", shortName = "KLO",
-        latitude = 30.267153, longitude = -97.743057, // Austin
-        hopsAway = 0,
-    )
-
-    private val onlineNode = NodeEntity(
-        num = 9,
-        user = user {
-            id = "!25060801"
-            longName = "Meshtastic 0801"
-            shortName = "0801"
-            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-        },
-        longName = "Meshtastic 0801",
-        shortName = "0801",
-        hopsAway = 0,
-        lastHeard = onlineNodeLastHeard
-    )
-
-    private val offlineNode = NodeEntity(
-        num = 10,
-        user = user {
-            id = "!25060802"
-            longName = "Meshtastic 0802"
-            shortName = "0802"
-            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-        },
-        longName = "Meshtastic 0802",
-        shortName = "0802",
-        hopsAway = 0,
-        lastHeard = offlineNodeLastHeard
-    )
-
-    private val directNode = NodeEntity(
-        num = 11,
-        user = user {
-            id = "!25060803"
-            longName = "Meshtastic 0803"
-            shortName = "0803"
-            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-        },
-        longName = "Meshtastic 0803",
-        shortName = "0803",
-        hopsAway = 0,
-        lastHeard = onlineNodeLastHeard
-    )
-
-    private val relayedNode = NodeEntity(
-        num = 12,
-        user = user {
-            id = "!25060804"
-            longName = "Meshtastic 0804"
-            shortName = "0804"
-            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-        },
-        longName = "Meshtastic 0804",
-        shortName = "0804",
-        hopsAway = 3,
-        lastHeard = onlineNodeLastHeard
-    )
-
-    private val myNodeInfo: MyNodeEntity = MyNodeEntity(
-        myNodeNum = ourNode.num,
-        model = null,
-        firmwareVersion = null,
-        couldUpdate = false,
-        shouldUpdate = false,
-        currentPacketId = 1L,
-        messageTimeoutMsec = 5 * 60 * 1000,
-        minAppVersion = 1,
-        maxChannels = 8,
-        hasWifi = false,
-    )
-
-    private val testPositions = arrayOf(
-        0.0 to 0.0,
-        32.776665 to -96.796989,  // Dallas
-        32.960758 to -96.733521,  // Richardson
-        32.912901 to -96.781776,  // North Dallas
-        29.760427 to -95.369804,  // Houston
-        33.748997 to -84.387985,  // Atlanta
-        34.052235 to -118.243683, // Los Angeles
-        40.712776 to -74.005974,  // New York City
-        41.878113 to -87.629799,  // Chicago
-        39.952583 to -75.165222,  // Philadelphia
-    )
-    private val testNodes = listOf(ourNode, unknownNode, onlineNode, offlineNode, directNode, relayedNode) + testPositions.mapIndexed { index, pos ->
+    private val unknownNode =
         NodeEntity(
-            num = 1000 + index,
-            user = user {
-                id = "+165087653%02d".format(9 + index)
-                longName = "Kevin Mester$index"
-                shortName = "KM$index"
+            num = 7,
+            user =
+            user {
+                id = "!a1b2c3d4"
+                longName = "Meshtastic c3d4"
+                shortName = "c3d4"
+                hwModel = MeshProtos.HardwareModel.UNSET
+            },
+            longName = "Meshtastic c3d4",
+            shortName = null, // Dao filter for includeUnknown
+        )
+
+    private val ourNode =
+        NodeEntity(
+            num = 8,
+            user =
+            user {
+                id = "+16508765308".format(8)
+                longName = "Kevin Mester"
+                shortName = "KLO"
                 hwModel = MeshProtos.HardwareModel.ANDROID_SIM
                 isLicensed = false
-                publicKey = ByteString.copyFrom(ByteArray(32) { index.toByte() })
             },
-            longName = "Kevin Mester$index", shortName = "KM$index",
-            latitude = pos.first, longitude = pos.second,
-            lastHeard = 9 + index,
+            longName = "Kevin Mester",
+            shortName = "KLO",
+            latitude = 30.267153,
+            longitude = -97.743057, // Austin
+            hopsAway = 0,
         )
-    }
+
+    private val onlineNode =
+        NodeEntity(
+            num = 9,
+            user =
+            user {
+                id = "!25060801"
+                longName = "Meshtastic 0801"
+                shortName = "0801"
+                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
+            },
+            longName = "Meshtastic 0801",
+            shortName = "0801",
+            hopsAway = 0,
+            lastHeard = onlineNodeLastHeard,
+        )
+
+    private val offlineNode =
+        NodeEntity(
+            num = 10,
+            user =
+            user {
+                id = "!25060802"
+                longName = "Meshtastic 0802"
+                shortName = "0802"
+                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
+            },
+            longName = "Meshtastic 0802",
+            shortName = "0802",
+            hopsAway = 0,
+            lastHeard = offlineNodeLastHeard,
+        )
+
+    private val directNode =
+        NodeEntity(
+            num = 11,
+            user =
+            user {
+                id = "!25060803"
+                longName = "Meshtastic 0803"
+                shortName = "0803"
+                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
+            },
+            longName = "Meshtastic 0803",
+            shortName = "0803",
+            hopsAway = 0,
+            lastHeard = onlineNodeLastHeard,
+        )
+
+    private val relayedNode =
+        NodeEntity(
+            num = 12,
+            user =
+            user {
+                id = "!25060804"
+                longName = "Meshtastic 0804"
+                shortName = "0804"
+                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
+            },
+            longName = "Meshtastic 0804",
+            shortName = "0804",
+            hopsAway = 3,
+            lastHeard = onlineNodeLastHeard,
+        )
+
+    private val myNodeInfo: MyNodeEntity =
+        MyNodeEntity(
+            myNodeNum = ourNode.num,
+            model = null,
+            firmwareVersion = null,
+            couldUpdate = false,
+            shouldUpdate = false,
+            currentPacketId = 1L,
+            messageTimeoutMsec = 5 * 60 * 1000,
+            minAppVersion = 1,
+            maxChannels = 8,
+            hasWifi = false,
+        )
+
+    private val testPositions =
+        arrayOf(
+            0.0 to 0.0,
+            32.776665 to -96.796989, // Dallas
+            32.960758 to -96.733521, // Richardson
+            32.912901 to -96.781776, // North Dallas
+            29.760427 to -95.369804, // Houston
+            33.748997 to -84.387985, // Atlanta
+            34.052235 to -118.243683, // Los Angeles
+            40.712776 to -74.005974, // New York City
+            41.878113 to -87.629799, // Chicago
+            39.952583 to -75.165222, // Philadelphia
+        )
+    private val testNodes =
+        listOf(ourNode, unknownNode, onlineNode, offlineNode, directNode, relayedNode) +
+            testPositions.mapIndexed { index, pos ->
+                NodeEntity(
+                    num = 1000 + index,
+                    user =
+                    user {
+                        id = "+165087653%02d".format(9 + index)
+                        longName = "Kevin Mester$index"
+                        shortName = "KM$index"
+                        hwModel = MeshProtos.HardwareModel.ANDROID_SIM
+                        isLicensed = false
+                        publicKey = ByteString.copyFrom(ByteArray(32) { index.toByte() })
+                    },
+                    longName = "Kevin Mester$index",
+                    shortName = "KM$index",
+                    latitude = pos.first,
+                    longitude = pos.second,
+                    lastHeard = 9 + index,
+                )
+            }
 
     @Before
     fun createDb(): Unit = runBlocking {
@@ -190,8 +211,8 @@ class NodeInfoDaoTest {
     }
 
     /**
-     * Retrieves a list of nodes based on [sort], [filter] and [includeUnknown] parameters.
-     * The list excludes [ourNode] to ensure consistency in the results.
+     * Retrieves a list of nodes based on [sort], [filter] and [includeUnknown] parameters. The list excludes [ourNode]
+     * to ensure consistency in the results.
      */
     private suspend fun getNodes(
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,
@@ -199,13 +220,17 @@ class NodeInfoDaoTest {
         includeUnknown: Boolean = true,
         onlyOnline: Boolean = false,
         onlyDirect: Boolean = false,
-    ) = nodeInfoDao.getNodes(
-        sort = sort.sqlValue,
-        filter = filter,
-        includeUnknown = includeUnknown,
-        hopsAwayMax = if (onlyDirect) 0 else -1,
-        lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
-    ).map { list -> list.map { it.toModel() } }.first().filter { it.num != ourNode.num }
+    ) = nodeInfoDao
+        .getNodes(
+            sort = sort.sqlValue,
+            filter = filter,
+            includeUnknown = includeUnknown,
+            hopsAwayMax = if (onlyDirect) 0 else -1,
+            lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
+        )
+        .map { list -> list.map { it.toModel() } }
+        .first()
+        .filter { it.num != ourNode.num }
 
     @Test // node list size
     fun testNodeListSize() = runBlocking {
@@ -237,9 +262,10 @@ class NodeInfoDaoTest {
     fun testSortByDistance() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.DISTANCE)
         fun NodeEntity.toNode() = Node(num = num, user = user, position = position)
-        val sortedNodes = nodes.sortedWith( // nodes with invalid (null) positions at the end
-            compareBy<Node> { it.validPosition == null }.thenBy { it.distance(ourNode.toNode()) }
-        )
+        val sortedNodes =
+            nodes.sortedWith( // nodes with invalid (null) positions at the end
+                compareBy<Node> { it.validPosition == null }.thenBy { it.distance(ourNode.toNode()) },
+            )
         assertEquals(sortedNodes, nodes)
     }
 
@@ -297,9 +323,8 @@ class NodeInfoDaoTest {
 
     @Test
     fun testPkcMismatch() = runBlocking {
-        val newNode = testNodes[1].copy(user = testNodes[1].user.copy {
-            publicKey = ByteString.copyFrom(ByteArray(32) { 99 })
-        })
+        val newNode =
+            testNodes[1].copy(user = testNodes[1].user.copy { publicKey = ByteString.copyFrom(ByteArray(32) { 99 }) })
         nodeInfoDao.putAll(listOf(newNode))
         val nodes = getNodes()
         val containsMismatchNode = nodes.any { it.mismatchKey }

@@ -43,8 +43,8 @@ import androidx.core.net.toUri
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.HyperlinkBlue
-import com.geeksville.mesh.util.GPSFormat
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.util.GPSFormat
 import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)

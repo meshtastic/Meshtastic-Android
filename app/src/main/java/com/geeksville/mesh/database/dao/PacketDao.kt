@@ -23,13 +23,13 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
-import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.PacketEntity
 import com.geeksville.mesh.database.entity.ReactionEntity
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 
 @Dao
 interface PacketDao {
@@ -40,7 +40,7 @@ interface PacketDao {
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = :portNum
     ORDER BY received_time ASC
-    """
+    """,
     )
     fun getAllPackets(portNum: Int): Flow<List<Packet>>
 
@@ -50,16 +50,22 @@ interface PacketDao {
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1
     ORDER BY received_time DESC
-    """
+    """,
     )
-    fun getContactKeys(): Flow<Map<@MapColumn(columnName = "contact_key") String, Packet>>
+    fun getContactKeys(): Flow<
+        Map<
+            @MapColumn(columnName = "contact_key")
+            String,
+            Packet,
+            >,
+        >
 
     @Query(
         """
     SELECT COUNT(*) FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact
-    """
+    """,
     )
     suspend fun getMessageCount(contact: String): Int
 
@@ -68,7 +74,7 @@ interface PacketDao {
     SELECT COUNT(*) FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact AND read = 0
-    """
+    """,
     )
     suspend fun getUnreadCount(contact: String): Int
 
@@ -78,12 +84,11 @@ interface PacketDao {
     SET read = 1
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact AND read = 0 AND received_time <= :timestamp
-    """
+    """,
     )
     suspend fun clearUnreadCount(contact: String, timestamp: Long)
 
-    @Upsert
-    suspend fun insert(packet: Packet)
+    @Upsert suspend fun insert(packet: Packet)
 
     @Transaction
     @Query(
@@ -92,7 +97,7 @@ interface PacketDao {
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact
     ORDER BY received_time DESC
-    """
+    """,
     )
     fun getMessagesFrom(contact: String): Flow<List<PacketEntity>>
 
@@ -101,7 +106,7 @@ interface PacketDao {
     SELECT * FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND data = :data
-    """
+    """,
     )
     suspend fun findDataPacket(data: DataPacket): Packet?
 
@@ -113,16 +118,16 @@ interface PacketDao {
     DELETE FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND contact_key IN (:contactList)
-    """
+    """,
     )
     suspend fun deleteContacts(contactList: List<String>)
 
     @Query("DELETE FROM packet WHERE uuid=:uuid")
-    suspend fun _delete(uuid: Long)
+    suspend fun delete(uuid: Long)
 
     @Transaction
     suspend fun delete(packet: Packet) {
-        _delete(packet.uuid)
+        delete(packet.uuid)
     }
 
     @Query("SELECT packet_id FROM packet WHERE uuid IN (:uuidList)")
@@ -140,8 +145,7 @@ interface PacketDao {
         deletePackets(uuidList)
     }
 
-    @Update
-    suspend fun update(packet: Packet)
+    @Update suspend fun update(packet: Packet)
 
     @Transaction
     suspend fun updateMessageStatus(data: DataPacket, m: MessageStatus) {
@@ -160,7 +164,7 @@ interface PacketDao {
     SELECT data FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
     ORDER BY received_time ASC
-    """
+    """,
     )
     suspend fun getDataPackets(): List<DataPacket>
 
@@ -171,7 +175,7 @@ interface PacketDao {
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND packet_id = :requestId
     ORDER BY received_time DESC
-    """
+    """,
     )
     suspend fun getPacketById(requestId: Int): Packet?
 
@@ -180,8 +184,7 @@ interface PacketDao {
     suspend fun getPacketByPacketId(packetId: Int): PacketEntity?
 
     @Transaction
-    suspend fun getQueuedPackets(): List<DataPacket>? =
-        getDataPackets().filter { it.status == MessageStatus.QUEUED }
+    suspend fun getQueuedPackets(): List<DataPacket>? = getDataPackets().filter { it.status == MessageStatus.QUEUED }
 
     @Query(
         """
@@ -189,7 +192,7 @@ interface PacketDao {
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 8
     ORDER BY received_time ASC
-    """
+    """,
     )
     suspend fun getAllWaypoints(): List<Packet>
 
@@ -200,25 +203,30 @@ interface PacketDao {
     }
 
     @Query("SELECT * FROM contact_settings")
-    fun getContactSettings(): Flow<Map<@MapColumn(columnName = "contact_key") String, ContactSettings>>
+    fun getContactSettings(): Flow<
+        Map<
+            @MapColumn(columnName = "contact_key")
+            String,
+            ContactSettings,
+            >,
+        >
 
     @Query("SELECT * FROM contact_settings WHERE contact_key = :contact")
     suspend fun getContactSettings(contact: String): ContactSettings?
 
-    @Upsert
-    suspend fun upsertContactSettings(contacts: List<ContactSettings>)
+    @Upsert suspend fun upsertContactSettings(contacts: List<ContactSettings>)
 
     @Transaction
     suspend fun setMuteUntil(contacts: List<String>, until: Long) {
-        val contactList = contacts.map { contact ->
-            getContactSettings(contact)?.copy(muteUntil = until)
-                ?: ContactSettings(contact_key = contact, muteUntil = until)
-        }
+        val contactList =
+            contacts.map { contact ->
+                getContactSettings(contact)?.copy(muteUntil = until)
+                    ?: ContactSettings(contact_key = contact, muteUntil = until)
+            }
         upsertContactSettings(contactList)
     }
 
-    @Upsert
-    suspend fun insert(reaction: ReactionEntity)
+    @Upsert suspend fun insert(reaction: ReactionEntity)
 
     @Query("DELETE FROM packet")
     suspend fun deleteAll()

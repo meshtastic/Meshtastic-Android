@@ -33,7 +33,6 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.DeviceUIProtos
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
@@ -42,14 +41,9 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.FromRadio.PayloadVariantCase
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.mesh.MeshUser
-import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.ModuleConfigProtos
-import com.geeksville.mesh.MyNodeInfo
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.Position
 import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.LocalStats
@@ -68,7 +62,6 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.ReactionEntity
 import com.geeksville.mesh.fromRadio
-import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.position
@@ -78,10 +71,7 @@ import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.telemetry
 import com.geeksville.mesh.user
-import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.ignoreException
-import com.geeksville.mesh.util.toOneLineString
-import com.geeksville.mesh.util.toPIIString
 import com.geeksville.mesh.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
@@ -100,7 +90,17 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.MeshUser
+import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.NodeInfo
+import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.getFullTracerouteResponse
+import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.model.util.toOneLineString
+import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.strings.R
@@ -2155,8 +2155,9 @@ class MeshService :
                 toRemoteExceptions {
                     if (p.id == 0) p.id = generatePacketId()
 
+                    val bytes = p.bytes!!
                     info(
-                        "sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes" +
+                        "sendData dest=${p.to}, id=${p.id} <- ${bytes.size} bytes" +
                             " (connectionState=$connectionState)",
                     )
 
@@ -2164,7 +2165,7 @@ class MeshService :
                         throw Exception("Port numbers must be non-zero!") // we are now more strict
                     }
 
-                    if (p.bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN.number) {
+                    if (bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN.number) {
                         p.status = MessageStatus.ERROR
                         throw RemoteException("Message too long")
                     } else {
@@ -2188,7 +2189,7 @@ class MeshService :
 
                     GeeksvilleApplication.analytics.track(
                         "data_send",
-                        DataPair("num_bytes", p.bytes.size),
+                        DataPair("num_bytes", bytes.size),
                         DataPair("type", p.dataType),
                     )
 

@@ -21,7 +21,7 @@ import android.app.Application
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import org.meshtastic.core.network.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkDeviceHardware
 import javax.inject.Inject
 
 class DeviceHardwareJsonDataSource @Inject constructor(private val application: Application) {

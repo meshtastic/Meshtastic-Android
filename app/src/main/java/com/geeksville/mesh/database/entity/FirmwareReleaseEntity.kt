@@ -20,9 +20,9 @@ package com.geeksville.mesh.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.geeksville.mesh.model.DeviceVersion
 import kotlinx.serialization.Serializable
-import org.meshtastic.core.network.model.NetworkFirmwareRelease
+import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.NetworkFirmwareRelease
 
 @Serializable
 @Entity(tableName = "firmware_release")
