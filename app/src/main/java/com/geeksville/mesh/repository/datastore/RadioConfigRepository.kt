@@ -24,15 +24,12 @@ import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.getChannelUrl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
@@ -50,12 +47,6 @@ constructor(
     private val localConfigDataSource: LocalConfigDataSource,
     private val moduleConfigDataSource: ModuleConfigDataSource,
 ) {
-
-    suspend fun getNodeDBbyNum() = nodeDB.getNodeDBbyNum().first()
-
-    suspend fun insertMetadata(fromNum: Int, metadata: DeviceMetadata) {
-        nodeDB.insertMetadata(MetadataEntity(fromNum, metadata))
-    }
 
     /** Flow representing the [ChannelSet] data store. */
     val channelSetFlow: Flow<ChannelSet> = channelSetDataSource.channelSetFlow

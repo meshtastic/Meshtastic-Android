@@ -81,11 +81,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.Packet
@@ -449,7 +451,7 @@ class MeshService :
     private fun loadSettings() = serviceScope.handledLaunch {
         discardNodeDB() // Get rid of any old state
         myNodeInfo = nodeRepository.myNodeInfo.value
-        nodeDBbyNodeNum.putAll(radioConfigRepository.getNodeDBbyNum())
+        nodeDBbyNodeNum.putAll(nodeRepository.getNodeDBbyNum().first())
         // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
         // device (rather than
         // this possibly stale hint)
@@ -939,7 +941,7 @@ class MeshService :
             AdminProtos.AdminMessage.PayloadVariantCase.GET_DEVICE_METADATA_RESPONSE -> {
                 debug("Admin: received DeviceMetadata from $fromNodeNum")
                 serviceScope.handledLaunch {
-                    radioConfigRepository.insertMetadata(fromNodeNum, a.getDeviceMetadataResponse)
+                    nodeRepository.insertMetadata(MetadataEntity(fromNodeNum, a.getDeviceMetadataResponse))
                 }
             }
 
@@ -1624,7 +1626,7 @@ class MeshService :
                         deviceId = deviceId.toStringUtf8(),
                     )
                 }
-            serviceScope.handledLaunch { radioConfigRepository.insertMetadata(mi.myNodeNum, metadata) }
+            serviceScope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
             newMyNodeInfo = mi
         }
     }
