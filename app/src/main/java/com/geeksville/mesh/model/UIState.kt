@@ -821,7 +821,7 @@ constructor(
         get() = serviceRepository.tracerouteResponse.asLiveData()
 
     fun clearTracerouteResponse() {
-        radioConfigRepository.clearTracerouteResponse()
+        serviceRepository.setTracerouteResponse(null)
     }
 
     fun setNodeFilterText(text: String) {

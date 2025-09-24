@@ -889,7 +889,7 @@ class MeshService :
                                 } else {
                                     full
                                 }
-                            radioConfigRepository.setTracerouteResponse(response)
+                            serviceRepository.setTracerouteResponse(response)
                         }
                     }
 

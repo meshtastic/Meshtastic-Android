@@ -29,7 +29,6 @@ import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.getChannelUrl
-import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -46,7 +45,6 @@ import javax.inject.Inject
 class RadioConfigRepository
 @Inject
 constructor(
-    private val serviceRepository: ServiceRepository,
     private val nodeDB: NodeRepository,
     private val channelSetDataSource: ChannelSetDataSource,
     private val localConfigDataSource: LocalConfigDataSource,
@@ -138,12 +136,4 @@ constructor(
                 }
             }
         }
-
-    fun setTracerouteResponse(value: String?) {
-        serviceRepository.setTracerouteResponse(value)
-    }
-
-    fun clearTracerouteResponse() {
-        setTracerouteResponse(null)
-    }
 }
