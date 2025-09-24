@@ -132,7 +132,7 @@
     <string name="config_position_broadcast_secs_summary">The maximum interval that can elapse without a node broadcasting a position.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">The minimum distance change in meters to be considered for a smart position broadcast.</string>
-    <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (<10sec keeps GPS on).</string>
+    <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
 
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
