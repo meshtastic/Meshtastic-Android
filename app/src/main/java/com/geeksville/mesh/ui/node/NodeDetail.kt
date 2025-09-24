@@ -391,7 +391,8 @@ private fun notesSection(node: Node, onSaveNotes: (Int, String) -> Unit) {
                     }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
+                keyboardActions =
+                KeyboardActions(
                     onDone = {
                         onSaveNotes(node.num, notes.trim())
                         keyboardController?.hide()
