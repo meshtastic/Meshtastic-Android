@@ -9,8 +9,8 @@ androidxComposeMaterial3Adaptive = "1.2.0-beta03"
 androidxTracing = "1.9.2"
 datastore = "1.1.7"
 lifecycle = "2.9.4"
-navigation = "2.9.4"
-navigation3 = "1.0.0-alpha09"
+navigation = "2.9.5"
+navigation3 = "1.0.0-alpha10"
 room = "2.8.1"
 
 # Kotlin
