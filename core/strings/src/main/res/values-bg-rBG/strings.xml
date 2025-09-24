@@ -98,7 +98,7 @@
     <string name="config_display_auto_screen_carousel_secs_summary">Automatically toggles to the next page on the screen like a carousel, based the specified interval.</string>
     <string name="config_display_compass_north_top_summary">The compass heading on the screen outside of the circle will always point north.</string>
     <string name="config_display_flip_screen_summary">Обръщане на екрана вертикално.</string>
-    <string name="config_display_units_summary">Units displayed on the device screen.</string>
+    <string name="config_display_units_summary">Мерни единици, показвани на екрана на устройството.</string>
     <string name="config_display_oled_summary">Override automatic OLED screen detection.</string>
     <string name="config_display_displaymode_summary">Override default screen layout.</string>
     <string name="config_display_heading_bold_summary">Bold the heading text on the screen.</string>
