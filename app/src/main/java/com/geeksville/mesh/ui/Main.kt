@@ -80,7 +80,6 @@ import com.geeksville.mesh.android.AddNavigationTracking
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.setAttributes
 import com.geeksville.mesh.model.BTScanModel
-import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.channelsGraph
@@ -112,6 +111,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MapRoutes

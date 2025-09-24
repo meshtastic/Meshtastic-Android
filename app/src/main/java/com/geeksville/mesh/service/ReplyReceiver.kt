@@ -19,24 +19,22 @@ package com.geeksville.mesh.service
 
 import android.content.BroadcastReceiver
 import androidx.core.app.RemoteInput
-import com.geeksville.mesh.DataPacket
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
+import org.meshtastic.core.model.DataPacket
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.
  *
- * This receiver is triggered when a user replies to a message directly from a notification.
- * It extracts the reply text and the contact key from the intent, sends the message
- * using the [ServiceRepository], and then cancels the original notification.
+ * This receiver is triggered when a user replies to a message directly from a notification. It extracts the reply text
+ * and the contact key from the intent, sends the message using the [ServiceRepository], and then cancels the original
+ * notification.
  */
 @AndroidEntryPoint
 class ReplyReceiver : BroadcastReceiver() {
-    @Inject
-    lateinit var serviceRepository: ServiceRepository
+    @Inject lateinit var serviceRepository: ServiceRepository
 
-    @Inject
-    lateinit var meshServiceNotifications: MeshServiceNotifications
+    @Inject lateinit var meshServiceNotifications: MeshServiceNotifications
 
     companion object {
         const val REPLY_ACTION = "com.geeksville.mesh.REPLY_ACTION"
@@ -57,9 +55,7 @@ class ReplyReceiver : BroadcastReceiver() {
 
         if (remoteInput != null) {
             val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
-            val message = remoteInput.getCharSequence(
-                KEY_TEXT_REPLY
-            )?.toString() ?: ""
+            val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString() ?: ""
             sendMessage(message, contactKey)
             MeshServiceNotifications(context).cancelMessageNotification(contactKey)
         }

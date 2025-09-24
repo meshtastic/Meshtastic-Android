@@ -25,14 +25,12 @@ import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.Position
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
-import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +46,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.ui.UiPrefs
 import java.io.BufferedWriter
 import java.io.FileNotFoundException

@@ -41,7 +41,6 @@ import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.Position
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.isAnalyticsAvailable
@@ -74,6 +73,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.meshtastic.core.model.Position
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs

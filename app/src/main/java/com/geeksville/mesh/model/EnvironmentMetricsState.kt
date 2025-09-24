@@ -28,7 +28,7 @@ import com.geeksville.mesh.ui.common.theme.GraphColors.Pink
 import com.geeksville.mesh.ui.common.theme.GraphColors.Purple
 import com.geeksville.mesh.ui.common.theme.GraphColors.Red
 import com.geeksville.mesh.ui.common.theme.GraphColors.Yellow
-import com.geeksville.mesh.util.UnitConversions
+import org.meshtastic.core.model.util.UnitConversions
 
 @Suppress("MagicNumber")
 enum class Environment(val color: Color) {

@@ -23,19 +23,19 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.geeksville.mesh.DeviceMetrics
-import com.geeksville.mesh.EnvironmentMetrics
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshUser
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.PaxcountProtos
-import com.geeksville.mesh.Position
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.util.onlineTimeThreshold
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
+import org.meshtastic.core.model.DeviceMetrics
+import org.meshtastic.core.model.EnvironmentMetrics
+import org.meshtastic.core.model.MeshUser
+import org.meshtastic.core.model.NodeInfo
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.onlineTimeThreshold
 
 data class NodeWithRelations(
     @Embedded val node: NodeEntity,

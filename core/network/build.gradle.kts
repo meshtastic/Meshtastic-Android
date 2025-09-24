@@ -31,6 +31,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.model)
     implementation(libs.bundles.ktor)
     implementation(libs.bundles.coil)
     "googleImplementation"(libs.bundles.datadog)

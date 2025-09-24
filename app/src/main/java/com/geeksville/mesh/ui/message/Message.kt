@@ -95,7 +95,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
@@ -108,6 +107,7 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.strings.R
 import java.nio.charset.StandardCharsets
 

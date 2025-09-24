@@ -15,15 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.model
 
 import android.graphics.Color
 import android.os.Parcelable
-import com.geeksville.mesh.util.anonymize
-import com.geeksville.mesh.util.bearing
-import com.geeksville.mesh.util.latLongToMeter
-import com.geeksville.mesh.util.onlineTimeThreshold
+import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.TelemetryProtos
 import kotlinx.parcelize.Parcelize
+import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.model.util.bearing
+import org.meshtastic.core.model.util.latLongToMeter
+import org.meshtastic.core.model.util.onlineTimeThreshold
 
 //
 // model objects that directly map to the corresponding protobufs

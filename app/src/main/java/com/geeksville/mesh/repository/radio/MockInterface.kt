@@ -21,10 +21,8 @@ import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigKt
 import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.Position
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.channel
@@ -39,6 +37,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Position
 import kotlin.random.Random
 
 private val defaultLoRaConfig =

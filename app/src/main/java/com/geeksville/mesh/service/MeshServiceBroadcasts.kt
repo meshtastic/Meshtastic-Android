@@ -20,9 +20,9 @@ package com.geeksville.mesh.service
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.MessageStatus
-import com.geeksville.mesh.NodeInfo
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeInfo
 
 class MeshServiceBroadcasts(
     private val context: Context,

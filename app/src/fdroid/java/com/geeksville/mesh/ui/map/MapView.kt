@@ -62,7 +62,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.gpsDisabled
@@ -79,11 +78,12 @@ import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.addCopyright
 import com.geeksville.mesh.util.addScaleBarOverlay
 import com.geeksville.mesh.util.createLatLongGrid
-import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.model.CustomTileSource

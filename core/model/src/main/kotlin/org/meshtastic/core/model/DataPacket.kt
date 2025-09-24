@@ -15,24 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.model
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.Portnums
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
-/**
- * Generic [Parcel.readParcelable] Android 13 compatibility extension.
- */
-private inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? {
-    return if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+/** Generic [Parcel.readParcelable] Android 13 compatibility extension. */
+private inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? =
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
         @Suppress("DEPRECATION")
         readParcelable(loader)
     } else {
         readParcelable(loader, T::class.java)
     }
-}
 
 @Parcelize
 enum class MessageStatus : Parcelable {
@@ -41,17 +40,16 @@ enum class MessageStatus : Parcelable {
     QUEUED, // Waiting to send to the mesh as soon as we connect to the device
     ENROUTE, // Delivered to the radio, but no ACK or NAK received
     DELIVERED, // We received an ack
-    ERROR // We received back a nak, message not delivered
+    ERROR, // We received back a nak, message not delivered
 }
 
-/**
- * A parcelable version of the protobuf MeshPacket + Data subpacket.
- */
+/** A parcelable version of the protobuf MeshPacket + Data subpacket. */
 @Serializable
 data class DataPacket(
     var to: String? = ID_BROADCAST, // a nodeID string, or ID_BROADCAST for broadcast
     val bytes: ByteArray?,
-    val dataType: Int, // A port number for this packet (formerly called DataType, see portnums.proto for new usage instructions)
+    // A port number for this packet (formerly called DataType, see portnums.proto for new usage instructions)
+    val dataType: Int,
     var from: String? = ID_LOCAL, // a nodeID string, or ID_LOCAL for localhost
     var time: Long = System.currentTimeMillis(), // msecs since 1970
     var id: Int = 0, // 0 means unassigned
@@ -62,62 +60,65 @@ data class DataPacket(
     var hopStart: Int = 0,
     var snr: Float = 0f,
     var rssi: Int = 0,
-    var replyId: Int? = null // If this is a reply to a previous message, this is the ID of that message
+    var replyId: Int? = null, // If this is a reply to a previous message, this is the ID of that message
 ) : Parcelable {
 
-    /**
-     * If there was an error with this message, this string describes what was wrong.
-     */
+    /** If there was an error with this message, this string describes what was wrong. */
     var errorMessage: String? = null
 
-    /**
-     * Syntactic sugar to make it easy to create text messages
-     */
-    constructor(to: String?, channel: Int, text: String, replyId: Int? = null) : this(
+    /** Syntactic sugar to make it easy to create text messages */
+    constructor(
+        to: String?,
+        channel: Int,
+        text: String,
+        replyId: Int? = null,
+    ) : this(
         to = to,
         bytes = text.encodeToByteArray(),
         dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
         channel = channel,
-        replyId = replyId ?: 0
+        replyId = replyId ?: 0,
     )
 
-    /**
-     * If this is a text message, return the string, otherwise null
-     */
+    /** If this is a text message, return the string, otherwise null */
     val text: String?
-        get() = if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
-            bytes?.decodeToString()
-        } else {
-            null
-        }
+        get() =
+            if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
+                bytes?.decodeToString()
+            } else {
+                null
+            }
 
     val alert: String?
-        get() = if (dataType == Portnums.PortNum.ALERT_APP_VALUE) {
-            bytes?.decodeToString()
-        } else {
-            null
-        }
+        get() =
+            if (dataType == Portnums.PortNum.ALERT_APP_VALUE) {
+                bytes?.decodeToString()
+            } else {
+                null
+            }
 
-    constructor(to: String?, channel: Int, waypoint: MeshProtos.Waypoint) : this(
-        to = to,
-        bytes = waypoint.toByteArray(),
-        dataType = Portnums.PortNum.WAYPOINT_APP_VALUE,
-        channel = channel,
-    )
+    constructor(
+        to: String?,
+        channel: Int,
+        waypoint: MeshProtos.Waypoint,
+    ) : this(to = to, bytes = waypoint.toByteArray(), dataType = Portnums.PortNum.WAYPOINT_APP_VALUE, channel = channel)
 
     val waypoint: MeshProtos.Waypoint?
-        get() = if (dataType == Portnums.PortNum.WAYPOINT_APP_VALUE) {
-            MeshProtos.Waypoint.parseFrom(bytes)
-        } else {
-            null
-        }
+        get() =
+            if (dataType == Portnums.PortNum.WAYPOINT_APP_VALUE) {
+                MeshProtos.Waypoint.parseFrom(bytes)
+            } else {
+                null
+            }
 
     val hopsAway: Int
         get() = if (hopStart == 0 || hopLimit > hopStart) -1 else hopStart - hopLimit
 
     // Autogenerated comparision, because we have a byte array
 
-    constructor(parcel: Parcel) : this(
+    constructor(
+        parcel: Parcel,
+    ) : this(
         parcel.readString(),
         parcel.createByteArray(),
         parcel.readInt(),
@@ -131,7 +132,7 @@ data class DataPacket(
         parcel.readInt(),
         parcel.readFloat(),
         parcel.readInt(),
-        parcel.readInt().let { if (it == 0) null else it }
+        parcel.readInt().let { if (it == 0) null else it },
     )
 
     @Suppress("CyclomaticComplexMethod")
@@ -194,9 +195,7 @@ data class DataPacket(
         parcel.writeInt(replyId ?: 0)
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
     // Update our object from our parcel (used for inout parameters
     fun readFromParcel(parcel: Parcel) {
@@ -232,15 +231,11 @@ data class DataPacket(
         const val PKC_CHANNEL_INDEX = 8
 
         fun nodeNumToDefaultId(n: Int): String = "!%08x".format(n)
-        fun idToDefaultNodeNum(id: String?): Int? =
-            runCatching { id?.toLong(16)?.toInt() }.getOrNull()
 
-        override fun createFromParcel(parcel: Parcel): DataPacket {
-            return DataPacket(parcel)
-        }
+        fun idToDefaultNodeNum(id: String?): Int? = runCatching { id?.toLong(16)?.toInt() }.getOrNull()
 
-        override fun newArray(size: Int): Array<DataPacket?> {
-            return arrayOfNulls(size)
-        }
+        override fun createFromParcel(parcel: Parcel): DataPacket = DataPacket(parcel)
+
+        override fun newArray(size: Int): Array<DataPacket?> = arrayOfNulls(size)
     }
 }

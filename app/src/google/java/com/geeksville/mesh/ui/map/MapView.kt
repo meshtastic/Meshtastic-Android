@@ -84,10 +84,7 @@ import com.geeksville.mesh.ui.metrics.HEADING_DEG
 import com.geeksville.mesh.ui.metrics.formatPositionTime
 import com.geeksville.mesh.ui.node.DEG_D
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.metersIn
-import com.geeksville.mesh.util.mpsToKmph
-import com.geeksville.mesh.util.mpsToMph
 import com.geeksville.mesh.util.toString
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.location.LocationCallback
@@ -120,6 +117,9 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.util.formatAgo
+import org.meshtastic.core.model.util.mpsToKmph
+import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.strings.R
 import timber.log.Timber
 import java.text.DateFormat

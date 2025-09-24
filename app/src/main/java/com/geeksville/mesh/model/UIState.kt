@@ -32,12 +32,10 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.Position
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.channel
 import com.geeksville.mesh.channelSet
@@ -60,7 +58,6 @@ import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +79,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.getShortDate
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.strings.R
 import javax.inject.Inject

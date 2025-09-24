@@ -19,9 +19,9 @@ package com.geeksville.mesh.ui.metrics
 
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 
 class EnvironmentMetricsTest {
 

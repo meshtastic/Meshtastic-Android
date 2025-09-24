@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.core.network.model
+package org.meshtastic.core.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

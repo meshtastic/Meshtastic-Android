@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.core.model.util
 
 import android.annotation.SuppressLint
-import com.geeksville.mesh.Position
+import org.meshtastic.core.model.Position
 import java.util.Locale
 import kotlin.math.asin
 import kotlin.math.atan2

@@ -17,8 +17,6 @@
 
 package com.geeksville.mesh.database
 
-import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.entity.ContactSettings
@@ -29,66 +27,52 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import javax.inject.Inject
 
 class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Lazy<PacketDao>) {
-    private val packetDao by lazy {
-        packetDaoLazy.get()
-    }
+    private val packetDao by lazy { packetDaoLazy.get() }
 
     fun getWaypoints(): Flow<List<Packet>> = packetDao.getAllPackets(PortNum.WAYPOINT_APP_VALUE)
 
     fun getContacts(): Flow<Map<String, Packet>> = packetDao.getContactKeys()
 
-    suspend fun getMessageCount(contact: String): Int = withContext(Dispatchers.IO) {
-        packetDao.getMessageCount(contact)
-    }
+    suspend fun getMessageCount(contact: String): Int =
+        withContext(Dispatchers.IO) { packetDao.getMessageCount(contact) }
 
-    suspend fun getUnreadCount(contact: String): Int = withContext(Dispatchers.IO) {
-        packetDao.getUnreadCount(contact)
-    }
+    suspend fun getUnreadCount(contact: String): Int = withContext(Dispatchers.IO) { packetDao.getUnreadCount(contact) }
 
-    suspend fun clearUnreadCount(contact: String, timestamp: Long) = withContext(Dispatchers.IO) {
-        packetDao.clearUnreadCount(contact, timestamp)
-    }
+    suspend fun clearUnreadCount(contact: String, timestamp: Long) =
+        withContext(Dispatchers.IO) { packetDao.clearUnreadCount(contact, timestamp) }
 
-    suspend fun getQueuedPackets(): List<DataPacket>? = withContext(Dispatchers.IO) {
-        packetDao.getQueuedPackets()
-    }
+    suspend fun getQueuedPackets(): List<DataPacket>? = withContext(Dispatchers.IO) { packetDao.getQueuedPackets() }
 
-    suspend fun insert(packet: Packet) = withContext(Dispatchers.IO) {
-        packetDao.insert(packet)
-    }
+    suspend fun insert(packet: Packet) = withContext(Dispatchers.IO) { packetDao.insert(packet) }
 
-    suspend fun getMessagesFrom(contact: String, getNode: suspend (String?) -> Node) =
-        withContext(Dispatchers.IO) {
-            packetDao.getMessagesFrom(contact).mapLatest { packets ->
-                packets.map { packet ->
-                    val message = packet.toMessage(getNode)
-                    message.replyId.takeIf { it != null && it != 0 }
-                        ?.let { getPacketByPacketId(it) }
-                        ?.toMessage(getNode)
-                        ?.let { originalMessage -> message.copy(originalMessage = originalMessage) }
-                        ?: message
-                }
+    suspend fun getMessagesFrom(contact: String, getNode: suspend (String?) -> Node) = withContext(Dispatchers.IO) {
+        packetDao.getMessagesFrom(contact).mapLatest { packets ->
+            packets.map { packet ->
+                val message = packet.toMessage(getNode)
+                message.replyId
+                    .takeIf { it != null && it != 0 }
+                    ?.let { getPacketByPacketId(it) }
+                    ?.toMessage(getNode)
+                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
             }
         }
-
-    suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) = withContext(Dispatchers.IO) {
-        packetDao.updateMessageStatus(d, m)
     }
 
-    suspend fun updateMessageId(d: DataPacket, id: Int) = withContext(Dispatchers.IO) {
-        packetDao.updateMessageId(d, id)
-    }
+    suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) =
+        withContext(Dispatchers.IO) { packetDao.updateMessageStatus(d, m) }
 
-    suspend fun getPacketById(requestId: Int) = withContext(Dispatchers.IO) {
-        packetDao.getPacketById(requestId)
-    }
+    suspend fun updateMessageId(d: DataPacket, id: Int) =
+        withContext(Dispatchers.IO) { packetDao.updateMessageId(d, id) }
 
-    suspend fun getPacketByPacketId(packetId: Int) = withContext(Dispatchers.IO) {
-        packetDao.getPacketByPacketId(packetId)
-    }
+    suspend fun getPacketById(requestId: Int) = withContext(Dispatchers.IO) { packetDao.getPacketById(requestId) }
+
+    suspend fun getPacketByPacketId(packetId: Int) =
+        withContext(Dispatchers.IO) { packetDao.getPacketByPacketId(packetId) }
 
     suspend fun deleteMessages(uuidList: List<Long>) = withContext(Dispatchers.IO) {
         for (chunk in uuidList.chunked(500)) { // limit number of UUIDs per query
@@ -96,37 +80,24 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         }
     }
 
-    suspend fun deleteContacts(contactList: List<String>) = withContext(Dispatchers.IO) {
-        packetDao.deleteContacts(contactList)
-    }
+    suspend fun deleteContacts(contactList: List<String>) =
+        withContext(Dispatchers.IO) { packetDao.deleteContacts(contactList) }
 
-    suspend fun deleteWaypoint(id: Int) = withContext(Dispatchers.IO) {
-        packetDao.deleteWaypoint(id)
-    }
+    suspend fun deleteWaypoint(id: Int) = withContext(Dispatchers.IO) { packetDao.deleteWaypoint(id) }
 
-    suspend fun delete(packet: Packet) = withContext(Dispatchers.IO) {
-        packetDao.delete(packet)
-    }
+    suspend fun delete(packet: Packet) = withContext(Dispatchers.IO) { packetDao.delete(packet) }
 
-    suspend fun update(packet: Packet) = withContext(Dispatchers.IO) {
-        packetDao.update(packet)
-    }
+    suspend fun update(packet: Packet) = withContext(Dispatchers.IO) { packetDao.update(packet) }
 
     fun getContactSettings(): Flow<Map<String, ContactSettings>> = packetDao.getContactSettings()
 
-    suspend fun getContactSettings(contact: String) = withContext(Dispatchers.IO) {
-        packetDao.getContactSettings(contact) ?: ContactSettings(contact)
-    }
+    suspend fun getContactSettings(contact: String) =
+        withContext(Dispatchers.IO) { packetDao.getContactSettings(contact) ?: ContactSettings(contact) }
 
-    suspend fun setMuteUntil(contacts: List<String>, until: Long) = withContext(Dispatchers.IO) {
-        packetDao.setMuteUntil(contacts, until)
-    }
+    suspend fun setMuteUntil(contacts: List<String>, until: Long) =
+        withContext(Dispatchers.IO) { packetDao.setMuteUntil(contacts, until) }
 
-    suspend fun insertReaction(reaction: ReactionEntity) = withContext(Dispatchers.IO) {
-        packetDao.insert(reaction)
-    }
+    suspend fun insertReaction(reaction: ReactionEntity) = withContext(Dispatchers.IO) { packetDao.insert(reaction) }
 
-    suspend fun clearPacketDB() = withContext(Dispatchers.IO) {
-        packetDao.deleteAll()
-    }
+    suspend fun clearPacketDB() = withContext(Dispatchers.IO) { packetDao.deleteAll() }
 }

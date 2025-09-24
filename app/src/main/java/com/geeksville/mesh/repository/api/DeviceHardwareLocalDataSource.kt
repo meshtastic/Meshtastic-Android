@@ -22,7 +22,7 @@ import com.geeksville.mesh.database.entity.DeviceHardwareEntity
 import com.geeksville.mesh.database.entity.asEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.network.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkDeviceHardware
 import javax.inject.Inject
 
 class DeviceHardwareLocalDataSource

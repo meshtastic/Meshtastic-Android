@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.util.formatAgo
+import org.meshtastic.core.model.util.formatAgo
 
 @Composable
 fun LastHeardInfo(modifier: Modifier = Modifier, lastHeard: Int, currentTimeMillis: Long) {

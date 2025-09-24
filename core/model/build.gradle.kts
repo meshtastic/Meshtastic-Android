@@ -19,8 +19,19 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
-android { namespace = "org.meshtastic.core.model" }
+android {
+    buildFeatures {
+        buildConfig = true
+        aidl = true
+    }
+    namespace = "org.meshtastic.core.model"
+}
 
-dependencies { implementation(projects.core.proto) }
+dependencies {
+    implementation(projects.core.proto)
+    implementation(projects.core.strings)
+    implementation(libs.timber)
+}

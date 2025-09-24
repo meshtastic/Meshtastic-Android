@@ -23,11 +23,11 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.User
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.util.getShortDateTime
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.getShortDateTime
 
 data class PacketEntity(
     @Embedded val packet: Packet,
@@ -52,20 +52,15 @@ data class PacketEntity(
             packetId = packetId,
             emojis = reactions.toReaction(getNode),
             replyId = data.replyId,
-            viaMqtt = node.viaMqtt
+            viaMqtt = node.viaMqtt,
         )
     }
 }
 
 @Entity(
     tableName = "packet",
-    indices = [
-        Index(value = ["myNodeNum"]),
-        Index(value = ["port_num"]),
-        Index(value = ["contact_key"]),
-    ]
+    indices = [Index(value = ["myNodeNum"]), Index(value = ["port_num"]), Index(value = ["contact_key"])],
 )
-
 data class Packet(
     @PrimaryKey(autoGenerate = true) val uuid: Long,
     @ColumnInfo(name = "myNodeNum", defaultValue = "0") val myNodeNum: Int,
@@ -83,26 +78,17 @@ data class Packet(
 )
 
 @Entity(tableName = "contact_settings")
-data class ContactSettings(
-    @PrimaryKey val contact_key: String,
-    val muteUntil: Long = 0L,
-) {
-    val isMuted get() = System.currentTimeMillis() <= muteUntil
+data class ContactSettings(@PrimaryKey val contact_key: String, val muteUntil: Long = 0L) {
+    val isMuted
+        get() = System.currentTimeMillis() <= muteUntil
 }
 
-data class Reaction(
-    val replyId: Int,
-    val user: User,
-    val emoji: String,
-    val timestamp: Long,
-)
+data class Reaction(val replyId: Int, val user: User, val emoji: String, val timestamp: Long)
 
 @Entity(
     tableName = "reactions",
     primaryKeys = ["reply_id", "user_id", "emoji"],
-    indices = [
-        Index(value = ["reply_id"]),
-    ],
+    indices = [Index(value = ["reply_id"])],
 )
 data class ReactionEntity(
     @ColumnInfo(name = "reply_id") val replyId: Int,
@@ -111,15 +97,8 @@ data class ReactionEntity(
     val timestamp: Long,
 )
 
-private suspend fun ReactionEntity.toReaction(
-    getNode: suspend (userId: String?) -> Node
-) = Reaction(
-    replyId = replyId,
-    user = getNode(userId).user,
-    emoji = emoji,
-    timestamp = timestamp,
-)
+private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node) =
+    Reaction(replyId = replyId, user = getNode(userId).user, emoji = emoji, timestamp = timestamp)
 
-private suspend fun List<ReactionEntity>.toReaction(
-    getNode: suspend (userId: String?) -> Node
-) = this.map { it.toReaction(getNode) }
+private suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node) =
+    this.map { it.toReaction(getNode) }
