@@ -58,6 +58,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class SettingsViewModel
 @Inject

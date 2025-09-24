@@ -100,6 +100,7 @@ data class RadioConfigState(
     val analyticsEnabled: Boolean = false,
 )
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class RadioConfigViewModel
 @Inject
