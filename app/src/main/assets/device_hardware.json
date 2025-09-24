@@ -1105,13 +1105,13 @@
     "platformioTarget": "m5stack-unitc6l",
     "architecture": "esp32-c6",
     "supportLevel": 1,
-    "activelySupported": false,
+    "activelySupported": true,
     "displayName": "M5Stack Unit C6L",
     "tags": [
       "M5Stack"
     ],
     "images": [
-      "place_holder.svg"
+      "m5_c6l.svg"
     ]
   },
   {
@@ -1119,7 +1119,7 @@
     "hwModelSlug": "HELTEC_V4",
     "platformioTarget": "heltec-v4",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec V4",
     "tags": [
@@ -1127,6 +1127,9 @@
     ],
     "requiresDfu": true,
     "hasMui": false,
-    "partitionScheme": "16MB"
+    "partitionScheme": "16MB",
+    "images": [
+      "heltec_v4.svg"
+    ]
   }
 ]
