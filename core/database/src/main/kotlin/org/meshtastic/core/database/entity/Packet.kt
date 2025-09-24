@@ -57,6 +57,7 @@ data class PacketEntity(
     }
 }
 
+@Suppress("ConstructorParameterNaming")
 @Entity(
     tableName = "packet",
     indices = [Index(value = ["myNodeNum"]), Index(value = ["port_num"]), Index(value = ["contact_key"])],
@@ -77,6 +78,7 @@ data class Packet(
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
 )
 
+@Suppress("ConstructorParameterNaming")
 @Entity(tableName = "contact_settings")
 data class ContactSettings(@PrimaryKey val contact_key: String, val muteUntil: Long = 0L) {
     val isMuted

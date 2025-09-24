@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("MatchingDeclarationName")
+
 package org.meshtastic.core.model.util
 
 import android.icu.util.LocaleData

@@ -27,6 +27,7 @@ import com.geeksville.mesh.Portnums
 import com.google.protobuf.TextFormat
 import java.io.IOException
 
+@Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")
 @Entity(tableName = "log", indices = [Index(value = ["from_num"]), Index(value = ["port_num"])])
 data class MeshLog(
     @PrimaryKey val uuid: String,

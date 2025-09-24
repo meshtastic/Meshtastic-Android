@@ -31,6 +31,7 @@ import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 
+@Suppress("TooManyFunctions")
 @Dao
 interface PacketDao {
 
