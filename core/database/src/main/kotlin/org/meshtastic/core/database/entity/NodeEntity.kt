@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.entity
+package org.meshtastic.core.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
@@ -27,9 +27,9 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.Node
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceMetrics
 import org.meshtastic.core.model.EnvironmentMetrics
 import org.meshtastic.core.model.MeshUser

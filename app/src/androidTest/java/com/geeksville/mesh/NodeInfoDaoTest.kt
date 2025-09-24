@@ -20,11 +20,8 @@ package com.geeksville.mesh
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.geeksville.mesh.database.MeshtasticDatabase
-import com.geeksville.mesh.database.dao.NodeInfoDao
-import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.model.Node
+import org.meshtastic.core.database.MeshtasticDatabase
+import org.meshtastic.core.database.dao.NodeInfoDao
 import com.geeksville.mesh.model.NodeSortOption
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.first
@@ -37,6 +34,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.onlineTimeThreshold
 
 @RunWith(AndroidJUnit4::class)

@@ -21,11 +21,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.database.dao.NodeInfoDao
-import com.geeksville.mesh.database.entity.MetadataEntity
-import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.model.Node
+import org.meshtastic.core.database.dao.NodeInfoDao
 import com.geeksville.mesh.model.NodeSortOption
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +34,10 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.database.entity.MetadataEntity
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import javax.inject.Inject

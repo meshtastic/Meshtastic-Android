@@ -52,9 +52,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.ui.common.components.BottomSheetDialog
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.database.entity.Reaction
 
 @Composable
 private fun ReactionItem(

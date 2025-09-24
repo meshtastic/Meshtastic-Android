@@ -18,10 +18,10 @@
 package com.geeksville.mesh.database
 
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.database.dao.QuickChatActionDao
-import com.geeksville.mesh.database.entity.QuickChatAction
+import org.meshtastic.core.database.dao.QuickChatActionDao
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.database.entity.QuickChatAction
 import javax.inject.Inject
 
 class QuickChatActionRepository @Inject constructor(

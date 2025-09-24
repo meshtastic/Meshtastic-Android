@@ -22,11 +22,11 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.deviceMetrics
 import com.geeksville.mesh.environmentMetrics
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.paxcount
 import com.geeksville.mesh.position
 import com.geeksville.mesh.user
 import com.google.protobuf.ByteString
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceMetrics.Companion.currentTime
 import kotlin.random.Random
 

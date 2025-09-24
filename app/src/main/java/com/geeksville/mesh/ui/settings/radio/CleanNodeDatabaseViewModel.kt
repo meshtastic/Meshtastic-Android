@@ -20,12 +20,12 @@ package com.geeksville.mesh.ui.settings.radio
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.meshtastic.core.database.entity.NodeEntity
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.milliseconds

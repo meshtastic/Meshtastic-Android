@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.dao
+package org.meshtastic.core.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -24,12 +24,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
-import com.geeksville.mesh.database.entity.MetadataEntity
-import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.database.entity.NodeWithRelations
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.database.entity.MetadataEntity
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.database.entity.NodeWithRelations
 
 @Suppress("TooManyFunctions")
 @Dao

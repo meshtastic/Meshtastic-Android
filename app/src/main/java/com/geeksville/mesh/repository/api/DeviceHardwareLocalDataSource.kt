@@ -17,11 +17,11 @@
 
 package com.geeksville.mesh.repository.api
 
-import com.geeksville.mesh.database.dao.DeviceHardwareDao
-import com.geeksville.mesh.database.entity.DeviceHardwareEntity
-import com.geeksville.mesh.database.entity.asEntity
+import org.meshtastic.core.database.dao.DeviceHardwareDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.database.entity.DeviceHardwareEntity
+import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.model.NetworkDeviceHardware
 import javax.inject.Inject
 

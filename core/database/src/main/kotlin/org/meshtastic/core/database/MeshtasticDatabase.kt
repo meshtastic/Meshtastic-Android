@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database
+package org.meshtastic.core.database
 
 import android.content.Context
 import androidx.room.AutoMigration
@@ -25,22 +25,22 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
-import com.geeksville.mesh.database.dao.DeviceHardwareDao
-import com.geeksville.mesh.database.dao.FirmwareReleaseDao
-import com.geeksville.mesh.database.dao.MeshLogDao
-import com.geeksville.mesh.database.dao.NodeInfoDao
-import com.geeksville.mesh.database.dao.PacketDao
-import com.geeksville.mesh.database.dao.QuickChatActionDao
-import com.geeksville.mesh.database.entity.ContactSettings
-import com.geeksville.mesh.database.entity.DeviceHardwareEntity
-import com.geeksville.mesh.database.entity.FirmwareReleaseEntity
-import com.geeksville.mesh.database.entity.MeshLog
-import com.geeksville.mesh.database.entity.MetadataEntity
-import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.database.entity.QuickChatAction
-import com.geeksville.mesh.database.entity.ReactionEntity
+import org.meshtastic.core.database.dao.DeviceHardwareDao
+import org.meshtastic.core.database.dao.FirmwareReleaseDao
+import org.meshtastic.core.database.dao.MeshLogDao
+import org.meshtastic.core.database.dao.NodeInfoDao
+import org.meshtastic.core.database.dao.PacketDao
+import org.meshtastic.core.database.dao.QuickChatActionDao
+import org.meshtastic.core.database.entity.ContactSettings
+import org.meshtastic.core.database.entity.DeviceHardwareEntity
+import org.meshtastic.core.database.entity.FirmwareReleaseEntity
+import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.database.entity.MetadataEntity
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.database.entity.ReactionEntity
 
 @Database(
     entities =

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.entity
+package org.meshtastic.core.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

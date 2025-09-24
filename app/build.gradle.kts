@@ -28,7 +28,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.android.application.firebase)
     alias(libs.plugins.meshtastic.hilt)
-    alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.devtools.ksp)

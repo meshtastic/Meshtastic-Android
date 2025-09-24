@@ -17,14 +17,14 @@
 
 package com.geeksville.mesh.repository.api
 
-import com.geeksville.mesh.database.dao.FirmwareReleaseDao
-import com.geeksville.mesh.database.entity.FirmwareReleaseEntity
-import com.geeksville.mesh.database.entity.FirmwareReleaseType
-import com.geeksville.mesh.database.entity.asDeviceVersion
-import com.geeksville.mesh.database.entity.asEntity
+import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import dagger.Lazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.database.entity.FirmwareReleaseEntity
+import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.database.entity.asDeviceVersion
+import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.model.NetworkFirmwareRelease
 import javax.inject.Inject
 

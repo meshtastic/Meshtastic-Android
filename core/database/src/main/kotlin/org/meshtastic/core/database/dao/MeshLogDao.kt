@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.dao
+package org.meshtastic.core.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.geeksville.mesh.database.entity.MeshLog
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.database.entity.MeshLog
 
 @Dao
 interface MeshLogDao {

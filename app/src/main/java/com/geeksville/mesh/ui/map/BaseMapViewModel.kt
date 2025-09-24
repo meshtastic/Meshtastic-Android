@@ -21,8 +21,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
-import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,6 +29,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.prefs.map.MapPrefs
 
 @Suppress("TooManyFunctions")

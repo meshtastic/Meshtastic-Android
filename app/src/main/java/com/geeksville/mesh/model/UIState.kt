@@ -46,10 +46,6 @@ import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
-import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.database.entity.QuickChatAction
-import com.geeksville.mesh.database.entity.asDeviceVersion
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -78,6 +74,12 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.database.entity.asDeviceVersion
+import org.meshtastic.core.database.model.Message
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware

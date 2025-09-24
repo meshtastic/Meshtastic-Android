@@ -43,12 +43,12 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.components.MaterialBatteryInfo
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 
 @Composable

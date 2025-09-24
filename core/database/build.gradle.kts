@@ -15,7 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.android.library) }
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.android.room)
+    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
+}
 
 android {
     namespace = "org.meshtastic.core.database"
@@ -23,4 +28,12 @@ android {
         // Adds exported schema location as test app assets.
         named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
     }
+}
+
+dependencies {
+    implementation(projects.core.model)
+    implementation(projects.core.proto)
+    implementation(projects.core.strings)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.timber)
 }

@@ -38,9 +38,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")

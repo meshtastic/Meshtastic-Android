@@ -30,11 +30,7 @@ import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.entity.MetadataEntity
-import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.ServiceAction
@@ -45,6 +41,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import org.meshtastic.core.database.entity.MetadataEntity
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource

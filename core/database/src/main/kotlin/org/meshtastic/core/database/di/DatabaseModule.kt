@@ -15,19 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database
+package org.meshtastic.core.database.di
 
 import android.app.Application
-import com.geeksville.mesh.database.dao.DeviceHardwareDao
-import com.geeksville.mesh.database.dao.FirmwareReleaseDao
-import com.geeksville.mesh.database.dao.MeshLogDao
-import com.geeksville.mesh.database.dao.NodeInfoDao
-import com.geeksville.mesh.database.dao.PacketDao
-import com.geeksville.mesh.database.dao.QuickChatActionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.database.MeshtasticDatabase
+import org.meshtastic.core.database.dao.DeviceHardwareDao
+import org.meshtastic.core.database.dao.FirmwareReleaseDao
+import org.meshtastic.core.database.dao.MeshLogDao
+import org.meshtastic.core.database.dao.NodeInfoDao
+import org.meshtastic.core.database.dao.PacketDao
+import org.meshtastic.core.database.dao.QuickChatActionDao
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)

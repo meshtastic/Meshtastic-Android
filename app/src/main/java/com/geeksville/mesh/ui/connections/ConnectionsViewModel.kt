@@ -21,8 +21,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +29,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
 import javax.inject.Inject
 

@@ -20,11 +20,9 @@ package com.geeksville.mesh
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.geeksville.mesh.database.MeshtasticDatabase
-import com.geeksville.mesh.database.dao.NodeInfoDao
-import com.geeksville.mesh.database.dao.PacketDao
-import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.Packet
+import org.meshtastic.core.database.MeshtasticDatabase
+import org.meshtastic.core.database.dao.NodeInfoDao
+import org.meshtastic.core.database.dao.PacketDao
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -33,6 +31,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
 
 @RunWith(AndroidJUnit4::class)

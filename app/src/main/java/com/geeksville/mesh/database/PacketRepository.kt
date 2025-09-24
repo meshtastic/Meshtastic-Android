@@ -18,15 +18,15 @@
 package com.geeksville.mesh.database
 
 import com.geeksville.mesh.Portnums.PortNum
-import com.geeksville.mesh.database.dao.PacketDao
-import com.geeksville.mesh.database.entity.ContactSettings
-import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.database.entity.ReactionEntity
-import com.geeksville.mesh.model.Node
+import org.meshtastic.core.database.dao.PacketDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.database.entity.ContactSettings
+import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.ReactionEntity
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import javax.inject.Inject

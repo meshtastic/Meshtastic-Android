@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.entity
+package org.meshtastic.core.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
@@ -24,8 +24,8 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import com.geeksville.mesh.MeshProtos.User
-import com.geeksville.mesh.model.Message
-import com.geeksville.mesh.model.Node
+import org.meshtastic.core.database.model.Message
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getShortDateTime
 

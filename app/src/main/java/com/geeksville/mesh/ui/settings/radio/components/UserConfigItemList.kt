@@ -30,12 +30,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.RegularPreference
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
 

@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.core.database.model
 
 import androidx.annotation.StringRes
 import com.geeksville.mesh.MeshProtos.Routing
-import com.geeksville.mesh.database.entity.Reaction
+import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.R
 

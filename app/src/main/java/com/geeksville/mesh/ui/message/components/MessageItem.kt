@@ -49,9 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.database.entity.Reaction
-import com.geeksville.mesh.model.Message
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.components.MDText
 import com.geeksville.mesh.ui.common.components.Rssi
 import com.geeksville.mesh.ui.common.components.Snr
@@ -60,6 +57,9 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MessageItemColors
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import org.meshtastic.core.database.entity.Reaction
+import org.meshtastic.core.database.model.Message
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.R
 

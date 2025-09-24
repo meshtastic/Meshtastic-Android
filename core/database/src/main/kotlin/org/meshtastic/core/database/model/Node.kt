@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.core.database.model
 
 import android.graphics.Color
 import com.geeksville.mesh.ConfigProtos
@@ -25,13 +25,13 @@ import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos.DeviceMetrics
 import com.geeksville.mesh.TelemetryProtos.EnvironmentMetrics
 import com.geeksville.mesh.TelemetryProtos.PowerMetrics
-import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.util.toDistanceString
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
+import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.latLongToMeter
+import org.meshtastic.core.model.util.toDistanceString
 
 @Suppress("MagicNumber")
 data class Node(

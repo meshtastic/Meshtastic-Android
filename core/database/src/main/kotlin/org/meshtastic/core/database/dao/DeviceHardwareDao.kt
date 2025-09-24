@@ -15,26 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.dao
+package org.meshtastic.core.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.geeksville.mesh.database.entity.FirmwareReleaseEntity
-import com.geeksville.mesh.database.entity.FirmwareReleaseType
+import org.meshtastic.core.database.entity.DeviceHardwareEntity
 
 @Dao
-interface FirmwareReleaseDao {
+interface DeviceHardwareDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(firmwareReleaseEntity: FirmwareReleaseEntity)
+    suspend fun insert(deviceHardware: DeviceHardwareEntity)
 
-    @Query("DELETE FROM firmware_release")
+    @Query("SELECT * FROM device_hardware WHERE hwModel = :hwModel")
+    suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity?
+
+    @Query("DELETE FROM device_hardware")
     suspend fun deleteAll()
-
-    @Query("SELECT * FROM firmware_release")
-    suspend fun getAllReleases(): List<FirmwareReleaseEntity>
-
-    @Query("SELECT * FROM firmware_release WHERE release_type = :releaseType")
-    suspend fun getReleasesByType(releaseType: FirmwareReleaseType): List<FirmwareReleaseEntity>
 }

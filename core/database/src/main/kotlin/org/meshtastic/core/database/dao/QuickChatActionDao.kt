@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.dao
+package org.meshtastic.core.database.dao
 
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
-import com.geeksville.mesh.database.entity.QuickChatAction
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.database.entity.QuickChatAction
 
 @Dao
 interface QuickChatActionDao {

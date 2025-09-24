@@ -19,12 +19,12 @@ package com.geeksville.mesh.repository.api
 
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
-import com.geeksville.mesh.database.entity.FirmwareRelease
-import com.geeksville.mesh.database.entity.FirmwareReleaseEntity
-import com.geeksville.mesh.database.entity.FirmwareReleaseType
-import com.geeksville.mesh.database.entity.asExternalModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.database.entity.FirmwareReleaseEntity
+import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

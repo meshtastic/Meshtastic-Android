@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.dao
+package org.meshtastic.core.database.dao
 
 import androidx.room.Dao
 import androidx.room.MapColumn
@@ -23,11 +23,11 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
-import com.geeksville.mesh.database.entity.ContactSettings
-import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.database.entity.PacketEntity
-import com.geeksville.mesh.database.entity.ReactionEntity
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.database.entity.ContactSettings
+import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.PacketEntity
+import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 
