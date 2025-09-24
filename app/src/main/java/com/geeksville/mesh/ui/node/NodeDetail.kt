@@ -36,6 +36,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -63,6 +65,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SignalCellularAlt
@@ -86,6 +89,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -108,9 +112,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -365,21 +371,34 @@ private fun notesSection(node: Node, onSaveNotes: (Int, String) -> Unit) {
         TitledCard(title = stringResource(R.string.notes)) {
             val originalNotes = node.notes
             var notes by remember(node.notes) { mutableStateOf(node.notes) }
+            val edited = notes.trim() != originalNotes.trim()
+            val keyboardController = LocalSoftwareKeyboardController.current
+
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
                 placeholder = { Text(stringResource(id = R.string.add_a_note)) },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            onSaveNotes(node.num, notes.trim())
+                            keyboardController?.hide()
+                        },
+                        enabled = edited,
+                    ) {
+                        Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(id = R.string.save))
+                    }
+                },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions =
+                KeyboardActions(
+                    onDone = {
+                        onSaveNotes(node.num, notes.trim())
+                        keyboardController?.hide()
+                    },
+                ),
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            val edited = notes.trim() != originalNotes.trim()
-            if (edited) {
-                NodeActionButton(
-                    title = stringResource(id = R.string.save),
-                    enabled = true,
-                    onClick = { onSaveNotes(node.num, notes.trim()) },
-                )
-            }
         }
     }
 }
