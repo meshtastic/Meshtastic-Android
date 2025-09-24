@@ -145,6 +145,8 @@ class MeshService :
 
     @Inject lateinit var radioConfigRepository: RadioConfigRepository
 
+    @Inject lateinit var serviceRepository: ServiceRepository
+
     @Inject lateinit var nodeRepository: NodeRepository
 
     @Inject lateinit var mqttRepository: MQTTRepository
@@ -218,7 +220,7 @@ class MeshService :
     private val clientPackages = mutableMapOf<String, String>()
     private val serviceBroadcasts =
         MeshServiceBroadcasts(this, clientPackages) {
-            connectionState.also { radioConfigRepository.setConnectionState(it) }
+            connectionState.also { serviceRepository.setConnectionState(it) }
         }
     private val packetHandler: PacketHandler by lazy {
         PacketHandler(
@@ -341,7 +343,7 @@ class MeshService :
         radioConfigRepository.localConfigFlow.onEach { localConfig = it }.launchIn(serviceScope)
         radioConfigRepository.moduleConfigFlow.onEach { moduleConfig = it }.launchIn(serviceScope)
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }.launchIn(serviceScope)
-        radioConfigRepository.serviceAction.onEach(::onServiceAction).launchIn(serviceScope)
+        serviceRepository.serviceAction.onEach(::onServiceAction).launchIn(serviceScope)
         nodeRepository.myNodeInfo
             .flatMapLatest { myNodeEntity ->
                 // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
@@ -837,7 +839,7 @@ class MeshService :
                         val u = MeshProtos.Routing.parseFrom(data.payload)
 
                         if (u.errorReason == MeshProtos.Routing.Error.DUTY_CYCLE_LIMIT) {
-                            radioConfigRepository.setErrorMessage(getString(R.string.error_duty_cycle))
+                            serviceRepository.setErrorMessage(getString(R.string.error_duty_cycle))
                         }
 
                         handleAckNak(data.requestId, fromId, u.errorReasonValue)
@@ -1191,7 +1193,7 @@ class MeshService :
                 )
             insertMeshLog(packetToSave)
 
-            serviceScope.handledLaunch { radioConfigRepository.emitMeshPacket(packet) }
+            serviceScope.handledLaunch { serviceRepository.emitMeshPacket(packet) }
 
             // Update last seen for the node that sent the packet, but also for _our node_ because
             // anytime a packet
@@ -1491,7 +1493,7 @@ class MeshService :
         insertMeshLog(packetToSave)
         setLocalConfig(config)
         val configCount = localConfig.allFields.size
-        radioConfigRepository.setStatusMessage("Device config ($configCount / $configTotal)")
+        serviceRepository.setStatusMessage("Device config ($configCount / $configTotal)")
     }
 
     private fun handleModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
@@ -1507,7 +1509,7 @@ class MeshService :
         insertMeshLog(packetToSave)
         setLocalModuleConfig(config)
         val moduleCount = moduleConfig.allFields.size
-        radioConfigRepository.setStatusMessage("Module config ($moduleCount / $moduleTotal)")
+        serviceRepository.setStatusMessage("Module config ($moduleCount / $moduleTotal)")
     }
 
     private fun handleChannel(ch: ChannelProtos.Channel) {
@@ -1523,7 +1525,7 @@ class MeshService :
         insertMeshLog(packetToSave)
         if (ch.role != ChannelProtos.Channel.Role.DISABLED) updateChannelSettings(ch)
         val maxChannels = myNodeInfo?.maxChannels ?: 8
-        radioConfigRepository.setStatusMessage("Channels (${ch.index + 1} / $maxChannels)")
+        serviceRepository.setStatusMessage("Channels (${ch.index + 1} / $maxChannels)")
     }
 
     /** Convert a protobuf NodeInfo into our model objects and update our node DB */
@@ -1587,7 +1589,7 @@ class MeshService :
         insertMeshLog(packetToSave)
 
         newNodes.add(info)
-        radioConfigRepository.setStatusMessage("Nodes (${newNodes.size})")
+        serviceRepository.setStatusMessage("Nodes (${newNodes.size})")
     }
 
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
@@ -1696,7 +1698,7 @@ class MeshService :
 
     private fun handleClientNotification(notification: MeshProtos.ClientNotification) {
         debug("Received clientNotification ${notification.toOneLineString()}")
-        radioConfigRepository.setClientNotification(notification)
+        serviceRepository.setClientNotification(notification)
         serviceNotifications.showClientNotification(notification)
         // if the future for the originating request is still in the queue, complete as unsuccessful
         // for now
@@ -1777,7 +1779,7 @@ class MeshService :
                     .onEach { message ->
                         packetHandler.sendToRadio(ToRadio.newBuilder().apply { mqttClientProxyMessage = message })
                     }
-                    .catch { throwable -> radioConfigRepository.setErrorMessage("MqttClientProxy failed: $throwable") }
+                    .catch { throwable -> serviceRepository.setErrorMessage("MqttClientProxy failed: $throwable") }
                     .launchIn(serviceScope)
         }
     }

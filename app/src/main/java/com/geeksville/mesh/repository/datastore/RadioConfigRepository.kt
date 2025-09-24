@@ -22,23 +22,15 @@ import com.geeksville.mesh.ChannelProtos.Channel
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
-import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.getChannelUrl
-import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.database.entity.MetadataEntity
@@ -60,14 +52,6 @@ constructor(
     private val localConfigDataSource: LocalConfigDataSource,
     private val moduleConfigDataSource: ModuleConfigDataSource,
 ) {
-    val meshService: IMeshService?
-        get() = serviceRepository.meshService
-
-    // Connection state to our radio device
-    val connectionState
-        get() = serviceRepository.connectionState
-
-    fun setConnectionState(state: ConnectionState) = serviceRepository.setConnectionState(state)
 
     suspend fun getNodeDBbyNum() = nodeDB.getNodeDBbyNum().first()
 
@@ -154,44 +138,6 @@ constructor(
                 }
             }
         }
-
-    val clientNotification = serviceRepository.clientNotification
-
-    fun setClientNotification(notification: MeshProtos.ClientNotification?) {
-        serviceRepository.setClientNotification(notification)
-    }
-
-    fun clearClientNotification() {
-        serviceRepository.clearClientNotification()
-    }
-
-    val errorMessage: StateFlow<String?>
-        get() = serviceRepository.errorMessage
-
-    fun setErrorMessage(text: String) {
-        serviceRepository.setErrorMessage(text)
-    }
-
-    fun clearErrorMessage() {
-        serviceRepository.clearErrorMessage()
-    }
-
-    fun setStatusMessage(text: String) {
-        serviceRepository.setStatusMessage(text)
-    }
-
-    val meshPacketFlow: SharedFlow<MeshPacket>
-        get() = serviceRepository.meshPacketFlow
-
-    suspend fun emitMeshPacket(packet: MeshPacket) = coroutineScope { serviceRepository.emitMeshPacket(packet) }
-
-    val serviceAction: Flow<ServiceAction>
-        get() = serviceRepository.serviceAction
-
-    suspend fun onServiceAction(action: ServiceAction) = coroutineScope { serviceRepository.onServiceAction(action) }
-
-    val tracerouteResponse: StateFlow<String?>
-        get() = serviceRepository.tracerouteResponse
 
     fun setTracerouteResponse(value: String?) {
         serviceRepository.setTracerouteResponse(value)

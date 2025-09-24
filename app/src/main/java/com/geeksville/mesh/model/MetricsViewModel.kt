@@ -41,6 +41,7 @@ import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -204,7 +205,8 @@ constructor(
     private val app: Application,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
-    private val radioConfigRepository: RadioConfigRepository,
+    radioConfigRepository: RadioConfigRepository,
+    private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
@@ -246,7 +248,7 @@ constructor(
         destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }
     }
 
-    fun onServiceAction(action: ServiceAction) = viewModelScope.launch { radioConfigRepository.onServiceAction(action) }
+    fun onServiceAction(action: ServiceAction) = viewModelScope.launch { serviceRepository.onServiceAction(action) }
 
     private val _state = MutableStateFlow(MetricsState.Empty)
     val state: StateFlow<MetricsState> = _state

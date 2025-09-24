@@ -55,6 +55,7 @@ import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.ConnectionState
+import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -106,6 +107,7 @@ constructor(
     savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
+    private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
@@ -113,7 +115,7 @@ constructor(
 ) : ViewModel(),
     Logging {
     private val meshService: IMeshService?
-        get() = radioConfigRepository.meshService
+        get() = serviceRepository.meshService
 
     private val destNum = savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum
     private val _destNode = MutableStateFlow<Node?>(null)
@@ -150,9 +152,9 @@ constructor(
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
 
-        radioConfigRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
+        serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
 
-        combine(radioConfigRepository.connectionState, radioConfigState) { connState, configState ->
+        combine(serviceRepository.connectionState, radioConfigState) { connState, configState ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.CONNECTED) }
             if (connState == ConnectionState.DISCONNECTED && configState.responseState.isWaiting()) {
                 sendError(R.string.disconnected)

@@ -20,7 +20,7 @@ package com.geeksville.mesh.ui.settings.radio
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +41,7 @@ class CleanNodeDatabaseViewModel
 @Inject
 constructor(
     private val nodeRepository: NodeRepository,
-    private val radioConfigRepository: RadioConfigRepository,
+    private val serviceRepository: ServiceRepository,
 ) : ViewModel() {
     private val _olderThanDays = MutableStateFlow(30f)
     val olderThanDays = _olderThanDays.asStateFlow()
@@ -110,7 +110,7 @@ constructor(
             if (nodeNums.isNotEmpty()) {
                 nodeRepository.deleteNodes(nodeNums)
 
-                val service = radioConfigRepository.meshService
+                val service = serviceRepository.meshService
                 if (service != null) {
                     for (nodeNum in nodeNums) {
                         service.removeByNodenum(service.packetId, nodeNum)
