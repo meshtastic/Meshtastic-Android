@@ -51,9 +51,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ui.map.CustomTileProviderConfig
 import com.geeksville.mesh.ui.map.MapViewModel
 import kotlinx.coroutines.flow.collectLatest
+import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")

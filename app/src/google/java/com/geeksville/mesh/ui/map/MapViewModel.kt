@@ -26,7 +26,6 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
-import com.geeksville.mesh.repository.map.CustomTileProviderRepository
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
@@ -50,6 +49,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
+import org.meshtastic.core.data.model.CustomTileProviderConfig
+import org.meshtastic.core.data.repository.CustomTileProviderRepository
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import timber.log.Timber
@@ -509,11 +510,4 @@ data class MapLayerItem(
     var kmlLayerData: KmlLayer? = null,
     var geoJsonLayerData: GeoJsonLayer? = null,
     val layerType: LayerType,
-)
-
-@Serializable
-data class CustomTileProviderConfig(
-    val id: String = UUID.randomUUID().toString(),
-    val name: String,
-    val urlTemplate: String,
 )
