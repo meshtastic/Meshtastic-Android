@@ -181,6 +181,7 @@ project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defa
 
 dependencies {
     implementation(projects.core.data)
+    implementation(projects.core.database)
     implementation(projects.core.datastore)
     implementation(projects.core.di)
     implementation(projects.core.model)
