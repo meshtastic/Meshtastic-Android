@@ -22,16 +22,14 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.data.repository.CustomTileProviderRepository
-import org.meshtastic.core.data.repository.SharedPreferencesCustomTileProviderRepository
+import org.meshtastic.core.data.repository.CustomTileProviderRepositoryImpl
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class GoogleDataModule {
+interface GoogleDataModule {
 
     @Binds
     @Singleton
-    abstract fun bindCustomTileProviderRepository(
-        impl: SharedPreferencesCustomTileProviderRepository,
-    ): CustomTileProviderRepository
+    fun bindCustomTileProviderRepository(impl: CustomTileProviderRepositoryImpl): CustomTileProviderRepository
 }
