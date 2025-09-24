@@ -170,7 +170,7 @@ firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-cra
 firebase-performance-gradlePlugin = { module = "com.google.firebase:perf-plugin", version = "2.0.1" }
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
 room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
-spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "7.2.1" }
+spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "8.0.0" }
 
 [bundles]
 # AndroidX
