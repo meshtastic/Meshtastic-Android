@@ -569,7 +569,7 @@
     <string name="position_flags">Informations relatives à la position</string>
     <string name="power_config">Configuration de l\'alimentation</string>
     <string name="enable_power_saving_mode">Activer le mode économie d\'énergie</string>
-    <string name="shutdown_on_power_loss">Shutdown on power loss</string>
+    <string name="shutdown_on_power_loss">Arrêt en cas de perte d\'alimentation</string>
     <string name="shutdown_on_battery_delay_seconds">Délai d’extinction sur batterie (secondes)</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
     <string name="adc_multiplier_override_ratio">Facteur de remplacement du multiplicateur ADC</string>
