@@ -106,14 +106,14 @@
     <string name="config_lora_region_summary">Alue, jossa aiot käyttää radiolaitteitasi.</string>
     <string name="config_lora_modem_preset_summary">Saatavilla olevat modeemiesiasetukset, oletus on Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Asettaa maksimihyppyjen määrän, oletus on 3. Hyppyjen määrän lisääminen kasvattaa myös ruuhkaa, joten sitä tulisi käyttää varoen. 0 hypyn lähettämät viestit eivät saa kuittauksia (ACK).</string>
-    <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
+    <string name="config_lora_frequency_slot_summary">Laitteesi käyttämä taajuus lasketaan alueen, modeemin esiasetuksen ja tämän kentän perusteella. Kun arvo on 0, aikaväli lasketaan automaattisesti ensisijaisen kanavan nimen perusteella ja se poikkeaa oletus-julkisesta aikavälistä. Vaihda takaisin julkiseen oletus-aikaväliin, jos käytössä on yksityinen ensisijainen ja julkinen toissijainen kanava.</string>
     <string name="config_network_wifi_enabled_summary">WiFi:n käyttöön ottaminen poistaa Bluetooth-yhteyden sovellukseen.</string>
     <string name="config_network_eth_enabled_summary">Ethernetin ottaminen käyttöön poistaa Bluetooth-yhteyden sovellukseen. TCP-laiteyhteydet eivät ole käytettävissä Applen laitteilla.</string>
     <string name="config_network_udp_enabled_summary">Ota käyttöön pakettien lähettäminen UDP:n kautta paikallisverkossa.</string>
     <string name="config_position_broadcast_secs_summary">Suurin aikaväli, jonka aikana laite ei lähetä sijaintia.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Nopein mahdollinen sijaintipäivitysten lähetysväli, kun minimietäisyys on täyttynyt.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Vähimmäisetäisyys metreinä, jonka muutos otetaan huomioon älykkäässä sijainnin lähetyksessä.</string>
-    <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
+    <string name="config_position_gps_update_interval_summary">Kuinka usein yritetään hakea GPS-sijainti (&lt;10 sekuntia pitää GPS:n päällä).</string>
     <string name="config_position_flags_summary">Valinnaiset kentät, jotka sisällytetään sijaintiviesteihin. Mitä enemmän kenttiä sisällytetään, sitä suurempi viesti on, mikä pidentää lähetysaikaa ja lisää pakettihäviön riskiä.</string>
     <string name="config_power_is_power_saving_summary">Asetus laittaa kaiken mahdollisen lepotilaan. Seuranta- ja anturiroolissa tämä sisältää myös LoRa-radion. Älä käytä tätä asetusta, jos haluat käyttää laitetta puhelinsovellusten kanssa tai laitetta ilman käyttäjäpainiketta.</string>
     <string name="config_security_public_key">Luodaan julkisesta avaimestasi ja lähetetään muille verkon solmuille, jotta ne voivat laskea jaetun salaisen avaimen.</string>
@@ -506,7 +506,7 @@
     <string name="coding_rate">Koodausnopeus</string>
     <string name="frequency_offset_mhz">Taajuuspoikkeama (MHz)</string>
     <string name="region_frequency_plan">Alue</string>
-    <string name="hop_limit">Number of Hops</string>
+    <string name="hop_limit">Hyppyjen määrä</string>
     <string name="tx_enabled">Lähetys käytössä</string>
     <string name="tx_power_dbm">Lähetysteho</string>
     <string name="frequency_slot">Taajuuspaikka</string>
@@ -561,7 +561,7 @@
     <string name="longitude">Pituuspiiri</string>
     <string name="altitude_meters">Korkeus (metriä)</string>
     <string name="position_config_set_fixed_from_phone">Aseta nykyisestä puhelimen sijainnista</string>
-    <string name="gps_mode">GPS Mode (Physical Hardware)</string>
+    <string name="gps_mode">GPS-tila (fyysinen laitteisto)</string>
     <string name="gps_update_interval_seconds">GPS päivitysväli (sekuntia)</string>
     <string name="redefine_gps_rx_pin">Määritä uudelleen GPS_RX_PIN</string>
     <string name="redefine_gps_tx_pin">Uudelleenmääritä GPS_TX_PIN</string>
