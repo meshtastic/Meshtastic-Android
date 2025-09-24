@@ -27,7 +27,7 @@ data class QuickChatAction(
     @ColumnInfo(name = "name") val name: String = "",
     @ColumnInfo(name = "message") val message: String = "",
     @ColumnInfo(name = "mode") val mode: Mode = Mode.Instant,
-    @ColumnInfo(name = "position") val position: Int
+    @ColumnInfo(name = "position") val position: Int,
 ) {
     enum class Mode {
         Append,

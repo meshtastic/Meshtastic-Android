@@ -34,27 +34,23 @@ class MeshtasticDatabaseTest {
     }
 
     @get:Rule
-    val helper: MigrationTestHelper = MigrationTestHelper(
-        InstrumentationRegistry.getInstrumentation(),
-        MeshtasticDatabase::class.java,
-    )
+    val helper: MigrationTestHelper =
+        MigrationTestHelper(InstrumentationRegistry.getInstrumentation(), MeshtasticDatabase::class.java)
 
     @Test
     @Throws(IOException::class)
     fun migrateAll() {
         // Create earliest version of the database.
-        helper.createDatabase(TEST_DB, 3).apply {
-            close()
-        }
+        helper.createDatabase(TEST_DB, 3).apply { close() }
 
         // Open latest version of the database. Room validates the schema
         // once all migrations execute.
         Room.databaseBuilder(
             InstrumentationRegistry.getInstrumentation().targetContext,
             MeshtasticDatabase::class.java,
-            TEST_DB
-        ).build().apply {
-            openHelper.writableDatabase.close()
-        }
+            TEST_DB,
+        )
+            .build()
+            .apply { openHelper.writableDatabase.close() }
     }
 }

@@ -34,38 +34,21 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 class DatabaseModule {
-    @Provides
-    @Singleton
-    fun provideDatabase(app: Application): MeshtasticDatabase =
-        MeshtasticDatabase.getDatabase(app)
+    @Provides @Singleton
+    fun provideDatabase(app: Application): MeshtasticDatabase = MeshtasticDatabase.getDatabase(app)
+
+    @Provides fun provideNodeInfoDao(database: MeshtasticDatabase): NodeInfoDao = database.nodeInfoDao()
+
+    @Provides fun providePacketDao(database: MeshtasticDatabase): PacketDao = database.packetDao()
+
+    @Provides fun provideMeshLogDao(database: MeshtasticDatabase): MeshLogDao = database.meshLogDao()
 
     @Provides
-    fun provideNodeInfoDao(database: MeshtasticDatabase): NodeInfoDao {
-        return database.nodeInfoDao()
-    }
+    fun provideQuickChatActionDao(database: MeshtasticDatabase): QuickChatActionDao = database.quickChatActionDao()
 
     @Provides
-    fun providePacketDao(database: MeshtasticDatabase): PacketDao {
-        return database.packetDao()
-    }
+    fun provideDeviceHardwareDao(database: MeshtasticDatabase): DeviceHardwareDao = database.deviceHardwareDao()
 
     @Provides
-    fun provideMeshLogDao(database: MeshtasticDatabase): MeshLogDao {
-        return database.meshLogDao()
-    }
-
-    @Provides
-    fun provideQuickChatActionDao(database: MeshtasticDatabase): QuickChatActionDao {
-        return database.quickChatActionDao()
-    }
-
-    @Provides
-    fun provideDeviceHardwareDao(database: MeshtasticDatabase): DeviceHardwareDao {
-        return database.deviceHardwareDao()
-    }
-
-    @Provides
-    fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao {
-        return database.firmwareReleaseDao()
-    }
+    fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao = database.firmwareReleaseDao()
 }

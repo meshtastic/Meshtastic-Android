@@ -29,36 +29,17 @@ import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 
 @Composable
-fun ElevationInfo(
-    modifier: Modifier = Modifier,
-    altitude: Int,
-    system: DisplayUnits,
-    suffix: String
-) {
+fun ElevationInfo(modifier: Modifier = Modifier, altitude: Int, system: DisplayUnits, suffix: String) {
     val annotatedString = buildAnnotatedString {
         append(altitude.metersIn(system).toString(system))
-        MaterialTheme.typography.labelSmall.toSpanStyle().let { style ->
-            withStyle(style) {
-                append(" $suffix")
-            }
-        }
+        MaterialTheme.typography.labelSmall.toSpanStyle().let { style -> withStyle(style) { append(" $suffix") } }
     }
 
-    Text(
-        modifier = modifier,
-        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-        text = annotatedString,
-    )
+    Text(modifier = modifier, fontSize = MaterialTheme.typography.labelLarge.fontSize, text = annotatedString)
 }
 
 @Composable
 @Preview
 fun ElevationInfoPreview() {
-    MaterialTheme {
-        ElevationInfo(
-            altitude = 100,
-            system = DisplayUnits.METRIC,
-            suffix = "ASL"
-        )
-    }
+    MaterialTheme { ElevationInfo(altitude = 100, system = DisplayUnits.METRIC, suffix = "ASL") }
 }

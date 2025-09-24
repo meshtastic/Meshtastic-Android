@@ -17,10 +17,10 @@
 
 package com.geeksville.mesh.repository.api
 
-import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import dagger.Lazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asDeviceVersion

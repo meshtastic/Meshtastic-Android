@@ -42,12 +42,11 @@ interface MeshLogDao {
         SELECT * FROM log 
         WHERE from_num = :fromNum AND (:portNum = 0 AND port_num != 0 OR port_num = :portNum)
         ORDER BY received_date DESC LIMIT 0,:maxItem
-        """
+        """,
     )
     fun getLogsFrom(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>
 
-    @Insert
-    fun insert(log: MeshLog)
+    @Insert fun insert(log: MeshLog)
 
     @Query("DELETE FROM log")
     fun deleteAll()

@@ -57,39 +57,20 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import org.meshtastic.core.database.entity.Reaction
 
 @Composable
-private fun ReactionItem(
-    emoji: String,
-    emojiCount: Int = 1,
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
-) {
+private fun ReactionItem(emoji: String, emojiCount: Int = 1, onClick: () -> Unit = {}, onLongClick: () -> Unit = {}) {
     BadgedBox(
         badge = {
             if (emojiCount > 1) {
-                Badge {
-                    Text(
-                        fontWeight = FontWeight.Bold,
-                        text = emojiCount.toString()
-                    )
-                }
+                Badge { Text(fontWeight = FontWeight.Bold, text = emojiCount.toString()) }
             }
-        }
+        },
     ) {
         Surface(
-            modifier = Modifier
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = onLongClick
-                ),
+            modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
             color = MaterialTheme.colorScheme.primaryContainer,
             shape = CircleShape,
         ) {
-            Text(
-                text = emoji,
-                modifier = Modifier
-                    .padding(4.dp)
-                    .clip(CircleShape),
-            )
+            Text(text = emoji, modifier = Modifier.padding(4.dp).clip(CircleShape))
         }
     }
 }
@@ -102,10 +83,7 @@ fun ReactionRow(
     onSendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
 ) {
-    val emojiList =
-        reduceEmojis(
-            reactions.reversed().map { it.emoji }
-        ).entries
+    val emojiList = reduceEmojis(reactions.reversed().map { it.emoji }).entries
 
     AnimatedVisibility(emojiList.isNotEmpty()) {
         LazyRow(
@@ -113,16 +91,12 @@ fun ReactionRow(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            items(
-                emojiList.size
-            ) { index ->
+            items(emojiList.size) { index ->
                 val entry = emojiList.elementAt(index)
                 ReactionItem(
                     emoji = entry.key,
                     emojiCount = entry.value,
-                    onClick = {
-                        onSendReaction(entry.key)
-                    },
+                    onClick = { onSendReaction(entry.key) },
                     onLongClick = onShowReactions,
                 )
             }
@@ -133,68 +107,47 @@ fun ReactionRow(
 fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
 
 @Composable
-fun ReactionDialog(
-    reactions: List<Reaction>,
-    onDismiss: () -> Unit = {}
-) = BottomSheetDialog(
-    onDismiss = onDismiss,
-    modifier = Modifier.fillMaxHeight(fraction = .3f),
-) {
-    val groupedEmojis = reactions.groupBy { it.emoji }
-    var selectedEmoji by remember { mutableStateOf<String?>(null) }
-    val filteredReactions = selectedEmoji?.let { groupedEmojis[it] ?: emptyList() } ?: reactions
+fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
+    BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
+        val groupedEmojis = reactions.groupBy { it.emoji }
+        var selectedEmoji by remember { mutableStateOf<String?>(null) }
+        val filteredReactions = selectedEmoji?.let { groupedEmojis[it] ?: emptyList() } ?: reactions
 
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        items(groupedEmojis.entries.toList()) { (emoji, reactions) ->
-            Text(
-                text = "$emoji${reactions.size}",
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(if (selectedEmoji == emoji) Color.Gray else Color.Transparent)
-                    .padding(8.dp)
-                    .clickable {
-                        selectedEmoji = if (selectedEmoji == emoji) null else emoji
-                    },
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-
-    HorizontalDivider(Modifier.padding(vertical = 8.dp))
-
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(filteredReactions) { reaction ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            items(groupedEmojis.entries.toList()) { (emoji, reactions) ->
                 Text(
-                    text = reaction.user.longName,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = reaction.emoji,
-                    style = MaterialTheme.typography.titleLarge
+                    text = "$emoji${reactions.size}",
+                    modifier =
+                    Modifier.clip(CircleShape)
+                        .background(if (selectedEmoji == emoji) Color.Gray else Color.Transparent)
+                        .padding(8.dp)
+                        .clickable { selectedEmoji = if (selectedEmoji == emoji) null else emoji },
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
+
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(filteredReactions) { reaction ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(text = reaction.user.longName, style = MaterialTheme.typography.titleMedium)
+                    Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
+                }
+            }
+        }
     }
-}
 
 @PreviewLightDark
 @Composable
 fun ReactionItemPreview() {
     AppTheme {
-        Column(
-            modifier = Modifier.background(MaterialTheme.colorScheme.background)
-        ) {
+        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             ReactionItem(emoji = "\uD83D\uDE42")
             ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
             ReactionButton()
@@ -207,20 +160,21 @@ fun ReactionItemPreview() {
 fun ReactionRowPreview() {
     AppTheme {
         ReactionRow(
-            reactions = listOf(
+            reactions =
+            listOf(
                 Reaction(
                     replyId = 1,
                     user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
-                    timestamp = 1L
+                    timestamp = 1L,
                 ),
                 Reaction(
                     replyId = 1,
                     user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
-                    timestamp = 1L
+                    timestamp = 1L,
                 ),
-            )
+            ),
         )
     }
 }

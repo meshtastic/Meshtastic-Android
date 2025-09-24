@@ -17,9 +17,9 @@
 
 package com.geeksville.mesh.repository.api
 
-import org.meshtastic.core.database.dao.DeviceHardwareDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.model.NetworkDeviceHardware

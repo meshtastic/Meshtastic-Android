@@ -45,7 +45,7 @@ class Converters {
     fun bytesToFromRadio(bytes: ByteArray): MeshProtos.FromRadio = try {
         MeshProtos.FromRadio.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex,"bytesToFromRadio TypeConverter error")
+        Timber.e(ex, "bytesToFromRadio TypeConverter error")
         MeshProtos.FromRadio.getDefaultInstance()
     }
 
@@ -55,7 +55,7 @@ class Converters {
     fun bytesToUser(bytes: ByteArray): MeshProtos.User = try {
         MeshProtos.User.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex,"bytesToUser TypeConverter error")
+        Timber.e(ex, "bytesToUser TypeConverter error")
         MeshProtos.User.getDefaultInstance()
     }
 
@@ -65,7 +65,7 @@ class Converters {
     fun bytesToPosition(bytes: ByteArray): MeshProtos.Position = try {
         MeshProtos.Position.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex,"bytesToPosition TypeConverter error")
+        Timber.e(ex, "bytesToPosition TypeConverter error")
         MeshProtos.Position.getDefaultInstance()
     }
 
@@ -75,7 +75,7 @@ class Converters {
     fun bytesToTelemetry(bytes: ByteArray): TelemetryProtos.Telemetry = try {
         TelemetryProtos.Telemetry.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex,"bytesToTelemetry TypeConverter error")
+        Timber.e(ex, "bytesToTelemetry TypeConverter error")
         TelemetryProtos.Telemetry.newBuilder().build() // Return an empty Telemetry object
     }
 
@@ -85,7 +85,7 @@ class Converters {
     fun bytesToPaxcounter(bytes: ByteArray): PaxcountProtos.Paxcount = try {
         PaxcountProtos.Paxcount.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex,"bytesToPaxcounter TypeConverter error")
+        Timber.e(ex, "bytesToPaxcounter TypeConverter error")
         PaxcountProtos.Paxcount.getDefaultInstance()
     }
 
@@ -95,7 +95,7 @@ class Converters {
     fun bytesToMetadata(bytes: ByteArray): MeshProtos.DeviceMetadata = try {
         MeshProtos.DeviceMetadata.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex,"bytesToMetadata TypeConverter error")
+        Timber.e(ex, "bytesToMetadata TypeConverter error")
         MeshProtos.DeviceMetadata.getDefaultInstance()
     }
 

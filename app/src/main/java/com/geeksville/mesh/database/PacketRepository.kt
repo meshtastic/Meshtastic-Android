@@ -18,11 +18,11 @@
 package com.geeksville.mesh.database
 
 import com.geeksville.mesh.Portnums.PortNum
-import org.meshtastic.core.database.dao.PacketDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity

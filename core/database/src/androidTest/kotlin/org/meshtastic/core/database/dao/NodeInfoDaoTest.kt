@@ -23,7 +23,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.user
-import org.meshtastic.core.database.MeshtasticDatabase
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -35,6 +34,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.model.Node

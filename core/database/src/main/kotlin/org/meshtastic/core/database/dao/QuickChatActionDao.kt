@@ -30,18 +30,17 @@ interface QuickChatActionDao {
     @Query("Select * from quick_chat order by position asc")
     fun getAll(): Flow<List<QuickChatAction>>
 
-    @Upsert
-    fun upsert(action: QuickChatAction)
+    @Upsert fun upsert(action: QuickChatAction)
 
     @Query("Delete from quick_chat")
     fun deleteAll()
 
     @Query("Delete from quick_chat where uuid=:uuid")
-    fun _delete(uuid: Long)
+    fun delete(uuid: Long)
 
     @Transaction
     fun delete(action: QuickChatAction) {
-        _delete(action.uuid)
+        delete(action.uuid)
         decrementPositionsAfter(action.position)
     }
 

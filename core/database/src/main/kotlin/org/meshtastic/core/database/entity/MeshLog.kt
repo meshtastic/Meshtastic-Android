@@ -27,13 +27,7 @@ import com.geeksville.mesh.Portnums
 import com.google.protobuf.TextFormat
 import java.io.IOException
 
-@Entity(
-    tableName = "log",
-    indices = [
-        Index(value = ["from_num"]),
-        Index(value = ["port_num"]),
-    ],
-)
+@Entity(tableName = "log", indices = [Index(value = ["from_num"]), Index(value = ["port_num"])])
 data class MeshLog(
     @PrimaryKey val uuid: String,
     @ColumnInfo(name = "type") val message_type: String,
@@ -52,8 +46,7 @@ data class MeshLog(
                 try {
                     TextFormat.getParser().merge(raw_message, builder)
                     return builder.build()
-                } catch (e: IOException) {
-                }
+                } catch (e: IOException) {}
             }
             return null
         }
@@ -65,8 +58,7 @@ data class MeshLog(
                 try {
                     TextFormat.getParser().merge(raw_message, builder)
                     return builder.build()
-                } catch (e: IOException) {
-                }
+                } catch (e: IOException) {}
             }
             return null
         }
@@ -78,8 +70,7 @@ data class MeshLog(
                 try {
                     TextFormat.getParser().merge(raw_message, builder)
                     return builder.build()
-                } catch (e: IOException) {
-                }
+                } catch (e: IOException) {}
             }
             return null
         }
