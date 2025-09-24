@@ -23,6 +23,9 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.model.MeshUser
+import org.meshtastic.core.model.NodeInfo
+import org.meshtastic.core.model.Position
 import java.util.Locale
 
 class NodeInfoTest {
