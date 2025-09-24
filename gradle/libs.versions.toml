@@ -6,7 +6,7 @@ accompanist = "0.37.3"
 
 # androidx
 androidxComposeMaterial3Adaptive = "1.2.0-beta02"
-androidxTracing = "1.9.1"
+androidxTracing = "1.9.2"
 datastore = "1.1.7"
 lifecycle = "2.9.4"
 navigation = "2.9.4"
@@ -67,11 +67,11 @@ room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 tracing-ktx = { module = "androidx.tracing:tracing-ktx", version.ref = "androidxTracing" }
-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.10.4" }
+work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.10.5" }
 
 # Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.09.00" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.09.01" }
 androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
 androidx-compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
