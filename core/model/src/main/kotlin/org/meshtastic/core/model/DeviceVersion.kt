@@ -22,6 +22,7 @@ import timber.log.Timber
 /** Provide structured access to parse and compare device version strings */
 data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     val asInt
         get() =
             try {
@@ -36,6 +37,7 @@ data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
      *
      * Or throw an exception if the string can not be parsed
      */
+    @Suppress("TooGenericExceptionThrown", "MagicNumber")
     private fun verStringToInt(s: String): Int {
         // Allow 1 to two digits per match
         val match = Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(s) ?: throw Exception("Can't parse version $s")

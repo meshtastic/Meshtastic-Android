@@ -232,6 +232,7 @@ data class DataPacket(
 
         fun nodeNumToDefaultId(n: Int): String = "!%08x".format(n)
 
+        @Suppress("MagicNumber")
         fun idToDefaultNodeNum(id: String?): Int? = runCatching { id?.toLong(16)?.toInt() }.getOrNull()
 
         override fun createFromParcel(parcel: Parcel): DataPacket = DataPacket(parcel)

@@ -60,6 +60,7 @@ fun Any.toPIIString() = if (!BuildConfig.DEBUG) {
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
+@Suppress("MagicNumber")
 fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMillis()): String {
     val currentTime = (currentTimeMillis / 1000).toInt()
     val diffMin = (currentTime - lastSeenUnix) / 60
