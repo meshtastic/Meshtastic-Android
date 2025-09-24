@@ -146,10 +146,6 @@ android {
     }
     bundle { language { enableSplit = false } }
     buildFeatures { aidl = true }
-    sourceSets {
-        // Adds exported schema location as test app assets.
-        named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
-    }
 }
 
 secrets {

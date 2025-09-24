@@ -17,4 +17,10 @@
 
 plugins { alias(libs.plugins.meshtastic.android.library) }
 
-android { namespace = "org.meshtastic.core.database" }
+android {
+    namespace = "org.meshtastic.core.database"
+    sourceSets {
+        // Adds exported schema location as test app assets.
+        named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
+    }
+}
