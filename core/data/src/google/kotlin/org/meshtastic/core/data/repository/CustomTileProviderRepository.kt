@@ -15,9 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.map
+package org.meshtastic.core.data.repository
 
-import com.geeksville.mesh.ui.map.CustomTileProviderConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,14 +24,28 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.di.annotation.IoDispatcher
 import org.meshtastic.core.prefs.map.MapTileProviderPrefs
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.plus
+
+interface CustomTileProviderRepository {
+    fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>>
+
+    suspend fun addCustomTileProvider(config: CustomTileProviderConfig)
+
+    suspend fun updateCustomTileProvider(config: CustomTileProviderConfig)
+
+    suspend fun deleteCustomTileProvider(configId: String)
+
+    suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig?
+}
 
 @Singleton
-class SharedPreferencesCustomTileProviderRepository
+class CustomTileProviderRepositoryImpl
 @Inject
 constructor(
     private val json: Json,
@@ -44,31 +57,6 @@ constructor(
 
     init {
         loadDataFromPrefs()
-    }
-
-    private fun loadDataFromPrefs() {
-        val jsonString = mapTileProviderPrefs.customTileProviders
-        if (jsonString != null) {
-            try {
-                customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
-            } catch (e: SerializationException) {
-                Timber.tag("TileRepo").e(e, "Error deserializing tile providers")
-                customTileProvidersStateFlow.value = emptyList()
-            }
-        } else {
-            customTileProvidersStateFlow.value = emptyList()
-        }
-    }
-
-    private suspend fun saveDataToPrefs(providers: List<CustomTileProviderConfig>) {
-        withContext(ioDispatcher) {
-            try {
-                val jsonString = json.encodeToString(providers)
-                mapTileProviderPrefs.customTileProviders = jsonString
-            } catch (e: SerializationException) {
-                Timber.tag("TileRepo").e(e, "Error serializing tile providers")
-            }
-        }
     }
 
     override fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>> =
@@ -94,4 +82,29 @@ constructor(
 
     override suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig? =
         customTileProvidersStateFlow.value.find { it.id == configId }
+
+    private fun loadDataFromPrefs() {
+        val jsonString = mapTileProviderPrefs.customTileProviders
+        if (jsonString != null) {
+            try {
+                customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
+            } catch (e: SerializationException) {
+                Timber.e(e, "Error deserializing tile providers")
+                customTileProvidersStateFlow.value = emptyList()
+            }
+        } else {
+            customTileProvidersStateFlow.value = emptyList()
+        }
+    }
+
+    private suspend fun saveDataToPrefs(providers: List<CustomTileProviderConfig>) {
+        withContext(ioDispatcher) {
+            try {
+                val jsonString = json.encodeToString(providers)
+                mapTileProviderPrefs.customTileProviders = jsonString
+            } catch (e: SerializationException) {
+                Timber.e(e, "Error serializing tile providers")
+            }
+        }
+    }
 }
