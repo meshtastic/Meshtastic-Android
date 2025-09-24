@@ -71,7 +71,6 @@ import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
 import com.geeksville.mesh.ui.map.components.CustomMapLayersSheet
@@ -84,8 +83,6 @@ import com.geeksville.mesh.ui.metrics.HEADING_DEG
 import com.geeksville.mesh.ui.metrics.formatPositionTime
 import com.geeksville.mesh.ui.node.DEG_D
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.util.metersIn
-import com.geeksville.mesh.util.toString
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -117,9 +114,12 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
+import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
+import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.R
 import timber.log.Timber
 import java.text.DateFormat

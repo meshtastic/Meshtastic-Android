@@ -25,40 +25,21 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import com.geeksville.mesh.util.metersIn
-import com.geeksville.mesh.util.toString
+import org.meshtastic.core.model.util.metersIn
+import org.meshtastic.core.model.util.toString
 
 @Composable
-fun ElevationInfo(
-    modifier: Modifier = Modifier,
-    altitude: Int,
-    system: DisplayUnits,
-    suffix: String
-) {
+fun ElevationInfo(modifier: Modifier = Modifier, altitude: Int, system: DisplayUnits, suffix: String) {
     val annotatedString = buildAnnotatedString {
         append(altitude.metersIn(system).toString(system))
-        MaterialTheme.typography.labelSmall.toSpanStyle().let { style ->
-            withStyle(style) {
-                append(" $suffix")
-            }
-        }
+        MaterialTheme.typography.labelSmall.toSpanStyle().let { style -> withStyle(style) { append(" $suffix") } }
     }
 
-    Text(
-        modifier = modifier,
-        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-        text = annotatedString,
-    )
+    Text(modifier = modifier, fontSize = MaterialTheme.typography.labelLarge.fontSize, text = annotatedString)
 }
 
 @Composable
 @Preview
 fun ElevationInfoPreview() {
-    MaterialTheme {
-        ElevationInfo(
-            altitude = 100,
-            system = DisplayUnits.METRIC,
-            suffix = "ASL"
-        )
-    }
+    MaterialTheme { ElevationInfo(altitude = 100, system = DisplayUnits.METRIC, suffix = "ASL") }
 }

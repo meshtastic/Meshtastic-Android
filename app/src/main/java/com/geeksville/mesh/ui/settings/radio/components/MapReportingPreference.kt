@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.common.components.precisionBitsToMeters
-import com.geeksville.mesh.util.DistanceUnit
-import com.geeksville.mesh.util.toDistanceString
+import org.meshtastic.core.model.util.DistanceUnit
+import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.strings.R
 import kotlin.math.roundToInt
 

@@ -46,8 +46,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.ui.node.components.NodeChip
+import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.strings.R
 
 /**

@@ -28,7 +28,6 @@ import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.ui.debug.FilterMode
 import com.google.protobuf.InvalidProtocolBufferException
@@ -45,6 +44,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.database.entity.MeshLog
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale

@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.model.Node
+import org.meshtastic.core.database.model.Node
 
 /** Simple [PreviewParameterProvider] that provides true and false values. */
 class BooleanProvider : PreviewParameterProvider<Boolean> {

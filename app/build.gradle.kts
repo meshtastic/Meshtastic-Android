@@ -28,7 +28,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.android.application.firebase)
     alias(libs.plugins.meshtastic.hilt)
-    alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.devtools.ksp)
@@ -146,10 +145,6 @@ android {
     }
     bundle { language { enableSplit = false } }
     buildFeatures { aidl = true }
-    sourceSets {
-        // Adds exported schema location as test app assets.
-        named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
-    }
 }
 
 secrets {
@@ -181,6 +176,7 @@ project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defa
 
 dependencies {
     implementation(projects.core.data)
+    implementation(projects.core.database)
     implementation(projects.core.datastore)
     implementation(projects.core.di)
     implementation(projects.core.model)
