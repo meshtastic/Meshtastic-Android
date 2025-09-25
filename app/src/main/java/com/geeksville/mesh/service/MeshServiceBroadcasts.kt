@@ -20,15 +20,28 @@ package com.geeksville.mesh.service
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class MeshServiceBroadcasts(
-    private val context: Context,
-    private val clientPackages: MutableMap<String, String>,
-    private val getConnectionState: () -> ConnectionState,
+@Singleton
+class MeshServiceBroadcasts
+@Inject
+constructor(
+    @ApplicationContext private val context: Context,
+    private val connectionStateHolder: MeshServiceConnectionStateHolder,
+    private val serviceRepository: ServiceRepository,
 ) {
+    // A mapping of receiver class name to package name - used for explicit broadcasts
+    private val clientPackages = mutableMapOf<String, String>()
+
+    fun subscribeReceiver(receiverName: String, packageName: String) {
+        clientPackages[receiverName] = packageName
+    }
+
     /** Broadcast some received data Payload will be a DataPacket */
     fun broadcastReceivedData(payload: DataPacket) {
         explicitBroadcast(Intent(MeshService.actionReceived(payload.dataType)).putExtra(EXTRA_PAYLOAD, payload))
@@ -59,8 +72,9 @@ class MeshServiceBroadcasts(
 
     /** Broadcast our current connection status */
     fun broadcastConnection() {
-        val intent =
-            Intent(MeshService.ACTION_MESH_CONNECTED).putExtra(EXTRA_CONNECTED, getConnectionState().toString())
+        val connectionState = connectionStateHolder.getState()
+        val intent = Intent(MeshService.ACTION_MESH_CONNECTED).putExtra(EXTRA_CONNECTED, connectionState.toString())
+        serviceRepository.setConnectionState(connectionState)
         explicitBroadcast(intent)
     }
 
