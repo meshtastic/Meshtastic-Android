@@ -94,11 +94,11 @@ import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
-import com.geeksville.mesh.ui.common.icons.Conversations
-import com.geeksville.mesh.ui.common.icons.Map
-import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
-import com.geeksville.mesh.ui.common.icons.Nodes
-import com.geeksville.mesh.ui.common.icons.Settings
+import org.meshtastic.core.ui.icon.Conversations
+import org.meshtastic.core.ui.icon.Map
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Nodes
+import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.connections.DeviceType

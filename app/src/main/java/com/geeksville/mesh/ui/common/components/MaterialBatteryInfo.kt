@@ -36,9 +36,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.common.icons.BatteryEmpty
-import com.geeksville.mesh.ui.common.icons.BatteryUnknown
-import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
+import org.meshtastic.core.ui.icon.BatteryEmpty
+import org.meshtastic.core.ui.icon.BatteryUnknown
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
