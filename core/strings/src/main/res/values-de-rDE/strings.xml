@@ -106,14 +106,14 @@
     <string name="config_lora_region_summary">Die Region, in der Sie das Funkgerät benutzen.</string>
     <string name="config_lora_modem_preset_summary">Verfügbare Modemvoreinstellungen, Standard ist LongFast.</string>
     <string name="config_lora_hop_limit_summary">Legt die maximale Sprungweite fest. Der Standardwert ist 3. Eine Erhöhung der Sprungweite erhöht auch die Überlastung und sollte daher mit Vorsicht verwendet werden. Nachrichten mit Sprungweite 0 erhalten keine Bestätigung.</string>
-    <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
+    <string name="config_lora_frequency_slot_summary">Die Betriebsfrequenz Ihres Knotens wird basierend auf der Region, dem Modem Preset und diesem Feld berechnet. Wenn \"0\", wird der Slot automatisch auf der Grundlage des primären Kanalnamens berechnet. Wenn ein privater als Primär- und öffentliche als Sekundärkanäle konfiguriert sind, kann es sein, dass sie keinen Empfang auf den öffentlichen haben, wenn diese sich auf einem anderen Slot befinden. Stellen Sie in diesem Fall den richtigen Slot fest ein, statt die Automatik (0) übernehmen zu lassen.</string>
     <string name="config_network_wifi_enabled_summary">Durch die Aktivierung von WLAN wird die Bluetooth Verbindung zur App deaktiviert.</string>
     <string name="config_network_eth_enabled_summary">Durch Aktivieren von Ethernet wird die Bluetooth Verbindung zur App deaktiviert. TCP Knotenverbindungen sind auf Apple Geräten nicht verfügbar.</string>
     <string name="config_network_udp_enabled_summary">Aktivieren Sie die Übertragung von Paketen per UDP über das lokale Netzwerk.</string>
     <string name="config_position_broadcast_secs_summary">Die maximale Verzögerung, ehe ein Knoten einen Standort erneut sendet.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Am schnellsten werden Standortaktualisierungen gesendet, wenn die Mindestentfernung eingehalten wurde.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Die minimale Entfernungsänderung in Metern, die für eine intelligente Standortübermittlung berücksichtigt werden muss.</string>
-    <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
+    <string name="config_position_gps_update_interval_summary">Intervall zur Erfassung der Position (&lt;10sek. = dauerhaft).</string>
     <string name="config_position_flags_summary">Optionale Felder, die bei der Zusammenstellung von Standortnachrichten enthalten sein sollen. Je mehr Optionen ausgewählt werden, desto größer wird die Nachricht und die längere Übertragungszeit erhöht das Risiko für einen Nachrichtenverlust.</string>
     <string name="config_power_is_power_saving_summary">Versetzt alles so weit wie möglich in den Ruhezustand. Für die Tracker- und Sensorfunktion umfasst dies auch das Lora Funkgerät. Verwenden Sie diese Einstellung nicht, wenn Sie Ihr Gerät mit den Telefon Apps verwenden möchten oder wenn Sie ein Gerät ohne Benutzertaste verwenden.</string>
     <string name="config_security_public_key">Wird aus Ihrem öffentlichen Schlüssel generiert und an andere Knoten im Netzwerk gesendet, damit diese einen gemeinsamen geheimen Schlüssel berechnen können.</string>
@@ -506,7 +506,7 @@
     <string name="coding_rate">Fehlerkorrektur</string>
     <string name="frequency_offset_mhz">Frequenzversatz (MHz)</string>
     <string name="region_frequency_plan">Region</string>
-    <string name="hop_limit">Number of Hops</string>
+    <string name="hop_limit">Anzahl der Weiterleitungen</string>
     <string name="tx_enabled">Senden aktiviert</string>
     <string name="tx_power_dbm">Sendeleistung</string>
     <string name="frequency_slot">Frequenzschlitz</string>
@@ -561,7 +561,7 @@
     <string name="longitude">Längengrad</string>
     <string name="altitude_meters">Höhenmeter (Meter)</string>
     <string name="position_config_set_fixed_from_phone">Vom aktuellen Telefonstandort festlegen</string>
-    <string name="gps_mode">GPS Mode (Physical Hardware)</string>
+    <string name="gps_mode">GPS-Chip (Hardware) Modus</string>
     <string name="gps_update_interval_seconds">GPS Aktualisierungsintervall (Sekunden)</string>
     <string name="redefine_gps_rx_pin">GPS RX PIN neu definieren</string>
     <string name="redefine_gps_tx_pin">GPS TX PIN neu definieren</string>
@@ -863,5 +863,5 @@
     <string name="device_configuration">Geräteeinstellungen</string>
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <string name="device_telemetry_enabled">Gerätetelemetrie senden</string>
-    <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul Gerätetelemetrie, um Daten an das Netzwerk zu senden.</string>
+    <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul Gerätetelemetrie, um Daten an das Netzwerk zu senden</string>
 </resources>
