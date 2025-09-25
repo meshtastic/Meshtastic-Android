@@ -149,22 +149,6 @@ internal fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSetting
         }
     }
 
-data class NodesUiState(
-    val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
-    val filter: String = "",
-    val includeUnknown: Boolean = false,
-    val onlyOnline: Boolean = false,
-    val onlyDirect: Boolean = false,
-    val distanceUnits: Int = 0,
-    val tempInFahrenheit: Boolean = false,
-    val showDetails: Boolean = false,
-    val showIgnored: Boolean = false,
-) {
-    companion object {
-        val Empty = NodesUiState()
-    }
-}
-
 data class Contact(
     val contactKey: String,
     val shortName: String,
@@ -303,7 +287,6 @@ constructor(
     private val nodeSortOption =
         MutableStateFlow(NodeSortOption.entries.getOrElse(uiPrefs.nodeSortOption) { NodeSortOption.VIA_FAVORITE })
     private val includeUnknown = MutableStateFlow(uiPrefs.includeUnknown)
-    private val showDetails = MutableStateFlow(uiPrefs.showDetails)
     private val onlyOnline = MutableStateFlow(uiPrefs.onlyOnline)
     private val onlyDirect = MutableStateFlow(uiPrefs.onlyDirect)
 
@@ -341,46 +324,18 @@ constructor(
             NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
         }
 
-    val nodesUiState: StateFlow<NodesUiState> =
-        combine(nodeFilterStateFlow, nodeSortOption, showDetails, radioConfigRepository.deviceProfileFlow) {
-                filterFlow,
-                sort,
-                showDetails,
-                profile,
-            ->
-            NodesUiState(
-                sort = sort,
-                filter = filterFlow.filterText,
-                includeUnknown = filterFlow.includeUnknown,
-                onlyOnline = filterFlow.onlyOnline,
-                onlyDirect = filterFlow.onlyDirect,
-                distanceUnits = profile.config.display.units.number,
-                tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-                showDetails = showDetails,
-                showIgnored = filterFlow.showIgnored,
-            )
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = NodesUiState.Empty,
-            )
-
-    val unfilteredNodeList: StateFlow<List<Node>> =
-        nodeDB
-            .getNodes()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-
     val nodeList: StateFlow<List<Node>> =
-        nodesUiState
-            .flatMapLatest { state ->
+        combine(nodeFilterStateFlow, nodeSortOption, ::Pair)
+            .flatMapLatest { (filter, sort) ->
                 nodeDB
-                    .getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
-                    .map { list -> list.filter { it.isIgnored == state.showIgnored } }
+                    .getNodes(
+                        sort = sort,
+                        filter = filter.filterText,
+                        includeUnknown = filter.includeUnknown,
+                        onlyOnline = filter.onlyOnline,
+                        onlyDirect = filter.onlyDirect,
+                    )
+                    .map { list -> list.filter { it.isIgnored == filter.showIgnored } }
             }
             .stateIn(
                 scope = viewModelScope,
@@ -716,9 +671,6 @@ constructor(
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
-
-    val maxChannels
-        get() = myNodeInfo.value?.maxChannels ?: 8
 
     override fun onCleared() {
         super.onCleared()
