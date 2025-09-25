@@ -46,7 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.node.components.NodeFilterTextField
@@ -65,7 +65,6 @@ import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeScreen(
-    model: UIViewModel = hiltViewModel(),
     nodesViewModel: NodesViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
@@ -107,15 +106,18 @@ fun NodeScreen(
         floatingActionButton = {
             val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
             val shareCapable = firmwareVersion.supportsQrCodeSharing()
-
+            val scannedContact: AdminProtos.SharedContact? by
+                nodesViewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
             AddContactFAB(
+                unfilteredNodes = unfilteredNodes,
+                scannedContact = scannedContact,
                 modifier =
                 Modifier.animateFloatingActionButton(
                     visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
-                model = model,
                 onSharedContactImport = { contact -> nodesViewModel.addSharedContact(contact) },
+                onSharedContactRequested = { contact -> nodesViewModel.setSharedContactRequested(contact) },
             )
         },
     ) { contentPadding ->

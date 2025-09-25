@@ -36,8 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -48,13 +46,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
-import com.geeksville.mesh.model.UIViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -79,19 +74,18 @@ import java.net.MalformedURLException
  * requests using Accompanist Permissions.
  *
  * @param modifier Modifier for this composable.
- * @param model UIViewModel for interacting with application state.
  * @param onSharedContactImport Callback invoked when a shared contact is successfully imported.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun AddContactFAB(
+    unfilteredNodes: List<Node>,
+    scannedContact: AdminProtos.SharedContact?,
     modifier: Modifier = Modifier,
-    model: UIViewModel = hiltViewModel(),
     onSharedContactImport: (AdminProtos.SharedContact) -> Unit = {},
+    onSharedContactRequested: (AdminProtos.SharedContact?) -> Unit = {},
 ) {
-    val scannedContact: AdminProtos.SharedContact? by model.sharedContactRequested.collectAsStateWithLifecycle(null)
-
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
             if (result.contents != null) {
@@ -104,15 +98,14 @@ fun AddContactFAB(
                         null
                     }
                 if (sharedContact != null) {
-                    model.setSharedContactRequested(sharedContact)
+                    onSharedContactRequested(sharedContact)
                 }
             }
         }
 
     scannedContact?.let { contactToImport ->
-        val nodeNum = scannedContact?.nodeNum
-        val nodes by model.unfilteredNodeList.collectAsState()
-        val node = nodes.find { it.num == nodeNum }
+        val nodeNum = contactToImport.nodeNum
+        val node = unfilteredNodes.find { it.num == nodeNum }
         SimpleAlertDialog(
             title = R.string.import_shared_contact,
             text = {
@@ -133,11 +126,11 @@ fun AddContactFAB(
                 }
             },
             dismissText = stringResource(R.string.cancel),
-            onDismiss = { model.setSharedContactRequested(null) },
+            onDismiss = { onSharedContactRequested(null) },
             confirmText = stringResource(R.string.import_label),
             onConfirm = {
                 onSharedContactImport(contactToImport)
-                model.setSharedContactRequested(null)
+                onSharedContactRequested(null)
             },
         )
     }

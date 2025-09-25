@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -71,6 +72,9 @@ constructor(
         )
 
     val connectionState = serviceRepository.connectionState
+
+    private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
+    val sharedContactRequested = _sharedContactRequested.asStateFlow()
 
     private val nodeSortOption =
         MutableStateFlow(NodeSortOption.entries.getOrElse(uiPrefs.nodeSortOption) { NodeSortOption.VIA_FAVORITE })
@@ -219,6 +223,10 @@ constructor(
         } catch (ex: RemoteException) {
             Timber.e("Request traceroute error: ${ex.message}")
         }
+    }
+
+    fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
+        _sharedContactRequested.value = sharedContact
     }
 
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
