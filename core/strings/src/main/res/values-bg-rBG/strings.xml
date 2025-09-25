@@ -475,7 +475,7 @@
     <string name="display_mode">Режим на дисплея</string>
     <string name="always_point_north">Always point north</string>
     <string name="bold_heading">Bold Heading</string>
-    <string name="wake_on_tap_or_motion">Wake on tap or motion</string>
+    <string name="wake_on_tap_or_motion">Събуждане при докосване или движение</string>
     <string name="compass_orientation">Ориентация на компаса</string>
     <string name="external_notification_config">Конфигуриране на външни известия</string>
     <string name="external_notification_enabled">Външните известия са активирани</string>
