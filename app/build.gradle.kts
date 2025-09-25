@@ -185,6 +185,7 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.strings)
+    implementation(projects.core.ui)
     implementation(projects.feature.map)
 
     // Bundles
