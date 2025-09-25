@@ -44,12 +44,18 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class PacketHandler(
+@Singleton
+class PacketHandler
+@Inject
+constructor(
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceBroadcasts: MeshServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
+    private val connectionStateHolder: MeshServiceConnectionStateHolder,
 ) {
 
     private var queueJob: Job? = null
@@ -89,9 +95,9 @@ class PacketHandler(
      * Send a mesh packet to the radio, if the radio is not currently connected this function will throw
      * NotConnectedException
      */
-    fun sendToRadio(packet: MeshPacket, getConnectionState: () -> ConnectionState) {
+    fun sendToRadio(packet: MeshPacket) {
         queuedPackets.add(packet)
-        startPacketQueue(getConnectionState)
+        startPacketQueue()
     }
 
     fun stopPacketQueue() {
@@ -121,17 +127,17 @@ class PacketHandler(
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    private fun startPacketQueue(getConnectionState: () -> ConnectionState) {
+    private fun startPacketQueue() {
         if (queueJob?.isActive == true) return
         queueJob =
             scope.handledLaunch {
                 debug("packet queueJob started")
-                while (getConnectionState() == ConnectionState.CONNECTED) {
+                while (connectionStateHolder.getState() == ConnectionState.CONNECTED) {
                     // take the first packet from the queue head
                     val packet = queuedPackets.poll() ?: break
                     try {
                         // send packet to the radio and wait for response
-                        val response = sendPacket(packet, getConnectionState)
+                        val response = sendPacket(packet)
                         debug("queueJob packet id=${packet.id.toUInt()} waiting")
                         val success = response.get(2, TimeUnit.MINUTES)
                         debug("queueJob packet id=${packet.id.toUInt()} success $success")
@@ -166,13 +172,13 @@ class PacketHandler(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    private fun sendPacket(packet: MeshPacket, getConnectionState: () -> ConnectionState): CompletableFuture<Boolean> {
+    private fun sendPacket(packet: MeshPacket): CompletableFuture<Boolean> {
         // send the packet to the radio and return a CompletableFuture that will be completed with
         // the result
         val future = CompletableFuture<Boolean>()
         queueResponse[packet.id] = future
         try {
-            if (getConnectionState() != ConnectionState.CONNECTED) throw RadioNotConnectedException()
+            if (connectionStateHolder.getState() != ConnectionState.CONNECTED) throw RadioNotConnectedException()
             sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
         } catch (ex: Exception) {
             errormsg("sendToRadio error:", ex)
