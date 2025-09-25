@@ -315,13 +315,6 @@ constructor(
 
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 
-    fun setSortOption(sort: NodeSortOption) {
-        nodeSortOption.value = sort
-        uiPrefs.nodeSortOption = sort.ordinal
-    }
-
-    fun toggleShowDetails() = toggle(showDetails) { uiPrefs.showDetails = it }
-
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
         (!state.value).let { toggled ->
             state.update { toggled }

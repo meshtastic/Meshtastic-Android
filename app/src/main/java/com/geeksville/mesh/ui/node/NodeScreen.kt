@@ -70,9 +70,9 @@ fun NodeScreen(
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
 ) {
-    val state by model.nodesUiState.collectAsStateWithLifecycle()
+    val state by nodesViewModel.nodesUiState.collectAsStateWithLifecycle()
 
-    val nodes by model.nodeList.collectAsStateWithLifecycle()
+    val nodes by nodesViewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by model.ourNodeInfo.collectAsStateWithLifecycle()
     val onlineNodeCount by model.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by model.totalNodeCount.collectAsStateWithLifecycle(0)
@@ -133,7 +133,7 @@ fun NodeScreen(
                         filterText = state.filter,
                         onTextChange = nodesViewModel::setNodeFilterText,
                         currentSortOption = state.sort,
-                        onSortSelect = model::setSortOption,
+                        onSortSelect = nodesViewModel::setSortOption,
                         includeUnknown = state.includeUnknown,
                         onToggleIncludeUnknown = nodesViewModel::toggleIncludeUnknown,
                         onlyOnline = state.onlyOnline,
@@ -141,7 +141,7 @@ fun NodeScreen(
                         onlyDirect = state.onlyDirect,
                         onToggleOnlyDirect = nodesViewModel::toggleOnlyDirect,
                         showDetails = state.showDetails,
-                        onToggleShowDetails = model::toggleShowDetails,
+                        onToggleShowDetails = nodesViewModel::toggleShowDetails,
                         showIgnored = state.showIgnored,
                         onToggleShowIgnored = nodesViewModel::toggleShowIgnored,
                         ignoredNodeCount = ignoredNodeCount,
