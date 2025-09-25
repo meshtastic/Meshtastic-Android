@@ -76,7 +76,7 @@ fun NodeScreen(
     val ourNode by nodesViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val onlineNodeCount by nodesViewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by nodesViewModel.totalNodeCount.collectAsStateWithLifecycle(0)
-    val unfilteredNodes by model.unfilteredNodeList.collectAsStateWithLifecycle()
+    val unfilteredNodes by nodesViewModel.unfilteredNodeList.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
     val listState = rememberLazyListState()

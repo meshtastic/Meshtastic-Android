@@ -128,6 +128,15 @@ constructor(
                 initialValue = emptyList(),
             )
 
+    val unfilteredNodeList: StateFlow<List<Node>> =
+        nodeRepository
+            .getNodes()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
+
     fun setNodeFilterText(text: String) {
         nodeFilterText.value = text
     }
