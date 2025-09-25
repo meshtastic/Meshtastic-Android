@@ -203,8 +203,7 @@ class MeshService :
         val minDeviceVersion = DeviceVersion(BuildConfig.MIN_FW_VERSION)
         val absoluteMinDeviceVersion = DeviceVersion(BuildConfig.ABS_MIN_FW_VERSION)
 
-        private const val CONFIG_ONLY_NONCE = 69420
-        private const val NODE_INFO_ONLY_NONCE = 69421
+        private var configNonce = 1
         private const val CONFIG_WAIT_MS = 250L
     }
 
@@ -1334,7 +1333,7 @@ class MeshService :
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
-                startConfigOnly()
+                startConfig()
             } catch (ex: InvalidProtocolBufferException) {
                 errormsg("Invalid protocol buffer sent by device - update device software and try again", ex)
             } catch (ex: RadioNotConnectedException) {
@@ -1787,10 +1786,10 @@ class MeshService :
         }
     }
 
-    // If we've received our initial config, our radio settings and all of our channels, send any
-    // queued packets and
-    // broadcast connected to clients
     private fun onHasSettings() {
+        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() }) {
+            connectionState
+        }
         processQueuedPackets() // send any packets that were queued up
         startMqttClientProxy()
         serviceBroadcasts.broadcastConnection()
@@ -1799,26 +1798,21 @@ class MeshService :
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
-        if (configCompleteId == CONFIG_ONLY_NONCE) {
-            debug("Received config complete for config-only nonce $CONFIG_ONLY_NONCE")
-            handleConfigOnlyComplete()
-        } else if (configCompleteId == NODE_INFO_ONLY_NONCE) {
-            debug("Received node info complete for nonce $NODE_INFO_ONLY_NONCE")
-            handleNodeInfoComplete()
-        } else {
-            warn("Received unexpected config complete id $configCompleteId")
+        if (configCompleteId == configNonce) {
+            debug("Received config complete for config-only nonce $configNonce")
+            handleConfigComplete()
         }
     }
 
-    private fun handleConfigOnlyComplete() {
-        debug("Received config only complete for nonce $CONFIG_ONLY_NONCE")
+    private fun handleConfigComplete() {
+        debug("Received config only complete for nonce $configNonce")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
-                message_type = "ConfigOnlyComplete",
+                message_type = "ConfigComplete",
                 received_date = System.currentTimeMillis(),
-                raw_message = CONFIG_ONLY_NONCE.toString(),
-                fromRadio = fromRadio { this.configCompleteId = CONFIG_ONLY_NONCE },
+                raw_message = configNonce.toString(),
+                fromRadio = fromRadio { this.configCompleteId = configNonce },
             )
         insertMeshLog(packetToSave)
 
@@ -1833,22 +1827,6 @@ class MeshService :
             radioInterfaceService.keepAlive()
             delay(CONFIG_WAIT_MS)
         }
-        startNodeInfoOnly()
-        onHasSettings()
-    }
-
-    private fun handleNodeInfoComplete() {
-        debug("Received node info complete for nonce $NODE_INFO_ONLY_NONCE")
-        val packetToSave =
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "NodeInfoComplete",
-                received_date = System.currentTimeMillis(),
-                raw_message = NODE_INFO_ONLY_NONCE.toString(),
-                fromRadio = fromRadio { this.configCompleteId = NODE_INFO_ONLY_NONCE },
-            )
-        insertMeshLog(packetToSave)
-
         // This was our config request
         if (newNodes.isEmpty()) {
             errormsg("Did not receive a valid node info")
@@ -1864,28 +1842,20 @@ class MeshService :
             haveNodeDB = true // we now have nodes from real hardware
 
             sendAnalytics()
+            onHasSettings()
             onNodeDBChanged()
-        }
-        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() }) {
-            connectionState
         }
     }
 
     /** Start the modern (REV2) API configuration flow */
-    private fun startConfigOnly() {
+    private fun startConfig() {
+        configNonce += 1
         newMyNodeInfo = null
-
-        debug("Starting config only nonce=$CONFIG_ONLY_NONCE")
-
-        packetHandler.sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = CONFIG_ONLY_NONCE })
-    }
-
-    private fun startNodeInfoOnly() {
         newNodes.clear()
 
-        debug("Starting node info nonce=$NODE_INFO_ONLY_NONCE")
+        debug("Starting config only nonce=$configNonce")
 
-        packetHandler.sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = NODE_INFO_ONLY_NONCE })
+        packetHandler.sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = configNonce })
     }
 
     /** Send a position (typically from our built in GPS) into the mesh. */
