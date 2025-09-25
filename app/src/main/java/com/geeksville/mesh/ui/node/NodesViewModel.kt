@@ -37,7 +37,17 @@ import org.meshtastic.core.prefs.ui.UiPrefs
 import javax.inject.Inject
 
 @HiltViewModel
-class NodesViewModel @Inject constructor(private val nodeRepository: NodeRepository,private val radioConfigRepository: RadioConfigRepository, private val uiPrefs: UiPrefs) : ViewModel() {
+class NodesViewModel
+@Inject
+constructor(
+    private val nodeRepository: NodeRepository,
+    radioConfigRepository: RadioConfigRepository,
+    private val uiPrefs: UiPrefs,
+) : ViewModel() {
+
+    private val nodeSortOption =
+        MutableStateFlow(NodeSortOption.entries.getOrElse(uiPrefs.nodeSortOption) { NodeSortOption.VIA_FAVORITE })
+
     private val nodeFilterText = MutableStateFlow("")
     private val includeUnknown = MutableStateFlow(uiPrefs.includeUnknown)
     private val onlyOnline = MutableStateFlow(uiPrefs.onlyOnline)
@@ -45,7 +55,7 @@ class NodesViewModel @Inject constructor(private val nodeRepository: NodeReposit
     private val _showIgnored = MutableStateFlow(uiPrefs.showIgnored)
     val showIgnored: StateFlow<Boolean> = _showIgnored
 
-    val nodeFilterStateFlow: Flow<NodeFilterState> =
+    private val nodeFilter: Flow<NodeFilterState> =
         combine(nodeFilterText, includeUnknown, onlyOnline, onlyDirect, showIgnored) {
                 filterText,
                 includeUnknown,
@@ -56,41 +66,41 @@ class NodesViewModel @Inject constructor(private val nodeRepository: NodeReposit
             NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
         }
 
-    private val nodeSortOption =
-        MutableStateFlow(NodeSortOption.entries.getOrElse(uiPrefs.nodeSortOption) { NodeSortOption.VIA_FAVORITE })
     private val showDetails = MutableStateFlow(uiPrefs.showDetails)
 
     val nodesUiState: StateFlow<NodesUiState> =
-        combine(nodeFilterStateFlow, nodeSortOption, showDetails, radioConfigRepository.deviceProfileFlow) {
-                filterFlow,
+        combine(nodeSortOption, nodeFilter, showDetails, radioConfigRepository.deviceProfileFlow) {
                 sort,
+                nodeFilter,
                 showDetails,
                 profile,
             ->
             NodesUiState(
                 sort = sort,
-                filter = filterFlow.filterText,
-                includeUnknown = filterFlow.includeUnknown,
-                onlyOnline = filterFlow.onlyOnline,
-                onlyDirect = filterFlow.onlyDirect,
+                filter = nodeFilter,
                 distanceUnits = profile.config.display.units.number,
                 tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
                 showDetails = showDetails,
-                showIgnored = filterFlow.showIgnored,
             )
         }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = NodesUiState.Empty,
+                initialValue = NodesUiState(),
             )
 
     val nodeList: StateFlow<List<Node>> =
-        nodesUiState
-            .flatMapLatest { state ->
+        combine(nodeFilter, nodeSortOption, ::Pair)
+            .flatMapLatest { (filter, sort) ->
                 nodeRepository
-                    .getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
-                    .map { list -> list.filter { it.isIgnored == state.showIgnored } }
+                    .getNodes(
+                        sort = sort,
+                        filter = filter.filterText,
+                        includeUnknown = filter.includeUnknown,
+                        onlyOnline = filter.onlyOnline,
+                        onlyDirect = filter.onlyDirect,
+                    )
+                    .map { list -> list.filter { it.isIgnored == filter.showIgnored } }
             }
             .stateIn(
                 scope = viewModelScope,
@@ -127,24 +137,16 @@ class NodesViewModel @Inject constructor(private val nodeRepository: NodeReposit
 
 data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
-    val filter: String = "",
-    val includeUnknown: Boolean = false,
-    val onlyOnline: Boolean = false,
-    val onlyDirect: Boolean = false,
+    val filter: NodeFilterState = NodeFilterState(),
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
     val showDetails: Boolean = false,
-    val showIgnored: Boolean = false,
-) {
-    companion object {
-        val Empty = NodesUiState()
-    }
-}
+)
 
 data class NodeFilterState(
-    val filterText: String,
-    val includeUnknown: Boolean,
-    val onlyOnline: Boolean,
-    val onlyDirect: Boolean,
-    val showIgnored: Boolean,
+    val filterText: String = "",
+    val includeUnknown: Boolean = false,
+    val onlyOnline: Boolean = false,
+    val onlyDirect: Boolean = false,
+    val showIgnored: Boolean = false,
 )
