@@ -53,6 +53,7 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -185,6 +186,7 @@ constructor(
     private val app: Application,
     private val nodeDB: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    private val serviceRepository: ServiceRepository,
     radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
@@ -215,10 +217,10 @@ constructor(
             }
             .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = null)
 
-    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = serviceRepository.clientNotification
 
     fun clearClientNotification(notification: MeshProtos.ClientNotification) {
-        radioConfigRepository.clearClientNotification()
+        serviceRepository.clearClientNotification()
         meshServiceNotifications.clearClientNotification(notification)
     }
 
@@ -275,7 +277,7 @@ constructor(
     }
 
     val meshService: IMeshService?
-        get() = radioConfigRepository.meshService
+        get() = serviceRepository.meshService
 
     private val localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
 
@@ -447,13 +449,13 @@ constructor(
     }
 
     init {
-        radioConfigRepository.errorMessage
+        serviceRepository.errorMessage
             .filterNotNull()
             .onEach {
                 showAlert(
                     title = app.getString(R.string.client_notification),
                     message = it,
-                    onConfirm = { radioConfigRepository.clearErrorMessage() },
+                    onConfirm = { serviceRepository.clearErrorMessage() },
                     dismissable = false,
                 )
             }
@@ -590,9 +592,8 @@ constructor(
         }
     }
 
-    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
-        radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
-    }
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
+        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey)) }
 
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
@@ -603,7 +604,7 @@ constructor(
     }
 
     fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
-        viewModelScope.launch { radioConfigRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
+        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
 
     fun requestTraceroute(destNum: Int) {
         info("Requesting traceroute for '$destNum'")
@@ -663,10 +664,10 @@ constructor(
 
     // Connection state to our radio device
     val connectionState
-        get() = radioConfigRepository.connectionState
+        get() = serviceRepository.connectionState
 
     val isConnectedStateFlow =
-        radioConfigRepository.connectionState
+        serviceRepository.connectionState
             .map { it.isConnected() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
@@ -701,7 +702,7 @@ constructor(
 
     fun favoriteNode(node: Node) = viewModelScope.launch {
         try {
-            radioConfigRepository.onServiceAction(ServiceAction.Favorite(node))
+            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
         } catch (ex: RemoteException) {
             errormsg("Favorite node error:", ex)
         }
@@ -709,7 +710,7 @@ constructor(
 
     fun ignoreNode(node: Node) = viewModelScope.launch {
         try {
-            radioConfigRepository.onServiceAction(ServiceAction.Ignore(node))
+            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
         } catch (ex: RemoteException) {
             errormsg("Ignore node error:", ex)
         }
@@ -817,10 +818,10 @@ constructor(
     }
 
     val tracerouteResponse: LiveData<String?>
-        get() = radioConfigRepository.tracerouteResponse.asLiveData()
+        get() = serviceRepository.tracerouteResponse.asLiveData()
 
     fun clearTracerouteResponse() {
-        radioConfigRepository.clearTracerouteResponse()
+        serviceRepository.clearTracerouteResponse()
     }
 
     fun setNodeFilterText(text: String) {

@@ -45,6 +45,7 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.isAnalyticsAvailable
 import com.geeksville.mesh.config
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.model.toChannelSet
@@ -54,6 +55,7 @@ import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.ConnectionState
+import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -98,6 +100,7 @@ data class RadioConfigState(
     val analyticsEnabled: Boolean = false,
 )
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class RadioConfigViewModel
 @Inject
@@ -105,13 +108,15 @@ constructor(
     savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
+    private val serviceRepository: ServiceRepository,
+    private val nodeRepository: NodeRepository,
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
 ) : ViewModel(),
     Logging {
     private val meshService: IMeshService?
-        get() = radioConfigRepository.meshService
+        get() = serviceRepository.meshService
 
     private val destNum = savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum
     private val _destNode = MutableStateFlow<Node?>(null)
@@ -137,7 +142,7 @@ constructor(
     }
 
     init {
-        radioConfigRepository.nodeDBbyNum
+        nodeRepository.nodeDBbyNum
             .mapLatest { nodes -> nodes[destNum] ?: nodes.values.firstOrNull() }
             .distinctUntilChanged()
             .onEach {
@@ -148,9 +153,9 @@ constructor(
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
 
-        radioConfigRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
+        serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
 
-        combine(radioConfigRepository.connectionState, radioConfigState) { connState, configState ->
+        combine(serviceRepository.connectionState, radioConfigState) { connState, configState ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.CONNECTED) }
             if (connState == ConnectionState.DISCONNECTED && configState.responseState.isWaiting()) {
                 sendError(R.string.disconnected)
@@ -158,7 +163,7 @@ constructor(
         }
             .launchIn(viewModelScope)
 
-        radioConfigRepository.myNodeInfo
+        nodeRepository.myNodeInfo
             .onEach { ni ->
                 _radioConfigState.update { it.copy(isLocal = destNum == null || destNum == ni?.myNodeNum) }
             }
@@ -170,7 +175,7 @@ constructor(
     }
 
     private val myNodeInfo: StateFlow<MyNodeEntity?>
-        get() = radioConfigRepository.myNodeInfo
+        get() = nodeRepository.myNodeInfo
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
@@ -342,7 +347,7 @@ constructor(
             "Request factory reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { radioConfigRepository.clearNodeDB() }
+            viewModelScope.launch { nodeRepository.clearNodeDB() }
         }
     }
 
@@ -353,7 +358,7 @@ constructor(
             "Request NodeDB reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { radioConfigRepository.clearNodeDB() }
+            viewModelScope.launch { nodeRepository.clearNodeDB() }
         }
     }
 

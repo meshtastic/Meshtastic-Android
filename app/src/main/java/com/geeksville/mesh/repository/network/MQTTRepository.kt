@@ -19,6 +19,7 @@ package com.geeksville.mesh.repository.network
 
 import com.geeksville.mesh.MeshProtos.MqttClientProxyMessage
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.model.subscribeList
 import com.geeksville.mesh.mqttClientProxyMessage
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -44,7 +45,12 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 
 @Singleton
-class MQTTRepository @Inject constructor(private val radioConfigRepository: RadioConfigRepository) : Logging {
+class MQTTRepository
+@Inject
+constructor(
+    private val radioConfigRepository: RadioConfigRepository,
+    private val nodeRepository: NodeRepository,
+) : Logging {
 
     companion object {
         /**
@@ -73,7 +79,7 @@ class MQTTRepository @Inject constructor(private val radioConfigRepository: Radi
     }
 
     val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
-        val ownerId = "MeshtasticAndroidMqttProxy-${radioConfigRepository.myId.value ?: generateClientId()}"
+        val ownerId = "MeshtasticAndroidMqttProxy-${nodeRepository.myId.value ?: generateClientId()}"
         val channelSet = radioConfigRepository.channelSetFlow.first()
         val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
 

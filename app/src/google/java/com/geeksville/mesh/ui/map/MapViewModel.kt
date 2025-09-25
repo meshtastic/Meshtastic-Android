@@ -26,6 +26,7 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.ServiceRepository
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
@@ -85,8 +86,9 @@ constructor(
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
+    serviceRepository: ServiceRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioConfigRepository) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()

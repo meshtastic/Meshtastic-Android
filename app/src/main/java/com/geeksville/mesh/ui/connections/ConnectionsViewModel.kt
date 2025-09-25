@@ -23,6 +23,7 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +40,7 @@ class ConnectionsViewModel
 @Inject
 constructor(
     radioConfigRepository: RadioConfigRepository,
+    serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
     bluetoothRepository: BluetoothRepository,
     private val uiPrefs: UiPrefs,
@@ -50,7 +52,7 @@ constructor(
             LocalConfig.getDefaultInstance(),
         )
 
-    val connectionState = radioConfigRepository.connectionState
+    val connectionState = serviceRepository.connectionState
 
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 

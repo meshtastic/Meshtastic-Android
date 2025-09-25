@@ -29,6 +29,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,12 +58,14 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class SettingsViewModel
 @Inject
 constructor(
     private val app: Application,
-    private val radioConfigRepository: RadioConfigRepository,
+    radioConfigRepository: RadioConfigRepository,
+    private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val meshLogRepository: MeshLogRepository,
     private val uiPrefs: UiPrefs,
@@ -77,7 +80,7 @@ constructor(
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     val isConnected =
-        radioConfigRepository.connectionState
+        serviceRepository.connectionState
             .map { it.isConnected() }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), false)
 
@@ -89,7 +92,7 @@ constructor(
         )
 
     val meshService: IMeshService?
-        get() = radioConfigRepository.meshService
+        get() = serviceRepository.meshService
 
     val provideLocation: StateFlow<Boolean> =
         myNodeInfo

@@ -36,10 +36,12 @@ import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -203,7 +205,9 @@ constructor(
     private val app: Application,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
-    private val radioConfigRepository: RadioConfigRepository,
+    radioConfigRepository: RadioConfigRepository,
+    private val serviceRepository: ServiceRepository,
+    private val nodeRepository: NodeRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val mapPrefs: MapPrefs,
@@ -233,7 +237,7 @@ constructor(
         return Node(num = nodeNum, user = defaultUser)
     }
 
-    fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
+    fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
     val tileSource
         get() = CustomTileSource.getTileSource(mapPrefs.mapStyle)
@@ -244,7 +248,7 @@ constructor(
         destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }
     }
 
-    fun onServiceAction(action: ServiceAction) = viewModelScope.launch { radioConfigRepository.onServiceAction(action) }
+    fun onServiceAction(action: ServiceAction) = viewModelScope.launch { serviceRepository.onServiceAction(action) }
 
     private val _state = MutableStateFlow(MetricsState.Empty)
     val state: StateFlow<MetricsState> = _state
@@ -257,7 +261,7 @@ constructor(
 
     init {
         if (destNum != null) {
-            radioConfigRepository.nodeDBbyNum
+            nodeRepository.nodeDBbyNum
                 .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
                 .distinctUntilChanged()
                 .onEach { (node, ourNode) ->

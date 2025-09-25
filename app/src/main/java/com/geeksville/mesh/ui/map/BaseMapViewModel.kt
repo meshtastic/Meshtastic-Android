@@ -21,7 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +38,7 @@ abstract class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
-    radioConfigRepository: RadioConfigRepository,
+    serviceRepository: ServiceRepository,
 ) : ViewModel() {
 
     val nodes: StateFlow<List<Node>> =
@@ -72,7 +72,7 @@ abstract class BaseMapViewModel(
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     val isConnected =
-        radioConfigRepository.connectionState
+        serviceRepository.connectionState
             .map { it.isConnected() }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 

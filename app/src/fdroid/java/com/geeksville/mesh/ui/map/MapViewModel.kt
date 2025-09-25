@@ -19,7 +19,7 @@ package com.geeksville.mesh.ui.map
 
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.meshtastic.core.prefs.map.MapPrefs
 import javax.inject.Inject
@@ -31,8 +31,8 @@ constructor(
     mapPrefs: MapPrefs,
     packetRepository: PacketRepository,
     nodeRepository: NodeRepository,
-    radioConfigRepository: RadioConfigRepository,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioConfigRepository) {
+    serviceRepository: ServiceRepository,
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
 
     var mapStyleId: Int
         get() = mapPrefs.mapStyle
