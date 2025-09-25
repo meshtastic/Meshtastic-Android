@@ -28,13 +28,13 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.ScannedQrCodeDialog
 
 @RunWith(AndroidJUnit4::class)
 class ScannedQrCodeDialogTest {
