@@ -64,7 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.common.components.EditTextPreference
+import org.meshtastic.core.ui.component.EditTextPreference
 import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.waypoint

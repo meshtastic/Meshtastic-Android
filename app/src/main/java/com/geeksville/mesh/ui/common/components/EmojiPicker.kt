@@ -31,6 +31,7 @@ import androidx.emoji2.emojipicker.RecentEmojiProviderAdapter
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geeksville.mesh.ui.common.EmojiPickerViewModel
 import com.geeksville.mesh.util.CustomRecentEmojiProvider
+import org.meshtastic.core.ui.component.BottomSheetDialog
 
 @Composable
 fun EmojiPicker(

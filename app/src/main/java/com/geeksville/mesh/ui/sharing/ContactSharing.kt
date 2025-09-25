@@ -55,8 +55,8 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.common.components.CopyIconButton
-import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import org.meshtastic.core.ui.component.CopyIconButton
+import org.meshtastic.core.ui.component.SimpleAlertDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState

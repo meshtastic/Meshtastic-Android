@@ -134,7 +134,7 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.common.components.TitledCard
+import org.meshtastic.core.ui.component.TitledCard
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen

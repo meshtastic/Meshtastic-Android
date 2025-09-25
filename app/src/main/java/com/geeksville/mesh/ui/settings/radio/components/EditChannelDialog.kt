@@ -46,9 +46,9 @@ import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.EditBase64Preference
-import com.geeksville.mesh.ui.common.components.EditTextPreference
+import org.meshtastic.core.ui.component.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PositionPrecisionPreference
-import com.geeksville.mesh.ui.common.components.SwitchPreference
+import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
 

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
+import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable

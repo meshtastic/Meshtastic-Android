@@ -91,9 +91,9 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
-import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons

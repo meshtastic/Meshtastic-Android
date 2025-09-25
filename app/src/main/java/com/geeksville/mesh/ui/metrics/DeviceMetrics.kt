@@ -63,9 +63,9 @@ import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
-import com.geeksville.mesh.ui.common.components.BatteryInfo
-import com.geeksville.mesh.ui.common.components.OptionLabel
-import com.geeksville.mesh.ui.common.components.SlidingSelector
+import org.meshtastic.core.ui.component.BatteryInfo
+import org.meshtastic.core.ui.component.OptionLabel
+import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Green

@@ -49,7 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.common.components.rememberTimeTickWithLifecycle
+import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 import com.geeksville.mesh.ui.node.components.NodeFilterTextField
 import com.geeksville.mesh.ui.node.components.NodeItem
 import com.geeksville.mesh.ui.node.components.NodeMenuAction

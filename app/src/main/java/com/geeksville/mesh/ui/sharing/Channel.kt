@@ -102,8 +102,8 @@ import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.ui.common.components.AdaptiveTwoPane
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
+import org.meshtastic.core.ui.component.AdaptiveTwoPane
+import org.meshtastic.core.ui.component.PreferenceFooter
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog

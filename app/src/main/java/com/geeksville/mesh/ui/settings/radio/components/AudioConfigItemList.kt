@@ -30,9 +30,9 @@ import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.AudioConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.common.components.DropDownPreference
-import com.geeksville.mesh.ui.common.components.EditTextPreference
-import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.SwitchPreference
+import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.PreferenceCategory
+import org.meshtastic.core.ui.component.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.strings.R
 

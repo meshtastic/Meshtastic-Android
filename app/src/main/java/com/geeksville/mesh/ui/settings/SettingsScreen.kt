@@ -60,8 +60,8 @@ import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
-import com.geeksville.mesh.ui.common.components.TitledCard
+import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem

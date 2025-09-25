@@ -66,7 +66,7 @@ import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.common.components.TitledCard
+import org.meshtastic.core.ui.component.TitledCard
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo

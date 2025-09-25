@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.SwitchPreference
 import kotlin.math.pow
 import kotlin.math.roundToInt
 

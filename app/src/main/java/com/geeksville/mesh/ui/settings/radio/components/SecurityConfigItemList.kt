@@ -46,11 +46,11 @@ import androidx.navigation.NavController
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.common.components.CopyIconButton
+import org.meshtastic.core.ui.component.CopyIconButton
 import com.geeksville.mesh.ui.common.components.EditBase64Preference
 import com.geeksville.mesh.ui.common.components.EditListPreference
-import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.SwitchPreference
+import org.meshtastic.core.ui.component.PreferenceCategory
+import org.meshtastic.core.ui.component.SwitchPreference
 import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.util.encodeToString

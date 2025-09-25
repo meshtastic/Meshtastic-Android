@@ -17,7 +17,7 @@
 
 @file:Suppress("MagicNumber")
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

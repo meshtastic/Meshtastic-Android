@@ -62,8 +62,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
-import com.geeksville.mesh.ui.common.components.OptionLabel
-import com.geeksville.mesh.ui.common.components.SlidingSelector
+import org.meshtastic.core.ui.component.OptionLabel
+import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
 import org.meshtastic.core.ui.theme.GraphColors.Red
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT

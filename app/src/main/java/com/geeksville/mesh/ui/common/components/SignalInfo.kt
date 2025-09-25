@@ -30,6 +30,7 @@ import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.NodeSignalQuality
 
 const val MAX_VALID_SNR = 100F
 const val MAX_VALID_RSSI = 0
