@@ -115,7 +115,7 @@ fun NodeScreen(
                     alignment = Alignment.BottomEnd,
                 ),
                 model = model,
-                onSharedContactImport = { contact -> model.addSharedContact(contact) },
+                onSharedContactImport = { contact -> nodesViewModel.addSharedContact(contact) },
             )
         },
     ) { contentPadding ->
@@ -157,18 +157,18 @@ fun NodeScreen(
                         tempInFahrenheit = state.tempInFahrenheit,
                         onAction = { menuItem ->
                             when (menuItem) {
-                                is NodeMenuAction.Remove -> model.removeNode(node.num)
-                                is NodeMenuAction.Ignore -> model.ignoreNode(node)
-                                is NodeMenuAction.Favorite -> model.favoriteNode(node)
+                                is NodeMenuAction.Remove -> nodesViewModel.removeNode(node.num)
+                                is NodeMenuAction.Ignore -> nodesViewModel.ignoreNode(node)
+                                is NodeMenuAction.Favorite -> nodesViewModel.favoriteNode(node)
                                 is NodeMenuAction.DirectMessage -> {
-                                    val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
+                                    val hasPKC = nodesViewModel.ourNodeInfo.value?.hasPKC == true && node.hasPKC
                                     val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                                     navigateToMessages("$channel${node.user.id}")
                                 }
 
-                                is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
-                                is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
-                                is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)
+                                is NodeMenuAction.RequestUserInfo -> nodesViewModel.requestUserInfo(node.num)
+                                is NodeMenuAction.RequestPosition -> nodesViewModel.requestPosition(node.num)
+                                is NodeMenuAction.TraceRoute -> nodesViewModel.requestTraceroute(node.num)
                                 is NodeMenuAction.MoreDetails -> navigateToNodeDetails(node.num)
                                 is NodeMenuAction.Share -> showSharedContact = node
                             }

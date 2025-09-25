@@ -17,12 +17,16 @@
 
 package com.geeksville.mesh.ui.node
 
+import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,9 +36,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.model.Position
 import org.meshtastic.core.prefs.ui.UiPrefs
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,7 +50,7 @@ class NodesViewModel
 constructor(
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
-    serviceRepository: ServiceRepository,
+    private val serviceRepository: ServiceRepository,
     private val uiPrefs: UiPrefs,
 ) : ViewModel() {
 
@@ -155,6 +162,64 @@ constructor(
     }
 
     fun toggleShowDetails() = toggle(showDetails) { uiPrefs.showDetails = it }
+
+    fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
+        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
+
+    fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
+        Timber.i("Removing node '$nodeNum'")
+        try {
+            val packetId = serviceRepository.meshService?.packetId ?: return@launch
+            serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+            nodeRepository.deleteNode(nodeNum)
+        } catch (ex: RemoteException) {
+            Timber.e("Remove node error: ${ex.message}")
+        }
+    }
+
+    fun ignoreNode(node: Node) = viewModelScope.launch {
+        try {
+            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
+        } catch (ex: RemoteException) {
+            Timber.e(ex, "Ignore node error")
+        }
+    }
+
+    fun favoriteNode(node: Node) = viewModelScope.launch {
+        try {
+            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
+        } catch (ex: RemoteException) {
+            Timber.e(ex, "Favorite node error")
+        }
+    }
+
+    fun requestUserInfo(destNum: Int) {
+        Timber.i("Requesting UserInfo for '$destNum'")
+        try {
+            serviceRepository.meshService?.requestUserInfo(destNum)
+        } catch (ex: RemoteException) {
+            Timber.e("Request NodeInfo error: ${ex.message}")
+        }
+    }
+
+    fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
+        Timber.i("Requesting position for '$destNum'")
+        try {
+            serviceRepository.meshService?.requestPosition(destNum, position)
+        } catch (ex: RemoteException) {
+            Timber.e("Request position error: ${ex.message}")
+        }
+    }
+
+    fun requestTraceroute(destNum: Int) {
+        Timber.i("Requesting traceroute for '$destNum'")
+        try {
+            val packetId = serviceRepository.meshService?.packetId ?: return
+            serviceRepository.meshService?.requestTraceroute(packetId, destNum)
+        } catch (ex: RemoteException) {
+            Timber.e("Request traceroute error: ${ex.message}")
+        }
+    }
 
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
         (!state.value).let { toggled ->

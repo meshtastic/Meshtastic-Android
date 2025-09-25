@@ -574,9 +574,6 @@ constructor(
         _sharedContactRequested.value = sharedContact
     }
 
-    fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
-        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
-
     fun requestTraceroute(destNum: Int) {
         info("Requesting traceroute for '$destNum'")
         try {
@@ -759,21 +756,6 @@ constructor(
         if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
-    fun setOwner(name: String) {
-        val user =
-            ourNodeInfo.value?.user?.copy {
-                longName = name
-                shortName = getInitials(name)
-            } ?: return
-
-        try {
-            // Note: we use ?. here because we might be running in the emulator
-            meshService?.setRemoteOwner(myNodeNum ?: return, user.toByteArray())
-        } catch (ex: RemoteException) {
-            errormsg("Can't set username on device, is device offline? ${ex.message}")
-        }
-    }
-
     fun addQuickChatAction(action: QuickChatAction) =
         viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.upsert(action) }
 
@@ -793,10 +775,6 @@ constructor(
 
     fun clearTracerouteResponse() {
         serviceRepository.clearTracerouteResponse()
-    }
-
-    fun setNodeFilterText(text: String) {
-        nodeFilterText.value = text
     }
 
     val appIntroCompleted: StateFlow<Boolean> = uiPreferencesDataSource.appIntroCompleted
