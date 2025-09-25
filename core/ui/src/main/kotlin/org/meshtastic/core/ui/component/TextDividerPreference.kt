@@ -56,31 +56,20 @@ fun TextDividerPreference(
     enabled: Boolean = true,
     trailingIcon: ImageVector? = null,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(all = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    Card(modifier = modifier.fillMaxWidth()) {
+        Row(modifier = modifier.fillMaxWidth().padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (!enabled) {
+                color =
+                if (!enabled) {
                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 } else {
                     Color.Unspecified
                 },
             )
             if (trailingIcon != null) {
-                Icon(
-                    trailingIcon, "trailingIcon",
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.End),
-                )
+                Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End))
             }
         }
     }

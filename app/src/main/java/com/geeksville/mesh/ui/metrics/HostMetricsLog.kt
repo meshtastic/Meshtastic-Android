@@ -55,10 +55,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.model.MetricsViewModel
-import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.theme.AppTheme
 import java.text.DecimalFormat
 
 @OptIn(ExperimentalFoundationApi::class)

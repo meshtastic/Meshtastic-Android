@@ -33,15 +33,15 @@ import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.DropDownPreference
-import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
-import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
-import org.meshtastic.core.ui.component.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.PreferenceCategory
+import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
+import org.meshtastic.core.ui.component.SwitchPreference
 
 @Composable
 fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {

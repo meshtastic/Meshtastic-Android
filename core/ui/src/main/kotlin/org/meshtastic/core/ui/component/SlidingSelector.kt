@@ -99,7 +99,7 @@ fun <T : Any> SlidingSelector(
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable (T) -> Unit
+    content: @Composable (T) -> Unit,
 ) {
     val state = remember { SelectorState() }
     state.optionCount = options.size
@@ -107,10 +107,7 @@ fun <T : Any> SlidingSelector(
     state.onOptionSelected = { onOptionSelected(options[it]) }
 
     /* Animate between whole-number indices so we don't need to do pixel calculations. */
-    val selectedIndexOffset by animateFloatAsState(
-        state.selectedOption.toFloat(),
-        label = "Selected Index Offset"
-    )
+    val selectedIndexOffset by animateFloatAsState(state.selectedOption.toFloat(), label = "Selected Index Offset")
 
     Layout(
         content = {
@@ -118,11 +115,12 @@ fun <T : Any> SlidingSelector(
             Dividers(state)
             Options(state, options, content)
         },
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .then(state.inputModifier)
             .background(TRACK_COLOR, BACKGROUND_SHAPE)
-            .padding(TRACK_PADDING)
+            .padding(TRACK_PADDING),
     ) { measurables, constraints ->
         val (indicatorMeasurable, dividersMeasurable, optionsMeasurable) = measurables
 
@@ -131,70 +129,57 @@ fun <T : Any> SlidingSelector(
         state.updatePressedScale(optionsPlaceable.height, this)
 
         /* Measure the indicator and dividers to be the right size. */
-        val indicatorPlaceable = indicatorMeasurable.measure(
-            Constraints.fixed(
-                width = optionsPlaceable.width / options.size,
-                height = optionsPlaceable.height
+        val indicatorPlaceable =
+            indicatorMeasurable.measure(
+                Constraints.fixed(width = optionsPlaceable.width / options.size, height = optionsPlaceable.height),
             )
-        )
 
-        val dividersPlaceable = dividersMeasurable.measure(
-            Constraints.fixed(
-                width = optionsPlaceable.width,
-                height = optionsPlaceable.height
+        val dividersPlaceable =
+            dividersMeasurable.measure(
+                Constraints.fixed(width = optionsPlaceable.width, height = optionsPlaceable.height),
             )
-        )
 
         layout(optionsPlaceable.width, optionsPlaceable.height) {
             val optionWidth = optionsPlaceable.width / options.size
 
             /* Place the indicator first so that it's below the option labels. */
-            indicatorPlaceable.placeRelative(
-                x = (selectedIndexOffset * optionWidth).toInt(),
-                y = 0
-            )
+            indicatorPlaceable.placeRelative(x = (selectedIndexOffset * optionWidth).toInt(), y = 0)
             dividersPlaceable.placeRelative(IntOffset.Zero)
             optionsPlaceable.placeRelative(IntOffset.Zero)
         }
     }
 }
 
-/**
- * Visual representation of the option the user may select.
- */
+/** Visual representation of the option the user may select. */
 @Composable
 fun OptionLabel(text: String) {
     Text(text, maxLines = 1, overflow = Ellipsis)
 }
 
-/**
- * Draws the selected indicator on the [SlidingSelector] track.
- */
+/** Draws the selected indicator on the [SlidingSelector] track. */
 @Composable
 private fun SelectedIndicator(state: SelectorState) {
     Box(
-        Modifier
-            .then(
-                state.optionScaleModifier(
-                    pressed = state.pressedOption == state.selectedOption,
-                    option = state.selectedOption
-                )
-            )
+        Modifier.then(
+            state.optionScaleModifier(
+                pressed = state.pressedOption == state.selectedOption,
+                option = state.selectedOption,
+            ),
+        )
             .shadow(4.dp, BACKGROUND_SHAPE)
-            .background(MaterialTheme.colorScheme.background, BACKGROUND_SHAPE)
+            .background(MaterialTheme.colorScheme.background, BACKGROUND_SHAPE),
     )
 }
 
-/**
- * Draws dividers between [OptionLabel]s.
- */
+/** Draws dividers between [OptionLabel]s. */
 @Composable
 private fun Dividers(state: SelectorState) {
     /* Animate each divider independently. */
-    val alphas = (0 until state.optionCount).map { i ->
-        val selectionAdjacent = i == state.selectedOption || i - 1 == state.selectedOption
-        animateFloatAsState(if (selectionAdjacent) 0f else 1f, label = "Dividers")
-    }
+    val alphas =
+        (0 until state.optionCount).map { i ->
+            val selectionAdjacent = i == state.selectedOption || i - 1 == state.selectedOption
+            animateFloatAsState(if (selectionAdjacent) 0f else 1f, label = "Dividers")
+        }
 
     Canvas(Modifier.fillMaxSize()) {
         val optionWidth = size.width / state.optionCount
@@ -206,46 +191,38 @@ private fun Dividers(state: SelectorState) {
                 Color.White,
                 alpha = alpha.value,
                 start = Offset(x, dividerPadding.toPx()),
-                end = Offset(x, size.height - dividerPadding.toPx())
+                end = Offset(x, size.height - dividerPadding.toPx()),
             )
         }
     }
 }
 
-/**
- * Draws the options available to the user.
- */
+/** Draws the options available to the user. */
 @Composable
-private fun <T> Options(
-    state: SelectorState,
-    options: List<T>,
-    content: @Composable (T) -> Unit
-) {
-    CompositionLocalProvider(
-        LocalTextStyle provides TextStyle(fontWeight = FontWeight.Medium)
-    ) {
-        Row(
-            horizontalArrangement = spacedBy(TRACK_PADDING),
-            modifier = Modifier
-                .fillMaxWidth()
-                .selectableGroup()
-        ) {
+private fun <T> Options(state: SelectorState, options: List<T>, content: @Composable (T) -> Unit) {
+    CompositionLocalProvider(LocalTextStyle provides TextStyle(fontWeight = FontWeight.Medium)) {
+        Row(horizontalArrangement = spacedBy(TRACK_PADDING), modifier = Modifier.fillMaxWidth().selectableGroup()) {
             options.forEachIndexed { i, timeFrame ->
                 val isSelected = i == state.selectedOption
                 val isPressed = i == state.pressedOption
 
                 /* Unselected presses are represented by fading. */
-                val alpha by animateFloatAsState(
-                    if (!isSelected && isPressed) PRESSED_UNSELECTED_ALPHA else 1f,
-                    label = "Unselected"
-                )
+                val alpha by
+                    animateFloatAsState(
+                        if (!isSelected && isPressed) PRESSED_UNSELECTED_ALPHA else 1f,
+                        label = "Unselected",
+                    )
 
-                val semanticsModifier = Modifier.semantics(mergeDescendants = true) {
-                    selected = isSelected
-                    role = Role.Button
-                    onClick { state.onOptionSelected(i); true }
-                    stateDescription = if (isSelected) "Selected" else "Not selected"
-                }
+                val semanticsModifier =
+                    Modifier.semantics(mergeDescendants = true) {
+                        selected = isSelected
+                        role = Role.Button
+                        onClick {
+                            state.onOptionSelected(i)
+                            true
+                        }
+                        stateDescription = if (isSelected) "Selected" else "Not selected"
+                    }
 
                 Box(
                     Modifier
@@ -258,7 +235,7 @@ private fun <T> Options(
                         /* Selected presses are represented by scaling. */
                         .then(state.optionScaleModifier(isPressed && isSelected, i))
                         /* Center the option content. */
-                        .wrapContentWidth()
+                        .wrapContentWidth(),
                 ) {
                     content(timeFrame)
                 }
@@ -267,9 +244,7 @@ private fun <T> Options(
     }
 }
 
-/**
- * Contains and handles the state necessary to present the [SlidingSelector] to the user.
- */
+/** Contains and handles the state necessary to present the [SlidingSelector] to the user. */
 private class SelectorState {
     var optionCount by mutableIntStateOf(0)
     var selectedOption by mutableIntStateOf(0)
@@ -277,15 +252,13 @@ private class SelectorState {
     var pressedOption by mutableIntStateOf(NO_OPTION_INDEX)
 
     /**
-     * Scale factor that should be used to scale pressed option. When this scale is applied,
-     * exactly [PRESSED_TRACK_PADDING] will be added around the element's usual size.
+     * Scale factor that should be used to scale pressed option. When this scale is applied, exactly
+     * [PRESSED_TRACK_PADDING] will be added around the element's usual size.
      */
     var pressedSelectedScale by mutableFloatStateOf(1f)
         private set
 
-    /**
-     * Calculates the scale factor we need to use for pressed options to get the desired padding.
-     */
+    /** Calculates the scale factor we need to use for pressed options to get the desired padding. */
     fun updatePressedScale(controlHeight: Int, density: Density) {
         with(density) {
             val pressedPadding = PRESSED_TRACK_PADDING * 2
@@ -295,93 +268,88 @@ private class SelectorState {
     }
 
     /**
-     * Returns a [Modifier] that will scale an element so that it gets [PRESSED_TRACK_PADDING] extra
-     * padding around it. The scale will be animated.
+     * Returns a [Modifier] that will scale an element so that it gets [PRESSED_TRACK_PADDING] extra padding around it.
+     * The scale will be animated.
      *
-     * The scale is also performed around either the left or right edge of the element if the option
-     * is the first or last option, respectively. In those cases, the scale will also be translated so
-     * that [PRESSED_TRACK_PADDING] will be added on the left or right edge.
+     * The scale is also performed around either the left or right edge of the element if the option is the first or
+     * last option, respectively. In those cases, the scale will also be translated so that [PRESSED_TRACK_PADDING] will
+     * be added on the left or right edge.
      */
     @SuppressLint("ModifierFactoryExtensionFunction")
-    fun optionScaleModifier(
-        pressed: Boolean,
-        option: Int,
-    ): Modifier = Modifier.composed {
+    fun optionScaleModifier(pressed: Boolean, option: Int): Modifier = Modifier.composed {
         val scale by animateFloatAsState(if (pressed) pressedSelectedScale else 1f, label = "Scale")
-        val xOffset by animateDpAsState(
-            if (pressed) PRESSED_TRACK_PADDING else 0.dp,
-            label = "x Offset"
-        )
+        val xOffset by animateDpAsState(if (pressed) PRESSED_TRACK_PADDING else 0.dp, label = "x Offset")
 
         graphicsLayer {
             this.scaleX = scale
             this.scaleY = scale
 
             /* Scales on the ends should gravitate to that edge. */
-            this.transformOrigin = TransformOrigin(
-                pivotFractionX = when (option) {
-                    0 -> 0f
-                    optionCount - 1 -> 1f
-                    else -> .5f
-                },
-                pivotFractionY = .5f
-            )
+            this.transformOrigin =
+                TransformOrigin(
+                    pivotFractionX =
+                    when (option) {
+                        0 -> 0f
+                        optionCount - 1 -> 1f
+                        else -> .5f
+                    },
+                    pivotFractionY = .5f,
+                )
 
             /* But should still move inwards to keep the pressed padding consistent with top and bottom. */
-            this.translationX = when (option) {
-                0 -> xOffset.toPx()
-                optionCount - 1 -> -xOffset.toPx()
-                else -> 0f
-            }
+            this.translationX =
+                when (option) {
+                    0 -> xOffset.toPx()
+                    optionCount - 1 -> -xOffset.toPx()
+                    else -> 0f
+                }
         }
     }
 
     /**
-     * A [Modifier] that will listen for touch gestures and update the selected and pressed properties
-     * of this state appropriately.
+     * A [Modifier] that will listen for touch gestures and update the selected and pressed properties of this state
+     * appropriately.
      */
-    val inputModifier = Modifier.pointerInput(optionCount) {
-        val optionWidth = size.width / optionCount
+    val inputModifier =
+        Modifier.pointerInput(optionCount) {
+            val optionWidth = size.width / optionCount
 
-        /* Helper to calculate which option an event occurred in. */
-        fun optionIndex(change: PointerInputChange): Int =
-            ((change.position.x / size.width.toFloat()) * optionCount)
-                .toInt()
-                .coerceIn(0, optionCount - 1)
+            /* Helper to calculate which option an event occurred in. */
+            fun optionIndex(change: PointerInputChange): Int =
+                ((change.position.x / size.width.toFloat()) * optionCount).toInt().coerceIn(0, optionCount - 1)
 
-        awaitEachGesture {
-            val down = awaitFirstDown()
+            awaitEachGesture {
+                val down = awaitFirstDown()
 
-            pressedOption = optionIndex(down)
-            val downOnSelected = pressedOption == selectedOption
-            val optionBounds = Rect(
-                left = pressedOption * optionWidth.toFloat(),
-                right = (pressedOption + 1) * optionWidth.toFloat(),
-                top = 0f,
-                bottom = size.height.toFloat()
-            )
+                pressedOption = optionIndex(down)
+                val downOnSelected = pressedOption == selectedOption
+                val optionBounds =
+                    Rect(
+                        left = pressedOption * optionWidth.toFloat(),
+                        right = (pressedOption + 1) * optionWidth.toFloat(),
+                        top = 0f,
+                        bottom = size.height.toFloat(),
+                    )
 
-            if (downOnSelected) {
-                horizontalDrag(down.id) { change ->
-                    pressedOption = optionIndex(change)
+                if (downOnSelected) {
+                    horizontalDrag(down.id) { change ->
+                        pressedOption = optionIndex(change)
 
-                    if (pressedOption != selectedOption) {
-                        onOptionSelected(pressedOption)
+                        if (pressedOption != selectedOption) {
+                            onOptionSelected(pressedOption)
+                        }
                     }
+                } else {
+                    waitForUpOrCancellation(inBounds = optionBounds)
+                        /* Null means the gesture was cancelled (e.g. dragged out of bounds). */
+                        ?.let { onOptionSelected(pressedOption) }
                 }
-            } else {
-                waitForUpOrCancellation(inBounds = optionBounds)
-                    /* Null means the gesture was cancelled (e.g. dragged out of bounds). */
-                    ?.let { onOptionSelected(pressedOption) }
+                pressedOption = NO_OPTION_INDEX
             }
-            pressedOption = NO_OPTION_INDEX
         }
-    }
 }
 
-/**
- * Works with bounds that may not be at 0,0.
- */
+/** Works with bounds that may not be at 0,0. */
 @Suppress("ReturnCount")
 private suspend fun AwaitPointerEventScope.waitForUpOrCancellation(inBounds: Rect): PointerInputChange? {
     while (true) {

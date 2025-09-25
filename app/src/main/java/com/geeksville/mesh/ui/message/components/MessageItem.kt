@@ -49,12 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.ui.component.MDText
-import org.meshtastic.core.ui.component.Rssi
-import org.meshtastic.core.ui.component.Snr
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
-import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.theme.MessageItemColors
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.entity.Reaction
@@ -62,6 +57,11 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MDText
+import org.meshtastic.core.ui.component.Rssi
+import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.MessageItemColors
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

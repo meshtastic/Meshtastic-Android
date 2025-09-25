@@ -57,9 +57,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.preview.LargeFontPreview
-import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Suppress("LongParameterList")
 @Composable

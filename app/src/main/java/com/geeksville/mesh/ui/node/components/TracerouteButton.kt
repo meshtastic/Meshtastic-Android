@@ -34,9 +34,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.theme.AppTheme
 
 private const val COOL_DOWN_TIME_MS = 30000L
 

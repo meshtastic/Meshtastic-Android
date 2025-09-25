@@ -60,9 +60,6 @@ import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
-import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
@@ -78,6 +75,9 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

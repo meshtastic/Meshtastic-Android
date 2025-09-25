@@ -58,12 +58,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MetricsViewModel
-import org.meshtastic.core.ui.component.SimpleAlertDialog
-import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.theme.AppTheme
 import java.text.DateFormat
 
 @OptIn(ExperimentalFoundationApi::class)

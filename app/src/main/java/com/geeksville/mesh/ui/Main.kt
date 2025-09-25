@@ -91,16 +91,7 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
-import org.meshtastic.core.ui.component.SimpleAlertDialog
-import org.meshtastic.core.ui.icon.Conversations
-import org.meshtastic.core.ui.icon.Map
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Nodes
-import org.meshtastic.core.ui.icon.Settings
-import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
-import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -120,6 +111,15 @@ import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.icon.Conversations
+import org.meshtastic.core.ui.icon.Map
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Nodes
+import org.meshtastic.core.ui.icon.Settings
+import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import kotlin.reflect.KClass
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {

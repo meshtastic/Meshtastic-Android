@@ -26,24 +26,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AdaptiveTwoPane(
-    first: @Composable ColumnScope.() -> Unit,
-    second: @Composable ColumnScope.() -> Unit,
-) = BoxWithConstraints {
-    val compactWidth = maxWidth < 600.dp
-    Row {
-        Column(modifier = Modifier.weight(1f)) {
-            first()
-
-            if (compactWidth) {
-                second()
-            }
-        }
-
-        if (!compactWidth) {
+fun AdaptiveTwoPane(first: @Composable ColumnScope.() -> Unit, second: @Composable ColumnScope.() -> Unit) =
+    BoxWithConstraints {
+        val compactWidth = maxWidth < 600.dp
+        Row {
             Column(modifier = Modifier.weight(1f)) {
-                second()
+                first()
+
+                if (compactWidth) {
+                    second()
+                }
+            }
+
+            if (!compactWidth) {
+                Column(modifier = Modifier.weight(1f)) { second() }
             }
         }
     }
-}

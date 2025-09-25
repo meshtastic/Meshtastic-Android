@@ -55,8 +55,6 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.model.UIViewModel
-import org.meshtastic.core.ui.component.CopyIconButton
-import org.meshtastic.core.ui.component.SimpleAlertDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -71,6 +69,8 @@ import com.journeyapps.barcodescanner.ScanOptions
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.CopyIconButton
+import org.meshtastic.core.ui.component.SimpleAlertDialog
 import timber.log.Timber
 import java.net.MalformedURLException
 

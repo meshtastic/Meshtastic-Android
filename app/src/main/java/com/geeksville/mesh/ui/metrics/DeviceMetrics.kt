@@ -63,13 +63,6 @@ import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
-import org.meshtastic.core.ui.component.BatteryInfo
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
-import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.theme.GraphColors.Cyan
-import org.meshtastic.core.ui.theme.GraphColors.Green
-import org.meshtastic.core.ui.theme.GraphColors.Magenta
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
@@ -77,6 +70,13 @@ import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.BatteryInfo
+import org.meshtastic.core.ui.component.OptionLabel
+import org.meshtastic.core.ui.component.SlidingSelector
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.GraphColors.Cyan
+import org.meshtastic.core.ui.theme.GraphColors.Green
+import org.meshtastic.core.ui.theme.GraphColors.Magenta
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f

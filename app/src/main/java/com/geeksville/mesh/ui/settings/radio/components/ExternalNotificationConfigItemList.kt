@@ -34,12 +34,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
+import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TextDividerPreference
-import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
-import org.meshtastic.core.strings.R
 
 @Composable
 fun ExternalNotificationConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {

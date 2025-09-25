@@ -74,50 +74,35 @@ fun RegularPreference(
     trailingIcon: ImageVector? = null,
     dropdownMenu: @Composable () -> Unit = {},
 ) {
-    val color = if (enabled) {
-        MaterialTheme.colorScheme.onSurface
-    } else {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-    }
+    val color =
+        if (enabled) {
+            MaterialTheme.colorScheme.onSurface
+        } else {
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(all = 16.dp),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            FlowRow(
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
+    Column(modifier = modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick).padding(all = 16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            FlowRow(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = if (enabled) {
+                    color =
+                    if (enabled) {
                         Color.Unspecified
                     } else {
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     },
                 )
 
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = color,
-                )
+                Text(text = subtitle, style = MaterialTheme.typography.bodyLarge, color = color)
             }
             if (trailingIcon != null) {
                 Box {
                     Icon(
                         imageVector = trailingIcon,
                         contentDescription = "trailingIcon",
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .wrapContentWidth(Alignment.End),
+                        modifier = Modifier.padding(start = 8.dp).wrapContentWidth(Alignment.End),
                         tint = color,
                     )
                     dropdownMenu()
@@ -125,11 +110,7 @@ fun RegularPreference(
             }
         }
         if (summary != null) {
-            Text(
-                text = summary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = color,
-            )
+            Text(text = summary, style = MaterialTheme.typography.bodyMedium, color = color)
         }
     }
 }
@@ -137,9 +118,5 @@ fun RegularPreference(
 @Preview(showBackground = true)
 @Composable
 private fun RegularPreferencePreview() {
-    RegularPreference(
-        title = "Advanced settings",
-        subtitle = "Text2",
-        onClick = { },
-    )
+    RegularPreference(title = "Advanced settings", subtitle = "Text2", onClick = {})
 }

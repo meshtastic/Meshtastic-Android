@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.IAQColors.IAQDangerouslyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQExcellent
 import org.meshtastic.core.ui.theme.IAQColors.IAQExtremelyPolluted
@@ -65,7 +66,6 @@ import org.meshtastic.core.ui.theme.IAQColors.IAQHeavilyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQLightlyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQModeratelyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQSeverelyPolluted
-import org.meshtastic.core.strings.R
 
 @Suppress("MagicNumber")
 enum class Iaq(val color: Color, val description: String, val range: IntRange) {

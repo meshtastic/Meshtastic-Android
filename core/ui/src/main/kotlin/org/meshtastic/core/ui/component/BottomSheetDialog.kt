@@ -40,30 +40,28 @@ import androidx.compose.ui.window.DialogProperties
 fun BottomSheetDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
-) = Dialog(
-    onDismissRequest = onDismiss,
-    properties = DialogProperties(usePlatformDefaultWidth = false),
-) {
+    content: @Composable ColumnScope.() -> Unit,
+) = Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+        Modifier.fillMaxSize()
             .background(Color.Transparent)
             .clickable(
                 onClick = onDismiss,
                 indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            )
+                interactionSource = remember { MutableInteractionSource() },
+            ),
     ) {
         Column(
-            modifier = modifier
+            modifier =
+            modifier
                 .align(Alignment.BottomCenter)
                 .background(
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 1f),
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
                 )
                 .padding(16.dp),
-            content = content
+            content = content,
         )
     }
 }

@@ -43,17 +43,17 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.PositionConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
-import org.meshtastic.core.ui.component.BitwisePreference
 import com.geeksville.mesh.ui.common.components.DropDownPreference
-import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
-import org.meshtastic.core.ui.component.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.BitwisePreference
+import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.PreferenceCategory
+import org.meshtastic.core.ui.component.SwitchPreference
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

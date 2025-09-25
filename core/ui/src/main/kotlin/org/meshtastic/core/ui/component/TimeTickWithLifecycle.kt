@@ -39,17 +39,13 @@ fun rememberTimeTickWithLifecycle(): Long {
         receiver.register(context)
         value = System.currentTimeMillis()
 
-        onPauseOrDispose {
-            receiver.unregister(context)
-        }
+        onPauseOrDispose { receiver.unregister(context) }
     }
 
     return value
 }
 
-private class TimeBroadcastReceiver(
-    val onTimeChanged: () -> Unit,
-) : BroadcastReceiver() {
+private class TimeBroadcastReceiver(val onTimeChanged: () -> Unit) : BroadcastReceiver() {
     private var registered = false
 
     override fun onReceive(context: Context, intent: Intent) {

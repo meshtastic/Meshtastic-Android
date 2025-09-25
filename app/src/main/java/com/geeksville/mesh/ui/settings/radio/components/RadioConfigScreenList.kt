@@ -26,9 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import org.meshtastic.core.ui.component.PreferenceFooter
 import com.geeksville.mesh.ui.settings.radio.ResponseState
 import com.google.protobuf.MessageLite
+import org.meshtastic.core.ui.component.PreferenceFooter
 
 @Composable
 fun <T : MessageLite> RadioConfigScreenList(

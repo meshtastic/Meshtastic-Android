@@ -50,7 +50,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.isConfigRoute
 import com.geeksville.mesh.navigation.isNodeDetailRoute
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
-import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -59,6 +58,7 @@ import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Suppress("CyclomaticComplexMethod")
 @Composable

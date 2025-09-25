@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 fun PreferenceCategory(
     text: String,
     modifier: Modifier = Modifier,
-    content: (@Composable ColumnScope.() -> Unit)? = null
+    content: (@Composable ColumnScope.() -> Unit)? = null,
 ) {
     Text(
         text,
@@ -43,18 +43,12 @@ fun PreferenceCategory(
         style = MaterialTheme.typography.titleLarge,
     )
     if (content != null) {
-        Card(
-            modifier = modifier.padding(bottom = 8.dp),
-        ) {
+        Card(modifier = modifier.padding(bottom = 8.dp)) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
-                    content()
-                }
+                ProvideTextStyle(MaterialTheme.typography.bodyLarge) { content() }
             }
         }
     }
@@ -63,7 +57,5 @@ fun PreferenceCategory(
 @Preview(showBackground = true)
 @Composable
 private fun PreferenceCategoryPreview() {
-    PreferenceCategory(
-        text = "Advanced settings"
-    )
+    PreferenceCategory(text = "Advanced settings")
 }
