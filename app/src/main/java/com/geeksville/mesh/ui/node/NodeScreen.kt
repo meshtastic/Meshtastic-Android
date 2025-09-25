@@ -66,6 +66,7 @@ import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 @Composable
 fun NodeScreen(
     model: UIViewModel = hiltViewModel(),
+    nodesViewModel: NodesViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
 ) {
@@ -130,19 +131,19 @@ fun NodeScreen(
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
                         filterText = state.filter,
-                        onTextChange = model::setNodeFilterText,
+                        onTextChange = nodesViewModel::setNodeFilterText,
                         currentSortOption = state.sort,
                         onSortSelect = model::setSortOption,
                         includeUnknown = state.includeUnknown,
-                        onToggleIncludeUnknown = model::toggleIncludeUnknown,
+                        onToggleIncludeUnknown = nodesViewModel::toggleIncludeUnknown,
                         onlyOnline = state.onlyOnline,
-                        onToggleOnlyOnline = model::toggleOnlyOnline,
+                        onToggleOnlyOnline = nodesViewModel::toggleOnlyOnline,
                         onlyDirect = state.onlyDirect,
-                        onToggleOnlyDirect = model::toggleOnlyDirect,
+                        onToggleOnlyDirect = nodesViewModel::toggleOnlyDirect,
                         showDetails = state.showDetails,
                         onToggleShowDetails = model::toggleShowDetails,
                         showIgnored = state.showIgnored,
-                        onToggleShowIgnored = model::toggleShowIgnored,
+                        onToggleShowIgnored = nodesViewModel::toggleShowIgnored,
                         ignoredNodeCount = ignoredNodeCount,
                     )
                 }

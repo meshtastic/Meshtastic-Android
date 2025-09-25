@@ -313,8 +313,6 @@ constructor(
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
-    fun toggleShowIgnored() = toggle(_showIgnored) { uiPrefs.showIgnored = it }
-
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 
     fun setSortOption(sort: NodeSortOption) {
@@ -323,12 +321,6 @@ constructor(
     }
 
     fun toggleShowDetails() = toggle(showDetails) { uiPrefs.showDetails = it }
-
-    fun toggleIncludeUnknown() = toggle(includeUnknown) { uiPrefs.includeUnknown = it }
-
-    fun toggleOnlyOnline() = toggle(onlyOnline) { uiPrefs.onlyOnline = it }
-
-    fun toggleOnlyDirect() = toggle(onlyDirect) { uiPrefs.onlyDirect = it }
 
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
         (!state.value).let { toggled ->
