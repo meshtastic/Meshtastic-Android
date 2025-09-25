@@ -12,8 +12,6 @@
     <ID>CommentSpacing:Exceptions.kt$Exceptions$/// Set in Application.onCreate</ID>
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableNaming:NodeDetail.kt$notesSection</ID>
-    <ID>ComposableParamOrder:AlertDialogs.kt$SimpleAlertDialog</ID>
-    <ID>ComposableParamOrder:BatteryInfo.kt$BatteryInfo</ID>
     <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
     <ID>ComposableParamOrder:Debug.kt$DebugMenuActions</ID>
     <ID>ComposableParamOrder:Debug.kt$DecodedPayloadBlock</ID>
@@ -21,7 +19,6 @@
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchStateviewModelDefaults</ID>
     <ID>ComposableParamOrder:DeviceMetrics.kt$DeviceMetricsChart</ID>
     <ID>ComposableParamOrder:EditBase64Preference.kt$EditBase64Preference</ID>
-    <ID>ComposableParamOrder:EditTextPreference.kt$EditTextPreference</ID>
     <ID>ComposableParamOrder:ElevationInfo.kt$ElevationInfo</ID>
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$ChartContent</ID>
@@ -33,7 +30,6 @@
     <ID>ComposableParamOrder:LinkedCoordinates.kt$LinkedCoordinates</ID>
     <ID>ComposableParamOrder:MainAppBar.kt$MainAppBar</ID>
     <ID>ComposableParamOrder:MapReportingPreference.kt$MapReportingPreference</ID>
-    <ID>ComposableParamOrder:MaterialBatteryInfo.kt$MaterialBatteryInfo</ID>
     <ID>ComposableParamOrder:Message.kt$MessageScreen</ID>
     <ID>ComposableParamOrder:Message.kt$QuickChatRow</ID>
     <ID>ComposableParamOrder:MessageActions.kt$MessageActions</ID>
@@ -59,23 +55,13 @@
     <ID>ComposableParamOrder:SettingsItem.kt$SettingsItem</ID>
     <ID>ComposableParamOrder:SignalInfo.kt$SignalInfo</ID>
     <ID>ComposableParamOrder:SignalMetrics.kt$SignalMetricsChart</ID>
-    <ID>ComposableParamOrder:SwitchPreference.kt$SwitchPreference</ID>
     <ID>ComposableParamOrder:TopLevelNavIcon.kt$ConnectionsNavIcon</ID>
     <ID>ComposableParamOrder:TracerouteButton.kt$TracerouteButton</ID>
     <ID>ComposableParamOrder:WarningDialog.kt$WarningDialog</ID>
-    <ID>ConstructorParameterNaming:MeshLog.kt$MeshLog$@ColumnInfo(name = "message") val raw_message: String</ID>
-    <ID>ConstructorParameterNaming:MeshLog.kt$MeshLog$@ColumnInfo(name = "received_date") val received_date: Long</ID>
-    <ID>ConstructorParameterNaming:MeshLog.kt$MeshLog$@ColumnInfo(name = "type") val message_type: String</ID>
-    <ID>ConstructorParameterNaming:Packet.kt$ContactSettings$@PrimaryKey val contact_key: String</ID>
-    <ID>ConstructorParameterNaming:Packet.kt$Packet$@ColumnInfo(name = "contact_key") val contact_key: String</ID>
-    <ID>ConstructorParameterNaming:Packet.kt$Packet$@ColumnInfo(name = "port_num") val port_num: Int</ID>
-    <ID>ConstructorParameterNaming:Packet.kt$Packet$@ColumnInfo(name = "received_time") val received_time: Long</ID>
-    <ID>ContentSlotReused:AdaptiveTwoPane.kt$second</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>EmptyCatchBlock:MeshLog.kt$MeshLog${ }</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
     <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided&gt;${ }</ID>
@@ -89,16 +75,13 @@
     <ID>FinalNewline:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>FinalNewline:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
     <ID>FinalNewline:DeferredExecution.kt$com.geeksville.mesh.concurrent.DeferredExecution.kt</ID>
-    <ID>FinalNewline:DeviceVersion.kt$com.geeksville.mesh.model.DeviceVersion.kt</ID>
     <ID>FinalNewline:InterfaceId.kt$com.geeksville.mesh.repository.radio.InterfaceId.kt</ID>
     <ID>FinalNewline:InterfaceSpec.kt$com.geeksville.mesh.repository.radio.InterfaceSpec.kt</ID>
     <ID>FinalNewline:MockInterfaceFactory.kt$com.geeksville.mesh.repository.radio.MockInterfaceFactory.kt</ID>
     <ID>FinalNewline:NopInterface.kt$com.geeksville.mesh.repository.radio.NopInterface.kt</ID>
     <ID>FinalNewline:NopInterfaceFactory.kt$com.geeksville.mesh.repository.radio.NopInterfaceFactory.kt</ID>
     <ID>FinalNewline:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
-    <ID>FinalNewline:QuickChatActionRepository.kt$com.geeksville.mesh.database.QuickChatActionRepository.kt</ID>
     <ID>FinalNewline:RadioNotConnectedException.kt$com.geeksville.mesh.service.RadioNotConnectedException.kt</ID>
-    <ID>FinalNewline:RegularPreference.kt$com.geeksville.mesh.ui.common.components.RegularPreference.kt</ID>
     <ID>FinalNewline:SerialConnection.kt$com.geeksville.mesh.repository.usb.SerialConnection.kt</ID>
     <ID>FinalNewline:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
     <ID>FinalNewline:SerialInterface.kt$com.geeksville.mesh.repository.radio.SerialInterface.kt</ID>
@@ -107,9 +90,6 @@
     <ID>FinalNewline:UsbBroadcastReceiver.kt$com.geeksville.mesh.repository.usb.UsbBroadcastReceiver.kt</ID>
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
-    <ID>FunctionNaming:PacketDao.kt$PacketDao$@Query("DELETE FROM packet WHERE uuid=:uuid") suspend fun _delete(uuid: Long)</ID>
-    <ID>FunctionNaming:QuickChatActionDao.kt$QuickChatActionDao$@Query("Delete from quick_chat where uuid=:uuid") fun _delete(uuid: Long)</ID>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$NodeInfo$String.format("%d%%", batteryLevel)</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
     <ID>LambdaParameterEventTrailing:MainAppBar.kt$onAction</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
@@ -139,16 +119,6 @@
     <ID>LongMethod:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>MagicNumber:BatteryInfo.kt$100</ID>
-    <ID>MagicNumber:BatteryInfo.kt$101</ID>
-    <ID>MagicNumber:BatteryInfo.kt$14</ID>
-    <ID>MagicNumber:BatteryInfo.kt$15</ID>
-    <ID>MagicNumber:BatteryInfo.kt$34</ID>
-    <ID>MagicNumber:BatteryInfo.kt$35</ID>
-    <ID>MagicNumber:BatteryInfo.kt$4</ID>
-    <ID>MagicNumber:BatteryInfo.kt$5</ID>
-    <ID>MagicNumber:BatteryInfo.kt$79</ID>
-    <ID>MagicNumber:BatteryInfo.kt$80</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1000</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$500</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$512</ID>
@@ -156,30 +126,15 @@
     <ID>MagicNumber:ChannelSet.kt$960</ID>
     <ID>MagicNumber:Contacts.kt$7</ID>
     <ID>MagicNumber:Contacts.kt$8</ID>
-    <ID>MagicNumber:DataPacket.kt$DataPacket.CREATOR$16</ID>
     <ID>MagicNumber:Debug.kt$3</ID>
-    <ID>MagicNumber:DeviceVersion.kt$DeviceVersion$100</ID>
-    <ID>MagicNumber:DeviceVersion.kt$DeviceVersion$10000</ID>
     <ID>MagicNumber:EditChannelDialog.kt$16</ID>
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
-    <ID>MagicNumber:EditIPv4Preference.kt$0xff</ID>
-    <ID>MagicNumber:EditIPv4Preference.kt$16</ID>
-    <ID>MagicNumber:EditIPv4Preference.kt$24</ID>
-    <ID>MagicNumber:EditIPv4Preference.kt$8</ID>
     <ID>MagicNumber:EditListPreference.kt$12</ID>
     <ID>MagicNumber:EditListPreference.kt$12345</ID>
     <ID>MagicNumber:EditListPreference.kt$67890</ID>
-    <ID>MagicNumber:Extensions.kt$1000</ID>
-    <ID>MagicNumber:Extensions.kt$1440000</ID>
-    <ID>MagicNumber:Extensions.kt$24</ID>
-    <ID>MagicNumber:Extensions.kt$2880</ID>
-    <ID>MagicNumber:Extensions.kt$60</ID>
-    <ID>MagicNumber:LazyColumnDragAndDropDemo.kt$50</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$1000L</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$30</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$31</ID>
-    <ID>MagicNumber:LocationUtils.kt$1e-7</ID>
-    <ID>MagicNumber:LocationUtils.kt$360</ID>
     <ID>MagicNumber:MQTTRepository.kt$MQTTRepository$512</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$0xffffffff</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$1000</ID>
@@ -193,28 +148,6 @@
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1000L</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
-    <ID>MagicNumber:NodeInfo.kt$DeviceMetrics.Companion$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics.Companion$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.114</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.299</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.587</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0x0000FF</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0x00FF00</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0xFF0000</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1000.0</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$16</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1609</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1609.34</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$255</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$3.281</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$8</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position$180</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position$90</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position$90.0</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1e-7</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1e7</ID>
     <ID>MagicNumber:PacketRepository.kt$PacketRepository$500</ID>
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
     <ID>MagicNumber:PowerConfigItemList.kt$3600</ID>
@@ -239,20 +172,12 @@
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$500</ID>
     <ID>MagicNumber:UIState.kt$4</ID>
     <ID>MatchingDeclarationName:AnalyticsClient.kt$AnalyticsProvider</ID>
-    <ID>MatchingDeclarationName:DistanceExtensions.kt$DistanceUnit</ID>
-    <ID>MatchingDeclarationName:LocationUtils.kt$GPSFormat</ID>
     <ID>MatchingDeclarationName:MeshServiceStarter.kt$ServiceStarter : Worker</ID>
-    <ID>MatchingDeclarationName:SortOption.kt$NodeSortOption</ID>
     <ID>MaxLineLength:BluetoothInterface.kt$/* Info for the esp32 device side code. See that source for the 'gold' standard docs on this interface. MeshBluetoothService UUID 6ba1b218-15a8-461f-9fa8-5dcae273eafd FIXME - notify vs indication for fromradio output. Using notify for now, not sure if that is best FIXME - in the esp32 mesh management code, occasionally mirror the current net db to flash, so that if we reboot we still have a good guess of users who are out there. FIXME - make sure this protocol is guaranteed robust and won't drop packets "According to the BLE specification the notification length can be max ATT_MTU - 3. The 3 bytes subtracted is the 3-byte header(OP-code (operation, 1 byte) and the attribute handle (2 bytes)). In BLE 4.1 the ATT_MTU is 23 bytes (20 bytes for payload), but in BLE 4.2 the ATT_MTU can be negotiated up to 247 bytes." MAXPACKET is 256? look into what the lora lib uses. FIXME Characteristics: UUID properties description 8ba2bcc2-ee02-4a55-a531-c525c5e454d5 read fromradio - contains a newly received packet destined towards the phone (up to MAXPACKET bytes? per packet). After reading the esp32 will put the next packet in this mailbox. If the FIFO is empty it will put an empty packet in this mailbox. f75c76d2-129e-4dad-a1dd-7866124401e7 write toradio - write ToRadio protobufs to this charstic to send them (up to MAXPACKET len) ed9da18c-a800-4f66-a670-aa7547e34453 read|notify|write fromnum - the current packet # in the message waiting inside fromradio, if the phone sees this notify it should read messages until it catches up with this number. The phone can write to this register to go backwards up to FIXME packets, to handle the rare case of a fromradio packet was dropped after the esp32 callback was called, but before it arrives at the phone. If the phone writes to this register the esp32 will discard older packets and put the next packet &gt;= fromnum in fromradio. When the esp32 advances fromnum, it will delay doing the notify by 100ms, in the hopes that the notify will never actally need to be sent if the phone is already pulling from fromradio. Note: that if the phone ever sees this number decrease, it means the esp32 has rebooted. Re: queue management Not all messages are kept in the fromradio queue (filtered based on SubPacket): * only the most recent Position and User messages for a particular node are kept * all Data SubPackets are kept * No WantNodeNum / DenyNodeNum messages are kept A variable keepAllPackets, if set to true will suppress this behavior and instead keep everything for forwarding to the phone (for debugging) */</ID>
-    <ID>MaxLineLength:BluetoothState.kt$BluetoothState$"BluetoothState(hasPermissions=$hasPermissions, enabled=$enabled, bondedDevices=${bondedDevices.map { it.anonymize }})"</ID>
-    <ID>MaxLineLength:DataPacket.kt$DataPacket$val dataType: Int</ID>
     <ID>MaxLineLength:LocationRepository.kt$LocationRepository$info("Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m")</ID>
-    <ID>MaxLineLength:MQTTRepository.kt$MQTTRepository.Companion$*</ID>
     <ID>MaxLineLength:ServiceClient.kt$ServiceClient$// Some phones seem to ahve a race where if you unbind and quickly rebind bindService returns false. Try</ID>
     <ID>MaxLineLength:ServiceClient.kt$ServiceClient.&lt;no name provided&gt;$// If we start to close a service, it seems that there is a possibility a onServiceConnected event is the queue</ID>
     <ID>ModifierClickableOrder:Channel.kt$clickable(onClick = onClick)</ID>
-    <ID>ModifierListSpacing:Packet.kt$Packet$@Entity( tableName = "packet", indices = [ Index(value = ["myNodeNum"]), Index(value = ["port_num"]), Index(value = ["contact_key"]), ] ) data</ID>
-    <ID>ModifierMissing:AdaptiveTwoPane.kt$AdaptiveTwoPane</ID>
     <ID>ModifierMissing:BLEDevices.kt$BLEDevices</ID>
     <ID>ModifierMissing:Channel.kt$ChannelScreen</ID>
     <ID>ModifierMissing:ChannelSettingsItemList.kt$ChannelSelection</ID>
@@ -270,11 +195,6 @@
     <ID>ModifierMissing:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ModifierMissing:EnvironmentMetrics.kt$EnvironmentMetricsScreen</ID>
     <ID>ModifierMissing:HostMetricsLog.kt$HostMetricsLogScreen</ID>
-    <ID>ModifierMissing:IndoorAirQuality.kt$IndoorAirQuality</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt$LoraSignalIndicator</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt$Rssi</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt$Snr</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt$SnrAndRssi</ID>
     <ID>ModifierMissing:Main.kt$MainScreen</ID>
     <ID>ModifierMissing:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ModifierMissing:MessageActions.kt$MessageStatusButton</ID>
@@ -302,8 +222,6 @@
     <ID>ModifierMissing:SettingsScreen.kt$SettingsScreen</ID>
     <ID>ModifierMissing:Share.kt$ShareScreen</ID>
     <ID>ModifierMissing:SignalMetrics.kt$SignalMetricsScreen</ID>
-    <ID>ModifierMissing:SimpleAlertDialog.kt$SimpleAlertDialog</ID>
-    <ID>ModifierMissing:SlidingSelector.kt$OptionLabel</ID>
     <ID>ModifierMissing:TopLevelNavIcon.kt$TopLevelNavIcon</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.width(dp)</ID>
@@ -317,13 +235,10 @@
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier.width(dp)</ID>
-    <ID>ModifierNotUsedAtRoot:PreferenceFooter.kt$modifier = modifier .height(48.dp) .weight(1f)</ID>
     <ID>ModifierNotUsedAtRoot:SignalInfo.kt$modifier = modifier</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier.width(dp)</ID>
-    <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt$modifier = modifier .fillMaxWidth() .padding(all = 16.dp)</ID>
-    <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt$modifier = modifier .fillMaxWidth() .wrapContentWidth(Alignment.End)</ID>
     <ID>ModifierReused:DeviceMetrics.kt$Canvas(modifier = modifier.width(dp)) { val height = size.height val width = size.width for (i in telemetries.indices) { val telemetry = telemetries[i] /* x-value time */ val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff val x = xRatio * width /* Channel Utilization */ plotPoint( drawContext = drawContext, color = Device.CH_UTIL.color, x = x, value = telemetry.deviceMetrics.channelUtilization, divisor = MAX_PERCENT_VALUE, ) /* Air Utilization Transmit */ plotPoint( drawContext = drawContext, color = Device.AIR_UTIL.color, x = x, value = telemetry.deviceMetrics.airUtilTx, divisor = MAX_PERCENT_VALUE, ) } /* Battery Line */ var index = 0 while (index &lt; telemetries.size) { val path = Path() index = createPath( telemetries = telemetries, index = index, path = path, oldestTime = oldest.time, timeRange = timeDiff, width = width, timeThreshold = selectedTime.timeThreshold(), ) { i -&gt; val telemetry = telemetries.getOrNull(i) ?: telemetries.last() val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE val y = height - (ratio * height) return@createPath y } drawPath( path = path, color = Device.BATTERY.color, style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round), ) } }</ID>
     <ID>ModifierReused:DeviceMetrics.kt$HorizontalLinesOverlay( modifier.width(dp), lineColors = listOf(graphColor, Color.Yellow, Color.Red, graphColor, graphColor), )</ID>
     <ID>ModifierReused:DeviceMetrics.kt$TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())</ID>
@@ -339,19 +254,11 @@
     <ID>ModifierReused:PowerMetrics.kt$TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())</ID>
     <ID>ModifierReused:PowerMetrics.kt$YAxisLabels( modifier = modifier.weight(weight = Y_AXIS_WEIGHT), Power.CURRENT.color, minValue = Power.CURRENT.min, maxValue = Power.CURRENT.max, )</ID>
     <ID>ModifierReused:PowerMetrics.kt$YAxisLabels( modifier = modifier.weight(weight = Y_AXIS_WEIGHT), VOLTAGE_COLOR, minValue = voltageMin, maxValue = voltageMax, )</ID>
-    <ID>ModifierReused:PreferenceCategory.kt$Card( modifier = modifier.padding(bottom = 8.dp), ) { Column( modifier = Modifier .fillMaxWidth() .padding(horizontal = 16.dp, vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally, ) { ProvideTextStyle(MaterialTheme.typography.bodyLarge) { content() } } }</ID>
-    <ID>ModifierReused:PreferenceCategory.kt$Text( text, modifier = modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp, end = 16.dp), style = MaterialTheme.typography.titleLarge, )</ID>
-    <ID>ModifierReused:PreferenceFooter.kt$OutlinedButton( modifier = modifier .height(48.dp) .weight(1f), enabled = enabled, onClick = onPositiveClicked, ) { Text( text = stringResource(id = positiveText), ) }</ID>
-    <ID>ModifierReused:PreferenceFooter.kt$OutlinedButton( modifier = modifier .height(48.dp) .weight(1f), onClick = onNegativeClicked, ) { Text( text = stringResource(id = negativeText), ) }</ID>
-    <ID>ModifierReused:PreferenceFooter.kt$Row( modifier = modifier .fillMaxWidth() .height(64.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically, ) { OutlinedButton( modifier = modifier .height(48.dp) .weight(1f), onClick = onNegativeClicked, ) { Text( text = stringResource(id = negativeText), ) } OutlinedButton( modifier = modifier .height(48.dp) .weight(1f), enabled = enabled, onClick = onPositiveClicked, ) { Text( text = stringResource(id = positiveText), ) } }</ID>
     <ID>ModifierReused:SignalMetrics.kt$Canvas(modifier = modifier.width(dp)) { val width = size.width /* Plot */ for (packet in meshPackets) { val xRatio = (packet.rxTime - oldest.rxTime).toFloat() / timeDiff val x = xRatio * width /* SNR */ plotPoint( drawContext = drawContext, color = Metric.SNR.color, x = x, value = packet.rxSnr - Metric.SNR.min, divisor = snrDiff, ) /* RSSI */ plotPoint( drawContext = drawContext, color = Metric.RSSI.color, x = x, value = packet.rxRssi - Metric.RSSI.min, divisor = rssiDiff, ) } }</ID>
     <ID>ModifierReused:SignalMetrics.kt$HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor })</ID>
     <ID>ModifierReused:SignalMetrics.kt$TimeAxisOverlay( modifier.width(dp), oldest = oldest.rxTime, newest = newest.rxTime, selectedTime.lineInterval(), )</ID>
     <ID>ModifierReused:SignalMetrics.kt$YAxisLabels( modifier = modifier.weight(weight = Y_AXIS_WEIGHT), Metric.RSSI.color, minValue = Metric.RSSI.min, maxValue = Metric.RSSI.max, )</ID>
     <ID>ModifierReused:SignalMetrics.kt$YAxisLabels( modifier = modifier.weight(weight = Y_AXIS_WEIGHT), Metric.SNR.color, minValue = Metric.SNR.min, maxValue = Metric.SNR.max, )</ID>
-    <ID>ModifierReused:TextDividerPreference.kt$Card( modifier = modifier.fillMaxWidth(), ) { Row( modifier = modifier .fillMaxWidth() .padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically ) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon( trailingIcon, "trailingIcon", modifier = modifier .fillMaxWidth() .wrapContentWidth(Alignment.End), ) } } }</ID>
-    <ID>ModifierReused:TextDividerPreference.kt$Icon( trailingIcon, "trailingIcon", modifier = modifier .fillMaxWidth() .wrapContentWidth(Alignment.End), )</ID>
-    <ID>ModifierReused:TextDividerPreference.kt$Row( modifier = modifier .fillMaxWidth() .padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically ) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon( trailingIcon, "trailingIcon", modifier = modifier .fillMaxWidth() .wrapContentWidth(Alignment.End), ) } }</ID>
     <ID>ModifierWithoutDefault:CommonCharts.kt$modifier</ID>
     <ID>ModifierWithoutDefault:EnvironmentCharts.kt$modifier</ID>
     <ID>MultiLineIfElse:Exceptions.kt$Exceptions.errormsg("ignoring exception", ex)</ID>
@@ -363,7 +270,6 @@
     <ID>MultipleEmitters:NodeDetail.kt$MetricsSection</ID>
     <ID>MultipleEmitters:PaxMetrics.kt$PaxMetricsChart</ID>
     <ID>MultipleEmitters:PowerMetrics.kt$PowerMetricsChart</ID>
-    <ID>MultipleEmitters:PreferenceCategory.kt$PreferenceCategory</ID>
     <ID>MultipleEmitters:RadioConfig.kt$RadioConfigItemList</ID>
     <ID>MultipleEmitters:SignalMetrics.kt$SignalMetricsChart</ID>
     <ID>MutableStateAutoboxing:Contacts.kt$mutableStateOf(2)</ID>
@@ -380,16 +286,13 @@
     <ID>NewLineAtEndOfFile:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>NewLineAtEndOfFile:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
     <ID>NewLineAtEndOfFile:DeferredExecution.kt$com.geeksville.mesh.concurrent.DeferredExecution.kt</ID>
-    <ID>NewLineAtEndOfFile:DeviceVersion.kt$com.geeksville.mesh.model.DeviceVersion.kt</ID>
     <ID>NewLineAtEndOfFile:InterfaceId.kt$com.geeksville.mesh.repository.radio.InterfaceId.kt</ID>
     <ID>NewLineAtEndOfFile:InterfaceSpec.kt$com.geeksville.mesh.repository.radio.InterfaceSpec.kt</ID>
     <ID>NewLineAtEndOfFile:MockInterfaceFactory.kt$com.geeksville.mesh.repository.radio.MockInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:NopInterface.kt$com.geeksville.mesh.repository.radio.NopInterface.kt</ID>
     <ID>NewLineAtEndOfFile:NopInterfaceFactory.kt$com.geeksville.mesh.repository.radio.NopInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
-    <ID>NewLineAtEndOfFile:QuickChatActionRepository.kt$com.geeksville.mesh.database.QuickChatActionRepository.kt</ID>
     <ID>NewLineAtEndOfFile:RadioNotConnectedException.kt$com.geeksville.mesh.service.RadioNotConnectedException.kt</ID>
-    <ID>NewLineAtEndOfFile:RegularPreference.kt$com.geeksville.mesh.ui.common.components.RegularPreference.kt</ID>
     <ID>NewLineAtEndOfFile:SerialConnection.kt$com.geeksville.mesh.repository.usb.SerialConnection.kt</ID>
     <ID>NewLineAtEndOfFile:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
     <ID>NewLineAtEndOfFile:SerialInterface.kt$com.geeksville.mesh.repository.radio.SerialInterface.kt</ID>
@@ -409,7 +312,6 @@
     <ID>NoSemicolons:DateUtils.kt$DateUtils$;</ID>
     <ID>NoWildcardImports:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
-    <ID>ParameterNaming:BitwisePreference.kt$onItemSelected</ID>
     <ID>ParameterNaming:ChannelSettingsItemList.kt$onPositiveClicked</ID>
     <ID>ParameterNaming:ChannelSettingsItemList.kt$onSelected</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onCheckedChanged</ID>
@@ -417,10 +319,7 @@
     <ID>ParameterNaming:Contacts.kt$onDeleteSelected</ID>
     <ID>ParameterNaming:Contacts.kt$onMuteSelected</ID>
     <ID>ParameterNaming:DropDownPreference.kt$onItemSelected</ID>
-    <ID>ParameterNaming:EditIPv4Preference.kt$onValueChanged</ID>
     <ID>ParameterNaming:EditListPreference.kt$onValuesChanged</ID>
-    <ID>ParameterNaming:EditPasswordPreference.kt$onValueChanged</ID>
-    <ID>ParameterNaming:EditTextPreference.kt$onValueChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onMapReportingEnabledChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onPositionPrecisionChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onPublishIntervalSecsChanged</ID>
@@ -429,25 +328,15 @@
     <ID>ParameterNaming:NodeDetail.kt$onFirmwareSelected</ID>
     <ID>ParameterNaming:NodeFilterTextField.kt$onToggleShowIgnored</ID>
     <ID>ParameterNaming:PositionPrecisionPreference.kt$onValueChanged</ID>
-    <ID>ParameterNaming:PreferenceFooter.kt$onCancelClicked</ID>
-    <ID>ParameterNaming:PreferenceFooter.kt$onNegativeClicked</ID>
-    <ID>ParameterNaming:PreferenceFooter.kt$onPositiveClicked</ID>
-    <ID>ParameterNaming:PreferenceFooter.kt$onSaveClicked</ID>
-    <ID>ParameterNaming:SlidingSelector.kt$onOptionSelected</ID>
     <ID>ParameterNaming:UsbDevices.kt$onDeviceSelected</ID>
     <ID>ParameterNaming:WelcomeScreen.kt$onGetStarted</ID>
     <ID>PreviewAnnotationNaming:LargeFontPreview.kt$LargeFontPreview$LargeFontPreview</ID>
-    <ID>PreviewPublic:BatteryInfo.kt$BatteryInfoPreview</ID>
-    <ID>PreviewPublic:BatteryInfo.kt$BatteryInfoPreviewSimple</ID>
     <ID>PreviewPublic:Channel.kt$ModemPresetInfoPreview</ID>
     <ID>PreviewPublic:ElevationInfo.kt$ElevationInfoPreview</ID>
     <ID>PreviewPublic:EmptyStateContent.kt$EmptyStateContentPreview</ID>
-    <ID>PreviewPublic:IndoorAirQuality.kt$IAQScalePreview</ID>
     <ID>PreviewPublic:LastHeardInfo.kt$LastHeardInfoPreview</ID>
-    <ID>PreviewPublic:LazyColumnDragAndDropDemo.kt$LazyColumnDragAndDropDemo</ID>
     <ID>PreviewPublic:LinkedCoordinates.kt$LinkedCoordinatesPreview</ID>
     <ID>PreviewPublic:MapReportingPreference.kt$MapReportingPreview</ID>
-    <ID>PreviewPublic:MaterialBatteryInfo.kt$MaterialBatteryInfoPreview</ID>
     <ID>PreviewPublic:NodeChip.kt$NodeChipPreview</ID>
     <ID>PreviewPublic:NodeItem.kt$NodeInfoPreview</ID>
     <ID>PreviewPublic:NodeItem.kt$NodeInfoSimplePreview</ID>
@@ -458,17 +347,13 @@
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoPreview</ID>
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoSelfPreview</ID>
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoSimplePreview</ID>
-    <ID>PreviewPublic:SlidingSelector.kt$SlidingSelectorPreview</ID>
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
     <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>SpacingAroundKeyword:Exceptions.kt$if</ID>
     <ID>SpacingAroundKeyword:Exceptions.kt$when</ID>
-    <ID>SpacingAroundRangeOperator:BatteryInfo.kt$..</ID>
     <ID>SwallowedException:BluetoothInterface.kt$BluetoothInterface$ex: CancellationException</ID>
     <ID>SwallowedException:ChannelSet.kt$ex: Throwable</ID>
-    <ID>SwallowedException:DeviceVersion.kt$DeviceVersion$e: Exception</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
-    <ID>SwallowedException:MeshLog.kt$MeshLog$e: IOException</ID>
     <ID>SwallowedException:MeshService.kt$MeshService$ex: BLEException</ID>
     <ID>SwallowedException:MeshService.kt$MeshService$ex: CancellationException</ID>
     <ID>SwallowedException:NsdManager.kt$ex: IllegalArgumentException</ID>
@@ -479,7 +364,6 @@
     <ID>TooGenericExceptionCaught:BTScanModel.kt$BTScanModel$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:BluetoothInterface.kt$BluetoothInterface$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:ChannelSet.kt$ex: Throwable</ID>
-    <ID>TooGenericExceptionCaught:DeviceVersion.kt$DeviceVersion$e: Exception</ID>
     <ID>TooGenericExceptionCaught:Exceptions.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:LanguageUtils.kt$LanguageUtils$e: Exception</ID>
     <ID>TooGenericExceptionCaught:LocationRepository.kt$LocationRepository$e: Exception</ID>
@@ -492,7 +376,6 @@
     <ID>TooGenericExceptionCaught:SafeBluetooth.kt$SafeBluetooth$ex: NullPointerException</ID>
     <ID>TooGenericExceptionCaught:SyncContinuation.kt$Continuation$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
-    <ID>TooGenericExceptionThrown:DeviceVersion.kt$DeviceVersion$throw Exception("Can't parse version $s")</ID>
     <ID>TooGenericExceptionThrown:MeshService.kt$MeshService$throw Exception("Can't set user without a NodeInfo")</ID>
     <ID>TooGenericExceptionThrown:MeshService.kt$MeshService.&lt;no name provided&gt;$throw Exception("Port numbers must be non-zero!")</ID>
     <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Haven't called connect")</ID>
@@ -503,9 +386,7 @@
     <ID>TooManyFunctions:MeshService.kt$MeshService : ServiceLogging</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided&gt; : Stub</ID>
     <ID>TooManyFunctions:NodeDetail.kt$com.geeksville.mesh.ui.node.NodeDetail.kt</ID>
-    <ID>TooManyFunctions:PacketDao.kt$PacketDao</ID>
     <ID>TooManyFunctions:PacketRepository.kt$PacketRepository</ID>
-    <ID>TooManyFunctions:RadioConfigRepository.kt$RadioConfigRepository</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModelLogging</ID>
     <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService : Logging</ID>
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : LoggingCloseable</ID>
@@ -521,15 +402,11 @@
     <ID>ViewModelForwarding:NodeScreen.kt$AddContactFAB( modifier = Modifier.animateFloatingActionButton( visible = !isScrollInProgress &amp;&amp; connectionState == ConnectionState.CONNECTED &amp;&amp; shareCapable, alignment = Alignment.BottomEnd, ), model = model, onSharedContactImport = { contact -&gt; model.addSharedContact(contact) }, )</ID>
     <ID>ViewModelInjection:DebugSearch.kt$viewModel</ID>
     <ID>WildcardImport:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
-    <ID>Wrapping:DebugFilters.kt$(</ID>
-    <ID>Wrapping:DebugFilters.kt$if (filter in filterTexts) { Icon( imageVector = Icons.Filled.Done, contentDescription = stringResource(id = R.string.debug_filter_included), ) }</ID>
-    <ID>Wrapping:MQTTRepository.kt$MQTTRepository.&lt;no name provided&gt;$(</ID>
     <ID>Wrapping:Message.kt${ event -&gt; when (event) { is MessageScreenEvent.SendMessage -&gt; { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -&gt; viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -&gt; { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -&gt; viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.HandleNodeMenuAction -&gt; { when (val action = event.action) { is NodeMenuAction.DirectMessage -&gt; { val hasPKC = ourNode?.hasPKC == true &amp;&amp; action.node.hasPKC val targetChannel = if (hasPKC) { DataPacket.PKC_CHANNEL_INDEX } else { action.node.channel } navigateToMessages("$targetChannel${action.node.user.id}") } is NodeMenuAction.MoreDetails -&gt; navigateToNodeDetails(action.node.num) is NodeMenuAction.Share -&gt; sharedContact = action.node else -&gt; viewModel.handleNodeMenuAction(action) } } is MessageScreenEvent.SetTitle -&gt; viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -&gt; navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -&gt; navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -&gt; onNavigateBack() is MessageScreenEvent.CopyToClipboard -&gt; { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
     <ID>Wrapping:SerialConnectionImpl.kt$SerialConnectionImpl$(</ID>
     <ID>Wrapping:SerialConnectionImpl.kt$SerialConnectionImpl$(port, object : SerialInputOutputManager.Listener { override fun onNewData(data: ByteArray) { listener.onDataReceived(data) } override fun onRunError(e: Exception?) { closed.set(true) ignoreException { port.dtr = false port.rts = false port.close() } closedLatch.countDown() listener.onDisconnected(e) } })</ID>
     <ID>Wrapping:SerialInterface.kt$SerialInterface$(</ID>
     <ID>Wrapping:SerialInterface.kt$SerialInterface$(device, object : SerialConnectionListener { override fun onMissingPermission() { errormsg("Need permissions for port") } override fun onConnected() { onConnect.invoke() } override fun onDataReceived(bytes: ByteArray) { debug("Received ${bytes.size} byte(s)") bytes.forEach(::readChar) } override fun onDisconnected(thrown: Exception?) { thrown?.let { e -&gt; errormsg("Serial error: $e") } debug("$device disconnected") onDeviceDisconnect(false) } })</ID>
     <ID>Wrapping:ServiceClient.kt$ServiceClient$Closeable, Logging</ID>
-    <ID>Wrapping:SlidingSelector.kt$;</ID>
   </CurrentIssues>
 </SmellBaseline>

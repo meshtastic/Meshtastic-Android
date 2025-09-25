@@ -46,6 +46,7 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.remoteHardwarePin
 import com.google.protobuf.ByteString
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.EditTextPreference
 
 @Suppress("LongMethod")
 @Composable

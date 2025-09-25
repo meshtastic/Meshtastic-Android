@@ -27,9 +27,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
-import com.geeksville.mesh.ui.common.theme.AppTheme
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.NodeSignalQuality
+import org.meshtastic.core.ui.theme.AppTheme
 
 const val MAX_VALID_SNR = 100F
 const val MAX_VALID_RSSI = 0

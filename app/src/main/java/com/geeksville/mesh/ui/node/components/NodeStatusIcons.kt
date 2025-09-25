@@ -39,10 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)

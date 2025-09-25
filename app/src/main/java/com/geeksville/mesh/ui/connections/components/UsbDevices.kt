@@ -26,9 +26,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.ui.common.components.TitledCard
-import com.geeksville.mesh.ui.common.theme.AppTheme
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun UsbDevices(

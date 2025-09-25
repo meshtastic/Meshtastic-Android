@@ -102,8 +102,6 @@ import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.ui.common.components.AdaptiveTwoPane
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
@@ -116,6 +114,8 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.AdaptiveTwoPane
+import org.meshtastic.core.ui.component.PreferenceFooter
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel

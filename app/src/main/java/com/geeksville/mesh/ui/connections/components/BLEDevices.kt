@@ -49,11 +49,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.ui.common.components.TitledCard
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.TitledCard
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth

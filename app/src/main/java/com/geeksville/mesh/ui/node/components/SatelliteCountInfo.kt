@@ -30,17 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun SatelliteCountInfo(
-    modifier: Modifier = Modifier,
-    satCount: Int,
-) {
+fun SatelliteCountInfo(modifier: Modifier = Modifier, satCount: Int) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Icon(
             modifier = Modifier.size(18.dp),
@@ -59,9 +56,5 @@ fun SatelliteCountInfo(
 @PreviewLightDark
 @Composable
 fun SatelliteCountInfoPreview() {
-    AppTheme {
-        SatelliteCountInfo(
-            satCount = 5,
-        )
-    }
+    AppTheme { SatelliteCountInfo(satCount = 5) }
 }

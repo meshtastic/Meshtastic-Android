@@ -73,16 +73,16 @@ import androidx.navigation.NavController
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.channelSettings
-import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SecurityIcon
-import com.geeksville.mesh.ui.common.components.dragContainer
-import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
-import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.PreferenceCategory
+import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.core.ui.component.dragContainer
+import org.meshtastic.core.ui.component.dragDropItemsIndexed
+import org.meshtastic.core.ui.component.rememberDragDropState
 
 @Composable
 private fun ChannelItem(

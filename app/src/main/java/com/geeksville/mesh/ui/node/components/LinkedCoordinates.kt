@@ -41,10 +41,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.core.net.toUri
 import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.HyperlinkBlue
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.util.GPSFormat
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.HyperlinkBlue
 import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)

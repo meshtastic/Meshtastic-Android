@@ -19,16 +19,16 @@ package com.geeksville.mesh.model
 
 import androidx.compose.ui.graphics.Color
 import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.ui.common.theme.GraphColors.Green
-import com.geeksville.mesh.ui.common.theme.GraphColors.InfantryBlue
-import com.geeksville.mesh.ui.common.theme.GraphColors.LightGreen
-import com.geeksville.mesh.ui.common.theme.GraphColors.Magenta
-import com.geeksville.mesh.ui.common.theme.GraphColors.Orange
-import com.geeksville.mesh.ui.common.theme.GraphColors.Pink
-import com.geeksville.mesh.ui.common.theme.GraphColors.Purple
-import com.geeksville.mesh.ui.common.theme.GraphColors.Red
-import com.geeksville.mesh.ui.common.theme.GraphColors.Yellow
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.ui.theme.GraphColors.Green
+import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
+import org.meshtastic.core.ui.theme.GraphColors.LightGreen
+import org.meshtastic.core.ui.theme.GraphColors.Magenta
+import org.meshtastic.core.ui.theme.GraphColors.Orange
+import org.meshtastic.core.ui.theme.GraphColors.Pink
+import org.meshtastic.core.ui.theme.GraphColors.Purple
+import org.meshtastic.core.ui.theme.GraphColors.Red
+import org.meshtastic.core.ui.theme.GraphColors.Yellow
 
 @Suppress("MagicNumber")
 enum class Environment(val color: Color) {

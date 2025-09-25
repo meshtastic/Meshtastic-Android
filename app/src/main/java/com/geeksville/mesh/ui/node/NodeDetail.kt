@@ -134,13 +134,7 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
-import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusOrange
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.node.components.TracerouteButton
@@ -168,6 +162,12 @@ import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,

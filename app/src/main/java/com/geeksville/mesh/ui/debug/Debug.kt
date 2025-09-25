@@ -73,7 +73,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.size
 import androidx.compose.ui.unit.sp
 import androidx.datastore.core.IOException
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -81,15 +80,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
-import com.geeksville.mesh.ui.common.components.CopyIconButton
-import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
-import com.geeksville.mesh.ui.common.theme.AnnotationColor
-import com.geeksville.mesh.ui.common.theme.AppTheme
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.CopyIconButton
+import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.theme.AnnotationColor
+import org.meshtastic.core.ui.theme.AppTheme
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat

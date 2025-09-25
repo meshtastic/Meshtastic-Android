@@ -66,7 +66,6 @@ import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo
@@ -83,6 +82,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.TitledCard
 
 fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
     @Suppress("DEPRECATION")

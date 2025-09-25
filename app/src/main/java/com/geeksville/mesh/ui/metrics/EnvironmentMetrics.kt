@@ -53,14 +53,14 @@ import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
-import com.geeksville.mesh.ui.common.components.IaqDisplayMode
-import com.geeksville.mesh.ui.common.components.IndoorAirQuality
-import com.geeksville.mesh.ui.common.components.OptionLabel
-import com.geeksville.mesh.ui.common.components.SlidingSelector
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.IaqDisplayMode
+import org.meshtastic.core.ui.component.IndoorAirQuality
+import org.meshtastic.core.ui.component.OptionLabel
+import org.meshtastic.core.ui.component.SlidingSelector
 
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {

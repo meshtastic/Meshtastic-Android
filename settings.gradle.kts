@@ -29,6 +29,7 @@ include(
     ":core:prefs",
     ":core:proto",
     ":core:strings",
+    ":core:ui",
     ":feature:map",
     ":mesh_service_example",
 )
