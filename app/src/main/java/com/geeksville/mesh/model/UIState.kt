@@ -388,20 +388,6 @@ constructor(
                 initialValue = emptyList(),
             )
 
-    val onlineNodeCount =
-        nodeDB.onlineNodeCount.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = 0,
-        )
-
-    val totalNodeCount =
-        nodeDB.totalNodeCount.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = 0,
-        )
-
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo

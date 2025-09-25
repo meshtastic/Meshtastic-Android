@@ -73,16 +73,16 @@ fun NodeScreen(
     val state by nodesViewModel.nodesUiState.collectAsStateWithLifecycle()
 
     val nodes by nodesViewModel.nodeList.collectAsStateWithLifecycle()
-    val ourNode by model.ourNodeInfo.collectAsStateWithLifecycle()
-    val onlineNodeCount by model.onlineNodeCount.collectAsStateWithLifecycle(0)
-    val totalNodeCount by model.totalNodeCount.collectAsStateWithLifecycle(0)
+    val ourNode by nodesViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val onlineNodeCount by nodesViewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
+    val totalNodeCount by nodesViewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by model.unfilteredNodeList.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
     val listState = rememberLazyListState()
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
-    val connectionState by model.connectionState.collectAsStateWithLifecycle()
+    val connectionState by nodesViewModel.connectionState.collectAsStateWithLifecycle()
 
     var showSharedContact: Node? by remember { mutableStateOf(null) }
     if (showSharedContact != null) {
