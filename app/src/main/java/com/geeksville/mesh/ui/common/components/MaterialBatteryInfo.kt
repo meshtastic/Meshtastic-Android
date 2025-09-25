@@ -19,12 +19,8 @@ package com.geeksville.mesh.ui.common.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.BatteryUnknown
-import androidx.compose.material.icons.rounded.BatteryUnknown
 import androidx.compose.material.icons.rounded.Power
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,10 +39,10 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.icons.BatteryEmpty
 import com.geeksville.mesh.ui.common.icons.BatteryUnknown
 import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
-import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusOrange
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 private const val FORMAT = "%d%%"
 private const val SIZE_ICON = 20

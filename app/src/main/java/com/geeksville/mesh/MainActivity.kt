@@ -44,8 +44,8 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.MainScreen
-import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.ui.sharing.toSharedContact
 import dagger.hilt.android.AndroidEntryPoint

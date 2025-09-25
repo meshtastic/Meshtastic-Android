@@ -17,7 +17,7 @@
 
 @file:Suppress("UnusedPrivateProperty")
 
-package com.geeksville.mesh.ui.common.theme
+package org.meshtastic.core.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

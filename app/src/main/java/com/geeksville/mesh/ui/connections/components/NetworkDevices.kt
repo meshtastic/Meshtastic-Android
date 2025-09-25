@@ -56,7 +56,7 @@ import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.TitledCard
-import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.ui.connections.isIPAddress
 import kotlinx.coroutines.launch
 import org.meshtastic.core.strings.R

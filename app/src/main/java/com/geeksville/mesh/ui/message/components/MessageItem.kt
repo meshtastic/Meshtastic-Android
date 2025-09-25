@@ -53,8 +53,8 @@ import com.geeksville.mesh.ui.common.components.MDText
 import com.geeksville.mesh.ui.common.components.Rssi
 import com.geeksville.mesh.ui.common.components.Snr
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
-import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.MessageItemColors
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.MessageItemColors
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.entity.Reaction

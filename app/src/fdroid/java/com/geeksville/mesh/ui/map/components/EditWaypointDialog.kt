@@ -66,7 +66,7 @@ import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
-import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.waypoint
 import org.meshtastic.core.strings.R
 import java.text.SimpleDateFormat

@@ -98,7 +98,7 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
 import com.geeksville.mesh.ui.common.components.SecurityIcon
-import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog

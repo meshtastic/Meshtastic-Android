@@ -47,10 +47,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusOrange
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.strings.R
 
 private const val SNR_GOOD_THRESHOLD = -7f

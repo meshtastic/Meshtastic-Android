@@ -41,10 +41,10 @@ import com.geeksville.mesh.ui.TopLevelDestination
 import com.geeksville.mesh.ui.common.icons.Device
 import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
 import com.geeksville.mesh.ui.common.icons.NoDevice
-import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.connections.DeviceType
 
 @Composable

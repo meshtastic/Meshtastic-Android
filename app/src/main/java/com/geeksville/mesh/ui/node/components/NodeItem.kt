@@ -54,7 +54,7 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ui.common.components.BatteryInfo
 import com.geeksville.mesh.ui.common.components.SignalInfo
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
-import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString

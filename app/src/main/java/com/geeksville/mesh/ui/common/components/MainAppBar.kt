@@ -50,7 +50,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.isConfigRoute
 import com.geeksville.mesh.navigation.isNodeDetailRoute
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
-import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction

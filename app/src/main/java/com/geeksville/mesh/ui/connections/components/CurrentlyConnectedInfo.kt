@@ -44,8 +44,8 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.ui.common.components.MaterialBatteryInfo
-import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.model.Node

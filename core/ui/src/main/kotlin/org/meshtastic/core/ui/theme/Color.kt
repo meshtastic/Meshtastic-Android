@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common.theme
+package org.meshtastic.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

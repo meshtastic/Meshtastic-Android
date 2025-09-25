@@ -62,7 +62,7 @@ import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.TitledCard
-import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
+import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemDetail

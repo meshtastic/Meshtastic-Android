@@ -55,10 +55,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.geeksville.mesh.ui.common.components.CopyIconButton
-import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R

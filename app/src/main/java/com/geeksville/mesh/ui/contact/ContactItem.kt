@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.common.components.SecurityIcon
-import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")

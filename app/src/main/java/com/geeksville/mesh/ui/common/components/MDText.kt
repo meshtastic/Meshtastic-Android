@@ -27,7 +27,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
-import com.geeksville.mesh.ui.common.theme.HyperlinkBlue
+import org.meshtastic.core.ui.theme.HyperlinkBlue
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.model.DefaultMarkdownColors

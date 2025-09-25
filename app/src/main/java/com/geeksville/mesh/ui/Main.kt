@@ -99,8 +99,8 @@ import com.geeksville.mesh.ui.common.icons.Map
 import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
 import com.geeksville.mesh.ui.common.icons.Nodes
 import com.geeksville.mesh.ui.common.icons.Settings
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction

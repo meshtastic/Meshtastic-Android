@@ -57,14 +57,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.geeksville.mesh.ui.common.theme.IAQColors.IAQDangerouslyPolluted
-import com.geeksville.mesh.ui.common.theme.IAQColors.IAQExcellent
-import com.geeksville.mesh.ui.common.theme.IAQColors.IAQExtremelyPolluted
-import com.geeksville.mesh.ui.common.theme.IAQColors.IAQGood
-import com.geeksville.mesh.ui.common.theme.IAQColors.IAQHeavilyPolluted
-import com.geeksville.mesh.ui.common.theme.IAQColors.IAQLightlyPolluted
-import com.geeksville.mesh.ui.common.theme.IAQColors.IAQModeratelyPolluted
-import com.geeksville.mesh.ui.common.theme.IAQColors.IAQSeverelyPolluted
+import org.meshtastic.core.ui.theme.IAQColors.IAQDangerouslyPolluted
+import org.meshtastic.core.ui.theme.IAQColors.IAQExcellent
+import org.meshtastic.core.ui.theme.IAQColors.IAQExtremelyPolluted
+import org.meshtastic.core.ui.theme.IAQColors.IAQGood
+import org.meshtastic.core.ui.theme.IAQColors.IAQHeavilyPolluted
+import org.meshtastic.core.ui.theme.IAQColors.IAQLightlyPolluted
+import org.meshtastic.core.ui.theme.IAQColors.IAQModeratelyPolluted
+import org.meshtastic.core.ui.theme.IAQColors.IAQSeverelyPolluted
 import org.meshtastic.core.strings.R
 
 @Suppress("MagicNumber")

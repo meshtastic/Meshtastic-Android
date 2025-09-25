@@ -64,8 +64,8 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
-import com.geeksville.mesh.ui.common.theme.GraphColors.InfantryBlue
-import com.geeksville.mesh.ui.common.theme.GraphColors.Red
+import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
+import org.meshtastic.core.ui.theme.GraphColors.Red
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil

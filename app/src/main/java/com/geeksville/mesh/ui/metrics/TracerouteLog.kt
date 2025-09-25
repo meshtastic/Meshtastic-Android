@@ -59,7 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
-import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.theme.AppTheme
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
