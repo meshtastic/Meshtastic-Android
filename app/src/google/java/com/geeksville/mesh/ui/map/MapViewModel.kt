@@ -85,9 +85,9 @@ constructor(
     mapPrefs: MapPrefs,
     private val googleMapsPrefs: GoogleMapsPrefs,
     nodeRepository: NodeRepository,
-    private val packetRepository: PacketRepository,
+    packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
-    private val serviceRepository: ServiceRepository,
+    serviceRepository: ServiceRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
     uiPreferencesDataSource: UiPreferencesDataSource,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
