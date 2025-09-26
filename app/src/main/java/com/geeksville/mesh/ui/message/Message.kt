@@ -95,7 +95,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
 import com.geeksville.mesh.ui.common.components.SecurityIcon
 import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
@@ -120,7 +119,7 @@ private const val ROUNDED_CORNER_PERCENT = 100
  *
  * @param contactKey A unique key identifying the contact or channel.
  * @param message An optional message to pre-fill in the input field.
- * @param viewModel The [UIViewModel] instance for handling business logic and state.
+ * @param viewModel The [MessageViewModel] instance for handling business logic and state.
  * @param navigateToMessages Callback to navigate to a different message thread.
  * @param navigateToNodeDetails Callback to navigate to a node's detail screen.
  * @param onNavigateBack Callback to navigate back from this screen.
@@ -130,7 +129,7 @@ private const val ROUNDED_CORNER_PERCENT = 100
 internal fun MessageScreen(
     contactKey: String,
     message: String,
-    messageViewModel: MessageViewModel = hiltViewModel(),
+    viewModel: MessageViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     navigateToQuickChatOptions: () -> Unit,
@@ -139,12 +138,12 @@ internal fun MessageScreen(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
 
-    val nodes by messageViewModel.nodeList.collectAsStateWithLifecycle()
-    val ourNode by messageViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val connectionState by messageViewModel.connectionState.collectAsStateWithLifecycle()
-    val channels by messageViewModel.channels.collectAsStateWithLifecycle()
-    val quickChatActions by messageViewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
-    val messages by messageViewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
+    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val channels by viewModel.channels.collectAsStateWithLifecycle()
+    val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
+    val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
 
     // UI State managed within this Composable
     var replyingToPacketId by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -152,7 +151,7 @@ internal fun MessageScreen(
     var sharedContact by rememberSaveable { mutableStateOf<Node?>(null) }
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
-    val showQuickChat by messageViewModel.showQuickChat.collectAsStateWithLifecycle()
+    val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
 
     // Derived state, memoized for performance
     val channelInfo =
@@ -167,16 +166,16 @@ internal fun MessageScreen(
     val channelName = rawChannelName ?: unknownChannelText
 
     val title =
-        remember(nodeId, channelName, messageViewModel) {
+        remember(nodeId, channelName, viewModel) {
             when (nodeId) {
                 DataPacket.ID_BROADCAST -> channelName
-                else -> messageViewModel.getUser(nodeId).longName
+                else -> viewModel.getUser(nodeId).longName
             }
         }
 
     val isMismatchKey =
-        remember(channelIndex, nodeId, messageViewModel) {
-            channelIndex == DataPacket.PKC_CHANNEL_INDEX && messageViewModel.getNode(nodeId).mismatchKey
+        remember(channelIndex, nodeId, viewModel) {
+            channelIndex == DataPacket.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
         }
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
@@ -187,26 +186,26 @@ internal fun MessageScreen(
         )
 
     val onEvent: (MessageScreenEvent) -> Unit =
-        remember(messageViewModel, contactKey, messageInputState, ourNode) {
+        remember(viewModel, contactKey, messageInputState, ourNode) {
             { event ->
                 when (event) {
                     is MessageScreenEvent.SendMessage -> {
-                        messageViewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
+                        viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
                         if (event.replyingToPacketId != null) replyingToPacketId = null
                         messageInputState.clearText()
                     }
 
                     is MessageScreenEvent.SendReaction ->
-                        messageViewModel.sendReaction(event.emoji, event.messageId, contactKey)
+                        viewModel.sendReaction(event.emoji, event.messageId, contactKey)
 
                     is MessageScreenEvent.DeleteMessages -> {
-                        messageViewModel.deleteMessages(event.ids)
+                        viewModel.deleteMessages(event.ids)
                         selectedMessageIds.value = emptySet()
                         showDeleteDialog = false
                     }
 
                     is MessageScreenEvent.ClearUnreadCount ->
-                        messageViewModel.clearUnreadCount(contactKey, event.lastReadMessageId)
+                        viewModel.clearUnreadCount(contactKey, event.lastReadMessageId)
 
                     is MessageScreenEvent.HandleNodeMenuAction -> {
                         when (val action = event.action) {
@@ -223,11 +222,11 @@ internal fun MessageScreen(
 
                             is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
                             is NodeMenuAction.Share -> sharedContact = action.node
-                            else -> messageViewModel.handleNodeMenuAction(action)
+                            else -> viewModel.handleNodeMenuAction(action)
                         }
                     }
 
-                    is MessageScreenEvent.SetTitle -> messageViewModel.setTitle(event.title)
+                    is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
                     is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey)
                     is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
@@ -287,7 +286,7 @@ internal fun MessageScreen(
                     channels = channels,
                     channelIndexParam = channelIndex,
                     showQuickChat = showQuickChat,
-                    onToggleQuickChat = messageViewModel::toggleShowQuickChat,
+                    onToggleQuickChat = viewModel::toggleShowQuickChat,
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
                 )
             }
@@ -305,8 +304,8 @@ internal fun MessageScreen(
                     selectedIds = selectedMessageIds,
                     onUnreadChanged = { messageId -> onEvent(MessageScreenEvent.ClearUnreadCount(messageId)) },
                     onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
-                    onDeleteMessages = { messageViewModel.deleteMessages(it) },
-                    onSendMessage = { text, contactKey -> messageViewModel.sendMessage(text, contactKey) },
+                    onDeleteMessages = { viewModel.deleteMessages(it) },
+                    onSendMessage = { text, contactKey -> viewModel.sendMessage(text, contactKey) },
                     contactKey = contactKey,
                     onReply = { message -> replyingToPacketId = message?.packetId },
                     onNodeMenuAction = { action -> onEvent(MessageScreenEvent.HandleNodeMenuAction(action)) },
