@@ -15,8 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.api
+package org.meshtastic.core.data.datasource
 
+import dagger.Lazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.dao.DeviceHardwareDao
@@ -25,11 +26,7 @@ import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.model.NetworkDeviceHardware
 import javax.inject.Inject
 
-class DeviceHardwareLocalDataSource
-@Inject
-constructor(
-    private val deviceHardwareDaoLazy: dagger.Lazy<DeviceHardwareDao>,
-) {
+class DeviceHardwareLocalDataSource @Inject constructor(private val deviceHardwareDaoLazy: Lazy<DeviceHardwareDao>) {
     private val deviceHardwareDao by lazy { deviceHardwareDaoLazy.get() }
 
     suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) = withContext(Dispatchers.IO) {

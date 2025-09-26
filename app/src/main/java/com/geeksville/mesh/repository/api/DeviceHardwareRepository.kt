@@ -21,6 +21,8 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
+import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.model.DeviceHardware
