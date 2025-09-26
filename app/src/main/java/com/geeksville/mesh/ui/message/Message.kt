@@ -168,10 +168,10 @@ internal fun MessageScreen(
     val channelName = rawChannelName ?: unknownChannelText
 
     val title =
-        remember(nodeId, channelName, viewModel) {
+        remember(nodeId, channelName, messageViewModel) {
             when (nodeId) {
                 DataPacket.ID_BROADCAST -> channelName
-                else -> viewModel.getUser(nodeId).longName
+                else -> messageViewModel.getUser(nodeId).longName
             }
         }
 
