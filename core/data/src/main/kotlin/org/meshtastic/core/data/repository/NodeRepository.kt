@@ -15,12 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database
+package org.meshtastic.core.data.repository
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,10 +38,12 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.di.annotation.IoDispatcher
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.map
 
 @Singleton
 @Suppress("TooManyFunctions")
@@ -50,13 +52,13 @@ class NodeRepository
 constructor(
     processLifecycle: Lifecycle,
     private val nodeInfoDao: NodeInfoDao,
-    private val dispatchers: CoroutineDispatchers,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?> =
         nodeInfoDao
             .getMyNodeInfo()
-            .flowOn(dispatchers.io)
+            .flowOn(ioDispatcher)
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, null)
 
     // our node info
@@ -81,7 +83,7 @@ constructor(
                 _ourNodeInfo.value = ourNodeInfo
                 _myId.value = ourNodeInfo?.user?.id
             }
-            .flowOn(dispatchers.io)
+            .flowOn(ioDispatcher)
             .conflate()
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 
@@ -113,43 +115,43 @@ constructor(
             lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
         )
         .mapLatest { list -> list.map { it.toModel() } }
-        .flowOn(dispatchers.io)
+        .flowOn(ioDispatcher)
         .conflate()
 
-    suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) { nodeInfoDao.upsert(node) }
+    suspend fun upsert(node: NodeEntity) = withContext(ioDispatcher) { nodeInfoDao.upsert(node) }
 
     suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) =
-        withContext(dispatchers.io) { nodeInfoDao.installConfig(mi, nodes) }
+        withContext(ioDispatcher) { nodeInfoDao.installConfig(mi, nodes) }
 
-    suspend fun clearNodeDB() = withContext(dispatchers.io) { nodeInfoDao.clearNodeInfo() }
+    suspend fun clearNodeDB() = withContext(ioDispatcher) { nodeInfoDao.clearNodeInfo() }
 
-    suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
+    suspend fun deleteNode(num: Int) = withContext(ioDispatcher) {
         nodeInfoDao.deleteNode(num)
         nodeInfoDao.deleteMetadata(num)
     }
 
-    suspend fun deleteNodes(nodeNums: List<Int>) = withContext(dispatchers.io) {
+    suspend fun deleteNodes(nodeNums: List<Int>) = withContext(ioDispatcher) {
         nodeInfoDao.deleteNodes(nodeNums)
         nodeNums.forEach { nodeInfoDao.deleteMetadata(it) }
     }
 
     suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> =
-        withContext(dispatchers.io) { nodeInfoDao.getNodesOlderThan(lastHeard) }
+        withContext(ioDispatcher) { nodeInfoDao.getNodesOlderThan(lastHeard) }
 
-    suspend fun getUnknownNodes(): List<NodeEntity> = withContext(dispatchers.io) { nodeInfoDao.getUnknownNodes() }
+    suspend fun getUnknownNodes(): List<NodeEntity> = withContext(ioDispatcher) { nodeInfoDao.getUnknownNodes() }
 
-    suspend fun insertMetadata(metadata: MetadataEntity) = withContext(dispatchers.io) { nodeInfoDao.upsert(metadata) }
+    suspend fun insertMetadata(metadata: MetadataEntity) = withContext(ioDispatcher) { nodeInfoDao.upsert(metadata) }
 
     val onlineNodeCount: Flow<Int> =
         nodeInfoDao
             .nodeDBbyNum()
             .mapLatest { map -> map.values.count { it.node.lastHeard > onlineTimeThreshold() } }
-            .flowOn(dispatchers.io)
+            .flowOn(ioDispatcher)
             .conflate()
 
     val totalNodeCount: Flow<Int> =
-        nodeInfoDao.nodeDBbyNum().mapLatest { map -> map.values.count() }.flowOn(dispatchers.io).conflate()
+        nodeInfoDao.nodeDBbyNum().mapLatest { map -> map.values.count() }.flowOn(ioDispatcher).conflate()
 
     suspend fun setNodeNotes(num: Int, notes: String) =
-        withContext(dispatchers.io) { nodeInfoDao.setNodeNotes(num, notes) }
+        withContext(ioDispatcher) { nodeInfoDao.setNodeNotes(num, notes) }
 }

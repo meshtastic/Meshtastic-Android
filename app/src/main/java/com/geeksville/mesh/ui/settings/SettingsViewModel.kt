@@ -26,8 +26,6 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,6 +42,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.data.repository.MeshLogRepository
+import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource

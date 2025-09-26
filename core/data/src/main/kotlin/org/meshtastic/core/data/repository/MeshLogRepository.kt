@@ -15,13 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database
+package org.meshtastic.core.data.repository
 
-import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.TelemetryProtos.Telemetry
+import dagger.Lazy
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -30,22 +31,23 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.di.annotation.IoDispatcher
 import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
 class MeshLogRepository
 @Inject
 constructor(
-    private val meshLogDaoLazy: dagger.Lazy<MeshLogDao>,
-    private val dispatchers: CoroutineDispatchers,
+    private val meshLogDaoLazy: Lazy<MeshLogDao>,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     private val meshLogDao by lazy { meshLogDaoLazy.get() }
 
     fun getAllLogs(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> =
-        meshLogDao.getAllLogs(maxItems).flowOn(dispatchers.io).conflate()
+        meshLogDao.getAllLogs(maxItems).flowOn(ioDispatcher).conflate()
 
     fun getAllLogsInReceiveOrder(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> =
-        meshLogDao.getAllLogsInReceiveOrder(maxItems).flowOn(dispatchers.io).conflate()
+        meshLogDao.getAllLogsInReceiveOrder(maxItems).flowOn(ioDispatcher).conflate()
 
     private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
         Telemetry.parseFrom(log.fromRadio.packet.decoded.payload)
@@ -109,34 +111,34 @@ constructor(
         .getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
         .distinctUntilChanged()
         .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
-        .flowOn(dispatchers.io)
+        .flowOn(ioDispatcher)
 
     fun getLogsFrom(
         nodeNum: Int,
         portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE,
         maxItem: Int = MAX_MESH_PACKETS,
     ): Flow<List<MeshLog>> =
-        meshLogDao.getLogsFrom(nodeNum, portNum, maxItem).distinctUntilChanged().flowOn(dispatchers.io)
+        meshLogDao.getLogsFrom(nodeNum, portNum, maxItem).distinctUntilChanged().flowOn(ioDispatcher)
 
     /*
      * Retrieves MeshPackets matching 'nodeNum' and 'portNum'.
      * If 'portNum' is not specified, returns all MeshPackets. Otherwise, filters by 'portNum'.
      */
     fun getMeshPacketsFrom(nodeNum: Int, portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE): Flow<List<MeshPacket>> =
-        getLogsFrom(nodeNum, portNum).mapLatest { list -> list.map { it.fromRadio.packet } }.flowOn(dispatchers.io)
+        getLogsFrom(nodeNum, portNum).mapLatest { list -> list.map { it.fromRadio.packet } }.flowOn(ioDispatcher)
 
     fun getMyNodeInfo(): Flow<MeshProtos.MyNodeInfo?> = getLogsFrom(0, 0)
         .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
-        .flowOn(dispatchers.io)
+        .flowOn(ioDispatcher)
 
-    suspend fun insert(log: MeshLog) = withContext(dispatchers.io) { meshLogDao.insert(log) }
+    suspend fun insert(log: MeshLog) = withContext(ioDispatcher) { meshLogDao.insert(log) }
 
-    suspend fun deleteAll() = withContext(dispatchers.io) { meshLogDao.deleteAll() }
+    suspend fun deleteAll() = withContext(ioDispatcher) { meshLogDao.deleteAll() }
 
-    suspend fun deleteLog(uuid: String) = withContext(dispatchers.io) { meshLogDao.deleteLog(uuid) }
+    suspend fun deleteLog(uuid: String) = withContext(ioDispatcher) { meshLogDao.deleteLog(uuid) }
 
     suspend fun deleteLogs(nodeNum: Int, portNum: Int) =
-        withContext(dispatchers.io) { meshLogDao.deleteLogs(nodeNum, portNum) }
+        withContext(ioDispatcher) { meshLogDao.deleteLogs(nodeNum, portNum) }
 
     companion object {
         private const val MAX_ITEMS = 500

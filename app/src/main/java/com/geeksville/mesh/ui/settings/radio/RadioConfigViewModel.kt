@@ -45,7 +45,6 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.isAnalyticsAvailable
 import com.geeksville.mesh.config
-import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.model.toChannelSet
@@ -72,6 +71,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.getStringResFrom

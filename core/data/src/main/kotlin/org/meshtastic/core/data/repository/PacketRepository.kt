@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database
+package org.meshtastic.core.data.repository
 
 import com.geeksville.mesh.Portnums.PortNum
+import dagger.Lazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapLatest
@@ -31,7 +32,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import javax.inject.Inject
 
-class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Lazy<PacketDao>) {
+class PacketRepository @Inject constructor(private val packetDaoLazy: Lazy<PacketDao>) {
     private val packetDao by lazy { packetDaoLazy.get() }
 
     fun getWaypoints(): Flow<List<Packet>> = packetDao.getAllPackets(PortNum.WAYPOINT_APP_VALUE)

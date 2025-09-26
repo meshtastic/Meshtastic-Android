@@ -27,8 +27,6 @@ import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.ui.debug.FilterMode
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,6 +42,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.data.repository.MeshLogRepository
+import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
 import java.text.DateFormat
 import java.util.Date
