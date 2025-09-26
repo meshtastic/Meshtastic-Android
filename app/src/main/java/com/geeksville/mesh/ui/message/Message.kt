@@ -224,7 +224,7 @@ internal fun MessageScreen(
 
                             is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
                             is NodeMenuAction.Share -> sharedContact = action.node
-                            else -> viewModel.handleNodeMenuAction(action)
+                            else -> messageViewModel.handleNodeMenuAction(action)
                         }
                     }
 
