@@ -58,7 +58,6 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -81,7 +80,6 @@ import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
@@ -283,16 +281,6 @@ constructor(
                 .getAllActions()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val nodeFilterText = MutableStateFlow("")
-    private val nodeSortOption =
-        MutableStateFlow(NodeSortOption.entries.getOrElse(uiPrefs.nodeSortOption) { NodeSortOption.VIA_FAVORITE })
-    private val includeUnknown = MutableStateFlow(uiPrefs.includeUnknown)
-    private val onlyOnline = MutableStateFlow(uiPrefs.onlyOnline)
-    private val onlyDirect = MutableStateFlow(uiPrefs.onlyDirect)
-
-    private val _showIgnored = MutableStateFlow(uiPrefs.showIgnored)
-    val showIgnored: StateFlow<Boolean> = _showIgnored
-
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
@@ -305,38 +293,9 @@ constructor(
         }
     }
 
-    data class NodeFilterState(
-        val filterText: String,
-        val includeUnknown: Boolean,
-        val onlyOnline: Boolean,
-        val onlyDirect: Boolean,
-        val showIgnored: Boolean,
-    )
-
-    val nodeFilterStateFlow: Flow<NodeFilterState> =
-        combine(nodeFilterText, includeUnknown, onlyOnline, onlyDirect, showIgnored) {
-                filterText,
-                includeUnknown,
-                onlyOnline,
-                onlyDirect,
-                showIgnored,
-            ->
-            NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
-        }
-
     val nodeList: StateFlow<List<Node>> =
-        combine(nodeFilterStateFlow, nodeSortOption, ::Pair)
-            .flatMapLatest { (filter, sort) ->
-                nodeDB
-                    .getNodes(
-                        sort = sort,
-                        filter = filter.filterText,
-                        includeUnknown = filter.includeUnknown,
-                        onlyOnline = filter.onlyOnline,
-                        onlyDirect = filter.onlyDirect,
-                    )
-                    .map { list -> list.filter { it.isIgnored == filter.showIgnored } }
-            }
+        nodeDB
+            .getNodes()
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
