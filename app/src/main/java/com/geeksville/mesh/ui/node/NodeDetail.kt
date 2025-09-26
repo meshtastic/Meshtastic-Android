@@ -196,9 +196,9 @@ fun NodeDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
-    val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
+    val lastTracerouteTime by nodeDetailViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
     val ourNode by nodeDetailViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
+    val connectionState by nodeDetailViewModel.connectionState.collectAsStateWithLifecycle()
 
     val availableLogs by
         remember(state, environmentState) {
@@ -227,7 +227,7 @@ fun NodeDetailScreen(
             MainAppBar(
                 title = node?.user?.longName ?: "",
                 ourNode = ourNode,
-                isConnected = isConnected,
+                isConnected = connectionState.isConnected(),
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
@@ -253,7 +253,7 @@ fun NodeDetailScreen(
                         onNavigateUp = onNavigateUp,
                         onNavigate = onNavigate,
                         viewModel = viewModel,
-                        handleNodeMenuAction = { uiViewModel.handleNodeMenuAction(it) },
+                        handleNodeMenuAction = { nodeDetailViewModel.handleNodeMenuAction(it) },
                     )
                 },
                 modifier = modifier.padding(paddingValues),
