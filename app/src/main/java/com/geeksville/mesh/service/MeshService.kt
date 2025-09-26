@@ -214,7 +214,6 @@ class MeshService :
         val absoluteMinDeviceVersion = DeviceVersion(BuildConfig.ABS_MIN_FW_VERSION)
 
         private var configNonce = 1
-        private const val CONFIG_WAIT_MS = 250L
     }
 
     private var previousSummary: String? = null
