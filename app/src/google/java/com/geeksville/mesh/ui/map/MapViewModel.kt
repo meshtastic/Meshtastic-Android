@@ -52,6 +52,7 @@ import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.data.repository.CustomTileProviderRepository
+import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import timber.log.Timber
@@ -88,7 +89,10 @@ constructor(
     radioConfigRepository: RadioConfigRepository,
     serviceRepository: ServiceRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
+    uiPreferencesDataSource: UiPreferencesDataSource,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
+
+    val theme: StateFlow<Int> = uiPreferencesDataSource.theme
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()

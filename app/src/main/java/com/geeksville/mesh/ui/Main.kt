@@ -412,7 +412,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                 ) {
                     contactsGraph(navController, uiViewModel = uIViewModel)
                     nodesGraph(navController, uiViewModel = uIViewModel)
-                    mapGraph(navController, uiViewModel = uIViewModel)
+                    mapGraph(navController)
                     channelsGraph(navController, uiViewModel = uIViewModel)
                     connectionsGraph(navController)
                     settingsGraph(navController)

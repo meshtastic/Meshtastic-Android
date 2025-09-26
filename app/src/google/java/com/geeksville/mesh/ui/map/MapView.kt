@@ -71,7 +71,6 @@ import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
 import com.geeksville.mesh.ui.map.components.CustomMapLayersSheet
 import com.geeksville.mesh.ui.map.components.CustomTileProviderManagerSheet
@@ -178,7 +177,6 @@ private fun filterNodeTrack(nodeTrack: List<Position>?): List<Position> {
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MapView(
-    uiViewModel: UIViewModel,
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
     focusedNodeNum: Int? = null,
@@ -208,7 +206,7 @@ fun MapView(
 
     var mapFilterMenuExpanded by remember { mutableStateOf(false) }
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
-    val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
@@ -319,8 +317,8 @@ fun MapView(
                 nodeSnippet = "${node.user.longName}",
             )
         }
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
-    val theme by uiViewModel.theme.collectAsStateWithLifecycle()
+    val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
+    val theme by mapViewModel.theme.collectAsStateWithLifecycle()
     val dark =
         when (theme) {
             AppCompatDelegate.MODE_NIGHT_YES -> true
@@ -531,7 +529,7 @@ fun MapView(
                 WaypointMarkers(
                     displayableWaypoints = displayableWaypoints,
                     mapFilterState = mapFilterState,
-                    myNodeNum = uiViewModel.myNodeNum ?: 0,
+                    myNodeNum = mapViewModel.myNodeNum ?: 0,
                     isConnected = isConnected,
                     unicodeEmojiToBitmapProvider = ::unicodeEmojiToBitmap,
                     onEditWaypointRequest = { waypointToEdit -> editingWaypoint = waypointToEdit },
@@ -577,21 +575,21 @@ fun MapView(
                     onSendClicked = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
-                            finalWp = finalWp.copy { id = uiViewModel.generatePacketId() ?: 0 }
+                            finalWp = finalWp.copy { id = mapViewModel.generatePacketId() ?: 0 }
                         }
                         if (updatedWp.icon == 0) {
                             finalWp = finalWp.copy { icon = 0x1F4CD }
                         }
 
-                        uiViewModel.sendWaypoint(finalWp)
+                        mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },
                     onDeleteClicked = { wpToDelete ->
                         if (wpToDelete.lockedTo == 0 && isConnected && wpToDelete.id != 0) {
                             val deleteMarkerWp = wpToDelete.copy { expire = 1 }
-                            uiViewModel.sendWaypoint(deleteMarkerWp)
+                            mapViewModel.sendWaypoint(deleteMarkerWp)
                         }
-                        uiViewModel.deleteWaypoint(wpToDelete.id)
+                        mapViewModel.deleteWaypoint(wpToDelete.id)
                         editingWaypoint = null
                     },
                     onDismissRequest = { editingWaypoint = null },

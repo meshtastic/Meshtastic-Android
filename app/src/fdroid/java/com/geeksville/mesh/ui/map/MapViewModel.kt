@@ -17,10 +17,16 @@
 
 package com.geeksville.mesh.ui.map
 
+import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
 import javax.inject.Inject
 
@@ -30,8 +36,9 @@ class MapViewModel
 constructor(
     mapPrefs: MapPrefs,
     packetRepository: PacketRepository,
-    nodeRepository: NodeRepository,
+    private val nodeRepository: NodeRepository,
     serviceRepository: ServiceRepository,
+    radioConfigRepository: RadioConfigRepository,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
 
     var mapStyleId: Int
@@ -39,4 +46,16 @@ constructor(
         set(value) {
             mapPrefs.mapStyle = value
         }
+
+    val localConfig =
+        radioConfigRepository.localConfigFlow.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000L),
+            LocalConfig.getDefaultInstance(),
+        )
+
+    val config
+        get() = localConfig.value
+
+    fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 }

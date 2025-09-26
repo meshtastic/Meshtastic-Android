@@ -61,12 +61,7 @@ fun NodeMapScreen(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            MapView(
-                uiViewModel = uiViewModel,
-                focusedNodeNum = destNum,
-                nodeTrack = positions,
-                navigateToNodeDetails = {},
-            )
+            MapView(focusedNodeNum = destNum, nodeTrack = positions, navigateToNodeDetails = {})
         }
     }
 }
