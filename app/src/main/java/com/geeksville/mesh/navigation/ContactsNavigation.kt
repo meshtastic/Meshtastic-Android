@@ -65,7 +65,6 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel:
             MessageScreen(
                 contactKey = args.contactKey,
                 message = args.message,
-                viewModel = uiViewModel,
                 navigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
                 navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                 navigateToQuickChatOptions = { navController.navigate(ContactsRoutes.QuickChat) },

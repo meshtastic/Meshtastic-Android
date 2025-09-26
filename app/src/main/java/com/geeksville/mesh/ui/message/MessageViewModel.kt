@@ -67,6 +67,15 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
+    val nodeList: StateFlow<List<Node>> =
+        nodeRepository
+            .getNodes()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
+
     val channels =
         radioConfigRepository.channelSetFlow.stateIn(
             viewModelScope,

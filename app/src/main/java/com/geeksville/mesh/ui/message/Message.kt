@@ -130,7 +130,6 @@ private const val ROUNDED_CORNER_PERCENT = 100
 internal fun MessageScreen(
     contactKey: String,
     message: String,
-    viewModel: UIViewModel = hiltViewModel(),
     messageViewModel: MessageViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
@@ -140,7 +139,7 @@ internal fun MessageScreen(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
 
-    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    val nodes by messageViewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by messageViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val connectionState by messageViewModel.connectionState.collectAsStateWithLifecycle()
     val channels by messageViewModel.channels.collectAsStateWithLifecycle()
@@ -306,8 +305,8 @@ internal fun MessageScreen(
                     selectedIds = selectedMessageIds,
                     onUnreadChanged = { messageId -> onEvent(MessageScreenEvent.ClearUnreadCount(messageId)) },
                     onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
-                    onDeleteMessages = { viewModel.deleteMessages(it) },
-                    onSendMessage = { text, contactKey -> viewModel.sendMessage(text, contactKey) },
+                    onDeleteMessages = { messageViewModel.deleteMessages(it) },
+                    onSendMessage = { text, contactKey -> messageViewModel.sendMessage(text, contactKey) },
                     contactKey = contactKey,
                     onReply = { message -> replyingToPacketId = message?.packetId },
                     onNodeMenuAction = { action -> onEvent(MessageScreenEvent.HandleNodeMenuAction(action)) },

@@ -278,15 +278,6 @@ constructor(
                 .getAllActions()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val nodeList: StateFlow<List<Node>> =
-        nodeDB
-            .getNodes()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo
@@ -412,23 +403,6 @@ constructor(
         }
     }
 
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
-        // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-
-        // if the destination is a node, we need to ensure it's a
-        // favorite so it does not get removed from the on-device node database.
-        if (channel == null) { // no channel specified, so we assume it's a direct message
-            val node = nodeDB.getNode(dest)
-            if (!node.isFavorite) {
-                favoriteNode(nodeDB.getNode(dest))
-            }
-        }
-        val p = DataPacket(dest, channel ?: 0, str, replyId)
-        sendDataPacket(p)
-    }
-
     fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
@@ -498,9 +472,6 @@ constructor(
 
     fun deleteContacts(contacts: List<String>) =
         viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
-
-    fun deleteMessages(uuidList: List<Long>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
 
