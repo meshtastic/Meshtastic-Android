@@ -131,7 +131,6 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
@@ -188,16 +187,16 @@ private data class DrawableMetricInfo(
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    uiViewModel: UIViewModel = hiltViewModel(),
+    nodeDetailViewModel: NodeDetailViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
-    val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
-    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
+    val lastTracerouteTime by nodeDetailViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
+    val ourNode by nodeDetailViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val connectionState by nodeDetailViewModel.connectionState.collectAsStateWithLifecycle()
 
     val availableLogs by
         remember(state, environmentState) {
@@ -226,7 +225,7 @@ fun NodeDetailScreen(
             MainAppBar(
                 title = node?.user?.longName ?: "",
                 ourNode = ourNode,
-                isConnected = isConnected,
+                isConnected = connectionState.isConnected(),
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
@@ -243,19 +242,20 @@ fun NodeDetailScreen(
                 metricsState = state,
                 lastTracerouteTime = lastTracerouteTime,
                 availableLogs = availableLogs,
-                uiViewModel = uiViewModel,
                 onAction = { action ->
                     handleNodeAction(
                         action = action,
-                        uiViewModel = uiViewModel,
+                        ourNode = ourNode,
                         node = node,
                         navigateToMessages = navigateToMessages,
                         onNavigateUp = onNavigateUp,
                         onNavigate = onNavigate,
                         viewModel = viewModel,
+                        handleNodeMenuAction = { nodeDetailViewModel.handleNodeMenuAction(it) },
                     )
                 },
                 modifier = modifier.padding(paddingValues),
+                onSaveNotes = { num, notes -> nodeDetailViewModel.setNodeNotes(num, notes) },
             )
         } else {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
@@ -267,12 +267,13 @@ fun NodeDetailScreen(
 
 private fun handleNodeAction(
     action: NodeDetailAction,
-    uiViewModel: UIViewModel,
+    ourNode: Node?,
     node: Node,
     navigateToMessages: (String) -> Unit,
     onNavigateUp: () -> Unit,
     onNavigate: (Route) -> Unit,
     viewModel: MetricsViewModel,
+    handleNodeMenuAction: (NodeMenuAction) -> Unit,
 ) {
     when (action) {
         is NodeDetailAction.Navigate -> onNavigate(action.route)
@@ -280,17 +281,17 @@ private fun handleNodeAction(
         is NodeDetailAction.HandleNodeMenuAction -> {
             when (val menuAction = action.action) {
                 is NodeMenuAction.DirectMessage -> {
-                    val hasPKC = uiViewModel.ourNodeInfo.value?.hasPKC == true
+                    val hasPKC = ourNode?.hasPKC == true
                     val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                     navigateToMessages("$channel${node.user.id}")
                 }
 
                 is NodeMenuAction.Remove -> {
-                    uiViewModel.handleNodeMenuAction(menuAction)
+                    handleNodeMenuAction(menuAction)
                     onNavigateUp()
                 }
 
-                else -> uiViewModel.handleNodeMenuAction(menuAction)
+                else -> handleNodeMenuAction(menuAction)
             }
         }
 
@@ -337,11 +338,10 @@ private fun NodeDetailContent(
     metricsState: MetricsState,
     lastTracerouteTime: Long?,
     availableLogs: Set<LogsType>,
-    uiViewModel: UIViewModel,
     onAction: (NodeDetailAction) -> Unit,
     modifier: Modifier = Modifier,
+    onSaveNotes: (nodeNum: Int, notes: String) -> Unit,
 ) {
-    uiViewModel.setTitle(node.user.longName)
     var showShareDialog by remember { mutableStateOf(false) }
     if (showShareDialog) {
         SharedContactDialog(node) { showShareDialog = false }
@@ -361,7 +361,7 @@ private fun NodeDetailContent(
         },
         modifier = modifier,
         availableLogs = availableLogs,
-        onSaveNotes = { num, notes -> uiViewModel.setNodeNotes(num, notes) },
+        onSaveNotes = onSaveNotes,
     )
 }
 

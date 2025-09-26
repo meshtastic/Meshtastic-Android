@@ -87,7 +87,6 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, uiViewMode
             val parentEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
             NodeDetailScreen(
-                uiViewModel = uiViewModel,
                 navigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
                 onNavigate = { navController.navigate(it) },
                 onNavigateUp = { navController.navigateUp() },

@@ -52,9 +52,7 @@ import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
-import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -80,9 +78,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.getShortDate
-import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.strings.R
 import javax.inject.Inject
 
@@ -172,16 +168,12 @@ constructor(
     private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
-    private val uiPrefs: UiPrefs,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel(),
     Logging {
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme
-
-    private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
-    val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
     val firmwareVersion = myNodeInfo.mapNotNull { nodeInfo -> nodeInfo?.firmwareVersion }
 
@@ -428,45 +420,6 @@ constructor(
         _sharedContactRequested.value = sharedContact
     }
 
-    fun requestTraceroute(destNum: Int) {
-        info("Requesting traceroute for '$destNum'")
-        try {
-            val packetId = meshService?.packetId ?: return
-            meshService?.requestTraceroute(packetId, destNum)
-        } catch (ex: RemoteException) {
-            errormsg("Request traceroute error: ${ex.message}")
-        }
-    }
-
-    fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
-        info("Removing node '$nodeNum'")
-        try {
-            val packetId = meshService?.packetId ?: return@launch
-            meshService?.removeByNodenum(packetId, nodeNum)
-            nodeDB.deleteNode(nodeNum)
-        } catch (ex: RemoteException) {
-            errormsg("Remove node error: ${ex.message}")
-        }
-    }
-
-    fun requestUserInfo(destNum: Int) {
-        info("Requesting UserInfo for '$destNum'")
-        try {
-            meshService?.requestUserInfo(destNum)
-        } catch (ex: RemoteException) {
-            errormsg("Request NodeInfo error: ${ex.message}")
-        }
-    }
-
-    fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
-        info("Requesting position for '$destNum'")
-        try {
-            meshService?.requestPosition(destNum, position)
-        } catch (ex: RemoteException) {
-            errormsg("Request position error: ${ex.message}")
-        }
-    }
-
     fun setMuteUntil(contacts: List<String>, until: Long) =
         viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
 
@@ -512,48 +465,6 @@ constructor(
         set(value) {
             updateLoraConfig { it.copy { region = value } }
         }
-
-    fun favoriteNode(node: Node) = viewModelScope.launch {
-        try {
-            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
-        } catch (ex: RemoteException) {
-            errormsg("Favorite node error:", ex)
-        }
-    }
-
-    fun ignoreNode(node: Node) = viewModelScope.launch {
-        try {
-            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
-        } catch (ex: RemoteException) {
-            errormsg("Ignore node error:", ex)
-        }
-    }
-
-    fun handleNodeMenuAction(action: NodeMenuAction) {
-        when (action) {
-            is NodeMenuAction.Remove -> removeNode(action.node.num)
-            is NodeMenuAction.Ignore -> ignoreNode(action.node)
-            is NodeMenuAction.Favorite -> favoriteNode(action.node)
-            is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
-            is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
-            is NodeMenuAction.TraceRoute -> {
-                requestTraceroute(action.node.num)
-                _lastTraceRouteTime.value = System.currentTimeMillis()
-            }
-
-            else -> {}
-        }
-    }
-
-    fun setNodeNotes(nodeNum: Int, notes: String) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            nodeDB.setNodeNotes(nodeNum, notes)
-        } catch (ex: java.io.IOException) {
-            errormsg("Set node notes IO error: ${ex.message}")
-        } catch (ex: java.sql.SQLException) {
-            errormsg("Set node notes SQL error: ${ex.message}")
-        }
-    }
 
     // managed mode disables all access to configuration
     val isManaged: Boolean
