@@ -61,6 +61,7 @@ fun MainAppBar(
     modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController,
+    isConnected: Boolean,
     onAction: (NodeMenuAction) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -70,7 +71,6 @@ fun MainAppBar(
     }
 
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
 
     val title: String =
         when {
