@@ -244,7 +244,6 @@ fun NodeDetailScreen(
                 metricsState = state,
                 lastTracerouteTime = lastTracerouteTime,
                 availableLogs = availableLogs,
-                uiViewModel = uiViewModel,
                 onAction = { action ->
                     handleNodeAction(
                         action = action,
@@ -258,6 +257,7 @@ fun NodeDetailScreen(
                     )
                 },
                 modifier = modifier.padding(paddingValues),
+                onSaveNotes = { num, notes -> uiViewModel.setNodeNotes(num, notes) },
             )
         } else {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
@@ -340,11 +340,10 @@ private fun NodeDetailContent(
     metricsState: MetricsState,
     lastTracerouteTime: Long?,
     availableLogs: Set<LogsType>,
-    uiViewModel: UIViewModel,
     onAction: (NodeDetailAction) -> Unit,
     modifier: Modifier = Modifier,
+    onSaveNotes: (nodeNum: Int, notes: String) -> Unit,
 ) {
-    uiViewModel.setTitle(node.user.longName)
     var showShareDialog by remember { mutableStateOf(false) }
     if (showShareDialog) {
         SharedContactDialog(node) { showShareDialog = false }
@@ -364,7 +363,7 @@ private fun NodeDetailContent(
         },
         modifier = modifier,
         availableLogs = availableLogs,
-        onSaveNotes = { num, notes -> uiViewModel.setNodeNotes(num, notes) },
+        onSaveNotes = onSaveNotes,
     )
 }
 
