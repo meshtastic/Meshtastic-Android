@@ -153,7 +153,7 @@ internal fun MessageScreen(
     var sharedContact by rememberSaveable { mutableStateOf<Node?>(null) }
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
-    val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
+    val showQuickChat by messageViewModel.showQuickChat.collectAsStateWithLifecycle()
 
     // Derived state, memoized for performance
     val channelInfo =
@@ -176,8 +176,8 @@ internal fun MessageScreen(
         }
 
     val isMismatchKey =
-        remember(channelIndex, nodeId, viewModel) {
-            channelIndex == DataPacket.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
+        remember(channelIndex, nodeId, messageViewModel) {
+            channelIndex == DataPacket.PKC_CHANNEL_INDEX && messageViewModel.getNode(nodeId).mismatchKey
         }
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
@@ -288,7 +288,7 @@ internal fun MessageScreen(
                     channels = channels,
                     channelIndexParam = channelIndex,
                     showQuickChat = showQuickChat,
-                    onToggleQuickChat = viewModel::toggleShowQuickChat,
+                    onToggleQuickChat = messageViewModel::toggleShowQuickChat,
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
                 )
             }

@@ -32,8 +32,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.prefs.ui.UiPrefs
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +47,7 @@ constructor(
     quickChatActionRepository: QuickChatActionRepository,
     serviceRepository: ServiceRepository,
     packetRepository: PacketRepository,
+    private val uiPrefs: UiPrefs,
 ) : ViewModel() {
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
@@ -56,6 +59,9 @@ constructor(
             SharingStarted.WhileSubscribed(5_000),
             channelSet {},
         )
+
+    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
+    val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
     val quickChatActions =
         quickChatActionRepository
@@ -76,6 +82,15 @@ constructor(
     fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
         contactKeyForMessages.value = contactKey
         return messagesForContactKey
+    }
+
+    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
+
+    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
+        (!state.value).let { toggled ->
+            state.update { toggled }
+            onChanged(toggled)
+        }
     }
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)

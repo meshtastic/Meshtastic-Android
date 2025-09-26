@@ -71,7 +71,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
@@ -278,18 +277,6 @@ constructor(
             quickChatActionRepository
                 .getAllActions()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
-    val showQuickChat: StateFlow<Boolean> = _showQuickChat
-
-    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
-
-    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
-        (!state.value).let { toggled ->
-            state.update { toggled }
-            onChanged(toggled)
-        }
-    }
 
     val nodeList: StateFlow<List<Node>> =
         nodeDB
