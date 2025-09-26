@@ -46,8 +46,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.message.components.MessageItem
 import com.geeksville.mesh.ui.message.components.ReactionDialog
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -57,6 +55,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.R
 
@@ -106,6 +105,9 @@ fun DeliveryInfo(
 @Suppress("LongMethod")
 @Composable
 internal fun MessageList(
+    nodes: List<Node>,
+    ourNode: Node?,
+    isConnected: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     messages: List<Message>,
@@ -113,7 +115,8 @@ internal fun MessageList(
     onUnreadChanged: (Long) -> Unit,
     onSendReaction: (String, Int) -> Unit,
     onNodeMenuAction: (NodeMenuAction) -> Unit,
-    viewModel: UIViewModel,
+    onDeleteMessages: (List<Long>) -> Unit,
+    onSendMessage: (messageText: String, contactKey: String) -> Unit,
     contactKey: String,
     onReply: (Message?) -> Unit,
 ) {
@@ -131,9 +134,9 @@ internal fun MessageList(
             text = text,
             onConfirm = {
                 val deleteList: List<Long> = listOf(msg.uuid)
-                viewModel.deleteMessages(deleteList)
+                onDeleteMessages(deleteList)
                 showStatusDialog = null
-                viewModel.sendMessage(msg.text, contactKey)
+                onSendMessage(msg.text, contactKey)
             },
             onDismiss = { showStatusDialog = null },
             resendOption = msg.status?.equals(MessageStatus.ERROR) ?: false,
@@ -152,9 +155,6 @@ internal fun MessageList(
         value += uuid
     }
 
-    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
-    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
     val coroutineScope = rememberCoroutineScope()
     LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
         items(messages, key = { it.uuid }) { msg ->
@@ -165,7 +165,7 @@ internal fun MessageList(
                 MessageItem(
                     modifier = Modifier.animateItem(),
                     node = node,
-                    ourNode = ourNode!!,
+                    ourNode = ourNode,
                     message = msg,
                     selected = selected,
                     onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },

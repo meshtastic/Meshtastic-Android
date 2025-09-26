@@ -65,20 +65,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.asDeviceVersion
-import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DataPacket
@@ -281,27 +278,6 @@ constructor(
                 .getAllActions()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
-    val showQuickChat: StateFlow<Boolean> = _showQuickChat
-
-    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
-
-    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
-        (!state.value).let { toggled ->
-            state.update { toggled }
-            onChanged(toggled)
-        }
-    }
-
-    val nodeList: StateFlow<List<Node>> =
-        nodeDB
-            .getNodes()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo
@@ -418,22 +394,6 @@ constructor(
                 initialValue = emptyList(),
             )
 
-    fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
-        contactKeyForMessages.value = contactKey
-        return messagesForContactKey
-    }
-
-    private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val messagesForContactKey: StateFlow<List<Message>> =
-        contactKeyForMessages
-            .filterNotNull()
-            .flatMapLatest { contactKey -> packetRepository.getMessagesFrom(contactKey, ::getNode) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-
     fun generatePacketId(): Int? {
         return try {
             meshService?.packetId
@@ -441,23 +401,6 @@ constructor(
             errormsg("RemoteException: ${ex.message}")
             return null
         }
-    }
-
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
-        // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-
-        // if the destination is a node, we need to ensure it's a
-        // favorite so it does not get removed from the on-device node database.
-        if (channel == null) { // no channel specified, so we assume it's a direct message
-            val node = nodeDB.getNode(dest)
-            if (!node.isFavorite) {
-                favoriteNode(nodeDB.getNode(dest))
-            }
-        }
-        val p = DataPacket(dest, channel ?: 0, str, replyId)
-        sendDataPacket(p)
     }
 
     fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
@@ -476,9 +419,6 @@ constructor(
             errormsg("Send DataPacket error: ${ex.message}")
         }
     }
-
-    fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
-        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey)) }
 
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
@@ -533,16 +473,7 @@ constructor(
     fun deleteContacts(contacts: List<String>) =
         viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
 
-    fun deleteMessages(uuidList: List<Long>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
-
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
-
-    fun clearUnreadCount(contact: String, timestamp: Long) = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.clearUnreadCount(contact, timestamp)
-        val unreadCount = packetRepository.getUnreadCount(contact)
-        if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
-    }
 
     // Connection state to our radio device
     val connectionState

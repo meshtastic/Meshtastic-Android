@@ -95,7 +95,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
 import com.geeksville.mesh.ui.common.components.SecurityIcon
 import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
@@ -120,7 +119,7 @@ private const val ROUNDED_CORNER_PERCENT = 100
  *
  * @param contactKey A unique key identifying the contact or channel.
  * @param message An optional message to pre-fill in the input field.
- * @param viewModel The [UIViewModel] instance for handling business logic and state.
+ * @param viewModel The [MessageViewModel] instance for handling business logic and state.
  * @param navigateToMessages Callback to navigate to a different message thread.
  * @param navigateToNodeDetails Callback to navigate to a node's detail screen.
  * @param onNavigateBack Callback to navigate back from this screen.
@@ -130,7 +129,7 @@ private const val ROUNDED_CORNER_PERCENT = 100
 internal fun MessageScreen(
     contactKey: String,
     message: String,
-    viewModel: UIViewModel = hiltViewModel(),
+    viewModel: MessageViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     navigateToQuickChatOptions: () -> Unit,
@@ -139,9 +138,9 @@ internal fun MessageScreen(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
 
-    // State from ViewModel
+    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(initialValue = false)
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
@@ -296,13 +295,17 @@ internal fun MessageScreen(
         Column(Modifier.padding(paddingValues)) {
             Box(modifier = Modifier.weight(1f)) {
                 MessageList(
+                    nodes = nodes,
+                    ourNode = ourNode,
+                    isConnected = connectionState.isConnected(),
                     modifier = Modifier.fillMaxSize(),
                     listState = listState,
                     messages = messages,
                     selectedIds = selectedMessageIds,
                     onUnreadChanged = { messageId -> onEvent(MessageScreenEvent.ClearUnreadCount(messageId)) },
                     onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
-                    viewModel = viewModel,
+                    onDeleteMessages = { viewModel.deleteMessages(it) },
+                    onSendMessage = { text, contactKey -> viewModel.sendMessage(text, contactKey) },
                     contactKey = contactKey,
                     onReply = { message -> replyingToPacketId = message?.packetId },
                     onNodeMenuAction = { action -> onEvent(MessageScreenEvent.HandleNodeMenuAction(action)) },
@@ -314,7 +317,7 @@ internal fun MessageScreen(
             }
             AnimatedVisibility(visible = showQuickChat) {
                 QuickChatRow(
-                    enabled = isConnected,
+                    enabled = connectionState.isConnected(),
                     actions = quickChatActions,
                     onClick = { action ->
                         handleQuickChatAction(
@@ -337,7 +340,7 @@ internal fun MessageScreen(
                 ourNode = ourNode,
             )
             MessageInput(
-                isEnabled = isConnected,
+                isEnabled = connectionState.isConnected(),
                 textFieldState = messageInputState,
                 onSendMessage = {
                     val messageText = messageInputState.text.toString().trim()
