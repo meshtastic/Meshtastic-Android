@@ -40,13 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.Contact
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.contact.ContactItem
+import com.geeksville.mesh.ui.contact.ContactsViewModel
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun ShareScreen(viewModel: UIViewModel = hiltViewModel(), onConfirm: (String) -> Unit) {
+fun ShareScreen(viewModel: ContactsViewModel = hiltViewModel(), onConfirm: (String) -> Unit) {
     val contactList by viewModel.contactList.collectAsStateWithLifecycle()
 
     ShareScreen(contacts = contactList, onConfirm = onConfirm)

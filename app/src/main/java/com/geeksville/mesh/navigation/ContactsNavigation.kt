@@ -23,7 +23,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.contact.ContactsScreen
 import com.geeksville.mesh.ui.message.MessageScreen
 import com.geeksville.mesh.ui.message.QuickChatScreen
@@ -34,7 +33,7 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodesRoutes
 
 @Suppress("LongMethod")
-fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
+fun NavGraphBuilder.contactsGraph(navController: NavHostController) {
     navigation<ContactsRoutes.ContactsGraph>(startDestination = ContactsRoutes.Contacts) {
         composable<ContactsRoutes.Contacts>(
             deepLinks = listOf(navDeepLink<ContactsRoutes.Contacts>(basePath = "$DEEP_LINK_BASE_URI/contacts")),
@@ -80,7 +79,7 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel:
         ),
     ) { backStackEntry ->
         val message = backStackEntry.toRoute<ContactsRoutes.Share>().message
-        ShareScreen(uiViewModel) {
+        ShareScreen {
             navController.navigate(ContactsRoutes.Messages(it, message)) {
                 popUpTo<ContactsRoutes.Share> { inclusive = true }
             }
