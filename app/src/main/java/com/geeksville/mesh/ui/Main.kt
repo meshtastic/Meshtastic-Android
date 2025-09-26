@@ -120,7 +120,6 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
-import kotlin.reflect.KClass
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -131,13 +130,6 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     ;
 
     companion object {
-        fun NavDestination.isTopLevel(): Boolean = listOf<KClass<out Route>>(
-            ContactsRoutes.Contacts::class,
-            MapRoutes.Map::class,
-            ConnectionsRoutes.Connections::class,
-        )
-            .any { this.hasRoute(it) }
-
         fun fromNavDestination(destination: NavDestination?): TopLevelDestination? =
             entries.find { dest -> destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true }
     }

@@ -46,7 +46,6 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -75,7 +74,7 @@ fun MainAppBar(
 
     val title: String =
         when {
-            currentDestination == null || currentDestination.isTopLevel() -> stringResource(id = R.string.app_name)
+            currentDestination == null -> ""
 
             currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> stringResource(id = R.string.debug_panel)
 
@@ -83,17 +82,17 @@ fun MainAppBar(
 
             currentDestination.hasRoute<ContactsRoutes.Share>() -> stringResource(id = R.string.share_to)
 
-            else -> stringResource(id = R.string.app_name)
+            else -> ""
         }
 
     MainAppBar(
         modifier = modifier,
         title = title,
         subtitle = null,
-        canNavigateUp = navController.previousBackStackEntry != null && currentDestination?.isTopLevel() == false,
+        canNavigateUp = navController.previousBackStackEntry != null,
         ourNode = ourNode,
         isConnected = isConnected,
-        showNodeChip = ourNode != null && currentDestination?.isTopLevel() == true && isConnected,
+        showNodeChip = false,
         onNavigateUp = navController::navigateUp,
         actions = {
             currentDestination?.let {
