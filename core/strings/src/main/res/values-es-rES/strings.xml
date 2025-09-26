@@ -22,7 +22,7 @@
     <string name="node_filter_include_unknown">Incluir desconocidos</string>
     <string name="node_filter_only_online">Ocultar nodos desconectados</string>
     <string name="node_filter_only_direct">Mostrar sólo nodos directos</string>
-    <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
+    <string name="node_filter_ignored">Estás viendo nodos ignorados, Prensa para volver a la lista de nodos.</string>
     <string name="node_filter_show_details">Mostrar detalles</string>
     <string name="node_sort_button">Opciones de orden de Nodos</string>
     <string name="node_sort_alpha">A-Z</string>
