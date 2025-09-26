@@ -226,6 +226,6 @@ interface NodeInfoDao {
     fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {
         clearMyNodeInfo()
         setMyNodeInfo(mi)
-        nodes.forEach { upsert(it) }
+        putAll(nodes.map { getVerifiedNodeForUpsert(it) })
     }
 }
