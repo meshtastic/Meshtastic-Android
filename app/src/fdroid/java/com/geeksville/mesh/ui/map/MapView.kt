@@ -19,6 +19,7 @@ package com.geeksville.mesh.ui.map
 
 import android.Manifest // Added for Accompanist
 import android.content.Context
+import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -61,13 +62,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
@@ -204,21 +203,17 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
  * Main composable for displaying the map view, including nodes, waypoints, and user location. It handles user
  * interactions for map manipulation, filtering, and offline caching.
  *
- * @param model The [UIViewModel] providing data and state for the map.
+ * @param mapViewModel The [MapViewModel] providing data and state for the map.
  * @param navigateToNodeDetails Callback to navigate to the details screen of a selected node.
  */
 @OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
-fun MapView(
-    uiViewModel: UIViewModel = viewModel(),
-    mapViewModel: MapViewModel = hiltViewModel(),
-    navigateToNodeDetails: (Int) -> Unit,
-) {
+fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
+    val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
 
     var cacheEstimate by remember { mutableStateOf("") }
 
@@ -267,7 +262,7 @@ fun MapView(
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
             debug("Telling user we need location turned on for MyLocationNewOverlay")
-            uiViewModel.showSnackBar(R.string.location_disabled)
+            Toast.makeText(context, R.string.location_disabled, Toast.LENGTH_SHORT).show()
             return
         }
         debug("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
@@ -313,8 +308,8 @@ fun MapView(
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val ourNode = uiViewModel.ourNodeInfo.value
-        val displayUnits = uiViewModel.config.display.units
+        val ourNode = mapViewModel.ourNodeInfo.value
+        val displayUnits = mapViewModel.config.display.units
         val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (mapFilterStateValue.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
@@ -360,13 +355,13 @@ fun MapView(
         builder.setNeutralButton(R.string.cancel) { _, _ -> debug("User canceled marker delete dialog") }
         builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
             debug("User deleted waypoint ${waypoint.id} for me")
-            uiViewModel.deleteWaypoint(waypoint.id)
+            mapViewModel.deleteWaypoint(waypoint.id)
         }
-        if (waypoint.lockedTo in setOf(0, uiViewModel.myNodeNum ?: 0) && isConnected) {
+        if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
                 debug("User deleted waypoint ${waypoint.id} for everyone")
-                uiViewModel.sendWaypoint(waypoint.copy { expire = 1 })
-                uiViewModel.deleteWaypoint(waypoint.id)
+                mapViewModel.sendWaypoint(waypoint.copy { expire = 1 })
+                mapViewModel.deleteWaypoint(waypoint.id)
             }
         }
         val dialog = builder.show()
@@ -390,7 +385,7 @@ fun MapView(
         debug("marker long pressed id=$id")
         val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
-        if (waypoint.lockedTo in setOf(0, uiViewModel.myNodeNum ?: 0) && isConnected) {
+        if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             showEditWaypointDialog = waypoint
         } else {
             showDeleteMarkerDialog(waypoint)
@@ -400,7 +395,7 @@ fun MapView(
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
         context.getString(R.string.you)
     } else {
-        uiViewModel.getUser(id).longName
+        mapViewModel.getUser(id).longName
     }
 
     @Composable
@@ -451,7 +446,7 @@ fun MapView(
 
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
-        uiViewModel.showSnackBar(R.string.calculating)
+        Toast.makeText(context, R.string.calculating, Toast.LENGTH_SHORT).show()
         val cacheManager = CacheManager(map)
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
@@ -560,11 +555,16 @@ fun MapView(
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        uiViewModel.showSnackBar(R.string.map_download_complete)
+                        Toast.makeText(context, R.string.map_download_complete, Toast.LENGTH_SHORT).show()
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        uiViewModel.showSnackBar(context.getString(R.string.map_download_errors, errors))
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.map_download_errors, errors),
+                            Toast.LENGTH_SHORT,
+                        )
+                            .show()
                         writer.onDetach()
                     },
                 ),
@@ -609,7 +609,7 @@ fun MapView(
                         dialog.dismiss()
                     }
 
-                    2 -> purgeTileSource { uiViewModel.showSnackBar(it) }
+                    2 -> purgeTileSource { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
                     else -> dialog.dismiss()
                 }
             }
@@ -770,12 +770,12 @@ fun MapView(
             onSendClicked = { waypoint ->
                 debug("User clicked send waypoint ${waypoint.id}")
                 showEditWaypointDialog = null
-                uiViewModel.sendWaypoint(
+                mapViewModel.sendWaypoint(
                     waypoint.copy {
-                        if (id == 0) id = uiViewModel.generatePacketId() ?: return@EditWaypointDialog
+                        if (id == 0) id = mapViewModel.generatePacketId() ?: return@EditWaypointDialog
                         if (name == "") name = "Dropped Pin"
                         if (expire == 0) expire = Int.MAX_VALUE
-                        lockedTo = if (waypoint.lockedTo != 0) uiViewModel.myNodeNum ?: 0 else 0
+                        lockedTo = if (waypoint.lockedTo != 0) mapViewModel.myNodeNum ?: 0 else 0
                         if (waypoint.icon == 0) icon = 128205
                     },
                 )

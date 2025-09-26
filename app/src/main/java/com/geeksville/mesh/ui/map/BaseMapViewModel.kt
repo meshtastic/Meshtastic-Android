@@ -17,11 +17,14 @@
 
 package com.geeksville.mesh.ui.map
 
+import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.service.ServiceRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,17 +32,25 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
+import timber.log.Timber
 
 @Suppress("TooManyFunctions")
 abstract class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,
     nodeRepository: NodeRepository,
-    packetRepository: PacketRepository,
-    serviceRepository: ServiceRepository,
+    private val packetRepository: PacketRepository,
+    private val serviceRepository: ServiceRepository,
 ) : ViewModel() {
+
+    val myNodeInfo = nodeRepository.myNodeInfo
+
+    val myNodeNum
+        get() = myNodeInfo.value?.myNodeNum
 
     val nodes: StateFlow<List<Node>> =
         nodeRepository
@@ -92,6 +103,34 @@ abstract class BaseMapViewModel(
         val current = showPrecisionCircleOnMap.value
         mapPrefs.showPrecisionCircleOnMap = !current
         showPrecisionCircleOnMap.value = !current
+    }
+
+    fun generatePacketId(): Int? {
+        return try {
+            serviceRepository.meshService?.packetId
+        } catch (ex: RemoteException) {
+            Timber.e("RemoteException: ${ex.message}")
+            return null
+        }
+    }
+
+    fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
+
+    fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = contactKey[0].digitToIntOrNull()
+        val dest = if (channel != null) contactKey.substring(1) else contactKey
+
+        val p = DataPacket(dest, channel ?: 0, wpt)
+        if (wpt.id != 0) sendDataPacket(p)
+    }
+
+    private fun sendDataPacket(p: DataPacket) {
+        try {
+            serviceRepository.meshService?.send(p)
+        } catch (ex: RemoteException) {
+            Timber.e("Send DataPacket error: ${ex.message}")
+        }
     }
 
     data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)

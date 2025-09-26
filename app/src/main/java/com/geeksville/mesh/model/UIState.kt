@@ -442,9 +442,6 @@ constructor(
     val isManaged: Boolean
         get() = config.device.isManaged || config.security.isManaged
 
-    val myNodeNum
-        get() = myNodeInfo.value?.myNodeNum
-
     override fun onCleared() {
         super.onCleared()
         debug("ViewModel cleared")
