@@ -90,9 +90,9 @@
     <string name="rebroadcast_mode_core_portnums_only">Core Portnums Only</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoruje pakety z nestandardních portů, jako jsou: TAK, RangeTest, PaxCounter atd. Opakuje pouze pakety se standardními porty: NodeInfo, Text, Position, Telemetry a Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Zachází s dvojitým poklepáním na podporovaných akcelerometrech jako se stisknutím uživatelského tlačítka.</string>
-    <string name="config_device_tripleClickAsAdHocPing_summary">Send a position on the primary channel when the user button is triple clicked.</string>
+    <string name="config_device_tripleClickAsAdHocPing_summary">Při trojím stisku tlačítka odeslat polohu na primární kanál.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Nastavuje blikání LED diody na zařízení. U většiny zařízení lze ovládat jednu ze čtyř LED diod, avšak LED diody nabíječky a GPS nelze ovládat.</string>
-    <string name="config_device_tzdef_summary">Time zone for dates on the device screen and log.</string>
+    <string name="config_device_tzdef_summary">Časové pásmo pro zobrazování dat na displeji a v záznamech (logu).</string>
     <string name="config_device_transmitOverLora_summary">Umožní odesílat informace o sousedních uzlech (NeighborInfo) nejen do MQTT a PhoneAPI, ale také přes LoRa. Nedostupné na kanálech s výchozím klíčem a názvem.</string>
     <string name="config_display_screen_on_secs_summary">How long the screen remains on after the user button is pressed or messages are received.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Automatically toggles to the next page on the screen like a carousel, based the specified interval.</string>
@@ -116,12 +116,12 @@
     <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
-    <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
-    <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
-    <string name="config_security_admin_key">The public key authorized to send admin messages to this node.</string>
-    <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
-    <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
-    <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
+    <string name="config_security_public_key">Je vytvořeno z tvého veřejného klíče a rozesláno ostatním uzlům v síti, aby mohly vypočítat společný (sdílený) tajný klíč.</string>
+    <string name="config_security_private_key">Slouží k vytvoření sdíleného klíče se vzdáleným zařízením.</string>
+    <string name="config_security_admin_key">Veřejný klíč oprávněný k odesílání administrátorských zpráv tomuto uzlu.</string>
+    <string name="config_security_is_managed">Toto zařízení spravuje správce mesh sítě, uživatel nemůže měnit žádná jeho nastavení.</string>
+    <string name="config_security_serial_enabled">Sériová konzole pomocí Stream API.</string>
+    <string name="config_security_debug_log_api_enabled">Živý debug přes sériový port, prohlížení a export logů s anonymizovanou polohou přes Bluetooth.</string>
     <!-- Position Config -->
     <string name="position_packet">Position Packet</string>
     <string name="broadcast_interval">Broadcast Interval</string>
@@ -137,7 +137,7 @@
     <string name="gps_transmit_gpio">GPS Transmit GPIO</string>
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
-    <string name="debug">Debug</string>
+    <string name="debug">Ladění</string>
     <string name="channel_name">Název kanálu</string>
     <string name="qr_code">QR kód</string>
     <string name="application_icon">Ikona aplikace</string>
@@ -464,10 +464,10 @@
     <string name="button_gpio">Button GPIO</string>
     <string name="buzzer_gpio">Buzzer GPIO</string>
     <string name="rebroadcast_mode">Režim opětovného vysílání</string>
-    <string name="nodeinfo_broadcast_interval">Node Info Broadcast Interval</string>
-    <string name="double_tap_as_button_press">Double Tap as Button</string>
-    <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
-    <string name="time_zone">Time Zone</string>
+    <string name="nodeinfo_broadcast_interval">Interval vysílání NodeInfo (v sekundách)</string>
+    <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
+    <string name="triple_click_adhoc_ping">Okamžitý ping (trojitý stisk)</string>
+    <string name="time_zone">Časové pásmo</string>
     <string name="led_heartbeat">LED Heartbeat</string>
     <string name="display_config">Obrazovka</string>
     <string name="screen_on_for">Screen on for</string>
@@ -501,8 +501,8 @@
     <string name="ringtone">Vyzváněcí tón</string>
     <string name="use_i2s_as_buzzer">Použít I2S jako bzučák</string>
     <string name="lora_config">LoRa</string>
-    <string name="options">Options</string>
-    <string name="advanced">Advanced</string>
+    <string name="options">Nastavení</string>
+    <string name="advanced">Rozšířené</string>
     <string name="use_modem_preset">Use Preset</string>
     <string name="modem_preset">Presets</string>
     <string name="bandwidth">Šířka pásma</string>
@@ -591,8 +591,8 @@
     <string name="allow_undefined_pin_access">Povolit přiřazení nedefinovaného pinu</string>
     <string name="available_pins">Dostupné piny</string>
     <string name="security_config">Zabezpečení</string>
-    <string name="direct_message_key">Direct Message Key</string>
-    <string name="admin_keys">Admin Keys</string>
+    <string name="direct_message_key">Klíč pro přímé zprávy</string>
+    <string name="admin_keys">Administrátorský klíč</string>
     <string name="public_key">Veřejný klíč</string>
     <string name="private_key">Soukromý klíč</string>
     <string name="admin_key">Administrátorský klíč</string>
@@ -739,7 +739,7 @@
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Unknown</string>
     <string name="message_device_managed">This radio is managed and can only be changed by a remote admin.</string>
-    <string name="advanced_title">Advanced</string>
+    <string name="advanced_title">Rozšířené</string>
     <string name="clean_node_database_title">Vyčistit databázi uzlů</string>
     <string name="clean_nodes_older_than">Vyčistit uzly neaktivní déle než %1$d dnů</string>
     <string name="clean_unknown_nodes">Vyčistit pouze neznámé uzly</string>
@@ -823,8 +823,8 @@
     <string name="notification_permissions_description">Meshtastic vás pomocí oznámení upozorní na nové zprávy a důležité události. Nastavení oznámení si můžete kdykoli upravit.</string>
     <string name="next">Další</string>
     <string name="grant_permissions">Povolit oprávnění</string>
-    <string name="nodes_queued_for_deletion">%d nodes queued for deletion:</string>
-    <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
+    <string name="nodes_queued_for_deletion">%d uzlů zařazeno k odstranění:</string>
+    <string name="clean_node_database_description">Varování: Tímto odstraníte uzly z databází v aplikaci i v zařízení.\nVybrané položky se sčítají (kombinují).</string>
     <string name="connecting_to_device">Connecting to device</string>
     <string name="map_type_normal">Normální</string>
     <string name="map_type_satellite">Satelitní</string>
