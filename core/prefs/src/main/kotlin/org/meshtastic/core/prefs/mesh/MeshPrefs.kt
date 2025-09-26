@@ -34,7 +34,7 @@ interface MeshPrefs {
 
 @Singleton
 class MeshPrefsImpl @Inject constructor(@MeshSharedPreferences private val prefs: SharedPreferences) : MeshPrefs {
-    override var deviceAddress: String? by NullableStringPrefDelegate(prefs, "device_address", null)
+    override var deviceAddress: String? by NullableStringPrefDelegate(prefs, "device_address", NO_DEVICE_SELECTED)
 
     override fun shouldProvideNodeLocation(nodeNum: Int?): Boolean =
         prefs.getBoolean(provideLocationKey(nodeNum), false)
@@ -45,3 +45,5 @@ class MeshPrefsImpl @Inject constructor(@MeshSharedPreferences private val prefs
 
     private fun provideLocationKey(nodeNum: Int?) = "provide-location-$nodeNum"
 }
+
+private const val NO_DEVICE_SELECTED = "n"
