@@ -60,6 +60,9 @@ constructor(
     private val uiPrefs: UiPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel() {
+    private val _title = MutableStateFlow("")
+    val title: StateFlow<String> = _title.asStateFlow()
+
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
     val connectionState = serviceRepository.connectionState
@@ -93,6 +96,10 @@ constructor(
     // TODO this should be moved to a repository class
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
+
+    fun setTitle(title: String) {
+        viewModelScope.launch { _title.value = title }
+    }
 
     fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
         contactKeyForMessages.value = contactKey

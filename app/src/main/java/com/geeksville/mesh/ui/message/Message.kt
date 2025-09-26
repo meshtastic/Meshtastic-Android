@@ -140,7 +140,7 @@ internal fun MessageScreen(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
 
-    // State from ViewModel
+    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by messageViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val connectionState by messageViewModel.connectionState.collectAsStateWithLifecycle()
     val channels by messageViewModel.channels.collectAsStateWithLifecycle()
@@ -228,7 +228,7 @@ internal fun MessageScreen(
                         }
                     }
 
-                    is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
+                    is MessageScreenEvent.SetTitle -> messageViewModel.setTitle(event.title)
                     is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey)
                     is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
@@ -297,13 +297,17 @@ internal fun MessageScreen(
         Column(Modifier.padding(paddingValues)) {
             Box(modifier = Modifier.weight(1f)) {
                 MessageList(
+                    nodes = nodes,
+                    ourNode = ourNode,
+                    isConnected = connectionState.isConnected(),
                     modifier = Modifier.fillMaxSize(),
                     listState = listState,
                     messages = messages,
                     selectedIds = selectedMessageIds,
                     onUnreadChanged = { messageId -> onEvent(MessageScreenEvent.ClearUnreadCount(messageId)) },
                     onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
-                    viewModel = viewModel,
+                    onDeleteMessages = { viewModel.deleteMessages(it) },
+                    onSendMessage = { text, contactKey -> viewModel.sendMessage(text, contactKey) },
                     contactKey = contactKey,
                     onReply = { message -> replyingToPacketId = message?.packetId },
                     onNodeMenuAction = { action -> onEvent(MessageScreenEvent.HandleNodeMenuAction(action)) },
