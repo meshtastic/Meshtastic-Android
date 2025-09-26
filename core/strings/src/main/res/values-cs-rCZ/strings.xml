@@ -627,8 +627,8 @@
     <string name="power_metrics_on_screen_enabled">Měření spotřeby na obrazovce povoleno</string>
     <string name="user_config">Nastavení uživatele</string>
     <string name="node_id">Identifikátor uzlu</string>
-    <string name="long_name">Long Name</string>
-    <string name="short_name">Short Name</string>
+    <string name="long_name">Dlouhé jméno</string>
+    <string name="short_name">Krátké jméno</string>
     <string name="hardware_model">Hardwarový model</string>
     <string name="licensed_amateur_radio">Licencované amatérské rádio (HAM)</string>
     <string name="licensed_amateur_radio_text">Povolení této možnosti zruší šifrování a není kompatibilní se základním nastavením Meshtastic sítě.</string>
@@ -670,8 +670,8 @@
     <string name="dynamic">Dynamický</string>
     <string name="scan_qr_code">Naskenovat QR kód</string>
     <string name="share_contact">Sdílet kontakt</string>
-    <string name="notes">Notes</string>
-    <string name="add_a_note">Add a private note…</string>
+    <string name="notes">Poznámka</string>
+    <string name="add_a_note">Přidat soukromou poznámku…</string>
     <string name="import_shared_contact">Importovat sdílený kontakt?</string>
     <string name="unmessageable">Nepřijímá zprávy</string>
     <string name="unmonitored_or_infrastructure">Nesledované nebo infrastruktura</string>
