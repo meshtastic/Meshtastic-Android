@@ -19,7 +19,6 @@ package com.geeksville.mesh.repository.network
 
 import com.geeksville.mesh.MeshProtos.MqttClientProxyMessage
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.model.subscribeList
 import com.geeksville.mesh.mqttClientProxyMessage
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.util.ignoreException
@@ -37,6 +36,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.model.util.subscribeList
 import java.net.URI
 import java.security.SecureRandom
 import javax.inject.Inject

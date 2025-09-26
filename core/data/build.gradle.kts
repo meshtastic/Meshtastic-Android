@@ -26,6 +26,7 @@ android { namespace = "org.meshtastic.core.data" }
 
 dependencies {
     implementation(projects.core.database)
+    implementation(projects.core.datastore)
     implementation(projects.core.di)
     implementation(projects.core.model)
     implementation(projects.core.prefs)

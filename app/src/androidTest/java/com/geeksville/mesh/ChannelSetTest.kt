@@ -18,21 +18,20 @@
 package com.geeksville.mesh
 
 import android.net.Uri
-import com.geeksville.mesh.model.getChannelUrl
-import com.geeksville.mesh.model.primaryChannel
-import com.geeksville.mesh.model.toChannelSet
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.meshtastic.core.model.util.getChannelUrl
+import org.meshtastic.core.model.util.primaryChannel
+import org.meshtastic.core.model.util.toChannelSet
 
 @HiltAndroidTest
 class ChannelSetTest {
 
-    @get:Rule
-    var hiltRule = HiltAndroidRule(this)
+    @get:Rule var hiltRule = HiltAndroidRule(this)
 
     @Before
     fun init() {

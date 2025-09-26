@@ -96,9 +96,6 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.getChannelUrl
-import com.geeksville.mesh.model.qrCode
-import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
@@ -112,6 +109,9 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.util.getChannelUrl
+import org.meshtastic.core.model.util.qrCode
+import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AdaptiveTwoPane

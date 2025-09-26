@@ -47,7 +47,6 @@ import com.geeksville.mesh.android.isAnalyticsAvailable
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.getChannelList
-import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
@@ -76,6 +75,7 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.getStringResFrom
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs

@@ -26,13 +26,13 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.deviceProfile
-import com.geeksville.mesh.model.getChannelUrl
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
+import org.meshtastic.core.model.util.getChannelUrl
 import javax.inject.Inject
 
 /**
