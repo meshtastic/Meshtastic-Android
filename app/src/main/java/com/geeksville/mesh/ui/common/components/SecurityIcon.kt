@@ -63,8 +63,8 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
-import com.geeksville.mesh.model.getChannel
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed

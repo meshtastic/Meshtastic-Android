@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.api
+package org.meshtastic.core.data.datasource
 
 import android.app.Application
 import kotlinx.serialization.ExperimentalSerializationApi

@@ -20,7 +20,6 @@ package com.geeksville.mesh.ui.node
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -30,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Position
 import timber.log.Timber

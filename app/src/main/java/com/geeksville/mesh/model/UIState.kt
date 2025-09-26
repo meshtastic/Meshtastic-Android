@@ -42,13 +42,6 @@ import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.PacketRepository
-import com.geeksville.mesh.database.QuickChatActionRepository
-import com.geeksville.mesh.repository.api.DeviceHardwareRepository
-import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
@@ -70,6 +63,13 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.data.repository.DeviceHardwareRepository
+import org.meshtastic.core.data.repository.FirmwareReleaseRepository
+import org.meshtastic.core.data.repository.MeshLogRepository
+import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
+import org.meshtastic.core.data.repository.QuickChatActionRepository
+import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.QuickChatAction
@@ -78,7 +78,9 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.getShortDate
+import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.strings.R
 import javax.inject.Inject
 

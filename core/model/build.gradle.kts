@@ -34,4 +34,6 @@ dependencies {
     implementation(projects.core.proto)
     implementation(projects.core.strings)
     implementation(libs.timber)
+    implementation(libs.zxing.android.embedded) { isTransitive = false }
+    implementation(libs.zxing.core)
 }

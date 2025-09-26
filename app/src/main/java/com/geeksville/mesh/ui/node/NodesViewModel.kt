@@ -21,8 +21,6 @@ import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.AdminProtos
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,6 +36,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.model.Position

@@ -15,23 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.core.model.util
 
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
-import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import org.meshtastic.core.model.Channel
+import timber.log.Timber
 import java.net.MalformedURLException
 import kotlin.jvm.Throws
 
 private const val MESHTASTIC_HOST = "meshtastic.org"
 private const val CHANNEL_PATH = "/e/"
-internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$CHANNEL_PATH"
+const val URL_PREFIX = "https://$MESHTASTIC_HOST$CHANNEL_PATH"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
 /**
@@ -86,6 +86,6 @@ fun ChannelSet.qrCode(shouldAdd: Boolean): Bitmap? = try {
     val barcodeEncoder = BarcodeEncoder()
     barcodeEncoder.createBitmap(bitMatrix)
 } catch (ex: Throwable) {
-    errormsg("URL was too complex to render as barcode")
+    Timber.e("URL was too complex to render as barcode")
     null
 }

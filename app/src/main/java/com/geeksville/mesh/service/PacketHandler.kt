@@ -24,8 +24,6 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.BuildUtils.info
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.Lazy
@@ -35,6 +33,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
+import org.meshtastic.core.data.repository.MeshLogRepository
+import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus

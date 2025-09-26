@@ -21,10 +21,6 @@ import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.PacketRepository
-import com.geeksville.mesh.database.QuickChatActionRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
@@ -40,6 +36,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
+import org.meshtastic.core.data.repository.QuickChatActionRepository
+import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket

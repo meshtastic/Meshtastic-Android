@@ -95,7 +95,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.model.getChannel
 import com.geeksville.mesh.ui.common.components.SecurityIcon
 import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -106,6 +105,7 @@ import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
 import java.nio.charset.StandardCharsets
