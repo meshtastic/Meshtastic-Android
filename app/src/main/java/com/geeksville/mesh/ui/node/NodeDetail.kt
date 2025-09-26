@@ -189,6 +189,7 @@ fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
+    nodeDetailViewModel: NodeDetailViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
@@ -196,7 +197,7 @@ fun NodeDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
-    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val ourNode by nodeDetailViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
 
     val availableLogs by
@@ -247,12 +248,13 @@ fun NodeDetailScreen(
                 onAction = { action ->
                     handleNodeAction(
                         action = action,
-                        uiViewModel = uiViewModel,
+                        ourNode = ourNode,
                         node = node,
                         navigateToMessages = navigateToMessages,
                         onNavigateUp = onNavigateUp,
                         onNavigate = onNavigate,
                         viewModel = viewModel,
+                        handleNodeMenuAction = { uiViewModel.handleNodeMenuAction(it) },
                     )
                 },
                 modifier = modifier.padding(paddingValues),
@@ -267,12 +269,13 @@ fun NodeDetailScreen(
 
 private fun handleNodeAction(
     action: NodeDetailAction,
-    uiViewModel: UIViewModel,
+    ourNode: Node?,
     node: Node,
     navigateToMessages: (String) -> Unit,
     onNavigateUp: () -> Unit,
     onNavigate: (Route) -> Unit,
     viewModel: MetricsViewModel,
+    handleNodeMenuAction: (NodeMenuAction) -> Unit,
 ) {
     when (action) {
         is NodeDetailAction.Navigate -> onNavigate(action.route)
@@ -280,17 +283,17 @@ private fun handleNodeAction(
         is NodeDetailAction.HandleNodeMenuAction -> {
             when (val menuAction = action.action) {
                 is NodeMenuAction.DirectMessage -> {
-                    val hasPKC = uiViewModel.ourNodeInfo.value?.hasPKC == true
+                    val hasPKC = ourNode?.hasPKC == true
                     val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                     navigateToMessages("$channel${node.user.id}")
                 }
 
                 is NodeMenuAction.Remove -> {
-                    uiViewModel.handleNodeMenuAction(menuAction)
+                    handleNodeMenuAction(menuAction)
                     onNavigateUp()
                 }
 
-                else -> uiViewModel.handleNodeMenuAction(menuAction)
+                else -> handleNodeMenuAction(menuAction)
             }
         }
 
