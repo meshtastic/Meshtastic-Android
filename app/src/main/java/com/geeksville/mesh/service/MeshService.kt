@@ -77,9 +77,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -323,9 +320,6 @@ class MeshService :
 
     override fun onCreate() {
         super.onCreate()
-
-        _lastAddress.value = meshPrefs.deviceAddress ?: NO_DEVICE_SELECTED
-
         info("Creating mesh service")
         serviceNotifications.initChannels()
         // Switch to the IO thread
@@ -1406,6 +1400,7 @@ class MeshService :
                     } else {
                         ConnectionState.DISCONNECTED
                     }
+
                 ConnectionState.DISCONNECTED -> ConnectionState.DISCONNECTED
             }
         onConnectionChanged(effectiveState)
@@ -1415,31 +1410,41 @@ class MeshService :
         PayloadVariantCase.entries.associateWith { variant: PayloadVariantCase ->
             when (variant) {
                 PayloadVariantCase.PACKET -> { proto: MeshProtos.FromRadio -> handleReceivedMeshPacket(proto.packet) }
+
                 PayloadVariantCase.CONFIG_COMPLETE_ID -> { proto: MeshProtos.FromRadio ->
                     handleConfigComplete(proto.configCompleteId)
                 }
+
                 PayloadVariantCase.MY_INFO -> { proto: MeshProtos.FromRadio -> handleMyInfo(proto.myInfo) }
                 PayloadVariantCase.NODE_INFO -> { proto: MeshProtos.FromRadio -> handleNodeInfo(proto.nodeInfo) }
+
                 PayloadVariantCase.CHANNEL -> { proto: MeshProtos.FromRadio -> handleChannel(proto.channel) }
                 PayloadVariantCase.CONFIG -> { proto: MeshProtos.FromRadio -> handleDeviceConfig(proto.config) }
+
                 PayloadVariantCase.MODULECONFIG -> { proto: MeshProtos.FromRadio ->
                     handleModuleConfig(proto.moduleConfig)
                 }
+
                 PayloadVariantCase.QUEUESTATUS -> { proto: MeshProtos.FromRadio ->
                     packetHandler.handleQueueStatus((proto.queueStatus))
                 }
+
                 PayloadVariantCase.METADATA -> { proto: MeshProtos.FromRadio -> handleMetadata(proto.metadata) }
                 PayloadVariantCase.MQTTCLIENTPROXYMESSAGE -> { proto: MeshProtos.FromRadio ->
                     handleMqttProxyMessage(proto.mqttClientProxyMessage)
                 }
+
                 PayloadVariantCase.DEVICEUICONFIG -> { proto: MeshProtos.FromRadio ->
                     handleDeviceUiConfig(proto.deviceuiConfig)
                 }
+
                 PayloadVariantCase.FILEINFO -> { proto: MeshProtos.FromRadio -> handleFileInfo(proto.fileInfo) }
                 PayloadVariantCase.CLIENTNOTIFICATION -> { proto: MeshProtos.FromRadio ->
                     handleClientNotification(proto.clientNotification)
                 }
+
                 PayloadVariantCase.LOG_RECORD -> { proto: MeshProtos.FromRadio -> handleLogReord(proto.logRecord) }
+
                 PayloadVariantCase.REBOOTED -> { proto: MeshProtos.FromRadio -> handleRebooted(proto.rebooted) }
                 PayloadVariantCase.XMODEMPACKET -> { proto: MeshProtos.FromRadio ->
                     handleXmodemPacket(proto.xmodemPacket)
@@ -1818,25 +1823,15 @@ class MeshService :
         } else {
             myNodeInfo = newMyNodeInfo
         }
-        serviceScope.handledLaunch {
-            delay(CONFIG_WAIT_MS)
-            radioInterfaceService.keepAlive()
-            delay(CONFIG_WAIT_MS)
-        }
         // This was our config request
         if (newNodes.isEmpty()) {
             errormsg("Did not receive a valid node info")
         } else {
             newNodes.forEach(::installNodeInfo)
-            newNodes.clear() // Just to save RAM ;-)
-
-            serviceScope.handledLaunch {
-                nodeRepository.installMyNodeInfo(myNodeInfo!!)
-                nodeRepository.installNodeDb(nodeDBbyNodeNum.values.toList())
-            }
+            newNodes.clear()
+            serviceScope.handledLaunch { nodeRepository.installConfig(myNodeInfo!!, nodeDBbyNodeNum.values.toList()) }
 
             haveNodeDB = true // we now have nodes from real hardware
-
             sendAnalytics()
             onHasSettings()
             onNodeDBChanged()
@@ -2004,10 +1999,6 @@ class MeshService :
         rememberReaction(packet.copy { from = myNodeNum })
     }
 
-    private val _lastAddress: MutableStateFlow<String?> = MutableStateFlow(null)
-    val lastAddress: StateFlow<String?>
-        get() = _lastAddress.asStateFlow()
-
     fun clearDatabases() = serviceScope.handledLaunch {
         debug("Clearing nodeDB")
         nodeRepository.clearNodeDB()
@@ -2015,28 +2006,14 @@ class MeshService :
 
     private fun updateLastAddress(deviceAddr: String?) {
         debug("setDeviceAddress: Passing through device change to radio service: ${deviceAddr.anonymize}")
-        when (deviceAddr) {
-            null,
-            "",
-            -> {
-                debug("SetDeviceAddress: No previous device address, setting new one")
-                _lastAddress.value = deviceAddr
-                meshPrefs.deviceAddress = deviceAddr
-            }
-
-            lastAddress.value,
-            NO_DEVICE_SELECTED,
-            -> {
-                debug("SetDeviceAddress: Device address is the none or same, ignoring")
-            }
-
-            else -> {
-                debug("SetDeviceAddress: Device address changed from $lastAddress to $deviceAddr")
-                _lastAddress.value = deviceAddr
-                meshPrefs.deviceAddress = deviceAddr
-                clearDatabases()
-                clearNotifications()
-            }
+        if (deviceAddr == meshPrefs.deviceAddress || deviceAddr == NO_DEVICE_SELECTED) {
+            debug("SetDeviceAddress: Device address is the none or same, ignoring")
+            return
+        } else {
+            debug("SetDeviceAddress: Device address changed from ${meshPrefs.deviceAddress} to $deviceAddr")
+            meshPrefs.deviceAddress = deviceAddr
+            clearDatabases()
+            clearNotifications()
         }
     }
 
@@ -2050,13 +2027,7 @@ class MeshService :
             override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
                 debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
                 updateLastAddress(deviceAddr)
-                val res = radioInterfaceService.setDeviceAddress(deviceAddr)
-                if (res) {
-                    discardNodeDB()
-                } else {
-                    serviceBroadcasts.broadcastConnection()
-                }
-                res
+                radioInterfaceService.setDeviceAddress(deviceAddr)
             }
 
             // Note: bound methods don't get properly exception caught/logged, so do that with a

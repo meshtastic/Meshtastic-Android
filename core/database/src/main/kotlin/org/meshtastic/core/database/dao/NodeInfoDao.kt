@@ -221,4 +221,11 @@ interface NodeInfoDao {
 
     @Query("UPDATE nodes SET notes = :notes WHERE num = :num")
     fun setNodeNotes(num: Int, notes: String)
+
+    @Transaction
+    fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {
+        clearMyNodeInfo()
+        setMyNodeInfo(mi)
+        nodes.forEach { upsert(it) }
+    }
 }

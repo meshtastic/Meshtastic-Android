@@ -118,16 +118,8 @@ constructor(
 
     suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) { nodeInfoDao.upsert(node) }
 
-    suspend fun installMyNodeInfo(mi: MyNodeEntity) = withContext(dispatchers.io) {
-        nodeInfoDao.clearMyNodeInfo()
-        nodeInfoDao.setMyNodeInfo(mi)
-        nodeInfoDao.clearNodeInfo()
-    }
-
-    suspend fun installNodeDb(nodes: List<NodeEntity>) = withContext(dispatchers.io) {
-        nodeInfoDao.clearNodeInfo()
-        nodeInfoDao.putAll(nodes)
-    }
+    suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) =
+        withContext(dispatchers.io) { nodeInfoDao.installConfig(mi, nodes) }
 
     suspend fun clearNodeDB() = withContext(dispatchers.io) { nodeInfoDao.clearNodeInfo() }
 
