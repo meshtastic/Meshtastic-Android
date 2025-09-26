@@ -70,6 +70,16 @@ constructor(
         }
     }
 
+    fun setNodeNotes(nodeNum: Int, notes: String) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            nodeRepository.setNodeNotes(nodeNum, notes)
+        } catch (ex: java.io.IOException) {
+            Timber.e("Set node notes IO error: ${ex.message}")
+        } catch (ex: java.sql.SQLException) {
+            Timber.e("Set node notes SQL error: ${ex.message}")
+        }
+    }
+
     private fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
         Timber.i("Removing node '$nodeNum'")
         try {

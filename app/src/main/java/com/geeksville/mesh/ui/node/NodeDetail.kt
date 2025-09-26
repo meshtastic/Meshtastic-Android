@@ -131,7 +131,6 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
@@ -188,7 +187,6 @@ private data class DrawableMetricInfo(
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    uiViewModel: UIViewModel = hiltViewModel(),
     nodeDetailViewModel: NodeDetailViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
@@ -257,7 +255,7 @@ fun NodeDetailScreen(
                     )
                 },
                 modifier = modifier.padding(paddingValues),
-                onSaveNotes = { num, notes -> uiViewModel.setNodeNotes(num, notes) },
+                onSaveNotes = { num, notes -> nodeDetailViewModel.setNodeNotes(num, notes) },
             )
         } else {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
