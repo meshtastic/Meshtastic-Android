@@ -577,21 +577,21 @@ fun MapView(
                     onSendClicked = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
-                            finalWp = finalWp.copy { id = uiViewModel.generatePacketId() ?: 0 }
+                            finalWp = finalWp.copy { id = mapViewModel.generatePacketId() ?: 0 }
                         }
                         if (updatedWp.icon == 0) {
                             finalWp = finalWp.copy { icon = 0x1F4CD }
                         }
 
-                        uiViewModel.sendWaypoint(finalWp)
+                        mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },
                     onDeleteClicked = { wpToDelete ->
                         if (wpToDelete.lockedTo == 0 && isConnected && wpToDelete.id != 0) {
                             val deleteMarkerWp = wpToDelete.copy { expire = 1 }
-                            uiViewModel.sendWaypoint(deleteMarkerWp)
+                            mapViewModel.sendWaypoint(deleteMarkerWp)
                         }
-                        uiViewModel.deleteWaypoint(wpToDelete.id)
+                        mapViewModel.deleteWaypoint(wpToDelete.id)
                         editingWaypoint = null
                     },
                     onDismissRequest = { editingWaypoint = null },

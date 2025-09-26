@@ -386,32 +386,6 @@ constructor(
                 initialValue = emptyList(),
             )
 
-    fun generatePacketId(): Int? {
-        return try {
-            meshService?.packetId
-        } catch (ex: RemoteException) {
-            errormsg("RemoteException: ${ex.message}")
-            return null
-        }
-    }
-
-    fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
-        // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-
-        val p = DataPacket(dest, channel ?: 0, wpt)
-        if (wpt.id != 0) sendDataPacket(p)
-    }
-
-    private fun sendDataPacket(p: DataPacket) {
-        try {
-            meshService?.send(p)
-        } catch (ex: RemoteException) {
-            errormsg("Send DataPacket error: ${ex.message}")
-        }
-    }
-
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
         get() = _sharedContactRequested.asStateFlow()
@@ -425,8 +399,6 @@ constructor(
 
     fun deleteContacts(contacts: List<String>) =
         viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
-
-    fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
 
     // Connection state to our radio device
     val connectionState

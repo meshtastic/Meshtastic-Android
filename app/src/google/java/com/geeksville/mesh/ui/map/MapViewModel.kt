@@ -19,9 +19,11 @@ package com.geeksville.mesh.ui.map
 
 import android.app.Application
 import android.net.Uri
+import android.os.RemoteException
 import androidx.core.net.toFile
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
@@ -52,6 +54,7 @@ import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.data.repository.CustomTileProviderRepository
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import timber.log.Timber
@@ -84,9 +87,9 @@ constructor(
     mapPrefs: MapPrefs,
     private val googleMapsPrefs: GoogleMapsPrefs,
     nodeRepository: NodeRepository,
-    packetRepository: PacketRepository,
+    private val packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
-    serviceRepository: ServiceRepository,
+    private val serviceRepository: ServiceRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
 
@@ -495,6 +498,34 @@ constructor(
     fun clearLoadedLayerData() {
         _mapLayers.update { currentLayers ->
             currentLayers.map { it.copy(kmlLayerData = null, geoJsonLayerData = null) }
+        }
+    }
+
+    fun generatePacketId(): Int? {
+        return try {
+            serviceRepository.meshService?.packetId
+        } catch (ex: RemoteException) {
+            Timber.e("RemoteException: ${ex.message}")
+            return null
+        }
+    }
+
+    fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = contactKey[0].digitToIntOrNull()
+        val dest = if (channel != null) contactKey.substring(1) else contactKey
+
+        val p = DataPacket(dest, channel ?: 0, wpt)
+        if (wpt.id != 0) sendDataPacket(p)
+    }
+
+    fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
+
+    private fun sendDataPacket(p: DataPacket) {
+        try {
+            serviceRepository.meshService?.send(p)
+        } catch (ex: RemoteException) {
+            Timber.e("Send DataPacket error: ${ex.message}")
         }
     }
 }
