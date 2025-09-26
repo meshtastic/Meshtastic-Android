@@ -63,7 +63,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.model.Contact
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.strings.R
@@ -73,14 +72,14 @@ import java.util.concurrent.TimeUnit
 @Suppress("LongMethod")
 @Composable
 fun ContactsScreen(
-    uiViewModel: UIViewModel = hiltViewModel(),
+    viewModel: ContactsViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit = {},
     onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
     onNavigateToShare: () -> Unit,
 ) {
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
-    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var showMuteDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -89,7 +88,7 @@ fun ContactsScreen(
     val isSelectionModeActive by remember { derivedStateOf { selectedContactKeys.isNotEmpty() } }
 
     // State for contacts list
-    val contacts by uiViewModel.contactList.collectAsStateWithLifecycle()
+    val contacts by viewModel.contactList.collectAsStateWithLifecycle()
 
     // Derived state for selected contacts and count
     val selectedContacts =
@@ -116,7 +115,7 @@ fun ContactsScreen(
         if (contact.contactKey.contains("!")) {
             // if it's a node, look up the nodeNum including the !
             val nodeKey = contact.contactKey.substring(1)
-            val node = uiViewModel.getNode(nodeKey)
+            val node = viewModel.getNode(nodeKey)
 
             if (node != null) {
                 // navigate to node details.
@@ -145,8 +144,8 @@ fun ContactsScreen(
             MainAppBar(
                 title = stringResource(R.string.conversations),
                 ourNode = ourNode,
-                isConnected = isConnected,
-                showNodeChip = ourNode != null && isConnected,
+                isConnected = connectionState.isConnected(),
+                showNodeChip = ourNode != null && connectionState.isConnected(),
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
@@ -160,7 +159,11 @@ fun ContactsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.animateFloatingActionButton(visible = isConnected, alignment = Alignment.BottomEnd),
+                modifier =
+                Modifier.animateFloatingActionButton(
+                    visible = connectionState.isConnected(),
+                    alignment = Alignment.BottomEnd,
+                ),
                 onClick = onNavigateToShare,
             ) {
                 Icon(Icons.Rounded.QrCode2, contentDescription = null)
@@ -183,7 +186,7 @@ fun ContactsScreen(
                 )
             }
 
-            val channels by uiViewModel.channels.collectAsStateWithLifecycle()
+            val channels by viewModel.channels.collectAsStateWithLifecycle()
             ContactListView(
                 contacts = contacts,
                 selectedList = selectedContactKeys,
@@ -200,7 +203,7 @@ fun ContactsScreen(
         onDismiss = { showDeleteDialog = false },
         onConfirm = {
             showDeleteDialog = false
-            uiViewModel.deleteContacts(selectedContactKeys.toList())
+            viewModel.deleteContacts(selectedContactKeys.toList())
             selectedContactKeys.clear()
         },
     )
@@ -210,7 +213,7 @@ fun ContactsScreen(
         onDismiss = { showMuteDialog = false },
         onConfirm = { muteUntil ->
             showMuteDialog = false
-            uiViewModel.setMuteUntil(selectedContactKeys.toList(), muteUntil)
+            viewModel.setMuteUntil(selectedContactKeys.toList(), muteUntil)
             selectedContactKeys.clear()
         },
     )

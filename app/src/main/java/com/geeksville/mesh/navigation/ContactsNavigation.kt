@@ -40,7 +40,6 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel:
             deepLinks = listOf(navDeepLink<ContactsRoutes.Contacts>(basePath = "$DEEP_LINK_BASE_URI/contacts")),
         ) {
             ContactsScreen(
-                uiViewModel,
                 onClickNodeChip = {
                     navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
                         launchSingleTop = true

@@ -396,12 +396,6 @@ constructor(
         _sharedContactRequested.value = sharedContact
     }
 
-    fun setMuteUntil(contacts: List<String>, until: Long) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
-
-    fun deleteContacts(contacts: List<String>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
-
     // Connection state to our radio device
     val connectionState
         get() = serviceRepository.connectionState
