@@ -188,26 +188,26 @@ internal fun MessageScreen(
         )
 
     val onEvent: (MessageScreenEvent) -> Unit =
-        remember(viewModel, contactKey, messageInputState, ourNode) {
+        remember(messageViewModel, contactKey, messageInputState, ourNode) {
             { event ->
                 when (event) {
                     is MessageScreenEvent.SendMessage -> {
-                        viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
+                        messageViewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
                         if (event.replyingToPacketId != null) replyingToPacketId = null
                         messageInputState.clearText()
                     }
 
                     is MessageScreenEvent.SendReaction ->
-                        viewModel.sendReaction(event.emoji, event.messageId, contactKey)
+                        messageViewModel.sendReaction(event.emoji, event.messageId, contactKey)
 
                     is MessageScreenEvent.DeleteMessages -> {
-                        viewModel.deleteMessages(event.ids)
+                        messageViewModel.deleteMessages(event.ids)
                         selectedMessageIds.value = emptySet()
                         showDeleteDialog = false
                     }
 
                     is MessageScreenEvent.ClearUnreadCount ->
-                        viewModel.clearUnreadCount(contactKey, event.lastReadMessageId)
+                        messageViewModel.clearUnreadCount(contactKey, event.lastReadMessageId)
 
                     is MessageScreenEvent.HandleNodeMenuAction -> {
                         when (val action = event.action) {

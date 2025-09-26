@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.message
 
+import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.channelSet
@@ -24,8 +25,11 @@ import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.MeshServiceNotifications
+import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,9 +37,12 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.meshtastic.core.database.model.Message
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.ui.UiPrefs
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,9 +52,10 @@ constructor(
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
-    serviceRepository: ServiceRepository,
-    packetRepository: PacketRepository,
+    private val serviceRepository: ServiceRepository,
+    private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
+    private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel() {
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
@@ -96,4 +104,49 @@ constructor(
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
     fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+
+    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = contactKey[0].digitToIntOrNull()
+        val dest = if (channel != null) contactKey.substring(1) else contactKey
+
+        // if the destination is a node, we need to ensure it's a
+        // favorite so it does not get removed from the on-device node database.
+        if (channel == null) { // no channel specified, so we assume it's a direct message
+            val node = nodeRepository.getNode(dest)
+            if (!node.isFavorite) {
+                favoriteNode(nodeRepository.getNode(dest))
+            }
+        }
+        val p = DataPacket(dest, channel ?: 0, str, replyId)
+        sendDataPacket(p)
+    }
+
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
+        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey)) }
+
+    fun deleteMessages(uuidList: List<Long>) =
+        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
+
+    fun clearUnreadCount(contact: String, timestamp: Long) = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.clearUnreadCount(contact, timestamp)
+        val unreadCount = packetRepository.getUnreadCount(contact)
+        if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
+    }
+
+    private fun favoriteNode(node: Node) = viewModelScope.launch {
+        try {
+            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
+        } catch (ex: RemoteException) {
+            Timber.e(ex, "Favorite node error")
+        }
+    }
+
+    private fun sendDataPacket(p: DataPacket) {
+        try {
+            serviceRepository.meshService?.send(p)
+        } catch (ex: RemoteException) {
+            Timber.e("Send DataPacket error: ${ex.message}")
+        }
+    }
 }

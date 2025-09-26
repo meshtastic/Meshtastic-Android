@@ -446,9 +446,6 @@ constructor(
         }
     }
 
-    fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
-        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey)) }
-
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
         get() = _sharedContactRequested.asStateFlow()
@@ -506,12 +503,6 @@ constructor(
         viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
-
-    fun clearUnreadCount(contact: String, timestamp: Long) = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.clearUnreadCount(contact, timestamp)
-        val unreadCount = packetRepository.getUnreadCount(contact)
-        if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
-    }
 
     // Connection state to our radio device
     val connectionState
