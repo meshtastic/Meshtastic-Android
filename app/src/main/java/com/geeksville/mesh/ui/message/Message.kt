@@ -131,6 +131,7 @@ internal fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: UIViewModel = hiltViewModel(),
+    messageViewModel: MessageViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     navigateToQuickChatOptions: () -> Unit,
@@ -140,10 +141,10 @@ internal fun MessageScreen(
     val clipboardManager = LocalClipboard.current
 
     // State from ViewModel
-    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(initialValue = false)
-    val channels by viewModel.channels.collectAsStateWithLifecycle()
-    val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
+    val ourNode by messageViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val connectionState by messageViewModel.connectionState.collectAsStateWithLifecycle()
+    val channels by messageViewModel.channels.collectAsStateWithLifecycle()
+    val quickChatActions by messageViewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
 
     // UI State managed within this Composable
@@ -314,7 +315,7 @@ internal fun MessageScreen(
             }
             AnimatedVisibility(visible = showQuickChat) {
                 QuickChatRow(
-                    enabled = isConnected,
+                    enabled = connectionState.isConnected(),
                     actions = quickChatActions,
                     onClick = { action ->
                         handleQuickChatAction(
@@ -337,7 +338,7 @@ internal fun MessageScreen(
                 ourNode = ourNode,
             )
             MessageInput(
-                isEnabled = isConnected,
+                isEnabled = connectionState.isConnected(),
                 textFieldState = messageInputState,
                 onSendMessage = {
                     val messageText = messageInputState.text.toString().trim()
