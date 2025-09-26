@@ -374,10 +374,11 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     )
                         .none { this.hasRoute(it) }
 
+                val ourNodeInfo by uIViewModel.ourNodeInfo.collectAsStateWithLifecycle()
                 AnimatedVisibility(visible = currentDestination?.hasGlobalAppBar() ?: false) {
                     MainAppBar(
-                        viewModel = uIViewModel,
                         navController = navController,
+                        ourNode = ourNodeInfo,
                         isConnected = connectionState.isConnected(),
                         onAction = { action ->
                             when (action) {

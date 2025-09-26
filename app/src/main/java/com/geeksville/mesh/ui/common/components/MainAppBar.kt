@@ -40,12 +40,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -59,8 +56,8 @@ import org.meshtastic.core.ui.theme.AppTheme
 @Composable
 fun MainAppBar(
     modifier: Modifier = Modifier,
-    viewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController,
+    ourNode: Node?,
     isConnected: Boolean,
     onAction: (NodeMenuAction) -> Unit,
 ) {
@@ -69,8 +66,6 @@ fun MainAppBar(
     if (currentDestination?.hasRoute<ContactsRoutes.Messages>() == true) {
         return
     }
-
-    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
     val title: String =
         when {
