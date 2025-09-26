@@ -65,7 +65,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -78,7 +77,6 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.asDeviceVersion
-import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DataPacket
@@ -412,22 +410,6 @@ constructor(
                 )
             }
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-
-    fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
-        contactKeyForMessages.value = contactKey
-        return messagesForContactKey
-    }
-
-    private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val messagesForContactKey: StateFlow<List<Message>> =
-        contactKeyForMessages
-            .filterNotNull()
-            .flatMapLatest { contactKey -> packetRepository.getMessagesFrom(contactKey, ::getNode) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),

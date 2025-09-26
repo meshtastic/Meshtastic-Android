@@ -21,22 +21,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.database.NodeRepository
+import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import org.meshtastic.core.database.model.Message
+import org.meshtastic.core.model.DataPacket
 import javax.inject.Inject
 
 @HiltViewModel
 class MessageViewModel
 @Inject
 constructor(
-    nodeRepository: NodeRepository,
+    private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
     serviceRepository: ServiceRepository,
+    packetRepository: PacketRepository,
 ) : ViewModel() {
     val ourNodeInfo = nodeRepository.ourNodeInfo
 
@@ -53,4 +61,22 @@ constructor(
         quickChatActionRepository
             .getAllActions()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val messagesForContactKey: StateFlow<List<Message>> =
+        contactKeyForMessages
+            .filterNotNull()
+            .flatMapLatest { contactKey -> packetRepository.getMessagesFrom(contactKey, ::getNode) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
+
+    fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
+        contactKeyForMessages.value = contactKey
+        return messagesForContactKey
+    }
+
+    fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 }

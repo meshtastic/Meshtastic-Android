@@ -145,7 +145,7 @@ internal fun MessageScreen(
     val connectionState by messageViewModel.connectionState.collectAsStateWithLifecycle()
     val channels by messageViewModel.channels.collectAsStateWithLifecycle()
     val quickChatActions by messageViewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
-    val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
+    val messages by messageViewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
 
     // UI State managed within this Composable
     var replyingToPacketId by rememberSaveable { mutableStateOf<Int?>(null) }
