@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.datastore
+package org.meshtastic.core.data.repository
 
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ChannelProtos.Channel
@@ -28,7 +28,6 @@ import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.deviceProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource

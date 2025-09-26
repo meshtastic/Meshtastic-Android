@@ -35,9 +35,6 @@ import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.repository.api.DeviceHardwareRepository
-import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.safeNumber
@@ -56,8 +53,11 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.data.repository.DeviceHardwareRepository
+import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node

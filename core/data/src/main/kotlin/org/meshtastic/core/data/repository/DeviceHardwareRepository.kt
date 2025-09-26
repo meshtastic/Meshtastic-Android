@@ -15,10 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.api
+package org.meshtastic.core.data.repository
 
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
@@ -27,6 +25,7 @@ import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -62,14 +61,14 @@ constructor(
                 // 1. Attempt to retrieve from cache first
                 val cachedEntity = localDataSource.getByHwModel(hwModel)
                 if (cachedEntity != null && !cachedEntity.isStale()) {
-                    debug("Using fresh cached device hardware for model $hwModel")
+                    Timber.d("Using fresh cached device hardware for model $hwModel")
                     return@withContext Result.success(cachedEntity.asExternalModel())
                 }
             }
 
             // 2. Fetch from remote API
             runCatching {
-                debug("Fetching device hardware from remote API.")
+                Timber.d("Fetching device hardware from remote API.")
                 val remoteHardware = remoteDataSource.getAllDeviceHardware()
 
                 localDataSource.insertAllDeviceHardware(remoteHardware)
@@ -80,17 +79,17 @@ constructor(
                     return@withContext Result.success(it)
                 }
                 .onFailure { e ->
-                    warn("Failed to fetch device hardware from server: ${e.message}")
+                    Timber.w("Failed to fetch device hardware from server: ${e.message}")
 
                     // 3. Attempt to use stale cache as a fallback
                     val staleEntity = localDataSource.getByHwModel(hwModel)
                     if (staleEntity != null) {
-                        debug("Using stale cached device hardware for model $hwModel")
+                        Timber.d("Using stale cached device hardware for model $hwModel")
                         return@withContext Result.success(staleEntity.asExternalModel())
                     }
 
                     // 4. Fallback to bundled JSON if cache is empty
-                    debug("Cache is empty, falling back to bundled JSON asset.")
+                    Timber.d("Cache is empty, falling back to bundled JSON asset.")
                     return@withContext loadFromBundledJson(hwModel)
                 }
         }

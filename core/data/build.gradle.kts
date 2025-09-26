@@ -29,6 +29,7 @@ dependencies {
     implementation(projects.core.datastore)
     implementation(projects.core.di)
     implementation(projects.core.model)
+    implementation(projects.core.network)
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
 

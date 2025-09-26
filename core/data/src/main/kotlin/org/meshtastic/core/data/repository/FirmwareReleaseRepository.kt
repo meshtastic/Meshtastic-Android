@@ -15,10 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.api
+package org.meshtastic.core.data.repository
 
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
@@ -28,6 +26,7 @@ import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -69,7 +68,7 @@ constructor(
         // This gives the UI something to show immediately.
         val cachedRelease = localDataSource.getLatestRelease(releaseType)
         cachedRelease?.let {
-            debug("Emitting cached firmware for $releaseType (isStale=${it.isStale()})")
+            Timber.d("Emitting cached firmware for $releaseType (isStale=${it.isStale()})")
             emit(it.asExternalModel())
         }
 
@@ -85,7 +84,7 @@ constructor(
         // The `distinctUntilChanged()` operator on the collector side will prevent
         // re-emitting the same data if the cache wasn't actually updated.
         val finalRelease = localDataSource.getLatestRelease(releaseType)
-        debug("Emitting final firmware for $releaseType from cache.")
+        Timber.d("Emitting final firmware for $releaseType from cache.")
         emit(finalRelease?.asExternalModel())
     }
 
@@ -99,7 +98,7 @@ constructor(
     private suspend fun updateCacheFromSources() {
         val remoteFetchSuccess =
             runCatching {
-                debug("Fetching fresh firmware releases from remote API.")
+                Timber.d("Fetching fresh firmware releases from remote API.")
                 val networkReleases = remoteDataSource.getFirmwareReleases()
 
                 // The API fetches all release types, so we cache them all at once.
@@ -110,13 +109,13 @@ constructor(
 
         // If remote fetch failed, try the JSON fallback as a last resort.
         if (!remoteFetchSuccess) {
-            warn("Remote fetch failed, attempting to cache from bundled JSON.")
+            Timber.w("Remote fetch failed, attempting to cache from bundled JSON.")
             runCatching {
                 val jsonReleases = jsonDataSource.loadFirmwareReleaseFromJsonAsset()
                 localDataSource.insertFirmwareReleases(jsonReleases.releases.stable, FirmwareReleaseType.STABLE)
                 localDataSource.insertFirmwareReleases(jsonReleases.releases.alpha, FirmwareReleaseType.ALPHA)
             }
-                .onFailure { warn("Failed to cache from JSON: ${it.message}") }
+                .onFailure { Timber.w("Failed to cache from JSON: ${it.message}") }
         }
     }
 
