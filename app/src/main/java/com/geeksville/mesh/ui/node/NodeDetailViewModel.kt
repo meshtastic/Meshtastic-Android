@@ -21,7 +21,6 @@ import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.prefs.ui.UiPrefs
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -42,9 +40,7 @@ class NodeDetailViewModel
 @Inject
 constructor(
     private val nodeRepository: NodeRepository,
-    radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    private val uiPrefs: UiPrefs,
 ) : ViewModel() {
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
