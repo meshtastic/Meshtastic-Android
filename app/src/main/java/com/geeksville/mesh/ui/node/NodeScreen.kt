@@ -46,7 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.node.components.NodeFilterTextField
@@ -65,23 +65,23 @@ import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeScreen(
-    model: UIViewModel = hiltViewModel(),
+    nodesViewModel: NodesViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
 ) {
-    val state by model.nodesUiState.collectAsStateWithLifecycle()
+    val state by nodesViewModel.nodesUiState.collectAsStateWithLifecycle()
 
-    val nodes by model.nodeList.collectAsStateWithLifecycle()
-    val ourNode by model.ourNodeInfo.collectAsStateWithLifecycle()
-    val onlineNodeCount by model.onlineNodeCount.collectAsStateWithLifecycle(0)
-    val totalNodeCount by model.totalNodeCount.collectAsStateWithLifecycle(0)
-    val unfilteredNodes by model.unfilteredNodeList.collectAsStateWithLifecycle()
+    val nodes by nodesViewModel.nodeList.collectAsStateWithLifecycle()
+    val ourNode by nodesViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val onlineNodeCount by nodesViewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
+    val totalNodeCount by nodesViewModel.totalNodeCount.collectAsStateWithLifecycle(0)
+    val unfilteredNodes by nodesViewModel.unfilteredNodeList.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
     val listState = rememberLazyListState()
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
-    val connectionState by model.connectionState.collectAsStateWithLifecycle()
+    val connectionState by nodesViewModel.connectionState.collectAsStateWithLifecycle()
 
     var showSharedContact: Node? by remember { mutableStateOf(null) }
     if (showSharedContact != null) {
@@ -106,15 +106,18 @@ fun NodeScreen(
         floatingActionButton = {
             val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
             val shareCapable = firmwareVersion.supportsQrCodeSharing()
-
+            val scannedContact: AdminProtos.SharedContact? by
+                nodesViewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
             AddContactFAB(
+                unfilteredNodes = unfilteredNodes,
+                scannedContact = scannedContact,
                 modifier =
                 Modifier.animateFloatingActionButton(
                     visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
-                model = model,
-                onSharedContactImport = { contact -> model.addSharedContact(contact) },
+                onSharedContactImport = { contact -> nodesViewModel.addSharedContact(contact) },
+                onSharedContactRequested = { contact -> nodesViewModel.setSharedContactRequested(contact) },
             )
         },
     ) { contentPadding ->
@@ -129,20 +132,20 @@ fun NodeScreen(
                             .graphicsLayer(alpha = animatedAlpha)
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
-                        filterText = state.filter,
-                        onTextChange = model::setNodeFilterText,
+                        filterText = state.filter.filterText,
+                        onTextChange = nodesViewModel::setNodeFilterText,
                         currentSortOption = state.sort,
-                        onSortSelect = model::setSortOption,
-                        includeUnknown = state.includeUnknown,
-                        onToggleIncludeUnknown = model::toggleIncludeUnknown,
-                        onlyOnline = state.onlyOnline,
-                        onToggleOnlyOnline = model::toggleOnlyOnline,
-                        onlyDirect = state.onlyDirect,
-                        onToggleOnlyDirect = model::toggleOnlyDirect,
+                        onSortSelect = nodesViewModel::setSortOption,
+                        includeUnknown = state.filter.includeUnknown,
+                        onToggleIncludeUnknown = nodesViewModel::toggleIncludeUnknown,
+                        onlyOnline = state.filter.onlyOnline,
+                        onToggleOnlyOnline = nodesViewModel::toggleOnlyOnline,
+                        onlyDirect = state.filter.onlyDirect,
+                        onToggleOnlyDirect = nodesViewModel::toggleOnlyDirect,
                         showDetails = state.showDetails,
-                        onToggleShowDetails = model::toggleShowDetails,
-                        showIgnored = state.showIgnored,
-                        onToggleShowIgnored = model::toggleShowIgnored,
+                        onToggleShowDetails = nodesViewModel::toggleShowDetails,
+                        showIgnored = state.filter.showIgnored,
+                        onToggleShowIgnored = nodesViewModel::toggleShowIgnored,
                         ignoredNodeCount = ignoredNodeCount,
                     )
                 }
@@ -156,18 +159,18 @@ fun NodeScreen(
                         tempInFahrenheit = state.tempInFahrenheit,
                         onAction = { menuItem ->
                             when (menuItem) {
-                                is NodeMenuAction.Remove -> model.removeNode(node.num)
-                                is NodeMenuAction.Ignore -> model.ignoreNode(node)
-                                is NodeMenuAction.Favorite -> model.favoriteNode(node)
+                                is NodeMenuAction.Remove -> nodesViewModel.removeNode(node.num)
+                                is NodeMenuAction.Ignore -> nodesViewModel.ignoreNode(node)
+                                is NodeMenuAction.Favorite -> nodesViewModel.favoriteNode(node)
                                 is NodeMenuAction.DirectMessage -> {
-                                    val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
+                                    val hasPKC = nodesViewModel.ourNodeInfo.value?.hasPKC == true && node.hasPKC
                                     val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                                     navigateToMessages("$channel${node.user.id}")
                                 }
 
-                                is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
-                                is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
-                                is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)
+                                is NodeMenuAction.RequestUserInfo -> nodesViewModel.requestUserInfo(node.num)
+                                is NodeMenuAction.RequestPosition -> nodesViewModel.requestPosition(node.num)
+                                is NodeMenuAction.TraceRoute -> nodesViewModel.requestTraceroute(node.num)
                                 is NodeMenuAction.MoreDetails -> navigateToNodeDetails(node.num)
                                 is NodeMenuAction.Share -> showSharedContact = node
                             }

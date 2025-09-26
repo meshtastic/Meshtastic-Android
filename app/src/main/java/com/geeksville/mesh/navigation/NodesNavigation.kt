@@ -65,7 +65,6 @@ fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UI
             deepLinks = listOf(navDeepLink<NodesRoutes.Nodes>(basePath = "$DEEP_LINK_BASE_URI/nodes")),
         ) {
             NodeScreen(
-                model = uiViewModel,
                 navigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
                 navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
             )

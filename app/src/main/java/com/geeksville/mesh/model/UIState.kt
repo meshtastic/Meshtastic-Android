@@ -58,7 +58,6 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -81,7 +80,6 @@ import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
@@ -148,22 +146,6 @@ internal fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSetting
             }
         }
     }
-
-data class NodesUiState(
-    val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
-    val filter: String = "",
-    val includeUnknown: Boolean = false,
-    val onlyOnline: Boolean = false,
-    val onlyDirect: Boolean = false,
-    val distanceUnits: Int = 0,
-    val tempInFahrenheit: Boolean = false,
-    val showDetails: Boolean = false,
-    val showIgnored: Boolean = false,
-) {
-    companion object {
-        val Empty = NodesUiState()
-    }
-}
 
 data class Contact(
     val contactKey: String,
@@ -299,36 +281,10 @@ constructor(
                 .getAllActions()
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val nodeFilterText = MutableStateFlow("")
-    private val nodeSortOption =
-        MutableStateFlow(NodeSortOption.entries.getOrElse(uiPrefs.nodeSortOption) { NodeSortOption.VIA_FAVORITE })
-    private val includeUnknown = MutableStateFlow(uiPrefs.includeUnknown)
-    private val showDetails = MutableStateFlow(uiPrefs.showDetails)
-    private val onlyOnline = MutableStateFlow(uiPrefs.onlyOnline)
-    private val onlyDirect = MutableStateFlow(uiPrefs.onlyDirect)
-
-    private val _showIgnored = MutableStateFlow(uiPrefs.showIgnored)
-    val showIgnored: StateFlow<Boolean> = _showIgnored
-
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
-    fun toggleShowIgnored() = toggle(_showIgnored) { uiPrefs.showIgnored = it }
-
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
-
-    fun setSortOption(sort: NodeSortOption) {
-        nodeSortOption.value = sort
-        uiPrefs.nodeSortOption = sort.ordinal
-    }
-
-    fun toggleShowDetails() = toggle(showDetails) { uiPrefs.showDetails = it }
-
-    fun toggleIncludeUnknown() = toggle(includeUnknown) { uiPrefs.includeUnknown = it }
-
-    fun toggleOnlyOnline() = toggle(onlyOnline) { uiPrefs.onlyOnline = it }
-
-    fun toggleOnlyDirect() = toggle(onlyDirect) { uiPrefs.onlyDirect = it }
 
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
         (!state.value).let { toggled ->
@@ -337,51 +293,7 @@ constructor(
         }
     }
 
-    data class NodeFilterState(
-        val filterText: String,
-        val includeUnknown: Boolean,
-        val onlyOnline: Boolean,
-        val onlyDirect: Boolean,
-        val showIgnored: Boolean,
-    )
-
-    val nodeFilterStateFlow: Flow<NodeFilterState> =
-        combine(nodeFilterText, includeUnknown, onlyOnline, onlyDirect, showIgnored) {
-                filterText,
-                includeUnknown,
-                onlyOnline,
-                onlyDirect,
-                showIgnored,
-            ->
-            NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
-        }
-
-    val nodesUiState: StateFlow<NodesUiState> =
-        combine(nodeFilterStateFlow, nodeSortOption, showDetails, radioConfigRepository.deviceProfileFlow) {
-                filterFlow,
-                sort,
-                showDetails,
-                profile,
-            ->
-            NodesUiState(
-                sort = sort,
-                filter = filterFlow.filterText,
-                includeUnknown = filterFlow.includeUnknown,
-                onlyOnline = filterFlow.onlyOnline,
-                onlyDirect = filterFlow.onlyDirect,
-                distanceUnits = profile.config.display.units.number,
-                tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-                showDetails = showDetails,
-                showIgnored = filterFlow.showIgnored,
-            )
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = NodesUiState.Empty,
-            )
-
-    val unfilteredNodeList: StateFlow<List<Node>> =
+    val nodeList: StateFlow<List<Node>> =
         nodeDB
             .getNodes()
             .stateIn(
@@ -389,33 +301,6 @@ constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList(),
             )
-
-    val nodeList: StateFlow<List<Node>> =
-        nodesUiState
-            .flatMapLatest { state ->
-                nodeDB
-                    .getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
-                    .map { list -> list.filter { it.isIgnored == state.showIgnored } }
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-
-    val onlineNodeCount =
-        nodeDB.onlineNodeCount.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = 0,
-        )
-
-    val totalNodeCount =
-        nodeDB.totalNodeCount.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = 0,
-        )
 
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
@@ -603,9 +488,6 @@ constructor(
         _sharedContactRequested.value = sharedContact
     }
 
-    fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
-        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
-
     fun requestTraceroute(destNum: Int) {
         info("Requesting traceroute for '$destNum'")
         try {
@@ -749,9 +631,6 @@ constructor(
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
 
-    val maxChannels
-        get() = myNodeInfo.value?.maxChannels ?: 8
-
     override fun onCleared() {
         super.onCleared()
         debug("ViewModel cleared")
@@ -788,21 +667,6 @@ constructor(
         if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
-    fun setOwner(name: String) {
-        val user =
-            ourNodeInfo.value?.user?.copy {
-                longName = name
-                shortName = getInitials(name)
-            } ?: return
-
-        try {
-            // Note: we use ?. here because we might be running in the emulator
-            meshService?.setRemoteOwner(myNodeNum ?: return, user.toByteArray())
-        } catch (ex: RemoteException) {
-            errormsg("Can't set username on device, is device offline? ${ex.message}")
-        }
-    }
-
     fun addQuickChatAction(action: QuickChatAction) =
         viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.upsert(action) }
 
@@ -822,10 +686,6 @@ constructor(
 
     fun clearTracerouteResponse() {
         serviceRepository.clearTracerouteResponse()
-    }
-
-    fun setNodeFilterText(text: String) {
-        nodeFilterText.value = text
     }
 
     val appIntroCompleted: StateFlow<Boolean> = uiPreferencesDataSource.appIntroCompleted
