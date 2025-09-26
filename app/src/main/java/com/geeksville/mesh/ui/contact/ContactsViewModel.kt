@@ -21,11 +21,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.model.Contact
-import com.geeksville.mesh.model.getChannel
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -34,8 +30,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
+import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.getShortDate
 import org.meshtastic.core.strings.R
 import javax.inject.Inject
