@@ -54,7 +54,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -67,19 +66,14 @@ import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
-import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.util.getChannel
-import org.meshtastic.core.model.util.getShortDate
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.strings.R
 import javax.inject.Inject
@@ -165,9 +159,8 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     radioInterfaceService: RadioInterfaceService,
-    private val meshLogRepository: MeshLogRepository,
+    meshLogRepository: MeshLogRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
-    private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
@@ -279,10 +272,6 @@ constructor(
     val ourNodeInfo: StateFlow<Node?>
         get() = nodeDB.ourNodeInfo
 
-    fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
-
-    fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
-
     val snackBarHostState = SnackbarHostState()
 
     fun showSnackBar(text: Int) = showSnackBar(app.getString(text))
@@ -327,67 +316,6 @@ constructor(
         debug("ViewModel created")
     }
 
-    val contactList =
-        combine(nodeDB.myNodeInfo, packetRepository.getContacts(), channels, packetRepository.getContactSettings()) {
-                myNodeInfo,
-                contacts,
-                channelSet,
-                settings,
-            ->
-            val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList()
-            // Add empty channel placeholders (always show Broadcast contacts, even when empty)
-            val placeholder =
-                (0 until channelSet.settingsCount).associate { ch ->
-                    val contactKey = "$ch${DataPacket.ID_BROADCAST}"
-                    val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
-                    contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
-                }
-
-            (contacts + (placeholder - contacts.keys)).values.map { packet ->
-                val data = packet.data
-                val contactKey = packet.contact_key
-
-                // Determine if this is my message (originated on this device)
-                val fromLocal = data.from == DataPacket.ID_LOCAL
-                val toBroadcast = data.to == DataPacket.ID_BROADCAST
-
-                // grab usernames from NodeInfo
-                val user = getUser(if (fromLocal) data.to else data.from)
-                val node = getNode(if (fromLocal) data.to else data.from)
-
-                val shortName = user.shortName
-                val longName =
-                    if (toBroadcast) {
-                        channelSet.getChannel(data.channel)?.name ?: app.getString(R.string.channel_name)
-                    } else {
-                        user.longName
-                    }
-
-                Contact(
-                    contactKey = contactKey,
-                    shortName = if (toBroadcast) "${data.channel}" else shortName,
-                    longName = longName,
-                    lastMessageTime = getShortDate(data.time),
-                    lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
-                    unreadCount = packetRepository.getUnreadCount(contactKey),
-                    messageCount = packetRepository.getMessageCount(contactKey),
-                    isMuted = settings[contactKey]?.isMuted == true,
-                    isUnmessageable = user.isUnmessagable,
-                    nodeColors =
-                    if (!toBroadcast) {
-                        node.colors
-                    } else {
-                        null
-                    },
-                )
-            }
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
         get() = _sharedContactRequested.asStateFlow()
@@ -395,12 +323,6 @@ constructor(
     fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
         _sharedContactRequested.value = sharedContact
     }
-
-    fun setMuteUntil(contacts: List<String>, until: Long) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
-
-    fun deleteContacts(contacts: List<String>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
 
     // Connection state to our radio device
     val connectionState
