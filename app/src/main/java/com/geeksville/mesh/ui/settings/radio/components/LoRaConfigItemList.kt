@@ -17,6 +17,8 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -24,9 +26,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -40,7 +44,6 @@ import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -128,116 +131,118 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
             }
         }
 
-        item { PreferenceCategory(text = stringResource(R.string.advanced)) }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
 
         item {
-            SwitchPreference(
-                title = stringResource(R.string.ignore_mqtt),
-                checked = formState.value.ignoreMqtt,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { ignoreMqtt = it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.ok_to_mqtt),
-                checked = formState.value.configOkToMqtt,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { configOkToMqtt = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.tx_enabled),
-                checked = formState.value.txEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { txEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.hop_limit),
-                summary = stringResource(id = R.string.config_lora_hop_limit_summary),
-                value = formState.value.hopLimit,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { hopLimit = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            var isFocused by remember { mutableStateOf(false) }
-            EditTextPreference(
-                title = stringResource(R.string.frequency_slot),
-                summary = stringResource(id = R.string.config_lora_frequency_slot_summary),
-                value =
-                if (isFocused || formState.value.channelNum != 0) {
-                    formState.value.channelNum
-                } else {
-                    primaryChannel.channelNum
-                },
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onFocusChanged = { isFocused = it.isFocused },
-                onValueChanged = {
-                    if (it <= formState.value.numChannels) { // total num of LoRa channels
-                        formState.value = formState.value.copy { channelNum = it }
-                    }
-                },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.sx126x_rx_boosted_gain),
-                checked = formState.value.sx126XRxBoostedGain,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { sx126XRxBoostedGain = it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            var isFocused by remember { mutableStateOf(false) }
-            EditTextPreference(
-                title = stringResource(R.string.override_frequency_mhz),
-                value =
-                if (isFocused || formState.value.overrideFrequency != 0f) {
-                    formState.value.overrideFrequency
-                } else {
-                    primaryChannel.radioFreq
-                },
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onFocusChanged = { isFocused = it.isFocused },
-                onValueChanged = { formState.value = formState.value.copy { overrideFrequency = it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            SignedIntegerEditTextPreference(
-                title = stringResource(R.string.tx_power_dbm),
-                value = formState.value.txPower,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { txPower = it } },
-            )
-        }
-
-        if (viewModel.hasPaFan) {
-            item {
+            TitledCard(title = stringResource(R.string.advanced)) {
                 SwitchPreference(
-                    title = stringResource(R.string.pa_fan_disabled),
-                    checked = formState.value.paFanDisabled,
+                    title = stringResource(R.string.ignore_mqtt),
+                    checked = formState.value.ignoreMqtt,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { paFanDisabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy { ignoreMqtt = it } },
+                    containerColor = Color.Transparent,
                 )
+
+                HorizontalDivider()
+
+                SwitchPreference(
+                    title = stringResource(R.string.ok_to_mqtt),
+                    checked = formState.value.configOkToMqtt,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { configOkToMqtt = it } },
+                    containerColor = Color.Transparent,
+                )
+
+                HorizontalDivider()
+
+                SwitchPreference(
+                    title = stringResource(R.string.tx_enabled),
+                    checked = formState.value.txEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { txEnabled = it } },
+                    containerColor = Color.Transparent,
+                )
+
+                HorizontalDivider()
+
+                EditTextPreference(
+                    title = stringResource(R.string.hop_limit),
+                    summary = stringResource(id = R.string.config_lora_hop_limit_summary),
+                    value = formState.value.hopLimit,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { hopLimit = it } },
+                )
+
+                HorizontalDivider()
+
+                var isFocusedSlot by remember { mutableStateOf(false) }
+                EditTextPreference(
+                    title = stringResource(R.string.frequency_slot),
+                    summary = stringResource(id = R.string.config_lora_frequency_slot_summary),
+                    value =
+                    if (isFocusedSlot || formState.value.channelNum != 0) {
+                        formState.value.channelNum
+                    } else {
+                        primaryChannel.channelNum
+                    },
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onFocusChanged = { isFocusedSlot = it.isFocused },
+                    onValueChanged = {
+                        if (it <= formState.value.numChannels) { // total num of LoRa channels
+                            formState.value = formState.value.copy { channelNum = it }
+                        }
+                    },
+                )
+
+                HorizontalDivider()
+
+                SwitchPreference(
+                    title = stringResource(R.string.sx126x_rx_boosted_gain),
+                    checked = formState.value.sx126XRxBoostedGain,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { sx126XRxBoostedGain = it } },
+                    containerColor = Color.Transparent,
+                )
+
+                HorizontalDivider()
+
+                var isFocusedOverride by remember { mutableStateOf(false) }
+                EditTextPreference(
+                    title = stringResource(R.string.override_frequency_mhz),
+                    value =
+                    if (isFocusedOverride || formState.value.overrideFrequency != 0f) {
+                        formState.value.overrideFrequency
+                    } else {
+                        primaryChannel.radioFreq
+                    },
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onFocusChanged = { isFocusedOverride = it.isFocused },
+                    onValueChanged = { formState.value = formState.value.copy { overrideFrequency = it } },
+                )
+
+                HorizontalDivider()
+
+                SignedIntegerEditTextPreference(
+                    title = stringResource(R.string.tx_power_dbm),
+                    value = formState.value.txPower,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { txPower = it } },
+                )
+
+                if (viewModel.hasPaFan) {
+                    SwitchPreference(
+                        title = stringResource(R.string.pa_fan_disabled),
+                        checked = formState.value.paFanDisabled,
+                        enabled = state.connected,
+                        onCheckedChange = { formState.value = formState.value.copy { paFanDisabled = it } },
+                        containerColor = Color.Transparent,
+                    )
+                }
             }
-            item { HorizontalDivider() }
         }
     }
 }
