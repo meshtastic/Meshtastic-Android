@@ -27,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.strings.R
 
 @Composable
@@ -51,12 +50,7 @@ fun MapScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = { action ->
-                    when (action) {
-                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
-                        else -> {}
-                    }
-                },
+                onClickChip = { onClickNodeChip(it.num) },
             )
         },
     ) { paddingValues ->

@@ -64,7 +64,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.strings.R
 import java.util.concurrent.TimeUnit
 
@@ -148,12 +147,7 @@ fun ContactsScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = { action ->
-                    when (action) {
-                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
-                        else -> {}
-                    }
-                },
+                onClickChip = { onClickNodeChip(it.num) },
             )
         },
         floatingActionButton = {

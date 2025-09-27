@@ -54,7 +54,7 @@ fun NodeMapScreen(
                 canNavigateUp = true,
                 onNavigateUp = navController::navigateUp,
                 actions = {},
-                onAction = {},
+                onClickChip = {},
             )
         },
     ) { paddingValues ->

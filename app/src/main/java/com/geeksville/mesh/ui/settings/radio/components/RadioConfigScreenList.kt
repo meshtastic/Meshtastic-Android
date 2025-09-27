@@ -56,7 +56,7 @@ fun <T : MessageLite> RadioConfigScreenList(
                 ourNode = null,
                 showNodeChip = false,
                 actions = {},
-                onAction = {},
+                onClickChip = {},
             )
         },
     ) { innerPadding ->

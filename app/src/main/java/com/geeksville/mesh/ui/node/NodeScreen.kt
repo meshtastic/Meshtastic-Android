@@ -84,7 +84,7 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = {},
+                onClickChip = {},
             )
         },
         floatingActionButton = {

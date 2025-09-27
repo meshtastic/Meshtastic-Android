@@ -60,7 +60,6 @@ import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
 import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
@@ -198,12 +197,7 @@ fun SettingsScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = { action ->
-                    when (action) {
-                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
-                        else -> {}
-                    }
-                },
+                onClickChip = { onClickNodeChip(it.num) },
             )
         },
     ) { paddingValues ->

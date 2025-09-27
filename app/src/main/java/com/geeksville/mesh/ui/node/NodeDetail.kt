@@ -228,7 +228,7 @@ fun NodeDetailScreen(
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {},
-                onAction = {},
+                onClickChip = {},
             )
         },
     ) { paddingValues ->

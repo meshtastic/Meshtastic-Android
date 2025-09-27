@@ -71,7 +71,6 @@ import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
@@ -185,12 +184,7 @@ fun ConnectionsScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = { action ->
-                    when (action) {
-                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
-                        else -> {}
-                    }
-                },
+                onClickChip = { onClickNodeChip(it.num) },
             )
         },
     ) { paddingValues ->

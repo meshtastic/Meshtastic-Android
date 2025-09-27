@@ -94,14 +94,11 @@ import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
@@ -332,11 +329,6 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     ) {
         Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { _ ->
             Column(modifier = Modifier.fillMaxSize()) {
-                var sharedContact: Node? by remember { mutableStateOf(null) }
-                if (sharedContact != null) {
-                    SharedContactDialog(contact = sharedContact, onDismiss = { sharedContact = null })
-                }
-
                 fun NavDestination.hasGlobalAppBar(): Boolean =
                     // List of screens to exclude from having the global app bar
                     listOf(
@@ -379,21 +371,14 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     MainAppBar(
                         navController = navController,
                         ourNode = ourNodeInfo,
-                        onAction = { action ->
-                            when (action) {
-                                is NodeMenuAction.MoreDetails -> {
-                                    navController.navigate(
-                                        NodesRoutes.NodeDetailGraph(action.node.num),
-                                        {
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        },
-                                    )
-                                }
-
-                                is NodeMenuAction.Share -> sharedContact = action.node
-                                else -> {}
-                            }
+                        onClickChip = {
+                            navController.navigate(
+                                NodesRoutes.NodeDetailGraph(it.num),
+                                {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                },
+                            )
                         },
                     )
                 }
