@@ -121,3 +121,38 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
         }
     }
 }
+
+@Composable
+internal fun NodeMapFilterDropdown(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    mapViewModel: MapViewModel
+) {
+    val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            val filterOptions = LastHeardFilter.entries
+            val selectedIndex = filterOptions.indexOf(mapFilterState.lastHeardTrackFilter)
+            var sliderPosition by remember(selectedIndex) { mutableFloatStateOf(selectedIndex.toFloat()) }
+
+            Text(
+                text =
+                    stringResource(
+                        R.string.last_heard_filter_label,
+                        stringResource(mapFilterState.lastHeardTrackFilter.label),
+                    ),
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Slider(
+                value = sliderPosition,
+                onValueChange = { sliderPosition = it },
+                onValueChangeFinished = {
+                    val newIndex = sliderPosition.roundToInt().coerceIn(0, filterOptions.size - 1)
+                    mapViewModel.setLastHeardTrackFilter(filterOptions[newIndex])
+                },
+                valueRange = 0f..(filterOptions.size - 1).toFloat(),
+                steps = filterOptions.size - 2,
+            )
+        }
+    }
+}
