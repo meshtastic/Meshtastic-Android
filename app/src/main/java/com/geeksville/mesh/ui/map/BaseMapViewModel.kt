@@ -104,9 +104,16 @@ abstract class BaseMapViewModel(
 
     private val lastHeardFilter = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter))
 
+    private val lastHeardTrackFilter = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter))
+
     fun setLastHeardFilter(filter: LastHeardFilter) {
         mapPrefs.lastHeardFilter = filter.seconds
         lastHeardFilter.value = filter
+    }
+
+    fun setLastHeardTrackFilter(filter: LastHeardFilter) {
+        mapPrefs.lastHeardTrackFilter = filter.seconds
+        lastHeardTrackFilter.value = filter
     }
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
@@ -167,16 +174,18 @@ abstract class BaseMapViewModel(
         val showWaypoints: Boolean,
         val showPrecisionCircle: Boolean,
         val lastHeardFilter: LastHeardFilter,
+        val lastHeardTrackFilter: LastHeardFilter,
     )
 
     val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(showOnlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap, lastHeardFilter) {
-                favoritesOnly,
-                showWaypoints,
-                showPrecisionCircle,
-                lastHeard,
-            ->
-            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, lastHeard)
+        combine(
+            showOnlyFavorites,
+            showWaypointsOnMap,
+            showPrecisionCircleOnMap,
+            lastHeardFilter,
+            lastHeardTrackFilter,
+        ) { favoritesOnly, showWaypoints, showPrecisionCircle, lastHeardFilter, lastHeardTrackFilter ->
+            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, lastHeardFilter, lastHeardTrackFilter)
         }
             .stateIn(
                 scope = viewModelScope,
@@ -187,6 +196,7 @@ abstract class BaseMapViewModel(
                     showWaypointsOnMap.value,
                     showPrecisionCircleOnMap.value,
                     lastHeardFilter.value,
+                    lastHeardTrackFilter.value,
                 ),
             )
 }

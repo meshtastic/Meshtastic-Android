@@ -30,6 +30,7 @@ interface MapPrefs {
     var showWaypointsOnMap: Boolean
     var showPrecisionCircleOnMap: Boolean
     var lastHeardFilter: Long
+    var lastHeardTrackFilter: Long
 }
 
 @Singleton
@@ -39,4 +40,5 @@ class MapPrefsImpl @Inject constructor(@MapSharedPreferences prefs: SharedPrefer
     override var showWaypointsOnMap: Boolean by PrefDelegate(prefs, "show_waypoints", true)
     override var showPrecisionCircleOnMap: Boolean by PrefDelegate(prefs, "show_precision_circle", true)
     override var lastHeardFilter: Long by PrefDelegate(prefs, "last_heard_filter", 0L)
+    override var lastHeardTrackFilter: Long by PrefDelegate(prefs, "last_heard_track_filter", 0L)
 }
