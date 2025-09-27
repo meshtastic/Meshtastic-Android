@@ -42,7 +42,7 @@ import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.database.model.Node
 
 @Composable
-fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: () -> Unit = {}) {
+fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: (Node) -> Unit = {}) {
     val isIgnored = node.isIgnored
     val (textColor, nodeColor) = node.colors
     val inputChipInteractionSource = remember { MutableInteractionSource() }
@@ -67,7 +67,7 @@ fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: () -> Unit = {}
                 maxLines = 1,
             )
         },
-        onClick = onClick,
+        onClick = { onClick(node) },
         interactionSource = inputChipInteractionSource,
     )
 }

@@ -157,7 +157,7 @@ private fun TopBarActions(
 ) {
     AnimatedVisibility(visible = showNodeChip, enter = fadeIn(), exit = fadeOut()) {
         ourNode?.let { node ->
-            NodeChip(modifier = Modifier.padding(horizontal = 16.dp), node = node, onClick = { onClickChip(node) })
+            NodeChip(modifier = Modifier.padding(horizontal = 16.dp), node = node, onClick = onClickChip)
         }
     }
 

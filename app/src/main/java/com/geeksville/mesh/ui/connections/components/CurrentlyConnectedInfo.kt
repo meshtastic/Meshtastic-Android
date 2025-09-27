@@ -64,7 +64,7 @@ fun CurrentlyConnectedInfo(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                NodeChip(node = node, onClick = { onNavigateToNodeDetails(node.num) })
+                NodeChip(node = node, onClick = { onNavigateToNodeDetails(it.num) })
 
                 MaterialBatteryInfo(level = node.batteryLevel)
             }
