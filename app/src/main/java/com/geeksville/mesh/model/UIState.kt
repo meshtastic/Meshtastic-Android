@@ -235,13 +235,6 @@ constructor(
         _currentAlert.value = null
     }
 
-    private val _title = MutableStateFlow("")
-    val title: StateFlow<String> = _title.asStateFlow()
-
-    fun setTitle(title: String) {
-        viewModelScope.launch { _title.value = title }
-    }
-
     val meshService: IMeshService?
         get() = serviceRepository.meshService
 

@@ -40,22 +40,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.isConfigRoute
-import com.geeksville.mesh.navigation.isNodeDetailRoute
-import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.ContactsRoutes
-import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
@@ -64,8 +56,9 @@ import org.meshtastic.core.ui.theme.AppTheme
 @Composable
 fun MainAppBar(
     modifier: Modifier = Modifier,
-    viewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController,
+    ourNode: Node?,
+    isConnected: Boolean,
     onAction: (NodeMenuAction) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -74,13 +67,9 @@ fun MainAppBar(
         return
     }
 
-    val longTitle by viewModel.title.collectAsStateWithLifecycle("")
-    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
-
     val title: String =
         when {
-            currentDestination == null || currentDestination.isTopLevel() -> stringResource(id = R.string.app_name)
+            currentDestination == null -> ""
 
             currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> stringResource(id = R.string.debug_panel)
 
@@ -88,19 +77,17 @@ fun MainAppBar(
 
             currentDestination.hasRoute<ContactsRoutes.Share>() -> stringResource(id = R.string.share_to)
 
-            currentDestination.showLongNameTitle() -> longTitle
-
-            else -> stringResource(id = R.string.app_name)
+            else -> ""
         }
 
     MainAppBar(
         modifier = modifier,
         title = title,
         subtitle = null,
-        canNavigateUp = navController.previousBackStackEntry != null && currentDestination?.isTopLevel() == false,
+        canNavigateUp = navController.previousBackStackEntry != null,
         ourNode = ourNode,
         isConnected = isConnected,
-        showNodeChip = ourNode != null && currentDestination?.isTopLevel() == true && isConnected,
+        showNodeChip = false,
         onNavigateUp = navController::navigateUp,
         actions = {
             currentDestination?.let {
@@ -170,14 +157,6 @@ fun MainAppBar(
         },
     )
 }
-
-fun NavDestination.showLongNameTitle(): Boolean = !this.isTopLevel() &&
-    (
-        this.hasRoute<SettingsRoutes.Settings>() ||
-            this.hasRoute<NodesRoutes.NodeDetail>() ||
-            this.isConfigRoute() ||
-            this.isNodeDetailRoute()
-        )
 
 @Composable
 private fun TopBarActions(
