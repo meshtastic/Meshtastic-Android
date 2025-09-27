@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui.common.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.google.protobuf.ProtocolMessageEnum
 
 @Composable
@@ -106,7 +108,7 @@ fun <T> DropDownPreference(
                 errorBorderColor = Color.Transparent,
             ),
             enabled = enabled,
-            supportingText = { if (summary != null) Text(text = summary) },
+            supportingText = { if (summary != null) Text(text = summary, modifier = Modifier.padding(bottom = 8.dp)) },
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items
