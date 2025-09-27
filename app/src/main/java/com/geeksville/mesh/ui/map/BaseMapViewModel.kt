@@ -178,13 +178,13 @@ abstract class BaseMapViewModel(
     )
 
     val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(showOnlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap, lastHeardFilter, lastHeardTrackFilter) {
-                favoritesOnly,
-                showWaypoints,
-                showPrecisionCircle,
-                lastHeardFilter,
-                lastHeardTrackFilter,
-            ->
+        combine(
+            showOnlyFavorites,
+            showWaypointsOnMap,
+            showPrecisionCircleOnMap,
+            lastHeardFilter,
+            lastHeardTrackFilter,
+        ) { favoritesOnly, showWaypoints, showPrecisionCircle, lastHeardFilter, lastHeardTrackFilter ->
             MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, lastHeardFilter, lastHeardTrackFilter)
         }
             .stateIn(

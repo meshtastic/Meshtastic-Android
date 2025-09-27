@@ -123,11 +123,7 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
 }
 
 @Composable
-internal fun NodeMapFilterDropdown(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    mapViewModel: MapViewModel
-) {
+internal fun NodeMapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, mapViewModel: MapViewModel) {
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
@@ -137,10 +133,10 @@ internal fun NodeMapFilterDropdown(
 
             Text(
                 text =
-                    stringResource(
-                        R.string.last_heard_filter_label,
-                        stringResource(mapFilterState.lastHeardTrackFilter.label),
-                    ),
+                stringResource(
+                    R.string.last_heard_filter_label,
+                    stringResource(mapFilterState.lastHeardTrackFilter.label),
+                ),
                 style = MaterialTheme.typography.labelLarge,
             )
             Slider(

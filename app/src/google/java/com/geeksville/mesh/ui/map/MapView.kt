@@ -326,11 +326,7 @@ fun MapView(
     }
 
     Scaffold { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             GoogleMap(
                 mapColorScheme = mapColorScheme,
                 modifier = Modifier.fillMaxSize(),
@@ -393,67 +389,67 @@ fun MapView(
 
                 if (nodeTracks != null && focusedNodeNum != null) {
                     val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
-                    val timeFilteredPositions = nodeTracks.filter {
-                        lastHeardTrackFilter == LastHeardFilter.Any ||
+                    val timeFilteredPositions =
+                        nodeTracks.filter {
+                            lastHeardTrackFilter == LastHeardFilter.Any ||
                                 it.time > System.currentTimeMillis() / 1000 - lastHeardTrackFilter.seconds
-                    }
-                    val sortedPositions = timeFilteredPositions.sortedBy { it.time }
-                    allNodes.find { it.num == focusedNodeNum }?.let { focusedNode ->
-                        sortedPositions.forEachIndexed { index, position ->
-                        val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
-                        val dateFormat = remember {
-                            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
                         }
-                            val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
-                            val color = Color(focusedNode!!.colors.second).copy(alpha = alpha)
-                            if (index == sortedPositions.lastIndex) {
-                                MarkerComposable(
-                                    state = markerState,
-                                    zIndex = 1f,
-                                ) {
-                                    NodeChip(
-                                        node = focusedNode,
-                                        isThisNode = false,
-                                        isConnected = false,
-                                        onAction = {})
+                    val sortedPositions = timeFilteredPositions.sortedBy { it.time }
+                    allNodes
+                        .find { it.num == focusedNodeNum }
+                        ?.let { focusedNode ->
+                            sortedPositions.forEachIndexed { index, position ->
+                                val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
+                                val dateFormat = remember {
+                                    DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
                                 }
-                            } else {
-                                MarkerInfoWindowComposable(
-                                    state = markerState,
-                                    title = stringResource(R.string.position),
-                                    snippet = formatAgo(position.time),
-                                    zIndex = alpha,
-                                    infoContent = {
-                                        PositionInfoWindowContent(
-                                            position = position,
-                                            dateFormat = dateFormat,
-                                            displayUnits = displayUnits,
+                                val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
+                                val color = Color(focusedNode!!.colors.second).copy(alpha = alpha)
+                                if (index == sortedPositions.lastIndex) {
+                                    MarkerComposable(state = markerState, zIndex = 1f) {
+                                        NodeChip(
+                                            node = focusedNode,
+                                            isThisNode = false,
+                                            isConnected = false,
+                                            onAction = {},
                                         )
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = androidx.compose.material.icons.Icons.Default.TripOrigin,
-                                        contentDescription = stringResource(R.string.track_point),
-                                        tint = color,
+                                    }
+                                } else {
+                                    MarkerInfoWindowComposable(
+                                        state = markerState,
+                                        title = stringResource(R.string.position),
+                                        snippet = formatAgo(position.time),
+                                        zIndex = alpha,
+                                        infoContent = {
+                                            PositionInfoWindowContent(
+                                                position = position,
+                                                dateFormat = dateFormat,
+                                                displayUnits = displayUnits,
+                                            )
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = androidx.compose.material.icons.Icons.Default.TripOrigin,
+                                            contentDescription = stringResource(R.string.track_point),
+                                            tint = color,
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (sortedPositions.size > 1 && focusedNode != null) {
+                                val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
+                                segments.forEachIndexed { index, segmentPoints ->
+                                    val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
+                                    Polyline(
+                                        points = segmentPoints.map { it.toLatLng() },
+                                        jointType = JointType.ROUND,
+                                        color = Color(focusedNode.colors.second).copy(alpha = alpha),
+                                        width = 8f,
                                     )
                                 }
                             }
                         }
-
-                        if (sortedPositions.size > 1 && focusedNode != null) {
-                            val segments =
-                                sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
-                            segments.forEachIndexed { index, segmentPoints ->
-                                val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
-                                Polyline(
-                                    points = segmentPoints.map { it.toLatLng() },
-                                    jointType = JointType.ROUND,
-                                    color = Color(focusedNode.colors.second).copy(alpha = alpha),
-                                    width = 8f,
-                                )
-                            }
-                        }
-                    }
                 } else {
                     NodeClusterMarkers(
                         nodeClusterItems = nodeClusterItems,
@@ -521,9 +517,7 @@ fun MapView(
 
             ScaleBar(
                 cameraPositionState = cameraPositionState,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(bottom = 48.dp),
+                modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 48.dp),
             )
             editingWaypoint?.let { waypointToEdit ->
                 EditWaypointDialog(
@@ -553,9 +547,7 @@ fun MapView(
             }
 
             MapControlsOverlay(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 8.dp),
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
                 onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
                 onToggleMapFilterMenu = { mapFilterMenuExpanded = true },

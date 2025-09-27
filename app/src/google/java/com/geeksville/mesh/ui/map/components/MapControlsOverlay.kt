@@ -66,7 +66,7 @@ fun MapControlsOverlay(
         trailingContent = {},
         content = {
             CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
-            if (isNodeMap){
+            if (isNodeMap) {
                 MapButton(
                     icon = Icons.Outlined.Tune,
                     contentDescription = stringResource(id = R.string.map_filter),
