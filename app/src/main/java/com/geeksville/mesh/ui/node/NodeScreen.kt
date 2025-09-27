@@ -36,9 +36,7 @@ import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -51,12 +49,8 @@ import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.node.components.NodeFilterTextField
 import com.geeksville.mesh.ui.node.components.NodeItem
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.AddContactFAB
-import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.ui.sharing.supportsQrCodeSharing
-import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
@@ -64,11 +58,7 @@ import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun NodeScreen(
-    nodesViewModel: NodesViewModel = hiltViewModel(),
-    navigateToMessages: (String) -> Unit,
-    navigateToNodeDetails: (Int) -> Unit,
-) {
+fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
     val state by nodesViewModel.nodesUiState.collectAsStateWithLifecycle()
 
     val nodes by nodesViewModel.nodeList.collectAsStateWithLifecycle()
@@ -82,11 +72,6 @@ fun NodeScreen(
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
     val connectionState by nodesViewModel.connectionState.collectAsStateWithLifecycle()
-
-    var showSharedContact: Node? by remember { mutableStateOf(null) }
-    if (showSharedContact != null) {
-        SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
-    }
 
     val isScrollInProgress by remember { derivedStateOf { listState.isScrollInProgress } }
     Scaffold(
@@ -156,24 +141,7 @@ fun NodeScreen(
                         thatNode = node,
                         distanceUnits = state.distanceUnits,
                         tempInFahrenheit = state.tempInFahrenheit,
-                        onAction = { menuItem ->
-                            when (menuItem) {
-                                is NodeMenuAction.Remove -> nodesViewModel.removeNode(node.num)
-                                is NodeMenuAction.Ignore -> nodesViewModel.ignoreNode(node)
-                                is NodeMenuAction.Favorite -> nodesViewModel.favoriteNode(node)
-                                is NodeMenuAction.DirectMessage -> {
-                                    val hasPKC = nodesViewModel.ourNodeInfo.value?.hasPKC == true && node.hasPKC
-                                    val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
-                                    navigateToMessages("$channel${node.user.id}")
-                                }
-
-                                is NodeMenuAction.RequestUserInfo -> nodesViewModel.requestUserInfo(node.num)
-                                is NodeMenuAction.RequestPosition -> nodesViewModel.requestPosition(node.num)
-                                is NodeMenuAction.TraceRoute -> nodesViewModel.requestTraceroute(node.num)
-                                is NodeMenuAction.MoreDetails -> navigateToNodeDetails(node.num)
-                                is NodeMenuAction.Share -> showSharedContact = node
-                            }
-                        },
+                        onClickChip = { navigateToNodeDetails(it.num) },
                         expanded = state.showDetails,
                         currentTimeMillis = currentTimeMillis,
                         isConnected = connectionState.isConnected(),
