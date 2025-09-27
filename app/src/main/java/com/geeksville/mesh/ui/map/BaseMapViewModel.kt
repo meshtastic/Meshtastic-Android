@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui.map
 
 import android.os.RemoteException
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.MeshProtos
@@ -37,7 +38,28 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.strings.R
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
+
+@Suppress("MagicNumber")
+sealed class LastHeardFilter(val seconds: Long, @StringRes val label: Int) {
+    data object Any : LastHeardFilter(0L, R.string.any)
+
+    data object OneHour : LastHeardFilter(TimeUnit.HOURS.toSeconds(1), R.string.one_hour)
+
+    data object EightHours : LastHeardFilter(TimeUnit.HOURS.toSeconds(8), R.string.eight_hours)
+
+    data object OneDay : LastHeardFilter(TimeUnit.DAYS.toSeconds(1), R.string.one_day)
+
+    data object TwoDays : LastHeardFilter(TimeUnit.DAYS.toSeconds(2), R.string.two_days)
+
+    companion object {
+        fun fromSeconds(seconds: Long): LastHeardFilter = entries.find { it.seconds == seconds } ?: Any
+
+        val entries = listOf(Any, OneHour, EightHours, OneDay, TwoDays)
+    }
+}
 
 @Suppress("TooManyFunctions")
 abstract class BaseMapViewModel(
@@ -79,6 +101,13 @@ abstract class BaseMapViewModel(
     private val showWaypointsOnMap = MutableStateFlow(mapPrefs.showWaypointsOnMap)
 
     private val showPrecisionCircleOnMap = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap)
+
+    private val lastHeardFilter = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter))
+
+    fun setLastHeardFilter(filter: LastHeardFilter) {
+        mapPrefs.lastHeardFilter = filter.seconds
+        lastHeardFilter.value = filter
+    }
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
@@ -133,20 +162,31 @@ abstract class BaseMapViewModel(
         }
     }
 
-    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
+    data class MapFilterState(
+        val onlyFavorites: Boolean,
+        val showWaypoints: Boolean,
+        val showPrecisionCircle: Boolean,
+        val lastHeardFilter: LastHeardFilter,
+    )
 
     val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(showOnlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+        combine(showOnlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap, lastHeardFilter) {
                 favoritesOnly,
                 showWaypoints,
                 showPrecisionCircle,
+                lastHeard,
             ->
-            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, lastHeard)
         }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue =
-                MapFilterState(showOnlyFavorites.value, showWaypointsOnMap.value, showPrecisionCircleOnMap.value),
+                MapFilterState(
+                    showOnlyFavorites.value,
+                    showWaypointsOnMap.value,
+                    showPrecisionCircleOnMap.value,
+                    lastHeardFilter.value,
+                ),
             )
 }
