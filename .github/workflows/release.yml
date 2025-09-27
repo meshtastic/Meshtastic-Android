@@ -28,13 +28,11 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
-
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'jetbrains'
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -64,13 +62,11 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
-
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'jetbrains'
-
       - name: Setup Gradle
         if: contains(github.ref_name, '-internal')
         uses: gradle/actions/setup-gradle@v4
@@ -142,6 +138,14 @@ jobs:
           path: app/build/outputs/apk/google/release/app-google-release.apk
           retention-days: 1
 
+      - name: Attest Google artifacts provenance
+        if: contains(github.ref_name, '-internal')
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            app/build/outputs/bundle/googleRelease/app-google-release.aab
+            app/build/outputs/apk/google/release/app-google-release.apk
+
   release-fdroid:
     if: contains(github.ref_name, '-internal')
     runs-on: ubuntu-latest
@@ -152,13 +156,11 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
-
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'jetbrains'
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -195,27 +197,74 @@ jobs:
           path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
           retention-days: 1
 
-  create-github-release:
-    if: contains(github.ref_name, '-internal')
+      - name: Attest F-Droid APK provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+
+  create-internal-release:
     runs-on: ubuntu-latest
-    needs: [release-google, release-fdroid]
+    needs: [prepare-build-info, release-google, release-fdroid]
+    if: contains(github.ref_name, '-internal')
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v5
         with:
           path: ./artifacts
 
+      - name: Get artifact paths
+        id: artifact_paths
+        run: |
+          paths=""
+          if [ -f ./artifacts/google-aab/app-google-release.aab ]; then
+            paths="${paths} ./artifacts/google-aab/app-google-release.aab"
+          fi
+          if [ -f ./artifacts/google-apk/app-google-release.apk ]; then
+            paths="${paths} ./artifacts/google-apk/app-google-release.apk"
+          fi
+          if [ -f ./artifacts/fdroid-apk/app-fdroid-release.apk ]; then
+            paths="${paths} ./artifacts/fdroid-apk/app-fdroid-release.apk"
+          fi
+          echo "paths=${paths}" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          tag_name: v${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          name: ${{ github.ref_name }}
           generate_release_notes: true
-          files: |
-            ./artifacts/google-aab/app-google-release.aab
-            ./artifacts/google-apk/app-google-release.apk
-            ./artifacts/fdroid-apk/app-fdroid-release.apk
+          files: ${{ steps.artifact_paths.outputs.paths }}
           draft: true
           prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  promote-release:
+    runs-on: ubuntu-latest
+    needs: [prepare-build-info, release-google]
+    if: "!contains(github.ref_name, '-internal')"
+    steps:
+      - name: Determine Release Properties
+        id: release_properties
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          if [[ "$TAG_NAME" == *"-closed"* ]]; then
+            echo "draft=false" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          elif [[ "$TAG_NAME" == *"-open"* ]]; then
+            echo "draft=false" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "draft=false" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          name: ${{ github.ref_name }}
+          draft: ${{ steps.release_properties.outputs.draft }}
+          prerelease: ${{ steps.release_properties.outputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
