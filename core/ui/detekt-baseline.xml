@@ -8,6 +8,7 @@
     <ID>ComposableParamOrder:MaterialBatteryInfo.kt$MaterialBatteryInfo</ID>
     <ID>ComposableParamOrder:SwitchPreference.kt$SwitchPreference</ID>
     <ID>ContentSlotReused:AdaptiveTwoPane.kt$second</ID>
+    <ID>LongMethod:EditTextPreference.kt$@Composable fun EditTextPreference( title: String, value: String, enabled: Boolean, isError: Boolean, keyboardOptions: KeyboardOptions, keyboardActions: KeyboardActions, onValueChanged: (String) -&gt; Unit, modifier: Modifier = Modifier, summary: String? = null, maxSize: Int = 0, // max_size - 1 (in bytes) onFocusChanged: (FocusState) -&gt; Unit = {}, trailingIcon: (@Composable () -&gt; Unit)? = null, visualTransformation: VisualTransformation = VisualTransformation.None, )</ID>
     <ID>MagicNumber:BatteryInfo.kt$100</ID>
     <ID>MagicNumber:BatteryInfo.kt$101</ID>
     <ID>MagicNumber:BatteryInfo.kt$14</ID>
