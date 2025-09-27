@@ -65,7 +65,6 @@ class MessageItemTest {
                 onClick = {},
                 onLongClick = {},
                 onStatusClick = {},
-                isConnected = true,
                 ourNode = testNode,
             )
         }
@@ -105,7 +104,6 @@ class MessageItemTest {
                 onClick = {},
                 onLongClick = {},
                 onStatusClick = {},
-                isConnected = true,
                 ourNode = testNode,
             )
         }
