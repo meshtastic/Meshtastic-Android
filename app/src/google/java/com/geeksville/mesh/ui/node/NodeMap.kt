@@ -44,14 +44,12 @@ fun NodeMapScreen(
     val positions = state.positionLogs
     val destNum = state.node?.num
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
                 ourNode = ourNodeInfo,
-                isConnected = isConnected,
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = navController::navigateUp,

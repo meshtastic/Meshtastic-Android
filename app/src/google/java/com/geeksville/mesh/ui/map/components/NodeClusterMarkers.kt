@@ -63,8 +63,6 @@ fun NodeClusterMarkers(
             navigateToNodeDetails(item.node.num)
             false
         },
-        clusterItemContent = { clusterItem ->
-            NodeChip(node = clusterItem.node, enabled = false, isThisNode = false, isConnected = false) {}
-        },
+        clusterItemContent = { clusterItem -> NodeChip(node = clusterItem.node, enabled = false) {} },
     )
 }

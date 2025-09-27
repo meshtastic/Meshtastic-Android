@@ -129,7 +129,7 @@ fun NodeItem(
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                NodeChip(node = thatNode, isThisNode = isThisNode, isConnected = isConnected, onAction = onAction)
+                NodeChip(node = thatNode, onAction = onAction)
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,

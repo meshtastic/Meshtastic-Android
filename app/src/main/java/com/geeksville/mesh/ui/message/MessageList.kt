@@ -107,7 +107,6 @@ fun DeliveryInfo(
 internal fun MessageList(
     nodes: List<Node>,
     ourNode: Node?,
-    isConnected: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     messages: List<Message>,
@@ -179,7 +178,6 @@ internal fun MessageList(
                     emojis = msg.emojis,
                     sendReaction = { onSendReaction(it, msg.packetId) },
                     onShowReactions = { showReactionDialog = msg.emojis },
-                    isConnected = isConnected,
                     onNavigateToOriginalMessage = {
                         coroutineScope.launch {
                             val targetIndex = messages.indexOfFirst { it.packetId == msg.replyId }

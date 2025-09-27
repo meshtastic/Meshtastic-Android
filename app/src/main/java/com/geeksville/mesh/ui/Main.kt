@@ -379,7 +379,6 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     MainAppBar(
                         navController = navController,
                         ourNode = ourNodeInfo,
-                        isConnected = connectionState.isConnected(),
                         onAction = { action ->
                             when (action) {
                                 is NodeMenuAction.MoreDetails -> {

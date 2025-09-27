@@ -194,7 +194,6 @@ fun SettingsScreen(
                     stringResource(R.string.remotely_administrating, remoteName)
                 },
                 ourNode = ourNode,
-                isConnected = isConnected,
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
                 canNavigateUp = false,
                 onNavigateUp = {},

@@ -47,7 +47,6 @@ fun MapScreen(
             MainAppBar(
                 title = stringResource(R.string.map),
                 ourNode = ourNodeInfo,
-                isConnected = isConnected,
                 showNodeChip = ourNodeInfo != null && isConnected,
                 canNavigateUp = false,
                 onNavigateUp = {},

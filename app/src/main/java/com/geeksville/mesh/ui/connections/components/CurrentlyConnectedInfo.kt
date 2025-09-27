@@ -68,8 +68,6 @@ fun CurrentlyConnectedInfo(
             ) {
                 NodeChip(
                     node = node,
-                    isThisNode = true,
-                    isConnected = true,
                     onAction = { action ->
                         when (action) {
                             is NodeMenuAction.MoreDetails -> onNavigateToNodeDetails(node.num)

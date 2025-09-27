@@ -58,7 +58,6 @@ fun MainAppBar(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     ourNode: Node?,
-    isConnected: Boolean,
     onAction: (NodeMenuAction) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -86,7 +85,6 @@ fun MainAppBar(
         subtitle = null,
         canNavigateUp = navController.previousBackStackEntry != null,
         ourNode = ourNode,
-        isConnected = isConnected,
         showNodeChip = false,
         onNavigateUp = navController::navigateUp,
         actions = {
@@ -108,7 +106,6 @@ fun MainAppBar(
     title: String,
     subtitle: String? = null,
     ourNode: Node?,
-    isConnected: Boolean,
     showNodeChip: Boolean,
     canNavigateUp: Boolean,
     onNavigateUp: () -> Unit,
@@ -147,13 +144,7 @@ fun MainAppBar(
             }
         },
         actions = {
-            TopBarActions(
-                ourNode = ourNode,
-                isConnected = isConnected,
-                showNodeChip = showNodeChip,
-                actions = actions,
-                onAction = onAction,
-            )
+            TopBarActions(ourNode = ourNode, showNodeChip = showNodeChip, actions = actions, onAction = onAction)
         },
     )
 }
@@ -161,21 +152,12 @@ fun MainAppBar(
 @Composable
 private fun TopBarActions(
     ourNode: Node?,
-    isConnected: Boolean,
     showNodeChip: Boolean,
     actions: @Composable () -> Unit,
     onAction: (NodeMenuAction) -> Unit,
 ) {
     AnimatedVisibility(visible = showNodeChip, enter = fadeIn(), exit = fadeOut()) {
-        ourNode?.let {
-            NodeChip(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                node = it,
-                isThisNode = true,
-                isConnected = isConnected,
-                onAction = onAction,
-            )
-        }
+        ourNode?.let { NodeChip(modifier = Modifier.padding(horizontal = 16.dp), node = it, onAction = onAction) }
     }
 
     actions()
@@ -189,7 +171,6 @@ private fun MainAppBarPreview(@PreviewParameter(BooleanProvider::class) canNavig
             title = "Title",
             subtitle = "Subtitle",
             ourNode = previewNode,
-            isConnected = false,
             showNodeChip = true,
             canNavigateUp = canNavigateUp,
             onNavigateUp = {},

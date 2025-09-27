@@ -297,7 +297,6 @@ internal fun MessageScreen(
                 MessageList(
                     nodes = nodes,
                     ourNode = ourNode,
-                    isConnected = connectionState.isConnected(),
                     modifier = Modifier.fillMaxSize(),
                     listState = listState,
                     messages = messages,

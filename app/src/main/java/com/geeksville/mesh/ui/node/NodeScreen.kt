@@ -95,7 +95,6 @@ fun NodeScreen(
                 title = stringResource(R.string.nodes),
                 subtitle = stringResource(R.string.node_count_template, onlineNodeCount, totalNodeCount),
                 ourNode = ourNode,
-                isConnected = connectionState.isConnected(),
                 showNodeChip = false,
                 canNavigateUp = false,
                 onNavigateUp = {},

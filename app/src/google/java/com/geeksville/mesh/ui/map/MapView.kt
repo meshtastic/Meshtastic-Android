@@ -449,7 +449,7 @@ fun MapView(
                                 state = rememberUpdatedMarkerState(position = originalLatLngs.first()),
                                 zIndex = 1f,
                             ) {
-                                NodeChip(node = it, isThisNode = false, isConnected = false, onAction = {})
+                                NodeChip(node = it, onAction = {})
                             }
                         }
                     }

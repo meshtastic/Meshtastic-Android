@@ -144,7 +144,6 @@ fun ContactsScreen(
             MainAppBar(
                 title = stringResource(R.string.conversations),
                 ourNode = ourNode,
-                isConnected = connectionState.isConnected(),
                 showNodeChip = ourNode != null && connectionState.isConnected(),
                 canNavigateUp = false,
                 onNavigateUp = {},

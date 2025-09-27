@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh.ui.node.components
 
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -29,10 +29,7 @@ import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
@@ -47,17 +44,9 @@ import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.database.model.Node
 
 @Composable
-fun NodeChip(
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    node: Node,
-    isThisNode: Boolean,
-    isConnected: Boolean,
-    onAction: (NodeMenuAction) -> Unit,
-) {
+fun NodeChip(modifier: Modifier = Modifier, enabled: Boolean = true, node: Node, onAction: (NodeMenuAction) -> Unit) {
     val isIgnored = node.isIgnored
     val (textColor, nodeColor) = node.colors
-    var menuExpanded by remember { mutableStateOf(false) }
     val inputChipInteractionSource = remember { MutableInteractionSource() }
     Box {
         ElevatedAssistChip(
@@ -87,26 +76,15 @@ fun NodeChip(
         Box(
             modifier =
             Modifier.matchParentSize()
-                .combinedClickable(
+                .clickable(
                     enabled = enabled,
                     onClick = { onAction(NodeMenuAction.MoreDetails(node)) },
-                    onLongClick = { menuExpanded = true },
                     interactionSource = inputChipInteractionSource,
                     indication = null,
                 )
                 .semantics { contentDescription = node.user.shortName.ifEmpty { "Node" } },
         )
     }
-    NodeMenu(
-        expanded = menuExpanded,
-        node = node,
-        showFullMenu = !isThisNode && isConnected,
-        onDismissMenuRequest = { menuExpanded = false },
-        onAction = {
-            menuExpanded = false
-            onAction(it)
-        },
-    )
 }
 
 @Suppress("MagicNumber")
@@ -123,5 +101,5 @@ fun NodeChipPreview() {
             environmentMetrics =
             TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f).setRelativeHumidity(60f).build(),
         )
-    NodeChip(node = node, isThisNode = false, isConnected = true, onAction = {})
+    NodeChip(node = node, onAction = {})
 }
