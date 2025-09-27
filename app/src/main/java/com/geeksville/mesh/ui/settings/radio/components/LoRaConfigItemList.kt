@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -42,6 +43,7 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 
 @Composable
 fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
@@ -65,74 +67,67 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
             viewModel.setConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.options)) }
         item {
-            DropDownPreference(
-                title = stringResource(R.string.region_frequency_plan),
-                summary = stringResource(id = R.string.config_lora_region_summary),
-                enabled = state.connected,
-                items = RegionInfo.entries.map { it.regionCode to it.description },
-                selectedItem = formState.value.region,
-                onItemSelected = { formState.value = formState.value.copy { region = it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.use_modem_preset),
-                checked = formState.value.usePreset,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { usePreset = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        if (formState.value.usePreset) {
-            item {
+            TitledCard(title = stringResource(R.string.options)) {
                 DropDownPreference(
-                    title = stringResource(R.string.modem_preset),
-                    summary = stringResource(id = R.string.config_lora_modem_preset_summary),
-                    enabled = state.connected && formState.value.usePreset,
-                    items =
-                    LoRaConfig.ModemPreset.entries
-                        .filter { it != LoRaConfig.ModemPreset.UNRECOGNIZED }
-                        .map { it to it.name },
-                    selectedItem = formState.value.modemPreset,
-                    onItemSelected = { formState.value = formState.value.copy { modemPreset = it } },
+                    title = stringResource(R.string.region_frequency_plan),
+                    summary = stringResource(id = R.string.config_lora_region_summary),
+                    enabled = state.connected,
+                    items = RegionInfo.entries.map { it.regionCode to it.description },
+                    selectedItem = formState.value.region,
+                    onItemSelected = { formState.value = formState.value.copy { region = it } },
                 )
-            }
-            item { HorizontalDivider() }
-        } else {
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.bandwidth),
-                    value = formState.value.bandwidth,
-                    enabled = state.connected && !formState.value.usePreset,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { bandwidth = it } },
-                )
-            }
 
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.spread_factor),
-                    value = formState.value.spreadFactor,
-                    enabled = state.connected && !formState.value.usePreset,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { spreadFactor = it } },
-                )
-            }
+                HorizontalDivider()
 
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.coding_rate),
-                    value = formState.value.codingRate,
-                    enabled = state.connected && !formState.value.usePreset,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { codingRate = it } },
+                SwitchPreference(
+                    title = stringResource(R.string.use_modem_preset),
+                    checked = formState.value.usePreset,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { usePreset = it } },
+                    containerColor = Color.Transparent,
                 )
+
+                if (formState.value.usePreset) {
+                    DropDownPreference(
+                        title = stringResource(R.string.modem_preset),
+                        summary = stringResource(id = R.string.config_lora_modem_preset_summary),
+                        enabled = state.connected && formState.value.usePreset,
+                        items =
+                        LoRaConfig.ModemPreset.entries
+                            .filter { it != LoRaConfig.ModemPreset.UNRECOGNIZED }
+                            .map { it to it.name },
+                        selectedItem = formState.value.modemPreset,
+                        onItemSelected = { formState.value = formState.value.copy { modemPreset = it } },
+                    )
+                } else {
+                    EditTextPreference(
+                        title = stringResource(R.string.bandwidth),
+                        value = formState.value.bandwidth,
+                        enabled = state.connected && !formState.value.usePreset,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { formState.value = formState.value.copy { bandwidth = it } },
+                    )
+
+                    EditTextPreference(
+                        title = stringResource(R.string.spread_factor),
+                        value = formState.value.spreadFactor,
+                        enabled = state.connected && !formState.value.usePreset,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { formState.value = formState.value.copy { spreadFactor = it } },
+                    )
+
+                    EditTextPreference(
+                        title = stringResource(R.string.coding_rate),
+                        value = formState.value.codingRate,
+                        enabled = state.connected && !formState.value.usePreset,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { formState.value = formState.value.copy { codingRate = it } },
+                    )
+                }
             }
         }
+
         item { PreferenceCategory(text = stringResource(R.string.advanced)) }
 
         item {
