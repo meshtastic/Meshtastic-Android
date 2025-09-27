@@ -51,7 +51,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
@@ -77,9 +76,8 @@ internal fun MessageItem(
     emojis: List<Reaction> = emptyList(),
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
-    onAction: (NodeMenuAction) -> Unit = {},
+    onClickChip: (Node) -> Unit = {},
     onStatusClick: () -> Unit = {},
-    isConnected: Boolean,
     onNavigateToOriginalMessage: (Int) -> Unit = {},
 ) = Column(
     modifier =
@@ -134,12 +132,8 @@ internal fun MessageItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    NodeChip(
-                        node = if (message.fromLocal) ourNode else node,
-                        onAction = onAction,
-                        isConnected = isConnected,
-                        isThisNode = message.fromLocal,
-                    )
+                    val chipNode = if (message.fromLocal) ourNode else node
+                    NodeChip(node = chipNode, onClick = onClickChip)
                     Text(
                         text = with(if (message.fromLocal) ourNode.user else node.user) { "$longName ($id)" },
                         overflow = TextOverflow.Ellipsis,
@@ -325,7 +319,6 @@ private fun MessageItemPreview() {
                 onClick = {},
                 onLongClick = {},
                 onStatusClick = {},
-                isConnected = true,
                 ourNode = sent.node,
             )
 
@@ -336,7 +329,6 @@ private fun MessageItemPreview() {
                 onClick = {},
                 onLongClick = {},
                 onStatusClick = {},
-                isConnected = true,
                 ourNode = sent.node,
             )
 
@@ -347,7 +339,6 @@ private fun MessageItemPreview() {
                 onClick = {},
                 onLongClick = {},
                 onStatusClick = {},
-                isConnected = true,
                 ourNode = sent.node,
             )
         }

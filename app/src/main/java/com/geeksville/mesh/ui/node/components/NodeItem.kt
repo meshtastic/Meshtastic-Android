@@ -68,7 +68,7 @@ fun NodeItem(
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
     modifier: Modifier = Modifier,
-    onAction: (NodeMenuAction) -> Unit = {},
+    onClickChip: (Node) -> Unit = {},
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
@@ -129,7 +129,7 @@ fun NodeItem(
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                NodeChip(node = thatNode, isThisNode = isThisNode, isConnected = isConnected, onAction = onAction)
+                NodeChip(node = thatNode, onClick = onClickChip)
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,

@@ -45,8 +45,6 @@ constructor(
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
-    val connectionState = serviceRepository.connectionState
-
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
