@@ -51,7 +51,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
@@ -77,7 +76,7 @@ internal fun MessageItem(
     emojis: List<Reaction> = emptyList(),
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
-    onAction: (NodeMenuAction) -> Unit = {},
+    onClickChip: (Node) -> Unit = {},
     onStatusClick: () -> Unit = {},
     onNavigateToOriginalMessage: (Int) -> Unit = {},
 ) = Column(
@@ -134,7 +133,7 @@ internal fun MessageItem(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     val chipNode = if (message.fromLocal) ourNode else node
-                    NodeChip(node = chipNode, onClick = { onAction(NodeMenuAction.MoreDetails(chipNode)) })
+                    NodeChip(node = chipNode, onClick = { onClickChip(chipNode) })
                     Text(
                         text = with(if (message.fromLocal) ourNode.user else node.user) { "$longName ($id)" },
                         overflow = TextOverflow.Ellipsis,

@@ -48,7 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.message.components.MessageItem
 import com.geeksville.mesh.ui.message.components.ReactionDialog
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -113,7 +112,7 @@ internal fun MessageList(
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
     onSendReaction: (String, Int) -> Unit,
-    onNodeMenuAction: (NodeMenuAction) -> Unit,
+    onClickChip: (Node) -> Unit,
     onDeleteMessages: (List<Long>) -> Unit,
     onSendMessage: (messageText: String, contactKey: String) -> Unit,
     contactKey: String,
@@ -172,7 +171,7 @@ internal fun MessageList(
                         selectedIds.toggle(msg.uuid)
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
-                    onAction = onNodeMenuAction,
+                    onClickChip = onClickChip,
                     onStatusClick = { showStatusDialog = msg },
                     onReply = { onReply(msg) },
                     emojis = msg.emojis,

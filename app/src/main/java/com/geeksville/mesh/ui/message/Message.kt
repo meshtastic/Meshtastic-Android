@@ -97,7 +97,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ui.common.components.SecurityIcon
 import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -207,24 +206,7 @@ internal fun MessageScreen(
                     is MessageScreenEvent.ClearUnreadCount ->
                         viewModel.clearUnreadCount(contactKey, event.lastReadMessageId)
 
-                    is MessageScreenEvent.HandleNodeMenuAction -> {
-                        when (val action = event.action) {
-                            is NodeMenuAction.DirectMessage -> {
-                                val hasPKC = ourNode?.hasPKC == true && action.node.hasPKC
-                                val targetChannel =
-                                    if (hasPKC) {
-                                        DataPacket.PKC_CHANNEL_INDEX
-                                    } else {
-                                        action.node.channel
-                                    }
-                                navigateToMessages("$targetChannel${action.node.user.id}")
-                            }
-
-                            is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
-                            is NodeMenuAction.Share -> sharedContact = action.node
-                            else -> viewModel.handleNodeMenuAction(action)
-                        }
-                    }
+                    is MessageScreenEvent.NodeDetails -> navigateToNodeDetails(event.node.num)
 
                     is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
                     is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey)
@@ -307,7 +289,7 @@ internal fun MessageScreen(
                     onSendMessage = { text, contactKey -> viewModel.sendMessage(text, contactKey) },
                     contactKey = contactKey,
                     onReply = { message -> replyingToPacketId = message?.packetId },
-                    onNodeMenuAction = { action -> onEvent(MessageScreenEvent.HandleNodeMenuAction(action)) },
+                    onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
                 )
                 // Show FAB if we can scroll towards the newest messages (index 0).
                 if (listState.canScrollBackward) {
