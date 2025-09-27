@@ -108,7 +108,12 @@ fun <T> DropDownPreference(
                 errorBorderColor = Color.Transparent,
             ),
             enabled = enabled,
-            supportingText = { if (summary != null) Text(text = summary, modifier = Modifier.padding(bottom = 8.dp)) },
+            supportingText =
+            if (summary != null) {
+                { Text(text = summary, modifier = Modifier.padding(bottom = 8.dp)) }
+            } else {
+                null
+            },
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items
