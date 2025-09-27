@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.settings.radio.ResponseState
 import com.google.protobuf.MessageLite
@@ -61,7 +63,7 @@ fun <T : MessageLite> RadioConfigScreenList(
             )
         },
     ) { innerPadding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding), contentPadding = PaddingValues(16.dp)) {
             content()
             item {
                 PreferenceFooter(
