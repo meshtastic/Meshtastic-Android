@@ -304,8 +304,8 @@ fun MapView(
         allNodes
             .filter { node -> !mapFilterState.onlyFavorites || node.isFavorite || node.num == ourNodeInfo?.num }
             .filter { node ->
-                mapFilterState.lastHeardFilter == 0L ||
-                    (System.currentTimeMillis() / 1000 - node.lastHeard) <= mapFilterState.lastHeardFilter ||
+                mapFilterState.lastHeardFilter.seconds == 0L ||
+                    (System.currentTimeMillis() / 1000 - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
                     node.num == ourNodeInfo?.num
             }
 
