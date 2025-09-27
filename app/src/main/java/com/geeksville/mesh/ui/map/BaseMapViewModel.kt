@@ -38,6 +38,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 @Suppress("TooManyFunctions")
 abstract class BaseMapViewModel(
@@ -79,6 +80,20 @@ abstract class BaseMapViewModel(
     private val showWaypointsOnMap = MutableStateFlow(mapPrefs.showWaypointsOnMap)
 
     private val showPrecisionCircleOnMap = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap)
+
+    private val lastHeardFilter = MutableStateFlow(mapPrefs.lastHeardFilter)
+    val lastHeardFilterOptions =
+        listOf(
+            0L, // Off
+            TimeUnit.HOURS.toSeconds(1),
+            TimeUnit.HOURS.toSeconds(8),
+            TimeUnit.DAYS.toSeconds(1),
+        )
+
+    fun setLastHeardFilter(lastHeard: Long) {
+        mapPrefs.lastHeardFilter = lastHeard
+        lastHeardFilter.value = lastHeard
+    }
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
@@ -133,20 +148,31 @@ abstract class BaseMapViewModel(
         }
     }
 
-    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
+    data class MapFilterState(
+        val onlyFavorites: Boolean,
+        val showWaypoints: Boolean,
+        val showPrecisionCircle: Boolean,
+        val lastHeardFilter: Long,
+    )
 
     val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(showOnlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+        combine(showOnlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap, lastHeardFilter) {
                 favoritesOnly,
                 showWaypoints,
                 showPrecisionCircle,
+                lastHeard,
             ->
-            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, lastHeard)
         }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue =
-                MapFilterState(showOnlyFavorites.value, showWaypointsOnMap.value, showPrecisionCircleOnMap.value),
+                MapFilterState(
+                    showOnlyFavorites.value,
+                    showWaypointsOnMap.value,
+                    showPrecisionCircleOnMap.value,
+                    lastHeardFilter.value,
+                ),
             )
 }

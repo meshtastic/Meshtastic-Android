@@ -301,11 +301,13 @@ fun MapView(
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
     val filteredNodes =
-        if (mapFilterState.onlyFavorites) {
-            allNodes.filter { it.isFavorite || it.num == ourNodeInfo?.num }
-        } else {
-            allNodes
-        }
+        allNodes
+            .filter { node -> !mapFilterState.onlyFavorites || node.isFavorite || node.num == ourNodeInfo?.num }
+            .filter { node ->
+                mapFilterState.lastHeardFilter == 0L ||
+                    (System.currentTimeMillis() / 1000 - node.lastHeard) <= mapFilterState.lastHeardFilter ||
+                    node.num == ourNodeInfo?.num
+            }
 
     val nodeClusterItems =
         filteredNodes.map { node ->

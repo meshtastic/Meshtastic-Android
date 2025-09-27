@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.map.components
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Place
@@ -24,14 +25,20 @@ import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ui.map.MapViewModel
 import org.meshtastic.core.strings.R
+import java.util.concurrent.TimeUnit
 
 @Composable
 internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, mapViewModel: MapViewModel) {
@@ -85,5 +92,37 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
                 )
             },
         )
+        HorizontalDivider()
+        Text(
+            text = stringResource(R.string.last_heard_filter),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.labelLarge,
+        )
+        mapViewModel.lastHeardFilterOptions.forEach { seconds ->
+            val text =
+                when (seconds) {
+                    0L -> stringResource(R.string.any)
+                    TimeUnit.HOURS.toSeconds(1) -> stringResource(R.string.one_hour)
+                    TimeUnit.HOURS.toSeconds(8) -> stringResource(R.string.eight_hours)
+                    TimeUnit.DAYS.toSeconds(1) -> stringResource(R.string.one_day)
+                    else -> seconds.toString()
+                }
+            DropdownMenuItem(
+                text = { Text(text) },
+                onClick = {
+                    mapViewModel.setLastHeardFilter(seconds)
+                    onDismissRequest()
+                },
+                trailingIcon = {
+                    RadioButton(
+                        selected = mapFilterState.lastHeardFilter == seconds,
+                        onClick = {
+                            mapViewModel.setLastHeardFilter(seconds)
+                            onDismissRequest()
+                        },
+                    )
+                },
+            )
+        }
     }
 }
