@@ -864,10 +864,10 @@
     <string name="remotely_administrating">"[Etälaite] %1$s"</string>
     <string name="device_telemetry_enabled">Lähetä laitteen telemetriatiedot</string>
     <string name="device_telemetry_enabled_summary">Ota käyttöön/poista käytöstä telemetriamoduuli laitteen mittaustietojen lähettämiseksi mesh-verkkoon</string>
-    <string name="any">Any</string>
-    <string name="one_hour">1 Hour</string>
-    <string name="eight_hours">8 Hours</string>
-    <string name="one_day">24 Hours</string>
-    <string name="two_days">48 Hours</string>
-    <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
+    <string name="any">Milloin tahansa</string>
+    <string name="one_hour">1 tunti</string>
+    <string name="eight_hours">8 tuntia</string>
+    <string name="one_day">24 tuntia</string>
+    <string name="two_days">48 tuntia</string>
+    <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %s</string>
 </resources>
