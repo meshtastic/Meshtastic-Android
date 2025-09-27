@@ -17,9 +17,7 @@
 
 package com.geeksville.mesh.ui.node.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,47 +42,34 @@ import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.database.model.Node
 
 @Composable
-fun NodeChip(modifier: Modifier = Modifier, enabled: Boolean = true, node: Node, onAction: (NodeMenuAction) -> Unit) {
+fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: () -> Unit) {
     val isIgnored = node.isIgnored
     val (textColor, nodeColor) = node.colors
     val inputChipInteractionSource = remember { MutableInteractionSource() }
-    Box {
-        ElevatedAssistChip(
-            modifier =
-            modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
-                contentDescription = node.user.shortName.ifEmpty { "Node" }
-            },
-            elevation = AssistChipDefaults.elevatedAssistChipElevation(),
-            colors =
-            AssistChipDefaults.elevatedAssistChipColors(
-                containerColor = Color(nodeColor),
-                labelColor = Color(textColor),
-            ),
-            label = {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = node.user.shortName.ifEmpty { "???" },
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                )
-            },
-            onClick = {},
-            interactionSource = inputChipInteractionSource,
-        )
-        Box(
-            modifier =
-            Modifier.matchParentSize()
-                .clickable(
-                    enabled = enabled,
-                    onClick = { onAction(NodeMenuAction.MoreDetails(node)) },
-                    interactionSource = inputChipInteractionSource,
-                    indication = null,
-                )
-                .semantics { contentDescription = node.user.shortName.ifEmpty { "Node" } },
-        )
-    }
+    ElevatedAssistChip(
+        modifier =
+        modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
+            contentDescription = node.user.shortName.ifEmpty { "Node" }
+        },
+        elevation = AssistChipDefaults.elevatedAssistChipElevation(),
+        colors =
+        AssistChipDefaults.elevatedAssistChipColors(
+            containerColor = Color(nodeColor),
+            labelColor = Color(textColor),
+        ),
+        label = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = node.user.shortName.ifEmpty { "???" },
+                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+            )
+        },
+        onClick = onClick,
+        interactionSource = inputChipInteractionSource,
+    )
 }
 
 @Suppress("MagicNumber")
@@ -101,5 +86,5 @@ fun NodeChipPreview() {
             environmentMetrics =
             TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f).setRelativeHumidity(60f).build(),
         )
-    NodeChip(node = node, onAction = {})
+    NodeChip(node = node, onClick = {})
 }

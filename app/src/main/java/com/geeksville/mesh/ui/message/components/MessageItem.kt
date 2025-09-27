@@ -133,7 +133,8 @@ internal fun MessageItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    NodeChip(node = if (message.fromLocal) ourNode else node, onAction = onAction)
+                    val chipNode = if (message.fromLocal) ourNode else node
+                    NodeChip(node = chipNode, onClick = { onAction(NodeMenuAction.MoreDetails(chipNode)) })
                     Text(
                         text = with(if (message.fromLocal) ourNode.user else node.user) { "$longName ($id)" },
                         overflow = TextOverflow.Ellipsis,

@@ -59,7 +59,7 @@ fun ClusterItemsListDialog(
 @Composable
 private fun ClusterDialogListItem(item: NodeClusterItem, onClick: () -> Unit, modifier: Modifier = Modifier) {
     ListItem(
-        leadingContent = { NodeChip(node = item.node, enabled = false) {} },
+        leadingContent = { NodeChip(node = item.node) {} },
         headlineContent = { Text(item.nodeTitle) },
         supportingContent = {
             if (item.nodeSnippet.isNotBlank()) {

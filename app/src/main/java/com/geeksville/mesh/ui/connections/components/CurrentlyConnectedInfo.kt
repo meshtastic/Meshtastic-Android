@@ -44,7 +44,6 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
@@ -55,7 +54,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 fun CurrentlyConnectedInfo(
     node: Node,
     onNavigateToNodeDetails: (Int) -> Unit,
-    onSetShowSharedContact: (Node) -> Unit,
     onNavigateToSettings: () -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
@@ -66,17 +64,7 @@ fun CurrentlyConnectedInfo(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                NodeChip(
-                    node = node,
-                    onAction = { action ->
-                        when (action) {
-                            is NodeMenuAction.MoreDetails -> onNavigateToNodeDetails(node.num)
-
-                            is NodeMenuAction.Share -> onSetShowSharedContact(node)
-                            else -> {}
-                        }
-                    },
-                )
+                NodeChip(node = node, onClick = { onNavigateToNodeDetails(node.num) })
 
                 MaterialBatteryInfo(level = node.batteryLevel)
             }
@@ -136,7 +124,6 @@ private fun CurrentlyConnectedInfoPreview() {
                     .build(),
             ),
             onNavigateToNodeDetails = {},
-            onSetShowSharedContact = {},
             onNavigateToSettings = {},
             onClickDisconnect = {},
         )
