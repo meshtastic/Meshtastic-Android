@@ -42,7 +42,7 @@ import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.database.model.Node
 
 @Composable
-fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: () -> Unit) {
+fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: () -> Unit = {}) {
     val isIgnored = node.isIgnored
     val (textColor, nodeColor) = node.colors
     val inputChipInteractionSource = remember { MutableInteractionSource() }
@@ -86,5 +86,5 @@ fun NodeChipPreview() {
             environmentMetrics =
             TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f).setRelativeHumidity(60f).build(),
         )
-    NodeChip(node = node, onClick = {})
+    NodeChip(node = node)
 }

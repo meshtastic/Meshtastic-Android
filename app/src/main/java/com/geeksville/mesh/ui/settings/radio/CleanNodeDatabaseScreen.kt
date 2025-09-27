@@ -173,7 +173,7 @@ private fun NodesDeletionPreview(nodesToDelete: List<NodeEntity>) {
         verticalArrangement = Arrangement.Center,
     ) {
         nodesToDelete.forEach { node ->
-            NodeChip(node = node.toModel(), modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)) {}
+            NodeChip(node = node.toModel(), modifier = Modifier.padding(end = 8.dp, bottom = 8.dp))
         }
     }
 }
