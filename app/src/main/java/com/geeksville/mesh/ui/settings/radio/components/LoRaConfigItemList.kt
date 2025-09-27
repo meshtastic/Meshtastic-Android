@@ -33,13 +33,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.common.components.PreferenceDivider
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.strings.R
@@ -98,10 +98,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                         title = stringResource(R.string.modem_preset),
                         summary = stringResource(id = R.string.config_lora_modem_preset_summary),
                         enabled = state.connected && formState.value.usePreset,
-                        items =
-                        LoRaConfig.ModemPreset.entries
-                            .filter { it != LoRaConfig.ModemPreset.UNRECOGNIZED }
-                            .map { it to it.name },
+                        items = ChannelOption.entries.map { it.modemPreset to it.description },
                         selectedItem = formState.value.modemPreset,
                         onItemSelected = { formState.value = formState.value.copy { modemPreset = it } },
                     )

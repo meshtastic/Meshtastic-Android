@@ -294,14 +294,14 @@ enum class RegionInfo(
     }
 }
 
-enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float) {
-    SHORT_TURBO(ModemPreset.SHORT_TURBO, bandwidth = .500f),
-    SHORT_FAST(ModemPreset.SHORT_FAST, .250f),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, .250f),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, .250f),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, .250f),
-    LONG_FAST(ModemPreset.LONG_FAST, .250f),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, .125f),
-    LONG_SLOW(ModemPreset.LONG_SLOW, .125f),
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, .0625f),
+enum class ChannelOption(val modemPreset: ModemPreset, val description: String, val bandwidth: Float) {
+    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, "", .0625f),
+    LONG_FAST(ModemPreset.LONG_FAST, "Long Range - Fast", .250f),
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, "Long Range - Moderate", .125f),
+    LONG_SLOW(ModemPreset.LONG_SLOW, "Long Range - Slow", .125f),
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, "Medium Range - Fast", .250f),
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, "Medium Range - Slow", .250f),
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, "Short Range - Turbo", bandwidth = .500f),
+    SHORT_FAST(ModemPreset.SHORT_FAST, "Short Range - Fast", .250f),
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, "Short Range - Slow", .250f),
 }
