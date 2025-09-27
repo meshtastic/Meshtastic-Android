@@ -168,13 +168,13 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
 
                 PreferenceDivider()
 
-                EditTextPreference(
+                DropDownPreference(
                     title = stringResource(R.string.hop_limit),
                     summary = stringResource(id = R.string.config_lora_hop_limit_summary),
-                    value = formState.value.hopLimit,
+                    selectedItem = formState.value.hopLimit,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { hopLimit = it } },
+                    items = (0..7).map { it to "$it" },
+                    onItemSelected = { formState.value = formState.value.copy { hopLimit = it } },
                 )
 
                 PreferenceDivider()
