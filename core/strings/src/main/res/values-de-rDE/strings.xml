@@ -864,4 +864,10 @@
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <string name="device_telemetry_enabled">Gerätetelemetrie senden</string>
     <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul Gerätetelemetrie, um Daten an das Netzwerk zu senden</string>
+    <string name="any">Beliebig</string>
+    <string name="one_hour">1 Stunde</string>
+    <string name="eight_hours">8 Stunden</string>
+    <string name="one_day">24 Stunden</string>
+    <string name="two_days">48 Stunden</string>
+    <string name="last_heard_filter_label">Filtern nach letztem Empfang: %s</string>
 </resources>

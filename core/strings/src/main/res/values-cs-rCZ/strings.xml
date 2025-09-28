@@ -738,7 +738,7 @@
     <string name="overflow_menu">Overflow menu</string>
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Neznámé</string>
-    <string name="message_device_managed">This radio is managed and can only be changed by a remote admin.</string>
+    <string name="message_device_managed">Toto rádio je spravováno vzdáleným správcem a změny může provádět jen on.</string>
     <string name="advanced_title">Rozšířené</string>
     <string name="clean_node_database_title">Vyčistit databázi uzlů</string>
     <string name="clean_nodes_older_than">Vyčistit uzly neaktivní déle než %1$d dnů</string>
@@ -865,4 +865,10 @@
     <string name="remotely_administrating">"[Vzdálený] %1$s"</string>
     <string name="device_telemetry_enabled">Send Device Telemetry</string>
     <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
+    <string name="any">Any</string>
+    <string name="one_hour">1 Hour</string>
+    <string name="eight_hours">8 Hours</string>
+    <string name="one_day">24 Hours</string>
+    <string name="two_days">48 Hours</string>
+    <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
 </resources>

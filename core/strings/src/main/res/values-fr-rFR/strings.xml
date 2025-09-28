@@ -861,4 +861,10 @@
     <string name="remotely_administrating">"[Distant] %1$s"</string>
     <string name="device_telemetry_enabled">Envoyer la télémétrie de l\'appareil</string>
     <string name="device_telemetry_enabled_summary">Activer/Désactiver le module de télémétrie de l\'appareil pour envoyer des métriques au maillage</string>
+    <string name="any">Any</string>
+    <string name="one_hour">1 Hour</string>
+    <string name="eight_hours">8 Hours</string>
+    <string name="one_day">24 Hours</string>
+    <string name="two_days">48 Hours</string>
+    <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
 </resources>
