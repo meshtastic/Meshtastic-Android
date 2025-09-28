@@ -50,7 +50,7 @@ fun MapControlsOverlay(
     onToggleMapTypeMenu: () -> Unit,
     onManageLayersClicked: () -> Unit,
     onManageCustomTileProvidersClicked: () -> Unit, // New parameter
-    showFilterButton: Boolean,
+    isNodeMap: Boolean,
     // Location tracking parameters
     hasLocationPermission: Boolean = false,
     isLocationTrackingEnabled: Boolean = false,
@@ -66,7 +66,18 @@ fun MapControlsOverlay(
         trailingContent = {},
         content = {
             CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
-            if (showFilterButton) {
+            if (isNodeMap) {
+                MapButton(
+                    icon = Icons.Outlined.Tune,
+                    contentDescription = stringResource(id = R.string.map_filter),
+                    onClick = onToggleMapFilterMenu,
+                )
+                NodeMapFilterDropdown(
+                    expanded = mapFilterMenuExpanded,
+                    onDismissRequest = onMapFilterMenuDismissRequest,
+                    mapViewModel = mapViewModel,
+                )
+            } else {
                 Box {
                     MapButton(
                         icon = Icons.Outlined.Tune,

@@ -23,7 +23,6 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.location.Location
 import android.net.Uri
 import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -65,7 +64,6 @@ import androidx.core.graphics.createBitmap
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -95,7 +93,6 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.RoundCap
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
@@ -125,54 +122,6 @@ import java.text.DateFormat
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 
-@Suppress("ReturnCount")
-private fun filterNodeTrack(nodeTrack: List<Position>?): List<Position> {
-    if (nodeTrack.isNullOrEmpty()) return emptyList()
-
-    val sortedTrack = nodeTrack.sortedBy { it.time }
-    if (sortedTrack.size <= 2) return sortedTrack.map { it }
-
-    val filteredPoints = mutableListOf<MeshProtos.Position>()
-    var lastAddedPointProto = sortedTrack.first()
-    filteredPoints.add(lastAddedPointProto)
-
-    for (i in 1 until sortedTrack.size - 1) {
-        val currentPointProto = sortedTrack[i]
-        val currentPoint = currentPointProto.toLatLng()
-        val lastAddedPoint = lastAddedPointProto.toLatLng()
-        val distanceResults = FloatArray(1)
-        Location.distanceBetween(
-            lastAddedPoint.latitude,
-            lastAddedPoint.longitude,
-            currentPoint.latitude,
-            currentPoint.longitude,
-            distanceResults,
-        )
-        if (distanceResults[0] > MIN_TRACK_POINT_DISTANCE_METERS) {
-            filteredPoints.add(currentPointProto)
-            lastAddedPointProto = currentPointProto
-        }
-    }
-
-    val lastOriginalPointProto = sortedTrack.last()
-    if (filteredPoints.last() != lastOriginalPointProto) {
-        val distanceResults = FloatArray(1)
-        val lastAddedPoint = lastAddedPointProto.toLatLng()
-        val lastOriginalPoint = lastOriginalPointProto.toLatLng()
-        Location.distanceBetween(
-            lastAddedPoint.latitude,
-            lastAddedPoint.longitude,
-            lastOriginalPoint.latitude,
-            lastOriginalPoint.longitude,
-            distanceResults,
-        )
-        if (distanceResults[0] > MIN_TRACK_POINT_DISTANCE_METERS || filteredPoints.size == 1) {
-            filteredPoints.add(lastAddedPointProto)
-        }
-    }
-    return filteredPoints
-}
-
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -180,7 +129,7 @@ fun MapView(
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
     focusedNodeNum: Int? = null,
-    nodeTrack: List<Position>? = null,
+    nodeTracks: List<Position>? = null,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -301,11 +250,13 @@ fun MapView(
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
     val filteredNodes =
-        if (mapFilterState.onlyFavorites) {
-            allNodes.filter { it.isFavorite || it.num == ourNodeInfo?.num }
-        } else {
-            allNodes
-        }
+        allNodes
+            .filter { node -> !mapFilterState.onlyFavorites || node.isFavorite || node.num == ourNodeInfo?.num }
+            .filter { node ->
+                mapFilterState.lastHeardFilter.seconds == 0L ||
+                    (System.currentTimeMillis() / 1000 - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
+                    node.num == ourNodeInfo?.num
+            }
 
     val nodeClusterItems =
         filteredNodes.map { node ->
@@ -405,7 +356,7 @@ fun MapView(
                 onMapLoaded = {
                     val pointsToBound: List<LatLng> =
                         when {
-                            !nodeTrack.isNullOrEmpty() -> nodeTrack.map { it.toLatLng() }
+                            !nodeTracks.isNullOrEmpty() -> nodeTracks.map { it.toLatLng() }
 
                             allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
                                 allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
@@ -436,70 +387,69 @@ fun MapView(
                     }
                 }
 
-                if (nodeTrack != null && focusedNodeNum != null) {
-                    val originalLatLngs =
-                        nodeTrack.sortedBy { it.time }.map { LatLng(it.latitudeI * DEG_D, it.longitudeI * DEG_D) }
-                    val filteredLatLngs = filterNodeTrack(nodeTrack)
+                if (nodeTracks != null && focusedNodeNum != null) {
+                    val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
+                    val timeFilteredPositions =
+                        nodeTracks.filter {
+                            lastHeardTrackFilter == LastHeardFilter.Any ||
+                                it.time > System.currentTimeMillis() / 1000 - lastHeardTrackFilter.seconds
+                        }
+                    val sortedPositions = timeFilteredPositions.sortedBy { it.time }
+                    allNodes
+                        .find { it.num == focusedNodeNum }
+                        ?.let { focusedNode ->
+                            sortedPositions.forEachIndexed { index, position ->
+                                val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
+                                val dateFormat = remember {
+                                    DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+                                }
+                                val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
+                                val color = Color(focusedNode!!.colors.second).copy(alpha = alpha)
+                                if (index == sortedPositions.lastIndex) {
+                                    MarkerComposable(state = markerState, zIndex = 1f) {
+                                        NodeChip(
+                                            node = focusedNode,
+                                            isThisNode = false,
+                                            isConnected = false,
+                                            onAction = {},
+                                        )
+                                    }
+                                } else {
+                                    MarkerInfoWindowComposable(
+                                        state = markerState,
+                                        title = stringResource(R.string.position),
+                                        snippet = formatAgo(position.time),
+                                        zIndex = alpha,
+                                        infoContent = {
+                                            PositionInfoWindowContent(
+                                                position = position,
+                                                dateFormat = dateFormat,
+                                                displayUnits = displayUnits,
+                                            )
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = androidx.compose.material.icons.Icons.Default.TripOrigin,
+                                            contentDescription = stringResource(R.string.track_point),
+                                            tint = color,
+                                        )
+                                    }
+                                }
+                            }
 
-                    val focusedNode = allNodes.find { it.num == focusedNodeNum }
-                    val polylineColor = focusedNode?.colors?.let { Color(it.first) } ?: Color.Blue
-                    if (originalLatLngs.isNotEmpty()) {
-                        focusedNode?.let {
-                            MarkerComposable(
-                                state = rememberUpdatedMarkerState(position = originalLatLngs.first()),
-                                zIndex = 1f,
-                            ) {
-                                NodeChip(node = it, isThisNode = false, isConnected = false, onAction = {})
+                            if (sortedPositions.size > 1 && focusedNode != null) {
+                                val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
+                                segments.forEachIndexed { index, segmentPoints ->
+                                    val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
+                                    Polyline(
+                                        points = segmentPoints.map { it.toLatLng() },
+                                        jointType = JointType.ROUND,
+                                        color = Color(focusedNode.colors.second).copy(alpha = alpha),
+                                        width = 8f,
+                                    )
+                                }
                             }
                         }
-                    }
-
-                    val pointsForMarkers =
-                        if (originalLatLngs.isNotEmpty() && focusedNode != null) {
-                            filteredLatLngs.drop(1)
-                        } else {
-                            filteredLatLngs
-                        }
-
-                    pointsForMarkers.forEachIndexed { index, position ->
-                        val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
-                        val dateFormat = remember {
-                            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-                        }
-                        val alpha = 1 - (index.toFloat() / pointsForMarkers.size.toFloat())
-                        MarkerInfoWindowComposable(
-                            state = markerState,
-                            title = stringResource(R.string.position),
-                            snippet = formatAgo(position.time),
-                            zIndex = alpha,
-                            infoContent = {
-                                PositionInfoWindowContent(
-                                    position = position,
-                                    dateFormat = dateFormat,
-                                    displayUnits = displayUnits,
-                                )
-                            },
-                        ) {
-                            Icon(
-                                imageVector = androidx.compose.material.icons.Icons.Default.TripOrigin,
-                                contentDescription = stringResource(R.string.track_point),
-                                modifier = Modifier.padding(8.dp),
-                                tint = polylineColor.copy(alpha = alpha),
-                            )
-                        }
-                    }
-                    if (filteredLatLngs.size > 1) {
-                        Polyline(
-                            points = filteredLatLngs.map { it.toLatLng() },
-                            jointType = JointType.ROUND,
-                            endCap = RoundCap(),
-                            startCap = RoundCap(),
-                            geodesic = true,
-                            color = polylineColor,
-                            width = 8f,
-                            zIndex = 0f,
-                        )
-                    }
                 } else {
                     NodeClusterMarkers(
                         nodeClusterItems = nodeClusterItems,
@@ -610,7 +560,7 @@ fun MapView(
                     mapTypeMenuExpanded = false
                     showCustomTileManagerSheet = true
                 },
-                showFilterButton = focusedNodeNum == null,
+                isNodeMap = focusedNodeNum != null,
                 hasLocationPermission = hasLocationPermission,
                 isLocationTrackingEnabled = isLocationTrackingEnabled,
                 onToggleLocationTracking = {
