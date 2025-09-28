@@ -406,9 +406,7 @@ fun MapView(
                                 val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
                                 val color = Color(focusedNode!!.colors.second).copy(alpha = alpha)
                                 if (index == sortedPositions.lastIndex) {
-                                    MarkerComposable(state = markerState, zIndex = 1f) {
-                                        NodeChip(node = focusedNode)
-                                    }
+                                    MarkerComposable(state = markerState, zIndex = 1f) { NodeChip(node = focusedNode) }
                                 } else {
                                     MarkerInfoWindowComposable(
                                         state = markerState,
