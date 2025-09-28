@@ -45,10 +45,10 @@ jobs:
         id: get_version_name
         run: echo "APP_VERSION_NAME=$(echo ${GITHUB_REF_NAME#v} | sed 's/-.*//')" >> $GITHUB_OUTPUT
 
-      - name: Extract VERSION_CODE_OFFSET from version.properties
+      - name: Extract VERSION_CODE_OFFSET from config.properties
         id: get_version_code_offset
         run: |
-          OFFSET=$(grep '^VERSION_CODE_OFFSET=' version.properties | cut -d'=' -f2)
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
           echo "VERSION_CODE_OFFSET=$OFFSET" >> $GITHUB_OUTPUT
 
       - name: Calculate Version Code from Git Commit Count
