@@ -107,6 +107,15 @@
     <string name="config_lora_modem_preset_summary">Available modem presets, default is Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Sets the maximum number of hops, default is 3. Increasing hops also increases congestion and should be used carefully. 0 hop broadcast messages will not get ACKs.</string>
     <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
+    <string name="label_very_long_slow">Very Long Range - Slow</string>
+    <string name="label_long_fast">Long Range - Fast</string>
+    <string name="label_long_moderate">Long Range - Moderate</string>
+    <string name="label_long_slow">Long Range - Slow</string>
+    <string name="label_medium_fast">Medium Range - Fast</string>
+    <string name="label_medium_slow">Medium Range - Slow</string>
+    <string name="label_short_turbo">Short Range - Turbo</string>
+    <string name="label_short_fast">Short Range - Fast</string>
+    <string name="label_short_slow">Short Range - Slow</string>
     <string name="config_network_wifi_enabled_summary">Enabling WiFi will disable the bluetooth connection to the app.</string>
     <string name="config_network_eth_enabled_summary">Enabling Ethernet will disable the bluetooth connection to the app. TCP node connections are not available on Apple devices.</string>
     <string name="config_network_udp_enabled_summary">Abilita la trasmissione di pacchetti tramite UDP sulla rete locale.</string>
@@ -148,7 +157,8 @@
     <string name="analytics_okay">Consenti analisi e segnalazione di crash.</string>
     <string name="accept">Accetta</string>
     <string name="cancel">Annulla</string>
-    <string name="clear_changes">Annulla modifiche</string>
+    <string name="discard_changes">Discard changes</string>
+    <string name="save_changes">Salva</string>
     <string name="new_channel_rcvd">Ricevuta URL del Nuovo Canale</string>
     <string name="permission_missing">Meshtastic ha bisogno dei permessi di localizzazione abilitati per trovare nuovi dispositivi via Bluetooth. Puoi disabilitare quando non è in uso.</string>
     <string name="report_bug">Segnala Bug</string>
