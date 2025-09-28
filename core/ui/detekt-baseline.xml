@@ -44,10 +44,8 @@
     <ID>ParameterNaming:EditIPv4Preference.kt$onValueChanged</ID>
     <ID>ParameterNaming:EditPasswordPreference.kt$onValueChanged</ID>
     <ID>ParameterNaming:EditTextPreference.kt$onValueChanged</ID>
-    <ID>ParameterNaming:PreferenceFooter.kt$onCancelClicked</ID>
     <ID>ParameterNaming:PreferenceFooter.kt$onNegativeClicked</ID>
     <ID>ParameterNaming:PreferenceFooter.kt$onPositiveClicked</ID>
-    <ID>ParameterNaming:PreferenceFooter.kt$onSaveClicked</ID>
     <ID>ParameterNaming:SlidingSelector.kt$onOptionSelected</ID>
     <ID>PreviewPublic:BatteryInfo.kt$BatteryInfoPreview</ID>
     <ID>PreviewPublic:BatteryInfo.kt$BatteryInfoPreviewSimple</ID>
