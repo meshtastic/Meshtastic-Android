@@ -150,7 +150,7 @@
     <string name="cancel">Отмена</string>
     <string name="clear_changes">Отменить изменения</string>
     <string name="new_channel_rcvd">URL нового канала получен</string>
-    <string name="permission_missing">Meshtastic needs location permissions enabled to find new devices via Bluetooth. You can disable when not in use.</string>
+    <string name="permission_missing">Meshtastic требуется разрешение, чтобы найти новые устройства через Bluetooth. Вы можете отключить если они не используются.</string>
     <string name="report_bug">Сообщить об ошибке</string>
     <string name="report_a_bug">Сообщить об ошибке</string>
     <string name="report_bug_text">Вы уверены, что хотите сообщить об ошибке? После сообщения, пожалуйста, напишите в https://github.com/orgs/meshtastic/discussions, чтобы мы могли сопоставить отчет с тем, что вы нашли.</string>
@@ -159,7 +159,7 @@
     <string name="pairing_failed_try_again">Сопряжение не удалось, пожалуйста, выберите еще раз</string>
     <string name="location_disabled">Доступ к местоположению выключен, невозможно посылать местоположение в сеть.</string>
     <string name="share">Поделиться</string>
-    <string name="new_node_seen">New Node Seen: %s</string>
+    <string name="new_node_seen">Возник новый узел - %s</string>
     <string name="disconnected">Отключено</string>
     <string name="device_sleeping">Устройство спит</string>
     <string name="connected_count">Подключено: %1$s в сети</string>
