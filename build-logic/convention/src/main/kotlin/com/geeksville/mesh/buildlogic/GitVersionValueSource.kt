@@ -53,8 +53,7 @@ abstract class GitVersionValueSource : ValueSource<String, GitVersionValueSource
             }
             output.toString().trim()
         } catch (e: Exception) {
-            // Fallback to timestamp if git command fails (e.g., in a shallow clone)
-            (System.currentTimeMillis() / 1000).toString()
+            throw RuntimeException("Failed to determine git commit count for versionCode. Ensure you have a full git history (not a shallow clone) and .git is present.\nOriginal error: ${e.message}", e)
         }
     }
 }

@@ -44,6 +44,13 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
+val versionPropertiesFile = rootProject.file("version.properties")
+val versionProperties = Properties()
+
+if (versionPropertiesFile.exists()) {
+    FileInputStream(versionPropertiesFile).use { versionProperties.load(it) }
+}
+
 android {
     namespace = "com.geeksville.mesh"
     // Assuming Configs object is available (e.g., from buildSrc)
@@ -62,12 +69,13 @@ android {
         minSdk = Configs.MIN_SDK
         targetSdk = Configs.TARGET_SDK
 
-        // Prioritize injected props, then ENV, then fallback to git commit count
+        val vcOffset = versionProperties["VERSION_CODE_OFFSET"]?.toString()?.toInt() ?: 0
+        println("Version code offset: $vcOffset")
         versionCode =
             (
                 project.findProperty("android.injected.version.code")?.toString()?.toInt()
                     ?: System.getenv("VERSION_CODE")?.toInt()
-                    ?: gitVersionProvider.get().toInt() // Restored GitVersionValueSource fallback
+                    ?: (gitVersionProvider.get().toInt() + vcOffset)
                 )
         versionName =
             (

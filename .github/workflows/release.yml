@@ -45,13 +45,21 @@ jobs:
         id: get_version_name
         run: echo "APP_VERSION_NAME=$(echo ${GITHUB_REF_NAME#v} | sed 's/-.*//')" >> $GITHUB_OUTPUT
 
-      - name: Calculate Version Code from Epoch
+      - name: Extract VERSION_CODE_OFFSET from version.properties
+        id: get_version_code_offset
+        run: |
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' version.properties | cut -d'=' -f2)
+          echo "VERSION_CODE_OFFSET=$OFFSET" >> $GITHUB_OUTPUT
+
+      - name: Calculate Version Code from Git Commit Count
         id: calculate_version_code
-        # We use epoch minutes to ensure a unique, always-incrementing version code.
-        # This is compatible with our release strategy of tagging the same commit for different
-        # channels (internal, closed, open, prod), as each build needs a unique code.
-        # This will overflow Integer.MAX_VALUE in the year 6052, hopefully we'll have moved on by then.
-        run: echo "versionCode=$(( $(date +%s) / 60 ))" >> $GITHUB_OUTPUT
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
+          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
+          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+        shell: bash
+        # This matches the reproducible versionCode strategy: versionCode = git commit count + offset
 
   release-google:
     runs-on: ubuntu-latest
