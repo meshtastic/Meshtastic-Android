@@ -432,7 +432,6 @@ class MeshService :
     //
 
     private fun loadSettings() = serviceScope.handledLaunch {
-        discardNodeDB() // Get rid of any old state
         myNodeInfo = nodeRepository.myNodeInfo.value
         nodeDBbyNodeNum.putAll(nodeRepository.getNodeDBbyNum().first())
         // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
@@ -2000,19 +1999,20 @@ class MeshService :
 
     fun clearDatabases() = serviceScope.handledLaunch {
         debug("Clearing nodeDB")
+        discardNodeDB()
         nodeRepository.clearNodeDB()
     }
 
     private fun updateLastAddress(deviceAddr: String?) {
-        debug("setDeviceAddress: Passing through device change to radio service: ${deviceAddr.anonymize}")
-        if (deviceAddr == meshPrefs.deviceAddress || deviceAddr == NO_DEVICE_SELECTED) {
-            debug("SetDeviceAddress: Device address is the none or same, ignoring")
-            return
-        } else {
-            debug("SetDeviceAddress: Device address changed from ${meshPrefs.deviceAddress} to $deviceAddr")
-            meshPrefs.deviceAddress = deviceAddr
+        val currentAddr = meshPrefs.deviceAddress
+        debug("setDeviceAddress: received request to change to: ${deviceAddr.anonymize}")
+        if (deviceAddr != currentAddr) {
+            debug("SetDeviceAddress: Device address changed from ${currentAddr.anonymize} to ${deviceAddr.anonymize}")
             clearDatabases()
             clearNotifications()
+            meshPrefs.deviceAddress = deviceAddr
+        } else {
+            debug("SetDeviceAddress: Device address is unchanged, ignoring.")
         }
     }
 
