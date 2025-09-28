@@ -18,7 +18,10 @@
 package com.geeksville.mesh.ui.node.components
 
 import android.content.res.Configuration
+import androidx.annotation.StringRes
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,14 +33,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -69,6 +76,9 @@ fun NodeItem(
     tempInFahrenheit: Boolean,
     modifier: Modifier = Modifier,
     onClickChip: (Node) -> Unit = {},
+    onConfirmFavorite: (Node) -> Unit,
+    onConfirmIgnore: (Node) -> Unit,
+    onConfirmRemove: (Node) -> Unit,
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
@@ -121,15 +131,54 @@ fun NodeItem(
             }
         }
 
+    var displayFavoriteDialog by remember { mutableStateOf(false) }
+    var displayIgnoreDialog by remember { mutableStateOf(false) }
+    var displayRemoveDialog by remember { mutableStateOf(false) }
+
+    NodeActionDialogs(
+        node = thatNode,
+        displayFavoriteDialog = displayFavoriteDialog,
+        displayIgnoreDialog = displayIgnoreDialog,
+        displayRemoveDialog = displayRemoveDialog,
+        onDismissMenuRequest = {
+            displayFavoriteDialog = false
+            displayIgnoreDialog = false
+            displayRemoveDialog = false
+        },
+        onConfirmFavorite = onConfirmFavorite,
+        onConfirmIgnore = onConfirmIgnore,
+        onConfirmRemove = onConfirmRemove,
+    )
+
+    var showContextMenu by remember { mutableStateOf(false) }
+
     Card(
         modifier =
-        modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).defaultMinSize(minHeight = 80.dp),
-        onClick = { showDetails(!detailsShown) },
+        modifier
+            .combinedClickable(onClick = { showDetails(!detailsShown) }, onLongClick = { showContextMenu = true })
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .defaultMinSize(minHeight = 80.dp),
         colors = cardColors,
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                NodeChip(node = thatNode, onClick = onClickChip)
+                Box {
+                    NodeChip(node = thatNode, onClick = onClickChip)
+
+                    ContextMenu(
+                        expanded = !isThisNode && showContextMenu,
+                        node = thatNode,
+                        onConfirm = { action, _ ->
+                            when (action) {
+                                ContextMenuAction.Favorite -> displayFavoriteDialog = true
+                                ContextMenuAction.Ignore -> displayIgnoreDialog = true
+                                ContextMenuAction.Remove -> displayRemoveDialog = true
+                            }
+                        },
+                        onDismiss = { showContextMenu = false },
+                    )
+                }
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
@@ -240,7 +289,16 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, currentTimeMillis = System.currentTimeMillis())
+        NodeItem(
+            thisNode = thisNode,
+            thatNode = thatNode,
+            0,
+            true,
+            currentTimeMillis = System.currentTimeMillis(),
+            onConfirmFavorite = {},
+            onConfirmIgnore = {},
+            onConfirmRemove = {},
+        )
     }
 }
 
@@ -258,6 +316,9 @@ fun NodeInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) thatN
                 tempInFahrenheit = true,
                 expanded = false,
                 currentTimeMillis = System.currentTimeMillis(),
+                onConfirmFavorite = {},
+                onConfirmIgnore = {},
+                onConfirmRemove = {},
             )
             Text(text = "Details Shown", color = MaterialTheme.colorScheme.onBackground)
             NodeItem(
@@ -267,7 +328,36 @@ fun NodeInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) thatN
                 tempInFahrenheit = true,
                 expanded = true,
                 currentTimeMillis = System.currentTimeMillis(),
+                onConfirmFavorite = {},
+                onConfirmIgnore = {},
+                onConfirmRemove = {},
             )
         }
     }
+}
+
+@Composable
+private fun ContextMenu(
+    expanded: Boolean,
+    node: Node,
+    onConfirm: (ContextMenuAction, Node) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        ContextMenuAction.entries.forEach {
+            DropdownMenuItem(
+                text = { Text(stringResource(it.text)) },
+                onClick = {
+                    onConfirm(it, node)
+                    onDismiss()
+                },
+            )
+        }
+    }
+}
+
+internal enum class ContextMenuAction(@StringRes val text: Int) {
+    Favorite(R.string.favorite),
+    Ignore(R.string.ignore),
+    Remove(R.string.remove),
 }

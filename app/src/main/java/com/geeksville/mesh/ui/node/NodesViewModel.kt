@@ -17,12 +17,14 @@
 
 package com.geeksville.mesh.ui.node
 
+import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +41,7 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.prefs.ui.UiPrefs
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -174,6 +177,33 @@ constructor(
         (!state.value).let { toggled ->
             state.update { toggled }
             onChanged(toggled)
+        }
+    }
+
+    fun favoriteNode(node: Node) = viewModelScope.launch {
+        try {
+            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
+        } catch (ex: RemoteException) {
+            Timber.e(ex, "Favorite node error")
+        }
+    }
+
+    fun ignoreNode(node: Node) = viewModelScope.launch {
+        try {
+            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
+        } catch (ex: RemoteException) {
+            Timber.e(ex, "Ignore node error")
+        }
+    }
+
+    fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
+        Timber.i("Removing node '$nodeNum'")
+        try {
+            val packetId = serviceRepository.meshService?.packetId ?: return@launch
+            serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+            nodeRepository.deleteNode(nodeNum)
+        } catch (ex: RemoteException) {
+            Timber.e("Remove node error: ${ex.message}")
         }
     }
 }

@@ -145,6 +145,9 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                         expanded = state.showDetails,
                         currentTimeMillis = currentTimeMillis,
                         isConnected = connectionState.isConnected(),
+                        onConfirmFavorite = nodesViewModel::favoriteNode,
+                        onConfirmIgnore = nodesViewModel::ignoreNode,
+                        onConfirmRemove = { nodesViewModel.removeNode(it.num) },
                     )
                 }
                 item { Spacer(modifier = Modifier.height(88.dp)) }
