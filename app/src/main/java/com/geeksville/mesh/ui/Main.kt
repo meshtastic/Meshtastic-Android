@@ -65,6 +65,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
@@ -112,6 +116,8 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
+import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.Map
@@ -120,6 +126,8 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -206,7 +214,40 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     traceRouteResponse?.let { response ->
         SimpleAlertDialog(
             title = R.string.traceroute,
-            text = { Column(modifier = Modifier.verticalScroll(rememberScrollState())) { Text(text = response) } },
+            text = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    Text(
+                        text =
+                        buildAnnotatedString {
+                            response.lines().forEachIndexed { i, line ->
+                                if (i > 0) append("\n")
+                                if (line.trimStart().startsWith("⇊")) {
+                                    val snrRegex = Regex("""⇊ ([\d\.\?-]+) dB""")
+                                    val snrMatch = snrRegex.find(line)
+                                    val snrValue = snrMatch?.groupValues?.getOrNull(1)?.toFloatOrNull()
+                                    if (snrValue != null) {
+                                        val snrColor =
+                                            when {
+                                                snrValue >= SNR_GOOD_THRESHOLD -> colorScheme.StatusGreen
+                                                snrValue >= SNR_FAIR_THRESHOLD -> colorScheme.StatusYellow
+                                                else -> colorScheme.StatusOrange
+                                            }
+                                        withStyle(
+                                            style = SpanStyle(color = snrColor, fontWeight = FontWeight.Bold),
+                                        ) {
+                                            append(line)
+                                        }
+                                    } else {
+                                        append(line)
+                                    }
+                                } else {
+                                    append(line)
+                                }
+                            }
+                        },
+                    )
+                }
+            },
             dismissText = stringResource(id = R.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
         )
