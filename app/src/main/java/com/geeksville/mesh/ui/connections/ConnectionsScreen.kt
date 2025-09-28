@@ -37,6 +37,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -120,6 +121,7 @@ fun ConnectionsScreen(
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
     val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
+    val bluetoothRssi by connectionsViewModel.bluetoothRssi.collectAsStateWithLifecycle()
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -224,6 +226,7 @@ fun ConnectionsScreen(
                                         onSetShowSharedContact = { showSharedContact = it },
                                         onNavigateToSettings = onNavigateToSettings,
                                         onClickDisconnect = { scanModel.disconnect() },
+                                        bluetoothRssi = bluetoothRssi,
                                     )
                                 }
                             }

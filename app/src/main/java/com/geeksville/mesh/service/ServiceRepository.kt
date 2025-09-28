@@ -46,8 +46,17 @@ class ServiceRepository @Inject constructor() : Logging {
     val connectionState: StateFlow<ConnectionState>
         get() = _connectionState
 
-    fun setConnectionState(connectionState: ConnectionState) {
+    fun setConnectionState(connectionState: ConnectionState){
         _connectionState.value = connectionState
+    }
+
+    // Current bluetooth link RSSI (dBm). Null if not connected or not a bluetooth interface.
+    private val _bluetoothRssi = MutableStateFlow<Int?>(null)
+    val bluetoothRssi: StateFlow<Int?>
+        get() = _bluetoothRssi
+
+    fun setBluetoothRssi(rssi: Int?) {
+        _bluetoothRssi.value = rssi
     }
 
     private val _clientNotification = MutableStateFlow<MeshProtos.ClientNotification?>(null)

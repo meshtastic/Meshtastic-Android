@@ -20,6 +20,7 @@ package com.geeksville.mesh.ui.connections.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +57,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
+    bluetoothRssi: Int? = null,
     onNavigateToNodeDetails: (Int) -> Unit,
     onSetShowSharedContact: (Node) -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -92,6 +96,14 @@ fun CurrentlyConnectedInfo(
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                if (bluetoothRssi != null) {
+                    HorizontalDivider()
+                    Text(
+                        text =
+                            stringResource(R.string.bluetooth_signal_strength_fmt, bluetoothRssi),
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }

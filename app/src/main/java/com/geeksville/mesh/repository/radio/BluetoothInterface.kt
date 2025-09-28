@@ -36,6 +36,8 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.util.anonymize
 import java.lang.reflect.Method
 import java.util.UUID
@@ -137,6 +139,39 @@ constructor(
 
     private lateinit var fromNum: BluetoothGattCharacteristic
 
+    // RSSI flow & polling job (null when unavailable / disconnected)
+    private val _rssiFlow = MutableStateFlow<Int?>(null)
+    val rssiFlow: StateFlow<Int?> = _rssiFlow
+    @Volatile private var rssiPollingJob: Job? = null
+
+    // Start polling RSSI every 5 seconds (immediate first read)
+    private fun startRssiPolling() {
+        rssiPollingJob?.cancel()
+        val s = safe ?: return
+        // Immediate read for faster UI update
+        s.asyncReadRemoteRssi { first -> first.getOrNull()?.let { _rssiFlow.value = it } }
+        rssiPollingJob = service.serviceScope.handledLaunch {
+            while (true) {
+                try {
+                    delay(5000)
+                    if (safe == null) break
+                    safe?.asyncReadRemoteRssi { res -> res.getOrNull()?.let { _rssiFlow.value = it } }
+                } catch (ex: CancellationException) {
+                    break
+                } catch (ex: Exception) {
+                    debug("RSSI polling error: ${ex.message}")
+                }
+            }
+        }
+    }
+
+    // Stop polling and clear current value
+    private fun stopRssiPolling() {
+        rssiPollingJob?.cancel()
+        rssiPollingJob = null
+        _rssiFlow.value = null
+    }
+
     /**
      * With the new rev2 api, our first send is to start the configure readbacks. In that case, rather than waiting for
      * FromNum notifies - we try to just aggressively read all of the responses.
@@ -201,6 +236,7 @@ constructor(
 
     /** We had some problem, schedule a reconnection attempt (if one isn't already queued) */
     private fun scheduleReconnect(reason: String) {
+        stopRssiPolling()
         if (reconnectJob == null) {
             warn("Scheduling reconnect because $reason")
             reconnectJob = service.serviceScope.handledLaunch { retryDueToException() }
@@ -391,6 +427,7 @@ constructor(
 
         service.serviceScope.handledLaunch {
             info("Connected to radio!")
+            startRssiPolling()
 
             if (
                 needForceRefresh
@@ -431,6 +468,7 @@ constructor(
 
     override fun close() {
         reconnectJob?.cancel() // Cancel any queued reconnect attempts
+        stopRssiPolling()
 
         if (safe != null) {
             info("Closing BluetoothInterface")
