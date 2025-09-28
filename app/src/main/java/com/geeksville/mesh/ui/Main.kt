@@ -65,10 +65,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
@@ -98,6 +94,7 @@ import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
+import com.geeksville.mesh.ui.metrics.annotateTraceroute
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -116,8 +113,6 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
-import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
-import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.Map
@@ -126,8 +121,6 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
-import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
-import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -216,36 +209,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             title = R.string.traceroute,
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(
-                        text =
-                        buildAnnotatedString {
-                            response.lines().forEachIndexed { i, line ->
-                                if (i > 0) append("\n")
-                                if (line.trimStart().startsWith("⇊")) {
-                                    val snrRegex = Regex("""⇊ ([\d\.\?-]+) dB""")
-                                    val snrMatch = snrRegex.find(line)
-                                    val snrValue = snrMatch?.groupValues?.getOrNull(1)?.toFloatOrNull()
-                                    if (snrValue != null) {
-                                        val snrColor =
-                                            when {
-                                                snrValue >= SNR_GOOD_THRESHOLD -> colorScheme.StatusGreen
-                                                snrValue >= SNR_FAIR_THRESHOLD -> colorScheme.StatusYellow
-                                                else -> colorScheme.StatusOrange
-                                            }
-                                        withStyle(
-                                            style = SpanStyle(color = snrColor, fontWeight = FontWeight.Bold),
-                                        ) {
-                                            append(line)
-                                        }
-                                    } else {
-                                        append(line)
-                                    }
-                                } else {
-                                    append(line)
-                                }
-                            }
-                        },
-                    )
+                    Text(text = annotateTraceroute(response))
                 }
             },
             dismissText = stringResource(id = R.string.okay),
