@@ -107,6 +107,15 @@
     <string name="config_lora_modem_preset_summary">Saadaval olevad modemi eelseadistused, vaikesäte on Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Määrab hüpete maksimaalse arvu, vaikimisi on see 3. Hüpete suurendamine suurendab ka ülekoormust ja seda tuleks kasutada ettevaatlikult. 0 hüppega leviedastussõnumid ei saa ACK-sid.</string>
     <string name="config_lora_frequency_slot_summary">Teie sõlme töösagedus arvutatakse piirkonna, modemi eelseadistuse ja selle välja põhjal. Kui see on 0, arvutatakse pesa automaatselt primaarse kanali nime põhjal ja see muutub vaikimisi avalikust pesast. Muutke see tagasi avalikuks vaikepesaks, kui privaatsed primaarsed ja avalikud sekundaarsed kanalid on konfigureeritud.</string>
+    <string name="label_very_long_slow">Väga pikk ulatus- aeglane</string>
+    <string name="label_long_fast">Pikk ulatus - kiire</string>
+    <string name="label_long_moderate">Pikk ulatus - mõõdukas</string>
+    <string name="label_long_slow">Pikk ulatus - aeglame</string>
+    <string name="label_medium_fast">Keskmine ulatus - kiire</string>
+    <string name="label_medium_slow">Keskmine ulatus - aeglane</string>
+    <string name="label_short_turbo">Lühike ulatus - turbo</string>
+    <string name="label_short_fast">Lühike ulatus - kiire</string>
+    <string name="label_short_slow">Short Range - Slow</string>
     <string name="config_network_wifi_enabled_summary">WiFi lubamine keelab rakenduses Bluetooth-ühenduse.</string>
     <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab Bluetooth-ühenduse rakendusega. TCP-sõlmede ühendused pole Apple\'i seadmetes saadaval.</string>
     <string name="config_network_udp_enabled_summary">Luba kohalikus võrgus pakettide edastamine UDP kaudu.</string>
@@ -148,7 +157,8 @@
     <string name="analytics_okay">Luba analüüsi ja krahhi aruandlus.</string>
     <string name="accept">Nõustu</string>
     <string name="cancel">Tühista</string>
-    <string name="clear_changes">Võta tagasi</string>
+    <string name="discard_changes">Discard changes</string>
+    <string name="save_changes">Salvesta</string>
     <string name="new_channel_rcvd">Uued kanalid vastu võetud</string>
     <string name="permission_missing">Meshtastic vajab sinihambaga kaudu seadmete leidmiseks asukohalubasid. Saate need keelata, kui neid ei kasutata.</string>
     <string name="report_bug">Teata veast</string>
