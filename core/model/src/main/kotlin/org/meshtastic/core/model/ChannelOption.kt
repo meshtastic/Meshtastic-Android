@@ -17,9 +17,11 @@
 
 package org.meshtastic.core.model
 
+import androidx.annotation.StringRes
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.RegionCode
+import org.meshtastic.core.strings.R
 import kotlin.math.floor
 
 /** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
@@ -294,14 +296,14 @@ enum class RegionInfo(
     }
 }
 
-enum class ChannelOption(val modemPreset: ModemPreset, val description: String, val bandwidth: Float) {
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, "", .0625f),
-    LONG_FAST(ModemPreset.LONG_FAST, "Long Range - Fast", .250f),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, "Long Range - Moderate", .125f),
-    LONG_SLOW(ModemPreset.LONG_SLOW, "Long Range - Slow", .125f),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, "Medium Range - Fast", .250f),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, "Medium Range - Slow", .250f),
-    SHORT_TURBO(ModemPreset.SHORT_TURBO, "Short Range - Turbo", bandwidth = .500f),
-    SHORT_FAST(ModemPreset.SHORT_FAST, "Short Range - Fast", .250f),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, "Short Range - Slow", .250f),
+enum class ChannelOption(val modemPreset: ModemPreset, @StringRes val labelRes: Int, val bandwidth: Float) {
+    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, R.string.label_very_long_slow, .0625f),
+    LONG_FAST(ModemPreset.LONG_FAST, R.string.label_long_fast, .250f),
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, R.string.label_long_moderate, .125f),
+    LONG_SLOW(ModemPreset.LONG_SLOW, R.string.label_long_slow, .125f),
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, R.string.label_medium_fast, .250f),
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, R.string.label_medium_slow, .250f),
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, R.string.label_short_turbo, bandwidth = .500f),
+    SHORT_FAST(ModemPreset.SHORT_FAST, R.string.label_short_fast, .250f),
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, R.string.label_short_slow, .250f),
 }

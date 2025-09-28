@@ -41,6 +41,7 @@ protobuf = "4.32.1"
 activity = { module = "androidx.activity:activity" }
 activity-compose = { module = "androidx.activity:activity-compose" }
 actvity-ktx = { module = "androidx.activity:activity-ktx" }
+annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 appcompat-resources = { module = "androidx.appcompat:appcompat-resources", version.ref = "appcompat" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }

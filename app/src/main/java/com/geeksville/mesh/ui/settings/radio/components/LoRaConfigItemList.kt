@@ -98,7 +98,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                         title = stringResource(R.string.modem_preset),
                         summary = stringResource(id = R.string.config_lora_modem_preset_summary),
                         enabled = state.connected && formState.value.usePreset,
-                        items = ChannelOption.entries.map { it.modemPreset to it.description },
+                        items = ChannelOption.entries.map { it.modemPreset to stringResource(it.labelRes) },
                         selectedItem = formState.value.modemPreset,
                         onItemSelected = { formState.value = formState.value.copy { modemPreset = it } },
                     )
