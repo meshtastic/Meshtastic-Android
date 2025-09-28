@@ -73,12 +73,12 @@ fun <T : MessageLite> RadioConfigScreenList(
 
             PreferenceFooter(
                 enabled = enabled && configState.isDirty,
-                negativeText = stringResource(R.string.clear_changes),
+                negativeText = stringResource(R.string.discard_changes),
                 onNegativeClicked = {
                     focusManager.clearFocus()
                     configState.reset()
                 },
-                positiveText = stringResource(R.string.send),
+                positiveText = stringResource(R.string.save_changes),
                 onPositiveClicked = {
                     focusManager.clearFocus()
                     onSave(configState.value)
