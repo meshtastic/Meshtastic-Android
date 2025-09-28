@@ -142,6 +142,7 @@ constructor(
     // RSSI flow & polling job (null when unavailable / disconnected)
     private val _rssiFlow = MutableStateFlow<Int?>(null)
     val rssiFlow: StateFlow<Int?> = _rssiFlow
+
     @Volatile private var rssiPollingJob: Job? = null
 
     // Start polling RSSI every 5 seconds (immediate first read)
@@ -150,19 +151,20 @@ constructor(
         val s = safe ?: return
         // Immediate read for faster UI update
         s.asyncReadRemoteRssi { first -> first.getOrNull()?.let { _rssiFlow.value = it } }
-        rssiPollingJob = service.serviceScope.handledLaunch {
-            while (true) {
-                try {
-                    delay(5000)
-                    if (safe == null) break
-                    safe?.asyncReadRemoteRssi { res -> res.getOrNull()?.let { _rssiFlow.value = it } }
-                } catch (ex: CancellationException) {
-                    break
-                } catch (ex: Exception) {
-                    debug("RSSI polling error: ${ex.message}")
+        rssiPollingJob =
+            service.serviceScope.handledLaunch {
+                while (true) {
+                    try {
+                        delay(5000)
+                        if (safe == null) break
+                        safe?.asyncReadRemoteRssi { res -> res.getOrNull()?.let { _rssiFlow.value = it } }
+                    } catch (ex: CancellationException) {
+                        break
+                    } catch (ex: Exception) {
+                        debug("RSSI polling error: ${ex.message}")
+                    }
                 }
             }
-        }
     }
 
     // Stop polling and clear current value

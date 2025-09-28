@@ -46,7 +46,7 @@ class ServiceRepository @Inject constructor() : Logging {
     val connectionState: StateFlow<ConnectionState>
         get() = _connectionState
 
-    fun setConnectionState(connectionState: ConnectionState){
+    fun setConnectionState(connectionState: ConnectionState) {
         _connectionState.value = connectionState
     }
 
