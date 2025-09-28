@@ -115,7 +115,7 @@
     <string name="label_medium_slow">Keskmine ulatus - aeglane</string>
     <string name="label_short_turbo">Lühike ulatus - turbo</string>
     <string name="label_short_fast">Lühike ulatus - kiire</string>
-    <string name="label_short_slow">Short Range - Slow</string>
+    <string name="label_short_slow">Lühike ulatus - aeglane</string>
     <string name="config_network_wifi_enabled_summary">WiFi lubamine keelab rakenduses Bluetooth-ühenduse.</string>
     <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab Bluetooth-ühenduse rakendusega. TCP-sõlmede ühendused pole Apple\'i seadmetes saadaval.</string>
     <string name="config_network_udp_enabled_summary">Luba kohalikus võrgus pakettide edastamine UDP kaudu.</string>
@@ -157,7 +157,7 @@
     <string name="analytics_okay">Luba analüüsi ja krahhi aruandlus.</string>
     <string name="accept">Nõustu</string>
     <string name="cancel">Tühista</string>
-    <string name="discard_changes">Discard changes</string>
+    <string name="discard_changes">Tühista muudatused</string>
     <string name="save_changes">Salvesta</string>
     <string name="new_channel_rcvd">Uued kanalid vastu võetud</string>
     <string name="permission_missing">Meshtastic vajab sinihambaga kaudu seadmete leidmiseks asukohalubasid. Saate need keelata, kui neid ei kasutata.</string>
@@ -874,10 +874,10 @@
     <string name="remotely_administrating">"[Kaugjuhtimine] %1$s"</string>
     <string name="device_telemetry_enabled">Saada seadme telemeetria</string>
     <string name="device_telemetry_enabled_summary">Luba/keela seadme telemeetriamooduli mõõdikute saatmiseks kärgvõrgustiku</string>
-    <string name="any">Any</string>
-    <string name="one_hour">1 Hour</string>
-    <string name="eight_hours">8 Hours</string>
-    <string name="one_day">24 Hours</string>
-    <string name="two_days">48 Hours</string>
-    <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
+    <string name="any">Kõik</string>
+    <string name="one_hour">1 tund</string>
+    <string name="eight_hours">8 tundi</string>
+    <string name="one_day">24 tundi</string>
+    <string name="two_days">48 tundi</string>
+    <string name="last_heard_filter_label">Filtreeri viimase kuulmise aja järgi: %s</string>
 </resources>
