@@ -2008,9 +2008,9 @@ class MeshService :
         debug("setDeviceAddress: received request to change to: ${deviceAddr.anonymize}")
         if (deviceAddr != currentAddr) {
             debug("SetDeviceAddress: Device address changed from ${currentAddr.anonymize} to ${deviceAddr.anonymize}")
+            meshPrefs.deviceAddress = deviceAddr
             clearDatabases()
             clearNotifications()
-            meshPrefs.deviceAddress = deviceAddr
         } else {
             debug("SetDeviceAddress: Device address is unchanged, ignoring.")
         }
