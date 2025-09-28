@@ -30,7 +30,9 @@ fun NodeActionDialogs(
     displayIgnoreDialog: Boolean,
     displayRemoveDialog: Boolean,
     onDismissMenuRequest: () -> Unit,
-    onAction: (NodeMenuAction) -> Unit,
+    onConfirmFavorite: (Node) -> Unit,
+    onConfirmIgnore: (Node) -> Unit,
+    onConfirmRemove: (Node) -> Unit,
 ) {
     if (displayFavoriteDialog) {
         SimpleAlertDialog(
@@ -42,7 +44,7 @@ fun NodeActionDialogs(
             ),
             onConfirm = {
                 onDismissMenuRequest()
-                onAction(NodeMenuAction.Favorite(node))
+                onConfirmFavorite(node)
             },
             onDismiss = onDismissMenuRequest,
         )
@@ -57,7 +59,7 @@ fun NodeActionDialogs(
             ),
             onConfirm = {
                 onDismissMenuRequest()
-                onAction(NodeMenuAction.Ignore(node))
+                onConfirmIgnore(node)
             },
             onDismiss = onDismissMenuRequest,
         )
@@ -68,7 +70,7 @@ fun NodeActionDialogs(
             text = R.string.remove_node_text,
             onConfirm = {
                 onDismissMenuRequest()
-                onAction(NodeMenuAction.Remove(node))
+                onConfirmRemove(node)
             },
             onDismiss = onDismissMenuRequest,
         )

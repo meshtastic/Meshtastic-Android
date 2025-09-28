@@ -640,7 +640,9 @@ private fun DeviceActions(
             displayIgnoreDialog = false
             displayRemoveDialog = false
         },
-        onAction = { onAction(NodeDetailAction.HandleNodeMenuAction(it)) },
+        onConfirmFavorite = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(it))) },
+        onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
+        onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
     )
     TitledCard(title = stringResource(R.string.actions)) {
         SettingsItem(
