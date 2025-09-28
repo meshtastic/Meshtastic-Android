@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.geeksville.mesh.buildlogic.Configs
 import com.geeksville.mesh.buildlogic.GitVersionValueSource
 import java.io.FileInputStream
 import java.util.Properties
@@ -44,10 +43,16 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
+val configPropertiesFile = rootProject.file("config.properties")
+val configProperties = Properties()
+
+if (configPropertiesFile.exists()) {
+    FileInputStream(configPropertiesFile).use { configProperties.load(it) }
+}
+
 android {
-    namespace = "com.geeksville.mesh"
-    // Assuming Configs object is available (e.g., from buildSrc)
-    compileSdk = Configs.COMPILE_SDK
+    namespace = configProperties.getProperty("APPLICATION_ID")
+    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
 
     signingConfigs {
         create("release") {
@@ -58,25 +63,26 @@ android {
         }
     }
     defaultConfig {
-        applicationId = Configs.APPLICATION_ID
-        minSdk = Configs.MIN_SDK
-        targetSdk = Configs.TARGET_SDK
+        applicationId = configProperties.getProperty("APPLICATION_ID")
+        minSdk = configProperties.getProperty("MIN_SDK").toInt()
+        targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
 
-        // Prioritize injected props, then ENV, then fallback to git commit count
+        val vcOffset = configProperties.getProperty("VERSION_CODE_OFFSET")?.toInt() ?: 0
+        println("Version code offset: $vcOffset")
         versionCode =
             (
                 project.findProperty("android.injected.version.code")?.toString()?.toInt()
                     ?: System.getenv("VERSION_CODE")?.toInt()
-                    ?: gitVersionProvider.get().toInt() // Restored GitVersionValueSource fallback
+                    ?: (gitVersionProvider.get().toInt() + vcOffset)
                 )
         versionName =
             (
                 project.findProperty("android.injected.version.name")?.toString()
                     ?: System.getenv("VERSION_NAME")
-                    ?: Configs.VERSION_NAME_BASE // Restored Configs.VERSION_NAME_BASE fallback
+                    ?: configProperties.getProperty("VERSION_NAME_BASE")
                 )
-        buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"") // Used Configs
-        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"") // Used Configs
+        buildConfigField("String", "MIN_FW_VERSION", "\"${configProperties.getProperty("MIN_FW_VERSION")}\"")
+        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${configProperties.getProperty("ABS_MIN_FW_VERSION")}\"")
         // We have to list all translated languages here,
         // because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
@@ -150,12 +156,6 @@ android {
 secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
     propertiesFileName = "secrets.properties"
-}
-
-datadog {
-    //    if (!gradle.startParameter.taskNames.any { it.contains("fdroid", ignoreCase = true) }) {
-    //        composeInstrumentation = InstrumentationMode.AUTO
-    //    }
 }
 
 // workaround for https://github.com/google/ksp/issues/1590
