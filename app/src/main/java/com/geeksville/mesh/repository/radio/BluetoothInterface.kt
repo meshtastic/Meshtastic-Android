@@ -146,6 +146,7 @@ constructor(
     @Volatile private var rssiPollingJob: Job? = null
 
     // Start polling RSSI every 5 seconds (immediate first read)
+    @Suppress("MagicNumber", "LoopWithTooManyJumpStatements")
     private fun startRssiPolling() {
         rssiPollingJob?.cancel()
         val s = safe ?: return

@@ -103,7 +103,6 @@ fun ConnectionsScreen(
     scanModel: BTScanModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
 ) {
@@ -223,7 +222,6 @@ fun ConnectionsScreen(
                                         node = node,
                                         onNavigateToNodeDetails = onNavigateToNodeDetails,
                                         onSetShowSharedContact = { showSharedContact = it },
-                                        onNavigateToSettings = onNavigateToSettings,
                                         onClickDisconnect = { scanModel.disconnect() },
                                         bluetoothRssi = bluetoothRssi,
                                     )

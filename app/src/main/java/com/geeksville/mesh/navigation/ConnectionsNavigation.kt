@@ -50,7 +50,6 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController) {
                         restoreState = true
                     }
                 },
-                onNavigateToSettings = { navController.navigate(SettingsRoutes.Settings()) },
                 onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                 onConfigNavigate = { route -> navController.navigate(route) },
             )

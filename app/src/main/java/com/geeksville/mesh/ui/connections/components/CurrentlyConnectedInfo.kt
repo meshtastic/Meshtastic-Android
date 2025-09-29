@@ -23,12 +23,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,12 +53,11 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
-    bluetoothRssi: Int? = null,
     onNavigateToNodeDetails: (Int) -> Unit,
     onSetShowSharedContact: (Node) -> Unit,
-    onNavigateToSettings: () -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
+    bluetoothRssi: Int? = null,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -107,13 +102,6 @@ fun CurrentlyConnectedInfo(
                     )
                 }
             }
-
-            IconButton(enabled = true, onClick = onNavigateToSettings) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = stringResource(id = R.string.radio_configuration),
-                )
-            }
         }
 
         Button(
@@ -154,7 +142,6 @@ private fun CurrentlyConnectedInfoPreview() {
                 bluetoothRssi = -75, // Example RSSI for signal preview
                 onNavigateToNodeDetails = {},
                 onSetShowSharedContact = {},
-                onNavigateToSettings = {},
                 onClickDisconnect = {},
             )
         }
