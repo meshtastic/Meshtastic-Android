@@ -105,8 +105,8 @@
     <string name="config_display_wake_on_tap_or_motion_summary">Необходимо наличие акселерометра на вашем устройстве.</string>
     <string name="config_lora_region_summary">Регион, в котором вы будете использовать ваше радио.</string>
     <string name="config_lora_modem_preset_summary">Доступные пресеты модема, по умолчанию - Long Fast.</string>
-    <string name="config_lora_hop_limit_summary">Sets the maximum number of hops, default is 3. Increasing hops also increases congestion and should be used carefully. 0 hop broadcast messages will not get ACKs.</string>
-    <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
+    <string name="config_lora_hop_limit_summary">Задает максимальное количество прыжков, по умолчанию - 3. Увеличение количества также увеличивает перегрузку и должно использоваться с осторожностью. Сообщения с 0 прыжков не будут получать подтверждения.</string>
+    <string name="config_lora_frequency_slot_summary">Рабочая частота вашего узла рассчитывается на основе региона, настроек модема и этого поля. При значении 0 интервал автоматически рассчитывается на основе названия основного канала и изменяется с публичного интервала по умолчанию. Вернитесь к публичному интервалу по умолчанию, если настроены частный основной и общедоступный дополнительный каналы.</string>
     <string name="label_very_long_slow">Очень большая дальность - Медленный</string>
     <string name="label_long_fast">Большая дальность - Быстрый</string>
     <string name="label_long_moderate">Большая дальность - Умеренно</string>
@@ -123,14 +123,14 @@
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Чем меньше расстояние, тем быстрее будет отправляться обновление позицию.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Минимальное изменение расстояния в метрах для рассылки смарт-позиции.</string>
     <string name="config_position_gps_update_interval_summary">Как часто мы пытаемся получить местоположение GPS (&lt;10sec держит GPS включенным).</string>
-    <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
-    <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
+    <string name="config_position_flags_summary">Необязательные поля для включения при сборке сообщений о местоположении. Чем больше полей будет включено, тем больше будет сообщение, что приведет к увеличению времени трансляции и повышению риска потери пакетов.</string>
+    <string name="config_power_is_power_saving_summary">Все устройства будут работать в режиме ожидания, насколько это возможно, в качестве трекера и датчика также будет использоваться радиоприемник lora. Не используйте эту настройку, если вы хотите использовать свое устройство с приложениями для телефона или же устройство без кнопки взаимодействий.</string>
     <string name="config_security_public_key">Сгенерирован с вашего открытого ключа и отправлен на другие узлы сетки, чтобы они могли вычислить общий секретный ключ.</string>
     <string name="config_security_private_key">Используется для создания общего ключа с удаленным устройством.</string>
     <string name="config_security_admin_key">Открытый ключ для отправки сообщения администратора на данный узел.</string>
     <string name="config_security_is_managed">Устройство управляется администратором сетки, пользователь не может получить доступ к настройкам устройства.</string>
-    <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
-    <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
+    <string name="config_security_serial_enabled">Последовательная консоль через Stream API.</string>
+    <string name="config_security_debug_log_api_enabled">Выводите журнал отладки в режиме реального времени по последовательному каналу, просматривайте и экспортируйте журналы устройств с измененным местоположением по Bluetooth.</string>
     <!-- Position Config -->
     <string name="position_packet">Пакет позиции</string>
     <string name="broadcast_interval">Период трансляции</string>
