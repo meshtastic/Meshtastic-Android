@@ -272,6 +272,7 @@
     <string name="delivery_confirmed">Dostarczono</string>
     <string name="error">Błąd</string>
     <string name="ignore">Zignoruj</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Dodać \'%s\' do listy ignorowanych?</string>
     <string name="ignore_remove">Usunąć \'%s\' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
     <string name="map_select_download_region">Wybierz region do pobrania</string>
@@ -374,6 +375,8 @@
     <string name="alert_bell_text">Znak ostrzegawczy!</string>
     <string name="critical_alert">Krytyczny alert!</string>
     <string name="favorite">Ulubiony</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Dodać węzeł \'%s\' do ulubionych?</string>
     <string name="favorite_remove">Usunąć węzeł \'%s\' z ulubionych?</string>
     <string name="power_metrics_log">Historia zasilania</string>
