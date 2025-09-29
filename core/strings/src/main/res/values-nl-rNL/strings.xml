@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Aflevering bevestigd</string>
     <string name="error">Fout</string>
     <string name="ignore">Negeer</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Voeg \'%s\' toe aan negeerlijst?</string>
     <string name="ignore_remove">Verwijder \'%s\' uit negeerlijst?</string>
     <string name="map_select_download_region">Selecteer regio om te downloaden</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Melding Bell teken!</string>
     <string name="critical_alert">Kritieke Waarschuwing!</string>
     <string name="favorite">Favoriet</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">\'%s\' aan favorieten toevoegen?</string>
     <string name="favorite_remove">\'%s\' uit favorieten verwijderen?</string>
     <string name="power_metrics_log">Energiegegevenslogboek</string>
