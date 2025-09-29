@@ -64,7 +64,7 @@ fun NodeItem(
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
     modifier: Modifier = Modifier,
-    onClickChip: (Node) -> Unit = {},
+    onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     currentTimeMillis: Long,
     isConnected: Boolean = false,
@@ -104,18 +104,13 @@ fun NodeItem(
             }
         }
 
-    Card(
-        modifier =
-        modifier
-            .combinedClickable(onClick = {}, onLongClick = onLongClick)
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .defaultMinSize(minHeight = 80.dp),
-        colors = cardColors,
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+    Card(modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 80.dp), colors = cardColors) {
+        Column(
+            modifier =
+            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(8.dp),
+        ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                NodeChip(node = thatNode, onClick = onClickChip)
+                NodeChip(node = thatNode)
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,

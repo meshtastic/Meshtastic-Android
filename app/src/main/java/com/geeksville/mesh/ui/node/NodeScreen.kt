@@ -20,7 +20,9 @@ package com.geeksville.mesh.ui.node
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -124,7 +126,12 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
         },
     ) { contentPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
-            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
                 stickyHeader {
                     val animatedAlpha by
                         animateFloatAsState(targetValue = if (!isScrollInProgress) 1.0f else 0f, label = "alpha")
@@ -179,7 +186,7 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                             thatNode = node,
                             distanceUnits = state.distanceUnits,
                             tempInFahrenheit = state.tempInFahrenheit,
-                            onClickChip = { navigateToNodeDetails(it.num) },
+                            onClick = { navigateToNodeDetails(node.num) },
                             onLongClick = { showContextMenu = true },
                             currentTimeMillis = currentTimeMillis,
                             isConnected = connectionState.isConnected(),
