@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Zustellung bestätigt</string>
     <string name="error">Fehler</string>
     <string name="ignore">Ignorieren</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">\'%s\' zur Ignorieren-Liste hinzufügen?</string>
     <string name="ignore_remove">\'%s\' von der Ignorieren-Liste entfernen?</string>
     <string name="map_select_download_region">Region zum Herunterladen auswählen</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Warnklingelzeichen!</string>
     <string name="critical_alert">Kritischer Fehler!</string>
     <string name="favorite">Favorit</string>
+    <string name="add_favorite">Zu Favoriten hinzufügen</string>
+    <string name="remove_favorite">Von Favoriten entfernen</string>
     <string name="favorite_add">\'%s\' als Favorit hinzufügen?</string>
     <string name="favorite_remove">\'%s\' als Favorit entfernen?</string>
     <string name="power_metrics_log">Energiedatenprotokoll</string>
