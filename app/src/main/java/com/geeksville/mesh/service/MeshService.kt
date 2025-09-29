@@ -104,6 +104,7 @@ import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.strings.R
+import timber.log.Timber
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -389,25 +390,19 @@ class MeshService :
                 this,
                 MeshServiceNotifications.SERVICE_NOTIFY_ID,
                 notification,
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (hasLocationPermission()) {
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
                     } else {
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
                     }
                 } else {
-                    0
+                    0 // No specific type needed for older Android versions
                 },
             )
-        } catch (ex: SecurityException) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                errormsg(
-                    "startForeground failed, likely due to missing POST_NOTIFICATIONS permission on Android 13+",
-                    ex,
-                )
-            } else {
-                errormsg("startForeground failed", ex)
-            }
+        } catch (ex: Exception) {
+            Timber.e(ex, "Error starting foreground service")
             return START_NOT_STICKY
         }
         return if (!wantForeground) {
