@@ -272,6 +272,7 @@
     <string name="delivery_confirmed">Delivery confirmed</string>
     <string name="error">שגיאה</string>
     <string name="ignore">התעלם</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">הוסף \'%s\' לרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="ignore_remove">הורד \'%s\' מרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="map_select_download_region">בחר אזור להורדה</string>
@@ -374,6 +375,8 @@
     <string name="alert_bell_text">Alert Bell Character!</string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Favorite</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>
     <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics Log</string>
