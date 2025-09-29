@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Envío confirmado</string>
     <string name="error">Error</string>
     <string name="ignore">Ignorar</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">¿Añadir \'%s\' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
     <string name="ignore_remove">¿Eliminar \'%s\' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
     <string name="map_select_download_region">Seleccionar región de descarga</string>
@@ -371,6 +372,8 @@ Rango de Valores 0 - 500.</string>
     <string name="alert_bell_text">¡Carácter Campana de Alerta!</string>
     <string name="critical_alert">¡Alerta Crítica!</string>
     <string name="favorite">Favorito</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">¿Añadir \'%s\' como un nodo favorito?</string>
     <string name="favorite_remove">¿Eliminar \'%s\' como un nodo favorito?</string>
     <string name="power_metrics_log">Registro de métricas de energía</string>

@@ -269,6 +269,7 @@
     <string name="delivery_confirmed">발송 확인 됨</string>
     <string name="error">오류</string>
     <string name="ignore">무시하기</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">%s를 무시 목록에 추가하시겠습니까?</string>
     <string name="ignore_remove">%s를 무시 목록에서 삭제하시겠습니까?</string>
     <string name="map_select_download_region">다운로드 지역 선택</string>
@@ -368,6 +369,8 @@
     <string name="alert_bell_text">알람 종 문자!</string>
     <string name="critical_alert">중요 경고!</string>
     <string name="favorite">즐겨찾기</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">\'%s\'를 즐겨찾기 하시겠습니까?</string>
     <string name="favorite_remove">\'%s\'를 즐겨찾기 취소하시겠습니까?</string>
     <string name="power_metrics_log">전원 메트릭 로그</string>

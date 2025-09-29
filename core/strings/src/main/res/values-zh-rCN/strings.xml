@@ -271,6 +271,7 @@
     <string name="delivery_confirmed">已送达</string>
     <string name="error">错误</string>
     <string name="ignore">忽略</string>
+    <string name="remove_ignored">从忽略中删除</string>
     <string name="ignore_add">添加 \'%s\' 到忽略列表？</string>
     <string name="ignore_remove">从忽略列表中删除 \'%s\' ？</string>
     <string name="map_select_download_region">选择下载地区</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">警铃字符！</string>
     <string name="critical_alert">关键告警！</string>
     <string name="favorite">收藏</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">添加 \'%s\'为收藏节点？</string>
     <string name="favorite_remove">不再把\'%s\'作为收藏节点？</string>
     <string name="power_metrics_log">电源计量日志</string>

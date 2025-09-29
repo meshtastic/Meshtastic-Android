@@ -272,6 +272,7 @@
     <string name="delivery_confirmed">Доставку підтверджено</string>
     <string name="error">Помилка</string>
     <string name="ignore">Ігнорувати</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Додати \'%s\' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <string name="ignore_remove">Видалити \'%s\' з чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <string name="map_select_download_region">Оберіть регіон завантаження</string>
@@ -374,6 +375,8 @@
     <string name="alert_bell_text">Alert Bell Character!</string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Обране</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Додати \'%s\' як обраний вузол?</string>
     <string name="favorite_remove">Видалити \'%s\' з обраних вузлів?</string>
     <string name="power_metrics_log">Power Metrics Log</string>

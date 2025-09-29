@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Sändning bekräftad</string>
     <string name="error">Fel</string>
     <string name="ignore">Ignorera</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Lägg till \'%s\' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
     <string name="ignore_remove">Ta bort \'%s\' från ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
     <string name="map_select_download_region">Välj nedladdningsområde</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Varningsklocka!</string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Favorit</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>
     <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics Log</string>

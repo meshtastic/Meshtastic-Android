@@ -272,6 +272,7 @@
     <string name="delivery_confirmed">Доставка подтверждена</string>
     <string name="error">Ошибка</string>
     <string name="ignore">Игнорировать</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Добавить \'%s\' в список игнорируемых?</string>
     <string name="ignore_remove">Удалить \'%s\' из списка игнорируемых?</string>
     <string name="map_select_download_region">Выберите регион загрузки</string>
@@ -374,6 +375,8 @@
     <string name="alert_bell_text">Символ колокольчика оповещения!</string>
     <string name="critical_alert">Критическое оповещение!</string>
     <string name="favorite">Избранное</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Добавить \'%s\' как избранный узел?</string>
     <string name="favorite_remove">Удалить \'%s\' как избранный узел?</string>
     <string name="power_metrics_log">Журнал энергопотребления</string>

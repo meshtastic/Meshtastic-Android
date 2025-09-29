@@ -274,6 +274,7 @@
     <string name="delivery_confirmed">Delivery confirmed</string>
     <string name="error">غلط</string>
     <string name="ignore">تجاهل</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">أضف \'%s\' إلى قائمة التجاهل؟</string>
     <string name="ignore_remove">Remove \'%s\' from ignore list?</string>
     <string name="map_select_download_region">حدد جهة التحميل</string>
@@ -378,6 +379,8 @@
     <string name="alert_bell_text">Alert Bell Character!</string>
     <string name="critical_alert">تنبيه حرج!</string>
     <string name="favorite">المفضلة</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">إضافة \'%s\' كعقدة مفضلة؟</string>
     <string name="favorite_remove">إزالة \'%s\' كعقدة مفضلة؟</string>
     <string name="power_metrics_log">Power Metrics Log</string>

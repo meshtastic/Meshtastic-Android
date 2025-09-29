@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">受信を確認しました</string>
     <string name="error">エラー</string>
     <string name="ignore">無視</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">\'%s\'を無視リストに追加しますか？</string>
     <string name="ignore_remove">\'%s\'を無視リストから削除しますか？</string>
     <string name="map_select_download_region">指定範囲の地図タイルをダウンロード</string>
@@ -369,6 +370,8 @@
     <string name="alert_bell_text">アラートベル！</string>
     <string name="critical_alert">緊急アラート</string>
     <string name="favorite">お気に入り</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">%s\' をお気に入りのノードとして追加しますか？</string>
     <string name="favorite_remove">お気に入りのノードとして「%s」を削除しますか？</string>
     <string name="power_metrics_log">電力指標ログ</string>

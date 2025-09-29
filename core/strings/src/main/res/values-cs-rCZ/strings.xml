@@ -272,6 +272,7 @@
     <string name="delivery_confirmed">Doručeno</string>
     <string name="error">Chyba</string>
     <string name="ignore">Ignorovat</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Přidat \'%s\' do seznamu ignorovaných?</string>
     <string name="ignore_remove">Odstranit \'%s\' ze seznamu ignorování?</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
@@ -374,6 +375,8 @@
     <string name="alert_bell_text">Výstražný zvonek!</string>
     <string name="critical_alert">Kritické varování!</string>
     <string name="favorite">Oblíbené</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Přidat \'%s\' jako oblíbený uzel?</string>
     <string name="favorite_remove">Odstranit \'%s\' z oblíbených uzlů?</string>
     <string name="power_metrics_log">Protokol metrik napájení</string>

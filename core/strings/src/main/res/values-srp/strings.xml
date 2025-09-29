@@ -271,6 +271,7 @@
     <string name="delivery_confirmed">Испорука потврђена</string>
     <string name="error">Грешка</string>
     <string name="ignore">Игнориши</string>
+    <string name="remove_ignored">Уклони из игнорисаних</string>
     <string name="ignore_add">Додати \'%s\' на листу игнорисаних?</string>
     <string name="ignore_remove">Уклнити \'%s\' на листу игнорисаних?</string>
     <string name="map_select_download_region">Изаберите регион за преузимање</string>
@@ -372,6 +373,8 @@
     <string name="alert_bell_text">Карактер звона за упозорења!</string>
     <string name="critical_alert">Критично упозорење!</string>
     <string name="favorite">Омиљени</string>
+    <string name="add_favorite">Додај у омиљене</string>
+    <string name="remove_favorite">Уклони из омиљених</string>
     <string name="favorite_add">Додај „%s” у омиљене чворове?</string>
     <string name="favorite_remove">Углони „%s” из листе омиљених чворова?</string>
     <string name="power_metrics_log">Логови метрика снаге</string>

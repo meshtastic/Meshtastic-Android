@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Съобщението е доставено</string>
     <string name="error">Грешка</string>
     <string name="ignore">Игнорирай</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Добави \'%s\' към списъка с игнорирани?</string>
     <string name="ignore_remove">Изтрий \'%s\' от списъка с игнорирани?</string>
     <string name="map_select_download_region">Избор на регион за сваляне</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Alert Bell Character!</string>
     <string name="critical_alert">Критичен сигнал!</string>
     <string name="favorite">Любим</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Добавяне на \'%s\' като любим възел?</string>
     <string name="favorite_remove">Премахване на \'%s\' като любим възел?</string>
     <string name="power_metrics_log">Журнал на показателите на захранването</string>

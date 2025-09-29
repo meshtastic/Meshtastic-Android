@@ -272,6 +272,7 @@
     <string name="delivery_confirmed">Prejem potrjen</string>
     <string name="error">Napaka</string>
     <string name="ignore">Prezri</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Dodaj \'%s\' na prezrto listo?</string>
     <string name="ignore_remove">Odstrani \'%s\' iz prezrte liste?</string>
     <string name="map_select_download_region">Prenesi izbrano regijo</string>
@@ -374,6 +375,8 @@
     <string name="alert_bell_text">Znak opozorilnega zvonca!</string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Favorite</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>
     <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics Log</string>
