@@ -880,4 +880,5 @@
     <string name="one_day">24 tuntia</string>
     <string name="two_days">48 tuntia</string>
     <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %s</string>
+    <string name="dbm_value">%1$d dBm</string>
 </resources>
