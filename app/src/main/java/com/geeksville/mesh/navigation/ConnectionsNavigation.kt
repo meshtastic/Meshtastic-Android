@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.geeksville.mesh.ui.connections.ConnectionsScreen
+import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.LoRaConfigScreen
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -62,6 +63,9 @@ private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
     composable<SettingsRoutes.LoRa> { backStackEntry ->
         val parentEntry =
             remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
-        LoRaConfigScreen(hiltViewModel(parentEntry))
+        LoRaConfigScreen(
+            navController = navController,
+            viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry)
+        )
     }
 }
