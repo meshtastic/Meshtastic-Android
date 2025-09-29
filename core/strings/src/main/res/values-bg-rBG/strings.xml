@@ -40,7 +40,7 @@
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
-    <string name="routing_error_timeout">Timeout</string>
+    <string name="routing_error_timeout"></string>
     <string name="routing_error_no_interface">Няма интерфейс</string>
     <string name="routing_error_max_retransmit">Достигнат максимален брой препращания</string>
     <string name="routing_error_no_channel">Няма канал</string>
@@ -127,13 +127,13 @@
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
     <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
-    <string name="config_security_admin_key">The public key authorized to send admin messages to this node.</string>
-    <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
+    <string name="config_security_admin_key">Публичният ключ, оторизиран за изпращане на администраторски съобщения до този възел.</string>
+    <string name="config_security_is_managed">Устройството се управлява от mesh администратор, потребителят няма достъп до никоя от настройките на устройството.</string>
     <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
     <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
     <!-- Position Config -->
     <string name="position_packet">Position Packet</string>
-    <string name="broadcast_interval">Broadcast Interval</string>
+    <string name="broadcast_interval">Интервал на излъчване</string>
     <string name="smart_position">Smart Position</string>
     <string name="minimum_interval">Минимален интервал</string>
     <string name="minimum_distance">Минимално разстояние</string>
@@ -142,8 +142,8 @@
     <string name="altitude">Надморска височина</string>
     <string name="update_interval">Интервал на актуализиране</string>
     <string name="advanced_device_gps">Advanced Device GPS</string>
-    <string name="gps_receive_gpio">GPS Receive GPIO</string>
-    <string name="gps_transmit_gpio">GPS Transmit GPIO</string>
+    <string name="gps_receive_gpio">GPIO за приемане от GPS</string>
+    <string name="gps_transmit_gpio">GPIO за предаване от GPS</string>
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Отстраняване на грешки</string>
@@ -157,7 +157,7 @@
     <string name="analytics_okay">Разрешаване на анализи и докладване за сривове.</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
-    <string name="discard_changes">Discard changes</string>
+    <string name="discard_changes">Отхвърляне на промените</string>
     <string name="save_changes">Запис</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="permission_missing">Meshtastic се нуждае от активирани разрешения за местоположение, за да намира нови устройства чрез Bluetooth. Можете да ги деактивирате, когато не се използват.</string>
@@ -190,7 +190,7 @@
     <string name="debug_logs_export">Експортиране на журнали</string>
     <string name="debug_export_cancelled">Експортирането е отменено</string>
     <string name="debug_export_success">%1$d logs exported</string>
-    <string name="debug_export_failed">Failed to write log file: %1$s</string>
+    <string name="debug_export_failed">Неуспешен запис на регистрационен файл: %1$s</string>
     <string name="debug_filters">Филтри</string>
     <string name="debug_active_filters">Активни филтри</string>
     <string name="debug_default_search">Търсене в журналите…</string>
@@ -427,8 +427,8 @@
     <string name="bluetooth_enabled">Bluetooth е активиран</string>
     <string name="pairing_mode">Режим на сдвояване</string>
     <string name="fixed_pin">Фиксиран ПИН</string>
-    <string name="uplink_enabled">Uplink enabled</string>
-    <string name="downlink_enabled">Downlink enabled</string>
+    <string name="uplink_enabled">Uplink активиран</string>
+    <string name="downlink_enabled">Downlink активиран</string>
     <string name="default_">По подразбиране</string>
     <string name="position_enabled">Позицията е активирана</string>
     <string name="precise_location">Точно местоположение</string>
@@ -467,8 +467,8 @@
     <string name="use_input_pullup_mode">Използване на режим INPUT_PULLUP</string>
     <string name="device_config">Устройство</string>
     <string name="role">Роля на устройството</string>
-    <string name="button_gpio">Button GPIO</string>
-    <string name="buzzer_gpio">Buzzer GPIO</string>
+    <string name="button_gpio">GPIO за бутон</string>
+    <string name="buzzer_gpio">GPIO за зумер</string>
     <string name="rebroadcast_mode">Режим на препредаване</string>
     <string name="nodeinfo_broadcast_interval">Node Info Broadcast Interval</string>
     <string name="double_tap_as_button_press">Double Tap as Button</string>
@@ -500,7 +500,7 @@
     <string name="output_led_gpio">Output LED (GPIO)</string>
     <string name="output_led_active_high">Output LED active high</string>
     <string name="output_buzzer_gpio">Output buzzer (GPIO)</string>
-    <string name="use_pwm_buzzer">Use PWM buzzer</string>
+    <string name="use_pwm_buzzer">Използване на PWM зумер</string>
     <string name="output_vibra_gpio">Output vibra (GPIO)</string>
     <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
     <string name="nag_timeout_seconds">Nag timeout (seconds)</string>
@@ -516,7 +516,7 @@
     <string name="coding_rate">Coding Rate</string>
     <string name="frequency_offset_mhz">Отместване на честотата (MHz)</string>
     <string name="region_frequency_plan">Регион</string>
-    <string name="hop_limit">Number of Hops</string>
+    <string name="hop_limit">Брой отскоци</string>
     <string name="tx_enabled">Предаването е активирано</string>
     <string name="tx_power_dbm">Мощност на предаване</string>
     <string name="frequency_slot">Честотен слот</string>
@@ -571,7 +571,7 @@
     <string name="longitude">Географска дължина</string>
     <string name="altitude_meters">Надморска височина (метри)</string>
     <string name="position_config_set_fixed_from_phone">Зададено от текущото местоположение на телефона</string>
-    <string name="gps_mode">GPS Mode (Physical Hardware)</string>
+    <string name="gps_mode">Режим на GPS (физически хардуер)</string>
     <string name="gps_update_interval_seconds">Интервал на актуализиране на GPS (секунди)</string>
     <string name="redefine_gps_rx_pin">Предефиниране на GPS_RX_PIN</string>
     <string name="redefine_gps_tx_pin">Предефиниране на GPS_TX_PIN</string>
@@ -694,7 +694,7 @@
     <string name="free_memory">Свободна памет</string>
     <string name="disk_free">Свободен диск</string>
     <string name="load">Load</string>
-    <string name="user_string">User String</string>
+    <string name="user_string">Потребителски низ</string>
     <string name="navigate_into_label">Navigate Into</string>
     <string name="connections">Свързване</string>
     <string name="map">Карта на Mesh</string>
@@ -720,7 +720,7 @@
     <string name="client_notification">Client Notification</string>
     <string name="compromised_keys">Открити са компрометирани ключове, изберете OK за регенериране.</string>
     <string name="regenerate_private_key">Регенериране на частния ключ</string>
-    <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
+    <string name="regenerate_keys_confirmation">Сигурни ли сте, че искате да генерирате отново своя частен ключ?\n\nВъзлите, които може да са обменяли преди това ключове с възела, ще трябва да го премахнат и да обменят отново ключове, за да възобновят защитената комуникация.</string>
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
     <string name="modules_unlocked">Modules unlocked</string>
@@ -813,9 +813,9 @@
     <string name="phone_location">Местоположение на телефона</string>
     <string name="phone_location_description">Meshtastic uses your phone\'s location to enable a number of features. You can update your location permissions at any time from settings.</string>
     <string name="share_location">Споделяне на местоположение</string>
-    <string name="share_location_description">Use your phone GPS to send locations to your node to instead of using a hardware GPS on your node.</string>
+    <string name="share_location_description">Използвайте GPS на телефона си, за да изпращате местоположения до вашия възел, вместо да използвате хардуеренния GPS на вашия възел.</string>
     <string name="distance_measurements">Измервания на разстояния</string>
-    <string name="distance_measurements_description">Display the distance between your phone and other Meshtastic nodes with positions.</string>
+    <string name="distance_measurements_description">Показване на разстоянието между вашия телефон и други възли на Meshtastic с позиции.</string>
     <string name="distance_filters">Distance Filters</string>
     <string name="distance_filters_description">Filter the node list and mesh map based on proximity to your phone.</string>
     <string name="mesh_map_location">Местоположение на mesh карта</string>
@@ -875,9 +875,9 @@
     <string name="device_telemetry_enabled">Send Device Telemetry</string>
     <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
     <string name="any">Any</string>
-    <string name="one_hour">1 Hour</string>
-    <string name="eight_hours">8 Hours</string>
-    <string name="one_day">24 Hours</string>
-    <string name="two_days">48 Hours</string>
-    <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
+    <string name="one_hour">1 час</string>
+    <string name="eight_hours">8 часа</string>
+    <string name="one_day">24 часа</string>
+    <string name="two_days">48 часа</string>
+    <string name="last_heard_filter_label">Филтриране по време на последното чуване: %s</string>
 </resources>
