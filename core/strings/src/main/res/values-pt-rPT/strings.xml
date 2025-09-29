@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Erro</string>
     <string name="ignore">Ignorar</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Adicionar \'%s\' para a lista de ignorados?</string>
     <string name="ignore_remove">Remover \'%s\' de lista dos ignorados?</string>
     <string name="map_select_download_region">Selecione a região para download</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Símbolo de alerta</string>
     <string name="critical_alert">Alerta crítico!</string>
     <string name="favorite">Favoritos</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Adicione \'%s\' como um nó favorito?</string>
     <string name="favorite_remove">Remover \'%s\' como um nó favorito?</string>
     <string name="power_metrics_log">Histórico de telemetria de energia</string>
