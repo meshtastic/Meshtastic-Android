@@ -40,6 +40,7 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.prefs.ui.UiPrefs
 import timber.log.Timber
 import javax.inject.Inject
@@ -52,6 +53,7 @@ constructor(
     radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val uiPrefs: UiPrefs,
+    private val uiPreferencesDataSource: UiPreferencesDataSource,
 ) : ViewModel() {
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
@@ -76,14 +78,13 @@ constructor(
     val sharedContactRequested = _sharedContactRequested.asStateFlow()
 
     private val nodeSortOption =
-        MutableStateFlow(NodeSortOption.entries.getOrElse(uiPrefs.nodeSortOption) { NodeSortOption.VIA_FAVORITE })
+        uiPreferencesDataSource.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
 
     private val nodeFilterText = MutableStateFlow("")
-    private val includeUnknown = MutableStateFlow(uiPrefs.includeUnknown)
-    private val onlyOnline = MutableStateFlow(uiPrefs.onlyOnline)
-    private val onlyDirect = MutableStateFlow(uiPrefs.onlyDirect)
-    private val _showIgnored = MutableStateFlow(uiPrefs.showIgnored)
-    val showIgnored: StateFlow<Boolean> = _showIgnored
+    private val includeUnknown = uiPreferencesDataSource.includeUnknown
+    private val onlyOnline = uiPreferencesDataSource.onlyOnline
+    private val onlyDirect = uiPreferencesDataSource.onlyDirect
+    private val showIgnored = uiPreferencesDataSource.showIgnored
 
     private val nodeFilter: Flow<NodeFilterState> =
         combine(nodeFilterText, includeUnknown, onlyOnline, onlyDirect, showIgnored) {
@@ -151,17 +152,24 @@ constructor(
         nodeFilterText.value = text
     }
 
-    fun toggleIncludeUnknown() = toggle(includeUnknown) { uiPrefs.includeUnknown = it }
+    fun toggleIncludeUnknown() {
+        uiPreferencesDataSource.setIncludeUnknown(!includeUnknown.value)
+    }
 
-    fun toggleOnlyOnline() = toggle(onlyOnline) { uiPrefs.onlyOnline = it }
+    fun toggleOnlyOnline() {
+        uiPreferencesDataSource.setOnlyOnline(!onlyOnline.value)
+    }
 
-    fun toggleOnlyDirect() = toggle(onlyDirect) { uiPrefs.onlyDirect = it }
+    fun toggleOnlyDirect() {
+        uiPreferencesDataSource.setOnlyDirect(!onlyDirect.value)
+    }
 
-    fun toggleShowIgnored() = toggle(_showIgnored) { uiPrefs.showIgnored = it }
+    fun toggleShowIgnored() {
+        uiPreferencesDataSource.setShowIgnored(!showIgnored.value)
+    }
 
     fun setSortOption(sort: NodeSortOption) {
-        nodeSortOption.value = sort
-        uiPrefs.nodeSortOption = sort.ordinal
+        uiPreferencesDataSource.setNodeSort(sort.ordinal)
     }
 
     fun toggleShowDetails() = toggle(showDetails) { uiPrefs.showDetails = it }
