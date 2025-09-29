@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Kohale toimetatud</string>
     <string name="error">Viga</string>
     <string name="ignore">Eira</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Lisa \'%s\' eiramis loendisse?</string>
     <string name="ignore_remove">Eemaldada \'%s\' eiramis loendist?</string>
     <string name="map_select_download_region">Vali allalaetav piirkond</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Häirekella sümbol!</string>
     <string name="critical_alert">Häiresõnum!</string>
     <string name="favorite">Lemmik</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Lisa \'%s\' lemmik sõlmede hulka?</string>
     <string name="favorite_remove">Eemalda \'%s\' lemmik sõlmede hulgast?</string>
     <string name="power_metrics_log">Toitepinge andurite logi</string>
