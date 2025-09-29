@@ -97,21 +97,13 @@ constructor(
             NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
         }
 
-    private val showDetails = MutableStateFlow(uiPrefs.showDetails)
-
     val nodesUiState: StateFlow<NodesUiState> =
-        combine(nodeSortOption, nodeFilter, showDetails, radioConfigRepository.deviceProfileFlow) {
-                sort,
-                nodeFilter,
-                showDetails,
-                profile,
-            ->
+        combine(nodeSortOption, nodeFilter, radioConfigRepository.deviceProfileFlow) { sort, nodeFilter, profile ->
             NodesUiState(
                 sort = sort,
                 filter = nodeFilter,
                 distanceUnits = profile.config.display.units.number,
                 tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-                showDetails = showDetails,
             )
         }
             .stateIn(
@@ -172,8 +164,6 @@ constructor(
         uiPreferencesDataSource.setNodeSort(sort.ordinal)
     }
 
-    fun toggleShowDetails() = toggle(showDetails) { uiPrefs.showDetails = it }
-
     fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
         viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
 
@@ -221,7 +211,6 @@ data class NodesUiState(
     val filter: NodeFilterState = NodeFilterState(),
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
-    val showDetails: Boolean = false,
 )
 
 data class NodeFilterState(

@@ -144,8 +144,6 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                         onToggleOnlyOnline = nodesViewModel::toggleOnlyOnline,
                         onlyDirect = state.filter.onlyDirect,
                         onToggleOnlyDirect = nodesViewModel::toggleOnlyDirect,
-                        showDetails = state.showDetails,
-                        onToggleShowDetails = nodesViewModel::toggleShowDetails,
                         showIgnored = state.filter.showIgnored,
                         onToggleShowIgnored = nodesViewModel::toggleShowIgnored,
                         ignoredNodeCount = ignoredNodeCount,
@@ -183,7 +181,6 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                             tempInFahrenheit = state.tempInFahrenheit,
                             onClickChip = { navigateToNodeDetails(it.num) },
                             onLongClick = { showContextMenu = true },
-                            expanded = state.showDetails,
                             currentTimeMillis = currentTimeMillis,
                             isConnected = connectionState.isConnected(),
                         )

@@ -75,8 +75,6 @@ fun NodeFilterTextField(
     onToggleOnlyOnline: () -> Unit,
     onlyDirect: Boolean,
     onToggleOnlyDirect: () -> Unit,
-    showDetails: Boolean,
-    onToggleShowDetails: () -> Unit,
     showIgnored: Boolean,
     onToggleShowIgnored: () -> Unit,
     ignoredNodeCount: Int,
@@ -97,8 +95,6 @@ fun NodeFilterTextField(
                     onToggleOnlyOnline = onToggleOnlyOnline,
                     onlyDirect = onlyDirect,
                     onToggleOnlyDirect = onToggleOnlyDirect,
-                    showDetails = showDetails,
-                    onToggleShowDetails = onToggleShowDetails,
                     showIgnored = showIgnored,
                     onToggleShowIgnored = onToggleShowIgnored,
                     ignoredNodeCount = ignoredNodeCount,
@@ -260,25 +256,6 @@ private fun NodeSortButton(
         HorizontalDivider()
         DropdownMenuItem(
             onClick = {
-                toggles.onToggleShowDetails()
-                expanded = false
-            },
-            text = {
-                Row {
-                    AnimatedVisibility(visible = toggles.showDetails) {
-                        Icon(
-                            imageVector = Icons.Default.Done,
-                            contentDescription = null,
-                            modifier = Modifier.padding(end = 4.dp),
-                        )
-                    }
-                    Text(text = stringResource(id = R.string.node_filter_show_details))
-                }
-            },
-        )
-        HorizontalDivider()
-        DropdownMenuItem(
-            onClick = {
                 toggles.onToggleShowIgnored()
                 expanded = false
             },
@@ -321,8 +298,6 @@ private fun NodeFilterTextFieldPreview() {
             onToggleOnlyOnline = {},
             onlyDirect = false,
             onToggleOnlyDirect = {},
-            showDetails = false,
-            onToggleShowDetails = {},
             showIgnored = false,
             onToggleShowIgnored = {},
             ignoredNodeCount = 0,
@@ -337,8 +312,6 @@ data class NodeFilterToggles(
     val onToggleOnlyOnline: () -> Unit,
     val onlyDirect: Boolean,
     val onToggleOnlyDirect: () -> Unit,
-    val showDetails: Boolean,
-    val onToggleShowDetails: () -> Unit,
     val showIgnored: Boolean,
     val onToggleShowIgnored: () -> Unit,
     val ignoredNodeCount: Int,

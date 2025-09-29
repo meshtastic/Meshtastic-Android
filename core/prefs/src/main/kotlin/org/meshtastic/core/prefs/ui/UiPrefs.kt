@@ -30,7 +30,6 @@ import javax.inject.Singleton
 
 interface UiPrefs {
     var hasShownNotPairedWarning: Boolean
-    var showDetails: Boolean
     var showQuickChat: Boolean
 
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
@@ -63,7 +62,6 @@ class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: Sh
     }
 
     override var hasShownNotPairedWarning: Boolean by PrefDelegate(prefs, "has_shown_not_paired_warning", false)
-    override var showDetails: Boolean by PrefDelegate(prefs, "show-details", false)
     override var showQuickChat: Boolean by PrefDelegate(prefs, "show-quick-chat", false)
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> = provideNodeLocationFlows
