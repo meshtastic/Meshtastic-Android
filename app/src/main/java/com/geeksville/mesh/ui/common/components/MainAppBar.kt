@@ -45,7 +45,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -58,8 +57,7 @@ fun MainAppBar(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     ourNode: Node?,
-    isConnected: Boolean,
-    onAction: (NodeMenuAction) -> Unit,
+    onClickChip: (Node) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -86,7 +84,6 @@ fun MainAppBar(
         subtitle = null,
         canNavigateUp = navController.previousBackStackEntry != null,
         ourNode = ourNode,
-        isConnected = isConnected,
         showNodeChip = false,
         onNavigateUp = navController::navigateUp,
         actions = {
@@ -97,7 +94,7 @@ fun MainAppBar(
                 }
             }
         },
-        onAction = onAction,
+        onClickChip = onClickChip,
     )
 }
 
@@ -108,12 +105,11 @@ fun MainAppBar(
     title: String,
     subtitle: String? = null,
     ourNode: Node?,
-    isConnected: Boolean,
     showNodeChip: Boolean,
     canNavigateUp: Boolean,
     onNavigateUp: () -> Unit,
     actions: @Composable () -> Unit,
-    onAction: (NodeMenuAction) -> Unit,
+    onClickChip: (Node) -> Unit,
 ) {
     TopAppBar(
         title = {
@@ -147,13 +143,7 @@ fun MainAppBar(
             }
         },
         actions = {
-            TopBarActions(
-                ourNode = ourNode,
-                isConnected = isConnected,
-                showNodeChip = showNodeChip,
-                actions = actions,
-                onAction = onAction,
-            )
+            TopBarActions(ourNode = ourNode, showNodeChip = showNodeChip, actions = actions, onClickChip = onClickChip)
         },
     )
 }
@@ -161,20 +151,13 @@ fun MainAppBar(
 @Composable
 private fun TopBarActions(
     ourNode: Node?,
-    isConnected: Boolean,
     showNodeChip: Boolean,
     actions: @Composable () -> Unit,
-    onAction: (NodeMenuAction) -> Unit,
+    onClickChip: (Node) -> Unit,
 ) {
     AnimatedVisibility(visible = showNodeChip, enter = fadeIn(), exit = fadeOut()) {
-        ourNode?.let {
-            NodeChip(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                node = it,
-                isThisNode = true,
-                isConnected = isConnected,
-                onAction = onAction,
-            )
+        ourNode?.let { node ->
+            NodeChip(modifier = Modifier.padding(horizontal = 16.dp), node = node, onClick = onClickChip)
         }
     }
 
@@ -189,7 +172,6 @@ private fun MainAppBarPreview(@PreviewParameter(BooleanProvider::class) canNavig
             title = "Title",
             subtitle = "Subtitle",
             ourNode = previewNode,
-            isConnected = false,
             showNodeChip = true,
             canNavigateUp = canNavigateUp,
             onNavigateUp = {},

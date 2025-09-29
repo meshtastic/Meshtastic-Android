@@ -24,7 +24,6 @@ import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +42,6 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Position
 import org.meshtastic.core.prefs.ui.UiPrefs
 import timber.log.Timber
 import javax.inject.Inject
@@ -102,10 +100,6 @@ constructor(
                 initialValue = emptyList(),
             )
 
-    // TODO this should be moved to a repository class
-    private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
-    val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
-
     fun setTitle(title: String) {
         viewModelScope.launch { _title.value = title }
     }
@@ -157,22 +151,6 @@ constructor(
         if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
     }
 
-    fun handleNodeMenuAction(action: NodeMenuAction) {
-        when (action) {
-            is NodeMenuAction.Remove -> removeNode(action.node.num)
-            is NodeMenuAction.Ignore -> ignoreNode(action.node)
-            is NodeMenuAction.Favorite -> favoriteNode(action.node)
-            is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
-            is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
-            is NodeMenuAction.TraceRoute -> {
-                requestTraceroute(action.node.num)
-                _lastTraceRouteTime.value = System.currentTimeMillis()
-            }
-
-            else -> {}
-        }
-    }
-
     private fun favoriteNode(node: Node) = viewModelScope.launch {
         try {
             serviceRepository.onServiceAction(ServiceAction.Favorite(node))
@@ -186,53 +164,6 @@ constructor(
             serviceRepository.meshService?.send(p)
         } catch (ex: RemoteException) {
             Timber.e("Send DataPacket error: ${ex.message}")
-        }
-    }
-
-    private fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
-        Timber.i("Removing node '$nodeNum'")
-        try {
-            val packetId = serviceRepository.meshService?.packetId ?: return@launch
-            serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
-            nodeRepository.deleteNode(nodeNum)
-        } catch (ex: RemoteException) {
-            Timber.e("Remove node error: ${ex.message}")
-        }
-    }
-
-    private fun ignoreNode(node: Node) = viewModelScope.launch {
-        try {
-            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
-        } catch (ex: RemoteException) {
-            Timber.e(ex, "Ignore node error:")
-        }
-    }
-
-    private fun requestUserInfo(destNum: Int) {
-        Timber.i("Requesting UserInfo for '$destNum'")
-        try {
-            serviceRepository.meshService?.requestUserInfo(destNum)
-        } catch (ex: RemoteException) {
-            Timber.e("Request NodeInfo error: ${ex.message}")
-        }
-    }
-
-    fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
-        Timber.i("Requesting position for '$destNum'")
-        try {
-            serviceRepository.meshService?.requestPosition(destNum, position)
-        } catch (ex: RemoteException) {
-            Timber.e("Request position error: ${ex.message}")
-        }
-    }
-
-    fun requestTraceroute(destNum: Int) {
-        Timber.i("Requesting traceroute for '$destNum'")
-        try {
-            val packetId = serviceRepository.meshService?.packetId ?: return
-            serviceRepository.meshService?.requestTraceroute(packetId, destNum)
-        } catch (ex: RemoteException) {
-            Timber.e("Request traceroute error: ${ex.message}")
         }
     }
 }

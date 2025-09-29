@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui.node.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,7 +69,8 @@ fun NodeItem(
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
     modifier: Modifier = Modifier,
-    onAction: (NodeMenuAction) -> Unit = {},
+    onClickChip: (Node) -> Unit = {},
+    onLongClick: () -> Unit = {},
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
@@ -123,13 +125,16 @@ fun NodeItem(
 
     Card(
         modifier =
-        modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).defaultMinSize(minHeight = 80.dp),
-        onClick = { showDetails(!detailsShown) },
+        modifier
+            .combinedClickable(onClick = { showDetails(!detailsShown) }, onLongClick = onLongClick)
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .defaultMinSize(minHeight = 80.dp),
         colors = cardColors,
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                NodeChip(node = thatNode, isThisNode = isThisNode, isConnected = isConnected, onAction = onAction)
+                NodeChip(node = thatNode, onClick = onClickChip)
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,

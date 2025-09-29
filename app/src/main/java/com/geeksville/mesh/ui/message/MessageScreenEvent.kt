@@ -17,16 +17,15 @@
 
 package com.geeksville.mesh.ui.message
 
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import org.meshtastic.core.database.model.Node
 
 /**
- * Defines the various user interactions that can occur on the [MessageScreen].
- * These events are typically handled by the [com.geeksville.mesh.model.UIViewModel].
+ * Defines the various user interactions that can occur on the [MessageScreen]. These events are typically handled by
+ * the [com.geeksville.mesh.model.UIViewModel].
  */
 internal sealed interface MessageScreenEvent {
     /** Send a new text message. */
-    data class SendMessage(val text: String, val replyingToPacketId: Int? = null) :
-        MessageScreenEvent
+    data class SendMessage(val text: String, val replyingToPacketId: Int? = null) : MessageScreenEvent
 
     /** Send an emoji reaction to a specific message. */
     data class SendReaction(val emoji: String, val messageId: Int) : MessageScreenEvent
@@ -38,7 +37,7 @@ internal sealed interface MessageScreenEvent {
     data class ClearUnreadCount(val lastReadMessageId: Long) : MessageScreenEvent
 
     /** Handle an action from a node's context menu. */
-    data class HandleNodeMenuAction(val action: NodeMenuAction) : MessageScreenEvent
+    data class NodeDetails(val node: Node) : MessageScreenEvent
 
     /** Set the title of the screen (typically the contact or channel name). */
     data class SetTitle(val title: String) : MessageScreenEvent

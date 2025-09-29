@@ -40,7 +40,6 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
-import org.meshtastic.core.model.Position
 import org.meshtastic.core.prefs.ui.UiPrefs
 import timber.log.Timber
 import javax.inject.Inject
@@ -170,22 +169,14 @@ constructor(
     fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
         viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
 
-    fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
-        Timber.i("Removing node '$nodeNum'")
-        try {
-            val packetId = serviceRepository.meshService?.packetId ?: return@launch
-            serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
-            nodeRepository.deleteNode(nodeNum)
-        } catch (ex: RemoteException) {
-            Timber.e("Remove node error: ${ex.message}")
-        }
+    fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
+        _sharedContactRequested.value = sharedContact
     }
 
-    fun ignoreNode(node: Node) = viewModelScope.launch {
-        try {
-            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
-        } catch (ex: RemoteException) {
-            Timber.e(ex, "Ignore node error")
+    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
+        (!state.value).let { toggled ->
+            state.update { toggled }
+            onChanged(toggled)
         }
     }
 
@@ -197,42 +188,22 @@ constructor(
         }
     }
 
-    fun requestUserInfo(destNum: Int) {
-        Timber.i("Requesting UserInfo for '$destNum'")
+    fun ignoreNode(node: Node) = viewModelScope.launch {
         try {
-            serviceRepository.meshService?.requestUserInfo(destNum)
+            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
         } catch (ex: RemoteException) {
-            Timber.e("Request NodeInfo error: ${ex.message}")
+            Timber.e(ex, "Ignore node error")
         }
     }
 
-    fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
-        Timber.i("Requesting position for '$destNum'")
+    fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
+        Timber.i("Removing node '$nodeNum'")
         try {
-            serviceRepository.meshService?.requestPosition(destNum, position)
+            val packetId = serviceRepository.meshService?.packetId ?: return@launch
+            serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+            nodeRepository.deleteNode(nodeNum)
         } catch (ex: RemoteException) {
-            Timber.e("Request position error: ${ex.message}")
-        }
-    }
-
-    fun requestTraceroute(destNum: Int) {
-        Timber.i("Requesting traceroute for '$destNum'")
-        try {
-            val packetId = serviceRepository.meshService?.packetId ?: return
-            serviceRepository.meshService?.requestTraceroute(packetId, destNum)
-        } catch (ex: RemoteException) {
-            Timber.e("Request traceroute error: ${ex.message}")
-        }
-    }
-
-    fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
-        _sharedContactRequested.value = sharedContact
-    }
-
-    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
-        (!state.value).let { toggled ->
-            state.update { toggled }
-            onChanged(toggled)
+            Timber.e("Remove node error: ${ex.message}")
         }
     }
 }

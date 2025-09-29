@@ -64,10 +64,7 @@ fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UI
         composable<NodesRoutes.Nodes>(
             deepLinks = listOf(navDeepLink<NodesRoutes.Nodes>(basePath = "$DEEP_LINK_BASE_URI/nodes")),
         ) {
-            NodeScreen(
-                navigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
-                navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
-            )
+            NodeScreen(navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) })
         }
         nodeDetailGraph(navController, uiViewModel)
     }

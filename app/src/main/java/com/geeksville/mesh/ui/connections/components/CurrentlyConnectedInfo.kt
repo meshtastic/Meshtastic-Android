@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,7 +40,6 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
@@ -54,7 +52,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 fun CurrentlyConnectedInfo(
     node: Node,
     onNavigateToNodeDetails: (Int) -> Unit,
-    onSetShowSharedContact: (Node) -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
     bluetoothRssi: Int? = null,
@@ -75,19 +72,7 @@ fun CurrentlyConnectedInfo(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                NodeChip(
-                    node = node,
-                    isThisNode = true,
-                    isConnected = true,
-                    onAction = { action ->
-                        when (action) {
-                            is NodeMenuAction.MoreDetails -> onNavigateToNodeDetails(node.num)
-
-                            is NodeMenuAction.Share -> onSetShowSharedContact(node)
-                            else -> {}
-                        }
-                    },
-                )
+                NodeChip(node = node, onClick = { onNavigateToNodeDetails(it.num) })
             }
 
             Column(modifier = Modifier.weight(1f, fill = true)) {
@@ -124,26 +109,22 @@ fun CurrentlyConnectedInfo(
 @Composable
 private fun CurrentlyConnectedInfoPreview() {
     AppTheme {
-        Surface {
-            CurrentlyConnectedInfo(
-                node =
-                Node(
-                    num = 13444,
-                    user =
-                    MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build(),
-                    isIgnored = false,
-                    paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
-                    environmentMetrics =
-                    TelemetryProtos.EnvironmentMetrics.newBuilder()
-                        .setTemperature(25f)
-                        .setRelativeHumidity(60f)
-                        .build(),
-                ),
-                bluetoothRssi = -75, // Example RSSI for signal preview
-                onNavigateToNodeDetails = {},
-                onSetShowSharedContact = {},
-                onClickDisconnect = {},
-            )
-        }
+        CurrentlyConnectedInfo(
+            node =
+            Node(
+                num = 13444,
+                user = MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build(),
+                isIgnored = false,
+                paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
+                environmentMetrics =
+                TelemetryProtos.EnvironmentMetrics.newBuilder()
+                    .setTemperature(25f)
+                    .setRelativeHumidity(60f)
+                    .build(),
+            ),
+            bluetoothRssi = -75, // Example RSSI for signal preview
+            onNavigateToNodeDetails = {},
+            onClickDisconnect = {},
+        )
     }
 }

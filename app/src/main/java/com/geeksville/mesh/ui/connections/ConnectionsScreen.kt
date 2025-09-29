@@ -71,14 +71,11 @@ import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
-import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.delay
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
@@ -177,27 +174,17 @@ fun ConnectionsScreen(
             scanModel.setErrorText(context.getString(it, firmwareString))
         }
     }
-    var showSharedContact by remember { mutableStateOf<Node?>(null) }
-    if (showSharedContact != null) {
-        SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
-    }
 
     Scaffold(
         topBar = {
             MainAppBar(
                 title = stringResource(R.string.connections),
                 ourNode = ourNode,
-                isConnected = connectionState.isConnected(),
                 showNodeChip = ourNode != null && connectionState.isConnected(),
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = { action ->
-                    when (action) {
-                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
-                        else -> {}
-                    }
-                },
+                onClickChip = { onClickNodeChip(it.num) },
             )
         },
     ) { paddingValues ->
@@ -221,7 +208,6 @@ fun ConnectionsScreen(
                                     CurrentlyConnectedInfo(
                                         node = node,
                                         onNavigateToNodeDetails = onNavigateToNodeDetails,
-                                        onSetShowSharedContact = { showSharedContact = it },
                                         onClickDisconnect = { scanModel.disconnect() },
                                         bluetoothRssi = bluetoothRssi,
                                     )

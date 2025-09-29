@@ -297,6 +297,7 @@
     <string name="delivery_confirmed">Delivery confirmed</string>
     <string name="error">Error</string>
     <string name="ignore">Ignore</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Add \'%s\' to ignore list?</string>
     <string name="ignore_remove">Remove \'%s\' from ignore list?</string>
     <string name="map_select_download_region">Select download region</string>
@@ -397,6 +398,8 @@
     <string name="alert_bell_text">Alert Bell Character!</string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Favorite</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>
     <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics Log</string>

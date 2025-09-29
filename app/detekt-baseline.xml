@@ -45,8 +45,6 @@
     <ID>ComposableParamOrder:NodeFilterTextField.kt$NodeFilterTextField</ID>
     <ID>ComposableParamOrder:NodeItem.kt$NodeItem</ID>
     <ID>ComposableParamOrder:NodeKeyStatusIcon.kt$NodeKeyStatusIcon</ID>
-    <ID>ComposableParamOrder:NodeMenu.kt$NodeMenu</ID>
-    <ID>ComposableParamOrder:NodeScreen.kt$NodeScreen</ID>
     <ID>ComposableParamOrder:PaxMetrics.kt$PaxMetricsChart</ID>
     <ID>ComposableParamOrder:PermissionScreenLayout.kt$PermissionScreenLayout</ID>
     <ID>ComposableParamOrder:PowerMetrics.kt$PowerMetricsChart</ID>
@@ -91,11 +89,10 @@
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
-    <ID>LambdaParameterEventTrailing:MainAppBar.kt$onAction</ID>
+    <ID>LambdaParameterEventTrailing:MainAppBar.kt$onClickChip</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
     <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
-    <ID>LambdaParameterEventTrailing:NodeChip.kt$onAction</ID>
     <ID>LambdaParameterEventTrailing:NodeDetail.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:NodeDetail.kt$onSaveNotes</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
@@ -119,7 +116,6 @@
     <ID>LongMethod:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongParameterList:MessageList.kt$( nodes: List&lt;Node&gt;, ourNode: Node?, isConnected: Boolean, modifier: Modifier = Modifier, listState: LazyListState = rememberLazyListState(), messages: List&lt;Message&gt;, selectedIds: MutableState&lt;Set&lt;Long&gt;&gt;, onUnreadChanged: (Long) -&gt; Unit, onSendReaction: (String, Int) -&gt; Unit, onNodeMenuAction: (NodeMenuAction) -&gt; Unit, onDeleteMessages: (List&lt;Long&gt;) -&gt; Unit, onSendMessage: (messageText: String, contactKey: String) -&gt; Unit, contactKey: String, onReply: (Message?) -&gt; Unit, )</ID>
     <ID>LongParameterList:MessageViewModel.kt$MessageViewModel$( private val nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, quickChatActionRepository: QuickChatActionRepository, private val serviceRepository: ServiceRepository, private val packetRepository: PacketRepository, private val uiPrefs: UiPrefs, private val meshServiceNotifications: MeshServiceNotifications, )</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1000</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$500</ID>
@@ -202,7 +198,6 @@
     <ID>ModifierMissing:MessageActions.kt$ReplyButton</ID>
     <ID>ModifierMissing:NetworkConfigItemList.kt$NetworkConfigScreen</ID>
     <ID>ModifierMissing:NetworkDevices.kt$NetworkDevices</ID>
-    <ID>ModifierMissing:NodeMenu.kt$NodeMenu</ID>
     <ID>ModifierMissing:NodeScreen.kt$NodeScreen</ID>
     <ID>ModifierMissing:NodeStatusIcons.kt$NodeStatusIcons</ID>
     <ID>ModifierMissing:PaxMetrics.kt$PaxMetricsItem</ID>
@@ -231,7 +226,6 @@
     <ID>ModifierNotUsedAtRoot:EditDeviceProfileDialog.kt$modifier = modifier.weight(1f)</ID>
     <ID>ModifierNotUsedAtRoot:EnvironmentCharts.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:EnvironmentCharts.kt$modifier.width(dp)</ID>
-    <ID>ModifierNotUsedAtRoot:NodeChip.kt$modifier = modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics { contentDescription = node.user.shortName.ifEmpty { "Node" } }</ID>
     <ID>ModifierNotUsedAtRoot:PaxMetrics.kt$modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.width(dp)</ID>
@@ -401,7 +395,7 @@
     <ID>ViewModelForwarding:Main.kt$VersionChecks(uIViewModel)</ID>
     <ID>ViewModelInjection:DebugSearch.kt$viewModel</ID>
     <ID>WildcardImport:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
-    <ID>Wrapping:Message.kt${ event -&gt; when (event) { is MessageScreenEvent.SendMessage -&gt; { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -&gt; viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -&gt; { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -&gt; viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.HandleNodeMenuAction -&gt; { when (val action = event.action) { is NodeMenuAction.DirectMessage -&gt; { val hasPKC = ourNode?.hasPKC == true &amp;&amp; action.node.hasPKC val targetChannel = if (hasPKC) { DataPacket.PKC_CHANNEL_INDEX } else { action.node.channel } navigateToMessages("$targetChannel${action.node.user.id}") } is NodeMenuAction.MoreDetails -&gt; navigateToNodeDetails(action.node.num) is NodeMenuAction.Share -&gt; sharedContact = action.node else -&gt; viewModel.handleNodeMenuAction(action) } } is MessageScreenEvent.SetTitle -&gt; viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -&gt; navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -&gt; navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -&gt; onNavigateBack() is MessageScreenEvent.CopyToClipboard -&gt; { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
+    <ID>Wrapping:Message.kt${ event -&gt; when (event) { is MessageScreenEvent.SendMessage -&gt; { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -&gt; viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -&gt; { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -&gt; viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.NodeDetails -&gt; navigateToNodeDetails(event.node.num) is MessageScreenEvent.SetTitle -&gt; viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -&gt; navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -&gt; navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -&gt; onNavigateBack() is MessageScreenEvent.CopyToClipboard -&gt; { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
     <ID>Wrapping:SerialConnectionImpl.kt$SerialConnectionImpl$(</ID>
     <ID>Wrapping:SerialConnectionImpl.kt$SerialConnectionImpl$(port, object : SerialInputOutputManager.Listener { override fun onNewData(data: ByteArray) { listener.onDataReceived(data) } override fun onRunError(e: Exception?) { closed.set(true) ignoreException { port.dtr = false port.rts = false port.close() } closedLatch.countDown() listener.onDisconnected(e) } })</ID>
     <ID>Wrapping:SerialInterface.kt$SerialInterface$(</ID>
