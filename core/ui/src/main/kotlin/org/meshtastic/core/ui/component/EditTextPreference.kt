@@ -26,8 +26,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,10 +40,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.strings.R
@@ -207,7 +211,7 @@ fun EditTextPreference(
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.padding(vertical = 8.dp)) {
+    Column(modifier = modifier) {
         OutlinedTextField(
             value = value,
             singleLine = true,
@@ -227,28 +231,39 @@ fun EditTextPreference(
                     onValueChanged(it)
                 }
             },
-            label = { Text(title) },
+            prefix = { Text(title) },
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             visualTransformation = visualTransformation,
-            trailingIcon = {
-                if (trailingIcon != null) {
-                    trailingIcon()
-                } else if (isError) {
+            trailingIcon =
+            if (trailingIcon != null) {
+                { trailingIcon() }
+            } else if (isError) {
+                {
                     Icon(
                         imageVector = Icons.TwoTone.Info,
                         contentDescription = stringResource(id = R.string.error),
                         tint = MaterialTheme.colorScheme.error,
                     )
                 }
+            } else {
+                null
             },
+            colors =
+            OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                disabledBorderColor = Color.Transparent,
+                errorBorderColor = Color.Transparent,
+            ),
+            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End),
         )
         if (summary != null) {
             Text(
                 text = summary,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 8.dp),
             )
         }
 

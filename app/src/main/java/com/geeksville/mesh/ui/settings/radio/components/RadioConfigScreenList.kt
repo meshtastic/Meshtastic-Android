@@ -17,6 +17,8 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,9 +27,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.settings.radio.ResponseState
 import com.google.protobuf.MessageLite
+import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.PreferenceFooter
 
 @Composable
@@ -60,21 +65,24 @@ fun <T : MessageLite> RadioConfigScreenList(
             )
         },
     ) { innerPadding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            content()
-            item {
-                PreferenceFooter(
-                    enabled = enabled && configState.isDirty,
-                    onCancelClicked = {
-                        focusManager.clearFocus()
-                        configState.reset()
-                    },
-                    onSaveClicked = {
-                        focusManager.clearFocus()
-                        onSave(configState.value)
-                    },
-                )
+        Column(modifier = Modifier.padding(innerPadding)) {
+            LazyColumn(modifier = Modifier.fillMaxSize().weight(1f), contentPadding = PaddingValues(16.dp)) {
+                content()
             }
+
+            PreferenceFooter(
+                enabled = enabled && configState.isDirty,
+                negativeText = stringResource(R.string.discard_changes),
+                onNegativeClicked = {
+                    focusManager.clearFocus()
+                    configState.reset()
+                },
+                positiveText = stringResource(R.string.save_changes),
+                onPositiveClicked = {
+                    focusManager.clearFocus()
+                    onSave(configState.value)
+                },
+            )
         }
     }
 }

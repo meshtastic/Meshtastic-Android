@@ -107,6 +107,15 @@
     <string name="config_lora_modem_preset_summary">Доступна унапред подешена подешавања модема, подразумевана је Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Sets the maximum number of hops, default is 3. Increasing hops also increases congestion and should be used carefully. 0 hop broadcast messages will not get ACKs.</string>
     <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
+    <string name="label_very_long_slow">Very Long Range - Slow</string>
+    <string name="label_long_fast">Дугачки домет - Брзо</string>
+    <string name="label_long_moderate">Дугачки домет - Умерено</string>
+    <string name="label_long_slow">Дугачки домет - Споро</string>
+    <string name="label_medium_fast">Средњи домет - Брзо</string>
+    <string name="label_medium_slow">Средњи домет - Споро</string>
+    <string name="label_short_turbo">Кратки домет - Турбо</string>
+    <string name="label_short_fast">Кратки домет - Брзо</string>
+    <string name="label_short_slow">Кратки домет - Споро</string>
     <string name="config_network_wifi_enabled_summary">Омогућавање ВајФаја ће онемогућити блутут везу са апликацијом.</string>
     <string name="config_network_eth_enabled_summary">Enabling Ethernet will disable the bluetooth connection to the app. TCP node connections are not available on Apple devices.</string>
     <string name="config_network_udp_enabled_summary">Enable broadcasting packets via UDP over the local network.</string>
@@ -148,7 +157,8 @@
     <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="accept">Прихвати</string>
     <string name="cancel">Откажи</string>
-    <string name="clear_changes">Clear changes</string>
+    <string name="discard_changes">Discard changes</string>
+    <string name="save_changes">Сачувај</string>
     <string name="new_channel_rcvd">Примљен нови линк канала</string>
     <string name="permission_missing">Meshtastic needs location permissions enabled to find new devices via Bluetooth. You can disable when not in use.</string>
     <string name="report_bug">Пријави грешку</string>

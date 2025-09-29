@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.ProtocolMessageEnum
@@ -90,18 +91,29 @@ fun <T> DropDownPreference(
                 expanded = !expanded
             }
         },
-        modifier = modifier.padding(vertical = 8.dp),
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled),
             readOnly = true,
-            value = items.firstOrNull { it.first == selectedItem }?.second ?: "",
+            value = "",
             onValueChange = {},
-            label = { Text(title) },
+            prefix = { Text(title) },
+            suffix = { Text(items.firstOrNull { it.first == selectedItem }?.second ?: "") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            colors =
+            ExposedDropdownMenuDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
+                disabledBorderColor = Color.Transparent,
+                errorBorderColor = Color.Transparent,
+            ),
             enabled = enabled,
-            supportingText = { if (summary != null) Text(text = summary) },
+            supportingText =
+            if (summary != null) {
+                { Text(text = summary, modifier = Modifier.padding(bottom = 8.dp)) }
+            } else {
+                null
+            },
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items

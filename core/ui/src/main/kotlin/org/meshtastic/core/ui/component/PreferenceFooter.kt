@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,25 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
 
-@Composable
-fun PreferenceFooter(
-    enabled: Boolean,
-    onCancelClicked: () -> Unit,
-    onSaveClicked: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    PreferenceFooter(
-        enabled = enabled,
-        negativeText = R.string.clear_changes,
-        onNegativeClicked = onCancelClicked,
-        positiveText = R.string.send,
-        onPositiveClicked = onSaveClicked,
-        modifier = modifier,
-    )
-}
-
+@Deprecated(message = "Use overload that accepts Strings for button text.")
 @Composable
 fun PreferenceFooter(
     enabled: Boolean,
@@ -58,16 +43,35 @@ fun PreferenceFooter(
     onPositiveClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    PreferenceFooter(
+        enabled = enabled,
+        negativeText = stringResource(id = negativeText),
+        onNegativeClicked = onNegativeClicked,
+        positiveText = stringResource(id = positiveText),
+        onPositiveClicked = onPositiveClicked,
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun PreferenceFooter(
+    enabled: Boolean,
+    negativeText: String,
+    onNegativeClicked: () -> Unit,
+    positiveText: String,
+    onPositiveClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(
-        modifier = modifier.fillMaxWidth().height(64.dp),
+        modifier = modifier.fillMaxWidth().padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         OutlinedButton(modifier = Modifier.height(48.dp).weight(1f), onClick = onNegativeClicked) {
-            Text(text = stringResource(id = negativeText))
+            Text(text = negativeText)
         }
-        OutlinedButton(modifier = Modifier.height(48.dp).weight(1f), enabled = enabled, onClick = onPositiveClicked) {
-            Text(text = stringResource(id = positiveText))
+        Button(modifier = Modifier.height(48.dp).weight(1f), enabled = enabled, onClick = onPositiveClicked) {
+            Text(text = positiveText)
         }
     }
 }
@@ -75,5 +79,11 @@ fun PreferenceFooter(
 @Preview(showBackground = true)
 @Composable
 private fun PreferenceFooterPreview() {
-    PreferenceFooter(enabled = true, onCancelClicked = {}, onSaveClicked = {})
+    PreferenceFooter(
+        enabled = true,
+        negativeText = "Cancel",
+        onNegativeClicked = {},
+        positiveText = "Save",
+        onPositiveClicked = {},
+    )
 }

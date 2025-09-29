@@ -190,6 +190,7 @@
     <ID>ModifierMissing:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ModifierMissing:EnvironmentMetrics.kt$EnvironmentMetricsScreen</ID>
     <ID>ModifierMissing:HostMetricsLog.kt$HostMetricsLogScreen</ID>
+    <ID>ModifierMissing:LoRaConfigItemList.kt$LoRaConfigScreen</ID>
     <ID>ModifierMissing:Main.kt$MainScreen</ID>
     <ID>ModifierMissing:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ModifierMissing:MessageActions.kt$MessageStatusButton</ID>
@@ -205,6 +206,7 @@
     <ID>ModifierMissing:PositionLog.kt$PositionItem</ID>
     <ID>ModifierMissing:PositionLog.kt$PositionLogScreen</ID>
     <ID>ModifierMissing:PowerMetrics.kt$PowerMetricsScreen</ID>
+    <ID>ModifierMissing:PreferenceDivider.kt$PreferenceDivider</ID>
     <ID>ModifierMissing:RadioConfig.kt$RadioConfigItemList</ID>
     <ID>ModifierMissing:RadioConfigScreenList.kt$RadioConfigScreenList</ID>
     <ID>ModifierMissing:Reaction.kt$ReactionDialog</ID>
@@ -387,6 +389,7 @@
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
     <ID>UnusedParameter:ChannelSettingsItemList.kt$onBack: () -&gt; Unit</ID>
     <ID>UnusedParameter:ChannelSettingsItemList.kt$title: String</ID>
+    <ID>UnusedParameter:DropDownPreference.kt$modifier: Modifier = Modifier</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
     <ID>ViewModelForwarding:Main.kt$ScannedQrCodeDialog(uIViewModel, newChannelSet)</ID>
     <ID>ViewModelForwarding:Main.kt$VersionChecks(uIViewModel)</ID>

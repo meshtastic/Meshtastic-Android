@@ -15,26 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.kover)
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.kotlin.parcelize)
-}
+package com.geeksville.mesh.ui.common.components
 
-android {
-    buildFeatures {
-        buildConfig = true
-        aidl = true
-    }
-    namespace = "org.meshtastic.core.model"
-}
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
-dependencies {
-    implementation(projects.core.proto)
-    implementation(projects.core.strings)
-    implementation(libs.annotation)
-    implementation(libs.timber)
-    implementation(libs.zxing.android.embedded) { isTransitive = false }
-    implementation(libs.zxing.core)
+@Composable
+fun PreferenceDivider() {
+    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 }
