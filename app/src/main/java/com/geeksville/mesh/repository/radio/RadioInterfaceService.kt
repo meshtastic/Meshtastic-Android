@@ -97,6 +97,10 @@ constructor(
 
     private var radioIf: IRadioInterface = NopInterface("")
 
+    // Expose current bluetooth RSSI (null if not connected or not BLE)
+    private val _bluetoothRssi = MutableStateFlow<Int?>(null)
+    val bluetoothRssi: StateFlow<Int?> = _bluetoothRssi.asStateFlow()
+
     /**
      * true if we have started our interface
      *
@@ -254,6 +258,13 @@ constructor(
                 }
 
                 radioIf = interfaceFactory.createInterface(address)
+
+                // If the new interface is bluetooth, collect its RSSI flow
+                if (radioIf is BluetoothInterface) {
+                    (radioIf as BluetoothInterface).rssiFlow.onEach { _bluetoothRssi.emit(it) }.launchIn(serviceScope)
+                } else {
+                    _bluetoothRssi.value = null
+                }
             }
         }
     }
@@ -280,6 +291,7 @@ constructor(
         if (r !is NopInterface) {
             onDisconnect(isPermanent = true) // Tell any clients we are now offline
         }
+        _bluetoothRssi.value = null
     }
 
     /**

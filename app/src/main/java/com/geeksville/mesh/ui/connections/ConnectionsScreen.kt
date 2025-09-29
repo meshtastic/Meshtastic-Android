@@ -100,7 +100,6 @@ fun ConnectionsScreen(
     scanModel: BTScanModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit,
-    onNavigateToSettings: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
 ) {
@@ -117,6 +116,7 @@ fun ConnectionsScreen(
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
     val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
+    val bluetoothRssi by connectionsViewModel.bluetoothRssi.collectAsStateWithLifecycle()
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -210,6 +210,7 @@ fun ConnectionsScreen(
                                         onNavigateToNodeDetails = onNavigateToNodeDetails,
                                         onNavigateToSettings = onNavigateToSettings,
                                         onClickDisconnect = { scanModel.disconnect() },
+                                        bluetoothRssi = bluetoothRssi,
                                     )
                                 }
                             }
