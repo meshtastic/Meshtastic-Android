@@ -40,7 +40,7 @@
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
-    <string name="routing_error_timeout">Timeout</string>
+    <string name="routing_error_timeout">бърз</string>
     <string name="routing_error_no_interface">Няма интерфейс</string>
     <string name="routing_error_max_retransmit">Достигнат максимален брой препращания</string>
     <string name="routing_error_no_channel">Няма канал</string>
@@ -127,8 +127,8 @@
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
     <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
-    <string name="config_security_admin_key">The public key authorized to send admin messages to this node.</string>
-    <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
+    <string name="config_security_admin_key">Публичният ключ, оторизиран за изпращане на администраторски съобщения до този възел.</string>
+    <string name="config_security_is_managed">Устройството се управлява от mesh администратор, потребителят няма достъп до никоя от настройките на устройството.</string>
     <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
     <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
     <!-- Position Config -->
@@ -157,7 +157,7 @@
     <string name="analytics_okay">Разрешаване на анализи и докладване за сривове.</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
-    <string name="discard_changes">Discard changes</string>
+    <string name="discard_changes">Отхвърляне на промените</string>
     <string name="save_changes">Запис</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="permission_missing">Meshtastic се нуждае от активирани разрешения за местоположение, за да намира нови устройства чрез Bluetooth. Можете да ги деактивирате, когато не се използват.</string>
@@ -427,8 +427,8 @@
     <string name="bluetooth_enabled">Bluetooth е активиран</string>
     <string name="pairing_mode">Режим на сдвояване</string>
     <string name="fixed_pin">Фиксиран ПИН</string>
-    <string name="uplink_enabled">Uplink enabled</string>
-    <string name="downlink_enabled">Downlink enabled</string>
+    <string name="uplink_enabled">Uplink активиран</string>
+    <string name="downlink_enabled">Downlink активиран</string>
     <string name="default_">По подразбиране</string>
     <string name="position_enabled">Позицията е активирана</string>
     <string name="precise_location">Точно местоположение</string>
@@ -467,8 +467,8 @@
     <string name="use_input_pullup_mode">Използване на режим INPUT_PULLUP</string>
     <string name="device_config">Устройство</string>
     <string name="role">Роля на устройството</string>
-    <string name="button_gpio">Button GPIO</string>
-    <string name="buzzer_gpio">Buzzer GPIO</string>
+    <string name="button_gpio">GPIO за бутон</string>
+    <string name="buzzer_gpio">GPIO за зумер</string>
     <string name="rebroadcast_mode">Режим на препредаване</string>
     <string name="nodeinfo_broadcast_interval">Node Info Broadcast Interval</string>
     <string name="double_tap_as_button_press">Double Tap as Button</string>
@@ -694,7 +694,7 @@
     <string name="free_memory">Свободна памет</string>
     <string name="disk_free">Свободен диск</string>
     <string name="load">Load</string>
-    <string name="user_string">User String</string>
+    <string name="user_string">Потребителски низ</string>
     <string name="navigate_into_label">Navigate Into</string>
     <string name="connections">Свързване</string>
     <string name="map">Карта на Mesh</string>
