@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Kézbesítés sikeres</string>
     <string name="error">Hiba</string>
     <string name="ignore">Mellőzés</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Hozzáadod „%s”-t a figyelmen kívül hagyási listához?</string>
     <string name="ignore_remove">Eltávolítod „%s”-t a figyelmen kívül hagyási listáról?</string>
     <string name="map_select_download_region">Válassz letöltési régiót</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Riasztási harang karakter!</string>
     <string name="critical_alert">Kritikus riasztás!</string>
     <string name="favorite">Kedvenc</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Hozzáadod „%s”-t kedvenc csomópontként?</string>
     <string name="favorite_remove">Eltávolítod „%s”-t a kedvencek közül?</string>
     <string name="power_metrics_log">Energia-mérési napló</string>
