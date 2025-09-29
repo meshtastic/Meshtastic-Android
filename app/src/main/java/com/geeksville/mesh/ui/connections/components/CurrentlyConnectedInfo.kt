@@ -23,13 +23,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,19 +45,31 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
+import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
+/** Converts Bluetooth RSSI to a 0-4 bar signal strength level. */
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
     onNavigateToNodeDetails: (Int) -> Unit,
     onSetShowSharedContact: (Node) -> Unit,
-    onNavigateToSettings: () -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
+    bluetoothRssi: Int? = null,
 ) {
     Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MaterialBatteryInfo(level = node.batteryLevel)
+            if (bluetoothRssi != null) {
+                MaterialBluetoothSignalInfo(rssi = bluetoothRssi)
+            }
+        }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -79,8 +88,6 @@ fun CurrentlyConnectedInfo(
                         }
                     },
                 )
-
-                MaterialBatteryInfo(level = node.batteryLevel)
             }
 
             Column(modifier = Modifier.weight(1f, fill = true)) {
@@ -94,13 +101,6 @@ fun CurrentlyConnectedInfo(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-            }
-
-            IconButton(enabled = true, onClick = onNavigateToSettings) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = stringResource(id = R.string.radio_configuration),
-                )
             }
         }
 
@@ -124,23 +124,26 @@ fun CurrentlyConnectedInfo(
 @Composable
 private fun CurrentlyConnectedInfoPreview() {
     AppTheme {
-        CurrentlyConnectedInfo(
-            node =
-            Node(
-                num = 13444,
-                user = MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build(),
-                isIgnored = false,
-                paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
-                environmentMetrics =
-                TelemetryProtos.EnvironmentMetrics.newBuilder()
-                    .setTemperature(25f)
-                    .setRelativeHumidity(60f)
-                    .build(),
-            ),
-            onNavigateToNodeDetails = {},
-            onSetShowSharedContact = {},
-            onNavigateToSettings = {},
-            onClickDisconnect = {},
-        )
+        Surface {
+            CurrentlyConnectedInfo(
+                node =
+                Node(
+                    num = 13444,
+                    user =
+                    MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build(),
+                    isIgnored = false,
+                    paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
+                    environmentMetrics =
+                    TelemetryProtos.EnvironmentMetrics.newBuilder()
+                        .setTemperature(25f)
+                        .setRelativeHumidity(60f)
+                        .build(),
+                ),
+                bluetoothRssi = -75, // Example RSSI for signal preview
+                onNavigateToNodeDetails = {},
+                onSetShowSharedContact = {},
+                onClickDisconnect = {},
+            )
+        }
     }
 }

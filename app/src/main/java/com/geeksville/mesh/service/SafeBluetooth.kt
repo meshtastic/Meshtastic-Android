@@ -317,6 +317,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             override fun onDescriptorRead(gatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int) {
                 completeWork(status, descriptor)
             }
+
+            // Added: callback for remote RSSI reads
+            override fun onReadRemoteRssi(gatt: BluetoothGatt, rssi: Int, status: Int) {
+                completeWork(status, rssi)
+            }
         }
 
     // To test loss of BLE faults we can randomly fail a certain % of all work items.  We
@@ -653,6 +658,14 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     fun asyncWriteDescriptor(c: BluetoothGattDescriptor, cb: (Result<BluetoothGattDescriptor>) -> Unit) =
         queueWriteDescriptor(c, CallbackContinuation(cb))
+
+    // Added: Support reading remote RSSI
+    private fun queueReadRemoteRssi(cont: Continuation<Int>, timeout: Long = 0) =
+        queueWork("readRSSI", cont, timeout) { gatt?.readRemoteRssi() ?: false }
+
+    fun asyncReadRemoteRssi(cb: (Result<Int>) -> Unit) = queueReadRemoteRssi(CallbackContinuation(cb))
+
+    fun readRemoteRssi(timeout: Long = timeoutMsec): Int = makeSync { queueReadRemoteRssi(it, timeout) }
 
     /**
      * Some old androids have a bug where calling disconnect doesn't guarantee that the onConnectionStateChange callback

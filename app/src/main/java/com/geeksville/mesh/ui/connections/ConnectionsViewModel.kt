@@ -60,6 +60,9 @@ constructor(
 
     val bluetoothState = bluetoothRepository.state
 
+    // Newly added: bluetooth RSSI stream (dBm, null if unavailable)
+    val bluetoothRssi = serviceRepository.bluetoothRssi
+
     private val _hasShownNotPairedWarning = MutableStateFlow(uiPrefs.hasShownNotPairedWarning)
     val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
 
