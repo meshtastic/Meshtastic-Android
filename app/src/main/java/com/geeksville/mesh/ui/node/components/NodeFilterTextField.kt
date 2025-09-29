@@ -25,8 +25,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -40,7 +42,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,6 +58,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.preview.LargeFontPreview
@@ -184,21 +189,20 @@ private fun NodeSortButton(
         onDismissRequest = { expanded = false },
         modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
     ) {
+        DropdownMenuTitle(text = stringResource(R.string.node_sort_title))
+
         NodeSortOption.entries.forEach { sort ->
-            DropdownMenuItem(
-                onClick = {
-                    onSortSelect(sort)
-                    expanded = false
-                },
-                text = {
-                    Text(
-                        text = stringResource(id = sort.stringRes),
-                        fontWeight = if (sort == currentSortOption) FontWeight.ExtraBold else null,
-                    )
-                },
+            DropdownMenuRadio(
+                text = stringResource(id = sort.stringRes),
+                selected = sort == currentSortOption,
+                onClick = { onSortSelect(sort) },
             )
         }
-        HorizontalDivider()
+
+        HorizontalDivider(modifier = Modifier.padding(MenuDefaults.DropdownMenuItemContentPadding))
+
+        DropdownMenuTitle(text = stringResource(R.string.node_filter_title))
+
         DropdownMenuItem(
             onClick = {
                 toggles.onToggleIncludeUnknown()
@@ -253,7 +257,7 @@ private fun NodeSortButton(
                 }
             },
         )
-        HorizontalDivider()
+
         DropdownMenuItem(
             onClick = {
                 toggles.onToggleShowIgnored()
@@ -280,6 +284,27 @@ private fun NodeSortButton(
             },
         )
     }
+}
+
+@Composable
+private fun DropdownMenuTitle(text: String) {
+    Text(
+        text = text,
+        modifier =
+        Modifier.height(48.dp)
+            .padding(MenuDefaults.DropdownMenuItemContentPadding)
+            .wrapContentHeight(align = Alignment.CenterVertically),
+        fontWeight = FontWeight.ExtraBold,
+    )
+}
+
+@Composable
+private fun DropdownMenuRadio(text: String, selected: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(
+        onClick = onClick,
+        leadingIcon = { RadioButton(selected = selected, onClick = null) },
+        text = { Text(text = text) },
+    )
 }
 
 @PreviewLightDark
