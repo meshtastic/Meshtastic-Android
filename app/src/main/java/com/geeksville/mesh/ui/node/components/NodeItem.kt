@@ -65,7 +65,7 @@ fun NodeItem(
     tempInFahrenheit: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
 ) {

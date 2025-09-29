@@ -174,6 +174,12 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
 
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                         var showContextMenu by remember { mutableStateOf(false) }
+                        val longClick =
+                            if (node.num != ourNode?.num) {
+                                { showContextMenu = true }
+                            } else {
+                                null
+                            }
 
                         NodeItem(
                             modifier = Modifier.animateItem(),
@@ -182,7 +188,7 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                             distanceUnits = state.distanceUnits,
                             tempInFahrenheit = state.tempInFahrenheit,
                             onClick = { navigateToNodeDetails(node.num) },
-                            onLongClick = { showContextMenu = true },
+                            onLongClick = longClick,
                             currentTimeMillis = currentTimeMillis,
                             isConnected = connectionState.isConnected(),
                         )
