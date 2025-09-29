@@ -272,6 +272,7 @@
     <string name="delivery_confirmed">Nustatymas įkeltas</string>
     <string name="error">Klaida</string>
     <string name="ignore">Ignoruoti</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Ar pridėti „%s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="ignore_remove">Ar pašalinti „%s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="map_select_download_region">Pasirinkite atsisiuntimo regioną</string>
@@ -374,6 +375,8 @@
     <string name="alert_bell_text">Skambučio simbolis!</string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Favorite</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>
     <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics Log</string>
