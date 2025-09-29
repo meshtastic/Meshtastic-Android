@@ -270,7 +270,7 @@
     <string name="delivery_confirmed">Toimitus vahvistettu</string>
     <string name="error">Virhe</string>
     <string name="ignore">Jätä huomiotta</string>
-    <string name="remove_ignored">Remove from ignored</string>
+    <string name="remove_ignored">Poista huomioimattomista</string>
     <string name="ignore_add">Lisää \'%s\' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
     <string name="ignore_remove">Poistetaanko \'%s\' jätä huomiotta listalta? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
     <string name="map_select_download_region">Valitse ladattava kartta-alue</string>
@@ -371,8 +371,8 @@
     <string name="alert_bell_text">Hälytysääni!</string>
     <string name="critical_alert">Kriittinen hälytys!</string>
     <string name="favorite">Suosikki</string>
-    <string name="add_favorite">Add to favorites</string>
-    <string name="remove_favorite">Remove from favorites</string>
+    <string name="add_favorite">Lisää suosikkeihin</string>
+    <string name="remove_favorite">Poista suosikeista</string>
     <string name="favorite_add">Lisää \'%s\' radio suosikkeihin?</string>
     <string name="favorite_remove">Poista \'%s\' radio suosikeista?</string>
     <string name="power_metrics_log">Tehomittausdata</string>
@@ -884,4 +884,5 @@
     <string name="two_days">48 tuntia</string>
     <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %s</string>
     <string name="dbm_value">%1$d dBm</string>
+    <string name="error_no_app_to_handle_link">Ei sovellusta linkin avaamiseen.</string>
 </resources>
