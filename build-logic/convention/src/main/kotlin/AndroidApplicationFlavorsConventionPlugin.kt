@@ -16,10 +16,12 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.geeksville.mesh.buildlogic.MeshtasticFlavor
 import com.geeksville.mesh.buildlogic.configureFlavors
 import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.exclude
@@ -29,17 +31,28 @@ class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
         with(target) {
             extensions.configure<ApplicationExtension> {
                 configureFlavors(this)
-                dependencies {
-                    // F-Droid specific dependencies
-                    "fdroidImplementation"(libs.findBundle("osm").get())
-                    "fdroidImplementation"(libs.findLibrary("osmdroid-geopackage").get()) {
-                        exclude(group = "com.j256.ormlite")
+                productFlavors {
+                    all {
+                        if (name == MeshtasticFlavor.google.name) {
+                            apply(plugin = "meshtastic.android.application.firebase")
+                            apply(plugin = "meshtastic.android.application.datadog")
+                            dependencies {
+                                // Google specific dependencies
+                                "googleImplementation"(libs.findBundle("maps-compose").get())
+                                "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
+                            }
+                        } else if (name == MeshtasticFlavor.fdroid.name) {
+                            dependencies {
+                                // F-Droid specific dependencies
+                                "fdroidImplementation"(libs.findBundle("osm").get())
+                                "fdroidImplementation"(
+                                    libs.findLibrary("osmdroid-geopackage").get()
+                                ) {
+                                    exclude(group = "com.j256.ormlite")
+                                }
+                            }
+                        }
                     }
-
-                    // Google specific dependencies
-                    "googleImplementation"(libs.findBundle("maps-compose").get())
-                    "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
-                    "googleImplementation"(libs.findBundle("datadog").get())
                 }
             }
         }

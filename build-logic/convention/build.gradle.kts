@@ -44,6 +44,7 @@ dependencies {
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.detekt.gradle)
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
+    compileOnly(libs.firebase.performance.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.room.gradlePlugin)
@@ -80,6 +81,10 @@ gradlePlugin {
         register("androidFirebase") {
             id = libs.plugins.meshtastic.android.application.firebase.get().pluginId
             implementationClass = "AndroidApplicationFirebaseConventionPlugin"
+        }
+        register("androidDatadog") {
+            id = libs.plugins.meshtastic.android.application.datadog.get().pluginId
+            implementationClass = "AndroidApplicationDatadogConventionPlugin"
         }
         register("androidLibraryCompose") {
             id = libs.plugins.meshtastic.android.library.compose.get().pluginId
