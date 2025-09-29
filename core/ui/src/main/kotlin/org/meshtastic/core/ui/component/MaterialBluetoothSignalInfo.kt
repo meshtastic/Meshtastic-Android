@@ -67,8 +67,8 @@ private const val SIZE_ICON = 20
 @Suppress("MagicNumber")
 @Composable
 fun MaterialSignalInfo(
-    modifier: Modifier = Modifier,
     signalBars: Int,
+    modifier: Modifier = Modifier,
     signalStrengthValue: String? = null,
     typeIcon: ImageVector? = null,
 ) {
@@ -87,18 +87,20 @@ fun MaterialSignalInfo(
                 else -> Icons.Rounded.SignalCellularOff to MaterialTheme.colorScheme.onSurfaceVariant
             }
 
-        val foregroundPainter = rememberVectorPainter(Icons.Rounded.Bluetooth)
+        val foregroundPainter = typeIcon?.let { rememberVectorPainter(typeIcon) }
         Icon(
             imageVector = iconVector,
             contentDescription = null,
             tint = iconTint,
             modifier =
-            modifier.size(SIZE_ICON.dp).drawWithContent {
+            Modifier.size(SIZE_ICON.dp).drawWithContent {
                 drawContent()
                 @Suppress("MagicNumber")
-                val badgeSize = size.width * .45f
-                with(foregroundPainter) {
-                    draw(Size(badgeSize, badgeSize), colorFilter = ColorFilter.tint(iconTint))
+                if (foregroundPainter != null) {
+                    val badgeSize = size.width * .45f
+                    with(foregroundPainter) {
+                        draw(Size(badgeSize, badgeSize), colorFilter = ColorFilter.tint(iconTint))
+                    }
                 }
             },
         )
@@ -110,7 +112,7 @@ fun MaterialSignalInfo(
 }
 
 @Composable
-fun MaterialBluetoothSignalInfo(modifier: Modifier = Modifier, rssi: Int) {
+fun MaterialBluetoothSignalInfo(rssi: Int, modifier: Modifier = Modifier) {
     MaterialSignalInfo(
         modifier = modifier,
         signalBars = getBluetoothSignalBars(rssi = rssi),
@@ -134,6 +136,6 @@ class SignalStrengthProvider : PreviewParameterProvider<Int> {
 
 @PreviewLightDark
 @Composable
-fun MaterialBluetoothSignalInfoPreview(@PreviewParameter(SignalStrengthProvider::class) rssi: Int) {
+private fun MaterialBluetoothSignalInfoPreview(@PreviewParameter(SignalStrengthProvider::class) rssi: Int) {
     AppTheme { Surface { MaterialBluetoothSignalInfo(rssi = rssi) } }
 }
