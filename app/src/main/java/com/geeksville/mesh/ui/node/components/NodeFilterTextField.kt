@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.node.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -36,6 +35,7 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -203,84 +203,39 @@ private fun NodeSortButton(
 
         DropdownMenuTitle(text = stringResource(R.string.node_filter_title))
 
-        DropdownMenuItem(
-            onClick = {
-                toggles.onToggleIncludeUnknown()
-                expanded = false
-            },
-            text = {
-                Row {
-                    AnimatedVisibility(visible = toggles.includeUnknown) {
-                        Icon(
-                            imageVector = Icons.Default.Done,
-                            contentDescription = null,
-                            modifier = Modifier.padding(end = 4.dp),
-                        )
-                    }
-                    Text(text = stringResource(id = R.string.node_filter_include_unknown))
-                }
-            },
-        )
-        DropdownMenuItem(
-            onClick = {
-                toggles.onToggleOnlyOnline()
-                expanded = false
-            },
-            text = {
-                Row {
-                    AnimatedVisibility(visible = toggles.onlyOnline) {
-                        Icon(
-                            imageVector = Icons.Default.Done,
-                            contentDescription = null,
-                            modifier = Modifier.padding(end = 4.dp),
-                        )
-                    }
-                    Text(text = stringResource(id = R.string.node_filter_only_online))
-                }
-            },
-        )
-        DropdownMenuItem(
-            onClick = {
-                toggles.onToggleOnlyDirect()
-                expanded = false
-            },
-            text = {
-                Row {
-                    AnimatedVisibility(visible = toggles.onlyDirect) {
-                        Icon(
-                            imageVector = Icons.Default.Done,
-                            contentDescription = null,
-                            modifier = Modifier.padding(end = 4.dp),
-                        )
-                    }
-                    Text(text = stringResource(id = R.string.node_filter_only_direct))
-                }
-            },
+        DropdownMenuCheck(
+            text = stringResource(R.string.node_filter_include_unknown),
+            checked = toggles.includeUnknown,
+            onClick = toggles.onToggleIncludeUnknown,
         )
 
-        DropdownMenuItem(
-            onClick = {
-                toggles.onToggleShowIgnored()
-                expanded = false
-            },
-            text = {
-                Row {
-                    AnimatedVisibility(visible = toggles.showIgnored) {
-                        Icon(
-                            imageVector = Icons.Default.Done,
-                            contentDescription = null,
-                            modifier = Modifier.padding(end = 4.dp),
-                        )
-                    }
-                    Text(text = stringResource(id = R.string.node_filter_show_ignored))
-                    if (toggles.ignoredNodeCount > 0) {
-                        Text(
-                            text = " (${toggles.ignoredNodeCount})",
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 4.dp),
-                        )
-                    }
+        DropdownMenuCheck(
+            text = stringResource(R.string.node_filter_only_online),
+            checked = toggles.onlyOnline,
+            onClick = toggles.onToggleOnlyOnline,
+        )
+
+        DropdownMenuCheck(
+            text = stringResource(R.string.node_filter_only_direct),
+            checked = toggles.onlyDirect,
+            onClick = toggles.onToggleOnlyDirect,
+        )
+
+        DropdownMenuCheck(
+            text = stringResource(R.string.node_filter_show_ignored),
+            checked = toggles.showIgnored,
+            onClick = toggles.onToggleShowIgnored,
+            trailing =
+            if (toggles.ignoredNodeCount > 0) {
+                {
+                    Text(
+                        text = " (${toggles.ignoredNodeCount})",
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
                 }
+            } else {
+                null
             },
         )
     }
@@ -303,6 +258,21 @@ private fun DropdownMenuRadio(text: String, selected: Boolean, onClick: () -> Un
     DropdownMenuItem(
         onClick = onClick,
         leadingIcon = { RadioButton(selected = selected, onClick = null) },
+        text = { Text(text = text) },
+    )
+}
+
+@Composable
+private fun DropdownMenuCheck(
+    text: String,
+    checked: Boolean,
+    onClick: () -> Unit,
+    trailing: @Composable (() -> Unit)? = null,
+) {
+    DropdownMenuItem(
+        onClick = onClick,
+        leadingIcon = { Checkbox(checked = checked, onCheckedChange = null) },
+        trailingIcon = trailing,
         text = { Text(text = text) },
     )
 }
