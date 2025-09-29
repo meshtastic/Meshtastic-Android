@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Consegna confermata</string>
     <string name="error">Errore</string>
     <string name="ignore">Ignora</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Aggiungere \'%s\' alla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
     <string name="ignore_remove">Rimuovere \'%s\' dalla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
     <string name="map_select_download_region">Seleziona la regione da scaricare</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Carattere Campana Di Allarme!</string>
     <string name="critical_alert">Avvisi critici</string>
     <string name="favorite">Preferito</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Aggiungere \'%s\' ai nodi preferiti?</string>
     <string name="favorite_remove">Rimuovere \'%s\' dai nodi preferiti?</string>
     <string name="power_metrics_log">Registro Metriche Alimentazione</string>
