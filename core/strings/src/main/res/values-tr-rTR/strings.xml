@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Teslim Edildi</string>
     <string name="error">Hata</string>
     <string name="ignore">Yok say</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Yoksay listesine \'%s\' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="ignore_remove">Yoksay listesinden \'%s\' çıkarılsın mı? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="map_select_download_region">İndirilecek bölgeyi seçin</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Zili Çaldır!</string>
     <string name="critical_alert">Kritik Uyarı!</string>
     <string name="favorite">Favori</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">\'%s\' düğümünü favorilere eklemek istiyor musunuz?</string>
     <string name="favorite_remove">\'%s\' düğümünü favorilerden silmek istiyor musunuz?</string>
     <string name="power_metrics_log">Güç Ölçüm Kayıtları</string>
