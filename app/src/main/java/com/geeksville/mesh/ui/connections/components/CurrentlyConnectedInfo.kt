@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,7 +52,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 fun CurrentlyConnectedInfo(
     node: Node,
     onNavigateToNodeDetails: (Int) -> Unit,
-    onNavigateToSettings: () -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
     bluetoothRssi: Int? = null,
@@ -126,7 +124,6 @@ private fun CurrentlyConnectedInfoPreview() {
             ),
             bluetoothRssi = -75, // Example RSSI for signal preview
             onNavigateToNodeDetails = {},
-            onNavigateToSettings = {},
             onClickDisconnect = {},
         )
     }

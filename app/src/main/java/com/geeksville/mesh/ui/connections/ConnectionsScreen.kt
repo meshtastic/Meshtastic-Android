@@ -208,7 +208,6 @@ fun ConnectionsScreen(
                                     CurrentlyConnectedInfo(
                                         node = node,
                                         onNavigateToNodeDetails = onNavigateToNodeDetails,
-                                        onNavigateToSettings = onNavigateToSettings,
                                         onClickDisconnect = { scanModel.disconnect() },
                                         bluetoothRssi = bluetoothRssi,
                                     )
