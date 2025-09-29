@@ -42,7 +42,6 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.prefs.ui.UiPrefs
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -55,7 +54,6 @@ constructor(
     quickChatActionRepository: QuickChatActionRepository,
     private val serviceRepository: ServiceRepository,
     private val packetRepository: PacketRepository,
-    private val uiPrefs: UiPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
@@ -81,7 +79,7 @@ constructor(
             channelSet {},
         )
 
-    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
+    private val _showQuickChat = MutableStateFlow(false)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
     val quickChatActions =
@@ -109,13 +107,8 @@ constructor(
         return messagesForContactKey
     }
 
-    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
-
-    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
-        (!state.value).let { toggled ->
-            state.update { toggled }
-            onChanged(toggled)
-        }
+    fun toggleShowQuickChat() {
+        _showQuickChat.update { !it }
     }
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)

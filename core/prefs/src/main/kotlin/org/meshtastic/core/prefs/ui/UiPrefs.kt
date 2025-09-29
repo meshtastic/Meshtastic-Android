@@ -36,7 +36,6 @@ interface UiPrefs {
     var onlyOnline: Boolean
     var onlyDirect: Boolean
     var showIgnored: Boolean
-    var showQuickChat: Boolean
 
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
@@ -74,7 +73,6 @@ class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: Sh
     override var onlyOnline: Boolean by PrefDelegate(prefs, "only-online", false)
     override var onlyDirect: Boolean by PrefDelegate(prefs, "only-direct", false)
     override var showIgnored: Boolean by PrefDelegate(prefs, "show-ignored", false)
-    override var showQuickChat: Boolean by PrefDelegate(prefs, "show-quick-chat", false)
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> = provideNodeLocationFlows
         .getOrPut(nodeNum) { MutableStateFlow(prefs.getBoolean(provideLocationKey(nodeNum), false)) }
