@@ -25,12 +25,10 @@ plugins {
     alias(libs.plugins.meshtastic.android.application)
     alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
-    alias(libs.plugins.meshtastic.android.application.firebase)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.devtools.ksp)
-    alias(libs.plugins.datadog)
     alias(libs.plugins.secrets)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
@@ -131,6 +129,13 @@ android {
             ),
         )
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
+
+        dependenciesInfo {
+            // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
+            includeInApk = false
+            // Disables dependency metadata when building Android App Bundles (for Google Play)
+            includeInBundle = false
+        }
     }
 
     // Configure existing product flavors (defined by convention plugin)

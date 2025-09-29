@@ -16,7 +16,6 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.geeksville.mesh.buildlogic.MeshtasticFlavor
 import com.geeksville.mesh.buildlogic.libs
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import org.gradle.api.Plugin
@@ -29,13 +28,14 @@ import org.gradle.kotlin.dsl.exclude
 class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            apply(plugin = "com.google.gms.google-services")
-            apply(plugin = "com.google.firebase.crashlytics")
-
+            apply(plugin = libs.findPlugin("firebase-crashlytics").get().get().pluginId)
+            apply(plugin = libs.findPlugin("firebase-perf").get().get().pluginId)
+            apply(plugin = libs.findPlugin("google-services").get().get().pluginId)
+            extensions.configure<ApplicationExtension> {
                 dependencies {
                     val bom = libs.findLibrary("firebase-bom").get()
-                    "implementation"(platform(bom))
-                    "implementation"(libs.findBundle("firebase").get()) {
+                    "googleImplementation"(platform(bom))
+                    "googleImplementation"(libs.findBundle("firebase").get()) {
                         /*
                         Exclusion of protobuf / protolite dependencies is necessary as the
                         datastore-proto brings in protobuf dependencies. These are the source of truth
@@ -45,9 +45,13 @@ class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
                         exclude(group = "com.google.protobuf", module = "protobuf-java")
                         exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
                         exclude(group = "com.google.protobuf", module = "protobuf-javalite")
-                        exclude(group = "com.google.firebase", module = "protolite-well-known-types")
+                        exclude(
+                            group = "com.google.firebase",
+                            module = "protolite-well-known-types"
+                        )
                     }
                 }
+            }
 
             extensions.configure<ApplicationExtension> {
                 buildTypes.configureEach {
