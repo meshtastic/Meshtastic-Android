@@ -91,7 +91,9 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
     val currentTimeMillis = rememberTimeTickWithLifecycle()
     val connectionState by nodesViewModel.connectionState.collectAsStateWithLifecycle()
 
-    val isScrollInProgress by remember { derivedStateOf { listState.isScrollInProgress } }
+    val isScrollInProgress by remember {
+        derivedStateOf { listState.isScrollInProgress && (listState.canScrollForward || listState.canScrollBackward) }
+    }
     Scaffold(
         topBar = {
             MainAppBar(
