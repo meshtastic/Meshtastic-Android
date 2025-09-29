@@ -379,6 +379,7 @@
     <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided&gt; : Stub</ID>
     <ID>TooManyFunctions:MessageViewModel.kt$MessageViewModel : ViewModel</ID>
     <ID>TooManyFunctions:NodeDetail.kt$com.geeksville.mesh.ui.node.NodeDetail.kt</ID>
+    <ID>TooManyFunctions:NodesViewModel.kt$NodesViewModel : ViewModel</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModelLogging</ID>
     <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService : Logging</ID>
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : LoggingCloseable</ID>
