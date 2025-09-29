@@ -20,9 +20,7 @@ package com.geeksville.mesh.ui.node
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -126,12 +124,7 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
         },
     ) { contentPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
                     val animatedAlpha by
                         animateFloatAsState(targetValue = if (!isScrollInProgress) 1.0f else 0f, label = "alpha")
@@ -177,7 +170,7 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                         onConfirmRemove = { nodesViewModel.removeNode(it.num) },
                     )
 
-                    Box {
+                    Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                         var showContextMenu by remember { mutableStateOf(false) }
 
                         NodeItem(
@@ -217,7 +210,7 @@ private fun ContextMenu(
     onClickRemove: (Node) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, offset = DpOffset(16.dp, 0.dp)) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, offset = DpOffset(x = 0.dp, y = 8.dp)) {
         val isFavorite = node.isFavorite
         val isIgnored = node.isIgnored
 
