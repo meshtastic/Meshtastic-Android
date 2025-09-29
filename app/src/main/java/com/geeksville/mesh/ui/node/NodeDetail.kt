@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2024-2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,9 @@
 
 package com.geeksville.mesh.ui.node
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
@@ -167,6 +169,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import timber.log.Timber
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,
@@ -595,8 +598,13 @@ private fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.pageUrl.toUri())
-                    context.startActivity(intent)
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.pageUrl.toUri())
+                        context.startActivity(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(context, R.string.error_no_app_to_handle_link, Toast.LENGTH_LONG).show()
+                        Timber.e(e)
+                    }
                 },
                 modifier = Modifier.weight(1f),
             ) {
@@ -606,8 +614,13 @@ private fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
             }
             Button(
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.zipUrl.toUri())
-                    context.startActivity(intent)
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.zipUrl.toUri())
+                        context.startActivity(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(context, R.string.error_no_app_to_handle_link, Toast.LENGTH_LONG).show()
+                        Timber.e(e)
+                    }
                 },
                 modifier = Modifier.weight(1f),
             ) {
