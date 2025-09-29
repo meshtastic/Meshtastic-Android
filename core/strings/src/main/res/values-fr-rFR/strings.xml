@@ -270,6 +270,7 @@
     <string name="delivery_confirmed">Réception confirmée</string>
     <string name="error">Erreur</string>
     <string name="ignore">Ignorer</string>
+    <string name="remove_ignored">Remove from ignored</string>
     <string name="ignore_add">Ajouter \'%s\' à la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
     <string name="ignore_remove">Supprimer \'%s\' de la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
     <string name="map_select_download_region">Sélectionnez la région de téléchargement</string>
@@ -370,6 +371,8 @@
     <string name="alert_bell_text">Caractère d\'appel !</string>
     <string name="critical_alert">Alerte Critique !</string>
     <string name="favorite">Favoris</string>
+    <string name="add_favorite">Add to favorites</string>
+    <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Ajouter «%s» en tant que nœud favori ?</string>
     <string name="favorite_remove">Supprimer «%s» comme nœud favori ?</string>
     <string name="power_metrics_log">Journal des métriques de puissance</string>
