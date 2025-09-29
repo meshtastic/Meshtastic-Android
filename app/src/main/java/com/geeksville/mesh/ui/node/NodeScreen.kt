@@ -91,7 +91,9 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
     val currentTimeMillis = rememberTimeTickWithLifecycle()
     val connectionState by nodesViewModel.connectionState.collectAsStateWithLifecycle()
 
-    val isScrollInProgress by remember { derivedStateOf { listState.isScrollInProgress } }
+    val isScrollInProgress by remember {
+        derivedStateOf { listState.isScrollInProgress && (listState.canScrollForward || listState.canScrollBackward) }
+    }
     Scaffold(
         topBar = {
             MainAppBar(
@@ -144,8 +146,6 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                         onToggleOnlyOnline = nodesViewModel::toggleOnlyOnline,
                         onlyDirect = state.filter.onlyDirect,
                         onToggleOnlyDirect = nodesViewModel::toggleOnlyDirect,
-                        showDetails = state.showDetails,
-                        onToggleShowDetails = nodesViewModel::toggleShowDetails,
                         showIgnored = state.filter.showIgnored,
                         onToggleShowIgnored = nodesViewModel::toggleShowIgnored,
                         ignoredNodeCount = ignoredNodeCount,
@@ -172,8 +172,14 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                         onConfirmRemove = { nodesViewModel.removeNode(it.num) },
                     )
 
-                    Box {
+                    Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                         var showContextMenu by remember { mutableStateOf(false) }
+                        val longClick =
+                            if (node.num != ourNode?.num) {
+                                { showContextMenu = true }
+                            } else {
+                                null
+                            }
 
                         NodeItem(
                             modifier = Modifier.animateItem(),
@@ -181,9 +187,8 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                             thatNode = node,
                             distanceUnits = state.distanceUnits,
                             tempInFahrenheit = state.tempInFahrenheit,
-                            onClickChip = { navigateToNodeDetails(it.num) },
-                            onLongClick = { showContextMenu = true },
-                            expanded = state.showDetails,
+                            onClick = { navigateToNodeDetails(node.num) },
+                            onLongClick = longClick,
                             currentTimeMillis = currentTimeMillis,
                             isConnected = connectionState.isConnected(),
                         )
@@ -213,7 +218,7 @@ private fun ContextMenu(
     onClickRemove: (Node) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, offset = DpOffset(16.dp, 0.dp)) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, offset = DpOffset(x = 0.dp, y = 8.dp)) {
         val isFavorite = node.isFavorite
         val isIgnored = node.isIgnored
 

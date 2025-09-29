@@ -31,27 +31,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ui.common.components.SignalInfo
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import org.meshtastic.core.database.model.Node
@@ -69,9 +64,8 @@ fun NodeItem(
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
     modifier: Modifier = Modifier,
-    onClickChip: (Node) -> Unit = {},
-    onLongClick: () -> Unit = {},
-    expanded: Boolean = false,
+    onClick: () -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
 ) {
@@ -82,18 +76,6 @@ fun NodeItem(
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
-
-    val hwInfoString =
-        when (val hwModel = thatNode.user.hwModel) {
-            MeshProtos.HardwareModel.UNSET -> MeshProtos.HardwareModel.UNSET.name
-            else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
-        }
-    val roleName =
-        if (thatNode.isUnknownUser) {
-            DeviceConfig.Role.UNRECOGNIZED.name
-        } else {
-            thatNode.user.role.name
-        }
 
     val style =
         if (thatNode.isUnknownUser) {
@@ -114,7 +96,6 @@ fun NodeItem(
                     .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
             } ?: (CardDefaults.cardColors())
 
-    val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
     val unmessageable =
         remember(thatNode) {
             when {
@@ -123,18 +104,13 @@ fun NodeItem(
             }
         }
 
-    Card(
-        modifier =
-        modifier
-            .combinedClickable(onClick = { showDetails(!detailsShown) }, onLongClick = onLongClick)
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .defaultMinSize(minHeight = 80.dp),
-        colors = cardColors,
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+    Card(modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 80.dp), colors = cardColors) {
+        Column(
+            modifier =
+            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(8.dp),
+        ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                NodeChip(node = thatNode, onClick = onClickChip)
+                NodeChip(node = thatNode)
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
@@ -190,51 +166,6 @@ fun NodeItem(
                     )
                 }
             }
-
-            if (detailsShown || expanded) {
-                Spacer(modifier = Modifier.height(8.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    thatNode.validPosition?.let {
-                        LinkedCoordinates(
-                            latitude = thatNode.latitude,
-                            longitude = thatNode.longitude,
-                            nodeName = longName,
-                        )
-                    }
-                    thatNode.validPosition?.let { position ->
-                        ElevationInfo(
-                            altitude = position.altitude,
-                            system = system,
-                            suffix = stringResource(id = R.string.elevation_suffix),
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = hwInfoString,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                        style = style,
-                    )
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = roleName,
-                        textAlign = TextAlign.Center,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                        style = style,
-                    )
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = thatNode.user.id.ifEmpty { "???" },
-                        textAlign = TextAlign.End,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                        style = style,
-                    )
-                }
-            }
         }
     }
 }
@@ -261,7 +192,6 @@ fun NodeInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) thatN
                 thatNode = thatNode,
                 distanceUnits = 1,
                 tempInFahrenheit = true,
-                expanded = false,
                 currentTimeMillis = System.currentTimeMillis(),
             )
             Text(text = "Details Shown", color = MaterialTheme.colorScheme.onBackground)
@@ -270,7 +200,6 @@ fun NodeInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) thatN
                 thatNode = thatNode,
                 distanceUnits = 1,
                 tempInFahrenheit = true,
-                expanded = true,
                 currentTimeMillis = System.currentTimeMillis(),
             )
         }

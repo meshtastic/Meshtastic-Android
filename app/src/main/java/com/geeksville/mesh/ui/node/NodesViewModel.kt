@@ -34,14 +34,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
-import org.meshtastic.core.prefs.ui.UiPrefs
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -52,7 +50,6 @@ constructor(
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    private val uiPrefs: UiPrefs,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
 ) : ViewModel() {
 
@@ -97,21 +94,13 @@ constructor(
             NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
         }
 
-    private val showDetails = MutableStateFlow(uiPrefs.showDetails)
-
     val nodesUiState: StateFlow<NodesUiState> =
-        combine(nodeSortOption, nodeFilter, showDetails, radioConfigRepository.deviceProfileFlow) {
-                sort,
-                nodeFilter,
-                showDetails,
-                profile,
-            ->
+        combine(nodeSortOption, nodeFilter, radioConfigRepository.deviceProfileFlow) { sort, nodeFilter, profile ->
             NodesUiState(
                 sort = sort,
                 filter = nodeFilter,
                 distanceUnits = profile.config.display.units.number,
                 tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-                showDetails = showDetails,
             )
         }
             .stateIn(
@@ -172,20 +161,11 @@ constructor(
         uiPreferencesDataSource.setNodeSort(sort.ordinal)
     }
 
-    fun toggleShowDetails() = toggle(showDetails) { uiPrefs.showDetails = it }
-
     fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
         viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
 
     fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
         _sharedContactRequested.value = sharedContact
-    }
-
-    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
-        (!state.value).let { toggled ->
-            state.update { toggled }
-            onChanged(toggled)
-        }
     }
 
     fun favoriteNode(node: Node) = viewModelScope.launch {
@@ -221,7 +201,6 @@ data class NodesUiState(
     val filter: NodeFilterState = NodeFilterState(),
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
-    val showDetails: Boolean = false,
 )
 
 data class NodeFilterState(
