@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">Effacer le filtre de nœud</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Inclure inconnus</string>
     <string name="node_filter_only_online">Masquer les nœuds hors ligne</string>
     <string name="node_filter_only_direct">Afficher uniquement les nœuds directs</string>
     <string name="node_filter_ignored">Vous visualisez les nœuds ignorés,\nAppuyez pour retourner à la liste des nœuds.</string>
     <string name="node_filter_show_details">Afficher les détails</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Options de tri des nœuds</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canal</string>
