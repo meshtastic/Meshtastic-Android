@@ -225,7 +225,7 @@ enum class NodeDetailRoute(
         R.string.node_map,
         NodeDetailRoutes.NodeMap,
         Icons.Default.LocationOn,
-        { navController, metricsVM, _ -> NodeMapScreen(navController, metricsViewModel = metricsVM) },
+        { navController, metricsVM, _ -> NodeMapScreen(navController, metricsVM) },
     ),
     POSITION_LOG(
         R.string.position_log,

@@ -30,14 +30,15 @@ import androidx.navigation.NavHostController
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.map.MapView
+import com.geeksville.mesh.ui.map.NodeMapViewModel
 
 const val DEG_D = 1e-7
 
 @Composable
 fun NodeMapScreen(
     navController: NavHostController,
-    nodeMapViewModel: NodeMapViewModel = hiltViewModel(),
     metricsViewModel: MetricsViewModel = hiltViewModel(),
+    nodeMapViewModel: NodeMapViewModel = hiltViewModel(),
 ) {
     val state by metricsViewModel.state.collectAsState()
     val positions = state.positionLogs
