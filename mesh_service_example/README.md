@@ -4,7 +4,7 @@ This module provides an example implementation of an app that uses the [AIDL](ht
 
 ## Overview
 
-The [AIDL](../app/src/main/aidl/com/geeksville/mesh/IMeshService.aidl) is defined in the main app module and is used to interact with the mesh network.
+The [AIDL](../core/service/src/main/aidl/org/meshtastic/core/service/IMeshService.aidl) is defined in the main app module and is used to interact with the mesh network.
 
 `mesh_service_example` demonstrates how to build and integrate a custom mesh service within the Meshtastic ecosystem. It is intended as a reference for developers who want to extend or customize mesh-related functionality.
 

@@ -155,7 +155,6 @@ android {
         }
     }
     bundle { language { enableSplit = false } }
-    buildFeatures { aidl = true }
 }
 
 secrets {

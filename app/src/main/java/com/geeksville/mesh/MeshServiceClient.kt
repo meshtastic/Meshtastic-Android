@@ -30,6 +30,7 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.startService
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.Job
+import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
 

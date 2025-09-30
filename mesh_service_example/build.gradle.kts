@@ -44,7 +44,6 @@ plugins {
 
 android {
     namespace = "com.meshtastic.android.meshserviceexample"
-    buildFeatures { aidl = true }
     defaultConfig {
         // Force this app to use the Google variant of any modules it's using that apply AndroidLibraryConventionPlugin
         missingDimensionStrategy(FlavorDimension.marketplace.name, MeshtasticFlavor.google.name)
@@ -52,7 +51,9 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.model)
     implementation(projects.core.proto)
+    implementation(projects.core.service)
 
     implementation(libs.appcompat)
     implementation(libs.material)

@@ -20,10 +20,14 @@ plugins {
     alias(libs.plugins.meshtastic.hilt)
 }
 
-android { namespace = "org.meshtastic.core.service" }
+android {
+    buildFeatures { aidl = true }
+    namespace = "org.meshtastic.core.service"
+}
 
 dependencies {
     implementation(projects.core.database)
+    implementation(projects.core.model)
     implementation(projects.core.proto)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.timber)
