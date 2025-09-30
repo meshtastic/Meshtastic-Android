@@ -15,19 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.service
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.hilt)
+}
 
-import org.meshtastic.core.service.ConnectionState
-import javax.inject.Inject
-import javax.inject.Singleton
+android {
+    buildFeatures { aidl = true }
+    namespace = "org.meshtastic.core.service"
+}
 
-@Singleton
-class MeshServiceConnectionStateHolder @Inject constructor() {
-    private var connectionState = ConnectionState.DISCONNECTED
-
-    fun setState(state: ConnectionState) {
-        connectionState = state
-    }
-
-    fun getState() = connectionState
+dependencies {
+    implementation(projects.core.database)
+    implementation(projects.core.model)
+    implementation(projects.core.proto)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.timber)
 }

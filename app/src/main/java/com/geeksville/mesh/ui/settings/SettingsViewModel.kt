@@ -21,12 +21,10 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +48,8 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.ServiceRepository
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter

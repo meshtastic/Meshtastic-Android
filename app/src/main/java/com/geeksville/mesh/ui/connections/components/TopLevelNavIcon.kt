@@ -36,9 +36,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.TopLevelDestination
 import com.geeksville.mesh.ui.connections.DeviceType
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice

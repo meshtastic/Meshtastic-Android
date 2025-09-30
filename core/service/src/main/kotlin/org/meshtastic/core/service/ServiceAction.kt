@@ -15,19 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.service
+package org.meshtastic.core.service
 
-enum class ConnectionState {
-    /** We are disconnected from the device, and we should be trying to reconnect. */
-    DISCONNECTED,
+import com.geeksville.mesh.AdminProtos
+import org.meshtastic.core.database.model.Node
 
-    /** We are connected to the device and communicating normally. */
-    CONNECTED,
+sealed class ServiceAction {
+    data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
 
-    /** The device is in a light sleep state, and we are waiting for it to wake up and reconnect to us. */
-    DEVICE_SLEEP,
+    data class Favorite(val node: Node) : ServiceAction()
 
-    ;
+    data class Ignore(val node: Node) : ServiceAction()
 
-    fun isConnected() = this != DISCONNECTED
+    data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
+
+    data class AddSharedContact(val contact: AdminProtos.SharedContact) : ServiceAction()
 }

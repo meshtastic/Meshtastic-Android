@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.model.Contact
-import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +36,7 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.getShortDate
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
 import javax.inject.Inject
 import kotlin.collections.map

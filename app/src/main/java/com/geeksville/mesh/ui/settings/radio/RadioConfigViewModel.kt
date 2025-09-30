@@ -37,7 +37,6 @@ import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
-import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.Portnums
@@ -51,8 +50,6 @@ import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.repository.location.LocationRepository
-import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -79,6 +76,9 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
+import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
 import java.io.FileOutputStream
 import javax.inject.Inject

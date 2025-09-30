@@ -54,9 +54,9 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.connections.isIPAddress
 import kotlinx.coroutines.launch
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme

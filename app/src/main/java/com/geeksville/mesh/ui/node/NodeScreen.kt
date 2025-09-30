@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AdminProtos
-import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeFilterTextField
@@ -69,6 +68,7 @@ import com.geeksville.mesh.ui.sharing.AddContactFAB
 import com.geeksville.mesh.ui.sharing.supportsQrCodeSharing
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed

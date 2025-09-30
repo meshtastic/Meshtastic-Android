@@ -32,7 +32,6 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos
@@ -45,7 +44,6 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
-import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -75,6 +73,8 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.util.toChannelSet
+import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
 import javax.inject.Inject
 

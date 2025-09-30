@@ -15,19 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.service
+package org.meshtastic.core.service
 
-import org.meshtastic.core.service.ConnectionState
-import javax.inject.Inject
-import javax.inject.Singleton
+enum class ConnectionState {
+    /** We are disconnected from the device, and we should be trying to reconnect. */
+    DISCONNECTED,
 
-@Singleton
-class MeshServiceConnectionStateHolder @Inject constructor() {
-    private var connectionState = ConnectionState.DISCONNECTED
+    /** We are connected to the device and communicating normally. */
+    CONNECTED,
 
-    fun setState(state: ConnectionState) {
-        connectionState = state
-    }
+    /** The device is in a light sleep state, and we are waiting for it to wake up and reconnect to us. */
+    DEVICE_SLEEP,
 
-    fun getState() = connectionState
+    ;
+
+    fun isConnected() = this != DISCONNECTED
 }
