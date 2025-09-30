@@ -27,10 +27,10 @@ import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.ServiceClient
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.service.startService
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.Job
+import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
 
 /** A Activity-lifecycle-aware [ServiceClient] that binds [MeshService] once the Activity is started. */

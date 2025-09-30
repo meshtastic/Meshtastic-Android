@@ -25,5 +25,6 @@ android { namespace = "org.meshtastic.core.service" }
 dependencies {
     implementation(projects.core.database)
     implementation(projects.core.proto)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.timber)
 }

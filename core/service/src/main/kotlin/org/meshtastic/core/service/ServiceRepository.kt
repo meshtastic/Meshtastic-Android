@@ -15,9 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.service
+package org.meshtastic.core.service
 
-import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import kotlinx.coroutines.channels.Channel
@@ -26,8 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
-import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.service.ServiceAction
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton

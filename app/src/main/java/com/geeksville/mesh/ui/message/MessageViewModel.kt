@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.service.MeshServiceNotifications
-import com.geeksville.mesh.service.ServiceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +42,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ServiceAction
+import org.meshtastic.core.service.ServiceRepository
 import timber.log.Timber
 import javax.inject.Inject
 

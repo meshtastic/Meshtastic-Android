@@ -34,7 +34,6 @@ import com.geeksville.mesh.repository.radio.InterfaceId
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.ServiceRepository
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -52,6 +51,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
 import javax.inject.Inject
 

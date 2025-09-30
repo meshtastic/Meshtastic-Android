@@ -22,6 +22,7 @@ import androidx.core.app.RemoteInput
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.service.ServiceRepository
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.
