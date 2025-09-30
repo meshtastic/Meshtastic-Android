@@ -189,6 +189,7 @@ dependencies {
     implementation(projects.core.network)
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
+    implementation(projects.core.service)
     implementation(projects.core.strings)
     implementation(projects.core.ui)
     implementation(projects.feature.map)

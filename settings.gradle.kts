@@ -28,6 +28,7 @@ include(
     ":core:network",
     ":core:prefs",
     ":core:proto",
+    ":core:service",
     ":core:strings",
     ":core:ui",
     ":feature:map",
