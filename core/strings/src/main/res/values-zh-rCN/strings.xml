@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">筛选器csvfganw</string>
     <string name="desc_node_filter_clear">清除筛选</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
     <string name="node_filter_only_online">隐藏离线节点</string>
     <string name="node_filter_only_direct">仅显示直连节点</string>
     <string name="node_filter_ignored">您正在查看被忽略的节点，\n点击返回到节点列表。</string>
     <string name="node_filter_show_details">显示详细信息</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">节点排序选项</string>
     <string name="node_sort_alpha">字母顺序</string>
     <string name="node_sort_channel">频道</string>
