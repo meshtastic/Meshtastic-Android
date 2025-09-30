@@ -28,22 +28,22 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.map.MapView
+import com.geeksville.mesh.ui.map.NodeMapViewModel
 
 const val DEG_D = 1e-7
 
 @Composable
 fun NodeMapScreen(
     navController: NavHostController,
-    uiViewModel: UIViewModel,
     metricsViewModel: MetricsViewModel = hiltViewModel(),
+    nodeMapViewModel: NodeMapViewModel = hiltViewModel(),
 ) {
     val state by metricsViewModel.state.collectAsState()
     val positions = state.positionLogs
     val destNum = state.node?.num
-    val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val ourNodeInfo by nodeMapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
