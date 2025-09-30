@@ -22,4 +22,7 @@ plugins {
 
 android { namespace = "org.meshtastic.core.service" }
 
-dependencies { implementation(libs.timber) }
+dependencies {
+    implementation(projects.core.proto)
+    implementation(libs.timber)
+}
