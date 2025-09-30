@@ -24,8 +24,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
-import timber.log.Timber
 import org.meshtastic.core.service.ServiceRepository
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -59,9 +59,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.opentelemetry.api.GlobalOpenTelemetry
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.BuildConfig
-import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import timber.log.Timber
 import javax.inject.Inject

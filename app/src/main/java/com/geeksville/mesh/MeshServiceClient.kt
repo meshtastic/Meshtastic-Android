@@ -30,9 +30,9 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.startService
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.Job
-import timber.log.Timber
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
+import timber.log.Timber
 import javax.inject.Inject
 
 /** A Activity-lifecycle-aware [ServiceClient] that binds [MeshService] once the Activity is started. */

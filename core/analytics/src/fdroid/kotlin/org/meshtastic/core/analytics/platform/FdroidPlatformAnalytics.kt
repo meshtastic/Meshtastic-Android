@@ -19,8 +19,8 @@ package org.meshtastic.core.analytics.platform
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import org.meshtastic.analytics.DataPair
 import org.meshtastic.core.analytics.BuildConfig
+import org.meshtastic.core.analytics.DataPair
 import timber.log.Timber
 import javax.inject.Inject
 

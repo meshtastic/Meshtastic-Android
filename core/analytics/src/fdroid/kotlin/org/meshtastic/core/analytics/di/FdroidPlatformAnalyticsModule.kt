@@ -22,7 +22,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.analytics.platform.FdroidPlatformAnalytics
-import org.meshtastic.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import javax.inject.Singleton
 
 /** Hilt module to provide the [FdroidPlatformAnalytics] for the fdroid flavor. */
