@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.analytics.platform
+package org.meshtastic.core.analytics.platform
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController

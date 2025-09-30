@@ -19,7 +19,7 @@ package com.geeksville.mesh
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
-import org.meshtastic.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import timber.log.Timber
 import javax.inject.Inject
 

@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.analytics.platform
+package org.meshtastic.core.analytics.platform
 
 import androidx.navigation.NavHostController
-import org.meshtastic.analytics.DataPair
+import org.meshtastic.core.analytics.DataPair
 
 /**
  * Interface to abstract platform-specific functionalities, primarily for analytics and related services that differ
@@ -39,7 +39,7 @@ interface PlatformAnalytics {
     /**
      * A Composable function to set up navigation tracking for the current platform.
      *
-     * @param navController The [androidx.navigation.NavHostController] to track.
+     * @param navController The [NavHostController] to track.
      */
     fun addNavigationTrackingEffect(navController: NavHostController): () -> Unit
 

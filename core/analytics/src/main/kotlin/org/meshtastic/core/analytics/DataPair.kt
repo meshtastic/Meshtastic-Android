@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.analytics
+package org.meshtastic.core.analytics
 
 /**
  * A key-value pair for sending properties with analytics events.

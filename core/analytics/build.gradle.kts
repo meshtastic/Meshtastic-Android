@@ -18,6 +18,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.secrets)
+    alias(libs.plugins.kover)
 }
 
 dependencies {

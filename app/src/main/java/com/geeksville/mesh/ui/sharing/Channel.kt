@@ -104,7 +104,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
-import org.meshtastic.analytics.DataPair
+import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.qrCode

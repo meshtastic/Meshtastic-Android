@@ -15,21 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.analytics.di
+package org.meshtastic.core.analytics.di
 
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.meshtastic.analytics.platform.GooglePlatformAnalytics
+import org.meshtastic.core.analytics.platform.FdroidPlatformAnalytics
 import org.meshtastic.analytics.platform.PlatformAnalytics
 import javax.inject.Singleton
 
-/** Hilt module to provide the [org.meshtastic.analytics.platform.GooglePlatformAnalytics] for the google flavor. */
+/** Hilt module to provide the [FdroidPlatformAnalytics] for the fdroid flavor. */
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class GooglePlatformAnalyticsModule {
+abstract class FdroidPlatformAnalyticsModule {
 
-    @Binds @Singleton
-    abstract fun bindPlatformHelper(googlePlatformHelper: GooglePlatformAnalytics): PlatformAnalytics
+    @Binds
+    @Singleton
+    abstract fun bindPlatformHelper(fdroidPlatformAnalytics: FdroidPlatformAnalytics): PlatformAnalytics
 }
