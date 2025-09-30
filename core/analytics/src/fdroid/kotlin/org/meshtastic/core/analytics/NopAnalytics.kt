@@ -15,10 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.analytics
+package org.meshtastic.core.analytics
 
 import android.content.Context
-import com.geeksville.mesh.android.Logging
 
 class DataPair(val name: String, valueIn: Any?) {
     val value = valueIn ?: "null"
@@ -31,9 +30,7 @@ class DataPair(val name: String, valueIn: Any?) {
 
 /** Implement our analytics API using Firebase Analytics */
 @Suppress("UNUSED_PARAMETER", "EmptyFunctionBlock", "EmptyInitBlock")
-class NopAnalytics(context: Context) :
-    AnalyticsProvider,
-    Logging {
+class NopAnalytics(context: Context) : AnalyticsClient {
 
     init {}
 

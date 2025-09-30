@@ -24,10 +24,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.analytics.AnalyticsProvider
-import com.geeksville.mesh.analytics.NopAnalytics
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.info
+import org.meshtastic.core.analytics.AnalyticsClient
+import org.meshtastic.core.analytics.NopAnalytics
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import timber.log.Timber
@@ -37,7 +37,7 @@ abstract class GeeksvilleApplication :
     Logging {
 
     companion object {
-        lateinit var analytics: AnalyticsProvider
+        lateinit var analytics: AnalyticsClient
     }
 
     // / Are we running inside the testlab?
