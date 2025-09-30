@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Фильтр</string>
     <string name="desc_node_filter_clear">очистить фильтр узлов</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Включить неизвестные</string>
     <string name="node_filter_only_online">Скрыть узлы офлайн</string>
     <string name="node_filter_only_direct">Отображать только слышимые узлы</string>
     <string name="node_filter_ignored">Вы просматриваете игнорируемые узлы,\nНажмите, чтобы вернуться к списку узлов.</string>
     <string name="node_filter_show_details">Показать детали</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Варианты сортировки узлов</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_channel">Канал</string>
