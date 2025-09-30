@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.analytics
+package org.meshtastic.core.analytics
 
 import android.os.Bundle
-import com.geeksville.mesh.android.Logging
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
 import com.google.firebase.analytics.logEvent
+import timber.log.Timber
 
 class DataPair(val name: String, valueIn: Any?) {
     val value = valueIn ?: "null"
@@ -34,9 +34,7 @@ class DataPair(val name: String, valueIn: Any?) {
 }
 
 /** Implement our analytics API using Firebase Analytics */
-class FirebaseAnalytics(installId: String) :
-    AnalyticsProvider,
-    Logging {
+class FirebaseAnalytics(installId: String) : AnalyticsClient {
 
     val t = Firebase.analytics.apply { setUserId(installId) }
 
@@ -54,7 +52,7 @@ class FirebaseAnalytics(installId: String) :
     }
 
     override fun track(event: String, vararg properties: DataPair) {
-        debug("Analytics: track $event")
+        Timber.d("Analytics: track $event")
 
         val bundle = Bundle()
         properties.forEach {
@@ -70,7 +68,7 @@ class FirebaseAnalytics(installId: String) :
     }
 
     override fun startSession() {
-        debug("Analytics: start session")
+        Timber.d("Analytics: start session")
         // automatic with firebase
     }
 
@@ -84,7 +82,7 @@ class FirebaseAnalytics(installId: String) :
 
     /** Send a google analytics screen view event */
     override fun sendScreenView(name: String) {
-        debug("Analytics: start screen $name")
+        Timber.d("Analytics: start screen $name")
         t.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
             param(FirebaseAnalytics.Param.SCREEN_NAME, name)
             param(FirebaseAnalytics.Param.SCREEN_CLASS, "MainActivity")

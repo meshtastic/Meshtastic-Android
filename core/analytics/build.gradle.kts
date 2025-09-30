@@ -19,4 +19,8 @@ plugins { alias(libs.plugins.meshtastic.android.library) }
 
 android { namespace = "org.meshtastic.core.analytics" }
 
-dependencies {}
+dependencies {
+    implementation(libs.timber)
+    googleImplementation(platform(libs.firebase.bom))
+    googleImplementation(libs.firebase.analytics)
+}

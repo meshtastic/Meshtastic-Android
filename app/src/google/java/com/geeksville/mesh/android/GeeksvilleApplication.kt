@@ -46,8 +46,6 @@ import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
 import com.datadog.android.trace.opentelemetry.DatadogOpenTelemetry
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.analytics.AnalyticsProvider
-import com.geeksville.mesh.analytics.FirebaseAnalytics
 import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
@@ -58,6 +56,8 @@ import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
 import com.suddenh4x.ratingdialog.AppRating
 import io.opentelemetry.api.GlobalOpenTelemetry
+import org.meshtastic.core.analytics.AnalyticsClient
+import org.meshtastic.core.analytics.FirebaseAnalytics
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import timber.log.Timber
@@ -67,7 +67,7 @@ abstract class GeeksvilleApplication :
     Logging {
 
     companion object {
-        lateinit var analytics: AnalyticsProvider
+        lateinit var analytics: AnalyticsClient
     }
 
     // / Are we running inside the testlab?
