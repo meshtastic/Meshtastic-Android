@@ -19,6 +19,7 @@ import org.gradle.kotlin.dsl.maven
 
 include(
     ":app",
+    ":core:analytics",
     ":core:data",
     ":core:database",
     ":core:datastore",
