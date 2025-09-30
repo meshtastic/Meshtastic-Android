@@ -17,16 +17,14 @@
 
 package com.geeksville.mesh.repository.radio
 
-import com.geeksville.mesh.android.Logging
+import timber.log.Timber
 
 /**
  * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP
  * probably)
  */
-abstract class StreamInterface(protected val service: RadioInterfaceService) :
-    Logging,
-    IRadioInterface {
-    companion object : Logging {
+abstract class StreamInterface(protected val service: RadioInterfaceService) : IRadioInterface {
+    companion object {
         private const val START1 = 0x94.toByte()
         private const val START2 = 0xc3.toByte()
         private const val MAX_TO_FROM_RADIO_SIZE = 512
@@ -43,7 +41,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
     private var packetLen = 0
 
     override fun close() {
-        debug("Closing stream for good")
+        Timber.d("Closing stream for good")
         onDeviceDisconnect(true)
     }
 
@@ -92,7 +90,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
         when (val c = b.toChar()) {
             '\r' -> {} // ignore
             '\n' -> {
-                debug("DeviceLog: $debugLineBuf")
+                Timber.d("DeviceLog: $debugLineBuf")
                 debugLineBuf.clear()
             }
             else -> debugLineBuf.append(c)
@@ -106,7 +104,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
         var nextPtr = ptr + 1
 
         fun lostSync() {
-            errormsg("Lost protocol sync")
+            Timber.e("Lost protocol sync")
             nextPtr = 0
         }
 

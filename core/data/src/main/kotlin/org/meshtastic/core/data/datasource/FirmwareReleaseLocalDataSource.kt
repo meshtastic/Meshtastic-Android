@@ -35,11 +35,8 @@ class FirmwareReleaseLocalDataSource @Inject constructor(private val firmwareRel
         firmwareReleases: List<NetworkFirmwareRelease>,
         releaseType: FirmwareReleaseType,
     ) = withContext(Dispatchers.IO) {
-        if (firmwareReleases.isNotEmpty()) {
-            firmwareReleaseDao.deleteAll()
-            firmwareReleases.forEach { firmwareRelease ->
-                firmwareReleaseDao.insert(firmwareRelease.asEntity(releaseType))
-            }
+        firmwareReleases.forEach { firmwareRelease ->
+            firmwareReleaseDao.insert(firmwareRelease.asEntity(releaseType))
         }
     }
 

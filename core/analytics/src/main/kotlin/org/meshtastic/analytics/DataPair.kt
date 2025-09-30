@@ -15,18 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.analytics
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import dagger.hilt.android.HiltAndroidApp
-import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
-import javax.inject.Inject
-
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
-    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
-
-    override fun onCreate() {
-        super.onCreate()
-    }
+/**
+ * A key-value pair for sending properties with analytics events.
+ *
+ * @param name The name (key) of the property.
+ * @param valueIn The raw value of the property; converted to the string "null" if null.
+ */
+class DataPair(val name: String, val valueIn: Any?) {
+    val value: Any = valueIn ?: "null"
 }

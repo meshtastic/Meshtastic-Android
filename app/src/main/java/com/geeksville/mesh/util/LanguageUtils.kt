@@ -20,12 +20,12 @@ package com.geeksville.mesh.util
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import com.geeksville.mesh.android.Logging
 import org.meshtastic.core.strings.R
 import org.xmlpull.v1.XmlPullParser
+import timber.log.Timber
 import java.util.Locale
 
-object LanguageUtils : Logging {
+object LanguageUtils {
 
     const val SYSTEM_DEFAULT = "zz"
 
@@ -57,7 +57,7 @@ object LanguageUtils : Logging {
                     }
                 }
             } catch (e: Exception) {
-                errormsg("Error parsing locale_config.xml: ${e.message}")
+                Timber.e("Error parsing locale_config.xml: ${e.message}")
             }
         }
 

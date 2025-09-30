@@ -48,8 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -94,7 +92,7 @@ fun AddContactFAB(
                     try {
                         uri.toSharedContact()
                     } catch (ex: MalformedURLException) {
-                        errormsg("URL was malformed: ${ex.message}")
+                        Timber.e("URL was malformed: ${ex.message}")
                         null
                     }
                 if (sharedContact != null) {
@@ -136,7 +134,7 @@ fun AddContactFAB(
     }
 
     fun zxingScan() {
-        debug("Starting zxing QR code scanner")
+        Timber.d("Starting zxing QR code scanner")
         val zxingScan = ScanOptions()
         zxingScan.setCameraId(CAMERA_ID)
         zxingScan.setPrompt("")
@@ -229,7 +227,7 @@ val Uri.qrCode: Bitmap?
             val barcodeEncoder = BarcodeEncoder()
             barcodeEncoder.createBitmap(bitMatrix)
         } catch (ex: WriterException) {
-            errormsg("URL was too complex to render as barcode: ${ex.message}")
+            Timber.e("URL was too complex to render as barcode: ${ex.message}")
             null
         }
 

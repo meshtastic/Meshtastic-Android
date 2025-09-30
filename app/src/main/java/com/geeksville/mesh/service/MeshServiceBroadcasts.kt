@@ -24,6 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
+import timber.log.Timber
 import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,7 +50,7 @@ constructor(
     }
 
     fun broadcastNodeChange(info: NodeInfo) {
-        MeshService.debug("Broadcasting node change $info")
+        Timber.d("Broadcasting node change $info")
         val intent = Intent(MeshService.ACTION_NODE_CHANGE).putExtra(EXTRA_NODEINFO, info)
         explicitBroadcast(intent)
     }
@@ -58,10 +59,10 @@ constructor(
 
     fun broadcastMessageStatus(id: Int, status: MessageStatus?) {
         if (id == 0) {
-            MeshService.debug("Ignoring anonymous packet status")
+            Timber.d("Ignoring anonymous packet status")
         } else {
             // Do not log, contains PII possibly
-            // MeshService.debug("Broadcasting message status $p")
+            // MeshService.Timber.d("Broadcasting message status $p")
             val intent =
                 Intent(MeshService.ACTION_MESSAGE_STATUS).apply {
                     putExtra(EXTRA_PACKET_ID, id)

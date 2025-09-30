@@ -40,7 +40,14 @@ data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
     @Suppress("TooGenericExceptionThrown", "MagicNumber")
     private fun verStringToInt(s: String): Int {
         // Allow 1 to two digits per match
-        val match = Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(s) ?: throw Exception("Can't parse version $s")
+        val versionString =
+            if (s.split(".").size == 2) {
+                "$s.0"
+            } else {
+                s
+            }
+        val match =
+            Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(versionString) ?: throw Exception("Can't parse version $s")
         val (major, minor, build) = match.destructured
         return major.toInt() * 10000 + minor.toInt() * 100 + build.toInt()
     }

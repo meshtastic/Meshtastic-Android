@@ -40,9 +40,6 @@ import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.isAnalyticsAvailable
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.getChannelList
@@ -80,6 +77,7 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import timber.log.Timber
 import java.io.FileOutputStream
 import javax.inject.Inject
 
@@ -113,10 +111,15 @@ constructor(
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
-) : ViewModel(),
-    Logging {
+) : ViewModel() {
     private val meshService: IMeshService?
         get() = serviceRepository.meshService
+
+    var analyticsAllowedFlow = analyticsPrefs.getAnalyticsAllowedChangesFlow()
+
+    fun toggleAnalyticsAllowed() {
+        analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
+    }
 
     private val destNum = savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum
     private val _destNode = MutableStateFlow<Node?>(null)
@@ -169,9 +172,7 @@ constructor(
             }
             .launchIn(viewModelScope)
 
-        _radioConfigState.update { it.copy(analyticsAvailable = (app as GeeksvilleApplication).isAnalyticsAvailable) }
-
-        debug("RadioConfigViewModel created")
+        Timber.d("RadioConfigViewModel created")
     }
 
     private val myNodeInfo: StateFlow<MyNodeEntity?>
@@ -197,7 +198,7 @@ constructor(
 
     override fun onCleared() {
         super.onCleared()
-        debug("RadioConfigViewModel cleared")
+        Timber.d("RadioConfigViewModel cleared")
     }
 
     private fun request(destNum: Int, requestAction: suspend (IMeshService, Int, Int) -> Unit, errorMessage: String) =
@@ -219,7 +220,7 @@ constructor(
                         }
                     }
                 } catch (ex: RemoteException) {
-                    errormsg("$errorMessage: ${ex.message}")
+                    Timber.e("$errorMessage: ${ex.message}")
                 }
             }
         }
@@ -387,7 +388,7 @@ constructor(
         try {
             meshService?.setFixedPosition(destNum, position)
         } catch (ex: RemoteException) {
-            errormsg("Set fixed position error: ${ex.message}")
+            Timber.e("Set fixed position error: ${ex.message}")
         }
     }
 
@@ -401,7 +402,7 @@ constructor(
                 onResult(protobuf)
             }
         } catch (ex: Exception) {
-            errormsg("Import DeviceProfile error: ${ex.message}")
+            Timber.e("Import DeviceProfile error: ${ex.message}")
             sendError(ex.customMessage)
         }
     }
@@ -417,7 +418,7 @@ constructor(
             }
             setResponseStateSuccess()
         } catch (ex: Exception) {
-            errormsg("Can't write file error: ${ex.message}")
+            Timber.e("Can't write file error: ${ex.message}")
             sendError(ex.customMessage)
         }
     }
@@ -456,7 +457,7 @@ constructor(
                 setResponseStateSuccess()
             } catch (ex: Exception) {
                 val errorMessage = "Can't write security keys JSON error: ${ex.message}"
-                errormsg(errorMessage)
+                Timber.e(errorMessage)
                 sendError(ex.customMessage)
             }
         }
@@ -479,7 +480,7 @@ constructor(
             try {
                 setChannels(channelUrl)
             } catch (ex: Exception) {
-                errormsg("DeviceProfile channel import error", ex)
+                Timber.e(ex, "DeviceProfile channel import error")
                 sendError(ex.customMessage)
             }
         }
@@ -617,7 +618,7 @@ constructor(
 
         if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
             val parsed = MeshProtos.Routing.parseFrom(data.payload)
-            debug(debugMsg.format(parsed.errorReason.name))
+            Timber.d(debugMsg.format(parsed.errorReason.name))
             if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
                 sendError(getStringResFrom(parsed.errorReasonValue))
             } else if (packet.from == destNum && route.isEmpty()) {
@@ -631,7 +632,7 @@ constructor(
         }
         if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
-            debug(debugMsg.format(parsed.payloadVariantCase.name))
+            Timber.d(debugMsg.format(parsed.payloadVariantCase.name))
             if (destNum != packet.from) {
                 sendError("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}.")
                 return
@@ -698,7 +699,7 @@ constructor(
                     incrementCompleted()
                 }
 
-                else -> debug("No custom processing needed for ${parsed.payloadVariantCase}")
+                else -> Timber.d("No custom processing needed for ${parsed.payloadVariantCase}")
             }
 
             if (AdminRoute.entries.any { it.name == route }) {
@@ -706,10 +707,5 @@ constructor(
             }
             requestIds.update { it.apply { remove(data.requestId) } }
         }
-    }
-
-    fun toggleAnalytics() {
-        analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
-        _radioConfigState.update { it.copy(analyticsEnabled = analyticsPrefs.analyticsAllowed) }
     }
 }

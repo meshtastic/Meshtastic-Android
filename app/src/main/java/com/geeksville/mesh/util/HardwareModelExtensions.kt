@@ -18,7 +18,7 @@
 package com.geeksville.mesh.util
 
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.android.BuildUtils.warn
+import timber.log.Timber
 
 /**
  * Safely extracts the hardware model number from a HardwareModel enum.
@@ -34,7 +34,7 @@ import com.geeksville.mesh.android.BuildUtils.warn
 fun MeshProtos.HardwareModel.safeNumber(fallbackValue: Int = -1): Int = try {
     this.number
 } catch (e: IllegalArgumentException) {
-    warn("Unknown hardware model enum value: $this, using fallback value: $fallbackValue")
+    Timber.w("Unknown hardware model enum value: $this, using fallback value: $fallbackValue")
     fallbackValue
 }
 

@@ -26,7 +26,6 @@ import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.ui.debug.FilterMode
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,6 +44,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
+import timber.log.Timber
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
@@ -203,8 +203,7 @@ class DebugViewModel
 constructor(
     private val meshLogRepository: MeshLogRepository,
     private val nodeRepository: NodeRepository,
-) : ViewModel(),
-    Logging {
+) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
         meshLogRepository
@@ -240,7 +239,7 @@ constructor(
     }
 
     init {
-        debug("DebugViewModel created")
+        Timber.d("DebugViewModel created")
         viewModelScope.launch {
             combine(searchManager.searchText, filterManager.filteredLogs) { searchText, logs ->
                 searchManager.findSearchMatches(searchText, logs)
@@ -253,7 +252,7 @@ constructor(
 
     override fun onCleared() {
         super.onCleared()
-        debug("DebugViewModel cleared")
+        Timber.d("DebugViewModel cleared")
     }
 
     private fun toUiState(databaseLogs: List<MeshLog>) = databaseLogs

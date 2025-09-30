@@ -15,19 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.analytics.di
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import dagger.hilt.android.HiltAndroidApp
-import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
-import javax.inject.Inject
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import org.meshtastic.analytics.platform.FdroidPlatformAnalytics
+import org.meshtastic.analytics.platform.PlatformAnalytics
+import javax.inject.Singleton
 
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
+/** Hilt module to provide the [FdroidPlatformAnalytics] for the fdroid flavor. */
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class FdroidPlatformAnalyticsModule {
 
-    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
-
-    override fun onCreate() {
-        super.onCreate()
-    }
+    @Binds
+    @Singleton
+    abstract fun bindPlatformHelper(fdroidPlatformAnalytics: FdroidPlatformAnalytics): PlatformAnalytics
 }

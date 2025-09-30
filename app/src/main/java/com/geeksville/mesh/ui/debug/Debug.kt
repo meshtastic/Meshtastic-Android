@@ -77,7 +77,6 @@ import androidx.compose.ui.unit.sp
 import androidx.datastore.core.IOException
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import kotlinx.collections.immutable.toImmutableList
@@ -89,6 +88,7 @@ import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.core.ui.theme.AppTheme
+import timber.log.Timber
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
@@ -394,7 +394,7 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
                 )
                     .show()
             }
-            warn("Error:IOException: " + e.toString())
+            Timber.w(e, "Error:IOException ")
         }
     }
 

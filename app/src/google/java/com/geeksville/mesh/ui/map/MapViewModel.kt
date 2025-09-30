@@ -22,7 +22,6 @@ import android.net.Uri
 import androidx.core.net.toFile
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.android.BuildUtils.debug
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
@@ -442,7 +441,7 @@ constructor(
             try {
                 application.contentResolver.openInputStream(uriToLoad)
             } catch (_: Exception) {
-                debug("MapViewModel: Error opening InputStream from URI: $uriToLoad")
+                Timber.d("MapViewModel: Error opening InputStream from URI: $uriToLoad")
                 null
             }
         }

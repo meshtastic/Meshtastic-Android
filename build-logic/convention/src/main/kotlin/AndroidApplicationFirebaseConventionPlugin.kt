@@ -17,7 +17,6 @@
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.geeksville.mesh.buildlogic.libs
-import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -36,12 +35,8 @@ class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
                     val bom = libs.findLibrary("firebase-bom").get()
                     "googleImplementation"(platform(bom))
                     "googleImplementation"(libs.findBundle("firebase").get()) {
-                        /*
-                        Exclusion of protobuf / protolite dependencies is necessary as the
-                        datastore-proto brings in protobuf dependencies. These are the source of truth
-                        for Now in Android.
-                        That's why the duplicate classes from below dependencies are excluded.
-                        */
+                        // Exclusion of protobuf / protolite dependencies is necessary as we depend
+                        // on different versions than those included.
                         exclude(group = "com.google.protobuf", module = "protobuf-java")
                         exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
                         exclude(group = "com.google.protobuf", module = "protobuf-javalite")
@@ -49,17 +44,6 @@ class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
                             group = "com.google.firebase",
                             module = "protolite-well-known-types"
                         )
-                    }
-                }
-            }
-
-            extensions.configure<ApplicationExtension> {
-                buildTypes.configureEach {
-                    // Disable the Crashlytics mapping file upload. This feature should only be
-                    // enabled if a Firebase backend is available and configured in
-                    // google-services.json.
-                    configure<CrashlyticsExtension> {
-                        mappingFileUploadEnabled = false
                     }
                 }
             }

@@ -18,7 +18,6 @@
 package com.geeksville.mesh.repository.network
 
 import com.geeksville.mesh.MeshProtos.MqttClientProxyMessage
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.mqttClientProxyMessage
 import com.geeksville.mesh.util.ignoreException
 import com.google.protobuf.ByteString
@@ -37,6 +36,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.subscribeList
+import timber.log.Timber
 import java.net.URI
 import java.security.SecureRandom
 import javax.inject.Inject
@@ -50,7 +50,7 @@ class MQTTRepository
 constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val nodeRepository: NodeRepository,
-) : Logging {
+) {
 
     companion object {
         /**
@@ -70,7 +70,7 @@ constructor(
     private var mqttClient: MqttAsyncClient? = null
 
     fun disconnect() {
-        info("MQTT Disconnected")
+        Timber.i("MQTT Disconnected")
         mqttClient?.apply {
             ignoreException { disconnect() }
             close(true)
@@ -110,7 +110,7 @@ constructor(
         val callback =
             object : MqttCallbackExtended {
                 override fun connectComplete(reconnect: Boolean, serverURI: String) {
-                    info("MQTT connectComplete: $serverURI reconnect: $reconnect")
+                    Timber.i("MQTT connectComplete: $serverURI reconnect: $reconnect")
                     channelSet.subscribeList
                         .ifEmpty {
                             return
@@ -123,7 +123,7 @@ constructor(
                 }
 
                 override fun connectionLost(cause: Throwable) {
-                    info("MQTT connectionLost cause: $cause")
+                    Timber.i("MQTT connectionLost cause: $cause")
                     if (cause is IllegalArgumentException) close(cause)
                 }
 
@@ -138,7 +138,7 @@ constructor(
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                    info("MQTT deliveryComplete messageId: ${token?.messageId}")
+                    Timber.i("MQTT deliveryComplete messageId: ${token?.messageId}")
                 }
             }
 
@@ -161,15 +161,15 @@ constructor(
 
     private fun subscribe(topic: String) {
         mqttClient?.subscribe(topic, DEFAULT_QOS)
-        info("MQTT Subscribed to topic: $topic")
+        Timber.i("MQTT Subscribed to topic: $topic")
     }
 
     fun publish(topic: String, data: ByteArray, retained: Boolean) {
         try {
             val token = mqttClient?.publish(topic, data, DEFAULT_QOS, retained)
-            info("MQTT Publish messageId: ${token?.messageId}")
+            Timber.i("MQTT Publish messageId: ${token?.messageId}")
         } catch (ex: Exception) {
-            errormsg("MQTT Publish error: ${ex.message}")
+            Timber.e("MQTT Publish error: ${ex.message}")
         }
     }
 }

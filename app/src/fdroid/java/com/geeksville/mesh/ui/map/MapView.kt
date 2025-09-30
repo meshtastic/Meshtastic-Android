@@ -63,7 +63,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.copy
@@ -107,6 +106,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
 
@@ -116,7 +116,7 @@ private fun MapView.UpdateMarkers(
     waypointMarkers: List<MarkerWithLabel>,
     nodeClusterer: RadiusMarkerClusterer,
 ) {
-    debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
+    Timber.d("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
     overlays.removeAll { it is MarkerWithLabel }
     // overlays.addAll(nodeMarkers + waypointMarkers)
     overlays.addAll(waypointMarkers)
@@ -242,7 +242,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun loadOnlineTileSourceBase(): ITileSource {
         val id = mapViewModel.mapStyleId
-        debug("mapStyleId from prefs: $id")
+        Timber.d("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
             zoomLevelMax = it.maximumZoomLevel.toDouble()
             showDownloadButton = if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
@@ -261,11 +261,11 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
-            debug("Telling user we need location turned on for MyLocationNewOverlay")
+            Timber.d("Telling user we need location turned on for MyLocationNewOverlay")
             Toast.makeText(context, R.string.location_disabled, Toast.LENGTH_SHORT).show()
             return
         }
-        debug("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
+        Timber.d("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
         if (myLocationOverlay == null) {
             myLocationOverlay =
                 MyLocationNewOverlay(this).apply {
@@ -352,14 +352,14 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(R.string.waypoint_delete)
-        builder.setNeutralButton(R.string.cancel) { _, _ -> debug("User canceled marker delete dialog") }
+        builder.setNeutralButton(R.string.cancel) { _, _ -> Timber.d("User canceled marker delete dialog") }
         builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
-            debug("User deleted waypoint ${waypoint.id} for me")
+            Timber.d("User deleted waypoint ${waypoint.id} for me")
             mapViewModel.deleteWaypoint(waypoint.id)
         }
         if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
-                debug("User deleted waypoint ${waypoint.id} for everyone")
+                Timber.d("User deleted waypoint ${waypoint.id} for everyone")
                 mapViewModel.sendWaypoint(waypoint.copy { expire = 1 })
                 mapViewModel.deleteWaypoint(waypoint.id)
             }
@@ -382,7 +382,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun showMarkerLongPressDialog(id: Int) {
         performHapticFeedback()
-        debug("marker long pressed id=$id")
+        Timber.d("marker long pressed id=$id")
         val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
         if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
@@ -570,9 +570,9 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 ),
             )
         } catch (ex: TileSourcePolicyException) {
-            debug("Tile source does not allow archiving: ${ex.message}")
+            Timber.d("Tile source does not allow archiving: ${ex.message}")
         } catch (ex: Exception) {
-            debug("Tile source exception: ${ex.message}")
+            Timber.d("Tile source exception: ${ex.message}")
         }
     }
 
@@ -582,7 +582,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
         val mapStyleInt = mapViewModel.mapStyleId
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
-            debug("Set mapStyleId pref to $which")
+            Timber.d("Set mapStyleId pref to $which")
             mapViewModel.mapStyleId = which
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
@@ -768,7 +768,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         EditWaypointDialog(
             waypoint = showEditWaypointDialog ?: return, // Safe call
             onSendClicked = { waypoint ->
-                debug("User clicked send waypoint ${waypoint.id}")
+                Timber.d("User clicked send waypoint ${waypoint.id}")
                 showEditWaypointDialog = null
                 mapViewModel.sendWaypoint(
                     waypoint.copy {
@@ -781,12 +781,12 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 )
             },
             onDeleteClicked = { waypoint ->
-                debug("User clicked delete waypoint ${waypoint.id}")
+                Timber.d("User clicked delete waypoint ${waypoint.id}")
                 showEditWaypointDialog = null
                 showDeleteMarkerDialog(waypoint)
             },
             onDismissRequest = {
-                debug("User clicked cancel marker edit dialog")
+                Timber.d("User clicked cancel marker edit dialog")
                 showEditWaypointDialog = null
             },
         )

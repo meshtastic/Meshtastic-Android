@@ -24,6 +24,7 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.IInterface
 import com.geeksville.mesh.util.exceptionReporter
+import timber.log.Timber
 import java.io.Closeable
 import java.lang.IllegalArgumentException
 import java.util.concurrent.locks.ReentrantLock
@@ -31,11 +32,8 @@ import kotlin.concurrent.withLock
 
 class BindFailedException : Exception("bindService failed")
 
-/**
- * A wrapper that cleans up the service binding process
- */
-open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T) : Closeable,
-    Logging {
+/** A wrapper that cleans up the service binding process */
+open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T) : Closeable {
 
     var serviceP: T? = null
 
@@ -72,17 +70,17 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
         if (isClosed) {
             isClosed = false
             if (!c.bindService(intent, connection, flags)) {
-
-                // Some phones seem to ahve a race where if you unbind and quickly rebind bindService returns false.  Try
+                // Some phones seem to ahve a race where if you unbind and quickly rebind bindService returns false.
+                // Try
                 // a short sleep to see if that helps
-                errormsg("Needed to use the second bind attempt hack")
+                Timber.e("Needed to use the second bind attempt hack")
                 Thread.sleep(500) // was 200ms, but received an autobug from a Galaxy Note4, android 6.0.1
                 if (!c.bindService(intent, connection, flags)) {
                     throw BindFailedException()
                 }
             }
         } else {
-            warn("Ignoring rebind attempt for service")
+            Timber.w("Ignoring rebind attempt for service")
         }
     }
 
@@ -92,41 +90,39 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
             context?.unbindService(connection)
         } catch (ex: IllegalArgumentException) {
             // Autobugs show this can generate an illegal arg exception for "service not registered" during reinstall?
-            warn("Ignoring error in ServiceClient.close, probably harmless")
+            Timber.w("Ignoring error in ServiceClient.close, probably harmless")
         }
         serviceP = null
         context = null
     }
 
     // Called when we become connected
-    open fun onConnected(service: T) {
-    }
+    open fun onConnected(service: T) {}
 
     // called on loss of connection
-    open fun onDisconnected() {
-    }
+    open fun onDisconnected() {}
 
-    private val connection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, binder: IBinder) = exceptionReporter {
-            if (!isClosed) {
-                val s = stubFactory(binder)
-                serviceP = s
-                onConnected(s)
+    private val connection =
+        object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName, binder: IBinder) = exceptionReporter {
+                if (!isClosed) {
+                    val s = stubFactory(binder)
+                    serviceP = s
+                    onConnected(s)
 
-                // after calling our handler, tell anyone who was waiting for this connection to complete
-                lock.withLock {
-                    condition.signalAll()
+                    // after calling our handler, tell anyone who was waiting for this connection to complete
+                    lock.withLock { condition.signalAll() }
+                } else {
+                    // If we start to close a service, it seems that there is a possibility a onServiceConnected event
+                    // is the queue
+                    // for us.  Be careful not to process that stale event
+                    Timber.w("A service connected while we were closing it, ignoring")
                 }
-            } else {
-                // If we start to close a service, it seems that there is a possibility a onServiceConnected event is the queue
-                // for us.  Be careful not to process that stale event
-                warn("A service connected while we were closing it, ignoring")
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) = exceptionReporter {
+                serviceP = null
+                onDisconnected()
             }
         }
-
-        override fun onServiceDisconnected(name: ComponentName?) = exceptionReporter {
-            serviceP = null
-            onDisconnected()
-        }
-    }
 }

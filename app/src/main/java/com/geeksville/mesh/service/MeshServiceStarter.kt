@@ -26,6 +26,7 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.geeksville.mesh.BuildConfig
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 /** Helper that calls MeshService.startService() */
@@ -37,7 +38,7 @@ class ServiceStarter(appContext: Context, workerParams: WorkerParameters) : Work
         // Indicate whether the task finished successfully with the Result
         Result.success()
     } catch (ex: Exception) {
-        MeshService.errormsg("failure starting service, will retry", ex)
+        Timber.e("failure starting service, will retry", ex)
         Result.retry()
     }
 }
@@ -48,7 +49,7 @@ class ServiceStarter(appContext: Context, workerParams: WorkerParameters) : Work
  */
 fun MeshService.Companion.startServiceLater(context: Context) {
     // No point in even starting the service if the user doesn't have a device bonded
-    info("Received boot complete announcement, starting mesh service in two minutes")
+    Timber.i("Received boot complete announcement, starting mesh service in two minutes")
     val delayRequest =
         OneTimeWorkRequestBuilder<ServiceStarter>()
             .setInitialDelay(2, TimeUnit.MINUTES)
@@ -69,14 +70,14 @@ fun MeshService.Companion.startService(context: Context) {
     // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
     // listening for the bluetooth packets arriving from the radio. And when they arrive forward them
     // to Signal or whatever.
-    info("Trying to start service debug=${BuildConfig.DEBUG}")
+    Timber.i("Trying to start service debug=${BuildConfig.DEBUG}")
 
     val intent = createIntent()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         try {
             context.startForegroundService(intent)
         } catch (ex: ForegroundServiceStartNotAllowedException) {
-            errormsg("Unable to start service: ${ex.message}")
+            Timber.e("Unable to start service: ${ex.message}")
         }
     } else {
         context.startForegroundService(intent)

@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.repository.radio
 
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.util.Exceptions
@@ -26,6 +25,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.IOException
@@ -34,10 +34,8 @@ import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 
-class TCPInterface @AssistedInject constructor(
-    service: RadioInterfaceService,
-    @Assisted private val address: String,
-) : StreamInterface(service), Logging {
+class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @Assisted private val address: String) :
+    StreamInterface(service) {
 
     companion object {
         const val MAX_RETRIES_ALLOWED = Int.MAX_VALUE
@@ -67,7 +65,7 @@ class TCPInterface @AssistedInject constructor(
     override fun onDeviceDisconnect(waitForStopped: Boolean) {
         val s = socket
         if (s != null) {
-            debug("Closing TCP socket")
+            Timber.d("Closing TCP socket")
             s.close()
             socket = null
         }
@@ -80,7 +78,7 @@ class TCPInterface @AssistedInject constructor(
                 try {
                     startConnect()
                 } catch (ex: IOException) {
-                    errormsg("IOException in TCP reader: $ex")
+                    Timber.e("IOException in TCP reader: $ex")
                     onDeviceDisconnect(false)
                 } catch (ex: Throwable) {
                     Exceptions.report(ex, "Exception in TCP reader")
@@ -89,22 +87,22 @@ class TCPInterface @AssistedInject constructor(
 
                 if (retryCount > MAX_RETRIES_ALLOWED) break
 
-                debug("Reconnect attempt $retryCount in ${backoffDelay / 1000}s")
+                Timber.d("Reconnect attempt $retryCount in ${backoffDelay / 1000}s")
                 delay(backoffDelay)
 
                 retryCount++
                 backoffDelay = minOf(backoffDelay * 2, MAX_BACKOFF_MILLIS)
             }
-            debug("Exiting TCP reader")
+            Timber.d("Exiting TCP reader")
         }
     }
 
     // Create a socket to make the connection with the server
     private suspend fun startConnect() = withContext(Dispatchers.IO) {
-        debug("TCP connecting to $address")
+        Timber.d("TCP connecting to $address")
 
-        val (host, port) = address.split(":", limit = 2)
-            .let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: SERVICE_PORT) }
+        val (host, port) =
+            address.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: SERVICE_PORT) }
 
         Socket(InetAddress.getByName(host), port).use { socket ->
             socket.tcpNoDelay = true
@@ -121,18 +119,20 @@ class TCPInterface @AssistedInject constructor(
                     backoffDelay = MIN_BACKOFF_MILLIS
 
                     var timeoutCount = 0
-                    while (timeoutCount < 180) try { // close after 90s of inactivity
-                        val c = inputStream.read()
-                        if (c == -1) {
-                            warn("Got EOF on TCP stream")
-                            break
-                        } else {
-                            timeoutCount = 0
-                            readChar(c.toByte())
+                    while (timeoutCount < 180) {
+                        try { // close after 90s of inactivity
+                            val c = inputStream.read()
+                            if (c == -1) {
+                                Timber.w("Got EOF on TCP stream")
+                                break
+                            } else {
+                                timeoutCount = 0
+                                readChar(c.toByte())
+                            }
+                        } catch (ex: SocketTimeoutException) {
+                            timeoutCount++
+                            // Ignore and start another read
                         }
-                    } catch (ex: SocketTimeoutException) {
-                        timeoutCount++
-                        // Ignore and start another read
                     }
                 }
             }

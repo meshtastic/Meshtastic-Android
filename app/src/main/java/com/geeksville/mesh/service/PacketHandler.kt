@@ -20,9 +20,6 @@ package com.geeksville.mesh.service
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.BuildUtils.errormsg
-import com.geeksville.mesh.android.BuildUtils.info
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
@@ -41,6 +38,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.service.ConnectionState
+import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
@@ -71,7 +69,7 @@ constructor(
      */
     fun sendToRadio(p: ToRadio.Builder) {
         val built = p.build()
-        debug("Sending to radio ${built.toPIIString()}")
+        Timber.d("Sending to radio ${built.toPIIString()}")
         val b = built.toByteArray()
 
         radioInterfaceService.sendToRadio(b)
@@ -103,7 +101,7 @@ constructor(
 
     fun stopPacketQueue() {
         if (queueJob?.isActive == true) {
-            info("Stopping packet queueJob")
+            Timber.i("Stopping packet queueJob")
             queueJob?.cancel()
             queueJob = null
             queuedPackets.clear()
@@ -113,7 +111,7 @@ constructor(
     }
 
     fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
-        debug("queueStatus ${queueStatus.toOneLineString()}")
+        Timber.d("queueStatus ${queueStatus.toOneLineString()}")
         val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, meshPacketId) }
         if (success && isFull) return // Queue is full, wait for free != 0
         if (requestId != 0) {
@@ -132,20 +130,20 @@ constructor(
         if (queueJob?.isActive == true) return
         queueJob =
             scope.handledLaunch {
-                debug("packet queueJob started")
+                Timber.d("packet queueJob started")
                 while (connectionStateHolder.getState() == ConnectionState.CONNECTED) {
                     // take the first packet from the queue head
                     val packet = queuedPackets.poll() ?: break
                     try {
                         // send packet to the radio and wait for response
                         val response = sendPacket(packet)
-                        debug("queueJob packet id=${packet.id.toUInt()} waiting")
+                        Timber.d("queueJob packet id=${packet.id.toUInt()} waiting")
                         val success = response.get(2, TimeUnit.MINUTES)
-                        debug("queueJob packet id=${packet.id.toUInt()} success $success")
+                        Timber.d("queueJob packet id=${packet.id.toUInt()} success $success")
                     } catch (e: TimeoutException) {
-                        debug("queueJob packet id=${packet.id.toUInt()} timeout")
+                        Timber.d("queueJob packet id=${packet.id.toUInt()} timeout")
                     } catch (e: Exception) {
-                        debug("queueJob packet id=${packet.id.toUInt()} failed")
+                        Timber.d("queueJob packet id=${packet.id.toUInt()} failed")
                     }
                 }
             }
@@ -182,7 +180,7 @@ constructor(
             if (connectionStateHolder.getState() != ConnectionState.CONNECTED) throw RadioNotConnectedException()
             sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
         } catch (ex: Exception) {
-            errormsg("sendToRadio error:", ex)
+            Timber.e("sendToRadio error:", ex)
             future.complete(false)
         }
         return future
