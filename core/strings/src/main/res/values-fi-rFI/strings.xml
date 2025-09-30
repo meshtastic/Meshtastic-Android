@@ -19,13 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Suodatus</string>
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
-    <string name="node_filter_title">Filter by</string>
+    <string name="node_filter_title">Suodata otsikon mukaan</string>
     <string name="node_filter_include_unknown">Näytä tuntemattomat</string>
     <string name="node_filter_only_online">Piilota ei yhteydessä olevat laitteet</string>
     <string name="node_filter_only_direct">Näytä vain suorat yhteydet</string>
     <string name="node_filter_ignored">Katselet tällä hetkellä huomioimattomia laitteita,\nPaina palataksesi laitelistaan.</string>
     <string name="node_filter_show_details">Näytä lisätiedot</string>
-    <string name="node_sort_title">Sort by</string>
+    <string name="node_sort_title">Lajittele otsikon mukaan</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_channel">Kanava</string>
