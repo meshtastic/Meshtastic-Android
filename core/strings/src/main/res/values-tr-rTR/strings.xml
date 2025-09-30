@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">düğüm filtresini kaldır</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Bilinmeyenleri dahil et</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
     <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
     <string name="node_filter_show_details">Detayları göster</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Düğüm sıralama seçenekleri</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
