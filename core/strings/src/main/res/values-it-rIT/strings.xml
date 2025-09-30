@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s%s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">elimina filtro nodi</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Includi sconosciuti</string>
     <string name="node_filter_only_online">Nascondi i nodi offline</string>
     <string name="node_filter_only_direct">Mostra solamente i nodi diretti</string>
     <string name="node_filter_ignored">Stai visualizzando i nodi ignorati,\nPremi per tornare alla lista dei nodi</string>
     <string name="node_filter_show_details">Mostra dettagli</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Opzioni ordinamento nodi</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canale</string>
