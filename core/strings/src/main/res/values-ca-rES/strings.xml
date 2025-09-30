@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">netejar filtre de node</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Incloure desconegut</string>
     <string name="node_filter_only_online">Oculta nodes offline</string>
     <string name="node_filter_only_direct">Només veure nodes directes</string>
     <string name="node_filter_ignored">Estàs veient nodes ignorats, \n Prem per tornar al llistat de nodes</string>
     <string name="node_filter_show_details">Veure detalls</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Opcions per ordenar nodes</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canal</string>
