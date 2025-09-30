@@ -20,20 +20,20 @@ package com.geeksville.mesh.service
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
-import com.geeksville.mesh.android.Logging
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /** Repository class for managing the [IMeshService] instance and connection state */
 @Suppress("TooManyFunctions")
 @Singleton
-class ServiceRepository @Inject constructor() : Logging {
+class ServiceRepository @Inject constructor() {
     var meshService: IMeshService? = null
         private set
 
@@ -64,7 +64,7 @@ class ServiceRepository @Inject constructor() : Logging {
         get() = _clientNotification
 
     fun setClientNotification(notification: MeshProtos.ClientNotification?) {
-        errormsg(notification?.message.orEmpty())
+        Timber.e(notification?.message.orEmpty())
 
         _clientNotification.value = notification
     }
@@ -78,7 +78,7 @@ class ServiceRepository @Inject constructor() : Logging {
         get() = _errorMessage
 
     fun setErrorMessage(text: String) {
-        errormsg(text)
+        Timber.e(text)
         _errorMessage.value = text
     }
 
