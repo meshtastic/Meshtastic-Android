@@ -24,7 +24,6 @@ import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.android.Logging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +49,7 @@ import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
+import timber.log.Timber
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -70,8 +70,7 @@ constructor(
     private val meshLogRepository: MeshLogRepository,
     private val uiPrefs: UiPrefs,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
-) : ViewModel(),
-    Logging {
+) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
     val myNodeNum
@@ -254,7 +253,7 @@ constructor(
                     }
                 }
             } catch (ex: FileNotFoundException) {
-                errormsg("Can't write file error: ${ex.message}")
+                Timber.e("Can't write file error: ${ex.message}")
             }
         }
     }

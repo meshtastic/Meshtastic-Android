@@ -35,7 +35,6 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.channel
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.channelSettings
@@ -44,7 +43,6 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
-import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,11 +69,11 @@ import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
-import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import timber.log.Timber
 import javax.inject.Inject
 
 // Given a human name, strip out the first letter of the first three words and return that as the
@@ -165,23 +163,11 @@ constructor(
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val meshServiceNotifications: MeshServiceNotifications,
-) : ViewModel(),
-    Logging {
+) : ViewModel() {
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme
 
-    val firmwareVersion = myNodeInfo.mapNotNull { nodeInfo -> nodeInfo?.firmwareVersion }
-
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmwareEdition }
-
-    val deviceHardware: StateFlow<DeviceHardware?> =
-        ourNodeInfo
-            .mapNotNull { nodeInfo ->
-                nodeInfo?.user?.hwModel?.let { hwModel ->
-                    deviceHardwareRepository.getDeviceHardwareByModel(hwModel.safeNumber()).getOrNull()
-                }
-            }
-            .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = null)
 
     val clientNotification: StateFlow<MeshProtos.ClientNotification?> = serviceRepository.clientNotification
 
@@ -306,7 +292,7 @@ constructor(
             .onEach { channelSet -> _channels.value = channelSet }
             .launchIn(viewModelScope)
 
-        debug("ViewModel created")
+        Timber.d("ViewModel created")
     }
 
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
@@ -332,7 +318,7 @@ constructor(
 
     fun requestChannelUrl(url: Uri) = runCatching { _requestChannelSet.value = url.toChannelSet() }
         .onFailure { ex ->
-            errormsg("Channel url error: ${ex.message}")
+            Timber.e(ex, "Channel url error")
             showSnackBar(R.string.channel_invalid)
         }
 
@@ -361,7 +347,7 @@ constructor(
 
     override fun onCleared() {
         super.onCleared()
-        debug("ViewModel cleared")
+        Timber.d("ViewModel cleared")
     }
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
@@ -374,7 +360,7 @@ constructor(
         try {
             meshService?.setConfig(config.toByteArray())
         } catch (ex: RemoteException) {
-            errormsg("Set config error:", ex)
+            Timber.e(ex, "Set config error")
         }
     }
 
@@ -382,7 +368,7 @@ constructor(
         try {
             meshService?.setChannel(channel.toByteArray())
         } catch (ex: RemoteException) {
-            errormsg("Set channel error:", ex)
+            Timber.e(ex, "Set channel error")
         }
     }
 

@@ -179,6 +179,7 @@ androidComponents {
 project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}") }
 
 dependencies {
+    implementation(projects.core.analytics)
     implementation(projects.core.data)
     implementation(projects.core.database)
     implementation(projects.core.datastore)

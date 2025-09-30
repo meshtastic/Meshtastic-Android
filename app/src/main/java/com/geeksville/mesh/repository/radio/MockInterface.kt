@@ -24,7 +24,6 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.channel
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.config
@@ -39,6 +38,7 @@ import kotlinx.coroutines.delay
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Position
+import timber.log.Timber
 import kotlin.random.Random
 
 private val defaultLoRaConfig =
@@ -59,8 +59,7 @@ class MockInterface
 constructor(
     private val service: RadioInterfaceService,
     @Assisted val address: String,
-) : IRadioInterface,
-    Logging {
+) : IRadioInterface {
 
     companion object {
         private const val MY_NODE = 0x42424242
@@ -72,7 +71,7 @@ constructor(
     private val packetIdSequence = generateSequence { currentPacketId++ }.iterator()
 
     init {
-        info("Starting the mock interface")
+        Timber.i("Starting the mock interface")
         service.onConnect() // Tell clients they can use the API
     }
 
@@ -87,7 +86,7 @@ constructor(
             data != null && data.portnum == Portnums.PortNum.ADMIN_APP ->
                 handleAdminPacket(pr, AdminProtos.AdminMessage.parseFrom(data.payload))
             pr.hasPacket() && pr.packet.wantAck -> sendFakeAck(pr)
-            else -> info("Ignoring data sent to mock interface $pr")
+            else -> Timber.i("Ignoring data sent to mock interface $pr")
         }
     }
 
@@ -109,12 +108,12 @@ constructor(
                     }
                 }
 
-            else -> info("Ignoring admin sent to mock interface $d")
+            else -> Timber.i("Ignoring admin sent to mock interface $d")
         }
     }
 
     override fun close() {
-        info("Closing the mock interface")
+        Timber.i("Closing the mock interface")
     }
 
     // / Generate a fake text message from a node
@@ -298,7 +297,7 @@ constructor(
     }
 
     private fun sendConfigResponse(configId: Int) {
-        debug("Sending mock config response")
+        Timber.d("Sending mock config response")
 
         // / Generate a fake node info entry
         @Suppress("MagicNumber")

@@ -28,7 +28,6 @@ import androidx.annotation.RequiresPermission
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasBluetoothPermission
 import com.geeksville.mesh.util.registerReceiverCompat
 import kotlinx.coroutines.flow.Flow
@@ -38,6 +37,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -51,7 +51,7 @@ constructor(
     private val bluetoothBroadcastReceiverLazy: dagger.Lazy<BluetoothBroadcastReceiver>,
     private val dispatchers: CoroutineDispatchers,
     private val processLifecycle: Lifecycle,
-) : Logging {
+) {
     private val _state =
         MutableStateFlow(
             BluetoothState(
@@ -126,7 +126,7 @@ constructor(
             } ?: BluetoothState()
 
         _state.emit(newState)
-        debug("Detected our bluetooth access=$newState")
+        Timber.d("Detected our bluetooth access=$newState")
     }
 
     companion object {

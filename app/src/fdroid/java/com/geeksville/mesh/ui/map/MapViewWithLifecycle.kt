@@ -34,7 +34,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.android.BuildUtils.errormsg
 import org.meshtastic.feature.map.requiredZoomLevel
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.ITileSource
@@ -43,6 +42,7 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
+import timber.log.Timber
 
 @SuppressLint("WakelockTimeout")
 private fun PowerManager.WakeLock.safeAcquire() {
@@ -50,9 +50,9 @@ private fun PowerManager.WakeLock.safeAcquire() {
         try {
             acquire()
         } catch (e: SecurityException) {
-            errormsg("WakeLock permission exception: ${e.message}")
+            Timber.e("WakeLock permission exception: ${e.message}")
         } catch (e: IllegalStateException) {
-            errormsg("WakeLock acquire() exception: ${e.message}")
+            Timber.e("WakeLock acquire() exception: ${e.message}")
         }
     }
 }
@@ -62,7 +62,7 @@ private fun PowerManager.WakeLock.safeRelease() {
         try {
             release()
         } catch (e: IllegalStateException) {
-            errormsg("WakeLock release() exception: ${e.message}")
+            Timber.e("WakeLock release() exception: ${e.message}")
         }
     }
 }

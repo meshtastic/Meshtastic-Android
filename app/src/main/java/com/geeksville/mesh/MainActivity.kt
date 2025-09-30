@@ -39,25 +39,20 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.ui.sharing.toSharedContact
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity :
-    AppCompatActivity(),
-    Logging {
+class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModels()
 
     // This is aware of the Activity lifecycle and handles binding to the mesh service.
@@ -77,15 +72,6 @@ class MainActivity :
         }
 
         super.onCreate(savedInstanceState)
-
-        if (savedInstanceState == null) {
-            lifecycleScope.launch {
-                val appIntroCompleted = uiPreferencesDataSource.appIntroCompleted.value
-                if (appIntroCompleted) {
-                    (application as GeeksvilleApplication).askToRate(this@MainActivity)
-                }
-            }
-        }
 
         setContent {
             val theme by model.theme.collectAsState()
@@ -108,12 +94,7 @@ class MainActivity :
                 if (appIntroCompleted) {
                     MainScreen(uIViewModel = model)
                 } else {
-                    AppIntroductionScreen(
-                        onDone = {
-                            model.onAppIntroCompleted()
-                            (application as GeeksvilleApplication).askToRate(this@MainActivity)
-                        },
-                    )
+                    AppIntroductionScreen(onDone = { model.onAppIntroCompleted() })
                 }
             }
         }
@@ -132,22 +113,22 @@ class MainActivity :
         when (appLinkAction) {
             Intent.ACTION_VIEW -> {
                 appLinkData?.let {
-                    debug("App link data: $it")
+                    Timber.d("App link data: $it")
                     if (it.path?.startsWith("/e/") == true || it.path?.startsWith("/E/") == true) {
-                        debug("App link data is a channel set")
+                        Timber.d("App link data is a channel set")
                         model.requestChannelUrl(it)
                     } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
                         val sharedContact = it.toSharedContact()
-                        debug("App link data is a shared contact: ${sharedContact.user.longName}")
+                        Timber.d("App link data is a shared contact: ${sharedContact.user.longName}")
                         model.setSharedContactRequested(sharedContact)
                     } else {
-                        debug("App link data is not a channel set")
+                        Timber.d("App link data is not a channel set")
                     }
                 }
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                debug("USB device attached")
+                Timber.d("USB device attached")
                 showSettingsPage()
             }
 
@@ -161,7 +142,7 @@ class MainActivity :
             }
 
             else -> {
-                warn("Unexpected action $appLinkAction")
+                Timber.w("Unexpected action $appLinkAction")
             }
         }
     }

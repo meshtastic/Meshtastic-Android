@@ -40,11 +40,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.core.net.toUri
-import com.geeksville.mesh.android.BuildUtils.debug
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.HyperlinkBlue
+import timber.log.Timber
 import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -69,7 +69,7 @@ fun LinkedCoordinates(modifier: Modifier = Modifier, latitude: Double, longitude
             onLongClick = {
                 coroutineScope.launch {
                     clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", annotatedString)))
-                    debug("Copied to clipboard")
+                    Timber.d("Copied to clipboard")
                 }
             },
         ),
@@ -106,7 +106,7 @@ private fun handleClick(context: Context, annotatedString: AnnotatedString) {
                 Toast.makeText(context, "No application available to open this location!", Toast.LENGTH_LONG).show()
             }
         } catch (ex: ActivityNotFoundException) {
-            debug("Failed to open geo intent: $ex")
+            Timber.d("Failed to open geo intent: $ex")
         }
     }
 }

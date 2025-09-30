@@ -39,16 +39,21 @@ kotlin {
 }
 
 dependencies {
-    compileOnly(libs.android.gradleApiPlugin)
-    compileOnly(libs.android.tools.common)
-    compileOnly(libs.compose.gradlePlugin)
-    compileOnly(libs.detekt.gradle)
-    compileOnly(libs.firebase.crashlytics.gradlePlugin)
-    compileOnly(libs.firebase.performance.gradlePlugin)
-    compileOnly(libs.kotlin.gradlePlugin)
-    compileOnly(libs.ksp.gradlePlugin)
-    compileOnly(libs.room.gradlePlugin)
-    compileOnly(libs.spotless.gradlePlugin)
+    implementation(libs.android.gradleApiPlugin)
+    implementation(libs.serialization.gradlePlugin)
+    implementation(libs.android.tools.common)
+    implementation(libs.compose.gradlePlugin)
+    implementation(libs.datadog.gradlePlugin)
+    implementation(libs.detekt.gradlePlugin)
+    implementation(libs.firebase.crashlytics.gradlePlugin)
+    implementation(libs.firebase.performance.gradlePlugin)
+    implementation(libs.google.services.gradlePlugin)
+    implementation(libs.hilt.gradlePlugin)
+    implementation(libs.kotlin.gradlePlugin)
+    implementation(libs.ksp.gradlePlugin)
+    implementation(libs.room.gradlePlugin)
+    implementation(libs.secrets.gradlePlugin)
+    implementation(libs.spotless.gradlePlugin)
     implementation(libs.truth)
 }
 

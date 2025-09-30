@@ -89,10 +89,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.analytics.DataPair
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.BuildUtils.errormsg
-import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.UIViewModel
@@ -107,6 +104,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
+import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.qrCode
@@ -116,6 +114,7 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.PreferenceFooter
+import timber.log.Timber
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel
@@ -184,7 +183,7 @@ fun ChannelScreen(
         }
 
     fun zxingScan() {
-        debug("Starting zxing QR code scanner")
+        Timber.d("Starting zxing QR code scanner")
         val zxingScan = ScanOptions()
         zxingScan.setCameraId(0)
         zxingScan.setPrompt("")
@@ -211,7 +210,7 @@ fun ChannelScreen(
             viewModel.setChannels(newChannelSet)
             // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
         } catch (ex: RemoteException) {
-            errormsg("ignoring channel problem", ex)
+            Timber.e("ignoring channel problem", ex)
 
             channelSet = channels // Throw away user edits
 
@@ -239,7 +238,7 @@ fun ChannelScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        debug("Switching back to default channel")
+                        Timber.d("Switching back to default channel")
                         installSettings(
                             Channel.default.settings,
                             Channel.default.loraConfig.copy {
@@ -383,7 +382,7 @@ private fun EditChannelUrl(enabled: Boolean, channelUrl: Uri, modifier: Modifier
 
                         else -> {
                             // track how many times users share channels
-                            GeeksvilleApplication.analytics.track("share", DataPair("content_type", "channel"))
+                            analytics.track("share", DataPair("content_type", "channel"))
                             coroutineScope.launch {
                                 clipboardManager.setClipEntry(
                                     ClipEntry(ClipData.newPlainText(label, valueState.toString())),

@@ -34,7 +34,6 @@ import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.TelemetryProtos.Telemetry
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,6 +66,7 @@ import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.model.CustomTileSource
+import timber.log.Timber
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -211,8 +211,7 @@ constructor(
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val mapPrefs: MapPrefs,
-) : ViewModel(),
-    Logging {
+) : ViewModel() {
     private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum
 
     private fun MeshLog.hasValidTraceroute(): Boolean =
@@ -376,15 +375,15 @@ constructor(
                 .onEach { firmwareEdition -> _state.update { state -> state.copy(firmwareEdition = firmwareEdition) } }
                 .launchIn(viewModelScope)
 
-            debug("MetricsViewModel created")
+            Timber.d("MetricsViewModel created")
         } else {
-            debug("MetricsViewModel: destNum is null, skipping metrics flows initialization.")
+            Timber.d("MetricsViewModel: destNum is null, skipping metrics flows initialization.")
         }
     }
 
     override fun onCleared() {
         super.onCleared()
-        debug("MetricsViewModel cleared")
+        Timber.d("MetricsViewModel cleared")
     }
 
     fun setTimeFrame(timeFrame: TimeFrame) {
@@ -427,7 +426,7 @@ constructor(
                     }
                 }
             } catch (ex: FileNotFoundException) {
-                errormsg("Can't write file error: ${ex.message}")
+                Timber.e(ex, "Can't write file error")
             }
         }
 }

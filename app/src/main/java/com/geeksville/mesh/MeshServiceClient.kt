@@ -32,6 +32,7 @@ import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.Job
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
+import timber.log.Timber
 import javax.inject.Inject
 
 /** A Activity-lifecycle-aware [ServiceClient] that binds [MeshService] once the Activity is started. */
@@ -56,7 +57,7 @@ constructor(
     private var serviceSetupJob: Job? = null
 
     init {
-        debug("Adding self as LifecycleObserver for $lifecycleOwner")
+        Timber.d("Adding self as LifecycleObserver for $lifecycleOwner")
         lifecycleOwner.lifecycle.addObserver(this)
     }
 
@@ -67,7 +68,7 @@ constructor(
         serviceSetupJob =
             lifecycleOwner.lifecycleScope.handledLaunch {
                 serviceRepository.setMeshService(service)
-                debug("connected to mesh service, connectionState=${serviceRepository.connectionState.value}")
+                Timber.d("connected to mesh service, connectionState=${serviceRepository.connectionState.value}")
             }
     }
 
@@ -82,32 +83,32 @@ constructor(
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        debug("Lifecycle: ON_START")
+        Timber.d("Lifecycle: ON_START")
 
         try {
             bindMeshService()
         } catch (ex: BindFailedException) {
-            errormsg("Bind of MeshService failed: ${ex.message}")
+            Timber.e("Bind of MeshService failed: ${ex.message}")
         }
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        debug("Lifecycle: ON_DESTROY")
+        Timber.d("Lifecycle: ON_DESTROY")
 
         owner.lifecycle.removeObserver(this)
-        debug("Removed self as LifecycleObserver to $lifecycleOwner")
+        Timber.d("Removed self as LifecycleObserver to $lifecycleOwner")
     }
 
     // endregion
 
     @Suppress("TooGenericExceptionCaught")
     private fun bindMeshService() {
-        debug("Binding to mesh service!")
+        Timber.d("Binding to mesh service!")
         try {
             MeshService.startService(activity)
         } catch (ex: Exception) {
-            errormsg("Failed to start service from activity - but ignoring because bind will work: ${ex.message}")
+            Timber.e("Failed to start service from activity - but ignoring because bind will work: ${ex.message}")
         }
 
         connect(activity, MeshService.createIntent(), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)

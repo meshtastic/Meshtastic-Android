@@ -76,9 +76,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.android.AddNavigationTracking
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.setAttributes
+import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.channelsGraph
@@ -118,6 +116,7 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import timber.log.Timber
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -150,14 +149,13 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         }
     }
 
-    AddNavigationTracking(navController)
-
     if (connectionState == ConnectionState.CONNECTED) {
         requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(uIViewModel, newChannelSet) }
     }
 
-    VersionChecks(uIViewModel)
+    analytics.addNavigationTrackingEffect(navController = navController)
 
+    VersionChecks(uIViewModel)
     val alertDialogState by uIViewModel.currentAlert.collectAsStateWithLifecycle()
     alertDialogState?.let { state ->
         if (state.choices.isNotEmpty()) {
@@ -230,8 +228,6 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val receiveColor = capturedColorScheme.StatusBlue
     LaunchedEffect(uIViewModel.meshActivity, capturedColorScheme) {
         uIViewModel.meshActivity.collectLatest { activity ->
-            debug("MeshActivity Event: $activity, Current Alpha: ${animatedGlowAlpha.value}")
-
             val newTargetColor =
                 when (activity) {
                     is MeshActivity.Send -> sendColor
@@ -416,16 +412,12 @@ private fun VersionChecks(viewModel: UIViewModel) {
 
     val firmwareEdition by viewModel.firmwareEdition.collectAsStateWithLifecycle(null)
 
-    val currentFirmwareVersion by viewModel.firmwareVersion.collectAsStateWithLifecycle(null)
-
-    val currentDeviceHardware by viewModel.deviceHardware.collectAsStateWithLifecycle(null)
-
     val latestStableFirmwareRelease by
         viewModel.latestStableFirmwareRelease.collectAsStateWithLifecycle(DeviceVersion("2.6.4"))
     LaunchedEffect(connectionState, firmwareEdition) {
         if (connectionState == ConnectionState.CONNECTED) {
             firmwareEdition?.let { edition ->
-                debug("FirmwareEdition: ${edition.name}")
+                Timber.d("FirmwareEdition: ${edition.name}")
                 when (edition) {
                     MeshProtos.FirmwareEdition.VANILLA -> {
                         // Handle any specific logic for VANILLA firmware edition if needed
@@ -435,14 +427,6 @@ private fun VersionChecks(viewModel: UIViewModel) {
                         // Handle other firmware editions if needed
                     }
                 }
-            }
-        }
-    }
-
-    LaunchedEffect(connectionState, currentFirmwareVersion, currentDeviceHardware) {
-        if (connectionState == ConnectionState.CONNECTED) {
-            if (currentDeviceHardware != null && currentFirmwareVersion != null) {
-                setAttributes(currentFirmwareVersion!!, currentDeviceHardware!!)
             }
         }
     }

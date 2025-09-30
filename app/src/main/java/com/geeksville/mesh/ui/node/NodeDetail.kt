@@ -853,19 +853,19 @@ private fun MainNodeDetails(node: Node, ourNode: Node?, displayUnits: ConfigProt
         icon = Icons.Default.History,
         trailingText = formatAgo(node.lastHeard),
     )
-    val distance = ourNode?.distance(node)?.toDistanceString(displayUnits)
-    if (node != ourNode && distance != null) {
+    val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(displayUnits)
+    if (distance != null && distance.isNotEmpty()) {
         SettingsItemDetail(
             text = stringResource(R.string.node_sort_distance),
             icon = Icons.Default.SocialDistance,
             trailingText = distance,
         )
-        SettingsItemDetail(
-            text = stringResource(R.string.last_position_update),
-            icon = Icons.Default.LocationOn,
-            trailingText = formatAgo(node.position.time),
-        )
     }
+    SettingsItemDetail(
+        text = stringResource(R.string.last_position_update),
+        icon = Icons.Default.LocationOn,
+        trailingText = formatAgo(node.position.time),
+    )
 }
 
 @Composable

@@ -232,11 +232,12 @@ fun SettingsScreen(
 
             TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
                 if (state.analyticsAvailable) {
+                    val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
                     SettingsItemSwitch(
                         text = stringResource(R.string.analytics_okay),
-                        checked = state.analyticsEnabled,
+                        checked = allowed,
                         leadingIcon = Icons.Default.BugReport,
-                        onClick = { viewModel.toggleAnalytics() },
+                        onClick = { viewModel.toggleAnalyticsAllowed() },
                     )
                 }
 

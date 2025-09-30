@@ -66,8 +66,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
 import com.geeksville.mesh.ui.map.components.CustomMapLayersSheet
@@ -205,7 +203,7 @@ fun MapView(
                             try {
                                 cameraPositionState.animate(cameraUpdate)
                             } catch (e: IllegalStateException) {
-                                debug("Error animating camera to location: ${e.message}")
+                                Timber.d("Error animating camera to location: ${e.message}")
                             }
                         }
                     }
@@ -224,14 +222,14 @@ fun MapView(
 
             try {
                 fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-                debug("Started location tracking")
+                Timber.d("Started location tracking")
             } catch (e: SecurityException) {
-                debug("Location permission not available: ${e.message}")
+                Timber.d("Location permission not available: ${e.message}")
                 isLocationTrackingEnabled = false
             }
         } else {
             fusedLocationClient.removeLocationUpdates(locationCallback)
-            debug("Stopped location tracking")
+            Timber.d("Stopped location tracking")
         }
     }
 
@@ -374,7 +372,7 @@ fun MapView(
                                 cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
                             }
                         } catch (e: IllegalStateException) {
-                            warn("MapView Could not animate to bounds: ${e.message}")
+                            Timber.w("MapView Could not animate to bounds: ${e.message}")
                         }
                     }
                 },
@@ -462,7 +460,7 @@ fun MapView(
                                         CameraUpdateFactory.newLatLngBounds(bounds.build(), 100),
                                     )
                                 }
-                                debug("Cluster clicked! $cluster")
+                                Timber.d("Cluster clicked! $cluster")
                             }
                             true
                         },
@@ -574,9 +572,9 @@ fun MapView(
                                 val currentPosition = cameraPositionState.position
                                 val newCameraPosition = CameraPosition.Builder(currentPosition).bearing(0f).build()
                                 cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
-                                debug("Oriented map to north")
+                                Timber.d("Oriented map to north")
                             } catch (e: IllegalStateException) {
-                                debug("Error orienting map to north: ${e.message}")
+                                Timber.d("Error orienting map to north: ${e.message}")
                             }
                         }
                     }

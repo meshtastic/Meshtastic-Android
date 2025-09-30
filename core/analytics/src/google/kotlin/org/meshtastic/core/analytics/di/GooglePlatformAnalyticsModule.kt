@@ -15,19 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.analytics.di
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import dagger.hilt.android.HiltAndroidApp
-import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
-import javax.inject.Inject
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.analytics.platform.GooglePlatformAnalytics
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import javax.inject.Singleton
 
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
+/** Hilt module to provide the [GooglePlatformAnalytics] for the google flavor. */
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class GooglePlatformAnalyticsModule {
 
-    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
-
-    override fun onCreate() {
-        super.onCreate()
-    }
+    @Binds @Singleton
+    abstract fun bindPlatformHelper(googlePlatformHelper: GooglePlatformAnalytics): PlatformAnalytics
 }

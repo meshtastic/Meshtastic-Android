@@ -20,10 +20,8 @@ package com.geeksville.mesh.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.geeksville.mesh.android.Logging
 
-
-class BootCompleteReceiver : BroadcastReceiver(), Logging {
+class BootCompleteReceiver : BroadcastReceiver() {
     override fun onReceive(mContext: Context, intent: Intent) {
         // Verify the intent action
         if (Intent.ACTION_BOOT_COMPLETED != intent.action) {

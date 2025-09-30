@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.maven
-
 /*
  * Copyright (c) 2025 Meshtastic LLC
  *
@@ -19,6 +17,7 @@ import org.gradle.kotlin.dsl.maven
 
 include(
     ":app",
+    ":core:analytics",
     ":core:data",
     ":core:database",
     ":core:datastore",

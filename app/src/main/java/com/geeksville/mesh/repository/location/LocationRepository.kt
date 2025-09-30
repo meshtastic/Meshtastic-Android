@@ -27,46 +27,47 @@ import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
 import androidx.core.location.altitude.AltitudeConverterCompat
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.MeshUtilApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class LocationRepository @Inject constructor(
+class LocationRepository
+@Inject
+constructor(
     private val context: Application,
     private val locationManager: dagger.Lazy<LocationManager>,
-) : Logging {
+) {
 
-    /**
-     * Status of whether the app is actively subscribed to location changes.
-     */
+    /** Status of whether the app is actively subscribed to location changes. */
     private val _receivingLocationUpdates: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val receivingLocationUpdates: StateFlow<Boolean> get() = _receivingLocationUpdates
+    val receivingLocationUpdates: StateFlow<Boolean>
+        get() = _receivingLocationUpdates
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     private fun LocationManager.requestLocationUpdates() = callbackFlow {
-
         val intervalMs = 30 * 1000L // 30 seconds
         val minDistanceM = 0f
 
-        val locationRequest = LocationRequestCompat.Builder(intervalMs)
-            .setMinUpdateDistanceMeters(minDistanceM)
-            .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
-            .build()
+        val locationRequest =
+            LocationRequestCompat.Builder(intervalMs)
+                .setMinUpdateDistanceMeters(minDistanceM)
+                .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
+                .build()
 
         val locationListener = LocationListenerCompat { location ->
             if (location.hasAltitude() && !LocationCompat.hasMslAltitude(location)) {
                 try {
                     AltitudeConverterCompat.addMslAltitudeToLocation(context, location)
                 } catch (e: Exception) {
-                    errormsg("addMslAltitudeToLocation() failed", e)
+                    Timber.e(e, "addMslAltitudeToLocation() failed")
                 }
             }
             // info("New location: $location")
@@ -83,9 +84,11 @@ class LocationRepository @Inject constructor(
             }
         }
 
-        info("Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m")
+        Timber.i(
+            "Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m",
+        )
         _receivingLocationUpdates.value = true
-        GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
+        MeshUtilApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
         try {
             providerList.forEach { provider ->
@@ -102,17 +105,15 @@ class LocationRepository @Inject constructor(
         }
 
         awaitClose {
-            info("Stopping location requests")
+            Timber.i("Stopping location requests")
             _receivingLocationUpdates.value = false
-            GeeksvilleApplication.analytics.track("location_stop")
+            MeshUtilApplication.analytics.track("location_stop")
 
             LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
         }
     }
 
-    /**
-     * Observable flow for location updates
-     */
+    /** Observable flow for location updates */
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun getLocations() = locationManager.get().requestLocationUpdates()
 }

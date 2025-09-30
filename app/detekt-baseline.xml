@@ -5,11 +5,6 @@
     <ID>CommentSpacing:BLEException.kt$BLEConnectionClosing$/// Our interface is being shut down</ID>
     <ID>CommentSpacing:Constants.kt$/// a bool true means we expect this condition to continue until, false means device might come back</ID>
     <ID>CommentSpacing:Coroutines.kt$/// Wrap launch with an exception handler, FIXME, move into a utility lib</ID>
-    <ID>CommentSpacing:DeferredExecution.kt$DeferredExecution$/// Queue some new work</ID>
-    <ID>CommentSpacing:DeferredExecution.kt$DeferredExecution$/// run all work in the queue and clear it to be ready to accept new work</ID>
-    <ID>CommentSpacing:Exceptions.kt$/// Convert any exceptions in this service call into a RemoteException that the client can</ID>
-    <ID>CommentSpacing:Exceptions.kt$/// then handle</ID>
-    <ID>CommentSpacing:Exceptions.kt$Exceptions$/// Set in Application.onCreate</ID>
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableNaming:NodeDetail.kt$notesSection</ID>
     <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
@@ -67,12 +62,10 @@
     <ID>FinalNewline:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
     <ID>FinalNewline:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
     <ID>FinalNewline:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
-    <ID>FinalNewline:BootCompleteReceiver.kt$com.geeksville.mesh.service.BootCompleteReceiver.kt</ID>
     <ID>FinalNewline:CoroutineDispatchers.kt$com.geeksville.mesh.CoroutineDispatchers.kt</ID>
     <ID>FinalNewline:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>FinalNewline:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>FinalNewline:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
-    <ID>FinalNewline:DeferredExecution.kt$com.geeksville.mesh.concurrent.DeferredExecution.kt</ID>
     <ID>FinalNewline:InterfaceId.kt$com.geeksville.mesh.repository.radio.InterfaceId.kt</ID>
     <ID>FinalNewline:InterfaceSpec.kt$com.geeksville.mesh.repository.radio.InterfaceSpec.kt</ID>
     <ID>FinalNewline:MockInterfaceFactory.kt$com.geeksville.mesh.repository.radio.MockInterfaceFactory.kt</ID>
@@ -82,10 +75,8 @@
     <ID>FinalNewline:RadioNotConnectedException.kt$com.geeksville.mesh.service.RadioNotConnectedException.kt</ID>
     <ID>FinalNewline:SerialConnection.kt$com.geeksville.mesh.repository.usb.SerialConnection.kt</ID>
     <ID>FinalNewline:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
-    <ID>FinalNewline:SerialInterface.kt$com.geeksville.mesh.repository.radio.SerialInterface.kt</ID>
     <ID>FinalNewline:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
     <ID>FinalNewline:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
-    <ID>FinalNewline:UsbBroadcastReceiver.kt$com.geeksville.mesh.repository.usb.UsbBroadcastReceiver.kt</ID>
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
@@ -97,7 +88,7 @@
     <ID>LambdaParameterEventTrailing:NodeDetail.kt$onSaveNotes</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
     <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
-    <ID>LargeClass:MeshService.kt$MeshService : ServiceLogging</ID>
+    <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
     <ID>LongMethod:AmbientLightingConfigItemList.kt$@Composable fun AmbientLightingConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
@@ -166,12 +157,8 @@
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$180</ID>
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$500</ID>
     <ID>MagicNumber:UIState.kt$4</ID>
-    <ID>MatchingDeclarationName:AnalyticsClient.kt$AnalyticsProvider</ID>
     <ID>MatchingDeclarationName:MeshServiceStarter.kt$ServiceStarter : Worker</ID>
     <ID>MaxLineLength:BluetoothInterface.kt$/* Info for the esp32 device side code. See that source for the 'gold' standard docs on this interface. MeshBluetoothService UUID 6ba1b218-15a8-461f-9fa8-5dcae273eafd FIXME - notify vs indication for fromradio output. Using notify for now, not sure if that is best FIXME - in the esp32 mesh management code, occasionally mirror the current net db to flash, so that if we reboot we still have a good guess of users who are out there. FIXME - make sure this protocol is guaranteed robust and won't drop packets "According to the BLE specification the notification length can be max ATT_MTU - 3. The 3 bytes subtracted is the 3-byte header(OP-code (operation, 1 byte) and the attribute handle (2 bytes)). In BLE 4.1 the ATT_MTU is 23 bytes (20 bytes for payload), but in BLE 4.2 the ATT_MTU can be negotiated up to 247 bytes." MAXPACKET is 256? look into what the lora lib uses. FIXME Characteristics: UUID properties description 8ba2bcc2-ee02-4a55-a531-c525c5e454d5 read fromradio - contains a newly received packet destined towards the phone (up to MAXPACKET bytes? per packet). After reading the esp32 will put the next packet in this mailbox. If the FIFO is empty it will put an empty packet in this mailbox. f75c76d2-129e-4dad-a1dd-7866124401e7 write toradio - write ToRadio protobufs to this charstic to send them (up to MAXPACKET len) ed9da18c-a800-4f66-a670-aa7547e34453 read|notify|write fromnum - the current packet # in the message waiting inside fromradio, if the phone sees this notify it should read messages until it catches up with this number. The phone can write to this register to go backwards up to FIXME packets, to handle the rare case of a fromradio packet was dropped after the esp32 callback was called, but before it arrives at the phone. If the phone writes to this register the esp32 will discard older packets and put the next packet &gt;= fromnum in fromradio. When the esp32 advances fromnum, it will delay doing the notify by 100ms, in the hopes that the notify will never actally need to be sent if the phone is already pulling from fromradio. Note: that if the phone ever sees this number decrease, it means the esp32 has rebooted. Re: queue management Not all messages are kept in the fromradio queue (filtered based on SubPacket): * only the most recent Position and User messages for a particular node are kept * all Data SubPackets are kept * No WantNodeNum / DenyNodeNum messages are kept A variable keepAllPackets, if set to true will suppress this behavior and instead keep everything for forwarding to the phone (for debugging) */</ID>
-    <ID>MaxLineLength:LocationRepository.kt$LocationRepository$info("Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m")</ID>
-    <ID>MaxLineLength:ServiceClient.kt$ServiceClient$// Some phones seem to ahve a race where if you unbind and quickly rebind bindService returns false. Try</ID>
-    <ID>MaxLineLength:ServiceClient.kt$ServiceClient.&lt;no name provided&gt;$// If we start to close a service, it seems that there is a possibility a onServiceConnected event is the queue</ID>
     <ID>ModifierClickableOrder:Channel.kt$clickable(onClick = onClick)</ID>
     <ID>ModifierMissing:BLEDevices.kt$BLEDevices</ID>
     <ID>ModifierMissing:Channel.kt$ChannelScreen</ID>
@@ -256,7 +243,6 @@
     <ID>ModifierReused:SignalMetrics.kt$YAxisLabels( modifier = modifier.weight(weight = Y_AXIS_WEIGHT), Metric.SNR.color, minValue = Metric.SNR.min, maxValue = Metric.SNR.max, )</ID>
     <ID>ModifierWithoutDefault:CommonCharts.kt$modifier</ID>
     <ID>ModifierWithoutDefault:EnvironmentCharts.kt$modifier</ID>
-    <ID>MultiLineIfElse:Exceptions.kt$Exceptions.errormsg("ignoring exception", ex)</ID>
     <ID>MultipleEmitters:CleanNodeDatabaseScreen.kt$NodesDeletionPreview</ID>
     <ID>MultipleEmitters:CommonCharts.kt$LegendLabel</ID>
     <ID>MultipleEmitters:DeviceMetrics.kt$DeviceMetricsChart</ID>
@@ -275,12 +261,10 @@
     <ID>NewLineAtEndOfFile:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
-    <ID>NewLineAtEndOfFile:BootCompleteReceiver.kt$com.geeksville.mesh.service.BootCompleteReceiver.kt</ID>
     <ID>NewLineAtEndOfFile:CoroutineDispatchers.kt$com.geeksville.mesh.CoroutineDispatchers.kt</ID>
     <ID>NewLineAtEndOfFile:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>NewLineAtEndOfFile:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>NewLineAtEndOfFile:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
-    <ID>NewLineAtEndOfFile:DeferredExecution.kt$com.geeksville.mesh.concurrent.DeferredExecution.kt</ID>
     <ID>NewLineAtEndOfFile:InterfaceId.kt$com.geeksville.mesh.repository.radio.InterfaceId.kt</ID>
     <ID>NewLineAtEndOfFile:InterfaceSpec.kt$com.geeksville.mesh.repository.radio.InterfaceSpec.kt</ID>
     <ID>NewLineAtEndOfFile:MockInterfaceFactory.kt$com.geeksville.mesh.repository.radio.MockInterfaceFactory.kt</ID>
@@ -290,22 +274,16 @@
     <ID>NewLineAtEndOfFile:RadioNotConnectedException.kt$com.geeksville.mesh.service.RadioNotConnectedException.kt</ID>
     <ID>NewLineAtEndOfFile:SerialConnection.kt$com.geeksville.mesh.repository.usb.SerialConnection.kt</ID>
     <ID>NewLineAtEndOfFile:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
-    <ID>NewLineAtEndOfFile:SerialInterface.kt$com.geeksville.mesh.repository.radio.SerialInterface.kt</ID>
     <ID>NewLineAtEndOfFile:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:UsbBroadcastReceiver.kt$com.geeksville.mesh.repository.usb.UsbBroadcastReceiver.kt</ID>
     <ID>NewLineAtEndOfFile:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>NoBlankLineBeforeRbrace:DebugLogFile.kt$BinaryLogFile$ </ID>
     <ID>NoBlankLineBeforeRbrace:NopInterface.kt$NopInterface$ </ID>
-    <ID>NoConsecutiveBlankLines:BootCompleteReceiver.kt$ </ID>
     <ID>NoConsecutiveBlankLines:Constants.kt$ </ID>
     <ID>NoConsecutiveBlankLines:DebugLogFile.kt$ </ID>
-    <ID>NoConsecutiveBlankLines:DeferredExecution.kt$ </ID>
-    <ID>NoConsecutiveBlankLines:Exceptions.kt$ </ID>
     <ID>NoConsecutiveBlankLines:IRadioInterface.kt$ </ID>
     <ID>NoEmptyClassBody:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>NoSemicolons:DateUtils.kt$DateUtils$;</ID>
-    <ID>NoWildcardImports:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
     <ID>ParameterNaming:ChannelSettingsItemList.kt$onPositiveClicked</ID>
     <ID>ParameterNaming:ChannelSettingsItemList.kt$onSelected</ID>
@@ -345,8 +323,6 @@
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoSimplePreview</ID>
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
     <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>SpacingAroundKeyword:Exceptions.kt$if</ID>
-    <ID>SpacingAroundKeyword:Exceptions.kt$when</ID>
     <ID>SwallowedException:BluetoothInterface.kt$BluetoothInterface$ex: CancellationException</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
     <ID>SwallowedException:MeshService.kt$MeshService$ex: BLEException</ID>
@@ -376,16 +352,16 @@
     <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Service not bound")</ID>
     <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("SyncContinuation timeout")</ID>
     <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("This shouldn't happen")</ID>
-    <ID>TooManyFunctions:BluetoothInterface.kt$BluetoothInterface : IRadioInterfaceLogging</ID>
-    <ID>TooManyFunctions:MeshService.kt$MeshService : ServiceLogging</ID>
+    <ID>TooManyFunctions:BluetoothInterface.kt$BluetoothInterface : IRadioInterface</ID>
+    <ID>TooManyFunctions:MeshService.kt$MeshService : Service</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided&gt; : Stub</ID>
     <ID>TooManyFunctions:MessageViewModel.kt$MessageViewModel : ViewModel</ID>
     <ID>TooManyFunctions:NodeDetail.kt$com.geeksville.mesh.ui.node.NodeDetail.kt</ID>
     <ID>TooManyFunctions:NodesViewModel.kt$NodesViewModel : ViewModel</ID>
-    <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModelLogging</ID>
-    <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService : Logging</ID>
-    <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : LoggingCloseable</ID>
-    <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModelLogging</ID>
+    <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
+    <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService</ID>
+    <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : Closeable</ID>
+    <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModel</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
     <ID>UnusedParameter:ChannelSettingsItemList.kt$onBack: () -&gt; Unit</ID>
     <ID>UnusedParameter:ChannelSettingsItemList.kt$title: String</ID>
@@ -394,12 +370,6 @@
     <ID>ViewModelForwarding:Main.kt$ScannedQrCodeDialog(uIViewModel, newChannelSet)</ID>
     <ID>ViewModelForwarding:Main.kt$VersionChecks(uIViewModel)</ID>
     <ID>ViewModelInjection:DebugSearch.kt$viewModel</ID>
-    <ID>WildcardImport:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
     <ID>Wrapping:Message.kt${ event -&gt; when (event) { is MessageScreenEvent.SendMessage -&gt; { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -&gt; viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -&gt; { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -&gt; viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.NodeDetails -&gt; navigateToNodeDetails(event.node.num) is MessageScreenEvent.SetTitle -&gt; viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -&gt; navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -&gt; navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -&gt; onNavigateBack() is MessageScreenEvent.CopyToClipboard -&gt; { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
-    <ID>Wrapping:SerialConnectionImpl.kt$SerialConnectionImpl$(</ID>
-    <ID>Wrapping:SerialConnectionImpl.kt$SerialConnectionImpl$(port, object : SerialInputOutputManager.Listener { override fun onNewData(data: ByteArray) { listener.onDataReceived(data) } override fun onRunError(e: Exception?) { closed.set(true) ignoreException { port.dtr = false port.rts = false port.close() } closedLatch.countDown() listener.onDisconnected(e) } })</ID>
-    <ID>Wrapping:SerialInterface.kt$SerialInterface$(</ID>
-    <ID>Wrapping:SerialInterface.kt$SerialInterface$(device, object : SerialConnectionListener { override fun onMissingPermission() { errormsg("Need permissions for port") } override fun onConnected() { onConnect.invoke() } override fun onDataReceived(bytes: ByteArray) { debug("Received ${bytes.size} byte(s)") bytes.forEach(::readChar) } override fun onDisconnected(thrown: Exception?) { thrown?.let { e -&gt; errormsg("Serial error: $e") } debug("$device disconnected") onDeviceDisconnect(false) } })</ID>
-    <ID>Wrapping:ServiceClient.kt$ServiceClient$Closeable, Logging</ID>
   </CurrentIssues>
 </SmellBaseline>

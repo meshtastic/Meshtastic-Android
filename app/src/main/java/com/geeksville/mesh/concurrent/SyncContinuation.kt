@@ -16,29 +16,23 @@
  */
 
 package com.geeksville.mesh.concurrent
-
-import com.geeksville.mesh.android.Logging
-
-/**
- * A deferred execution object (with various possible implementations)
- */
-interface Continuation<in T> : Logging {
+/** A deferred execution object (with various possible implementations) */
+interface Continuation<in T> {
     abstract fun resume(res: Result<T>)
 
     // syntactic sugar
 
     fun resumeSuccess(res: T) = resume(Result.success(res))
+
     fun resumeWithException(ex: Throwable) = try {
         resume(Result.failure(ex))
     } catch (ex: Throwable) {
-        // errormsg("Ignoring $ex while resuming, because we are the ones who threw it")
+        // Timber.e("Ignoring $ex while resuming, because we are the ones who threw it")
         throw ex
     }
 }
 
-/**
- * An async continuation that just calls a callback when the result is available
- */
+/** An async continuation that just calls a callback when the result is available */
 class CallbackContinuation<in T>(private val cb: (Result<T>) -> Unit) : Continuation<T> {
     override fun resume(res: Result<T>) = cb(res)
 }
@@ -46,8 +40,8 @@ class CallbackContinuation<in T>(private val cb: (Result<T>) -> Unit) : Continua
 /**
  * This is a blocking/threaded version of coroutine Continuation
  *
- * A little bit ugly, but the coroutine version has a nasty internal bug that showed up
- * in my SyncBluetoothDevice so I needed a quick workaround.
+ * A little bit ugly, but the coroutine version has a nasty internal bug that showed up in my SyncBluetoothDevice so I
+ * needed a quick workaround.
  */
 class SyncContinuation<T> : Continuation<T> {
 
@@ -84,8 +78,8 @@ class SyncContinuation<T> : Continuation<T> {
 }
 
 /**
- * Calls an init function which is responsible for saving our continuation so that some
- * other thread can call resume or resume with exception.
+ * Calls an init function which is responsible for saving our continuation so that some other thread can call resume or
+ * resume with exception.
  *
  * Essentially this is a blocking version of the (buggy) coroutine suspendCoroutine
  */

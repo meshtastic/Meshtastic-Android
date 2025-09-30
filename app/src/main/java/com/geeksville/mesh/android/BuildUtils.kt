@@ -19,13 +19,12 @@ package com.geeksville.mesh.android
 
 import android.os.Build
 
-/**
- * Created by kevinh on 1/14/16.
- */
-object BuildUtils : Logging {
+/** Created by kevinh on 1/14/16. */
+object BuildUtils {
     // Are we running on the emulator?
     val isEmulator
-        get() = Build.FINGERPRINT.startsWith("generic") ||
+        get() =
+            Build.FINGERPRINT.startsWith("generic") ||
                 Build.FINGERPRINT.startsWith("unknown") ||
                 Build.FINGERPRINT.contains("emulator") ||
                 setOf(Build.MODEL, Build.PRODUCT).contains("google_sdk") ||

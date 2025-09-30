@@ -26,7 +26,6 @@ import android.os.RemoteException
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
@@ -53,6 +52,7 @@ import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -108,8 +108,7 @@ constructor(
     private val networkRepository: NetworkRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val recentAddressesDataSource: RecentAddressesDataSource,
-) : ViewModel(),
-    Logging {
+) : ViewModel() {
     private val context: Context
         get() = application.applicationContext
 
@@ -199,12 +198,12 @@ constructor(
 
     init {
         serviceRepository.statusMessage.onEach { errorText.value = it }.launchIn(viewModelScope)
-        debug("BTScanModel created")
+        Timber.d("BTScanModel created")
     }
 
     override fun onCleared() {
         super.onCleared()
-        debug("BTScanModel cleared")
+        Timber.d("BTScanModel cleared")
     }
 
     fun setErrorText(text: String) {
@@ -233,11 +232,11 @@ constructor(
 
     fun stopScan() {
         if (scanJob != null) {
-            debug("stopping scan")
+            Timber.d("stopping scan")
             try {
                 scanJob?.cancel()
             } catch (ex: Throwable) {
-                warn("Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}")
+                Timber.w("Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}")
             } finally {
                 scanJob = null
             }
@@ -252,7 +251,7 @@ constructor(
 
     @SuppressLint("MissingPermission")
     fun startScan() {
-        debug("starting classic scan")
+        Timber.d("starting classic scan")
 
         _spinner.value = true
         scanJob =
@@ -281,7 +280,7 @@ constructor(
         try {
             serviceRepository.meshService?.let { service -> MeshService.changeDeviceAddress(context, service, address) }
         } catch (ex: RemoteException) {
-            errormsg("changeDeviceSelection failed, probably it is shutting down", ex)
+            Timber.e(ex, "changeDeviceSelection failed, probably it is shutting down")
             // ignore the failure and the GUI won't be updating anyways
         }
     }
@@ -289,14 +288,14 @@ constructor(
     @SuppressLint("MissingPermission")
     private fun requestBonding(it: DeviceListEntry) {
         val device = bluetoothRepository.getRemoteDevice(it.address) ?: return
-        info("Starting bonding for ${device.anonymize}")
+        Timber.i("Starting bonding for ${device.anonymize}")
 
         bluetoothRepository
             .createBond(device)
             .onEach { state ->
-                debug("Received bond state changed $state")
+                Timber.d("Received bond state changed $state")
                 if (state != BluetoothDevice.BOND_BONDING) {
-                    debug("Bonding completed, state=$state")
+                    Timber.d("Bonding completed, state=$state")
                     if (state == BluetoothDevice.BOND_BONDED) {
                         setErrorText(context.getString(R.string.pairing_completed))
                         changeDeviceAddress("x${device.address}")
@@ -307,7 +306,7 @@ constructor(
             }
             .catch { ex ->
                 // We ignore missing BT adapters, because it lets us run on the emulator
-                warn("Failed creating Bluetooth bond: ${ex.message}")
+                Timber.w("Failed creating Bluetooth bond: ${ex.message}")
             }
             .launchIn(viewModelScope)
     }
@@ -317,10 +316,10 @@ constructor(
             .requestPermission(it.driver.device)
             .onEach { granted ->
                 if (granted) {
-                    info("User approved USB access")
+                    Timber.i("User approved USB access")
                     changeDeviceAddress(it.fullAddress)
                 } else {
-                    errormsg("USB permission denied for device ${it.address}")
+                    Timber.e("USB permission denied for device ${it.address}")
                 }
             }
             .launchIn(viewModelScope)
