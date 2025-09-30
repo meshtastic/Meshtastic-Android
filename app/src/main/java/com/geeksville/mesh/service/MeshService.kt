@@ -103,6 +103,7 @@ import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.strings.R
 import timber.log.Timber

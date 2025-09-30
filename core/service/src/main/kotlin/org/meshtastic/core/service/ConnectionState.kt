@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.service
+package org.meshtastic.core.service
 
 enum class ConnectionState {
     /** We are disconnected from the device, and we should be trying to reconnect. */

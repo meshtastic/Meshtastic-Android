@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceAction
 import timber.log.Timber
 import javax.inject.Inject

@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.service
 
+import org.meshtastic.core.service.ConnectionState
 import javax.inject.Inject
 import javax.inject.Singleton
 

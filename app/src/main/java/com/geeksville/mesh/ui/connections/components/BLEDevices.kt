@@ -48,10 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.service.ConnectionState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.TitledCard
 

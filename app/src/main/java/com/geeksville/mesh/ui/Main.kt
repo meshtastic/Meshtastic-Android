@@ -88,7 +88,6 @@ import com.geeksville.mesh.navigation.mapGraph
 import com.geeksville.mesh.navigation.nodesGraph
 import com.geeksville.mesh.navigation.settingsGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
-import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
@@ -108,6 +107,7 @@ import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.component.SimpleAlertDialog

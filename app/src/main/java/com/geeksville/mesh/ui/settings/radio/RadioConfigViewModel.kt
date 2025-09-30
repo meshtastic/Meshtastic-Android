@@ -51,7 +51,6 @@ import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.repository.location.LocationRepository
-import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
@@ -79,6 +78,7 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import java.io.FileOutputStream
 import javax.inject.Inject

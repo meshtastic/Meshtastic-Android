@@ -30,7 +30,6 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +48,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
+import org.meshtastic.core.service.ConnectionState
 import javax.inject.Inject
 import javax.inject.Singleton
 

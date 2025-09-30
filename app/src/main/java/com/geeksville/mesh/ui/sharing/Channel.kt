@@ -98,7 +98,6 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
-import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
@@ -113,6 +112,7 @@ import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.qrCode
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.PreferenceFooter
