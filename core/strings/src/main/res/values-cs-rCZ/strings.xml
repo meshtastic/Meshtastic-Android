@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Včetně neznámých</string>
     <string name="node_filter_only_online">Skrýt offline uzly</string>
     <string name="node_filter_only_direct">Zobrazit jen přímé uzly</string>
     <string name="node_filter_ignored">Prohlížíte ignorované uzly,\nStiskněte pro návrat do seznamu uzlů.</string>
     <string name="node_filter_show_details">Zobrazit detaily</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Možnosti řazení uzlů</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanál</string>
