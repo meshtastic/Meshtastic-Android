@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">limpar filtro de dispositivos</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Incluir desconhecido</string>
     <string name="node_filter_only_online">Ocultar nós offline</string>
     <string name="node_filter_only_direct">Mostrar apenas nós diretos</string>
     <string name="node_filter_ignored">Você está vendo nós ignorados,\nPressione para retornar à lista de nós.</string>
     <string name="node_filter_show_details">Mostrar detalhes</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Opções de ordenação do nó</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canal</string>
