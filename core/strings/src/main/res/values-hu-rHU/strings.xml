@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">állomás filter törlése</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Ismeretlent tartalmaz</string>
     <string name="node_filter_only_online">Offline csomópontok elrejtése</string>
     <string name="node_filter_only_direct">Csak közvetlen csomópontok megjelenítése</string>
     <string name="node_filter_ignored">Figyelmen kívül hagyott csomópontokat nézed,\nnyomd meg a gombot a listához való visszatéréshez.</string>
     <string name="node_filter_show_details">Részletek megjelenítése</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Csomópont-rendezési beállítások</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Csatorna</string>
