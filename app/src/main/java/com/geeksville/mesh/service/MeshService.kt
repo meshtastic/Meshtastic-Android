@@ -103,6 +103,7 @@ import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.strings.R
 import timber.log.Timber
 import java.util.Random
@@ -110,18 +111,6 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.math.absoluteValue
-
-sealed class ServiceAction {
-    data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
-
-    data class Favorite(val node: Node) : ServiceAction()
-
-    data class Ignore(val node: Node) : ServiceAction()
-
-    data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
-
-    data class AddSharedContact(val contact: AdminProtos.SharedContact) : ServiceAction()
-}
 
 /**
  * Handles all the communication with android apps. Also keeps an internal model of the network state.

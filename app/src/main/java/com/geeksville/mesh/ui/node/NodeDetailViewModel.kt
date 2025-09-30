@@ -20,7 +20,6 @@ package com.geeksville.mesh.ui.node
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,6 +31,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.service.ServiceAction
 import timber.log.Timber
 import javax.inject.Inject
 

@@ -15,15 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.hilt)
-}
+package org.meshtastic.core.service
 
-android { namespace = "org.meshtastic.core.service" }
+import com.geeksville.mesh.AdminProtos
+import org.meshtastic.core.database.model.Node
 
-dependencies {
-    implementation(projects.core.database)
-    implementation(projects.core.proto)
-    implementation(libs.timber)
+sealed class ServiceAction {
+    data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
+
+    data class Favorite(val node: Node) : ServiceAction()
+
+    data class Ignore(val node: Node) : ServiceAction()
+
+    data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
+
+    data class AddSharedContact(val contact: AdminProtos.SharedContact) : ServiceAction()
 }
