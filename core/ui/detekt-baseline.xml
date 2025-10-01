@@ -6,6 +6,8 @@
     <ID>ComposableParamOrder:BatteryInfo.kt$BatteryInfo</ID>
     <ID>ComposableParamOrder:EditTextPreference.kt$EditTextPreference</ID>
     <ID>ComposableParamOrder:MaterialBatteryInfo.kt$MaterialBatteryInfo</ID>
+    <ID>ComposableParamOrder:SettingsItem.kt$SettingsItem</ID>
+    <ID>ComposableParamOrder:SignalInfo.kt$SignalInfo</ID>
     <ID>ComposableParamOrder:SwitchPreference.kt$SwitchPreference</ID>
     <ID>ContentSlotReused:AdaptiveTwoPane.kt$second</ID>
     <ID>LongMethod:EditTextPreference.kt$@Composable fun EditTextPreference( title: String, value: String, enabled: Boolean, isError: Boolean, keyboardOptions: KeyboardOptions, keyboardActions: KeyboardActions, onValueChanged: (String) -&gt; Unit, modifier: Modifier = Modifier, summary: String? = null, maxSize: Int = 0, // max_size - 1 (in bytes) onFocusChanged: (FocusState) -&gt; Unit = {}, trailingIcon: (@Composable () -&gt; Unit)? = null, visualTransformation: VisualTransformation = VisualTransformation.None, )</ID>
@@ -30,8 +32,12 @@
     <ID>ModifierMissing:LoraSignalIndicator.kt$Rssi</ID>
     <ID>ModifierMissing:LoraSignalIndicator.kt$Snr</ID>
     <ID>ModifierMissing:LoraSignalIndicator.kt$SnrAndRssi</ID>
+    <ID>ModifierMissing:SettingsItem.kt$SettingsItem</ID>
+    <ID>ModifierMissing:SettingsItem.kt$SettingsItemDetail</ID>
+    <ID>ModifierMissing:SettingsItem.kt$SettingsItemSwitch</ID>
     <ID>ModifierMissing:SimpleAlertDialog.kt$SimpleAlertDialog</ID>
     <ID>ModifierMissing:SlidingSelector.kt$OptionLabel</ID>
+    <ID>ModifierNotUsedAtRoot:SignalInfo.kt$modifier = modifier</ID>
     <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt$modifier = modifier.fillMaxWidth().padding(all = 16.dp)</ID>
     <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt$modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)</ID>
     <ID>ModifierReused:PreferenceCategory.kt$Card(modifier = modifier.padding(bottom = 8.dp)) { Column( modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally, ) { ProvideTextStyle(MaterialTheme.typography.bodyLarge) { content() } } }</ID>
@@ -52,5 +58,8 @@
     <ID>PreviewPublic:IndoorAirQuality.kt$IAQScalePreview</ID>
     <ID>PreviewPublic:LazyColumnDragAndDropDemo.kt$LazyColumnDragAndDropDemo</ID>
     <ID>PreviewPublic:MaterialBatteryInfo.kt$MaterialBatteryInfoPreview</ID>
+    <ID>PreviewPublic:SignalInfo.kt$SignalInfoPreview</ID>
+    <ID>PreviewPublic:SignalInfo.kt$SignalInfoSelfPreview</ID>
+    <ID>PreviewPublic:SignalInfo.kt$SignalInfoSimplePreview</ID>
   </CurrentIssues>
 </SmellBaseline>
