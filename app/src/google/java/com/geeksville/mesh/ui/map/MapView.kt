@@ -68,10 +68,7 @@ import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
-import com.geeksville.mesh.ui.map.components.CustomMapLayersSheet
-import com.geeksville.mesh.ui.map.components.CustomTileProviderManagerSheet
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
-import com.geeksville.mesh.ui.map.components.MapControlsOverlay
 import com.geeksville.mesh.ui.map.components.NodeClusterMarkers
 import com.geeksville.mesh.ui.map.components.WaypointMarkers
 import com.geeksville.mesh.ui.metrics.HEADING_DEG
@@ -118,6 +115,9 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.LayerType
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.component.CustomMapLayersSheet
+import org.meshtastic.feature.map.component.CustomTileProviderManagerSheet
+import org.meshtastic.feature.map.component.MapControlsOverlay
 import timber.log.Timber
 import java.text.DateFormat
 
