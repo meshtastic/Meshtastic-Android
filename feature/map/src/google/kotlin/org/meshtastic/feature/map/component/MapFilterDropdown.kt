@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map.components
+package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -40,9 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ui.map.LastHeardFilter
-import com.geeksville.mesh.ui.map.MapViewModel
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.MapViewModel
 import kotlin.math.roundToInt
 
 @Composable

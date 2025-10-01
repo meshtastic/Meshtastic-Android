@@ -66,10 +66,7 @@ import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.map.components.CacheLayout
-import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
-import com.geeksville.mesh.ui.map.components.MapButton
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.addCopyright
 import com.geeksville.mesh.util.addScaleBarOverlay
@@ -83,7 +80,11 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
+import org.meshtastic.feature.map.component.CacheLayout
+import org.meshtastic.feature.map.component.DownloadButton
+import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.zoomIn

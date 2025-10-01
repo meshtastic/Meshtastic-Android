@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package org.meshtastic.feature.map
 
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig

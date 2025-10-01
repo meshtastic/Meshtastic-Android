@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map.components
+package org.meshtastic.feature.map.component
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size

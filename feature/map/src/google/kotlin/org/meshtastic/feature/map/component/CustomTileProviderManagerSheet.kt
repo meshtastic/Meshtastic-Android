@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map.components
+package org.meshtastic.feature.map.component
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -51,10 +51,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ui.map.MapViewModel
 import kotlinx.coroutines.flow.collectLatest
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.map.MapViewModel
 
 @Suppress("LongMethod")
 @Composable

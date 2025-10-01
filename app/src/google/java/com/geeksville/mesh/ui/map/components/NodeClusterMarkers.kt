@@ -20,7 +20,6 @@ package com.geeksville.mesh.ui.map.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
-import com.geeksville.mesh.ui.map.BaseMapViewModel
 import com.geeksville.mesh.ui.map.NodeClusterItem
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.google.maps.android.clustering.Cluster
@@ -28,6 +27,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
+import org.meshtastic.feature.map.BaseMapViewModel
 
 @OptIn(MapsComposeExperimentalApi::class)
 @Suppress("NestedBlockDepth")
