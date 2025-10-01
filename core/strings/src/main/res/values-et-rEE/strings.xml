@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Kärgvõrgustik %s</string>
     <string name="node_filter_placeholder">Filtreeri</string>
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
+    <string name="node_filter_title">Filtreeri </string>
     <string name="node_filter_include_unknown">Kaasa tundmatud</string>
     <string name="node_filter_only_online">Peida ühenduseta</string>
     <string name="node_filter_only_direct">Kuva ainult otseühendusega</string>
     <string name="node_filter_ignored">Sa vaatad eiratud sõlmi,\nVajuta tagasi minekuks sõlmede nimekirja.</string>
     <string name="node_filter_show_details">Kuva üksikasjad</string>
+    <string name="node_sort_title">Sorteeri</string>
     <string name="node_sort_button">Sõlmede filter</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
@@ -270,7 +272,7 @@
     <string name="delivery_confirmed">Kohale toimetatud</string>
     <string name="error">Viga</string>
     <string name="ignore">Eira</string>
-    <string name="remove_ignored">Remove from ignored</string>
+    <string name="remove_ignored">Eemalda ignoreeritute hulgast</string>
     <string name="ignore_add">Lisa \'%s\' eiramis loendisse?</string>
     <string name="ignore_remove">Eemaldada \'%s\' eiramis loendist?</string>
     <string name="map_select_download_region">Vali allalaetav piirkond</string>
@@ -371,8 +373,8 @@
     <string name="alert_bell_text">Häirekella sümbol!</string>
     <string name="critical_alert">Häiresõnum!</string>
     <string name="favorite">Lemmik</string>
-    <string name="add_favorite">Add to favorites</string>
-    <string name="remove_favorite">Remove from favorites</string>
+    <string name="add_favorite">Lisa lemmikutesse</string>
+    <string name="remove_favorite">Eemalda lemmikutest</string>
     <string name="favorite_add">Lisa \'%s\' lemmik sõlmede hulka?</string>
     <string name="favorite_remove">Eemalda \'%s\' lemmik sõlmede hulgast?</string>
     <string name="power_metrics_log">Toitepinge andurite logi</string>
@@ -884,4 +886,5 @@
     <string name="two_days">48 tundi</string>
     <string name="last_heard_filter_label">Filtreeri viimase kuulmise aja järgi: %s</string>
     <string name="dbm_value">%1$d dBm</string>
+    <string name="error_no_app_to_handle_link">Lingi haldamiseks pole rakendust saadaval.</string>
 </resources>

@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Филтър</string>
     <string name="desc_node_filter_clear">изчистване на филтъра за възли</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Включително неизвестните</string>
     <string name="node_filter_only_online">Скриване на офлайн възлите</string>
     <string name="node_filter_only_direct">Показване само на директни възли</string>
     <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете, за да се върнете към списъка с възли.</string>
     <string name="node_filter_show_details">Показване на детайли</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
     <string name="node_sort_alpha">А-Я</string>
     <string name="node_sort_channel">Канал</string>
@@ -884,4 +886,5 @@
     <string name="two_days">48 часа</string>
     <string name="last_heard_filter_label">Филтриране по време на последното чуване: %s</string>
     <string name="dbm_value">%1$d dBm</string>
+    <string name="error_no_app_to_handle_link">No application available to handle link.</string>
 </resources>

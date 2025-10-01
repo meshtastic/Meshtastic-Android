@@ -19,11 +19,13 @@
     <string name="fallback_node_name">(No se ha podido obtener el nombre) Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Incluir desconocidos</string>
     <string name="node_filter_only_online">Ocultar nodos desconectados</string>
     <string name="node_filter_only_direct">Mostrar sólo nodos directos</string>
     <string name="node_filter_ignored">Estás viendo nodos ignorados, Prensa para volver a la lista de nodos.</string>
     <string name="node_filter_show_details">Mostrar detalles</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">Opciones de orden de Nodos</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canal</string>
@@ -886,4 +888,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="two_days">48 Hours</string>
     <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
     <string name="dbm_value">%1$d dBm</string>
+    <string name="error_no_app_to_handle_link">No application available to handle link.</string>
 </resources>

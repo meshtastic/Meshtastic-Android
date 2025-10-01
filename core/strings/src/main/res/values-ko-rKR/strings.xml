@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">필터</string>
     <string name="desc_node_filter_clear">노드 필터 지우기</string>
+    <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">미확인 노드 포함</string>
     <string name="node_filter_only_online">오프라인 노드 숨기기</string>
     <string name="node_filter_only_direct">직접 연결된 노드만 보기</string>
     <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
     <string name="node_filter_show_details">자세히 보기</string>
+    <string name="node_sort_title">Sort by</string>
     <string name="node_sort_button">노드 정렬</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">채널</string>
@@ -882,4 +884,5 @@
     <string name="two_days">48 Hours</string>
     <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
     <string name="dbm_value">%1$d dBm</string>
+    <string name="error_no_app_to_handle_link">No application available to handle link.</string>
 </resources>

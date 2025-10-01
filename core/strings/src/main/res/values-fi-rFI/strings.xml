@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Suodatus</string>
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
+    <string name="node_filter_title">Suodata otsikon mukaan</string>
     <string name="node_filter_include_unknown">Näytä tuntemattomat</string>
     <string name="node_filter_only_online">Piilota ei yhteydessä olevat laitteet</string>
     <string name="node_filter_only_direct">Näytä vain suorat yhteydet</string>
     <string name="node_filter_ignored">Katselet tällä hetkellä huomioimattomia laitteita,\nPaina palataksesi laitelistaan.</string>
     <string name="node_filter_show_details">Näytä lisätiedot</string>
+    <string name="node_sort_title">Lajittele otsikon mukaan</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
     <string name="node_sort_alpha">A-Ö</string>
     <string name="node_sort_channel">Kanava</string>
@@ -270,7 +272,7 @@
     <string name="delivery_confirmed">Toimitus vahvistettu</string>
     <string name="error">Virhe</string>
     <string name="ignore">Jätä huomiotta</string>
-    <string name="remove_ignored">Remove from ignored</string>
+    <string name="remove_ignored">Poista huomioimattomista</string>
     <string name="ignore_add">Lisää \'%s\' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
     <string name="ignore_remove">Poistetaanko \'%s\' jätä huomiotta listalta? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
     <string name="map_select_download_region">Valitse ladattava kartta-alue</string>
@@ -371,8 +373,8 @@
     <string name="alert_bell_text">Hälytysääni!</string>
     <string name="critical_alert">Kriittinen hälytys!</string>
     <string name="favorite">Suosikki</string>
-    <string name="add_favorite">Add to favorites</string>
-    <string name="remove_favorite">Remove from favorites</string>
+    <string name="add_favorite">Lisää suosikkeihin</string>
+    <string name="remove_favorite">Poista suosikeista</string>
     <string name="favorite_add">Lisää \'%s\' radio suosikkeihin?</string>
     <string name="favorite_remove">Poista \'%s\' radio suosikeista?</string>
     <string name="power_metrics_log">Tehomittausdata</string>
@@ -884,4 +886,5 @@
     <string name="two_days">48 tuntia</string>
     <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %s</string>
     <string name="dbm_value">%1$d dBm</string>
+    <string name="error_no_app_to_handle_link">Ei sovellusta linkin avaamiseen.</string>
 </resources>

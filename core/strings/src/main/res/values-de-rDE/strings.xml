@@ -19,11 +19,13 @@
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">Knotenfilter löschen</string>
+    <string name="node_filter_title">Filtern nach</string>
     <string name="node_filter_include_unknown">Unbekannte Stationen einbeziehen</string>
     <string name="node_filter_only_online">Offline Knoten ausblenden</string>
     <string name="node_filter_only_direct">Nur direkte Knoten anzeigen</string>
     <string name="node_filter_ignored">Sie sehen ignorierte Knoten,\ndrücken um zur Knotenliste zurückzukehren.</string>
     <string name="node_filter_show_details">Details anzeigen</string>
+    <string name="node_sort_title">Sortieren nach</string>
     <string name="node_sort_button">Sortieroptionen</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
@@ -884,4 +886,5 @@
     <string name="two_days">48 Stunden</string>
     <string name="last_heard_filter_label">Filtern nach letztem Empfang: %s</string>
     <string name="dbm_value">%1$d dBm</string>
+    <string name="error_no_app_to_handle_link">Keine Anwendung zum Bearbeiten des Links verfügbar.</string>
 </resources>
