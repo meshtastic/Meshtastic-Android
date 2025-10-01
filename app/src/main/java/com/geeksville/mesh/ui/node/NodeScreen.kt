@@ -72,24 +72,25 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
+import org.meshtastic.feature.node.list.NodeListViewModel
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
-    val state by nodesViewModel.nodesUiState.collectAsStateWithLifecycle()
+fun NodeScreen(viewModel: NodeListViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
+    val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
 
-    val nodes by nodesViewModel.nodeList.collectAsStateWithLifecycle()
-    val ourNode by nodesViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val onlineNodeCount by nodesViewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
-    val totalNodeCount by nodesViewModel.totalNodeCount.collectAsStateWithLifecycle(0)
-    val unfilteredNodes by nodesViewModel.unfilteredNodeList.collectAsStateWithLifecycle()
+    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
+    val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
+    val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
     val listState = rememberLazyListState()
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
-    val connectionState by nodesViewModel.connectionState.collectAsStateWithLifecycle()
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
 
     val isScrollInProgress by remember {
         derivedStateOf { listState.isScrollInProgress && (listState.canScrollForward || listState.canScrollBackward) }
@@ -111,7 +112,7 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
             val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
             val shareCapable = firmwareVersion.supportsQrCodeSharing()
             val scannedContact: AdminProtos.SharedContact? by
-                nodesViewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
+                viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
             AddContactFAB(
                 unfilteredNodes = unfilteredNodes,
                 scannedContact = scannedContact,
@@ -120,8 +121,8 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                     visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
-                onSharedContactImport = { contact -> nodesViewModel.addSharedContact(contact) },
-                onSharedContactRequested = { contact -> nodesViewModel.setSharedContactRequested(contact) },
+                onSharedContactImport = { contact -> viewModel.addSharedContact(contact) },
+                onSharedContactRequested = { contact -> viewModel.setSharedContactRequested(contact) },
             )
         },
     ) { contentPadding ->
@@ -137,17 +138,17 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
                         filterText = state.filter.filterText,
-                        onTextChange = nodesViewModel::setNodeFilterText,
+                        onTextChange = viewModel::setNodeFilterText,
                         currentSortOption = state.sort,
-                        onSortSelect = nodesViewModel::setSortOption,
+                        onSortSelect = viewModel::setSortOption,
                         includeUnknown = state.filter.includeUnknown,
-                        onToggleIncludeUnknown = nodesViewModel::toggleIncludeUnknown,
+                        onToggleIncludeUnknown = viewModel::toggleIncludeUnknown,
                         onlyOnline = state.filter.onlyOnline,
-                        onToggleOnlyOnline = nodesViewModel::toggleOnlyOnline,
+                        onToggleOnlyOnline = viewModel::toggleOnlyOnline,
                         onlyDirect = state.filter.onlyDirect,
-                        onToggleOnlyDirect = nodesViewModel::toggleOnlyDirect,
+                        onToggleOnlyDirect = viewModel::toggleOnlyDirect,
                         showIgnored = state.filter.showIgnored,
-                        onToggleShowIgnored = nodesViewModel::toggleShowIgnored,
+                        onToggleShowIgnored = viewModel::toggleShowIgnored,
                         ignoredNodeCount = ignoredNodeCount,
                     )
                 }
@@ -167,9 +168,9 @@ fun NodeScreen(nodesViewModel: NodesViewModel = hiltViewModel(), navigateToNodeD
                             displayIgnoreDialog = false
                             displayRemoveDialog = false
                         },
-                        onConfirmFavorite = nodesViewModel::favoriteNode,
-                        onConfirmIgnore = nodesViewModel::ignoreNode,
-                        onConfirmRemove = { nodesViewModel.removeNode(it.num) },
+                        onConfirmFavorite = viewModel::favoriteNode,
+                        onConfirmIgnore = viewModel::ignoreNode,
+                        onConfirmRemove = { viewModel.removeNode(it.num) },
                     )
 
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
