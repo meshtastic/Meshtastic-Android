@@ -78,7 +78,6 @@ import androidx.compose.ui.unit.sp
 import androidx.datastore.core.IOException
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.components.MainAppBar
@@ -105,7 +104,7 @@ private var redactedKeys: List<String> = listOf("session_passkey", "private_key"
 
 @Suppress("LongMethod")
 @Composable
-internal fun DebugScreen(navController: NavHostController, viewModel: DebugViewModel = hiltViewModel()) {
+internal fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewModel()) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
@@ -153,7 +152,7 @@ internal fun DebugScreen(navController: NavHostController, viewModel: DebugViewM
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
-                onNavigateUp = navController::navigateUp,
+                onNavigateUp = onNavigateUp,
                 actions = { DebugMenuActions(deleteLogs = { viewModel.deleteAllLogs() }) },
                 onClickChip = {},
             )
