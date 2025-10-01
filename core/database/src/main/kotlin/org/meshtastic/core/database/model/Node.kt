@@ -53,6 +53,7 @@ data class Node(
     val paxcounter: PaxcountProtos.Paxcount = PaxcountProtos.Paxcount.getDefaultInstance(),
     val publicKey: ByteString? = null,
     val notes: String = "",
+    val manuallyVerified: Boolean = false,
 ) {
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'

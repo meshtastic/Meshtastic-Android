@@ -29,5 +29,7 @@ sealed class ServiceAction {
 
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 
-    data class AddSharedContact(val contact: AdminProtos.SharedContact) : ServiceAction()
+    data class ImportContact(val contact: AdminProtos.SharedContact) : ServiceAction()
+
+    data class SendContact(val contact: AdminProtos.SharedContact) : ServiceAction()
 }

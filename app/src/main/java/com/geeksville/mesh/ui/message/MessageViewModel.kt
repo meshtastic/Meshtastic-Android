@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.service.MeshServiceNotifications
+import com.geeksville.mesh.sharedContact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +41,7 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
@@ -130,9 +132,19 @@ constructor(
         // if the destination is a node, we need to ensure it's a
         // favorite so it does not get removed from the on-device node database.
         if (channel == null) { // no channel specified, so we assume it's a direct message
-            val node = nodeRepository.getNode(dest)
-            if (!node.isFavorite) {
-                favoriteNode(nodeRepository.getNode(dest))
+            val fwVersion = ourNodeInfo.value?.metadata?.firmwareVersion
+            val destNode = nodeRepository.getNode(dest)
+
+            fwVersion?.let { fw ->
+                val ver = DeviceVersion(asString = fw)
+                val gateFw = DeviceVersion(asString = "2.7.12")
+                if (ver < gateFw) {
+                    if (!destNode.isFavorite) {
+                        favoriteNode(destNode)
+                    }
+                } else {
+                    sendSharedContact(destNode)
+                }
             }
         }
         val p = DataPacket(dest, channel ?: 0, str, replyId)
@@ -156,6 +168,19 @@ constructor(
             serviceRepository.onServiceAction(ServiceAction.Favorite(node))
         } catch (ex: RemoteException) {
             Timber.e(ex, "Favorite node error")
+        }
+    }
+
+    private fun sendSharedContact(node: Node) = viewModelScope.launch {
+        try {
+            val contact = sharedContact {
+                nodeNum = node.num
+                user = node.user
+                manuallyVerified = node.manuallyVerified
+            }
+            serviceRepository.onServiceAction(ServiceAction.SendContact(contact = contact))
+        } catch (ex: RemoteException) {
+            Timber.e(ex, "Send shared contact error")
         }
     }
 
