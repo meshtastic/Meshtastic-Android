@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node
+package org.meshtastic.feature.node.detail
 
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel

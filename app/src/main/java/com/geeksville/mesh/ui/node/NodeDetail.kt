@@ -169,6 +169,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.TracerouteButton
+import org.meshtastic.feature.node.detail.NodeDetailViewModel
 import timber.log.Timber
 
 private data class VectorMetricInfo(
