@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -34,8 +34,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.settings.components.SettingsItem
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.SettingsItem
 import org.meshtastic.core.ui.theme.AppTheme
 
 private const val COOL_DOWN_TIME_MS = 30000L

@@ -1,37 +1,5 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$NodeInfo$String.format("%d%%", batteryLevel)</ID>
-    <ID>MagicNumber:DataPacket.kt$DataPacket.CREATOR$16</ID>
-    <ID>MagicNumber:Extensions.kt$1000</ID>
-    <ID>MagicNumber:Extensions.kt$1440000</ID>
-    <ID>MagicNumber:Extensions.kt$24</ID>
-    <ID>MagicNumber:Extensions.kt$2880</ID>
-    <ID>MagicNumber:Extensions.kt$60</ID>
-    <ID>MagicNumber:LocationUtils.kt$1e-7</ID>
-    <ID>MagicNumber:NodeInfo.kt$DeviceMetrics.Companion$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics.Companion$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.114</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.299</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.587</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0x0000FF</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0x00FF00</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0xFF0000</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1000.0</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$16</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1609</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1609.34</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$255</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$3.281</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$8</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position$180</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position$90</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position$90.0</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1e-7</ID>
-    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1e7</ID>
-    <ID>MatchingDeclarationName:LocationUtils.kt$GPSFormat</ID>
-  </CurrentIssues>
+  <CurrentIssues/>
 </SmellBaseline>

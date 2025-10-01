@@ -15,29 +15,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.SocialDistance
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.core.model.util.metersIn
+import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.icon.Elevation
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
-fun DistanceInfo(distance: String, modifier: Modifier = Modifier) {
+fun ElevationInfo(
+    modifier: Modifier = Modifier,
+    altitude: Int,
+    system: DisplayUnits,
+    suffix: String = stringResource(R.string.elevation_suffix),
+) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Rounded.SocialDistance,
-        contentDescription = stringResource(R.string.distance),
-        text = distance,
+        icon = MeshtasticIcons.Elevation,
+        contentDescription = stringResource(R.string.altitude),
+        text = altitude.metersIn(system).toString(system) + " " + suffix,
     )
 }
 
-@PreviewLightDark
 @Composable
-private fun DistanceInfoPreview() {
-    AppTheme { DistanceInfo(distance = "423 mi.") }
+@Preview
+private fun ElevationInfoPreview() {
+    MaterialTheme { ElevationInfo(altitude = 100, system = DisplayUnits.METRIC, suffix = "ASL") }
 }

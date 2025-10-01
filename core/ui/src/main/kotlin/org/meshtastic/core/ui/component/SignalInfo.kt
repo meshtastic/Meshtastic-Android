@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -32,12 +32,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.Rssi
-import org.meshtastic.core.ui.component.Snr
-import org.meshtastic.core.ui.component.determineSignalQuality
+import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 
 const val MAX_VALID_SNR = 100F

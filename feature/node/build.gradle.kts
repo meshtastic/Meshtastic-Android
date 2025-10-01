@@ -15,9 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common.preview
+plugins {
+    alias(libs.plugins.kover)
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.hilt)
+}
 
-import androidx.compose.ui.tooling.preview.Preview
+android { namespace = "org.meshtastic.feature.node" }
 
-@Preview(name = "Large Font", fontScale = 2f)
-annotation class LargeFontPreview
+dependencies {
+    implementation(projects.core.data)
+    implementation(projects.core.database)
+    implementation(projects.core.datastore)
+    implementation(projects.core.model)
+    implementation(projects.core.proto)
+    implementation(projects.core.service)
+    implementation(projects.core.strings)
+    implementation(projects.core.ui)
+
+    implementation(libs.timber)
+}

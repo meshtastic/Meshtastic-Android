@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComposableParamOrder:ElevationInfo.kt$ElevationInfo</ID>
+    <ID>ComposableParamOrder:LastHeardInfo.kt$LastHeardInfo</ID>
+    <ID>ComposableParamOrder:LinkedCoordinates.kt$LinkedCoordinates</ID>
+    <ID>ComposableParamOrder:NodeFilterTextField.kt$NodeFilterTextField</ID>
+    <ID>ComposableParamOrder:NodeItem.kt$NodeItem</ID>
+    <ID>ComposableParamOrder:NodeKeyStatusIcon.kt$NodeKeyStatusIcon</ID>
+    <ID>ComposableParamOrder:SatelliteCountInfo.kt$SatelliteCountInfo</ID>
+    <ID>ComposableParamOrder:TracerouteButton.kt$TracerouteButton</ID>
+    <ID>ModifierMissing:NodeStatusIcons.kt$NodeStatusIcons</ID>
+    <ID>ParameterNaming:NodeFilterTextField.kt$onToggleShowIgnored</ID>
+    <ID>PreviewPublic:NodeItem.kt$NodeInfoPreview</ID>
+    <ID>PreviewPublic:NodeItem.kt$NodeInfoSimplePreview</ID>
+    <ID>TooManyFunctions:NodeListViewModel.kt$NodeListViewModel : ViewModel</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
@@ -6,7 +6,7 @@
     <ID>CommentSpacing:Constants.kt$/// a bool true means we expect this condition to continue until, false means device might come back</ID>
     <ID>CommentSpacing:Coroutines.kt$/// Wrap launch with an exception handler, FIXME, move into a utility lib</ID>
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
-    <ID>ComposableNaming:NodeDetail.kt$notesSection</ID>
+    <ID>ComposableNaming:NodeDetailScreen.kt$notesSection</ID>
     <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
     <ID>ComposableParamOrder:Debug.kt$DebugMenuActions</ID>
     <ID>ComposableParamOrder:Debug.kt$DecodedPayloadBlock</ID>
@@ -14,15 +14,12 @@
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchStateviewModelDefaults</ID>
     <ID>ComposableParamOrder:DeviceMetrics.kt$DeviceMetricsChart</ID>
     <ID>ComposableParamOrder:EditBase64Preference.kt$EditBase64Preference</ID>
-    <ID>ComposableParamOrder:ElevationInfo.kt$ElevationInfo</ID>
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$ChartContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$EnvironmentMetricsChart</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$MetricPlottingCanvas</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt$HostMetricsItem</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt$LogLine</ID>
-    <ID>ComposableParamOrder:LastHeardInfo.kt$LastHeardInfo</ID>
-    <ID>ComposableParamOrder:LinkedCoordinates.kt$LinkedCoordinates</ID>
     <ID>ComposableParamOrder:MainAppBar.kt$MainAppBar</ID>
     <ID>ComposableParamOrder:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ComposableParamOrder:Message.kt$MessageScreen</ID>
@@ -32,24 +29,16 @@
     <ID>ComposableParamOrder:MessageItem.kt$MessageItem</ID>
     <ID>ComposableParamOrder:MessageList.kt$DeliveryInfo</ID>
     <ID>ComposableParamOrder:MessageList.kt$MessageList</ID>
-    <ID>ComposableParamOrder:NodeChip.kt$NodeChip</ID>
-    <ID>ComposableParamOrder:NodeDetail.kt$DeviceActions</ID>
-    <ID>ComposableParamOrder:NodeDetail.kt$EnvironmentMetrics</ID>
-    <ID>ComposableParamOrder:NodeDetail.kt$NodeActionButton</ID>
-    <ID>ComposableParamOrder:NodeDetail.kt$NodeDetailList</ID>
-    <ID>ComposableParamOrder:NodeFilterTextField.kt$NodeFilterTextField</ID>
-    <ID>ComposableParamOrder:NodeItem.kt$NodeItem</ID>
-    <ID>ComposableParamOrder:NodeKeyStatusIcon.kt$NodeKeyStatusIcon</ID>
+    <ID>ComposableParamOrder:NodeDetailScreen.kt$DeviceActions</ID>
+    <ID>ComposableParamOrder:NodeDetailScreen.kt$EnvironmentMetrics</ID>
+    <ID>ComposableParamOrder:NodeDetailScreen.kt$NodeActionButton</ID>
+    <ID>ComposableParamOrder:NodeDetailScreen.kt$NodeDetailList</ID>
     <ID>ComposableParamOrder:PaxMetrics.kt$PaxMetricsChart</ID>
     <ID>ComposableParamOrder:PermissionScreenLayout.kt$PermissionScreenLayout</ID>
     <ID>ComposableParamOrder:PowerMetrics.kt$PowerMetricsChart</ID>
     <ID>ComposableParamOrder:QuickChat.kt$OutlinedTextFieldWithCounter</ID>
-    <ID>ComposableParamOrder:SatelliteCountInfo.kt$SatelliteCountInfo</ID>
-    <ID>ComposableParamOrder:SettingsItem.kt$SettingsItem</ID>
-    <ID>ComposableParamOrder:SignalInfo.kt$SignalInfo</ID>
     <ID>ComposableParamOrder:SignalMetrics.kt$SignalMetricsChart</ID>
     <ID>ComposableParamOrder:TopLevelNavIcon.kt$ConnectionsNavIcon</ID>
-    <ID>ComposableParamOrder:TracerouteButton.kt$TracerouteButton</ID>
     <ID>ComposableParamOrder:WarningDialog.kt$WarningDialog</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
@@ -57,7 +46,7 @@
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
-    <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided&gt;${ }</ID>
+    <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:TrustAllX509TrustManager.kt$TrustAllX509TrustManager${}</ID>
     <ID>FinalNewline:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
     <ID>FinalNewline:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
@@ -84,8 +73,8 @@
     <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
     <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
-    <ID>LambdaParameterEventTrailing:NodeDetail.kt$onClick</ID>
-    <ID>LambdaParameterEventTrailing:NodeDetail.kt$onSaveNotes</ID>
+    <ID>LambdaParameterEventTrailing:NodeDetailScreen.kt$onClick</ID>
+    <ID>LambdaParameterEventTrailing:NodeDetailScreen.kt$onSaveNotes</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
     <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
@@ -145,7 +134,7 @@
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$100</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$1000</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$2500</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$2500</ID>
+    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided>$2500</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
     <ID>MagicNumber:ServiceClient.kt$ServiceClient$500</ID>
@@ -158,7 +147,7 @@
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$500</ID>
     <ID>MagicNumber:UIState.kt$4</ID>
     <ID>MatchingDeclarationName:MeshServiceStarter.kt$ServiceStarter : Worker</ID>
-    <ID>MaxLineLength:BluetoothInterface.kt$/* Info for the esp32 device side code. See that source for the 'gold' standard docs on this interface. MeshBluetoothService UUID 6ba1b218-15a8-461f-9fa8-5dcae273eafd FIXME - notify vs indication for fromradio output. Using notify for now, not sure if that is best FIXME - in the esp32 mesh management code, occasionally mirror the current net db to flash, so that if we reboot we still have a good guess of users who are out there. FIXME - make sure this protocol is guaranteed robust and won't drop packets "According to the BLE specification the notification length can be max ATT_MTU - 3. The 3 bytes subtracted is the 3-byte header(OP-code (operation, 1 byte) and the attribute handle (2 bytes)). In BLE 4.1 the ATT_MTU is 23 bytes (20 bytes for payload), but in BLE 4.2 the ATT_MTU can be negotiated up to 247 bytes." MAXPACKET is 256? look into what the lora lib uses. FIXME Characteristics: UUID properties description 8ba2bcc2-ee02-4a55-a531-c525c5e454d5 read fromradio - contains a newly received packet destined towards the phone (up to MAXPACKET bytes? per packet). After reading the esp32 will put the next packet in this mailbox. If the FIFO is empty it will put an empty packet in this mailbox. f75c76d2-129e-4dad-a1dd-7866124401e7 write toradio - write ToRadio protobufs to this charstic to send them (up to MAXPACKET len) ed9da18c-a800-4f66-a670-aa7547e34453 read|notify|write fromnum - the current packet # in the message waiting inside fromradio, if the phone sees this notify it should read messages until it catches up with this number. The phone can write to this register to go backwards up to FIXME packets, to handle the rare case of a fromradio packet was dropped after the esp32 callback was called, but before it arrives at the phone. If the phone writes to this register the esp32 will discard older packets and put the next packet &gt;= fromnum in fromradio. When the esp32 advances fromnum, it will delay doing the notify by 100ms, in the hopes that the notify will never actally need to be sent if the phone is already pulling from fromradio. Note: that if the phone ever sees this number decrease, it means the esp32 has rebooted. Re: queue management Not all messages are kept in the fromradio queue (filtered based on SubPacket): * only the most recent Position and User messages for a particular node are kept * all Data SubPackets are kept * No WantNodeNum / DenyNodeNum messages are kept A variable keepAllPackets, if set to true will suppress this behavior and instead keep everything for forwarding to the phone (for debugging) */</ID>
+    <ID>MaxLineLength:BluetoothInterface.kt$/* Info for the esp32 device side code. See that source for the 'gold' standard docs on this interface. MeshBluetoothService UUID 6ba1b218-15a8-461f-9fa8-5dcae273eafd FIXME - notify vs indication for fromradio output. Using notify for now, not sure if that is best FIXME - in the esp32 mesh management code, occasionally mirror the current net db to flash, so that if we reboot we still have a good guess of users who are out there. FIXME - make sure this protocol is guaranteed robust and won't drop packets "According to the BLE specification the notification length can be max ATT_MTU - 3. The 3 bytes subtracted is the 3-byte header(OP-code (operation, 1 byte) and the attribute handle (2 bytes)). In BLE 4.1 the ATT_MTU is 23 bytes (20 bytes for payload), but in BLE 4.2 the ATT_MTU can be negotiated up to 247 bytes." MAXPACKET is 256? look into what the lora lib uses. FIXME Characteristics: UUID properties description 8ba2bcc2-ee02-4a55-a531-c525c5e454d5 read fromradio - contains a newly received packet destined towards the phone (up to MAXPACKET bytes? per packet). After reading the esp32 will put the next packet in this mailbox. If the FIFO is empty it will put an empty packet in this mailbox. f75c76d2-129e-4dad-a1dd-7866124401e7 write toradio - write ToRadio protobufs to this charstic to send them (up to MAXPACKET len) ed9da18c-a800-4f66-a670-aa7547e34453 read|notify|write fromnum - the current packet # in the message waiting inside fromradio, if the phone sees this notify it should read messages until it catches up with this number. The phone can write to this register to go backwards up to FIXME packets, to handle the rare case of a fromradio packet was dropped after the esp32 callback was called, but before it arrives at the phone. If the phone writes to this register the esp32 will discard older packets and put the next packet >= fromnum in fromradio. When the esp32 advances fromnum, it will delay doing the notify by 100ms, in the hopes that the notify will never actally need to be sent if the phone is already pulling from fromradio. Note: that if the phone ever sees this number decrease, it means the esp32 has rebooted. Re: queue management Not all messages are kept in the fromradio queue (filtered based on SubPacket): * only the most recent Position and User messages for a particular node are kept * all Data SubPackets are kept * No WantNodeNum / DenyNodeNum messages are kept A variable keepAllPackets, if set to true will suppress this behavior and instead keep everything for forwarding to the phone (for debugging) */</ID>
     <ID>ModifierClickableOrder:Channel.kt$clickable(onClick = onClick)</ID>
     <ID>ModifierMissing:BLEDevices.kt$BLEDevices</ID>
     <ID>ModifierMissing:Channel.kt$ChannelScreen</ID>
@@ -185,8 +174,7 @@
     <ID>ModifierMissing:MessageActions.kt$ReplyButton</ID>
     <ID>ModifierMissing:NetworkConfigItemList.kt$NetworkConfigScreen</ID>
     <ID>ModifierMissing:NetworkDevices.kt$NetworkDevices</ID>
-    <ID>ModifierMissing:NodeScreen.kt$NodeScreen</ID>
-    <ID>ModifierMissing:NodeStatusIcons.kt$NodeStatusIcons</ID>
+    <ID>ModifierMissing:NodeListScreen.kt$NodeListScreen</ID>
     <ID>ModifierMissing:PaxMetrics.kt$PaxMetricsItem</ID>
     <ID>ModifierMissing:PaxMetrics.kt$PaxMetricsScreen</ID>
     <ID>ModifierMissing:PositionConfigItemList.kt$PositionConfigScreen</ID>
@@ -199,9 +187,6 @@
     <ID>ModifierMissing:Reaction.kt$ReactionDialog</ID>
     <ID>ModifierMissing:SecurityConfigItemList.kt$SecurityConfigScreen</ID>
     <ID>ModifierMissing:SecurityIcon.kt$SecurityIcon</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItem</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItemDetail</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItemSwitch</ID>
     <ID>ModifierMissing:SettingsScreen.kt$SettingsScreen</ID>
     <ID>ModifierMissing:Share.kt$ShareScreen</ID>
     <ID>ModifierMissing:SignalMetrics.kt$SignalMetricsScreen</ID>
@@ -217,11 +202,10 @@
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier.width(dp)</ID>
-    <ID>ModifierNotUsedAtRoot:SignalInfo.kt$modifier = modifier</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier.width(dp)</ID>
-    <ID>ModifierReused:DeviceMetrics.kt$Canvas(modifier = modifier.width(dp)) { val height = size.height val width = size.width for (i in telemetries.indices) { val telemetry = telemetries[i] /* x-value time */ val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff val x = xRatio * width /* Channel Utilization */ plotPoint( drawContext = drawContext, color = Device.CH_UTIL.color, x = x, value = telemetry.deviceMetrics.channelUtilization, divisor = MAX_PERCENT_VALUE, ) /* Air Utilization Transmit */ plotPoint( drawContext = drawContext, color = Device.AIR_UTIL.color, x = x, value = telemetry.deviceMetrics.airUtilTx, divisor = MAX_PERCENT_VALUE, ) } /* Battery Line */ var index = 0 while (index &lt; telemetries.size) { val path = Path() index = createPath( telemetries = telemetries, index = index, path = path, oldestTime = oldest.time, timeRange = timeDiff, width = width, timeThreshold = selectedTime.timeThreshold(), ) { i -&gt; val telemetry = telemetries.getOrNull(i) ?: telemetries.last() val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE val y = height - (ratio * height) return@createPath y } drawPath( path = path, color = Device.BATTERY.color, style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round), ) } }</ID>
+    <ID>ModifierReused:DeviceMetrics.kt$Canvas(modifier = modifier.width(dp)) { val height = size.height val width = size.width for (i in telemetries.indices) { val telemetry = telemetries[i] /* x-value time */ val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff val x = xRatio * width /* Channel Utilization */ plotPoint( drawContext = drawContext, color = Device.CH_UTIL.color, x = x, value = telemetry.deviceMetrics.channelUtilization, divisor = MAX_PERCENT_VALUE, ) /* Air Utilization Transmit */ plotPoint( drawContext = drawContext, color = Device.AIR_UTIL.color, x = x, value = telemetry.deviceMetrics.airUtilTx, divisor = MAX_PERCENT_VALUE, ) } /* Battery Line */ var index = 0 while (index &lt; telemetries.size) { val path = Path() index = createPath( telemetries = telemetries, index = index, path = path, oldestTime = oldest.time, timeRange = timeDiff, width = width, timeThreshold = selectedTime.timeThreshold(), ) { i -> val telemetry = telemetries.getOrNull(i) ?: telemetries.last() val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE val y = height - (ratio * height) return@createPath y } drawPath( path = path, color = Device.BATTERY.color, style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round), ) } }</ID>
     <ID>ModifierReused:DeviceMetrics.kt$HorizontalLinesOverlay( modifier.width(dp), lineColors = listOf(graphColor, Color.Yellow, Color.Red, graphColor, graphColor), )</ID>
     <ID>ModifierReused:DeviceMetrics.kt$TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())</ID>
     <ID>ModifierReused:EnvironmentCharts.kt$Box( contentAlignment = Alignment.TopStart, modifier = modifier.horizontalScroll(state = scrollState, reverseScrolling = true), ) { HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor }) TimeAxisOverlay(modifier = modifier.width(dp), oldest = oldest, newest = newest, selectedTime.lineInterval()) MetricPlottingCanvas( modifier = modifier.width(dp), telemetries = telemetries, graphData = graphData, selectedTime = selectedTime, oldest = oldest, timeDiff = timeDiff, rightMin = rightMin, rightMax = rightMax, ) }</ID>
@@ -229,9 +213,9 @@
     <ID>ModifierReused:EnvironmentCharts.kt$MetricPlottingCanvas( modifier = modifier.width(dp), telemetries = telemetries, graphData = graphData, selectedTime = selectedTime, oldest = oldest, timeDiff = timeDiff, rightMin = rightMin, rightMax = rightMax, )</ID>
     <ID>ModifierReused:EnvironmentCharts.kt$TimeAxisOverlay(modifier = modifier.width(dp), oldest = oldest, newest = newest, selectedTime.lineInterval())</ID>
     <ID>ModifierReused:PaxMetrics.kt$HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { Color.LightGray })</ID>
-    <ID>ModifierReused:PaxMetrics.kt$Row(modifier = modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f)) { YAxisLabels( modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight().padding(start = 8.dp), labelColor = MaterialTheme.colorScheme.onSurface, minValue = minValue, maxValue = maxValue, ) Box( contentAlignment = Alignment.TopStart, modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(CHART_WEIGHT), ) { HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { Color.LightGray }) TimeAxisOverlay(modifier.width(dp), oldest = minTime, newest = maxTime, timeFrame.lineInterval()) Canvas(modifier = Modifier.width(dp).fillMaxHeight()) { val width = size.width val height = size.height fun xForTime(t: Int): Float = if (maxTime == minTime) width / 2 else (t - minTime).toFloat() / (maxTime - minTime) * width fun yForValue(v: Int): Float = height - (v - minValue) / (maxValue - minValue) * height fun drawLine(series: List&lt;Pair&lt;Int, Int&gt;&gt;, color: Color) { for (i in 1 until series.size) { drawLine( color = color, start = Offset(xForTime(series[i - 1].first), yForValue(series[i - 1].second)), end = Offset(xForTime(series[i].first), yForValue(series[i].second)), strokeWidth = 2.dp.toPx(), ) } } drawLine(bleSeries, PaxSeries.BLE.color) drawLine(wifiSeries, PaxSeries.WIFI.color) drawLine(totalSeries, PaxSeries.PAX.color) } } YAxisLabels( modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight().padding(end = 8.dp), labelColor = MaterialTheme.colorScheme.onSurface, minValue = minValue, maxValue = maxValue, ) }</ID>
+    <ID>ModifierReused:PaxMetrics.kt$Row(modifier = modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f)) { YAxisLabels( modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight().padding(start = 8.dp), labelColor = MaterialTheme.colorScheme.onSurface, minValue = minValue, maxValue = maxValue, ) Box( contentAlignment = Alignment.TopStart, modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(CHART_WEIGHT), ) { HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { Color.LightGray }) TimeAxisOverlay(modifier.width(dp), oldest = minTime, newest = maxTime, timeFrame.lineInterval()) Canvas(modifier = Modifier.width(dp).fillMaxHeight()) { val width = size.width val height = size.height fun xForTime(t: Int): Float = if (maxTime == minTime) width / 2 else (t - minTime).toFloat() / (maxTime - minTime) * width fun yForValue(v: Int): Float = height - (v - minValue) / (maxValue - minValue) * height fun drawLine(series: List&lt;Pair&lt;Int, Int>>, color: Color) { for (i in 1 until series.size) { drawLine( color = color, start = Offset(xForTime(series[i - 1].first), yForValue(series[i - 1].second)), end = Offset(xForTime(series[i].first), yForValue(series[i].second)), strokeWidth = 2.dp.toPx(), ) } } drawLine(bleSeries, PaxSeries.BLE.color) drawLine(wifiSeries, PaxSeries.WIFI.color) drawLine(totalSeries, PaxSeries.PAX.color) } } YAxisLabels( modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight().padding(end = 8.dp), labelColor = MaterialTheme.colorScheme.onSurface, minValue = minValue, maxValue = maxValue, ) }</ID>
     <ID>ModifierReused:PaxMetrics.kt$TimeAxisOverlay(modifier.width(dp), oldest = minTime, newest = maxTime, timeFrame.lineInterval())</ID>
-    <ID>ModifierReused:PowerMetrics.kt$Canvas(modifier = modifier.width(dp)) { val width = size.width val height = size.height /* Voltage */ var index = 0 while (index &lt; telemetries.size) { val path = Path() index = createPath( telemetries = telemetries, index = index, path = path, oldestTime = oldest.time, timeRange = timeDiff, width = width, timeThreshold = selectedTime.timeThreshold(), ) { i -&gt; val telemetry = telemetries.getOrNull(i) ?: telemetries.last() val ratio = (retrieveVoltage(selectedChannel, telemetry) - voltageMin) / voltageDiff val y = height - (ratio * height) return@createPath y } drawPath( path = path, color = VOLTAGE_COLOR, style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round), ) } /* Current */ index = 0 while (index &lt; telemetries.size) { val path = Path() index = createPath( telemetries = telemetries, index = index, path = path, oldestTime = oldest.time, timeRange = timeDiff, width = width, timeThreshold = selectedTime.timeThreshold(), ) { i -&gt; val telemetry = telemetries.getOrNull(i) ?: telemetries.last() val ratio = (retrieveCurrent(selectedChannel, telemetry) - Power.CURRENT.min) / currentDiff val y = height - (ratio * height) return@createPath y } drawPath( path = path, color = Power.CURRENT.color, style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round), ) } }</ID>
+    <ID>ModifierReused:PowerMetrics.kt$Canvas(modifier = modifier.width(dp)) { val width = size.width val height = size.height /* Voltage */ var index = 0 while (index &lt; telemetries.size) { val path = Path() index = createPath( telemetries = telemetries, index = index, path = path, oldestTime = oldest.time, timeRange = timeDiff, width = width, timeThreshold = selectedTime.timeThreshold(), ) { i -> val telemetry = telemetries.getOrNull(i) ?: telemetries.last() val ratio = (retrieveVoltage(selectedChannel, telemetry) - voltageMin) / voltageDiff val y = height - (ratio * height) return@createPath y } drawPath( path = path, color = VOLTAGE_COLOR, style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round), ) } /* Current */ index = 0 while (index &lt; telemetries.size) { val path = Path() index = createPath( telemetries = telemetries, index = index, path = path, oldestTime = oldest.time, timeRange = timeDiff, width = width, timeThreshold = selectedTime.timeThreshold(), ) { i -> val telemetry = telemetries.getOrNull(i) ?: telemetries.last() val ratio = (retrieveCurrent(selectedChannel, telemetry) - Power.CURRENT.min) / currentDiff val y = height - (ratio * height) return@createPath y } drawPath( path = path, color = Power.CURRENT.color, style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round), ) } }</ID>
     <ID>ModifierReused:PowerMetrics.kt$HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor })</ID>
     <ID>ModifierReused:PowerMetrics.kt$TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())</ID>
     <ID>ModifierReused:PowerMetrics.kt$YAxisLabels( modifier = modifier.weight(weight = Y_AXIS_WEIGHT), Power.CURRENT.color, minValue = Power.CURRENT.min, maxValue = Power.CURRENT.max, )</ID>
@@ -247,8 +231,8 @@
     <ID>MultipleEmitters:CommonCharts.kt$LegendLabel</ID>
     <ID>MultipleEmitters:DeviceMetrics.kt$DeviceMetricsChart</ID>
     <ID>MultipleEmitters:EnvironmentCharts.kt$EnvironmentMetricsChart</ID>
-    <ID>MultipleEmitters:NodeDetail.kt$EncryptionErrorContent</ID>
-    <ID>MultipleEmitters:NodeDetail.kt$MetricsSection</ID>
+    <ID>MultipleEmitters:NodeDetailScreen.kt$EncryptionErrorContent</ID>
+    <ID>MultipleEmitters:NodeDetailScreen.kt$MetricsSection</ID>
     <ID>MultipleEmitters:PaxMetrics.kt$PaxMetricsChart</ID>
     <ID>MultipleEmitters:PowerMetrics.kt$PowerMetricsChart</ID>
     <ID>MultipleEmitters:RadioConfig.kt$RadioConfigItemList</ID>
@@ -299,28 +283,15 @@
     <ID>ParameterNaming:MapReportingPreference.kt$onPublishIntervalSecsChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onShouldReportLocationChanged</ID>
     <ID>ParameterNaming:MessageList.kt$onUnreadChanged</ID>
-    <ID>ParameterNaming:NodeDetail.kt$onFirmwareSelected</ID>
-    <ID>ParameterNaming:NodeFilterTextField.kt$onToggleShowIgnored</ID>
+    <ID>ParameterNaming:NodeDetailScreen.kt$onFirmwareSelected</ID>
     <ID>ParameterNaming:PositionPrecisionPreference.kt$onValueChanged</ID>
     <ID>ParameterNaming:UsbDevices.kt$onDeviceSelected</ID>
     <ID>ParameterNaming:WelcomeScreen.kt$onGetStarted</ID>
-    <ID>PreviewAnnotationNaming:LargeFontPreview.kt$LargeFontPreview$LargeFontPreview</ID>
     <ID>PreviewPublic:Channel.kt$ModemPresetInfoPreview</ID>
-    <ID>PreviewPublic:ElevationInfo.kt$ElevationInfoPreview</ID>
     <ID>PreviewPublic:EmptyStateContent.kt$EmptyStateContentPreview</ID>
-    <ID>PreviewPublic:LastHeardInfo.kt$LastHeardInfoPreview</ID>
-    <ID>PreviewPublic:LinkedCoordinates.kt$LinkedCoordinatesPreview</ID>
     <ID>PreviewPublic:MapReportingPreference.kt$MapReportingPreview</ID>
-    <ID>PreviewPublic:NodeChip.kt$NodeChipPreview</ID>
-    <ID>PreviewPublic:NodeItem.kt$NodeInfoPreview</ID>
-    <ID>PreviewPublic:NodeItem.kt$NodeInfoSimplePreview</ID>
-    <ID>PreviewPublic:NodeStatusIcons.kt$StatusIconsPreview</ID>
     <ID>PreviewPublic:Reaction.kt$ReactionItemPreview</ID>
     <ID>PreviewPublic:Reaction.kt$ReactionRowPreview</ID>
-    <ID>PreviewPublic:SatelliteCountInfo.kt$SatelliteCountInfoPreview</ID>
-    <ID>PreviewPublic:SignalInfo.kt$SignalInfoPreview</ID>
-    <ID>PreviewPublic:SignalInfo.kt$SignalInfoSelfPreview</ID>
-    <ID>PreviewPublic:SignalInfo.kt$SignalInfoSimplePreview</ID>
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
     <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>SwallowedException:BluetoothInterface.kt$BluetoothInterface$ex: CancellationException</ID>
@@ -339,7 +310,7 @@
     <ID>TooGenericExceptionCaught:LocationRepository.kt$LocationRepository$e: Exception</ID>
     <ID>TooGenericExceptionCaught:MQTTRepository.kt$MQTTRepository$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService$ex: Exception</ID>
-    <ID>TooGenericExceptionCaught:MeshService.kt$MeshService.&lt;no name provided&gt;$ex: Exception</ID>
+    <ID>TooGenericExceptionCaught:MeshService.kt$MeshService.&lt;no name provided>$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshServiceStarter.kt$ServiceStarter$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:RadioConfigViewModel.kt$RadioConfigViewModel$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:SafeBluetooth.kt$SafeBluetooth$ex: Exception</ID>
@@ -347,29 +318,28 @@
     <ID>TooGenericExceptionCaught:SyncContinuation.kt$Continuation$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
     <ID>TooGenericExceptionThrown:MeshService.kt$MeshService$throw Exception("Can't set user without a NodeInfo")</ID>
-    <ID>TooGenericExceptionThrown:MeshService.kt$MeshService.&lt;no name provided&gt;$throw Exception("Port numbers must be non-zero!")</ID>
+    <ID>TooGenericExceptionThrown:MeshService.kt$MeshService.&lt;no name provided>$throw Exception("Port numbers must be non-zero!")</ID>
     <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Haven't called connect")</ID>
     <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Service not bound")</ID>
     <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("SyncContinuation timeout")</ID>
     <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("This shouldn't happen")</ID>
     <ID>TooManyFunctions:BluetoothInterface.kt$BluetoothInterface : IRadioInterface</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService : Service</ID>
-    <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided&gt; : Stub</ID>
+    <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided> : Stub</ID>
     <ID>TooManyFunctions:MessageViewModel.kt$MessageViewModel : ViewModel</ID>
-    <ID>TooManyFunctions:NodeDetail.kt$com.geeksville.mesh.ui.node.NodeDetail.kt</ID>
-    <ID>TooManyFunctions:NodesViewModel.kt$NodesViewModel : ViewModel</ID>
+    <ID>TooManyFunctions:NodeDetailScreen.kt$com.geeksville.mesh.ui.node.NodeDetailScreen.kt</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
     <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService</ID>
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : Closeable</ID>
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModel</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
-    <ID>UnusedParameter:ChannelSettingsItemList.kt$onBack: () -&gt; Unit</ID>
+    <ID>UnusedParameter:ChannelSettingsItemList.kt$onBack: () -> Unit</ID>
     <ID>UnusedParameter:ChannelSettingsItemList.kt$title: String</ID>
     <ID>UnusedParameter:DropDownPreference.kt$modifier: Modifier = Modifier</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
     <ID>ViewModelForwarding:Main.kt$ScannedQrCodeDialog(uIViewModel, newChannelSet)</ID>
     <ID>ViewModelForwarding:Main.kt$VersionChecks(uIViewModel)</ID>
     <ID>ViewModelInjection:DebugSearch.kt$viewModel</ID>
-    <ID>Wrapping:Message.kt${ event -&gt; when (event) { is MessageScreenEvent.SendMessage -&gt; { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -&gt; viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -&gt; { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -&gt; viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.NodeDetails -&gt; navigateToNodeDetails(event.node.num) is MessageScreenEvent.SetTitle -&gt; viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -&gt; navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -&gt; navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -&gt; onNavigateBack() is MessageScreenEvent.CopyToClipboard -&gt; { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
+    <ID>Wrapping:Message.kt${ event -> when (event) { is MessageScreenEvent.SendMessage -> { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -> viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -> { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -> viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.NodeDetails -> navigateToNodeDetails(event.node.num) is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -> onNavigateBack() is MessageScreenEvent.CopyToClipboard -> { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
   </CurrentIssues>
 </SmellBaseline>

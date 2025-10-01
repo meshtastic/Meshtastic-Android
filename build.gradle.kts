@@ -75,4 +75,5 @@ dependencies {
     kover(projects.core.network)
     kover(projects.core.prefs)
     kover(projects.feature.map)
+    kover(projects.feature.node)
 }

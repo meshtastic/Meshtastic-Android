@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,8 +23,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import com.geeksville.mesh.R
 import org.meshtastic.core.model.util.formatAgo
+import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
@@ -39,7 +39,7 @@ fun LastHeardInfo(modifier: Modifier = Modifier, lastHeard: Int, currentTimeMill
 
 @PreviewLightDark
 @Composable
-fun LastHeardInfoPreview() {
+private fun LastHeardInfoPreview() {
     AppTheme {
         LastHeardInfo(
             lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600,

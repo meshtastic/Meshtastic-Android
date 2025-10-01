@@ -43,11 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.geeksville.mesh.ui.node.components.NodeChip
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Suppress("CyclomaticComplexMethod")
