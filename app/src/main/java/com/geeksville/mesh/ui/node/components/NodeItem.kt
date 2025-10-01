@@ -19,6 +19,7 @@ package com.geeksville.mesh.ui.node.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -37,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,9 +79,7 @@ fun NodeItem(
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
-        remember(thisNode, thatNode) {
-            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
-        }
+        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
 
     var contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors =
@@ -91,8 +91,7 @@ fun NodeItem(
             ?.let {
                 val containerColor = Color(it).copy(alpha = 0.2f)
                 contentColor = contentColorFor(containerColor)
-                CardDefaults.cardColors()
-                    .copy(containerColor = containerColor, contentColor = contentColor)
+                CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
             } ?: (CardDefaults.cardColors())
 
     val style =
@@ -110,24 +109,23 @@ fun NodeItem(
             }
         }
 
+    val interactionSource = remember { MutableInteractionSource() }
     Card(
-        modifier = modifier
+        modifier =
+        modifier
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick, interactionSource = interactionSource)
             .fillMaxWidth()
             .defaultMinSize(minHeight = 80.dp),
-        colors = cardColors
+        colors = cardColors,
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-                    .fillMaxWidth()
-                    .padding(8.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                NodeChip(node = thatNode, onClick = { onClick() })
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                NodeChip(
+                    node = thatNode,
+                    onClick = { onClick() },
+                    onLongClick = onLongClick,
+                    interactionSource = interactionSource,
+                )
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
@@ -139,9 +137,9 @@ fun NodeItem(
                     modifier = Modifier.weight(1f),
                     text = longName,
                     style =
-                        MaterialTheme.typography.titleMediumEmphasized.copy(
-                            color = MaterialTheme.colorScheme.onSurface,
-                        ),
+                    MaterialTheme.typography.titleMediumEmphasized.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
                 )
@@ -191,10 +189,7 @@ fun NodeItem(
 
             if (telemetryStrings.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     telemetryStrings.forEach { telemetryString ->
                         Text(
                             text = telemetryString,
@@ -233,13 +228,7 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(
-            thisNode = thisNode,
-            thatNode = thatNode,
-            0,
-            true,
-            currentTimeMillis = System.currentTimeMillis()
-        )
+        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, currentTimeMillis = System.currentTimeMillis())
     }
 }
 
