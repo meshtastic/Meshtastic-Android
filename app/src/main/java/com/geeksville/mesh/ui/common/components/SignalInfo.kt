@@ -43,6 +43,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 const val MAX_VALID_SNR = 100F
 const val MAX_VALID_RSSI = 0
 
+@Suppress("LongMethod")
 @Composable
 fun SignalInfo(modifier: Modifier = Modifier, node: Node, isThisNode: Boolean) {
     val text =

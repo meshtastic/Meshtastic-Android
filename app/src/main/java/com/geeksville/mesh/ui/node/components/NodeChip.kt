@@ -54,10 +54,10 @@ fun NodeChip(
     val isIgnored = node.isIgnored
     val (textColor, nodeColor) = node.colors
     val inputChipInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
-    Box {
+    Box(modifier = modifier) {
         ElevatedAssistChip(
             modifier =
-            modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
+            Modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
                 contentDescription = node.user.shortName.ifEmpty { "Node" }
             },
             elevation = AssistChipDefaults.elevatedAssistChipElevation(),

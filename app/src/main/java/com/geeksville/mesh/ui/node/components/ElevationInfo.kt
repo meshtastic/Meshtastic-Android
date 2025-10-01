@@ -30,12 +30,17 @@ import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
-fun ElevationInfo(modifier: Modifier = Modifier, altitude: Int, system: DisplayUnits, suffix: String) {
+fun ElevationInfo(
+    modifier: Modifier = Modifier,
+    altitude: Int,
+    system: DisplayUnits,
+    suffix: String = stringResource(R.string.elevation_suffix),
+) {
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Elevation,
         contentDescription = stringResource(R.string.altitude),
-        text = altitude.metersIn(system).toString(system),
+        text = altitude.metersIn(system).toString(system) + " " + suffix,
     )
 }
 

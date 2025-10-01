@@ -36,9 +36,9 @@ private const val SIZE_ICON = 20
 
 @Composable
 fun IconInfo(
-    modifier: Modifier = Modifier,
     icon: ImageVector,
     contentDescription: String,
+    modifier: Modifier = Modifier,
     text: String? = null,
     content: @Composable () -> Unit = {},
 ) {
@@ -62,7 +62,7 @@ fun IconInfo(
 
 @Composable
 @Preview
-fun IconInfoPreview() {
+private fun IconInfoPreview() {
     MaterialTheme {
         IconInfo(icon = MeshtasticIcons.Elevation, contentDescription = "Elevation", content = { Text(text = "100") })
     }

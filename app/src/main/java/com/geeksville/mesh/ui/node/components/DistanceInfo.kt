@@ -27,7 +27,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun DistanceInfo(modifier: Modifier = Modifier, distance: String) {
+fun DistanceInfo(distance: String, modifier: Modifier = Modifier) {
     IconInfo(
         modifier = modifier,
         icon = Icons.Rounded.SocialDistance,
@@ -38,6 +38,6 @@ fun DistanceInfo(modifier: Modifier = Modifier, distance: String) {
 
 @PreviewLightDark
 @Composable
-fun DistanceInfoPreview() {
+private fun DistanceInfoPreview() {
     AppTheme { DistanceInfo(distance = "423 mi.") }
 }
