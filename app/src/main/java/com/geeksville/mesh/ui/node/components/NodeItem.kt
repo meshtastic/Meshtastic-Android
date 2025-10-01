@@ -19,7 +19,6 @@ package com.geeksville.mesh.ui.node.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -109,23 +108,13 @@ fun NodeItem(
             }
         }
 
-    val interactionSource = remember { MutableInteractionSource() }
-    Card(
-        modifier =
-        modifier
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick, interactionSource = interactionSource)
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 80.dp),
-        colors = cardColors,
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+    Card(modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 80.dp), colors = cardColors) {
+        Column(
+            modifier =
+            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(8.dp),
+        ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                NodeChip(
-                    node = thatNode,
-                    onClick = { onClick() },
-                    onLongClick = onLongClick,
-                    interactionSource = interactionSource,
-                )
+                NodeChip(node = thatNode)
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
@@ -151,6 +140,9 @@ fun NodeItem(
                     isConnected = isConnected,
                 )
             }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
