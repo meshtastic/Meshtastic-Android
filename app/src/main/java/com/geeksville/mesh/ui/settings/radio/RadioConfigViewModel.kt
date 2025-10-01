@@ -160,9 +160,6 @@ constructor(
 
         combine(serviceRepository.connectionState, radioConfigState) { connState, configState ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.CONNECTED) }
-            if (connState == ConnectionState.DISCONNECTED && configState.responseState.isWaiting()) {
-                sendError(R.string.disconnected)
-            }
         }
             .launchIn(viewModelScope)
 
