@@ -40,7 +40,7 @@ jobs:
           distribution: 'jetbrains'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       - name: Build Dokka HTML documentation
         run: ./gradlew :app:dokkaGeneratePublicationHtml
