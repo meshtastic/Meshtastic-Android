@@ -6,6 +6,7 @@
     <ID>ComposableParamOrder:BatteryInfo.kt$BatteryInfo</ID>
     <ID>ComposableParamOrder:EditTextPreference.kt$EditTextPreference</ID>
     <ID>ComposableParamOrder:MaterialBatteryInfo.kt$MaterialBatteryInfo</ID>
+    <ID>ComposableParamOrder:NodeChip.kt$NodeChip</ID>
     <ID>ComposableParamOrder:SettingsItem.kt$SettingsItem</ID>
     <ID>ComposableParamOrder:SignalInfo.kt$SignalInfo</ID>
     <ID>ComposableParamOrder:SwitchPreference.kt$SwitchPreference</ID>

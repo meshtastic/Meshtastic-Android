@@ -33,7 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.map.NodeClusterItem
 import org.meshtastic.core.strings.R
-import org.meshtastic.feature.node.component.NodeChip
+import org.meshtastic.core.ui.component.NodeChip
 
 @Composable
 fun ClusterItemsListDialog(

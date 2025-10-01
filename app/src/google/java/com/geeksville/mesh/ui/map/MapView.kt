@@ -111,6 +111,7 @@ import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.LayerType
 import org.meshtastic.feature.map.LocationPermissionsHandler
@@ -118,7 +119,6 @@ import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.CustomTileProviderManagerSheet
 import org.meshtastic.feature.map.component.MapControlsOverlay
-import org.meshtastic.feature.node.component.NodeChip
 import timber.log.Timber
 import java.text.DateFormat
 

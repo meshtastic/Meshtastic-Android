@@ -5,7 +5,6 @@
     <ID>ComposableParamOrder:ElevationInfo.kt$ElevationInfo</ID>
     <ID>ComposableParamOrder:LastHeardInfo.kt$LastHeardInfo</ID>
     <ID>ComposableParamOrder:LinkedCoordinates.kt$LinkedCoordinates</ID>
-    <ID>ComposableParamOrder:NodeChip.kt$NodeChip</ID>
     <ID>ComposableParamOrder:NodeFilterTextField.kt$NodeFilterTextField</ID>
     <ID>ComposableParamOrder:NodeItem.kt$NodeItem</ID>
     <ID>ComposableParamOrder:NodeKeyStatusIcon.kt$NodeKeyStatusIcon</ID>

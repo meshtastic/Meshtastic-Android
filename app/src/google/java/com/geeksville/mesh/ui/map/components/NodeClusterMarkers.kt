@@ -26,8 +26,8 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.BaseMapViewModel
-import org.meshtastic.feature.node.component.NodeChip
 
 @OptIn(MapsComposeExperimentalApi::class)
 @Suppress("NestedBlockDepth")

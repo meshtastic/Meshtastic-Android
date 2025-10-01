@@ -48,8 +48,8 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.node.component.NodeChip
 
 @Suppress("CyclomaticComplexMethod")
 @Composable

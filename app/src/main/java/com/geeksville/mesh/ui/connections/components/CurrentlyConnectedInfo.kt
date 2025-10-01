@@ -43,9 +43,9 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
+import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
-import org.meshtastic.feature.node.component.NodeChip
 
 /** Converts Bluetooth RSSI to a 0-4 bar signal strength level. */
 @Composable
