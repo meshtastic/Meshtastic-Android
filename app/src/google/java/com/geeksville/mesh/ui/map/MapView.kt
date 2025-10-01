@@ -114,6 +114,7 @@ import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.LayerType
+import org.meshtastic.feature.map.LocationPermissionsHandler
 import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.CustomTileProviderManagerSheet
