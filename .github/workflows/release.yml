@@ -34,7 +34,7 @@ jobs:
           java-version: '21'
           distribution: 'jetbrains'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           build-scan-publish: true
@@ -77,7 +77,7 @@ jobs:
           distribution: 'jetbrains'
       - name: Setup Gradle
         if: contains(github.ref_name, '-internal')
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           build-scan-publish: true
@@ -170,7 +170,7 @@ jobs:
           java-version: '21'
           distribution: 'jetbrains'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           build-scan-publish: true
