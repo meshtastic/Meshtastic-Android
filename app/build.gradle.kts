@@ -152,6 +152,10 @@ android {
             } else {
                 signingConfig = signingConfigs.getByName("debug")
             }
+            productFlavors.getByName("fdroid") {
+                isMinifyEnabled = false
+                isShrinkResources = false
+            }
         }
     }
     bundle { language { enableSplit = false } }
@@ -218,6 +222,21 @@ dependencies {
     implementation(libs.timber)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
+}
+
+val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
+tasks.configureEach {
+    if (
+        googleServiceKeywords.any {
+            name.contains(
+                it,
+                ignoreCase = true
+            )
+        } && name.contains("fdroid", ignoreCase = true)
+    ) {
+        project.logger.lifecycle("Disabling task for F-Droid: $name")
+        enabled = false
+    }
 }
 
 dokka {
