@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.hilt)
 }
 
@@ -32,6 +33,7 @@ dependencies {
     implementation(projects.core.proto)
     implementation(projects.core.service)
     implementation(projects.core.strings)
+    implementation(projects.core.ui)
 
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.lifecycle)

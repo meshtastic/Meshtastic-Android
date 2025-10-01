@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map.components
+package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +40,7 @@ import org.meshtastic.core.strings.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun CacheLayout(
+fun CacheLayout(
     cacheEstimate: String,
     onExecuteJob: () -> Unit,
     onCancelDownload: () -> Unit,
