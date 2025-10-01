@@ -23,8 +23,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import com.geeksville.mesh.R
-import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.theme.AppTheme
