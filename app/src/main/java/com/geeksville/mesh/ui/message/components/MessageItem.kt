@@ -174,8 +174,8 @@ internal fun MessageItem(
                         if (!message.fromLocal) {
                             if (message.hopsAway == 0) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Snr(message.snr, fontSize = MaterialTheme.typography.labelSmall.fontSize)
-                                    Rssi(message.rssi, fontSize = MaterialTheme.typography.labelSmall.fontSize)
+                                    Snr(message.snr)
+                                    Rssi(message.rssi)
                                 }
                             } else {
                                 Text(

@@ -18,25 +18,26 @@
 package com.geeksville.mesh.ui.node.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.SatelliteAlt
+import androidx.compose.material.icons.rounded.SocialDistance
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun SatelliteCountInfo(modifier: Modifier = Modifier, satCount: Int) {
+fun DistanceInfo(distance: String, modifier: Modifier = Modifier) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.TwoTone.SatelliteAlt,
-        contentDescription = stringResource(org.meshtastic.core.strings.R.string.sats),
-        text = "$satCount",
+        icon = Icons.Rounded.SocialDistance,
+        contentDescription = stringResource(R.string.distance),
+        text = distance,
     )
 }
 
 @PreviewLightDark
 @Composable
-fun SatelliteCountInfoPreview() {
-    AppTheme { SatelliteCountInfo(satCount = 5) }
+private fun DistanceInfoPreview() {
+    AppTheme { DistanceInfo(distance = "423 mi.") }
 }

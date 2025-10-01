@@ -18,24 +18,30 @@
 package com.geeksville.mesh.ui.node.components
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.icon.Elevation
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 
 @Composable
-fun ElevationInfo(modifier: Modifier = Modifier, altitude: Int, system: DisplayUnits, suffix: String) {
-    val annotatedString = buildAnnotatedString {
-        append(altitude.metersIn(system).toString(system))
-        MaterialTheme.typography.labelSmall.toSpanStyle().let { style -> withStyle(style) { append(" $suffix") } }
-    }
-
-    Text(modifier = modifier, fontSize = MaterialTheme.typography.labelLarge.fontSize, text = annotatedString)
+fun ElevationInfo(
+    modifier: Modifier = Modifier,
+    altitude: Int,
+    system: DisplayUnits,
+    suffix: String = stringResource(R.string.elevation_suffix),
+) {
+    IconInfo(
+        modifier = modifier,
+        icon = MeshtasticIcons.Elevation,
+        contentDescription = stringResource(R.string.altitude),
+        text = altitude.metersIn(system).toString(system) + " " + suffix,
+    )
 }
 
 @Composable

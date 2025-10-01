@@ -70,7 +70,7 @@ import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.BatteryInfo
+import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.theme.AppTheme
@@ -319,7 +319,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                             fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
 
-                        BatteryInfo(batteryLevel = deviceMetrics.batteryLevel, voltage = deviceMetrics.voltage)
+                        MaterialBatteryInfo(level = deviceMetrics.batteryLevel, voltage = deviceMetrics.voltage)
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))

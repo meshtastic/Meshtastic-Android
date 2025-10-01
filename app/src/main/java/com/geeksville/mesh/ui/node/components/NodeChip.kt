@@ -17,7 +17,9 @@
 
 package com.geeksville.mesh.ui.node.components
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,34 +44,52 @@ import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.database.model.Node
 
 @Composable
-fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: (Node) -> Unit = {}) {
+fun NodeChip(
+    modifier: Modifier = Modifier,
+    node: Node,
+    onClick: (Node) -> Unit = {},
+    onLongClick: (() -> Unit)? = {},
+    interactionSource: MutableInteractionSource? = null,
+) {
     val isIgnored = node.isIgnored
     val (textColor, nodeColor) = node.colors
-    val inputChipInteractionSource = remember { MutableInteractionSource() }
-    ElevatedAssistChip(
-        modifier =
-        modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
-            contentDescription = node.user.shortName.ifEmpty { "Node" }
-        },
-        elevation = AssistChipDefaults.elevatedAssistChipElevation(),
-        colors =
-        AssistChipDefaults.elevatedAssistChipColors(
-            containerColor = Color(nodeColor),
-            labelColor = Color(textColor),
-        ),
-        label = {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = node.user.shortName.ifEmpty { "???" },
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-            )
-        },
-        onClick = { onClick(node) },
-        interactionSource = inputChipInteractionSource,
-    )
+    val inputChipInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
+    Box(modifier = modifier) {
+        ElevatedAssistChip(
+            modifier =
+            Modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
+                contentDescription = node.user.shortName.ifEmpty { "Node" }
+            },
+            elevation = AssistChipDefaults.elevatedAssistChipElevation(),
+            colors =
+            AssistChipDefaults.elevatedAssistChipColors(
+                containerColor = Color(nodeColor),
+                labelColor = Color(textColor),
+            ),
+            label = {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = node.user.shortName.ifEmpty { "???" },
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+            },
+            onClick = {},
+            interactionSource = inputChipInteractionSource,
+        )
+        Box(
+            modifier =
+            Modifier.matchParentSize()
+                .combinedClickable(
+                    onLongClick = onLongClick,
+                    onClick = { onClick(node) },
+                    interactionSource = inputChipInteractionSource,
+                    indication = null,
+                ),
+        )
+    }
 }
 
 @Suppress("MagicNumber")

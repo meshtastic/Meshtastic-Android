@@ -86,6 +86,7 @@ androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidxTracing" }
 androidx-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-compose-ui-testManifest = { module = "androidx.compose.ui:ui-test-manifest" }
+androidx-compose-ui-text = { module = "androidx.compose.ui:ui-text" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata" }
@@ -216,7 +217,7 @@ testing-room = ["room-testing"]
 
 # UI
 adaptive = ["androidx-compose-material3-adaptive", "androidx-compose-material3-adaptive-layout", "androidx-compose-material3-adaptive-navigation", "androidx-compose-material3-navigationSuite"]
-ui = ["material", "constraintlayout", "androidx-compose-material3", "androidx-compose-material-iconsExtended", "androidx-compose-ui-tooling-preview", "compose-runtime-livedata"]
+ui = ["material", "constraintlayout", "androidx-compose-material3", "androidx-compose-material-iconsExtended", "androidx-compose-ui-tooling-preview", "compose-runtime-livedata", "androidx-compose-ui-text"]
 ui-tooling = ["androidx-compose-ui-tooling"] #Separate for debugImplementation
 
 [plugins]

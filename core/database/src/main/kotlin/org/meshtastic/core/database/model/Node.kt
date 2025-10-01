@@ -119,7 +119,7 @@ data class Node(
 
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)
 
-    private fun EnvironmentMetrics.getDisplayString(isFahrenheit: Boolean): String {
+    private fun EnvironmentMetrics.getDisplayStrings(isFahrenheit: Boolean): List<String> {
         val temp =
             if (temperature != 0f) {
                 if (isFahrenheit) {
@@ -152,15 +152,23 @@ data class Node(
         val current = if (current != 0f) "%.1fmA".format(current) else null
         val iaq = if (iaq != 0) "IAQ: $iaq" else null
 
-        return listOfNotNull(temp, humidity, soilTemperatureStr, soilMoisture, voltage, current, iaq).joinToString(" ")
+        return listOfNotNull(
+            paxcounter.getDisplayString(),
+            temp,
+            humidity,
+            soilTemperatureStr,
+            soilMoisture,
+            voltage,
+            current,
+            iaq,
+        )
     }
 
     private fun PaxcountProtos.Paxcount.getDisplayString() =
         "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 || wifi != 0 }
 
-    fun getTelemetryString(isFahrenheit: Boolean = false): String =
-        listOfNotNull(paxcounter.getDisplayString(), environmentMetrics.getDisplayString(isFahrenheit))
-            .joinToString(" ")
+    fun getTelemetryStrings(isFahrenheit: Boolean = false): List<String> =
+        environmentMetrics.getDisplayStrings(isFahrenheit)
 }
 
 fun ConfigProtos.Config.DeviceConfig.Role?.isUnmessageableRole(): Boolean = this in

@@ -32,10 +32,12 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.icon.BatteryEmpty
 import org.meshtastic.core.ui.icon.BatteryUnknown
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -47,9 +49,9 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 private const val FORMAT = "%d%%"
 private const val SIZE_ICON = 20
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 @Composable
-fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int) {
+fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Float? = null) {
     val levelString = FORMAT.format(level)
 
     Row(
@@ -57,21 +59,25 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        if (level > 100) {
-            Icon(
-                modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
-                imageVector = Icons.Rounded.Power,
-                tint = MaterialTheme.colorScheme.onSurface,
-                contentDescription = null,
-            )
-
-            Text(text = "PWD", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelLarge)
-        } else if (level < 0) {
+        if (level == null || level < 0) {
             Icon(
                 modifier = Modifier.size(SIZE_ICON.dp),
                 imageVector = MeshtasticIcons.BatteryUnknown,
                 tint = MaterialTheme.colorScheme.onSurface,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.unknown),
+            )
+        } else if (level > 100) {
+            Icon(
+                modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
+                imageVector = Icons.Rounded.Power,
+                tint = MaterialTheme.colorScheme.onSurface,
+                contentDescription = levelString,
+            )
+
+            Text(
+                text = "PWD",
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelMedium,
             )
         } else {
             // Map battery percentage to color
@@ -103,24 +109,42 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int) {
                 },
                 imageVector = MeshtasticIcons.BatteryEmpty,
                 tint = MaterialTheme.colorScheme.onSurface,
-                contentDescription = null,
+                contentDescription = levelString,
             )
 
             Text(
                 text = levelString,
                 color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
             )
+            voltage?.let {
+                Text(
+                    text = "%.2fV".format(it),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
         }
     }
 }
 
-class BatteryLevelProvider : PreviewParameterProvider<Int> {
-    override val values: Sequence<Int> = sequenceOf(-1, 19, 39, 90, 101)
+class BatteryInfoPreviewParameterProvider : PreviewParameterProvider<Pair<Int?, Float?>> {
+    override val values: Sequence<Pair<Int?, Float?>>
+        get() =
+            sequenceOf(
+                85 to 3.7F,
+                2 to 3.7F,
+                12 to 3.7F,
+                28 to 3.7F,
+                50 to 3.7F,
+                101 to 4.9F,
+                null to 4.5F,
+                null to null,
+            )
 }
 
 @PreviewLightDark
 @Composable
-fun MaterialBatteryInfoPreview(@PreviewParameter(BatteryLevelProvider::class) batteryLevel: Int) {
-    AppTheme { MaterialBatteryInfo(level = batteryLevel) }
+fun MaterialBatteryInfoPreview(@PreviewParameter(BatteryInfoPreviewParameterProvider::class) info: Pair<Int?, Float?>) {
+    AppTheme { MaterialBatteryInfo(level = info.first, voltage = info.second) }
 }
