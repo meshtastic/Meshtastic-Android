@@ -23,6 +23,8 @@ plugins {
 android { namespace = "org.meshtastic.core.ui" }
 
 dependencies {
+    implementation(projects.core.database)
+    implementation(projects.core.proto)
     implementation(projects.core.strings)
     implementation(libs.bundles.markdown)
 }
