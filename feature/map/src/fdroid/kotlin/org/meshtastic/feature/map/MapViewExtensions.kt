@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.feature.map
 
 import android.graphics.Color
 import android.graphics.DashPathEffect
@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.geeksville.mesh.MeshProtos
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.R
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
@@ -126,7 +126,7 @@ fun MapView.addPolyline(density: Density, geoPoints: List<GeoPoint>, onClick: ()
 }
 
 fun MapView.addPositionMarkers(positions: List<MeshProtos.Position>, onClick: () -> Unit): List<Marker> {
-    val navIcon = ContextCompat.getDrawable(context, com.geeksville.mesh.R.drawable.ic_map_navigation_24)
+    val navIcon = ContextCompat.getDrawable(context, R.drawable.ic_map_navigation_24)
     val markers =
         positions.map {
             Marker(this).apply {
