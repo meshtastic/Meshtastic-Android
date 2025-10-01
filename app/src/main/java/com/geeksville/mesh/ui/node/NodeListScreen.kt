@@ -77,7 +77,7 @@ import org.meshtastic.feature.node.list.NodeListViewModel
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun NodeScreen(viewModel: NodeListViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
+fun NodeListScreen(viewModel: NodeListViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()

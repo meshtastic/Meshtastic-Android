@@ -50,8 +50,8 @@ import com.geeksville.mesh.ui.metrics.PowerMetricsScreen
 import com.geeksville.mesh.ui.metrics.SignalMetricsScreen
 import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
 import com.geeksville.mesh.ui.node.NodeDetailScreen
+import com.geeksville.mesh.ui.node.NodeListScreen
 import com.geeksville.mesh.ui.node.NodeMapScreen
-import com.geeksville.mesh.ui.node.NodeScreen
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodeDetailRoutes
@@ -64,7 +64,7 @@ fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UI
         composable<NodesRoutes.Nodes>(
             deepLinks = listOf(navDeepLink<NodesRoutes.Nodes>(basePath = "$DEEP_LINK_BASE_URI/nodes")),
         ) {
-            NodeScreen(navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) })
+            NodeListScreen(navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) })
         }
         nodeDetailGraph(navController, uiViewModel)
     }
