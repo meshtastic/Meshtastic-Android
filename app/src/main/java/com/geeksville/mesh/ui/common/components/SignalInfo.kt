@@ -17,7 +17,9 @@
 
 package com.geeksville.mesh.ui.common.components
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,10 +62,9 @@ fun SignalInfo(modifier: Modifier = Modifier, node: Node, isThisNode: Boolean) {
             }
                 .joinToString(" ")
         }
-    Column {
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         if (text.isNotEmpty()) {
             Text(
-                modifier = modifier,
                 text = text,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = MaterialTheme.typography.bodySmall.fontSize,

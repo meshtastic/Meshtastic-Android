@@ -17,37 +17,24 @@
 
 package com.geeksville.mesh.ui.node.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun LastHeardInfo(modifier: Modifier = Modifier, lastHeard: Int, currentTimeMillis: Long) {
-    Row(
+    IconInfo(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        Icon(
-            modifier = Modifier.height(18.dp),
-            imageVector = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
-            contentDescription = null,
-        )
-        Text(text = formatAgo(lastHeard, currentTimeMillis), fontSize = MaterialTheme.typography.labelLarge.fontSize)
-    }
+        icon = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
+        contentDescription = stringResource(org.meshtastic.core.strings.R.string.node_sort_last_heard),
+        text = formatAgo(lastHeard, currentTimeMillis),
+    )
 }
 
 @PreviewLightDark

@@ -225,14 +225,10 @@ dependencies {
 }
 
 val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
+
 tasks.configureEach {
     if (
-        googleServiceKeywords.any {
-            name.contains(
-                it,
-                ignoreCase = true
-            )
-        } && name.contains("fdroid", ignoreCase = true)
+        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } && name.contains("fdroid", ignoreCase = true)
     ) {
         project.logger.lifecycle("Disabling task for F-Droid: $name")
         enabled = false
