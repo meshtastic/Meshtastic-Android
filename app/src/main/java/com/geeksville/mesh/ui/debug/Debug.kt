@@ -105,10 +105,7 @@ private var redactedKeys: List<String> = listOf("session_passkey", "private_key"
 
 @Suppress("LongMethod")
 @Composable
-internal fun DebugScreen(
-    navController: NavHostController,
-    viewModel: DebugViewModel = hiltViewModel()
-) {
+internal fun DebugScreen(navController: NavHostController, viewModel: DebugViewModel = hiltViewModel()) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
@@ -120,11 +117,9 @@ internal fun DebugScreen(
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
     val filteredLogsState by
-    remember(logs, filterTexts, filterMode) {
-        derivedStateOf {
-            viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList()
+        remember(logs, filterTexts, filterMode) {
+            derivedStateOf { viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList() }
         }
-    }
     val filteredLogs = filteredLogsState
 
     LaunchedEffect(filteredLogs) { viewModel.updateFilteredLogs(filteredLogs) }
@@ -164,16 +159,14 @@ internal fun DebugScreen(
             )
         },
     ) { paddingValues ->
-        Column(modifier = Modifier
-            .padding(paddingValues)
-            .fillMaxSize()) {
+        Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
                 stickyHeader {
                     val animatedAlpha by
-                    animateFloatAsState(
-                        targetValue = if (!listState.isScrollInProgress) 1.0f else 0f,
-                        label = "alpha"
-                    )
+                        animateFloatAsState(
+                            targetValue = if (!listState.isScrollInProgress) 1.0f else 0f,
+                            label = "alpha",
+                        )
                     DebugSearchStateviewModelDefaults(
                         modifier = Modifier.graphicsLayer(alpha = animatedAlpha),
                         searchState = searchState,
@@ -183,8 +176,7 @@ internal fun DebugScreen(
                         filterMode = filterMode,
                         onFilterModeChange = { filterMode = it },
                         onExportLogs = {
-                            val timestamp =
-                                SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
                             val fileName = "meshtastic_debug_$timestamp.txt"
                             exportLogsLauncher.launch(fileName)
                         },
@@ -215,48 +207,38 @@ internal fun DebugItem(
     val colorScheme = MaterialTheme.colorScheme
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(4.dp),
+        modifier = modifier.fillMaxWidth().padding(4.dp),
         colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    if (isSelected) {
-                        colorScheme.primary.copy(alpha = 0.1f)
-                    } else {
-                        colorScheme.surface
-                    },
-            ),
-        border =
+        CardDefaults.cardColors(
+            containerColor =
             if (isSelected) {
-                BorderStroke(2.dp, colorScheme.primary)
+                colorScheme.primary.copy(alpha = 0.1f)
             } else {
-                null
+                colorScheme.surface
             },
+        ),
+        border =
+        if (isSelected) {
+            BorderStroke(2.dp, colorScheme.primary)
+        } else {
+            null
+        },
     ) {
         SelectionContainer {
             Column(
-                modifier = Modifier
-                    .padding(if (isSelected) 12.dp else 8.dp)
-                    .fillMaxWidth()
-                    .clickable { onLogClick() },
+                modifier = Modifier.padding(if (isSelected) 12.dp else 8.dp).fillMaxWidth().clickable { onLogClick() },
             ) {
-                DebugItemHeader(
-                    log = log,
-                    searchText = searchText,
-                    isSelected = isSelected,
-                    theme = colorScheme
-                )
+                DebugItemHeader(log = log, searchText = searchText, isSelected = isSelected, theme = colorScheme)
                 val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchText)
                 Text(
                     text = messageAnnotatedString,
                     softWrap = false,
                     style =
-                        TextStyle(
-                            fontSize = if (isSelected) 12.sp else 9.sp,
-                            fontFamily = FontFamily.Monospace,
-                            color = colorScheme.onSurface,
-                        ),
+                    TextStyle(
+                        fontSize = if (isSelected) 12.sp else 9.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = colorScheme.onSurface,
+                    ),
                 )
                 // Show decoded payload if available, with search highlighting
                 if (!log.decodedPayload.isNullOrBlank()) {
@@ -274,30 +256,22 @@ internal fun DebugItem(
 }
 
 @Composable
-private fun DebugItemHeader(
-    log: UiMeshLog,
-    searchText: String,
-    isSelected: Boolean,
-    theme: ColorScheme
-) {
+private fun DebugItemHeader(log: UiMeshLog, searchText: String, isSelected: Boolean, theme: ColorScheme) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = if (isSelected) 12.dp else 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(bottom = if (isSelected) 12.dp else 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val typeAnnotatedString =
-            rememberAnnotatedString(text = log.messageType, searchText = searchText)
+        val typeAnnotatedString = rememberAnnotatedString(text = log.messageType, searchText = searchText)
         Text(
             text = typeAnnotatedString,
             modifier = Modifier.weight(1f),
             style =
-                TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = if (isSelected) 16.sp else 14.sp,
-                    color = theme.onSurface,
-                ),
+            TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = if (isSelected) 16.sp else 14.sp,
+                color = theme.onSurface,
+            ),
         )
         // Copy full log: message + decoded payload if present
         val fullLogText =
@@ -313,16 +287,15 @@ private fun DebugItemHeader(
                 }
             }
         CopyIconButton(valueToCopy = fullLogText, modifier = Modifier.padding(start = 8.dp))
-        val dateAnnotatedString =
-            rememberAnnotatedString(text = log.formattedReceivedDate, searchText = searchText)
+        val dateAnnotatedString = rememberAnnotatedString(text = log.formattedReceivedDate, searchText = searchText)
         Text(
             text = dateAnnotatedString,
             style =
-                TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = if (isSelected) 14.sp else 12.sp,
-                    color = theme.onSurface,
-                ),
+            TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = if (isSelected) 14.sp else 12.sp,
+                color = theme.onSurface,
+            ),
         )
     }
 }
@@ -330,22 +303,16 @@ private fun DebugItemHeader(
 @Composable
 private fun rememberAnnotatedString(text: String, searchText: String): AnnotatedString {
     val theme = MaterialTheme.colorScheme
-    val highlightStyle =
-        SpanStyle(background = theme.primary.copy(alpha = 0.3f), color = theme.onSurface)
+    val highlightStyle = SpanStyle(background = theme.primary.copy(alpha = 0.3f), color = theme.onSurface)
 
     return remember(text, searchText) {
         buildAnnotatedString {
             append(text)
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
-                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(text)
-                        .forEach { match ->
-                            addStyle(
-                                style = highlightStyle,
-                                start = match.range.first,
-                                end = match.range.last + 1
-                            )
-                        }
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(text).forEach { match ->
+                        addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
+                    }
                 }
             }
         }
@@ -356,8 +323,7 @@ private fun rememberAnnotatedString(text: String, searchText: String): Annotated
 private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): AnnotatedString {
     val theme = MaterialTheme.colorScheme
     val style = SpanStyle(color = AnnotationColor, fontStyle = FontStyle.Italic)
-    val highlightStyle =
-        SpanStyle(background = theme.primary.copy(alpha = 0.3f), color = theme.onSurface)
+    val highlightStyle = SpanStyle(background = theme.primary.copy(alpha = 0.3f), color = theme.onSurface)
 
     return remember(log.uuid, searchText) {
         buildAnnotatedString {
@@ -371,14 +337,9 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
             // Add search highlight annotations
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
-                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(log.logMessage)
-                        .forEach { match ->
-                            addStyle(
-                                style = highlightStyle,
-                                start = match.range.first,
-                                end = match.range.last + 1
-                            )
-                        }
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(log.logMessage).forEach { match ->
+                        addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
+                    }
                 }
             }
         }
@@ -393,10 +354,7 @@ fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modi
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = stringResource(id = R.string.debug_clear)
-        )
+        Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.debug_clear))
     }
     if (showDeleteLogsDialog) {
         SimpleAlertDialog(
@@ -444,11 +402,7 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
             } ?: run { throw IOException("Unable to open output stream for URI: $targetUri") }
 
             withContext(Dispatchers.Main) {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.debug_export_success, logs.size),
-                    Toast.LENGTH_LONG
-                )
+                Toast.makeText(context, context.getString(R.string.debug_export_success, logs.size), Toast.LENGTH_LONG)
                     .show()
             }
         } catch (e: IOException) {
@@ -473,11 +427,7 @@ private fun DecodedPayloadBlock(
     modifier: Modifier = Modifier,
 ) {
     val commonTextStyle =
-        TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary
-        )
+        TextStyle(fontSize = if (isSelected) 10.sp else 8.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
 
     Column(modifier = modifier) {
         Text(
@@ -485,29 +435,20 @@ private fun DecodedPayloadBlock(
             style = commonTextStyle,
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
         )
-        Text(
-            text = "{",
-            style = commonTextStyle,
-            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
-        )
-        val annotatedPayload =
-            rememberAnnotatedDecodedPayload(decodedPayload, searchText, colorScheme)
+        Text(text = "{", style = commonTextStyle, modifier = Modifier.padding(start = 8.dp, bottom = 2.dp))
+        val annotatedPayload = rememberAnnotatedDecodedPayload(decodedPayload, searchText, colorScheme)
         Text(
             text = annotatedPayload,
             softWrap = true,
             style =
-                TextStyle(
-                    fontSize = if (isSelected) 10.sp else 8.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = colorScheme.onSurface.copy(alpha = 0.8f),
-                ),
+            TextStyle(
+                fontSize = if (isSelected) 10.sp else 8.sp,
+                fontFamily = FontFamily.Monospace,
+                color = colorScheme.onSurface.copy(alpha = 0.8f),
+            ),
             modifier = Modifier.padding(start = 16.dp, bottom = 0.dp),
         )
-        Text(
-            text = "}",
-            style = commonTextStyle,
-            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-        )
+        Text(text = "}", style = commonTextStyle, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
     }
 }
 
@@ -517,23 +458,15 @@ private fun rememberAnnotatedDecodedPayload(
     searchText: String,
     colorScheme: ColorScheme,
 ): AnnotatedString {
-    val highlightStyle = SpanStyle(
-        background = colorScheme.primary.copy(alpha = 0.3f),
-        color = colorScheme.onSurface
-    )
+    val highlightStyle = SpanStyle(background = colorScheme.primary.copy(alpha = 0.3f), color = colorScheme.onSurface)
     return remember(decodedPayload, searchText) {
         buildAnnotatedString {
             append(decodedPayload)
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
-                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(decodedPayload)
-                        .forEach { match ->
-                            addStyle(
-                                style = highlightStyle,
-                                start = match.range.first,
-                                end = match.range.last + 1
-                            )
-                        }
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(decodedPayload).forEach { match ->
+                        addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
+                    }
                 }
             }
         }
@@ -550,21 +483,21 @@ private fun DebugPacketPreview() {
                 messageType = "NodeInfo",
                 formattedReceivedDate = "9/27/20, 8:00:58 PM",
                 logMessage =
-                    "from: 2885173132\n" +
-                            "decoded {\n" +
-                            "   position {\n" +
-                            "       altitude: 60\n" +
-                            "       battery_level: 81\n" +
-                            "       latitude_i: 411111136\n" +
-                            "       longitude_i: -711111805\n" +
-                            "       time: 1600390966\n" +
-                            "   }\n" +
-                            "}\n" +
-                            "hop_limit: 3\n" +
-                            "id: 1737414295\n" +
-                            "rx_snr: 9.5\n" +
-                            "rx_time: 316400569\n" +
-                            "to: -1409790708",
+                "from: 2885173132\n" +
+                    "decoded {\n" +
+                    "   position {\n" +
+                    "       altitude: 60\n" +
+                    "       battery_level: 81\n" +
+                    "       latitude_i: 411111136\n" +
+                    "       longitude_i: -711111805\n" +
+                    "       time: 1600390966\n" +
+                    "   }\n" +
+                    "}\n" +
+                    "hop_limit: 3\n" +
+                    "id: 1737414295\n" +
+                    "rx_snr: 9.5\n" +
+                    "rx_time: 316400569\n" +
+                    "to: -1409790708",
             ),
         )
     }
@@ -611,9 +544,9 @@ private fun DebugItemErrorPreview() {
                 messageType = "Error",
                 formattedReceivedDate = "9/27/20, 8:02:30 PM",
                 logMessage =
-                    "Connection failed: timeout after 30 seconds\n" +
-                            "Retry attempt: 3/5\n" +
-                            "Last known position: 40.7128, -74.0060",
+                "Connection failed: timeout after 30 seconds\n" +
+                    "Retry attempt: 3/5\n" +
+                    "Last known position: 40.7128, -74.0060",
             ),
         )
     }
@@ -629,15 +562,15 @@ private fun DebugItemLongMessagePreview() {
                 messageType = "Waypoint",
                 formattedReceivedDate = "9/27/20, 8:03:45 PM",
                 logMessage =
-                    "Waypoint created:\n" +
-                            "  Name: Home Base\n" +
-                            "  Description: Primary meeting location\n" +
-                            "  Latitude: 40.7128\n" +
-                            "  Longitude: -74.0060\n" +
-                            "  Altitude: 100m\n" +
-                            "  Icon: 🏠\n" +
-                            "  Created by: (!a1b2c3d4)\n" +
-                            "  Expires: 2025-12-31 23:59:59",
+                "Waypoint created:\n" +
+                    "  Name: Home Base\n" +
+                    "  Description: Primary meeting location\n" +
+                    "  Latitude: 40.7128\n" +
+                    "  Longitude: -74.0060\n" +
+                    "  Altitude: 100m\n" +
+                    "  Icon: 🏠\n" +
+                    "  Created by: (!a1b2c3d4)\n" +
+                    "  Expires: 2025-12-31 23:59:59",
             ),
         )
     }
@@ -671,10 +604,7 @@ private fun DebugMenuActionsPreview() {
                 )
             }
             IconButton(onClick = { /* Preview only */ }, modifier = Modifier.padding(4.dp)) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(id = R.string.debug_clear)
-                )
+                Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.debug_clear))
             }
         }
     }
@@ -688,9 +618,7 @@ private fun DebugScreenEmptyPreview() {
         Surface {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
-                    Surface(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)) {
+                    Surface(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -705,18 +633,13 @@ private fun DebugScreenEmptyPreview() {
                                     OutlinedTextField(
                                         value = "",
                                         onValueChange = {},
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(end = 8.dp),
+                                        modifier = Modifier.weight(1f).padding(end = 8.dp),
                                         placeholder = { Text("Search in logs...") },
                                         singleLine = true,
                                     )
                                     TextButton(onClick = {}) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(
-                                                text = "Filters",
-                                                style = TextStyle(fontWeight = FontWeight.Bold)
-                                            )
+                                            Text(text = "Filters", style = TextStyle(fontWeight = FontWeight.Bold))
                                             Icon(
                                                 imageVector = Icons.TwoTone.FilterAltOff,
                                                 contentDescription = stringResource(id = R.string.debug_filters),
@@ -730,12 +653,7 @@ private fun DebugScreenEmptyPreview() {
                 }
                 // Empty state
                 item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "No Debug Logs",
@@ -766,21 +684,21 @@ private fun DebugScreenWithSampleDataPreview() {
                     messageType = "NodeInfo",
                     formattedReceivedDate = "9/27/20, 8:00:58 PM",
                     logMessage =
-                        "from: 2885173132\n" +
-                                "decoded {\n" +
-                                "   position {\n" +
-                                "       altitude: 60\n" +
-                                "       battery_level: 81\n" +
-                                "       latitude_i: 411111136\n" +
-                                "       longitude_i: -711111805\n" +
-                                "       time: 1600390966\n" +
-                                "   }\n" +
-                                "}\n" +
-                                "hop_limit: 3\n" +
-                                "id: 1737414295\n" +
-                                "rx_snr: 9.5\n" +
-                                "rx_time: 316400569\n" +
-                                "to: -1409790708",
+                    "from: 2885173132\n" +
+                        "decoded {\n" +
+                        "   position {\n" +
+                        "       altitude: 60\n" +
+                        "       battery_level: 81\n" +
+                        "       latitude_i: 411111136\n" +
+                        "       longitude_i: -711111805\n" +
+                        "       time: 1600390966\n" +
+                        "   }\n" +
+                        "}\n" +
+                        "hop_limit: 3\n" +
+                        "id: 1737414295\n" +
+                        "rx_snr: 9.5\n" +
+                        "rx_time: 316400569\n" +
+                        "to: -1409790708",
                 ),
                 UiMeshLog(
                     uuid = "2",
@@ -813,9 +731,7 @@ private fun DebugScreenWithSampleDataPreview() {
         Surface {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
-                    Surface(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)) {
+                    Surface(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(
                                 text = "Debug Screen Preview",
