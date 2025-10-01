@@ -154,7 +154,7 @@ internal fun DebugScreen(navController: NavHostController, viewModel: DebugViewM
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = navController::navigateUp,
-                actions = { DebugMenuActions(viewModel = viewModel) },
+                actions = { DebugMenuActions(deleteLogs = { viewModel.deleteAllLogs() }) },
                 onClickChip = {},
             )
         },
@@ -347,10 +347,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
 }
 
 @Composable
-fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
+fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
@@ -362,7 +359,7 @@ fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modi
             text = R.string.debug_clear_logs_confirm,
             onConfirm = {
                 showDeleteLogsDialog = false
-                viewModel.deleteAllLogs()
+                deleteLogs()
             },
             onDismiss = { showDeleteLogsDialog = false },
         )
