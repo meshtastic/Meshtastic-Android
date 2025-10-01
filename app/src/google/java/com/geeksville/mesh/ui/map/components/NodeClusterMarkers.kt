@@ -24,6 +24,7 @@ import com.geeksville.mesh.ui.map.BaseMapViewModel
 import com.geeksville.mesh.ui.map.NodeClusterItem
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.google.maps.android.clustering.Cluster
+import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
@@ -64,5 +65,8 @@ fun NodeClusterMarkers(
             false
         },
         clusterItemContent = { clusterItem -> NodeChip(node = clusterItem.node) },
+        onClusterManager = { clusterManager ->
+            (clusterManager.renderer as DefaultClusterRenderer).minClusterSize = 10
+        },
     )
 }
