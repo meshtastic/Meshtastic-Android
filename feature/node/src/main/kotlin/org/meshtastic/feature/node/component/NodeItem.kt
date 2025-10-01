@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
@@ -55,11 +55,6 @@ import org.meshtastic.core.ui.component.BatteryInfo
 import org.meshtastic.core.ui.component.SignalInfo
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.node.component.LastHeardInfo
-import org.meshtastic.feature.node.component.NodeChip
-import org.meshtastic.feature.node.component.NodeKeyStatusIcon
-import org.meshtastic.feature.node.component.NodeStatusIcons
-import org.meshtastic.feature.node.component.SatelliteCountInfo
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

@@ -60,9 +60,6 @@ import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.settings.components.SettingsItem
-import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
-import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
@@ -75,6 +72,9 @@ import kotlinx.coroutines.delay
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.SettingsItem
+import org.meshtastic.core.ui.component.SettingsItemDetail
+import org.meshtastic.core.ui.component.SettingsItemSwitch
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import java.text.SimpleDateFormat

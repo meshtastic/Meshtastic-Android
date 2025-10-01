@@ -61,7 +61,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.node.components.NodeItem
 import com.geeksville.mesh.ui.sharing.AddContactFAB
 import com.geeksville.mesh.ui.sharing.supportsQrCodeSharing
 import org.meshtastic.core.database.model.Node
@@ -72,6 +71,7 @@ import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
+import org.meshtastic.feature.node.component.NodeItem
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
