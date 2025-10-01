@@ -116,6 +116,8 @@ import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.LayerType
+import org.meshtastic.feature.map.MapViewModel
 import timber.log.Timber
 import java.text.DateFormat
 

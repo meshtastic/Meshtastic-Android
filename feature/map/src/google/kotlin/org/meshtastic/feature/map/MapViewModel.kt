@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package org.meshtastic.feature.map
 
 import android.app.Application
 import android.net.Uri
@@ -54,7 +54,6 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.feature.map.BaseMapViewModel
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream

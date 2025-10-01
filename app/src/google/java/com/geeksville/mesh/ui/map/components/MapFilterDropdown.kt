@@ -40,9 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ui.map.MapViewModel
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.MapViewModel
 import kotlin.math.roundToInt
 
 @Composable

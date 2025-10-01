@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package org.meshtastic.feature.map
 
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
@@ -28,7 +28,6 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.feature.map.BaseMapViewModel
 import javax.inject.Inject
 
 @HiltViewModel

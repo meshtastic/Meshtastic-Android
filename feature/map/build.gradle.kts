@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.hilt)
 }
 
 android { namespace = "org.meshtastic.feature.map" }
@@ -25,6 +26,7 @@ android { namespace = "org.meshtastic.feature.map" }
 dependencies {
     implementation(projects.core.data)
     implementation(projects.core.database)
+    implementation(projects.core.datastore)
     implementation(projects.core.model)
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
@@ -34,6 +36,7 @@ dependencies {
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.osm)
+    googleImplementation(libs.bundles.maps.compose)
 
     implementation(libs.annotation)
     implementation(libs.timber)
