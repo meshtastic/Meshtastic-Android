@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import android.content.ActivityNotFoundException
 import android.content.ClipData
@@ -113,6 +113,6 @@ private fun handleClick(context: Context, annotatedString: AnnotatedString) {
 
 @PreviewLightDark
 @Composable
-fun LinkedCoordinatesPreview() {
+private fun LinkedCoordinatesPreview() {
     AppTheme { LinkedCoordinates(latitude = 37.7749, longitude = -122.4194, nodeName = "Test Node Name") }
 }

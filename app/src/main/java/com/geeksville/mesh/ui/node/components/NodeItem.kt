@@ -55,6 +55,11 @@ import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.BatteryInfo
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.node.component.LastHeardInfo
+import org.meshtastic.feature.node.component.NodeChip
+import org.meshtastic.feature.node.component.NodeKeyStatusIcon
+import org.meshtastic.feature.node.component.NodeStatusIcons
+import org.meshtastic.feature.node.component.SatelliteCountInfo
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

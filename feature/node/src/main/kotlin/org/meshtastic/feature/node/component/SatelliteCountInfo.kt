@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -55,6 +55,6 @@ fun SatelliteCountInfo(modifier: Modifier = Modifier, satCount: Int) {
 
 @PreviewLightDark
 @Composable
-fun SatelliteCountInfoPreview() {
+private fun SatelliteCountInfoPreview() {
     AppTheme { SatelliteCountInfo(satCount = 5) }
 }

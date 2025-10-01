@@ -135,8 +135,6 @@ import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
-import com.geeksville.mesh.ui.node.components.NodeActionDialogs
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.node.components.TracerouteButton
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
@@ -169,6 +167,8 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.feature.node.component.NodeActionDialogs
+import org.meshtastic.feature.node.component.NodeMenuAction
 import timber.log.Timber
 
 private data class VectorMetricInfo(

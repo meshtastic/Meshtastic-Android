@@ -74,7 +74,6 @@ import com.geeksville.mesh.ui.map.components.WaypointMarkers
 import com.geeksville.mesh.ui.metrics.HEADING_DEG
 import com.geeksville.mesh.ui.metrics.formatPositionTime
 import com.geeksville.mesh.ui.node.DEG_D
-import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -119,6 +118,7 @@ import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.CustomTileProviderManagerSheet
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.node.component.NodeChip
 import timber.log.Timber
 import java.text.DateFormat
 

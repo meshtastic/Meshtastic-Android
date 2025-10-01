@@ -24,4 +24,12 @@ plugins {
 
 android { namespace = "org.meshtastic.feature.node" }
 
-dependencies {}
+dependencies {
+    implementation(projects.core.database)
+    implementation(projects.core.model)
+    implementation(projects.core.proto)
+    implementation(projects.core.strings)
+    implementation(projects.core.ui)
+
+    implementation(libs.timber)
+}

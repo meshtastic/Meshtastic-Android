@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -122,6 +122,6 @@ fun NodeStatusIcons(isThisNode: Boolean, isUnmessageable: Boolean, isFavorite: B
 
 @Preview
 @Composable
-fun StatusIconsPreview() {
+private fun StatusIconsPreview() {
     NodeStatusIcons(isThisNode = true, isUnmessageable = true, isFavorite = true, isConnected = false)
 }

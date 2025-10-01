@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import android.util.Base64
 import androidx.annotation.StringRes
@@ -130,7 +130,7 @@ fun NodeKeyStatusIcon(
             mismatchKey -> Icons.Default.KeyOff to colorScheme.StatusRed
             hasPKC -> Icons.Default.Lock to colorScheme.StatusGreen
             else ->
-                ImageVector.vectorResource(com.geeksville.mesh.R.drawable.ic_lock_open_right_24) to
+                ImageVector.vectorResource(org.meshtastic.core.ui.R.drawable.ic_lock_open_right_24) to
                     colorScheme.StatusYellow
         }
 

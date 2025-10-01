@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +40,6 @@ fun ElevationInfo(modifier: Modifier = Modifier, altitude: Int, system: DisplayU
 
 @Composable
 @Preview
-fun ElevationInfoPreview() {
+private fun ElevationInfoPreview() {
     MaterialTheme { ElevationInfo(altitude = 100, system = DisplayUnits.METRIC, suffix = "ASL") }
 }
