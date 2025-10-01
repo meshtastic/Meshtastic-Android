@@ -49,7 +49,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 private const val FORMAT = "%d%%"
 private const val SIZE_ICON = 20
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 @Composable
 fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Float? = null) {
     val levelString = FORMAT.format(level)
