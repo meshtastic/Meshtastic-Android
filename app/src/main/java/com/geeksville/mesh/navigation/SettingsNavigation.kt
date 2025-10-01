@@ -129,7 +129,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
             deepLinks =
             listOf(navDeepLink<SettingsRoutes.DebugPanel>(basePath = "$DEEP_LINK_BASE_URI/settings/debug_panel")),
         ) {
-            DebugScreen()
+            DebugScreen(navController = navController)
         }
     }
 }
