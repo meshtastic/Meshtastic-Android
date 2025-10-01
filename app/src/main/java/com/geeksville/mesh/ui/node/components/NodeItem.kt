@@ -21,6 +21,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -56,6 +57,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.theme.AppTheme
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeItem(
@@ -75,7 +77,9 @@ fun NodeItem(
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
-        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+        remember(thisNode, thatNode) {
+            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
+        }
 
     var contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors =
@@ -87,12 +91,13 @@ fun NodeItem(
             ?.let {
                 val containerColor = Color(it).copy(alpha = 0.2f)
                 contentColor = contentColorFor(containerColor)
-                CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
+                CardDefaults.cardColors()
+                    .copy(containerColor = containerColor, contentColor = contentColor)
             } ?: (CardDefaults.cardColors())
 
     val style =
         if (thatNode.isUnknownUser) {
-            LocalTextStyle.current.copy(color = contentColor, fontStyle = FontStyle.Italic)
+            LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
         } else {
             LocalTextStyle.current
         }
@@ -105,12 +110,23 @@ fun NodeItem(
             }
         }
 
-    Card(modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 80.dp), colors = cardColors) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 80.dp),
+        colors = cardColors
+    ) {
         Column(
             modifier =
-            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(8.dp),
+                Modifier
+                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                    .fillMaxWidth()
+                    .padding(8.dp),
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 NodeChip(node = thatNode, onClick = { onClick() })
 
                 NodeKeyStatusIcon(
@@ -122,7 +138,10 @@ fun NodeItem(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = longName,
-                    style = style,
+                    style =
+                        MaterialTheme.typography.titleMediumEmphasized.copy(
+                            color = MaterialTheme.colorScheme.onSurface,
+                        ),
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
                 )
@@ -161,10 +180,10 @@ fun NodeItem(
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 SignalInfo(node = thatNode, isThisNode = isThisNode)
             }
@@ -172,51 +191,55 @@ fun NodeItem(
 
             if (telemetryStrings.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(2.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     telemetryStrings.forEach { telemetryString ->
                         Text(
                             text = telemetryString,
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(2.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = thatNode.user.hwModel.name,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                    style = style,
-                )
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = thatNode.user.role.name,
-                    textAlign = TextAlign.Center,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                    style = style,
-                )
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = thatNode.user.id.ifEmpty { "???" },
-                    textAlign = TextAlign.End,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                    style = style,
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val labelStyle =
+                    if (thatNode.isUnknownUser) {
+                        MaterialTheme.typography.labelSmall.copy(
+                            fontStyle = FontStyle.Italic,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    } else {
+                        MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface)
+                    }
+                Text(text = thatNode.user.hwModel.name, style = labelStyle)
+                Text(text = thatNode.user.role.name, style = labelStyle)
+                Text(text = thatNode.user.id.ifEmpty { "???" }, style = labelStyle)
             }
         }
     }
 }
 
 @Composable
-@Preview(showBackground = false)
+@Preview(showBackground = false, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, currentTimeMillis = System.currentTimeMillis())
+        NodeItem(
+            thisNode = thisNode,
+            thatNode = thatNode,
+            0,
+            true,
+            currentTimeMillis = System.currentTimeMillis()
+        )
     }
 }
 
@@ -225,23 +248,12 @@ fun NodeInfoSimplePreview() {
 fun NodeInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) thatNode: Node) {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
-        Column {
-            Text(text = "Details Collapsed", color = MaterialTheme.colorScheme.onBackground)
-            NodeItem(
-                thisNode = thisNode,
-                thatNode = thatNode,
-                distanceUnits = 1,
-                tempInFahrenheit = true,
-                currentTimeMillis = System.currentTimeMillis(),
-            )
-            Text(text = "Details Shown", color = MaterialTheme.colorScheme.onBackground)
-            NodeItem(
-                thisNode = thisNode,
-                thatNode = thatNode,
-                distanceUnits = 1,
-                tempInFahrenheit = true,
-                currentTimeMillis = System.currentTimeMillis(),
-            )
-        }
+        NodeItem(
+            thisNode = thisNode,
+            thatNode = thatNode,
+            distanceUnits = 1,
+            tempInFahrenheit = true,
+            currentTimeMillis = System.currentTimeMillis(),
+        )
     }
 }

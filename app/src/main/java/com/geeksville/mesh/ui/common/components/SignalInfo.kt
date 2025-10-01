@@ -20,18 +20,24 @@ package com.geeksville.mesh.ui.common.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.NodeSignalQuality
+import org.meshtastic.core.ui.component.Rssi
+import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.theme.AppTheme
 
 const val MAX_VALID_SNR = 100F
@@ -62,18 +68,42 @@ fun SignalInfo(modifier: Modifier = Modifier, node: Node, isThisNode: Boolean) {
             }
                 .joinToString(" ")
         }
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         if (text.isNotEmpty()) {
-            Text(
-                text = text,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.bodySmall.fontSize,
-            )
+            Text(text = text, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelSmall)
         }
         /* We only know the Signal Quality from direct nodes aka 0 hop. */
         if (node.hopsAway <= 0) {
             if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
-                NodeSignalQuality(node.snr, node.rssi)
+                val quality = determineSignalQuality(node.snr, node.rssi)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Snr(node.snr)
+                    Rssi(node.rssi)
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        modifier = Modifier.size(20.dp),
+                        imageVector = quality.imageVector,
+                        contentDescription = stringResource(R.string.signal_quality),
+                        tint = quality.color.invoke(),
+                    )
+                    Text(
+                        text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }
