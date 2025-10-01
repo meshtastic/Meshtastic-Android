@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.geeksville.mesh.ui.debug.DebugMenuActions
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -86,14 +85,7 @@ fun MainAppBar(
         ourNode = ourNode,
         showNodeChip = false,
         onNavigateUp = navController::navigateUp,
-        actions = {
-            currentDestination?.let {
-                when {
-                    currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> DebugMenuActions()
-                    else -> {}
-                }
-            }
-        },
+        actions = {},
         onClickChip = onClickChip,
     )
 }

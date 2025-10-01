@@ -47,6 +47,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -79,6 +80,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
+import com.geeksville.mesh.ui.common.components.MainAppBar
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -102,7 +104,7 @@ private var redactedKeys: List<String> = listOf("session_passkey", "private_key"
 
 @Suppress("LongMethod")
 @Composable
-internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
+internal fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewModel()) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
@@ -143,34 +145,51 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
             }
         }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
-            stickyHeader {
-                val animatedAlpha by
-                    animateFloatAsState(targetValue = if (!listState.isScrollInProgress) 1.0f else 0f, label = "alpha")
-                DebugSearchStateviewModelDefaults(
-                    modifier = Modifier.graphicsLayer(alpha = animatedAlpha),
-                    searchState = searchState,
-                    filterTexts = filterTexts,
-                    presetFilters = viewModel.presetFilters,
-                    logs = logs,
-                    filterMode = filterMode,
-                    onFilterModeChange = { filterMode = it },
-                    onExportLogs = {
-                        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-                        val fileName = "meshtastic_debug_$timestamp.txt"
-                        exportLogsLauncher.launch(fileName)
-                    },
-                )
-            }
-            items(filteredLogs, key = { it.uuid }) { log ->
-                DebugItem(
-                    modifier = Modifier.animateItem(),
-                    log = log,
-                    searchText = searchState.searchText,
-                    isSelected = selectedLogId == log.uuid,
-                    onLogClick = { viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid) },
-                )
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = stringResource(R.string.debug_panel),
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = { DebugMenuActions(deleteLogs = { viewModel.deleteAllLogs() }) },
+                onClickChip = {},
+            )
+        },
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+            LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
+                stickyHeader {
+                    val animatedAlpha by
+                        animateFloatAsState(
+                            targetValue = if (!listState.isScrollInProgress) 1.0f else 0f,
+                            label = "alpha",
+                        )
+                    DebugSearchStateviewModelDefaults(
+                        modifier = Modifier.graphicsLayer(alpha = animatedAlpha),
+                        searchState = searchState,
+                        filterTexts = filterTexts,
+                        presetFilters = viewModel.presetFilters,
+                        logs = logs,
+                        filterMode = filterMode,
+                        onFilterModeChange = { filterMode = it },
+                        onExportLogs = {
+                            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                            val fileName = "meshtastic_debug_$timestamp.txt"
+                            exportLogsLauncher.launch(fileName)
+                        },
+                    )
+                }
+                items(filteredLogs, key = { it.uuid }) { log ->
+                    DebugItem(
+                        modifier = Modifier.animateItem(),
+                        log = log,
+                        searchText = searchState.searchText,
+                        isSelected = selectedLogId == log.uuid,
+                        onLogClick = { viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid) },
+                    )
+                }
             }
         }
     }
@@ -327,10 +346,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
 }
 
 @Composable
-fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
+fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
@@ -342,7 +358,7 @@ fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modi
             text = R.string.debug_clear_logs_confirm,
             onConfirm = {
                 showDeleteLogsDialog = false
-                viewModel.deleteAllLogs()
+                deleteLogs()
             },
             onDismiss = { showDeleteLogsDialog = false },
         )

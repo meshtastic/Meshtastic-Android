@@ -129,7 +129,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
             deepLinks =
             listOf(navDeepLink<SettingsRoutes.DebugPanel>(basePath = "$DEEP_LINK_BASE_URI/settings/debug_panel")),
         ) {
-            DebugScreen()
+            DebugScreen(onNavigateUp = navController::navigateUp)
         }
     }
 }
@@ -178,42 +178,51 @@ private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController
         when (entry.route) {
             is SettingsRoutes.User ->
                 addRadioConfigScreenComposable<SettingsRoutes.User>(navController, entry.name, entry.screenComposable)
+
             is SettingsRoutes.ChannelConfig ->
                 addRadioConfigScreenComposable<SettingsRoutes.ChannelConfig>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.Device ->
                 addRadioConfigScreenComposable<SettingsRoutes.Device>(navController, entry.name, entry.screenComposable)
+
             is SettingsRoutes.Position ->
                 addRadioConfigScreenComposable<SettingsRoutes.Position>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.Power ->
                 addRadioConfigScreenComposable<SettingsRoutes.Power>(navController, entry.name, entry.screenComposable)
+
             is SettingsRoutes.Network ->
                 addRadioConfigScreenComposable<SettingsRoutes.Network>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.Display ->
                 addRadioConfigScreenComposable<SettingsRoutes.Display>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.LoRa ->
                 addRadioConfigScreenComposable<SettingsRoutes.LoRa>(navController, entry.name, entry.screenComposable)
+
             is SettingsRoutes.Bluetooth ->
                 addRadioConfigScreenComposable<SettingsRoutes.Bluetooth>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.Security ->
                 addRadioConfigScreenComposable<SettingsRoutes.Security>(
                     navController,
@@ -232,70 +241,83 @@ private fun NavGraphBuilder.moduleRoutesScreens(navController: NavHostController
         when (entry.route) {
             is SettingsRoutes.MQTT ->
                 addRadioConfigScreenComposable<SettingsRoutes.MQTT>(navController, entry.name, entry.screenComposable)
+
             is SettingsRoutes.Serial ->
                 addRadioConfigScreenComposable<SettingsRoutes.Serial>(navController, entry.name, entry.screenComposable)
+
             is SettingsRoutes.ExtNotification ->
                 addRadioConfigScreenComposable<SettingsRoutes.ExtNotification>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.StoreForward ->
                 addRadioConfigScreenComposable<SettingsRoutes.StoreForward>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.RangeTest ->
                 addRadioConfigScreenComposable<SettingsRoutes.RangeTest>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.Telemetry ->
                 addRadioConfigScreenComposable<SettingsRoutes.Telemetry>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.CannedMessage ->
                 addRadioConfigScreenComposable<SettingsRoutes.CannedMessage>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.Audio ->
                 addRadioConfigScreenComposable<SettingsRoutes.Audio>(navController, entry.name, entry.screenComposable)
+
             is SettingsRoutes.RemoteHardware ->
                 addRadioConfigScreenComposable<SettingsRoutes.RemoteHardware>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.NeighborInfo ->
                 addRadioConfigScreenComposable<SettingsRoutes.NeighborInfo>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.AmbientLighting ->
                 addRadioConfigScreenComposable<SettingsRoutes.AmbientLighting>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.DetectionSensor ->
                 addRadioConfigScreenComposable<SettingsRoutes.DetectionSensor>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             is SettingsRoutes.Paxcounter ->
                 addRadioConfigScreenComposable<SettingsRoutes.Paxcounter>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
+
             else -> Unit // Should not happen if ModuleRoute enum is exhaustive for this context
         }
     }
