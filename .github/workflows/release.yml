@@ -220,28 +220,13 @@ jobs:
         with:
           path: ./artifacts
 
-      - name: Get artifact paths
-        id: artifact_paths
-        run: |
-          paths=""
-          if [ -f ./artifacts/google-aab/app-google-release.aab ]; then
-            paths="${paths} ./artifacts/google-aab/app-google-release.aab"
-          fi
-          if [ -f ./artifacts/google-apk/app-google-release.apk ]; then
-            paths="${paths} ./artifacts/google-apk/app-google-release.apk"
-          fi
-          if [ -f ./artifacts/fdroid-apk/app-fdroid-release.apk ]; then
-            paths="${paths} ./artifacts/fdroid-apk/app-fdroid-release.apk"
-          fi
-          echo "paths=${paths}" >> $GITHUB_OUTPUT
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           name: ${{ github.ref_name }}
           generate_release_notes: true
-          files: ${{ steps.artifact_paths.outputs.paths }}
+          files: ./artifacts/*/*
           draft: true
           prerelease: true
         env:
