@@ -28,6 +28,7 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.feature.map.BaseMapViewModel
 import javax.inject.Inject
 
 @HiltViewModel

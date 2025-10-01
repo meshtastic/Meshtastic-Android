@@ -54,6 +54,7 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.feature.map.BaseMapViewModel
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream

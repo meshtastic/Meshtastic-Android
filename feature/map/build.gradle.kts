@@ -22,4 +22,19 @@ plugins {
 
 android { namespace = "org.meshtastic.feature.map" }
 
-dependencies { implementation(libs.bundles.osm) }
+dependencies {
+    implementation(projects.core.data)
+    implementation(projects.core.database)
+    implementation(projects.core.model)
+    implementation(projects.core.prefs)
+    implementation(projects.core.proto)
+    implementation(projects.core.service)
+    implementation(projects.core.strings)
+
+    implementation(libs.bundles.coroutines)
+    implementation(libs.bundles.lifecycle)
+    implementation(libs.bundles.osm)
+
+    implementation(libs.annotation)
+    implementation(libs.timber)
+}
