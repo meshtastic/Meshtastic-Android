@@ -140,6 +140,7 @@ constructor(
                 .trackLongTasks()
                 .trackNonFatalAnrs(true)
                 .trackUserInteractions()
+                .setSessionSampleRate(sampleRate)
                 .enableComposeActionTracking()
                 .build()
         Rum.enable(rumConfiguration)

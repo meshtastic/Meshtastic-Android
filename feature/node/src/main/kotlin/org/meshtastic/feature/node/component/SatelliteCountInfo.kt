@@ -17,40 +17,22 @@
 
 package org.meshtastic.feature.node.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.SatelliteAlt
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun SatelliteCountInfo(modifier: Modifier = Modifier, satCount: Int) {
-    Row(
+    IconInfo(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Icon(
-            modifier = Modifier.size(18.dp),
-            imageVector = Icons.TwoTone.SatelliteAlt,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = "$satCount",
-            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-    }
+        icon = Icons.TwoTone.SatelliteAlt,
+        contentDescription = stringResource(org.meshtastic.core.strings.R.string.sats),
+        text = "$satCount",
+    )
 }
 
 @PreviewLightDark

@@ -17,17 +17,18 @@
 
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
@@ -42,34 +43,37 @@ import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.database.model.Node
 
 @Composable
-fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: (Node) -> Unit = {}) {
-    val isIgnored = node.isIgnored
+fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit)? = null) {
     val (textColor, nodeColor) = node.colors
-    val inputChipInteractionSource = remember { MutableInteractionSource() }
-    ElevatedAssistChip(
-        modifier =
-        modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
-            contentDescription = node.user.shortName.ifEmpty { "Node" }
-        },
-        elevation = AssistChipDefaults.elevatedAssistChipElevation(),
-        colors =
-        AssistChipDefaults.elevatedAssistChipColors(
-            containerColor = Color(nodeColor),
-            labelColor = Color(textColor),
-        ),
-        label = {
+    val colors = CardDefaults.cardColors(containerColor = Color(nodeColor), contentColor = Color(textColor))
+
+    val content: @Composable () -> Unit = {
+        Box(
+            modifier =
+            Modifier.width(IntrinsicSize.Min)
+                .defaultMinSize(minWidth = 72.dp, minHeight = 32.dp)
+                .padding(horizontal = 8.dp)
+                .semantics { contentDescription = node.user.shortName.ifEmpty { "Node" } },
+            contentAlignment = Alignment.Center,
+        ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = node.user.shortName.ifEmpty { "???" },
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                textDecoration = TextDecoration.LineThrough.takeIf { node.isIgnored },
                 textAlign = TextAlign.Center,
                 maxLines = 1,
             )
-        },
-        onClick = { onClick(node) },
-        interactionSource = inputChipInteractionSource,
-    )
+        }
+    }
+
+    if (onClick == null) {
+        Card(modifier = modifier, shape = MaterialTheme.shapes.small, colors = colors) { content() }
+    } else {
+        Card(modifier = modifier, shape = MaterialTheme.shapes.small, colors = colors, onClick = { onClick(node) }) {
+            content()
+        }
+    }
 }
 
 @Suppress("MagicNumber")

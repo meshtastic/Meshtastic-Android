@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui.node
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -55,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -74,7 +72,7 @@ import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 import org.meshtastic.feature.node.list.NodeListViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeListScreen(viewModel: NodeListViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
@@ -173,11 +171,12 @@ fun NodeListScreen(viewModel: NodeListViewModel = hiltViewModel(), navigateToNod
                         onConfirmRemove = { viewModel.removeNode(it.num) },
                     )
 
+                    var expanded by remember { mutableStateOf(false) }
+
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                        var showContextMenu by remember { mutableStateOf(false) }
                         val longClick =
                             if (node.num != ourNode?.num) {
-                                { showContextMenu = true }
+                                { expanded = true }
                             } else {
                                 null
                             }
@@ -194,14 +193,16 @@ fun NodeListScreen(viewModel: NodeListViewModel = hiltViewModel(), navigateToNod
                             isConnected = connectionState.isConnected(),
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }
-                        ContextMenu(
-                            expanded = !isThisNode && showContextMenu,
-                            node = node,
-                            onClickFavorite = { displayFavoriteDialog = true },
-                            onClickIgnore = { displayIgnoreDialog = true },
-                            onClickRemove = { displayRemoveDialog = true },
-                            onDismiss = { showContextMenu = false },
-                        )
+                        if (!isThisNode) {
+                            ContextMenu(
+                                expanded = expanded,
+                                node = node,
+                                onClickFavorite = { displayFavoriteDialog = true },
+                                onClickIgnore = { displayIgnoreDialog = true },
+                                onClickRemove = { displayRemoveDialog = true },
+                                onDismiss = { expanded = false },
+                            )
+                        }
                     }
                 }
                 item { Spacer(modifier = Modifier.height(88.dp)) }
@@ -219,7 +220,7 @@ private fun ContextMenu(
     onClickRemove: (Node) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss, offset = DpOffset(x = 0.dp, y = 8.dp)) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         val isFavorite = node.isFavorite
         val isIgnored = node.isIgnored
 
