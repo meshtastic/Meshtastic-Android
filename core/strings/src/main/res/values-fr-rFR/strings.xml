@@ -881,7 +881,7 @@
     <string name="eight_hours">8 Hours</string>
     <string name="one_day">24 Hours</string>
     <string name="two_days">48 Hours</string>
-    <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
+    <string name="last_heard_filter_label">Filtrer par la dernière écoute : %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">No application available to handle link.</string>
 </resources>
