@@ -209,7 +209,7 @@ enum class NodeDetailRoute(
         R.string.position_log,
         NodeDetailRoutes.PositionLog,
         Icons.Default.LocationOn,
-        { metricsVM, onNavigateUp -> PositionLogScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> PositionLogScreen(metricsVM, onNavigateUp) },
     ),
     ENVIRONMENT(
         R.string.environment,

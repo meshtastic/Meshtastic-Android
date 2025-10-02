@@ -43,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -67,6 +68,7 @@ import com.geeksville.mesh.model.MetricsViewModel
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 import java.text.DateFormat
 import kotlin.time.Duration.Companion.days
@@ -171,7 +173,7 @@ private fun ActionButtons(
 }
 
 @Composable
-fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel()) {
+fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     val exportPositionLauncher =
@@ -183,37 +185,51 @@ fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel()) {
 
     var clearButtonEnabled by rememberSaveable(state.positionLogs) { mutableStateOf(state.positionLogs.isNotEmpty()) }
 
-    BoxWithConstraints {
-        val compactWidth = maxWidth < 600.dp
-        Column {
-            val textStyle =
-                if (compactWidth) {
-                    MaterialTheme.typography.bodySmall
-                } else {
-                    LocalTextStyle.current
-                }
-            CompositionLocalProvider(LocalTextStyle provides textStyle) {
-                HeaderItem(compactWidth)
-                PositionList(compactWidth, state.positionLogs, state.displayUnits)
-            }
-
-            ActionButtons(
-                clearButtonEnabled = clearButtonEnabled,
-                onClear = {
-                    clearButtonEnabled = false
-                    viewModel.clearPosition()
-                },
-                saveButtonEnabled = state.hasPositionLogs(),
-                onSave = {
-                    val intent =
-                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                            addCategory(Intent.CATEGORY_OPENABLE)
-                            type = "application/*"
-                            putExtra(Intent.EXTRA_TITLE, "position.csv")
-                        }
-                    exportPositionLauncher.launch(intent)
-                },
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = state.node?.user?.longName ?: "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
             )
+        },
+    ) { innerPadding ->
+        BoxWithConstraints(modifier = Modifier.padding(innerPadding)) {
+            val compactWidth = maxWidth < 600.dp
+            Column {
+                val textStyle =
+                    if (compactWidth) {
+                        MaterialTheme.typography.bodySmall
+                    } else {
+                        LocalTextStyle.current
+                    }
+                CompositionLocalProvider(LocalTextStyle provides textStyle) {
+                    HeaderItem(compactWidth)
+                    PositionList(compactWidth, state.positionLogs, state.displayUnits)
+                }
+
+                ActionButtons(
+                    clearButtonEnabled = clearButtonEnabled,
+                    onClear = {
+                        clearButtonEnabled = false
+                        viewModel.clearPosition()
+                    },
+                    saveButtonEnabled = state.hasPositionLogs(),
+                    onSave = {
+                        val intent =
+                            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "application/*"
+                                putExtra(Intent.EXTRA_TITLE, "position.csv")
+                            }
+                        exportPositionLauncher.launch(intent)
+                    },
+                )
+            }
         }
     }
 }

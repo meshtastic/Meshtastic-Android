@@ -125,7 +125,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     Scaffold(
         topBar = {
             MainAppBar(
-                title = "",
+                title = state.node?.user?.longName ?: "",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,

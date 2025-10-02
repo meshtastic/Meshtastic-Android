@@ -340,6 +340,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                         MapRoutes.Map::class,
                         NodeDetailRoutes.NodeMap::class,
                         NodeDetailRoutes.DeviceMetrics::class,
+                        NodeDetailRoutes.PositionLog::class,
                         NodesRoutes.Nodes::class,
                         NodesRoutes.NodeDetail::class,
                         SettingsRoutes.Settings::class,
