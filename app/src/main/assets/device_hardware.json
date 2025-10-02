@@ -1047,6 +1047,22 @@
     "hasMui": true
   },
   {
+    "hwModel": 101,
+    "hwModelSlug": "MUZI_R1_NEO",
+    "platformioTarget": "r1-neo",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "muzi R1 Neo",
+    "tags": [
+      "muzi"
+    ],
+    "requiresDfu": true,
+    "images": [
+      "muzi_r1_neo.svg"
+    ]
+  },
+  {
     "hwModel": 102,
     "hwModelSlug": "T_DECK_PRO",
     "platformioTarget": "t-deck-pro",
