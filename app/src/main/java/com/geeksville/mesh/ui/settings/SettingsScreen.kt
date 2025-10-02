@@ -20,7 +20,9 @@ package com.geeksville.mesh.ui.settings
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -34,6 +36,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LocationOn
@@ -197,7 +200,7 @@ fun SettingsScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onClickChip = { onClickNodeChip(it.num) },
+                onClickChip = { node -> onClickNodeChip(node.num) },
             )
         },
     ) { paddingValues ->
@@ -279,6 +282,7 @@ fun SettingsScreen(
 
                 val settingsLauncher =
                     rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
+
                 // On Android 12 and below, system app settings for language are not available. Use the in-app language
                 // picker for these devices.
                 val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
@@ -357,6 +361,16 @@ fun SettingsScreen(
                     settingsViewModel.showAppIntro()
                 }
 
+                SettingsItem(
+                    text = stringResource(R.string.system_settings),
+                    leadingIcon = Icons.Rounded.AppSettingsAlt,
+                    trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                ) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.data = Uri.fromParts("package", context.packageName, null)
+                    settingsLauncher.launch(intent)
+                }
+
                 AppVersionButton(excludedModulesUnlocked) { settingsViewModel.unlockExcludedModules() }
             }
         }
@@ -392,6 +406,7 @@ private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedM
                 clickCount = 0
                 Toast.makeText(context, context.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG).show()
             }
+
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
                 onUnlockExcludedModules()
