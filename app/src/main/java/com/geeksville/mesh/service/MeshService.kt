@@ -1940,7 +1940,7 @@ class MeshService : Service() {
     private fun importContact(contact: AdminProtos.SharedContact) {
         val verifiedContact = contact.copy { manuallyVerified = true }
         sendContact(verifiedContact)
-        handleSharedContactImport(contact = contact)
+        handleSharedContactImport(contact = verifiedContact)
     }
 
     /**
