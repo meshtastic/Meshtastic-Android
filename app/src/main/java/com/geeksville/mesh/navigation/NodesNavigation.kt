@@ -227,7 +227,7 @@ enum class NodeDetailRoute(
         R.string.traceroute,
         NodeDetailRoutes.TracerouteLog,
         Icons.Default.PermScanWifi,
-        { metricsVM, onNavigateUp -> TracerouteLogScreen(viewModel = metricsVM) },
+        { metricsVM, onNavigateUp -> TracerouteLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
     ),
     POWER(
         R.string.power,
