@@ -48,6 +48,8 @@ import org.meshtastic.core.service.ServiceRepository
 import timber.log.Timber
 import javax.inject.Inject
 
+private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
+
 @HiltViewModel
 class MessageViewModel
 @Inject
@@ -124,6 +126,20 @@ constructor(
 
     fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 
+    /**
+     * Sends a message to a contact or channel.
+     *
+     * If the message is a direct message (no channel specified), this function will:
+     * - If the device firmware version is older than 2.7.12, it will mark the destination node as a favorite to prevent
+     *   it from being removed from the on-device node database.
+     * - If the device firmware version is 2.7.12 or newer, it will send a shared contact to the destination node.
+     *
+     * @param str The message content.
+     * @param contactKey The unique contact key, which is a combination of channel (optional) and node ID. Defaults to
+     *   broadcasting on channel 0.
+     * @param replyId The ID of the message this is a reply to, if any.
+     */
+    @Suppress("NestedBlockDepth")
     fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
@@ -137,13 +153,17 @@ constructor(
 
             fwVersion?.let { fw ->
                 val ver = DeviceVersion(asString = fw)
-                val gateFw = DeviceVersion(asString = "2.7.12")
-                if (ver < gateFw) {
+                val verifiedSharedContactsVersion =
+                    DeviceVersion(
+                        asString = VERIFIED_CONTACT_FIRMWARE_CUTOFF,
+                    ) // Version cutover to verified shared contacts
+
+                if (ver >= verifiedSharedContactsVersion) {
+                    sendSharedContact(destNode)
+                } else {
                     if (!destNode.isFavorite) {
                         favoriteNode(destNode)
                     }
-                } else {
-                    sendSharedContact(destNode)
                 }
             }
         }
