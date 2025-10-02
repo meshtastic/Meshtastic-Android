@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -40,33 +39,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.preview.BooleanProvider
 import org.meshtastic.core.ui.component.preview.previewNode
 import org.meshtastic.core.ui.theme.AppTheme
-
-@Suppress("CyclomaticComplexMethod")
-@Composable
-fun MainAppBar(
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    ourNode: Node?,
-    onClickChip: (Node) -> Unit,
-) {
-    MainAppBar(
-        modifier = modifier,
-        title = "",
-        subtitle = null,
-        canNavigateUp = navController.previousBackStackEntry != null,
-        ourNode = ourNode,
-        showNodeChip = false,
-        onNavigateUp = navController::navigateUp,
-        actions = {},
-        onClickChip = onClickChip,
-    )
-}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable

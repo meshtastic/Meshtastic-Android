@@ -22,7 +22,6 @@ package com.geeksville.mesh.ui
 import android.Manifest
 import android.os.Build
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -97,17 +96,14 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MapRoutes
-import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
@@ -331,73 +327,6 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     ) {
         Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { _ ->
             Column(modifier = Modifier.fillMaxSize()) {
-                fun NavDestination.hasGlobalAppBar(): Boolean =
-                    // List of screens to exclude from having the global app bar
-                    listOf(
-                        ChannelsRoutes.Channels::class,
-                        ConnectionsRoutes.Connections::class,
-                        ContactsRoutes.Contacts::class,
-                        ContactsRoutes.Messages::class,
-                        ContactsRoutes.QuickChat::class,
-                        ContactsRoutes.Share::class,
-                        MapRoutes.Map::class,
-                        NodeDetailRoutes.NodeMap::class,
-                        NodeDetailRoutes.DeviceMetrics::class,
-                        NodeDetailRoutes.PositionLog::class,
-                        NodeDetailRoutes.PowerMetrics::class,
-                        NodeDetailRoutes.TracerouteLog::class,
-                        NodeDetailRoutes.HostMetricsLog::class,
-                        NodeDetailRoutes.PaxMetrics::class,
-                        NodeDetailRoutes.EnvironmentMetrics::class,
-                        NodeDetailRoutes.SignalMetrics::class,
-                        NodesRoutes.Nodes::class,
-                        NodesRoutes.NodeDetail::class,
-                        SettingsRoutes.Settings::class,
-                        SettingsRoutes.AmbientLighting::class,
-                        SettingsRoutes.LoRa::class,
-                        SettingsRoutes.Security::class,
-                        SettingsRoutes.Audio::class,
-                        SettingsRoutes.Bluetooth::class,
-                        SettingsRoutes.ChannelConfig::class,
-                        SettingsRoutes.DetectionSensor::class,
-                        SettingsRoutes.Display::class,
-                        SettingsRoutes.Telemetry::class,
-                        SettingsRoutes.Network::class,
-                        SettingsRoutes.Paxcounter::class,
-                        SettingsRoutes.Power::class,
-                        SettingsRoutes.Position::class,
-                        SettingsRoutes.User::class,
-                        SettingsRoutes.Device::class,
-                        SettingsRoutes.StoreForward::class,
-                        SettingsRoutes.MQTT::class,
-                        SettingsRoutes.Serial::class,
-                        SettingsRoutes.ExtNotification::class,
-                        SettingsRoutes.CleanNodeDb::class,
-                        SettingsRoutes.DebugPanel::class,
-                        SettingsRoutes.RangeTest::class,
-                        SettingsRoutes.CannedMessage::class,
-                        SettingsRoutes.RemoteHardware::class,
-                        SettingsRoutes.NeighborInfo::class,
-                    )
-                        .none { this.hasRoute(it) }
-
-                val ourNodeInfo by uIViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-                AnimatedVisibility(visible = currentDestination?.hasGlobalAppBar() ?: false) {
-                    MainAppBar(
-                        navController = navController,
-                        ourNode = ourNodeInfo,
-                        onClickChip = {
-                            navController.navigate(
-                                NodesRoutes.NodeDetailGraph(it.num),
-                                {
-                                    launchSingleTop = true
-                                    restoreState = true
-                                },
-                            )
-                        },
-                    )
-                }
-
                 NavHost(
                     navController = navController,
                     startDestination = NodesRoutes.NodesGraph,
