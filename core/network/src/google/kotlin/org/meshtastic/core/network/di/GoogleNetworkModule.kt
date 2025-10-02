@@ -17,11 +17,13 @@
 
 package org.meshtastic.core.network.di
 
+import android.content.Context
 import com.datadog.android.okhttp.DatadogEventListener
 import com.datadog.android.okhttp.DatadogInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
@@ -29,11 +31,13 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.meshtastic.core.network.BuildConfig
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.createApiService
+import java.io.File
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -42,7 +46,14 @@ class GoogleNetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient = OkHttpClient.Builder()
+        .cache(
+            cache =
+            Cache(
+                directory = File(context.applicationContext.cacheDir, "http_cache"),
+                maxSize = 50L * 1024L * 1024L, // 50 MiB
+            ),
+        )
         .addInterceptor(
             interceptor =
             HttpLoggingInterceptor().apply {
