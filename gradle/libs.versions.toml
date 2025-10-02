@@ -166,7 +166,7 @@ android-tools-common = { module = "com.android.tools:common", version = "31.13.0
 serialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 androidx-lint-gradle = { module = "androidx.lint:lint-gradle", version = "1.0.0-alpha05" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
-datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.20.0" }
+datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.21.0" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.4.27" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
@@ -246,7 +246,7 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.
 firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.1" }
 
 # Other
-datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.20.0" }
+datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.21.0" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.0.4" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
