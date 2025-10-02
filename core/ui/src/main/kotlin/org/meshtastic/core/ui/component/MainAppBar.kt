@@ -40,11 +40,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.preview.BooleanProvider
 import org.meshtastic.core.ui.component.preview.previewNode
@@ -58,21 +55,9 @@ fun MainAppBar(
     ourNode: Node?,
     onClickChip: (Node) -> Unit,
 ) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = backStackEntry?.destination
-
-    val title: String =
-        when {
-            currentDestination == null -> ""
-
-            currentDestination.hasRoute<ContactsRoutes.QuickChat>() -> stringResource(id = R.string.quick_chat)
-
-            else -> ""
-        }
-
     MainAppBar(
         modifier = modifier,
-        title = title,
+        title = "",
         subtitle = null,
         canNavigateUp = navController.previousBackStackEntry != null,
         ourNode = ourNode,

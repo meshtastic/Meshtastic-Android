@@ -91,6 +91,6 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController) {
     composable<ContactsRoutes.QuickChat>(
         deepLinks = listOf(navDeepLink<ContactsRoutes.QuickChat>(basePath = "$DEEP_LINK_BASE_URI/quick_chat")),
     ) {
-        QuickChatScreen()
+        QuickChatScreen(onNavigateUp = navController::navigateUp)
     }
 }
