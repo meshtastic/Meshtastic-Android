@@ -221,7 +221,7 @@ enum class NodeDetailRoute(
         R.string.signal,
         NodeDetailRoutes.SignalMetrics,
         Icons.Default.CellTower,
-        { metricsVM, onNavigateUp -> SignalMetricsScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> SignalMetricsScreen(metricsVM, onNavigateUp) },
     ),
     TRACEROUTE(
         R.string.traceroute,
