@@ -70,6 +70,7 @@ import org.meshtastic.core.ui.component.TitledCard
 fun BLEDevices(
     connectionState: ConnectionState,
     bondedDevices: List<DeviceListEntry>,
+    availableDevices: List<DeviceListEntry>,
     selectedDevice: String,
     scanModel: BTScanModel,
     bluetoothEnabled: Boolean,
@@ -153,7 +154,7 @@ fun BLEDevices(
                         }
                     }
 
-                    if (bondedDevices.isEmpty()) {
+                    if (bondedDevices.isEmpty() && availableDevices.isEmpty()) {
                         EmptyStateContent(
                             imageVector = Icons.Rounded.BluetoothDisabled,
                             text =
@@ -165,18 +166,19 @@ fun BLEDevices(
                             actionButton = scanButton,
                         )
                     } else {
-                        TitledCard(title = stringResource(R.string.bluetooth_paired_devices)) {
-                            bondedDevices.forEach { device ->
-                                val connected =
-                                    connectionState == ConnectionState.CONNECTED && device.fullAddress == selectedDevice
-                                DeviceListItem(
-                                    connected = connected,
-                                    device = device,
-                                    onSelect = { scanModel.onSelected(device) },
-                                    modifier = Modifier,
-                                )
-                            }
-                        }
+                        bondedDevices.Section(
+                            title = stringResource(R.string.bluetooth_paired_devices),
+                            connectionState = connectionState,
+                            selectedDevice = selectedDevice,
+                            onSelect = scanModel::onSelected,
+                        )
+
+                        availableDevices.Section(
+                            title = stringResource(R.string.bluetooth_available_devices),
+                            connectionState = connectionState,
+                            selectedDevice = selectedDevice,
+                            onSelect = scanModel::onSelected,
+                        )
 
                         scanButton()
                     }
@@ -211,5 +213,27 @@ private fun checkPermissionsAndScan(
         scanModel.startScan()
     } else {
         permissionsState.launchMultiplePermissionRequest()
+    }
+}
+
+@Composable
+private fun List<DeviceListEntry>.Section(
+    title: String,
+    connectionState: ConnectionState,
+    selectedDevice: String,
+    onSelect: (DeviceListEntry) -> Unit,
+) {
+    if (isNotEmpty()) {
+        TitledCard(title = title) {
+            forEach { device ->
+                val connected = connectionState == ConnectionState.CONNECTED && device.fullAddress == selectedDevice
+                DeviceListItem(
+                    connected = connected,
+                    device = device,
+                    onSelect = { onSelect(device) },
+                    modifier = Modifier,
+                )
+            }
+        }
     }
 }
