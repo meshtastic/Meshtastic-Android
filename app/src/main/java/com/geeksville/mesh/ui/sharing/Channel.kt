@@ -21,6 +21,7 @@ import android.Manifest
 import android.content.ClipData
 import android.net.Uri
 import android.os.RemoteException
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -74,6 +75,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -92,7 +94,6 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
@@ -124,18 +125,18 @@ import timber.log.Timber
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelScreen(
-    viewModel: UIViewModel = hiltViewModel(),
+    channelViewModel: ChannelViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onNavigate: (Route) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
-    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val connectionState by channelViewModel.connectionState.collectAsStateWithLifecycle()
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
 
-    val enabled = connectionState == ConnectionState.CONNECTED && !viewModel.isManaged
+    val enabled = connectionState == ConnectionState.CONNECTED && !channelViewModel.isManaged
 
-    val channels by viewModel.channels.collectAsStateWithLifecycle()
+    val channels by channelViewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
     val modemPresetName by remember(channels) { mutableStateOf(Channel(loraConfig = channels.loraConfig).name) }
 
@@ -175,10 +176,13 @@ fun ChannelScreen(
             settings.addAll(result)
         }
 
+    val context = LocalContext.current
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
             if (result.contents != null) {
-                viewModel.requestChannelUrl(result.contents.toUri())
+                channelViewModel.requestChannelUrl(result.contents.toUri()) {
+                    Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -207,15 +211,15 @@ fun ChannelScreen(
     fun installSettings(newChannelSet: ChannelSet) {
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
-            viewModel.setChannels(newChannelSet)
+            channelViewModel.setChannels(newChannelSet)
             // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
         } catch (ex: RemoteException) {
-            Timber.e("ignoring channel problem", ex)
+            Timber.e(ex, "ignoring channel problem")
 
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            viewModel.showSnackBar(R.string.cant_change_no_radio)
+            Toast.makeText(context, R.string.cant_change_no_radio, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -242,8 +246,8 @@ fun ChannelScreen(
                         installSettings(
                             Channel.default.settings,
                             Channel.default.loraConfig.copy {
-                                region = viewModel.region
-                                txEnabled = viewModel.txEnabled
+                                region = channelViewModel.region
+                                txEnabled = channelViewModel.txEnabled
                             },
                         )
                         showResetDialog = false
@@ -282,7 +286,11 @@ fun ChannelScreen(
             EditChannelUrl(
                 enabled = enabled,
                 channelUrl = selectedChannelSet.getChannelUrl(shouldAdd = shouldAddChannelsState),
-                onConfirm = viewModel::requestChannelUrl,
+                onConfirm = {
+                    channelViewModel.requestChannelUrl(it) {
+                        Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                    }
+                },
             )
         }
         item {
