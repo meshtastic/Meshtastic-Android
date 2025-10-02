@@ -28,9 +28,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.map.MapView
 import com.geeksville.mesh.ui.map.NodeMapViewModel
+import org.meshtastic.core.ui.component.MainAppBar
 
 const val DEG_D = 1e-7
 

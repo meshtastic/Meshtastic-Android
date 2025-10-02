@@ -29,10 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.settings.radio.ResponseState
 import com.google.protobuf.MessageLite
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
 
 @Composable

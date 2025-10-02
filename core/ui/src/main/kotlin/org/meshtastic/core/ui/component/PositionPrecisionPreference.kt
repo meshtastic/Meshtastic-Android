@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SwitchPreference
 import kotlin.math.pow
 import kotlin.math.roundToInt
 

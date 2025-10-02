@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -47,7 +47,8 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.preview.BooleanProvider
+import org.meshtastic.core.ui.component.preview.previewNode
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Suppress("CyclomaticComplexMethod")
@@ -128,7 +129,8 @@ fun MainAppBar(
             {
                 IconButton(enabled = false, onClick = {}) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = com.geeksville.mesh.R.drawable.app_icon),
+                        imageVector =
+                        ImageVector.vectorResource(id = org.meshtastic.core.ui.R.drawable.ic_meshtastic),
                         contentDescription = stringResource(id = R.string.application_icon),
                     )
                 }

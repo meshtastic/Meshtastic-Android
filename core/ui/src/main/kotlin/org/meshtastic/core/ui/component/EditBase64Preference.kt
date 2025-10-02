@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,10 +44,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.util.encodeToString
-import com.geeksville.mesh.util.toByteString
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.util.encodeToString
+import org.meshtastic.core.model.util.toByteString
 import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")

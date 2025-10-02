@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,7 +46,6 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.remoteHardwarePin
 import com.google.protobuf.ByteString
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.EditTextPreference
 
 @Suppress("LongMethod")
 @Composable

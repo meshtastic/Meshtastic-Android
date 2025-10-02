@@ -29,9 +29,9 @@ import androidx.navigation.NavController
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.SerialConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
-import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
