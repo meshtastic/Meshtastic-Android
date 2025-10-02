@@ -36,6 +36,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,6 +71,7 @@ import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
@@ -114,41 +116,55 @@ private val LEGEND_DATA =
     )
 
 @Composable
-fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {
+fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var displayInfoDialog by remember { mutableStateOf(false) }
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     val data = state.deviceMetricsFiltered(selectedTimeFrame)
 
-    Column {
-        if (displayInfoDialog) {
-            LegendInfoDialog(
-                pairedRes =
-                listOf(
-                    Pair(R.string.channel_utilization, R.string.ch_util_definition),
-                    Pair(R.string.air_utilization, R.string.air_util_definition),
-                ),
-                onDismiss = { displayInfoDialog = false },
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
             )
+        },
+    ) { scaffoldPadding ->
+        Column(modifier = Modifier.padding(scaffoldPadding)) {
+            if (displayInfoDialog) {
+                LegendInfoDialog(
+                    pairedRes =
+                    listOf(
+                        Pair(R.string.channel_utilization, R.string.ch_util_definition),
+                        Pair(R.string.air_utilization, R.string.air_util_definition),
+                    ),
+                    onDismiss = { displayInfoDialog = false },
+                )
+            }
+
+            DeviceMetricsChart(
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
+                telemetries = data.reversed(),
+                selectedTimeFrame,
+                promptInfoDialog = { displayInfoDialog = true },
+            )
+
+            SlidingSelector(
+                TimeFrame.entries.toList(),
+                selectedTimeFrame,
+                onOptionSelected = { viewModel.setTimeFrame(it) },
+            ) {
+                OptionLabel(stringResource(it.strRes))
+            }
+
+            /* Device Metric Cards */
+            LazyColumn(modifier = Modifier.fillMaxSize()) { items(data) { telemetry -> DeviceMetricsCard(telemetry) } }
         }
-
-        DeviceMetricsChart(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
-            telemetries = data.reversed(),
-            selectedTimeFrame,
-            promptInfoDialog = { displayInfoDialog = true },
-        )
-
-        SlidingSelector(
-            TimeFrame.entries.toList(),
-            selectedTimeFrame,
-            onOptionSelected = { viewModel.setTimeFrame(it) },
-        ) {
-            OptionLabel(stringResource(it.strRes))
-        }
-
-        /* Device Metric Cards */
-        LazyColumn(modifier = Modifier.fillMaxSize()) { items(data) { telemetry -> DeviceMetricsCard(telemetry) } }
     }
 }
 
