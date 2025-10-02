@@ -171,12 +171,7 @@ fun NavDestination.isNodeDetailRoute(): Boolean = NodeDetailRoute.entries.any { 
 private inline fun <reified R : Route> NavGraphBuilder.addNodeDetailScreenComposable(
     navController: NavHostController,
     routeInfo: NodeDetailRoute,
-    crossinline screenContent:
-    @Composable (
-        navController: NavHostController,
-        metricsViewModel: MetricsViewModel,
-        onNavigateUp: () -> Unit,
-    ) -> Unit,
+    crossinline screenContent: @Composable (metricsViewModel: MetricsViewModel, onNavigateUp: () -> Unit) -> Unit,
 ) {
     composable<R>(
         deepLinks =
@@ -188,7 +183,7 @@ private inline fun <reified R : Route> NavGraphBuilder.addNodeDetailScreenCompos
         val parentGraphBackStackEntry =
             remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
         val metricsViewModel = hiltViewModel<MetricsViewModel>(parentGraphBackStackEntry)
-        screenContent(navController, metricsViewModel, navController::navigateUp)
+        screenContent(metricsViewModel, navController::navigateUp)
     }
 }
 
@@ -196,65 +191,60 @@ enum class NodeDetailRoute(
     @StringRes val title: Int,
     val route: Route,
     val icon: ImageVector?,
-    val screenComposable:
-    @Composable (
-        navController: NavHostController,
-        metricsViewModel: MetricsViewModel,
-        onNavigateUp: () -> Unit,
-    ) -> Unit,
+    val screenComposable: @Composable (metricsViewModel: MetricsViewModel, onNavigateUp: () -> Unit) -> Unit,
 ) {
     DEVICE(
         R.string.device,
         NodeDetailRoutes.DeviceMetrics,
         Icons.Default.Router,
-        { _, metricsVM, onNavigateUp -> DeviceMetricsScreen(metricsVM, onNavigateUp) },
+        { metricsVM, onNavigateUp -> DeviceMetricsScreen(metricsVM, onNavigateUp) },
     ),
     NODE_MAP(
         R.string.node_map,
         NodeDetailRoutes.NodeMap,
         Icons.Default.LocationOn,
-        { navController, metricsVM, onNavigateUp -> NodeMapScreen(navController, metricsVM) },
+        { metricsVM, onNavigateUp -> NodeMapScreen(metricsVM, onNavigateUp = onNavigateUp) },
     ),
     POSITION_LOG(
         R.string.position_log,
         NodeDetailRoutes.PositionLog,
         Icons.Default.LocationOn,
-        { _, metricsVM, onNavigateUp -> PositionLogScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> PositionLogScreen(metricsVM) },
     ),
     ENVIRONMENT(
         R.string.environment,
         NodeDetailRoutes.EnvironmentMetrics,
         Icons.Default.LightMode,
-        { _, metricsVM, onNavigateUp -> EnvironmentMetricsScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> EnvironmentMetricsScreen(metricsVM) },
     ),
     SIGNAL(
         R.string.signal,
         NodeDetailRoutes.SignalMetrics,
         Icons.Default.CellTower,
-        { _, metricsVM, onNavigateUp -> SignalMetricsScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> SignalMetricsScreen(metricsVM) },
     ),
     TRACEROUTE(
         R.string.traceroute,
         NodeDetailRoutes.TracerouteLog,
         Icons.Default.PermScanWifi,
-        { _, metricsVM, onNavigateUp -> TracerouteLogScreen(viewModel = metricsVM) },
+        { metricsVM, onNavigateUp -> TracerouteLogScreen(viewModel = metricsVM) },
     ),
     POWER(
         R.string.power,
         NodeDetailRoutes.PowerMetrics,
         Icons.Default.Power,
-        { _, metricsVM, onNavigateUp -> PowerMetricsScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> PowerMetricsScreen(metricsVM) },
     ),
     HOST(
         R.string.host,
         NodeDetailRoutes.HostMetricsLog,
         Icons.Default.Memory,
-        { _, metricsVM, onNavigateUp -> HostMetricsLogScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> HostMetricsLogScreen(metricsVM) },
     ),
     PAX(
         R.string.pax,
         NodeDetailRoutes.PaxMetrics,
         Icons.Default.People,
-        { _, metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM) },
     ),
 }
