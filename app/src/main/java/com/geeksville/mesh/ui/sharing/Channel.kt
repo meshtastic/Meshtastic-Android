@@ -86,12 +86,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.AppOnlyProtos.ChannelSet
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
-import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
@@ -114,6 +109,11 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.proto.AppOnlyProtos.ChannelSet
+import org.meshtastic.proto.ChannelProtos
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.copy
 import timber.log.Timber
 
 /**

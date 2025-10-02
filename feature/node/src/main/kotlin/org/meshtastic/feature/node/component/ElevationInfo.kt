@@ -22,12 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 
 @Composable
 fun ElevationInfo(

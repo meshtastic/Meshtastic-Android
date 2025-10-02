@@ -18,7 +18,6 @@
 package com.geeksville.mesh.model
 
 import androidx.compose.ui.graphics.Color
-import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
@@ -29,6 +28,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.core.ui.theme.GraphColors.Yellow
+import org.meshtastic.proto.TelemetryProtos
 
 @Suppress("MagicNumber")
 enum class Environment(val color: Color) {

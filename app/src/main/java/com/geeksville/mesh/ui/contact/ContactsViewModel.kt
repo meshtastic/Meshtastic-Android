@@ -20,7 +20,6 @@ package com.geeksville.mesh.ui.contact
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.model.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -38,6 +37,7 @@ import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.getShortDate
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.channelSet
 import javax.inject.Inject
 import kotlin.collections.map
 

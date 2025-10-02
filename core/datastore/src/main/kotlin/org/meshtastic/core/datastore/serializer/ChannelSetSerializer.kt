@@ -19,8 +19,8 @@ package org.meshtastic.core.datastore.serializer
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
-import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.google.protobuf.InvalidProtocolBufferException
+import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import java.io.InputStream
 import java.io.OutputStream
 

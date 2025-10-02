@@ -56,7 +56,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
@@ -67,6 +66,7 @@ import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.component.SnrAndRssi
+import org.meshtastic.proto.MeshProtos.MeshPacket
 
 @Suppress("MagicNumber")
 private enum class Metric(val color: Color, val min: Float, val max: Float) {

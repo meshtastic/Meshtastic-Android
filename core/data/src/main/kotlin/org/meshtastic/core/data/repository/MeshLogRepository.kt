@@ -17,10 +17,6 @@
 
 package org.meshtastic.core.data.repository
 
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshProtos.MeshPacket
-import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.TelemetryProtos.Telemetry
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +28,10 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.annotation.IoDispatcher
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.TelemetryProtos.Telemetry
 import javax.inject.Inject
 
 @Suppress("TooManyFunctions")

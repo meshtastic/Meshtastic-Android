@@ -19,7 +19,6 @@ package com.geeksville.mesh.ui.connections
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +32,7 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import javax.inject.Inject
 
 @HiltViewModel

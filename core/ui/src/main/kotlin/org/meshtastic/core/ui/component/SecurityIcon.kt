@@ -60,15 +60,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.ChannelProtos.ChannelSettings
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.ChannelProtos.ChannelSettings
+import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 
 private const val PRECISE_POSITION_BITS = 32
 

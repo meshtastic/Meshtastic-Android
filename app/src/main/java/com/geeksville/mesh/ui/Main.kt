@@ -75,7 +75,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.UIViewModel
@@ -116,6 +115,7 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {

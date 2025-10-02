@@ -18,10 +18,10 @@
 package org.meshtastic.core.datastore
 
 import androidx.datastore.core.DataStore
-import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
+import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig
 import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject

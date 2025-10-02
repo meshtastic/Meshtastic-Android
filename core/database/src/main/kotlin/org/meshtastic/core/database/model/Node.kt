@@ -18,13 +18,6 @@
 package org.meshtastic.core.database.model
 
 import android.graphics.Color
-import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.PaxcountProtos
-import com.geeksville.mesh.TelemetryProtos.DeviceMetrics
-import com.geeksville.mesh.TelemetryProtos.EnvironmentMetrics
-import com.geeksville.mesh.TelemetryProtos.PowerMetrics
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
 import org.meshtastic.core.database.entity.NodeEntity
@@ -32,6 +25,13 @@ import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.latLongToMeter
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.PaxcountProtos
+import org.meshtastic.proto.TelemetryProtos.DeviceMetrics
+import org.meshtastic.proto.TelemetryProtos.EnvironmentMetrics
+import org.meshtastic.proto.TelemetryProtos.PowerMetrics
 
 @Suppress("MagicNumber")
 data class Node(

@@ -17,11 +17,7 @@
 
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshProtos.MeshPacket
-import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.Lazy
 import java8.util.concurrent.CompletableFuture
@@ -38,6 +34,10 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshProtos.ToRadio
+import org.meshtastic.proto.fromRadio
 import timber.log.Timber
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
