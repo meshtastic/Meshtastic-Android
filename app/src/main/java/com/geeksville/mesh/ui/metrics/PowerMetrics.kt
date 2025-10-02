@@ -37,6 +37,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -67,6 +68,7 @@ import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
@@ -117,33 +119,50 @@ private val LEGEND_DATA =
     )
 
 @Composable
-fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {
+fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
     val data = state.powerMetricsFiltered(selectedTimeFrame)
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = state.node?.user?.longName ?: "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
+            )
+        },
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+            PowerMetricsChart(
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
+                telemetries = data.reversed(),
+                selectedTimeFrame,
+                selectedChannel,
+            )
 
-    Column {
-        PowerMetricsChart(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
-            telemetries = data.reversed(),
-            selectedTimeFrame,
-            selectedChannel,
-        )
+            SlidingSelector(
+                PowerChannel.entries.toList(),
+                selectedChannel,
+                onOptionSelected = { selectedChannel = it },
+            ) {
+                OptionLabel(stringResource(it.strRes))
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+            SlidingSelector(
+                TimeFrame.entries.toList(),
+                selectedTimeFrame,
+                onOptionSelected = { viewModel.setTimeFrame(it) },
+            ) {
+                OptionLabel(stringResource(it.strRes))
+            }
 
-        SlidingSelector(PowerChannel.entries.toList(), selectedChannel, onOptionSelected = { selectedChannel = it }) {
-            OptionLabel(stringResource(it.strRes))
+            LazyColumn(modifier = Modifier.fillMaxSize()) { items(data) { telemetry -> PowerMetricsCard(telemetry) } }
         }
-        Spacer(modifier = Modifier.height(2.dp))
-        SlidingSelector(
-            TimeFrame.entries.toList(),
-            selectedTimeFrame,
-            onOptionSelected = { viewModel.setTimeFrame(it) },
-        ) {
-            OptionLabel(stringResource(it.strRes))
-        }
-
-        LazyColumn(modifier = Modifier.fillMaxSize()) { items(data) { telemetry -> PowerMetricsCard(telemetry) } }
     }
 }
 

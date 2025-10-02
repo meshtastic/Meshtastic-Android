@@ -233,7 +233,7 @@ enum class NodeDetailRoute(
         R.string.power,
         NodeDetailRoutes.PowerMetrics,
         Icons.Default.Power,
-        { metricsVM, onNavigateUp -> PowerMetricsScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> PowerMetricsScreen(metricsVM, onNavigateUp) },
     ),
     HOST(
         R.string.host,
