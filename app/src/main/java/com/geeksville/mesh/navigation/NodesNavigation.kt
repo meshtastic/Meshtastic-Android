@@ -215,7 +215,7 @@ enum class NodeDetailRoute(
         R.string.environment,
         NodeDetailRoutes.EnvironmentMetrics,
         Icons.Default.LightMode,
-        { metricsVM, onNavigateUp -> EnvironmentMetricsScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> EnvironmentMetricsScreen(metricsVM, onNavigateUp) },
     ),
     SIGNAL(
         R.string.signal,
