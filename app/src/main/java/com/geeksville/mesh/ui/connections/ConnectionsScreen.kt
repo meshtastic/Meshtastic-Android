@@ -118,7 +118,7 @@ fun ConnectionsScreen(
     val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
     val bluetoothRssi by connectionsViewModel.bluetoothRssi.collectAsStateWithLifecycle()
 
-    val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
+    val bondedBleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
     val recentTcpDevices by scanModel.recentTcpDevicesForUi.collectAsStateWithLifecycle()
     val usbDevices by scanModel.usbDevicesForUi.collectAsStateWithLifecycle()
@@ -245,7 +245,7 @@ fun ConnectionsScreen(
                             DeviceType.BLE -> {
                                 BLEDevices(
                                     connectionState = connectionState,
-                                    btDevices = bleDevices,
+                                    bondedDevices = bondedBleDevices,
                                     selectedDevice = selectedDevice,
                                     scanModel = scanModel,
                                     bluetoothEnabled = bluetoothState.enabled,
@@ -280,7 +280,7 @@ fun ConnectionsScreen(
                         val showWarningNotPaired =
                             !connectionState.isConnected() &&
                                 !hasShownNotPairedWarning &&
-                                bleDevices.none { it is DeviceListEntry.Ble && it.bonded }
+                                bondedBleDevices.none { it is DeviceListEntry.Ble && it.bonded }
                         if (showWarningNotPaired) {
                             Text(
                                 text = stringResource(R.string.warning_not_paired),

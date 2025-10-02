@@ -69,7 +69,7 @@ import org.meshtastic.core.ui.component.TitledCard
 @Composable
 fun BLEDevices(
     connectionState: ConnectionState,
-    btDevices: List<DeviceListEntry>,
+    bondedDevices: List<DeviceListEntry>,
     selectedDevice: String,
     scanModel: BTScanModel,
     bluetoothEnabled: Boolean,
@@ -153,7 +153,7 @@ fun BLEDevices(
                         }
                     }
 
-                    if (btDevices.isEmpty()) {
+                    if (bondedDevices.isEmpty()) {
                         EmptyStateContent(
                             imageVector = Icons.Rounded.BluetoothDisabled,
                             text =
@@ -166,7 +166,7 @@ fun BLEDevices(
                         )
                     } else {
                         TitledCard(title = stringResource(R.string.bluetooth_paired_devices)) {
-                            btDevices.forEach { device ->
+                            bondedDevices.forEach { device ->
                                 val connected =
                                     connectionState == ConnectionState.CONNECTED && device.fullAddress == selectedDevice
                                 DeviceListItem(
