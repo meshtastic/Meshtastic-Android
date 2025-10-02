@@ -18,16 +18,16 @@
 package org.meshtastic.core.ui.component.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.deviceMetrics
-import com.geeksville.mesh.environmentMetrics
-import com.geeksville.mesh.paxcount
-import com.geeksville.mesh.position
-import com.geeksville.mesh.user
 import com.google.protobuf.ByteString
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceMetrics.Companion.currentTime
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.deviceMetrics
+import org.meshtastic.proto.environmentMetrics
+import org.meshtastic.proto.paxcount
+import org.meshtastic.proto.position
+import org.meshtastic.proto.user
 import kotlin.random.Random
 
 class NodePreviewParameterProvider : PreviewParameterProvider<Node> {

@@ -17,21 +17,21 @@
 
 package org.meshtastic.core.data.repository
 
-import com.geeksville.mesh.AppOnlyProtos.ChannelSet
-import com.geeksville.mesh.ChannelProtos.Channel
-import com.geeksville.mesh.ChannelProtos.ChannelSettings
-import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
-import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
-import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
-import com.geeksville.mesh.deviceProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
 import org.meshtastic.core.model.util.getChannelUrl
+import org.meshtastic.proto.AppOnlyProtos.ChannelSet
+import org.meshtastic.proto.ChannelProtos.Channel
+import org.meshtastic.proto.ChannelProtos.ChannelSettings
+import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
+import org.meshtastic.proto.ConfigProtos.Config
+import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
+import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
+import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig
+import org.meshtastic.proto.deviceProfile
 import javax.inject.Inject
 
 /**

@@ -21,7 +21,7 @@ package org.meshtastic.core.model.util
 
 import android.icu.util.LocaleData
 import android.icu.util.ULocale
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import java.util.Locale
 
 enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: Int) {

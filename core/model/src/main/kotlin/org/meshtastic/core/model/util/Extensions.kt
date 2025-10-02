@@ -18,9 +18,9 @@
 package org.meshtastic.core.model.util
 
 import android.widget.EditText
-import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.MeshProtos
 import org.meshtastic.core.model.BuildConfig
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.MeshProtos
 
 /**
  * When printing strings to logs sometimes we want to print useful debugging information about users or positions. But

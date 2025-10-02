@@ -36,11 +36,11 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.geeksville.mesh.Portnums
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.service.IMeshService
+import org.meshtastic.proto.Portnums
 
 private const val TAG: String = "MeshServiceExample"
 

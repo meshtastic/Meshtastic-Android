@@ -20,7 +20,6 @@ package org.meshtastic.core.database.dao
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.geeksville.mesh.Portnums
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -33,6 +32,7 @@ import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.proto.Portnums
 
 @RunWith(AndroidJUnit4::class)
 class PacketDaoTest {

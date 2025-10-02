@@ -42,15 +42,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.channelSettings
-import com.geeksville.mesh.copy
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PositionPrecisionPreference
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.proto.ChannelProtos
+import org.meshtastic.proto.channelSettings
+import org.meshtastic.proto.copy
 
 @Suppress("LongMethod")
 @Composable

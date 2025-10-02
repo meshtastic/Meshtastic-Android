@@ -33,8 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.geeksville.mesh.config
-import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ChannelOption
@@ -47,6 +45,8 @@ import org.meshtastic.core.ui.component.PreferenceDivider
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.proto.config
+import org.meshtastic.proto.copy
 
 @Composable
 fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {

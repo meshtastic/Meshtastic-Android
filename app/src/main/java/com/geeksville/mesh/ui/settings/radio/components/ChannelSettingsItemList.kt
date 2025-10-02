@@ -70,9 +70,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.geeksville.mesh.ChannelProtos.ChannelSettings
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
-import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
@@ -83,6 +80,9 @@ import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
+import org.meshtastic.proto.ChannelProtos.ChannelSettings
+import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
+import org.meshtastic.proto.channelSettings
 
 @Composable
 private fun ChannelItem(

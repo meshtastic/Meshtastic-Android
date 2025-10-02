@@ -129,8 +129,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
@@ -170,6 +168,8 @@ import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.TracerouteButton
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 
 private data class VectorMetricInfo(

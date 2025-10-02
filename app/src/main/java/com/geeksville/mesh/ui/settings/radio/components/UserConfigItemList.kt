@@ -29,7 +29,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.DeviceVersion
@@ -38,6 +37,7 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.RegularPreference
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.proto.copy
 
 @Composable
 fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {

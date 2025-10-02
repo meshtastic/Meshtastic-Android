@@ -56,7 +56,6 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
@@ -77,6 +76,7 @@ import org.meshtastic.core.ui.component.SettingsItemDetail
 import org.meshtastic.core.ui.component.SettingsItemSwitch
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
