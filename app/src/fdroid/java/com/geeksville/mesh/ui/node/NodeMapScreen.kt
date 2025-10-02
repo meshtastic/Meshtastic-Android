@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.map.NodeMapViewModel
 import com.geeksville.mesh.ui.map.rememberMapViewWithLifecycle
@@ -41,9 +40,9 @@ private const val DEG_D = 1e-7
 
 @Composable
 fun NodeMapScreen(
-    navController: NavHostController,
     metricsViewModel: MetricsViewModel = hiltViewModel(),
     nodeMapViewModel: NodeMapViewModel = hiltViewModel(),
+    onNavigateUp: () -> Unit,
 ) {
     val density = LocalDensity.current
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
