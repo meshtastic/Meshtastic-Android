@@ -125,18 +125,18 @@ import timber.log.Timber
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelScreen(
-    channelViewModel: ChannelViewModel = hiltViewModel(),
+    viewModel: ChannelViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onNavigate: (Route) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
-    val connectionState by channelViewModel.connectionState.collectAsStateWithLifecycle()
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
 
-    val enabled = connectionState == ConnectionState.CONNECTED && !channelViewModel.isManaged
+    val enabled = connectionState == ConnectionState.CONNECTED && !viewModel.isManaged
 
-    val channels by channelViewModel.channels.collectAsStateWithLifecycle()
+    val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
     val modemPresetName by remember(channels) { mutableStateOf(Channel(loraConfig = channels.loraConfig).name) }
 
@@ -180,7 +180,7 @@ fun ChannelScreen(
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
             if (result.contents != null) {
-                channelViewModel.requestChannelUrl(result.contents.toUri()) {
+                viewModel.requestChannelUrl(result.contents.toUri()) {
                     Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -211,7 +211,7 @@ fun ChannelScreen(
     fun installSettings(newChannelSet: ChannelSet) {
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
-            channelViewModel.setChannels(newChannelSet)
+            viewModel.setChannels(newChannelSet)
             // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
         } catch (ex: RemoteException) {
             Timber.e(ex, "ignoring channel problem")
@@ -246,8 +246,8 @@ fun ChannelScreen(
                         installSettings(
                             Channel.default.settings,
                             Channel.default.loraConfig.copy {
-                                region = channelViewModel.region
-                                txEnabled = channelViewModel.txEnabled
+                                region = viewModel.region
+                                txEnabled = viewModel.txEnabled
                             },
                         )
                         showResetDialog = false
@@ -287,7 +287,7 @@ fun ChannelScreen(
                 enabled = enabled,
                 channelUrl = selectedChannelSet.getChannelUrl(shouldAdd = shouldAddChannelsState),
                 onConfirm = {
-                    channelViewModel.requestChannelUrl(it) {
+                    viewModel.requestChannelUrl(it) {
                         Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
                     }
                 },
