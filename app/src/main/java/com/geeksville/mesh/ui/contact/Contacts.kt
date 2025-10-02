@@ -61,10 +61,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.model.Contact
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.proto.AppOnlyProtos
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

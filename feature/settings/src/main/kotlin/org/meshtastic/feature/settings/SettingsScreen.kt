@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
@@ -78,6 +77,7 @@ import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.getLanguageMap
+import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

@@ -17,6 +17,8 @@
 
 package com.geeksville.mesh.ui.node
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.MetricsViewModel
@@ -39,6 +42,20 @@ import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
+
+private data class VectorMetricInfo(
+    @StringRes val label: Int,
+    val value: String,
+    val icon: ImageVector,
+    val rotateIcon: Float = 0f,
+)
+
+private data class DrawableMetricInfo(
+    @StringRes val label: Int,
+    val value: String,
+    @DrawableRes val icon: Int,
+    val rotateIcon: Float = 0f,
+)
 
 @Suppress("LongMethod")
 @Composable

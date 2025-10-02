@@ -47,15 +47,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
-import com.geeksville.mesh.config
-import com.geeksville.mesh.copy
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig
+import org.meshtastic.proto.config
+import org.meshtastic.proto.copy
 
 private val DeviceConfig.Role.description: Int
     get() =

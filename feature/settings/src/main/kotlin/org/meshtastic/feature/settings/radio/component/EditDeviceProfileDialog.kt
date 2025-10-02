@@ -40,10 +40,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.google.protobuf.Descriptors
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 
 private const val SUPPORTED_FIELDS = 7
 

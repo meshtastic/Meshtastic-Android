@@ -19,13 +19,13 @@ package org.meshtastic.core.proto
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ChannelProtos.ChannelSettings
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshProtos.MeshPacket
-import com.geeksville.mesh.MeshProtos.Position
-import com.geeksville.mesh.channel
-import com.geeksville.mesh.channelSettings
+import org.meshtastic.proto.ChannelProtos
+import org.meshtastic.proto.ChannelProtos.ChannelSettings
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshProtos.Position
+import org.meshtastic.proto.channel
+import org.meshtastic.proto.channelSettings
 import java.text.DateFormat
 import kotlin.time.Duration.Companion.days
 

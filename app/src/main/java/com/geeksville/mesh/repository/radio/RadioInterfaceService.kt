@@ -23,7 +23,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.concurrent.handledLaunch
@@ -49,6 +48,7 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton

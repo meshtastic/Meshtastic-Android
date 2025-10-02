@@ -21,9 +21,6 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.Portnums
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +47,9 @@ import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Portnums
 import timber.log.Timber
 import java.io.BufferedWriter
 import java.io.FileNotFoundException

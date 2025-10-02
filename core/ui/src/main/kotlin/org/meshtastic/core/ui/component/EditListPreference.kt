@@ -40,12 +40,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ModuleConfigProtos.RemoteHardwarePin
-import com.geeksville.mesh.ModuleConfigProtos.RemoteHardwarePinType
-import com.geeksville.mesh.copy
-import com.geeksville.mesh.remoteHardwarePin
 import com.google.protobuf.ByteString
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePin
+import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePinType
+import org.meshtastic.proto.copy
+import org.meshtastic.proto.remoteHardwarePin
 
 @Suppress("LongMethod")
 @Composable
