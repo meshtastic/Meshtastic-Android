@@ -61,6 +61,7 @@ data class NodeWithRelations(
             powerMetrics = powerTelemetry.powerMetrics,
             paxcounter = paxcounter,
             notes = notes,
+            manuallyVerified = manuallyVerified,
         )
     }
 
@@ -82,6 +83,7 @@ data class NodeWithRelations(
             powerTelemetry = powerTelemetry,
             paxcounter = paxcounter,
             notes = notes,
+            manuallyVerified = manuallyVerified,
         )
     }
 }
@@ -122,6 +124,8 @@ data class NodeEntity(
     var paxcounter: PaxcountProtos.Paxcount = PaxcountProtos.Paxcount.getDefaultInstance(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
+    @ColumnInfo(name = "manually_verified", defaultValue = "0")
+    var manuallyVerified: Boolean = false, // ONLY set true when scanned/imported manually
 ) {
     val deviceMetrics: TelemetryProtos.DeviceMetrics
         get() = deviceTelemetry.deviceMetrics

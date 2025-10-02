@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.service.MeshServiceNotifications
+import com.geeksville.mesh.sharedContact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,11 +41,14 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import timber.log.Timber
 import javax.inject.Inject
+
+private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
 
 @HiltViewModel
 class MessageViewModel
@@ -122,6 +126,20 @@ constructor(
 
     fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 
+    /**
+     * Sends a message to a contact or channel.
+     *
+     * If the message is a direct message (no channel specified), this function will:
+     * - If the device firmware version is older than 2.7.12, it will mark the destination node as a favorite to prevent
+     *   it from being removed from the on-device node database.
+     * - If the device firmware version is 2.7.12 or newer, it will send a shared contact to the destination node.
+     *
+     * @param str The message content.
+     * @param contactKey The unique contact key, which is a combination of channel (optional) and node ID. Defaults to
+     *   broadcasting on channel 0.
+     * @param replyId The ID of the message this is a reply to, if any.
+     */
+    @Suppress("NestedBlockDepth")
     fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
@@ -130,9 +148,23 @@ constructor(
         // if the destination is a node, we need to ensure it's a
         // favorite so it does not get removed from the on-device node database.
         if (channel == null) { // no channel specified, so we assume it's a direct message
-            val node = nodeRepository.getNode(dest)
-            if (!node.isFavorite) {
-                favoriteNode(nodeRepository.getNode(dest))
+            val fwVersion = ourNodeInfo.value?.metadata?.firmwareVersion
+            val destNode = nodeRepository.getNode(dest)
+
+            fwVersion?.let { fw ->
+                val ver = DeviceVersion(asString = fw)
+                val verifiedSharedContactsVersion =
+                    DeviceVersion(
+                        asString = VERIFIED_CONTACT_FIRMWARE_CUTOFF,
+                    ) // Version cutover to verified shared contacts
+
+                if (ver >= verifiedSharedContactsVersion) {
+                    sendSharedContact(destNode)
+                } else {
+                    if (!destNode.isFavorite) {
+                        favoriteNode(destNode)
+                    }
+                }
             }
         }
         val p = DataPacket(dest, channel ?: 0, str, replyId)
@@ -156,6 +188,19 @@ constructor(
             serviceRepository.onServiceAction(ServiceAction.Favorite(node))
         } catch (ex: RemoteException) {
             Timber.e(ex, "Favorite node error")
+        }
+    }
+
+    private fun sendSharedContact(node: Node) = viewModelScope.launch {
+        try {
+            val contact = sharedContact {
+                nodeNum = node.num
+                user = node.user
+                manuallyVerified = node.manuallyVerified
+            }
+            serviceRepository.onServiceAction(ServiceAction.SendContact(contact = contact))
+        } catch (ex: RemoteException) {
+            Timber.e(ex, "Send shared contact error")
         }
     }
 

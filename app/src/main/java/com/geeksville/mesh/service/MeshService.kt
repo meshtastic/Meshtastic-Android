@@ -918,8 +918,17 @@ class MeshService : Service() {
         sessionPasskey = a.sessionPasskey
     }
 
+    private fun handleSharedContactImport(contact: AdminProtos.SharedContact) {
+        handleReceivedUser(contact.nodeNum, contact.user, manuallyVerified = true)
+    }
+
     // Update our DB of users based on someone sending out a User subpacket
-    private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User, channel: Int = 0) {
+    private fun handleReceivedUser(
+        fromNum: Int,
+        p: MeshProtos.User,
+        channel: Int = 0,
+        manuallyVerified: Boolean = false,
+    ) {
         updateNodeInfo(fromNum) {
             val newNode = (it.isUnknownUser && p.hwModel != MeshProtos.HardwareModel.UNSET)
 
@@ -936,6 +945,7 @@ class MeshService : Service() {
             it.longName = p.longName
             it.shortName = p.shortName
             it.channel = channel
+            it.manuallyVerified = manuallyVerified
             if (newNode) {
                 serviceNotifications.showNewNodeSeenNotification(it)
             }
@@ -1913,14 +1923,33 @@ class MeshService : Service() {
                 is ServiceAction.Favorite -> favoriteNode(action.node)
                 is ServiceAction.Ignore -> ignoreNode(action.node)
                 is ServiceAction.Reaction -> sendReaction(action)
-                is ServiceAction.AddSharedContact -> importContact(action.contact)
+                is ServiceAction.ImportContact -> importContact(action.contact)
+                is ServiceAction.SendContact -> sendContact(action.contact)
             }
         }
     }
 
+    /**
+     * Imports a manually shared contact.
+     *
+     * This function takes a [AdminProtos.SharedContact] proto, marks it as manually verified, sends it for further
+     * processing, and then handles the import specific logic.
+     *
+     * @param contact The [AdminProtos.SharedContact] to be imported.
+     */
     private fun importContact(contact: AdminProtos.SharedContact) {
+        val verifiedContact = contact.copy { manuallyVerified = true }
+        sendContact(verifiedContact)
+        handleSharedContactImport(contact = verifiedContact)
+    }
+
+    /**
+     * Sends a shared contact to the radio via [AdminProtos.AdminMessage]
+     *
+     * @param contact The contact to send.
+     */
+    private fun sendContact(contact: AdminProtos.SharedContact) {
         packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { addContact = contact })
-        handleReceivedUser(contact.nodeNum, contact.user)
     }
 
     private fun getDeviceMetadata(destNum: Int) = toRemoteExceptions {
