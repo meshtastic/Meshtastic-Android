@@ -887,4 +887,5 @@
     <string name="last_heard_filter_label">Filtreeri viimase kuulmise aja järgi: %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Lingi haldamiseks pole rakendust saadaval.</string>
+    <string name="system_settings">System Settings</string>
 </resources>
