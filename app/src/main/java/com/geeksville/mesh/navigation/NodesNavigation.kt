@@ -245,6 +245,6 @@ enum class NodeDetailRoute(
         R.string.pax,
         NodeDetailRoutes.PaxMetrics,
         Icons.Default.People,
-        { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM, onNavigateUp) },
     ),
 }

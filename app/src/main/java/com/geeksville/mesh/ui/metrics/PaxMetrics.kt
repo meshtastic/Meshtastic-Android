@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,6 +61,7 @@ import com.geeksville.mesh.model.TimeFrame
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
 import java.text.DateFormat
@@ -153,7 +155,7 @@ private fun PaxMetricsChart(
 
 @Composable
 @Suppress("MagicNumber", "LongMethod")
-fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel()) {
+fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
     val dateFormat = DateFormat.getDateTimeInstance()
     var timeFrame by remember { mutableStateOf(TimeFrame.TWENTY_FOUR_HOURS) }
@@ -189,38 +191,52 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel()) {
             LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color, environmentMetric = null),
         )
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Time frame selector
-        SlidingSelector(
-            options = TimeFrame.entries.toList(),
-            selectedOption = timeFrame,
-            onOptionSelected = { timeFrame = it },
-        ) { tf: TimeFrame ->
-            OptionLabel(stringResource(tf.strRes))
-        }
-        // Graph
-        if (graphData.isNotEmpty()) {
-            ChartHeader(graphData.size)
-            Legend(legendData = legendData)
-            PaxMetricsChart(
-                totalSeries = totalSeries,
-                bleSeries = bleSeries,
-                wifiSeries = wifiSeries,
-                minValue = minValue,
-                maxValue = maxValue,
-                timeFrame = timeFrame,
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = state.node?.user?.longName ?: "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
             )
-        }
-        // List
-        if (paxMetrics.isEmpty()) {
-            Text(
-                text = stringResource(R.string.no_pax_metrics_logs),
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                textAlign = TextAlign.Center,
-            )
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
-                items(paxMetrics) { (log, pax) -> PaxMetricsItem(log, pax, dateFormat) }
+        },
+    ) { innerPadding ->
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            // Time frame selector
+            SlidingSelector(
+                options = TimeFrame.entries.toList(),
+                selectedOption = timeFrame,
+                onOptionSelected = { timeFrame = it },
+            ) { tf: TimeFrame ->
+                OptionLabel(stringResource(tf.strRes))
+            }
+            // Graph
+            if (graphData.isNotEmpty()) {
+                ChartHeader(graphData.size)
+                Legend(legendData = legendData)
+                PaxMetricsChart(
+                    totalSeries = totalSeries,
+                    bleSeries = bleSeries,
+                    wifiSeries = wifiSeries,
+                    minValue = minValue,
+                    maxValue = maxValue,
+                    timeFrame = timeFrame,
+                )
+            }
+            // List
+            if (paxMetrics.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.no_pax_metrics_logs),
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    textAlign = TextAlign.Center,
+                )
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
+                    items(paxMetrics) { (log, pax) -> PaxMetricsItem(log, pax, dateFormat) }
+                }
             }
         }
     }
