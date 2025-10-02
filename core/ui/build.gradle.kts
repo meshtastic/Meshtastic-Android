@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.hilt)
 }
 
 android { namespace = "org.meshtastic.core.ui" }
@@ -25,7 +26,9 @@ android { namespace = "org.meshtastic.core.ui" }
 dependencies {
     implementation(projects.core.database)
     implementation(projects.core.model)
+    implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.strings)
+
     implementation(libs.bundles.markdown)
 }
