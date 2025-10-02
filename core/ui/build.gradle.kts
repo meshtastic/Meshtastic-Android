@@ -30,5 +30,7 @@ dependencies {
     implementation(projects.core.proto)
     implementation(projects.core.strings)
 
+    implementation(libs.bundles.coroutines)
     implementation(libs.bundles.markdown)
+    implementation(libs.emoji2.emojipicker)
 }

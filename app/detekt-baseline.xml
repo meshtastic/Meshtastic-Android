@@ -8,7 +8,6 @@
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableNaming:NodeDetailScreen.kt$notesSection</ID>
     <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
-    <ID>ComposableParamOrder:Debug.kt$DebugMenuActions</ID>
     <ID>ComposableParamOrder:Debug.kt$DecodedPayloadBlock</ID>
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchState</ID>
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchStateviewModelDefaults</ID>
@@ -161,8 +160,6 @@
     <ID>ModifierMissing:Contacts.kt$ContactsScreen</ID>
     <ID>ModifierMissing:Contacts.kt$SelectionToolbar</ID>
     <ID>ModifierMissing:DeviceMetrics.kt$DeviceMetricsScreen</ID>
-    <ID>ModifierMissing:EmojiPicker.kt$EmojiPicker</ID>
-    <ID>ModifierMissing:EmojiPicker.kt$EmojiPickerDialog</ID>
     <ID>ModifierMissing:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ModifierMissing:EnvironmentMetrics.kt$EnvironmentMetricsScreen</ID>
     <ID>ModifierMissing:HostMetricsLog.kt$HostMetricsLogScreen</ID>
