@@ -239,7 +239,7 @@ enum class NodeDetailRoute(
         R.string.host,
         NodeDetailRoutes.HostMetricsLog,
         Icons.Default.Memory,
-        { metricsVM, onNavigateUp -> HostMetricsLogScreen(metricsVM) },
+        { metricsVM, onNavigateUp -> HostMetricsLogScreen(metricsVM, onNavigateUp) },
     ),
     PAX(
         R.string.pax,
