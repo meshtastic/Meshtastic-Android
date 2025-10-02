@@ -884,4 +884,5 @@
     <string name="last_heard_filter_label">Filtrer par la dernière écoute : %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Aucune application disponible pour gérer ce lien.</string>
+    <string name="system_settings">System Settings</string>
 </resources>
