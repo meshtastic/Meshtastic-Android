@@ -356,6 +356,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                         SettingsRoutes.Power::class,
                         SettingsRoutes.Position::class,
                         SettingsRoutes.User::class,
+                        SettingsRoutes.Device::class,
                         SettingsRoutes.StoreForward::class,
                         SettingsRoutes.MQTT::class,
                         SettingsRoutes.Serial::class,
