@@ -21,6 +21,7 @@ import android.Manifest
 import android.content.ClipData
 import android.net.Uri
 import android.os.RemoteException
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -74,6 +75,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -92,7 +94,6 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
@@ -124,7 +125,7 @@ import timber.log.Timber
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelScreen(
-    viewModel: UIViewModel = hiltViewModel(),
+    viewModel: ChannelViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onNavigate: (Route) -> Unit,
 ) {
@@ -175,10 +176,13 @@ fun ChannelScreen(
             settings.addAll(result)
         }
 
+    val context = LocalContext.current
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
             if (result.contents != null) {
-                viewModel.requestChannelUrl(result.contents.toUri())
+                viewModel.requestChannelUrl(result.contents.toUri()) {
+                    Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -210,12 +214,12 @@ fun ChannelScreen(
             viewModel.setChannels(newChannelSet)
             // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
         } catch (ex: RemoteException) {
-            Timber.e("ignoring channel problem", ex)
+            Timber.e(ex, "ignoring channel problem")
 
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            viewModel.showSnackBar(R.string.cant_change_no_radio)
+            Toast.makeText(context, R.string.cant_change_no_radio, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -282,7 +286,11 @@ fun ChannelScreen(
             EditChannelUrl(
                 enabled = enabled,
                 channelUrl = selectedChannelSet.getChannelUrl(shouldAdd = shouldAddChannelsState),
-                onConfirm = viewModel::requestChannelUrl,
+                onConfirm = {
+                    viewModel.requestChannelUrl(it) {
+                        Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                    }
+                },
             )
         }
         item {

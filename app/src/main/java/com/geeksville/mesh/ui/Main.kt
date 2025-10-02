@@ -390,9 +390,9 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
                 ) {
                     contactsGraph(navController)
-                    nodesGraph(navController, uiViewModel = uIViewModel)
+                    nodesGraph(navController)
                     mapGraph(navController)
-                    channelsGraph(navController, uiViewModel = uIViewModel)
+                    channelsGraph(navController)
                     connectionsGraph(navController)
                     settingsGraph(navController)
                 }

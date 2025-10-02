@@ -58,7 +58,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
@@ -158,7 +157,6 @@ constructor(
     private val serviceRepository: ServiceRepository,
     radioInterfaceService: RadioInterfaceService,
     meshLogRepository: MeshLogRepository,
-    private val deviceHardwareRepository: DeviceHardwareRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
@@ -307,11 +305,6 @@ constructor(
     val connectionState
         get() = serviceRepository.connectionState
 
-    val isConnectedStateFlow =
-        serviceRepository.connectionState
-            .map { it.isConnected() }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?>
         get() = _requestChannelSet
@@ -329,21 +322,11 @@ constructor(
         _requestChannelSet.value = null
     }
 
-    var txEnabled: Boolean
-        get() = config.lora.txEnabled
-        set(value) {
-            updateLoraConfig { it.copy { txEnabled = value } }
-        }
-
     var region: Config.LoRaConfig.RegionCode
         get() = config.lora.region
         set(value) {
             updateLoraConfig { it.copy { region = value } }
         }
-
-    // managed mode disables all access to configuration
-    val isManaged: Boolean
-        get() = config.device.isManaged || config.security.isManaged
 
     override fun onCleared() {
         super.onCleared()
