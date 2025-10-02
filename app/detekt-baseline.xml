@@ -8,19 +8,16 @@
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableNaming:NodeDetailScreen.kt$notesSection</ID>
     <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
-    <ID>ComposableParamOrder:Debug.kt$DebugMenuActions</ID>
     <ID>ComposableParamOrder:Debug.kt$DecodedPayloadBlock</ID>
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchState</ID>
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchStateviewModelDefaults</ID>
     <ID>ComposableParamOrder:DeviceMetrics.kt$DeviceMetricsChart</ID>
-    <ID>ComposableParamOrder:EditBase64Preference.kt$EditBase64Preference</ID>
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$ChartContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$EnvironmentMetricsChart</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$MetricPlottingCanvas</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt$HostMetricsItem</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt$LogLine</ID>
-    <ID>ComposableParamOrder:MainAppBar.kt$MainAppBar</ID>
     <ID>ComposableParamOrder:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ComposableParamOrder:Message.kt$MessageScreen</ID>
     <ID>ComposableParamOrder:Message.kt$QuickChatRow</ID>
@@ -69,7 +66,6 @@
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
-    <ID>LambdaParameterEventTrailing:MainAppBar.kt$onClickChip</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
     <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
@@ -105,9 +101,6 @@
     <ID>MagicNumber:Debug.kt$3</ID>
     <ID>MagicNumber:EditChannelDialog.kt$16</ID>
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
-    <ID>MagicNumber:EditListPreference.kt$12</ID>
-    <ID>MagicNumber:EditListPreference.kt$12345</ID>
-    <ID>MagicNumber:EditListPreference.kt$67890</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$1000L</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$30</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$31</ID>
@@ -161,8 +154,6 @@
     <ID>ModifierMissing:Contacts.kt$ContactsScreen</ID>
     <ID>ModifierMissing:Contacts.kt$SelectionToolbar</ID>
     <ID>ModifierMissing:DeviceMetrics.kt$DeviceMetricsScreen</ID>
-    <ID>ModifierMissing:EmojiPicker.kt$EmojiPicker</ID>
-    <ID>ModifierMissing:EmojiPicker.kt$EmojiPickerDialog</ID>
     <ID>ModifierMissing:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ModifierMissing:EnvironmentMetrics.kt$EnvironmentMetricsScreen</ID>
     <ID>ModifierMissing:HostMetricsLog.kt$HostMetricsLogScreen</ID>
@@ -181,12 +172,10 @@
     <ID>ModifierMissing:PositionLog.kt$PositionItem</ID>
     <ID>ModifierMissing:PositionLog.kt$PositionLogScreen</ID>
     <ID>ModifierMissing:PowerMetrics.kt$PowerMetricsScreen</ID>
-    <ID>ModifierMissing:PreferenceDivider.kt$PreferenceDivider</ID>
     <ID>ModifierMissing:RadioConfig.kt$RadioConfigItemList</ID>
     <ID>ModifierMissing:RadioConfigScreenList.kt$RadioConfigScreenList</ID>
     <ID>ModifierMissing:Reaction.kt$ReactionDialog</ID>
     <ID>ModifierMissing:SecurityConfigItemList.kt$SecurityConfigScreen</ID>
-    <ID>ModifierMissing:SecurityIcon.kt$SecurityIcon</ID>
     <ID>ModifierMissing:SettingsScreen.kt$SettingsScreen</ID>
     <ID>ModifierMissing:Share.kt$ShareScreen</ID>
     <ID>ModifierMissing:SignalMetrics.kt$SignalMetricsScreen</ID>
@@ -276,15 +265,12 @@
     <ID>ParameterNaming:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>ParameterNaming:Contacts.kt$onDeleteSelected</ID>
     <ID>ParameterNaming:Contacts.kt$onMuteSelected</ID>
-    <ID>ParameterNaming:DropDownPreference.kt$onItemSelected</ID>
-    <ID>ParameterNaming:EditListPreference.kt$onValuesChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onMapReportingEnabledChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onPositionPrecisionChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onPublishIntervalSecsChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onShouldReportLocationChanged</ID>
     <ID>ParameterNaming:MessageList.kt$onUnreadChanged</ID>
     <ID>ParameterNaming:NodeDetailScreen.kt$onFirmwareSelected</ID>
-    <ID>ParameterNaming:PositionPrecisionPreference.kt$onValueChanged</ID>
     <ID>ParameterNaming:UsbDevices.kt$onDeviceSelected</ID>
     <ID>ParameterNaming:WelcomeScreen.kt$onGetStarted</ID>
     <ID>PreviewPublic:Channel.kt$ModemPresetInfoPreview</ID>
@@ -335,7 +321,6 @@
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
     <ID>UnusedParameter:ChannelSettingsItemList.kt$onBack: () -> Unit</ID>
     <ID>UnusedParameter:ChannelSettingsItemList.kt$title: String</ID>
-    <ID>UnusedParameter:DropDownPreference.kt$modifier: Modifier = Modifier</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
     <ID>ViewModelForwarding:Main.kt$ScannedQrCodeDialog(uIViewModel, newChannelSet)</ID>
     <ID>ViewModelForwarding:Main.kt$VersionChecks(uIViewModel)</ID>

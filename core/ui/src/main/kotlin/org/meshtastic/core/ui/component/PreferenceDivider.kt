@@ -15,19 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.common
+package org.meshtastic.core.ui.component
 
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
-import javax.inject.Inject
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
-@HiltViewModel
-class EmojiPickerViewModel @Inject constructor(private val customEmojiPrefs: CustomEmojiPrefs) : ViewModel() {
-
-    var customEmojiFrequency: String?
-        get() = customEmojiPrefs.customEmojiFrequency
-        set(value) {
-            customEmojiPrefs.customEmojiFrequency = value
-        }
+@Composable
+fun PreferenceDivider() {
+    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 }

@@ -133,7 +133,6 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.thenIf
 import com.mikepenz.markdown.m3.Markdown
@@ -156,6 +155,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SettingsItem
 import org.meshtastic.core.ui.component.SettingsItemDetail
 import org.meshtastic.core.ui.component.SettingsItemSwitch

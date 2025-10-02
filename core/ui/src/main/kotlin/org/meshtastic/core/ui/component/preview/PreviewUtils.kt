@@ -17,7 +17,7 @@
 
 @file:Suppress("MatchingDeclarationName")
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.geeksville.mesh.MeshProtos

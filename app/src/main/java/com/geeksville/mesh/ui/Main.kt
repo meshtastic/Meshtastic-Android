@@ -87,7 +87,6 @@ import com.geeksville.mesh.navigation.nodesGraph
 import com.geeksville.mesh.navigation.settingsGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
@@ -107,6 +106,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations

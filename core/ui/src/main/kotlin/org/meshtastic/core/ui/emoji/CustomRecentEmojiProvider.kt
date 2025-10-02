@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.core.ui.emoji
 
 import androidx.emoji2.emojipicker.RecentEmojiAsyncProvider
 import com.google.common.util.concurrent.Futures

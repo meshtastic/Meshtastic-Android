@@ -17,7 +17,7 @@
 
 @file:Suppress("TooManyFunctions")
 
-package com.geeksville.mesh.ui.common.components
+package org.meshtastic.core.ui.component
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement

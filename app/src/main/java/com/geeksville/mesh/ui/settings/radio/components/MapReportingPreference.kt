@@ -40,12 +40,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.common.components.precisionBitsToMeters
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.precisionBitsToMeters
 import kotlin.math.roundToInt
 
 private const val POSITION_PRECISION_MIN = 12

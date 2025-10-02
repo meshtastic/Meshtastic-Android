@@ -43,11 +43,11 @@ import androidx.navigation.NavController
 import com.geeksville.mesh.ConfigProtos.Config.NetworkConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditIPv4Preference
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
