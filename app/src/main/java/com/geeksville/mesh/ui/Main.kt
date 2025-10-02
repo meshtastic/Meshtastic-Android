@@ -97,6 +97,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MapRoutes
@@ -333,6 +334,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                 fun NavDestination.hasGlobalAppBar(): Boolean =
                     // List of screens to exclude from having the global app bar
                     listOf(
+                        ChannelsRoutes.Channels::class,
                         ConnectionsRoutes.Connections::class,
                         ContactsRoutes.Contacts::class,
                         MapRoutes.Map::class,

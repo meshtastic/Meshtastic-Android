@@ -40,6 +40,7 @@ fun NavGraphBuilder.channelsGraph(navController: NavHostController) {
             ChannelScreen(
                 radioConfigViewModel = hiltViewModel(parentEntry),
                 onNavigate = { route -> navController.navigate(route) },
+                onNavigateUp = { navController.navigateUp() },
             )
         }
         configRoutes(navController)
