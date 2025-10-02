@@ -337,6 +337,8 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                         ChannelsRoutes.Channels::class,
                         ConnectionsRoutes.Connections::class,
                         ContactsRoutes.Contacts::class,
+                        ContactsRoutes.Messages::class,
+                        ContactsRoutes.Share::class,
                         MapRoutes.Map::class,
                         NodeDetailRoutes.NodeMap::class,
                         NodeDetailRoutes.DeviceMetrics::class,

@@ -45,7 +45,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.ContactsRoutes
-import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.preview.BooleanProvider
 import org.meshtastic.core.ui.component.preview.previewNode
@@ -61,19 +60,12 @@ fun MainAppBar(
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
-    if (currentDestination?.hasRoute<ContactsRoutes.Messages>() == true) {
-        return
-    }
 
     val title: String =
         when {
             currentDestination == null -> ""
 
-            currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> stringResource(id = R.string.debug_panel)
-
             currentDestination.hasRoute<ContactsRoutes.QuickChat>() -> stringResource(id = R.string.quick_chat)
-
-            currentDestination.hasRoute<ContactsRoutes.Share>() -> stringResource(id = R.string.share_to)
 
             else -> ""
         }

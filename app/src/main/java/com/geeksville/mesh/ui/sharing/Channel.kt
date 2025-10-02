@@ -284,11 +284,11 @@ fun ChannelScreen(
                 onClickChip = {},
             )
         },
-    ) { scaffoldPadding ->
+    ) { innerPadding ->
         val listState = rememberLazyListState()
         LazyColumn(
             state = listState,
-            modifier = Modifier.padding(scaffoldPadding),
+            modifier = Modifier.padding(innerPadding),
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
         ) {
             item {

@@ -134,8 +134,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 onClickChip = {},
             )
         },
-    ) { scaffoldPadding ->
-        Column(modifier = Modifier.padding(scaffoldPadding)) {
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
             if (displayInfoDialog) {
                 LegendInfoDialog(
                     pairedRes =

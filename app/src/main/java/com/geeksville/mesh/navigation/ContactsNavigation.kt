@@ -79,11 +79,14 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController) {
         ),
     ) { backStackEntry ->
         val message = backStackEntry.toRoute<ContactsRoutes.Share>().message
-        ShareScreen {
-            navController.navigate(ContactsRoutes.Messages(it, message)) {
-                popUpTo<ContactsRoutes.Share> { inclusive = true }
-            }
-        }
+        ShareScreen(
+            onConfirm = {
+                navController.navigate(ContactsRoutes.Messages(it, message)) {
+                    popUpTo<ContactsRoutes.Share> { inclusive = true }
+                }
+            },
+            onNavigateUp = navController::navigateUp,
+        )
     }
     composable<ContactsRoutes.QuickChat>(
         deepLinks = listOf(navDeepLink<ContactsRoutes.QuickChat>(basePath = "$DEEP_LINK_BASE_URI/quick_chat")),
