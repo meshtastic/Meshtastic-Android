@@ -68,9 +68,6 @@ import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.util.SqlTileWriterExt
-import com.geeksville.mesh.util.addCopyright
-import com.geeksville.mesh.util.addScaleBarOverlay
-import com.geeksville.mesh.util.createLatLongGrid
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
@@ -81,10 +78,13 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.addCopyright
+import org.meshtastic.feature.map.addScaleBarOverlay
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
 import org.meshtastic.feature.map.component.MapButton
+import org.meshtastic.feature.map.createLatLongGrid
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.zoomIn
@@ -276,7 +276,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                         setPersonIcon(it)
                         setPersonAnchor(0.5f, 0.5f)
                     }
-                    getBitmapFromVectorDrawable(context, com.geeksville.mesh.R.drawable.ic_map_navigation_24)?.let {
+                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_navigation_24)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
                     }

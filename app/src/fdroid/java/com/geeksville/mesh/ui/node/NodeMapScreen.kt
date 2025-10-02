@@ -30,10 +30,10 @@ import androidx.navigation.NavHostController
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.map.NodeMapViewModel
 import com.geeksville.mesh.ui.map.rememberMapViewWithLifecycle
-import com.geeksville.mesh.util.addCopyright
-import com.geeksville.mesh.util.addPolyline
-import com.geeksville.mesh.util.addPositionMarkers
-import com.geeksville.mesh.util.addScaleBarOverlay
+import org.meshtastic.feature.map.addCopyright
+import org.meshtastic.feature.map.addPolyline
+import org.meshtastic.feature.map.addPositionMarkers
+import org.meshtastic.feature.map.addScaleBarOverlay
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 
