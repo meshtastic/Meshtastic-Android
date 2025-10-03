@@ -786,8 +786,8 @@
     <string name="no_pax_metrics_logs">PAX-laskurien lokitietoja ei ole saatavilla.</string>
     <string name="wifi_devices">WiFi-laitteet</string>
     <string name="ble_devices">Bluetooth-laitteet</string>
-    <string name="bluetooth_paired_devices">Paired devices</string>
-    <string name="bluetooth_available_devices">Available devices</string>
+    <string name="bluetooth_paired_devices">Paritetut laitteet</string>
+    <string name="bluetooth_available_devices">Käytettävissä olevat laitteet</string>
     <string name="connected_device">Yhdistetty laite</string>
     <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
     <string name="view_release">Näytä versio</string>
