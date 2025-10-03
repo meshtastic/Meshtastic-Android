@@ -60,7 +60,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
-import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
@@ -71,6 +70,7 @@ import com.geeksville.mesh.util.LanguageUtils.getLanguageMap
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
+import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar

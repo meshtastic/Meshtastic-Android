@@ -63,13 +63,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.meshtastic.core.common.gpsDisabled
+import org.meshtastic.core.common.hasGps
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket

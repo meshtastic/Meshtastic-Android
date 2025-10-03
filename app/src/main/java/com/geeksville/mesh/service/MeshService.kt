@@ -49,7 +49,6 @@ import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.XmodemProtos
-import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.fromRadio
@@ -78,6 +77,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.DataPair
+import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository

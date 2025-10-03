@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android
+package org.meshtastic.core.common
 
 import android.Manifest
 import android.content.Context
