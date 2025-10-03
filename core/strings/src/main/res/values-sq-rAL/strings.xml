@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Njoftime shërbimi</string>
     <string name="about">Rreth</string>
     <string name="channel_invalid">Ky URL kanal është i pavlefshëm dhe nuk mund të përdoret</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Paneli i debug-ut</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
