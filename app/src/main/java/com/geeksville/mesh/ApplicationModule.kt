@@ -27,6 +27,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.common.BuildConfigProvider
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -41,6 +42,7 @@ object ApplicationModule {
     fun providesMeshServiceNotifications(application: Application): MeshServiceNotifications =
         MeshServiceNotifications(application)
 
+    @Singleton
     @Provides
     fun provideBuildConfigProvider(): BuildConfigProvider = object : BuildConfigProvider {
         override val isDebug: Boolean = BuildConfig.DEBUG
