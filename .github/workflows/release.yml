@@ -97,9 +97,47 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
+  check-versioncode-google-play:
+    runs-on: ubuntu-latest
+    needs: prepare-build-info
+    outputs:
+      exists: ${{ steps.check_versioncode.outputs.exists }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+      - name: Check if versionCode exists on Google Play Internal Track
+        id: check_versioncode
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+        run: |
+          set -euo pipefail
+          echo "$GOOGLE_PLAY_JSON_KEY" > /tmp/play-store-credentials.json
+          exists=false
+          if bundle exec fastlane supply --help | grep -q -- '--json'; then
+            JSON=$(bundle exec fastlane supply --json_key /tmp/play-store-credentials.json --package_name com.geeksville.mesh --track internal --json || true)
+            if echo "$JSON" | jq -e ".tracks.internal.releases[].versionCodes[] | select(. == ${VERSION_CODE})" >/dev/null 2>&1; then
+              exists=true
+            fi
+          else
+            # Fallback: use fastlane action output and parse array from stdout
+            OUTFILE=$(mktemp)
+            bundle exec fastlane run google_play_track_version_codes json_key:/tmp/play-store-credentials.json package_name:com.geeksville.mesh track:internal --capture_output | tee "$OUTFILE" || true
+            ARR=$(grep -oE '\\[[^]]*\\]' "$OUTFILE" | head -n1)
+            if echo "$ARR" | tr -d '[] ' | tr ',' '\n' | grep -x "${VERSION_CODE}" >/dev/null 2>&1; then
+              exists=true
+            fi
+          fi
+          echo "exists=${exists}" >> $GITHUB_OUTPUT
+
   release-google:
     runs-on: ubuntu-latest
-    needs: [prepare-build-info, prepare-release-environment]
+    needs: [prepare-build-info, prepare-release-environment, check-versioncode-google-play]
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -146,11 +184,18 @@ jobs:
           bundler-cache: true
 
       - name: Build and Deploy to Internal Track
-        if: needs.prepare-release-environment.outputs.exists == 'false'
+        if: contains(github.ref_name, '-internal') && needs.prepare-release-environment.outputs.exists == 'false' && needs.check-versioncode-google-play.outputs.exists == 'false'
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane internal
+
+      - name: Build Google artifacts without upload
+        if: contains(github.ref_name, '-internal') && needs.prepare-release-environment.outputs.exists == 'false' && needs.check-versioncode-google-play.outputs.exists == 'true'
+        env:
+          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: ./gradlew clean bundleGoogleRelease assembleGoogleRelease -Pandroid.injected.version.name=${VERSION_NAME} -Pandroid.injected.version.code=${VERSION_CODE}
 
       - name: Determine Fastlane Promotion Lane
         id: fastlane_lane
@@ -165,15 +210,21 @@ jobs:
             echo "lane=production" >> $GITHUB_OUTPUT
           fi
 
+      - name: Ensure internal track has version for promotion
+        if: "!contains(github.ref_name, '-internal') && needs.check-versioncode-google-play.outputs.exists != 'true'"
+        run: |
+          echo "::error::Cannot promote: versionCode ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }} not found on Google Play internal track. Run internal build first." >&2
+          exit 1
+
       - name: Promote on Google Play
-        if: "steps.fastlane_lane.outputs.lane != ''"
+        if: "steps.fastlane_lane.outputs.lane != '' && needs.check-versioncode-google-play.outputs.exists == 'true'"
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane ${{ steps.fastlane_lane.outputs.lane }}
 
       - name: Upload Google AAB artifact
-        if: needs.prepare-release-environment.outputs.exists == 'false'
+        if: needs.prepare-release-environment.outputs.exists == 'false' && contains(github.ref_name, '-internal')
         uses: actions/upload-artifact@v4
         with:
           name: google-aab
@@ -181,7 +232,7 @@ jobs:
           retention-days: 1
 
       - name: Upload Google APK artifact
-        if: needs.prepare-release-environment.outputs.exists == 'false'
+        if: needs.prepare-release-environment.outputs.exists == 'false' && contains(github.ref_name, '-internal')
         uses: actions/upload-artifact@v4
         with:
           name: google-apk
@@ -189,7 +240,7 @@ jobs:
           retention-days: 1
 
       - name: Attest Google artifacts provenance
-        if: needs.prepare-release-environment.outputs.exists == 'false'
+        if: needs.prepare-release-environment.outputs.exists == 'false' && contains(github.ref_name, '-internal')
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: |
@@ -197,9 +248,9 @@ jobs:
             app/build/outputs/apk/google/release/app-google-release.apk
 
   release-fdroid:
-    if: needs.prepare-release-environment.outputs.exists == 'false'
+    if: contains(github.ref_name, '-internal') && needs.prepare-release-environment.outputs.exists == 'false' && needs.check-versioncode-google-play.outputs.exists == 'false'
     runs-on: ubuntu-latest
-    needs: [prepare-build-info, prepare-release-environment]
+    needs: [prepare-build-info, prepare-release-environment, check-versioncode-google-play]
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -254,7 +305,7 @@ jobs:
 
   manage-github-release:
     runs-on: ubuntu-latest
-    needs: [prepare-build-info, prepare-release-environment, release-google, release-fdroid]
+    needs: [prepare-build-info, prepare-release-environment, check-versioncode-google-play, release-google, release-fdroid]
     steps:
       - name: Download all artifacts
         if: needs.prepare-release-environment.outputs.exists == 'false'
