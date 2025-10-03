@@ -31,8 +31,6 @@ import com.geeksville.mesh.ui.map.MapView
 import com.geeksville.mesh.ui.map.NodeMapViewModel
 import org.meshtastic.core.ui.component.MainAppBar
 
-const val DEG_D = 1e-7
-
 @Composable
 fun NodeMapScreen(
     metricsViewModel: MetricsViewModel = hiltViewModel(),

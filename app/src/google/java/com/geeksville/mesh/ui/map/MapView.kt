@@ -71,9 +71,9 @@ import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.map.components.NodeClusterMarkers
 import com.geeksville.mesh.ui.map.components.WaypointMarkers
+import com.geeksville.mesh.ui.metrics.DEG_D
 import com.geeksville.mesh.ui.metrics.HEADING_DEG
 import com.geeksville.mesh.ui.metrics.formatPositionTime
-import com.geeksville.mesh.ui.node.DEG_D
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
