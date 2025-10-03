@@ -2,16 +2,6 @@ name: Make Release
 
 on:
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "If true, simulate the release without building, uploading, promoting, or creating a GitHub release"
-        required: false
-        default: "false"
-        type: choice
-        options: ["false", "true"]
-      pr_number:
-        description: "Optional PR number to comment on with dry-run readiness summary"
-        required: false
   push:
     tags:
       - 'v*'
@@ -31,10 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
-      FINAL_VERSION_CODE: ${{ steps.final_version_code.outputs.FINAL_VERSION_CODE }}
-      HOTFIX_PATCH: ${{ steps.is_hotfix_patch.outputs.hotfix_patch }}
+      APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
       BASE_TAG: ${{ steps.get_base_tag.outputs.BASE_TAG }}
-      FULL_TAG: ${{ steps.get_full_tag.outputs.FULL_TAG }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -58,21 +46,16 @@ jobs:
         id: get_version_name
         run: echo "APP_VERSION_NAME=$(echo ${GITHUB_REF_NAME#v} | sed 's/-.*//')" >> $GITHUB_OUTPUT
 
-      - name: Get Full Tag
-        id: get_full_tag
-        run: echo "FULL_TAG=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-
       - name: Get Base Tag (for release/artifact naming)
         id: get_base_tag
         run: |
-          # Remove track/iteration suffix (e.g., -internal.1, -closed.1, -open.1)
-          BASE_TAG=$(echo ${GITHUB_REF_NAME} | sed 's/\(-internal\.[0-9]\+\|-closed\.[0-9]\+\|-open\.[0-9]\+\)$//')
-          echo "BASE_TAG=$BASE_TAG" >> $GITHUB_OUTPUT
+          VERSION_NAME=$(echo ${GITHUB_REF_NAME#v} | sed 's/-.*//')
+          echo "BASE_TAG=v${VERSION_NAME}" >> $GITHUB_OUTPUT
 
       - name: Extract VERSION_CODE_OFFSET from config.properties
         id: get_version_code_offset
         run: |
-          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut-d'=' -f2)
           echo "VERSION_CODE_OFFSET=$OFFSET" >> $GITHUB_OUTPUT
 
       - name: Calculate Version Code from Git Commit Count
@@ -83,91 +66,40 @@ jobs:
           VERSION_CODE=$((COMMIT_COUNT + OFFSET))
           echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
         shell: bash
-        # This matches the reproducible versionCode strategy: versionCode = git commit count + offset
 
-      - name: Check if Hotfix or Patch
-        id: is_hotfix_patch
-        run: |
-          TAG_LOWER=$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]')
-          if [[ "$TAG_LOWER" == *"-hotfix"* || "$TAG_LOWER" == *"-patch"* ]]; then
-            echo "hotfix_patch=true" >> $GITHUB_OUTPUT
-          else
-            echo "hotfix_patch=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Download Version Code Artifact (if exists)
-        id: try_download_version_code
-        continue-on-error: true
-        uses: actions/download-artifact@v5
-        with:
-          name: version-code
-          path: .
-
-      - name: Generate and Store Version Code (first build for regular release)
-        if: steps.is_hotfix_patch.outputs.hotfix_patch == 'false' && steps.try_download_version_code.outcome != 'success'
-        id: generate_and_store_version_code
-        run: |
-          VERSION_CODE=${{ steps.calculate_version_code.outputs.versionCode }}
-          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
-          echo "$VERSION_CODE" > version_code.txt
-
-      - name: Upload Version Code Artifact (if generated)
-        if: |
-          (steps.is_hotfix_patch.outputs.hotfix_patch == 'true') ||
-          (steps.is_hotfix_patch.outputs.hotfix_patch == 'false' && steps.generate_and_store_version_code.conclusion == 'success')
-        uses: actions/upload-artifact@v4
-        with:
-          name: version-code
-          path: version_code.txt
-
-      - name: Set Version Code from Artifact (if exists)
-        if: steps.try_download_version_code.outcome == 'success'
-        id: set_version_code_from_artifact
-        run: |
-          VERSION_CODE=$(cat version_code.txt)
-          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
-
-      - name: Set Final Version Code Output
-        id: final_version_code
-        run: |
-          if [ -f version_code.txt ]; then
-            FV=$(cat version_code.txt)
-          else
-            FV=${{ steps.calculate_version_code.outputs.versionCode }}
-          fi
-          echo "FINAL_VERSION_CODE=$FV" >> $GITHUB_OUTPUT
-
-  check-internal-release:
+  prepare-release-environment:
     runs-on: ubuntu-latest
     needs: prepare-build-info
     outputs:
-      exists: ${{ steps.check_release.outputs.exists }}
+      exists: ${{ steps.check_and_clean.outputs.exists }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - name: Check for existing GitHub release
-        id: check_release
+      - name: Check for Existing Release and Clean if Superseded
+        id: check_and_clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BASE_TAG=${{ needs.prepare-build-info.outputs.BASE_TAG }}
           COMMIT_SHA=$(git rev-parse HEAD)
-          EXISTING_RELEASE=$(gh release list --limit 100 --json tagName,targetCommitish | jq -r --arg BASE_TAG "$BASE_TAG" --arg COMMIT_SHA "$COMMIT_SHA" '.[] | select(.tagName == $BASE_TAG and .targetCommitish.oid == $COMMIT_SHA)')
-          if [ -n "$EXISTING_RELEASE" ]; then
-            echo "An existing release with tag '${BASE_TAG}' was found for this commit."
+          RELEASE_INFO=$(gh release view $BASE_TAG --json targetCommitish -q ".targetCommitish.oid" || echo "")
+          if [ -z "$RELEASE_INFO" ]; then
+            echo "No existing release for tag '${BASE_TAG}'. Starting fresh."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          elif [ "$RELEASE_INFO" == "$COMMIT_SHA" ]; then
+            echo "Existing release for '${BASE_TAG}' found on the current commit. This is a promotion."
             echo "exists=true" >> $GITHUB_OUTPUT
           else
-            echo "No existing release found for this commit."
+            echo "Existing release for '${BASE_TAG}' found on a DIFFERENT commit ($RELEASE_INFO)."
+            echo "This new tag supersedes the old one. Deleting old release and tag to restart the process."
+            gh release delete $BASE_TAG --cleanup-tag --yes || echo "Could not delete release. It might have been deleted already."
+            echo "Old release and tag deleted. A new build will be created."
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
   release-google:
     runs-on: ubuntu-latest
-    needs: [prepare-build-info, check-internal-release]
-    outputs:
-      INTERNAL_VERSION_CODE: ${{ steps.resolve_internal_version_code.outputs.INTERNAL_VERSION_CODE }}
+    needs: [prepare-build-info, prepare-release-environment]
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -213,258 +145,129 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Dry Run Sanity Version Code Check
-        if: github.event.inputs.dry_run == 'true'
-        id: dry_run_sanity
-        run: |
-          set -euo pipefail
-          echo "Performing version code sanity check (dry run)..."
-          # Query highest existing version code across tracks
-          bundle exec fastlane get_highest_version_code || true
-          HIGHEST=$(cat highest_version_code.txt 2>/dev/null || echo 0)
-          HOTFIX='${{ needs.prepare-build-info.outputs.HOTFIX_PATCH }}'
-          if [ "$HOTFIX" = "true" ]; then
-            PLANNED=$((HIGHEST + 1))
-            echo "Hotfix planned versionCode: $PLANNED (highest existing: $HIGHEST)";
-            STATUS=ok
-          else
-            # Regular base release planned version code (commit count + offset or reused artifact)
-            PLANNED='${{ needs.prepare-build-info.outputs.FINAL_VERSION_CODE }}'
-            if [ -z "$PLANNED" ]; then PLANNED=0; fi
-            if [ "$PLANNED" -le "$HIGHEST" ]; then
-              echo "ERROR: Planned versionCode $PLANNED is not greater than highest existing $HIGHEST. Adjust VERSION_CODE_OFFSET or convert to hotfix." >&2
-              STATUS=fail
-            else
-              echo "Planned versionCode $PLANNED is greater than existing $HIGHEST: OK";
-              STATUS=ok
-            fi
-          fi
-          echo "sanity_status=$STATUS" >> $GITHUB_OUTPUT
-          echo "sanity_highest=$HIGHEST" >> $GITHUB_OUTPUT
-          echo "sanity_planned=$PLANNED" >> $GITHUB_OUTPUT
-          # Promotion policy validation (if this is a promotion tag in dry run)
-          TAG='${{ github.ref_name }}'
-          if echo "$TAG" | grep -Eq '-(closed|open)$' || [[ "$TAG" != *"-internal"* && "$TAG" != *"-closed"* && "$TAG" != *"-open"* && "$TAG" == v* ]]; then
-            echo "Checking promotion policy (dry run)..."
-            if ! bundle exec fastlane get_internal_track_version_code; then
-              echo "ERROR: Promotion attempted but no internal artifact present." >&2
-              echo "promotion_status=fail" >> $GITHUB_OUTPUT
-              [ "$STATUS" = ok ] || true
-              STATUS=fail
-            else
-              echo "Internal artifact present for promotion.";
-              echo "promotion_status=ok" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "Not a promotion tag (internal build).";
-            echo "promotion_status=na" >> $GITHUB_OUTPUT
-          fi
-          if [ "$STATUS" = fail ]; then
-            echo "Dry run sanity check failed." >&2
-            exit 1
-          fi
-
-      - name: Resolve Version Code For Internal Build
-        if: needs.check-internal-release.outputs.exists == 'false'
-        id: resolve_internal_version_code
-        run: |
-          if [ "${{ needs.prepare-build-info.outputs.HOTFIX_PATCH }}" = "true" ]; then
-            echo "Hotfix/Patch detected; querying Google Play for highest version code..."
-            bundle exec fastlane get_highest_version_code
-            CODE=$(cat highest_version_code.txt || echo 0)
-            NEXT_CODE=$((CODE + 1))
-            # Race mitigation: re-query to ensure no concurrent allocation
-            bundle exec fastlane get_highest_version_code
-            NEW_HIGHEST=$(cat highest_version_code.txt || echo 0)
-            if [ "$NEW_HIGHEST" -ge "$NEXT_CODE" ]; then
-              echo "Detected race: highest changed from $CODE to $NEW_HIGHEST; bumping again.";
-              NEXT_CODE=$((NEW_HIGHEST + 1))
-            fi
-            echo "Using hotfix version code: $NEXT_CODE (previous highest final: $NEW_HIGHEST)"
-            echo "INTERNAL_VERSION_CODE=$NEXT_CODE" >> $GITHUB_OUTPUT
-            echo "VERSION_CODE=$NEXT_CODE" >> $GITHUB_ENV
-          else
-            BASE_CODE=${{ needs.prepare-build-info.outputs.FINAL_VERSION_CODE }}
-            echo "Using base/internal version code: $BASE_CODE"
-            echo "INTERNAL_VERSION_CODE=$BASE_CODE" >> $GITHUB_OUTPUT
-            echo "VERSION_CODE=$BASE_CODE" >> $GITHUB_ENV
-          fi
-
       - name: Build and Deploy to Internal Track
-        if: needs.check-internal-release.outputs.exists == 'false' && github.event.inputs.dry_run != 'true'
+        if: needs.prepare-release-environment.outputs.exists == 'false'
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ env.VERSION_CODE }}
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane internal
 
-      - name: Build F-Droid (same version code)
-        if: needs.check-internal-release.outputs.exists == 'false' && github.event.inputs.dry_run != 'true'
-        env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ env.VERSION_CODE }}
-        run: bundle exec fastlane fdroid_build
-
-      - name: Generate Build Metadata & Checksums
-        if: needs.check-internal-release.outputs.exists == 'false' && github.event.inputs.dry_run != 'true'
-        id: gen_metadata
+      - name: Determine Fastlane Promotion Lane
+        id: fastlane_lane
+        if: "!contains(github.ref_name, '-internal')"
         run: |
-          set -euo pipefail
-          AAB=app/build/outputs/bundle/googleRelease/app-google-release.aab
-          APK_GOOGLE=app/build/outputs/apk/google/release/app-google-release.apk
-          APK_FDROID=app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
-          SHA_AAB=$(sha256sum "$AAB" | cut -d' ' -f1)
-          SHA_APK_GOOGLE=$(sha256sum "$APK_GOOGLE" | cut -d' ' -f1)
-          SHA_APK_FDROID=$(sha256sum "$APK_FDROID" | cut -d' ' -f1)
-          GIT_SHA=$(git rev-parse HEAD)
-          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          cat > build-metadata.json <<EOF
-          {
-            "baseTag": "${{ needs.prepare-build-info.outputs.BASE_TAG }}",
-            "fullTag": "${{ needs.prepare-build-info.outputs.FULL_TAG }}",
-            "versionName": "${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}",
-            "versionCode": "${{ env.VERSION_CODE }}",
-            "hotfixOrPatch": "${{ needs.prepare-build-info.outputs.HOTFIX_PATCH }}",
-            "gitSha": "$GIT_SHA",
-            "buildTimeUtc": "$BUILD_TIME",
-            "artifacts": {
-              "googleAab": { "path": "$AAB", "sha256": "$SHA_AAB" },
-              "googleApk": { "path": "$APK_GOOGLE", "sha256": "$SHA_APK_GOOGLE" },
-              "fdroidApk": { "path": "$APK_FDROID", "sha256": "$SHA_APK_FDROID" }
-            }
-          }
-          EOF
-          echo "Generated build-metadata.json:"; cat build-metadata.json
-          echo "AAB_SHA256=$SHA_AAB" >> $GITHUB_ENV
-          echo "APK_GOOGLE_SHA256=$SHA_APK_GOOGLE" >> $GITHUB_ENV
-          echo "APK_FDROID_SHA256=$SHA_APK_FDROID" >> $GITHUB_ENV
-
-      - name: Upload Build Metadata Artifact
-        if: needs.check-internal-release.outputs.exists == 'false' && github.event.inputs.dry_run != 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-metadata
-          path: build-metadata.json
-          retention-days: 7
-
-      - name: Upload F-Droid APK artifact
-        if: needs.check-internal-release.outputs.exists == 'false' && github.event.inputs.dry_run != 'true'
-        uses: actions/upload-artifact@v4
-        with:
-            name: fdroid-apk
-            path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
-            retention-days: 1
-
-      - name: Promotion Guard - Internal Must Exist
-        if: steps.fastlane_lane.outputs.lane != '' && github.event.inputs.dry_run != 'true'
-        run: |
-          set -e
-          echo "Validating internal track has an artifact before promotion..."
-          if ! bundle exec fastlane get_internal_track_version_code; then
-            echo "ERROR: No internal artifact found to promote. Ensure an internal tag was built first." >&2
-            exit 1
+          TAG_NAME="${{ github.ref_name }}"
+          if [[ "$TAG_NAME" == *"-closed"* ]]; then
+            echo "lane=closed" >> $GITHUB_OUTPUT
+          elif [[ "$TAG_NAME" == *"-open"* ]]; then
+            echo "lane=open" >> $GITHUB_OUTPUT
+          else
+            echo "lane=production" >> $GITHUB_OUTPUT
           fi
 
-      - name: Fetch Internal Track Version Code (for promotion)
-        if: steps.fastlane_lane.outputs.lane != '' && github.event.inputs.dry_run != 'true'
-        run: |
-          bundle exec fastlane get_internal_track_version_code
-          CODE=$(cat internal_version_code.txt)
-          echo "INTERNAL_VERSION_CODE=$CODE" >> $GITHUB_ENV
-
       - name: Promote on Google Play
-        if: steps.fastlane_lane.outputs.lane != '' && github.event.inputs.dry_run != 'true'
+        if: "steps.fastlane_lane.outputs.lane != ''"
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ env.INTERNAL_VERSION_CODE }}
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane ${{ steps.fastlane_lane.outputs.lane }}
 
-      - name: Build Summary (Internal Build)
-        if: needs.check-internal-release.outputs.exists == 'false' && github.event.inputs.dry_run != 'true'
-        run: |
-          {
-            echo "### Internal Build Summary"
-            echo "Version Name: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}"
-            echo "Version Code: ${{ env.VERSION_CODE }}"
-            echo "Base Tag: ${{ needs.prepare-build-info.outputs.BASE_TAG }}"
-            echo "Full Tag: ${{ needs.prepare-build-info.outputs.FULL_TAG }}"
-            echo "Hotfix/Patch: ${{ needs.prepare-build-info.outputs.HOTFIX_PATCH }}"
-            echo "Google AAB SHA256: $AAB_SHA256"
-            echo "Google APK SHA256: $APK_GOOGLE_SHA256"
-            echo "F-Droid APK SHA256: $APK_FDROID_SHA256"
-          } >> $GITHUB_STEP_SUMMARY
+      - name: Upload Google AAB artifact
+        if: needs.prepare-release-environment.outputs.exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-aab
+          path: app/build/outputs/bundle/googleRelease/app-google-release.aab
+          retention-days: 1
 
-      - name: Dry Run Summary
-        if: github.event.inputs.dry_run == 'true'
-        run: |
-          echo "### Release Dry Run" >> $GITHUB_STEP_SUMMARY
-          echo "Tag: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "Base Tag: ${{ needs.prepare-build-info.outputs.BASE_TAG }}" >> $GITHUB_STEP_SUMMARY
-          echo "Hotfix/Patch: ${{ needs.prepare-build-info.outputs.HOTFIX_PATCH }}" >> $GITHUB_STEP_SUMMARY
-          echo "Computed Version Name: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}" >> $GITHUB_STEP_SUMMARY
-          echo "Planned Version Code Strategy: $([[ '${{ needs.prepare-build-info.outputs.HOTFIX_PATCH }}' == 'true' ]] && echo 'highest+1 from Play' || echo 'commit-count+offset (first internal) or reuse')" >> $GITHUB_STEP_SUMMARY
-          echo "Sanity Highest Existing VersionCode: ${{ steps.dry_run_sanity.outputs.sanity_highest }}" >> $GITHUB_STEP_SUMMARY
-          echo "Sanity Planned VersionCode: ${{ steps.dry_run_sanity.outputs.sanity_planned }}" >> $GITHUB_STEP_SUMMARY
-          echo "Sanity Status: ${{ steps.dry_run_sanity.outputs.sanity_status }}" >> $GITHUB_STEP_SUMMARY
-          echo "Promotion Policy Check: ${{ steps.dry_run_sanity.outputs.promotion_status }}" >> $GITHUB_STEP_SUMMARY
-          echo "Would build internal artifacts: $([[ '${{ needs.check-internal-release.outputs.exists }}' == 'false' ]] && echo yes || echo 'no (already exists)')" >> $GITHUB_STEP_SUMMARY
-          echo "Would promote lane: $([[ -n '${{ steps.fastlane_lane.outputs.lane }}' ]] && echo '${{ steps.fastlane_lane.outputs.lane }}' || echo 'n/a')" >> $GITHUB_STEP_SUMMARY
-          echo "Would create or update draft GitHub release: $([[ '${{ needs.check-internal-release.outputs.exists }}' == 'false' ]] && echo yes || echo no)" >> $GITHUB_STEP_SUMMARY
+      - name: Upload Google APK artifact
+        if: needs.prepare-release-environment.outputs.exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-apk
+          path: app/build/outputs/apk/google/release/app-google-release.apk
+          retention-days: 1
 
-      - name: Post Dry Run PR Comment
-        if: github.event.inputs.dry_run == 'true' && github.event.inputs.pr_number != ''
+      - name: Attest Google artifacts provenance
+        if: needs.prepare-release-environment.outputs.exists == 'false'
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: |
+            app/build/outputs/bundle/googleRelease/app-google-release.aab
+            app/build/outputs/apk/google/release/app-google-release.apk
+
+  release-fdroid:
+    if: needs.prepare-release-environment.outputs.exists == 'false'
+    runs-on: ubuntu-latest
+    needs: [prepare-build-info, prepare-release-environment]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'jetbrains'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          build-scan-publish: true
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+
+      - name: Load secrets
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
+          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
         run: |
-          BODY=$(cat <<'EOT'
-          Release Dry Run Summary
-          ----------------------
-          Tag: ${{ github.ref_name }}
-          Base Tag: ${{ needs.prepare-build-info.outputs.BASE_TAG }}
-          Version Name: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          Hotfix/Patch: ${{ needs.prepare-build-info.outputs.HOTFIX_PATCH }}
-          Planned VersionCode: ${{ steps.dry_run_sanity.outputs.sanity_planned }} (highest existing: ${{ steps.dry_run_sanity.outputs.sanity_highest }})
-          Sanity Status: ${{ steps.dry_run_sanity.outputs.sanity_status }}
-          Promotion Policy: ${{ steps.dry_run_sanity.outputs.promotion_status }}
-          Would Promote Lane: $([[ -n '${{ steps.fastlane_lane.outputs.lane }}' ]] && echo '${{ steps.fastlane_lane.outputs.lane }}' || echo 'n/a')
-          Draft Release Action: $([[ '${{ needs.check-internal-release.outputs.exists }}' == 'false' ]] && echo 'would create/update' || echo 'none')
-          EOT
-          )
-          gh pr comment ${{ github.event.inputs.pr_number }} --body "$BODY" || echo "Failed to post PR comment (verify pr_number)"
+          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
+          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
+
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Build F-Droid with Fastlane
+        env:
+          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: bundle exec fastlane fdroid_build
+
+      - name: Upload F-Droid APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fdroid-apk
+          path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+          retention-days: 1
+
+      - name: Attest F-Droid APK provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
 
   manage-github-release:
-    if: github.event.inputs.dry_run != 'true'
     runs-on: ubuntu-latest
-    needs: [prepare-build-info, check-internal-release, release-google]
+    needs: [prepare-build-info, prepare-release-environment, release-google, release-fdroid]
     steps:
       - name: Download all artifacts
-        if: needs.check-internal-release.outputs.exists == 'false'
+        if: needs.prepare-release-environment.outputs.exists == 'false'
         uses: actions/download-artifact@v5
         with:
           path: ./artifacts
 
-      - name: Compute Release Name (Channel Aware)
-        id: release_name
-        run: |
-          BASE='${{ needs.prepare-build-info.outputs.BASE_TAG }}'
-          REF='${{ github.ref_name }}'
-          if [[ "$REF" == *"-internal"* ]]; then
-            NAME="$BASE (internal)"
-          elif [[ "$REF" == *"-closed"* ]]; then
-            NAME="$BASE (closed testing)"
-          elif [[ "$REF" == *"-open"* ]]; then
-            NAME="$BASE (open beta)"
-          else
-            NAME="$BASE"
-          fi
-          echo "Computed release name: $NAME"
-          echo "name=$NAME" >> $GITHUB_OUTPUT
-
       - name: Create GitHub Release
-        if: needs.check-internal-release.outputs.exists == 'false'
+        if: needs.prepare-release-environment.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.prepare-build-info.outputs.BASE_TAG }}
-          name: ${{ steps.release_name.outputs.name }}
+          name: v${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}-internal
           generate_release_notes: true
           files: ./artifacts/*/*
           draft: true
@@ -493,19 +296,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.prepare-build-info.outputs.BASE_TAG }}
-          name: ${{ steps.release_name.outputs.name }}
+          name: ${{ github.ref_name }}
           draft: ${{ steps.release_properties.outputs.draft }}
           prerelease: ${{ steps.release_properties.outputs.prerelease }}
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Append Metadata to Release Notes
-        if: needs.check-internal-release.outputs.exists == 'false'
-        run: |
-          if [ -f artifacts/build-metadata/build-metadata.json ]; then
-            echo "\n---\nBuild Metadata JSON:\n" > appended_notes.txt
-            cat artifacts/build-metadata/build-metadata.json >> appended_notes.txt
-            gh release edit ${{ needs.prepare-build-info.outputs.BASE_TAG }} --notes-file appended_notes.txt
-          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
