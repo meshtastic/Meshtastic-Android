@@ -27,11 +27,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.ui.map.NodeMapViewModel
 import org.meshtastic.feature.map.addCopyright
 import org.meshtastic.feature.map.addPolyline
 import org.meshtastic.feature.map.addPositionMarkers
 import org.meshtastic.feature.map.addScaleBarOverlay
+import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.feature.map.rememberMapViewWithLifecycle
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
