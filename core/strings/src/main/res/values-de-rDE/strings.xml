@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Dienstbenachrichtigungen</string>
     <string name="about">Über</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug-Ausgaben</string>
     <string name="debug_decoded_payload">Dekodiertes Payload:</string>
     <string name="debug_logs_export">Protokolle exportieren</string>
