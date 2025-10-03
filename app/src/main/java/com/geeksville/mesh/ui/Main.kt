@@ -91,6 +91,7 @@ import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
 import com.geeksville.mesh.ui.metrics.annotateTraceroute
+import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -139,6 +140,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val navController = rememberNavController()
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
+    val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -151,6 +153,10 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
 
     if (connectionState == ConnectionState.CONNECTED) {
         requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(uIViewModel, newChannelSet) }
+
+        sharedContactRequested?.let {
+            SharedContactDialog(sharedContact = it, onDismiss = { uIViewModel.clearSharedContactRequested() })
+        }
     }
 
     analytics.addNavigationTrackingEffect(navController = navController)
