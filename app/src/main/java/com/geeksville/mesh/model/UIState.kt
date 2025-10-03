@@ -347,23 +347,6 @@ constructor(
         }
     }
 
-    fun setChannel(channel: ChannelProtos.Channel) {
-        try {
-            meshService?.setChannel(channel.toByteArray())
-        } catch (ex: RemoteException) {
-            Timber.e(ex, "Set channel error")
-        }
-    }
-
-    /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
-        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
-
-        val newConfig = config { lora = channelSet.loraConfig }
-        if (config.lora != newConfig.lora) setConfig(newConfig)
-    }
-
     fun addQuickChatAction(action: QuickChatAction) =
         viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.upsert(action) }
 
