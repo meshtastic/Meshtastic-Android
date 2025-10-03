@@ -187,7 +187,7 @@
     <string name="meshtastic_service_notifications">Palveluilmoitukset</string>
     <string name="about">Tietoja</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
-    <string name="contact_invalid">This contact is invalid and can not be added</string>
+    <string name="contact_invalid">Tämä yhteystieto on virheellinen eikä sitä voi lisätä</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
     <string name="debug_decoded_payload">Dekoodattu data:</string>
     <string name="debug_logs_export">Vie lokitiedot</string>
@@ -328,9 +328,9 @@
     <string name="air_util_definition">Viimeisen tunnin aikana käytetyn lähetyksen prosenttiosuus.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Jaettu avain</string>
-    <string name="encryption_psk_text">Suorat viestit käyttävät kanavan jaettua avainta.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Julkisen avaimen salaus</string>
-    <string name="encryption_pkc_text">Suorat viestit käyttävät uutta julkisen avaimen infrastruktuuria salaukseen. Vaatii laiteohjelmiston version 2.5 tai uudemman.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Julkinen avain ei täsmää</string>
     <string name="encryption_error_text">Julkinen avain ei vastaa kirjattua avainta. Voit poistaa laitteen ja antaa sen vaihtaa avaimia uudelleen, mutta tämä saattaa merkitä vakavampaa turvallisuusongelmaa. Ota yhteyttä käyttäjään toisen luotetun kanavan kautta määrittääksesi, johtuiko avain tehtaan resetoinnista tai muusta tarkoituksellisesta toiminnosta.</string>
     <string name="exchange_userinfo">Tarkastele käyttäjätietoja</string>
