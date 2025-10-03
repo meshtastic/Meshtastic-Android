@@ -91,6 +91,10 @@ constructor(
             onError()
         }
 
+    fun clearRequestChannelUrl() {
+        _requestChannelSet.value = null
+    }
+
     /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
         getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
