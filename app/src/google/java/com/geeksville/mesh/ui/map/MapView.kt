@@ -87,7 +87,6 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -119,6 +118,7 @@ import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.CustomTileProviderManagerSheet
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.model.NodeClusterItem
 import timber.log.Timber
 import java.text.DateFormat
 
@@ -649,34 +649,6 @@ fun Uri.getFileName(context: android.content.Context): String {
         }
     }
     return name
-}
-
-data class NodeClusterItem(val node: Node, val nodePosition: LatLng, val nodeTitle: String, val nodeSnippet: String) :
-    ClusterItem {
-    override fun getPosition(): LatLng = nodePosition
-
-    override fun getTitle(): String = nodeTitle
-
-    override fun getSnippet(): String = nodeSnippet
-
-    override fun getZIndex(): Float? = null
-
-    fun getPrecisionMeters(): Double? {
-        val precisionMap =
-            mapOf(
-                10 to 23345.484932,
-                11 to 11672.7369,
-                12 to 5836.36288,
-                13 to 2918.175876,
-                14 to 1459.0823719999053,
-                15 to 729.53562,
-                16 to 364.7622,
-                17 to 182.375556,
-                18 to 91.182212,
-                19 to 45.58554,
-            )
-        return precisionMap[this.node.position.precisionBits]
-    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
