@@ -67,11 +67,11 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MetricsViewModel
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.proto.formatPositionTime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 import java.text.DateFormat
-import kotlin.time.Duration.Companion.days
 
 @Composable
 private fun RowScope.PositionText(text: String, weight: Float) {
@@ -106,7 +106,6 @@ private fun HeaderItem(compactWidth: Boolean) {
 
 const val DEG_D = 1e-7
 const val HEADING_DEG = 1e-5
-private const val SECONDS_TO_MILLIS = 1000L
 
 @Composable
 fun PositionItem(compactWidth: Boolean, position: MeshProtos.Position, dateFormat: DateFormat, system: DisplayUnits) {
@@ -122,22 +121,8 @@ fun PositionItem(compactWidth: Boolean, position: MeshProtos.Position, dateForma
             PositionText("${position.groundSpeed} Km/h", WEIGHT_15)
             PositionText("%.0f°".format(position.groundTrack * HEADING_DEG), WEIGHT_15)
         }
-        PositionText(formatPositionTime(position, dateFormat), WEIGHT_40)
+        PositionText(position.formatPositionTime(dateFormat), WEIGHT_40)
     }
-}
-
-@Composable
-fun formatPositionTime(position: MeshProtos.Position, dateFormat: DateFormat): String {
-    val currentTime = System.currentTimeMillis()
-    val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
-    val isOlderThanSixMonths = position.time * SECONDS_TO_MILLIS < sixMonthsAgo
-    val timeText =
-        if (isOlderThanSixMonths) {
-            stringResource(id = R.string.unknown_age)
-        } else {
-            dateFormat.format(position.time * SECONDS_TO_MILLIS)
-        }
-    return timeText
 }
 
 @Composable

@@ -69,7 +69,6 @@ import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.metrics.DEG_D
 import com.geeksville.mesh.ui.metrics.HEADING_DEG
-import com.geeksville.mesh.ui.metrics.formatPositionTime
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -105,6 +104,7 @@ import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.proto.formatPositionTime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.LastHeardFilter
@@ -694,7 +694,7 @@ private fun PositionInfoWindowContent(
                 value = "%.0f°".format(position.groundTrack * HEADING_DEG),
             )
 
-            PositionRow(label = stringResource(R.string.timestamp), value = formatPositionTime(position, dateFormat))
+            PositionRow(label = stringResource(R.string.timestamp), value = position.formatPositionTime(dateFormat))
         }
     }
 }

@@ -34,6 +34,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.protobuf)
 }
 
@@ -53,6 +54,8 @@ protobuf {
 }
 
 dependencies {
+    implementation(projects.core.strings)
+
     // This needs to be API for consuming modules
     api(libs.protobuf.kotlin)
 }
