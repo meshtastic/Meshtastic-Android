@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Servisní upozornění</string>
     <string name="about">O aplikaci</string>
     <string name="channel_invalid">Tato adresa URL kanálu je neplatná a nelze ji použít</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Panel pro ladění</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>

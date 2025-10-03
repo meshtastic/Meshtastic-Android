@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Servisna obaveštenja</string>
     <string name="about">O nama</string>
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti.</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Panel za otklanjanje grešaka</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>

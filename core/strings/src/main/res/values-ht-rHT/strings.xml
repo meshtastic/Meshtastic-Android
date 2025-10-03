@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Notifikasyon sèvis</string>
     <string name="about">Sou</string>
     <string name="channel_invalid">Kanal URL sa a pa valab e yo pa kapab itilize li</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Panno Debug</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
