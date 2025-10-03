@@ -330,9 +330,9 @@
     <string name="air_util_definition">Procentas eterio laiko naudoto perdavimams per pastarąją valandą.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Viešas raktas</string>
-    <string name="encryption_psk_text">Tiesioginės žinutės naudoja bendrajį kanalo raktą (nėra šifruotos).</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Viešojo rakto šifruotė</string>
-    <string name="encryption_pkc_text">Tiesioginės žinutės šifravimui naudoja naująją viešojo rakto infrastruktūrą. Reikalinga 2,5 ar vėlesnės versijos programinė įranga.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
     <string name="exchange_userinfo">Exchange user info</string>
