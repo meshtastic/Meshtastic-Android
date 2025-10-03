@@ -187,7 +187,7 @@
     <string name="meshtastic_service_notifications">Dienstbenachrichtigungen</string>
     <string name="about">Über</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
-    <string name="contact_invalid">This contact is invalid and can not be added</string>
+    <string name="contact_invalid">Dieser Kontakt ist ungültig und kann nicht hinzugefügt werden</string>
     <string name="debug_panel">Debug-Ausgaben</string>
     <string name="debug_decoded_payload">Dekodiertes Payload:</string>
     <string name="debug_logs_export">Protokolle exportieren</string>
@@ -328,9 +328,9 @@
     <string name="air_util_definition">Prozentuale Sendezeit für die Übertragung innerhalb der letzten Stunde.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Geteilter Schlüssel</string>
-    <string name="encryption_psk_text">Direktnachrichten verwenden den gemeinsamen Schlüssel für den Kanal.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Verschlüsselung mit öffentlichen Schlüssel</string>
-    <string name="encryption_pkc_text">Direkte Nachrichten verwenden die neue öffentliche Schlüssel-Infrastruktur für die Verschlüsselung. Benötigt Firmware-Version 2.5 oder höher.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Öffentlicher Schlüssel stimmt nicht überein</string>
     <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem gespeicherten Schlüssel überein. Sie können den Knoten entfernen und ihn erneut Schlüssel austauschen lassen. Dies kann jedoch auf ein schwerwiegenderes Sicherheitsproblem hinweisen. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um festzustellen, ob die Schlüsseländerung durch Zurücksetzung auf die Werkseinstellungen oder eine andere absichtliche Aktion zurückzuführen ist.</string>
     <string name="exchange_userinfo">Benutzer Informationen teilen</string>
@@ -787,8 +787,8 @@
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="wifi_devices">WLAN Geräte</string>
     <string name="ble_devices">BLE Geräte</string>
-    <string name="bluetooth_paired_devices">Paired devices</string>
-    <string name="bluetooth_available_devices">Available devices</string>
+    <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
+    <string name="bluetooth_available_devices">Verfügbare Geräte</string>
     <string name="connected_device">Verbundene Geräte</string>
     <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
     <string name="view_release">Version ansehen</string>
@@ -889,5 +889,5 @@
     <string name="last_heard_filter_label">Filtern nach letztem Empfang: %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Keine Anwendung zum Bearbeiten des Links verfügbar.</string>
-    <string name="system_settings">System Settings</string>
+    <string name="system_settings">Systemeinstellungen</string>
 </resources>
