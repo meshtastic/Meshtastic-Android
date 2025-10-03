@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Szolgáltatás értesítések</string>
     <string name="about">A programról</string>
     <string name="channel_invalid">Ez a csatorna URL érvénytelen, ezért nem használható.</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Hibakereső panel</string>
     <string name="debug_decoded_payload">Dekódolt adat:</string>
     <string name="debug_logs_export">Naplók exportálása</string>
@@ -786,7 +787,8 @@
     <string name="no_pax_metrics_logs">Nem érhetők el PAX metrika naplók.</string>
     <string name="wifi_devices">WiFi eszközök</string>
     <string name="ble_devices">BLE eszközök</string>
-    <string name="bluetooth_paired_devices">Párosított eszközök</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Csatlakoztatott eszköz</string>
     <string name="routing_error_rate_limit_exceeded">Túllépted a sebességkorlátot. Próbáld újra később.</string>
     <string name="view_release">Kiadás megtekintése</string>

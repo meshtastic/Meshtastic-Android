@@ -97,6 +97,8 @@ import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
+import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
+import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
@@ -146,6 +148,8 @@ fun ChannelScreen(
     var showResetDialog by remember { mutableStateOf(false) }
 
     var shouldAddChannelsState by remember { mutableStateOf(true) }
+
+    val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -271,6 +275,8 @@ fun ChannelScreen(
             },
         )
     }
+
+    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { viewModel.clearRequestChannelUrl() }) }
 
     Scaffold(
         topBar = {

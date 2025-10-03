@@ -214,6 +214,7 @@
     <string name="meshtastic_service_notifications">Service notifications</string>
     <string name="about">About</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug Panel</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
@@ -354,9 +355,9 @@
     <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Shared Key</string>
-    <string name="encryption_psk_text">Direct messages are using the shared key for the channel.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Public Key Encryption</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption. Requires firmware version 2.5 or greater.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Public key mismatch</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
     <string name="exchange_userinfo">Exchange user info</string>
@@ -821,7 +822,8 @@
     <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
     <string name="wifi_devices">WiFi Devices</string>
     <string name="ble_devices">BLE Devices</string>
-    <string name="bluetooth_paired_devices">Paired Devices</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Connected Device</string>
 
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>

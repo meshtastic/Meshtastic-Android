@@ -23,17 +23,25 @@ platform :android do
 
   desc "Deploy a new version to the internal track on Google Play"
   lane :internal do
-    aab_path = build_google_release
-    upload_to_play_store(
-      track: 'internal',
-      aab: aab_path,
-      release_status: 'completed',
-      skip_upload_apk: true,
-      skip_upload_metadata: true,
-      skip_upload_changelogs: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-    )
+    begin
+      aab_path = build_google_release
+      upload_to_play_store(
+        track: 'internal',
+        aab: aab_path,
+        release_status: 'completed',
+        skip_upload_apk: true,
+        skip_upload_metadata: true,
+        skip_upload_changelogs: true,
+        skip_upload_images: true,
+        skip_upload_screenshots: true,
+      )
+    rescue => exception
+      if exception.message.include?("Google Api Error: forbidden: A release with version code") && exception.message.include?("already exists for this track")
+        UI.message("This version code is already on the internal track. No action needed.")
+      else
+        raise exception
+      end
+    end
   end
 
   desc "Promote from internal track to the closed track on Google Play"
@@ -41,6 +49,7 @@ platform :android do
     upload_to_play_store(
       track: 'internal',
       track_promote_to: 'NewAlpha',
+      version_codes: [ENV["VERSION_CODE"].to_i],
       release_status: 'completed',
       skip_upload_apk: true,
       skip_upload_metadata: true,
@@ -50,11 +59,12 @@ platform :android do
     )
   end
 
-  desc "Promote from closed track to the open track on Google Play"
+  desc "Promote from internal track to the open track on Google Play"
   lane :open do
     upload_to_play_store(
-      track: 'NewAlpha',
+      track: 'internal',
       track_promote_to: 'beta',
+      version_codes: [ENV["VERSION_CODE"].to_i],
       release_status: 'draft',
       skip_upload_apk: true,
       skip_upload_metadata: true,
@@ -64,11 +74,12 @@ platform :android do
     )
   end
 
-  desc "Promote from open track to the production track on Google Play"
+  desc "Promote from internal track to the production track on Google Play"
   lane :production do
     upload_to_play_store(
-      track: 'open',
+      track: 'internal',
       track_promote_to: 'production',
+      version_codes: [ENV["VERSION_CODE"].to_i],
       release_status: 'draft',
       skip_upload_apk: true,
       skip_upload_metadata: true,
@@ -87,6 +98,35 @@ platform :android do
         "android.injected.version.code" => ENV['VERSION_CODE']
       }
     )
+  end
+
+  desc "Get the highest version code from all Google Play tracks"
+  lane :get_highest_version_code do
+    require 'set'
+    all_codes = Set.new
+    tracks = ['internal', 'closed', 'open', 'production']
+    tracks.each do |track|
+      begin
+        codes = google_play_track_version_codes(track: track, package_name: 'com.geeksville.mesh')
+        all_codes.merge(codes.map(&:to_i))
+      rescue => e
+        UI.message("Could not fetch version codes for track #{track}: #{e.message}")
+      end
+    end
+    highest = all_codes.max || 0
+    UI.message("Highest version code on Google Play: #{highest}")
+    File.write('highest_version_code.txt', highest.to_s)
+  end
+
+  desc "Get the version code currently on the internal track (max if multiple)"
+  lane :get_internal_track_version_code do
+    codes = google_play_track_version_codes(track: 'internal', package_name: 'com.geeksville.mesh')
+    if codes.nil? || codes.empty?
+      UI.user_error!("No version codes found on internal track. Ensure an internal build has been published before promoting.")
+    end
+    max_code = codes.map(&:to_i).max
+    UI.message("Internal track version code: #{max_code}")
+    File.write('internal_version_code.txt', max_code.to_s)
   end
 
   private_lane :build_google_release do

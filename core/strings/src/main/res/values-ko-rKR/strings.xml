@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">서비스 알림</string>
     <string name="about">앱에 대하여</string>
     <string name="channel_invalid">이 채널 URL은 유효하지 않으며 사용할 수 없습니다.</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">디버그 패널</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">로그 내보내기</string>
@@ -784,7 +785,8 @@
     <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
     <string name="wifi_devices">WiFi Devices</string>
     <string name="ble_devices">BLE Devices</string>
-    <string name="bluetooth_paired_devices">Paired Devices</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Connected Device</string>
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
     <string name="view_release">View Release</string>

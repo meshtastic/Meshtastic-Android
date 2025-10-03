@@ -30,9 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.QrCodeScanner
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,17 +70,14 @@ import java.net.MalformedURLException
  * requests using Accompanist Permissions.
  *
  * @param modifier Modifier for this composable.
- * @param onSharedContactImport Callback invoked when a shared contact is successfully imported.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun AddContactFAB(
-    unfilteredNodes: List<Node>,
-    scannedContact: AdminProtos.SharedContact?,
+    sharedContact: AdminProtos.SharedContact?,
     modifier: Modifier = Modifier,
-    onSharedContactImport: (AdminProtos.SharedContact) -> Unit = {},
-    onSharedContactRequested: (AdminProtos.SharedContact?) -> Unit = {},
+    onSharedContactRequested: (AdminProtos.SharedContact?) -> Unit,
 ) {
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
@@ -101,37 +96,7 @@ fun AddContactFAB(
             }
         }
 
-    scannedContact?.let { contactToImport ->
-        val nodeNum = contactToImport.nodeNum
-        val node = unfilteredNodes.find { it.num == nodeNum }
-        SimpleAlertDialog(
-            title = R.string.import_shared_contact,
-            text = {
-                Column {
-                    if (node != null) {
-                        Text(text = stringResource(R.string.import_known_shared_contact_text))
-                        if (node.user.publicKey.size() > 0 && node.user.publicKey != contactToImport.user?.publicKey) {
-                            Text(
-                                text = stringResource(R.string.public_key_changed),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        }
-                        HorizontalDivider()
-                        Text(text = compareUsers(node.user, contactToImport.user))
-                    } else {
-                        Text(text = userFieldsToString(contactToImport.user))
-                    }
-                }
-            },
-            dismissText = stringResource(R.string.cancel),
-            onDismiss = { onSharedContactRequested(null) },
-            confirmText = stringResource(R.string.import_label),
-            onConfirm = {
-                onSharedContactImport(contactToImport)
-                onSharedContactRequested(null)
-            },
-        )
-    }
+    sharedContact?.let { SharedContactDialog(sharedContact = it, onDismiss = { onSharedContactRequested(null) }) }
 
     fun zxingScan() {
         Timber.d("Starting zxing QR code scanner")

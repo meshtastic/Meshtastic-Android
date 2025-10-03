@@ -68,6 +68,7 @@
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
+    <ID>LambdaParameterEventTrailing:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
     <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
@@ -183,6 +184,7 @@
     <ID>ModifierMissing:SecurityConfigItemList.kt$SecurityConfigScreen</ID>
     <ID>ModifierMissing:SettingsScreen.kt$SettingsScreen</ID>
     <ID>ModifierMissing:Share.kt$ShareScreen</ID>
+    <ID>ModifierMissing:SharedContactDialog.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:SignalMetrics.kt$SignalMetricsScreen</ID>
     <ID>ModifierMissing:TopLevelNavIcon.kt$TopLevelNavIcon</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>

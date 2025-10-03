@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">服務通知</string>
     <string name="about">關於</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">除錯面板</string>
     <string name="debug_decoded_payload">解析封包：</string>
     <string name="debug_logs_export">匯出日誌</string>
@@ -784,7 +785,8 @@
     <string name="no_pax_metrics_logs">沒有可用的 PAX 指標日誌。</string>
     <string name="wifi_devices">WiFi 裝置</string>
     <string name="ble_devices">藍牙裝置</string>
-    <string name="bluetooth_paired_devices">配對裝置</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">連接裝置</string>
     <string name="routing_error_rate_limit_exceeded">超過速率限制，請稍後再嘗試。</string>
     <string name="view_release">查看版本資訊</string>

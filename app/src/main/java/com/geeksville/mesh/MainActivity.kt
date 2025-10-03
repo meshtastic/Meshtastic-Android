@@ -42,7 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
-import com.geeksville.mesh.ui.sharing.toSharedContact
 import dagger.hilt.android.AndroidEntryPoint
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -118,9 +117,8 @@ class MainActivity : AppCompatActivity() {
                         Timber.d("App link data is a channel set")
                         model.requestChannelUrl(it)
                     } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
-                        val sharedContact = it.toSharedContact()
-                        Timber.d("App link data is a shared contact: ${sharedContact.user.longName}")
-                        model.setSharedContactRequested(sharedContact)
+                        Timber.d("App link data is a shared contact")
+                        model.setSharedContactRequested(it)
                     } else {
                         Timber.d("App link data is not a channel set")
                     }

@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Dienstbenachrichtigungen</string>
     <string name="about">Über</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug-Ausgaben</string>
     <string name="debug_decoded_payload">Dekodiertes Payload:</string>
     <string name="debug_logs_export">Protokolle exportieren</string>
@@ -786,7 +787,8 @@
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="wifi_devices">WLAN Geräte</string>
     <string name="ble_devices">BLE Geräte</string>
-    <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Verbundene Geräte</string>
     <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
     <string name="view_release">Version ansehen</string>

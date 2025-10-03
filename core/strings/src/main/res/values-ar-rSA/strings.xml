@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">خدمة الإشعارات</string>
     <string name="about">حول</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug Panel</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
@@ -794,7 +795,8 @@
     <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
     <string name="wifi_devices">WiFi Devices</string>
     <string name="ble_devices">BLE Devices</string>
-    <string name="bluetooth_paired_devices">Paired Devices</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Connected Device</string>
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
     <string name="view_release">View Release</string>
