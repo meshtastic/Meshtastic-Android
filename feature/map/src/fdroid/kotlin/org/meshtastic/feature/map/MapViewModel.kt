@@ -22,7 +22,7 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
-import org.meshtastic.core.common.build.BuildConfigProvider
+import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository

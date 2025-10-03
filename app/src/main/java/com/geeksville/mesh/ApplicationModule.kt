@@ -26,7 +26,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.meshtastic.core.common.build.BuildConfigProvider
+import org.meshtastic.core.common.BuildConfigProvider
 
 @InstallIn(SingletonComponent::class)
 @Module
