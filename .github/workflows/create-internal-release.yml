@@ -46,6 +46,12 @@ jobs:
           echo "DRY RUN: Would create tag ${{ steps.tag.outputs.internal_tag }} pointing to $(git rev-parse HEAD)"
           git log -5 --oneline
 
+      - name: Configure Git User
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
       - name: Create and Push Tag
         if: ${{ inputs.dry_run != 'true' }}
         run: |
