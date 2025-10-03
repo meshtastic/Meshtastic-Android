@@ -328,9 +328,9 @@
     <string name="air_util_definition">Viimeisen tunnin aikana käytetyn lähetyksen prosenttiosuus.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Jaettu avain</string>
-    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
+    <string name="encryption_psk_text">Voit lähettää ja vastaanottaa vain kanavaviestejä. Yksityisviestit toimivat vasta, kun käytössä on ohjelmistoversio 2.5+ tai uudempi, jossa on tuki salausavaimille.</string>
     <string name="encryption_pkc">Julkisen avaimen salaus</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
+    <string name="encryption_pkc_text">Yksityisviesteissä käytetään uutta julkisen avaimen infrastruktuuria salaukseen.</string>
     <string name="encryption_error">Julkinen avain ei täsmää</string>
     <string name="encryption_error_text">Julkinen avain ei vastaa kirjattua avainta. Voit poistaa laitteen ja antaa sen vaihtaa avaimia uudelleen, mutta tämä saattaa merkitä vakavampaa turvallisuusongelmaa. Ota yhteyttä käyttäjään toisen luotetun kanavan kautta määrittääksesi, johtuiko avain tehtaan resetoinnista tai muusta tarkoituksellisesta toiminnosta.</string>
     <string name="exchange_userinfo">Tarkastele käyttäjätietoja</string>
