@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Servicemeldingen</string>
     <string name="about">Over</string>
     <string name="channel_invalid">Deze Kanaal URL is ongeldig en kan niet worden gebruikt</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug-paneel</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
