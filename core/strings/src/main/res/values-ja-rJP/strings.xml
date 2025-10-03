@@ -328,9 +328,9 @@
     <string name="air_util_definition">過去1時間以内に送信に使用された通信時間の割合。</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">共有キー</string>
-    <string name="encryption_psk_text">ダイレクトメッセージは、チャンネルの共有キーを使用します。</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">公開キー暗号化</string>
-    <string name="encryption_pkc_text">ダイレクトメッセージは、暗号化に新しい公開キーのインフラストラクチャを使用しています。ファームウェアバージョン2.5以降が必要です。</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">公開キーが一致しません</string>
     <string name="encryption_error_text">公開キーが記録されているキーと一致しません。ノードを削除して再度キーの交換を行うことも可能ですが、これはより深刻なセキュリティ問題を示している可能性があります。出荷時リセットやその他の意図的な操作によるキーの変更かどうかを確認するため、別の信頼できるチャンネルでユーザーに連絡を取ってください。</string>
     <string name="exchange_userinfo">ユーザー情報を交換</string>
