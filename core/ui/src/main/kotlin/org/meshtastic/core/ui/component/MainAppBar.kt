@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -40,56 +39,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.navigation.ContactsRoutes
-import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.preview.BooleanProvider
 import org.meshtastic.core.ui.component.preview.previewNode
 import org.meshtastic.core.ui.theme.AppTheme
-
-@Suppress("CyclomaticComplexMethod")
-@Composable
-fun MainAppBar(
-    modifier: Modifier = Modifier,
-    navController: NavHostController,
-    ourNode: Node?,
-    onClickChip: (Node) -> Unit,
-) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = backStackEntry?.destination
-    if (currentDestination?.hasRoute<ContactsRoutes.Messages>() == true) {
-        return
-    }
-
-    val title: String =
-        when {
-            currentDestination == null -> ""
-
-            currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> stringResource(id = R.string.debug_panel)
-
-            currentDestination.hasRoute<ContactsRoutes.QuickChat>() -> stringResource(id = R.string.quick_chat)
-
-            currentDestination.hasRoute<ContactsRoutes.Share>() -> stringResource(id = R.string.share_to)
-
-            else -> ""
-        }
-
-    MainAppBar(
-        modifier = modifier,
-        title = title,
-        subtitle = null,
-        canNavigateUp = navController.previousBackStackEntry != null,
-        ourNode = ourNode,
-        showNodeChip = false,
-        onNavigateUp = navController::navigateUp,
-        actions = {},
-        onClickChip = onClickChip,
-    )
-}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable

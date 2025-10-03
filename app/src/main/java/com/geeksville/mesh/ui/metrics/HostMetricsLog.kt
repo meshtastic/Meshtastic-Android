@@ -39,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,18 +59,36 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 import java.text.DecimalFormat
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel()) {
+fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
 
     val hostMetrics = state.hostMetrics
 
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
-        items(hostMetrics) { telemetry -> HostMetricsItem(telemetry = telemetry) }
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = state.node?.user?.longName ?: "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
+            )
+        },
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(innerPadding),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+        ) {
+            items(hostMetrics) { telemetry -> HostMetricsItem(telemetry = telemetry) }
+        }
     }
 }
 

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,40 +44,59 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.contact.ContactItem
 import com.geeksville.mesh.ui.contact.ContactsViewModel
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun ShareScreen(viewModel: ContactsViewModel = hiltViewModel(), onConfirm: (String) -> Unit) {
+fun ShareScreen(viewModel: ContactsViewModel = hiltViewModel(), onConfirm: (String) -> Unit, onNavigateUp: () -> Unit) {
     val contactList by viewModel.contactList.collectAsStateWithLifecycle()
 
-    ShareScreen(contacts = contactList, onConfirm = onConfirm)
+    ShareScreen(contacts = contactList, onConfirm = onConfirm, onNavigateUp = onNavigateUp)
 }
 
 @Composable
-fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit) {
+fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigateUp: () -> Unit) {
     var selectedContact by remember { mutableStateOf("") }
 
-    Column {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            items(contacts, key = { it.contactKey }) { contact ->
-                val selected = contact.contactKey == selectedContact
-                ContactItem(contact = contact, selected = selected, onClick = { selectedContact = contact.contactKey })
-            }
-        }
-
-        Button(
-            onClick = { onConfirm(selectedContact) },
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
-            enabled = selectedContact.isNotEmpty(),
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.Send,
-                contentDescription = stringResource(id = R.string.share),
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = stringResource(id = R.string.share_to),
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
             )
+        },
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                items(contacts, key = { it.contactKey }) { contact ->
+                    val selected = contact.contactKey == selectedContact
+                    ContactItem(
+                        contact = contact,
+                        selected = selected,
+                        onClick = { selectedContact = contact.contactKey },
+                    )
+                }
+            }
+
+            Button(
+                onClick = { onConfirm(selectedContact) },
+                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                enabled = selectedContact.isNotEmpty(),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.Send,
+                    contentDescription = stringResource(id = R.string.share),
+                )
+            }
         }
     }
 }
@@ -101,6 +121,7 @@ private fun ShareScreenPreview() {
                 ),
             ),
             onConfirm = {},
+            onNavigateUp = {},
         )
     }
 }

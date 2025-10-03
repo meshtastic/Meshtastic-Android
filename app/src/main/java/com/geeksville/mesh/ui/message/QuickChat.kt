@@ -48,6 +48,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -73,13 +74,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.UIViewModel
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-internal fun QuickChatScreen(modifier: Modifier = Modifier, viewModel: UIViewModel = hiltViewModel()) {
+internal fun QuickChatScreen(
+    modifier: Modifier = Modifier,
+    viewModel: UIViewModel = hiltViewModel(),
+    onNavigateUp: () -> Unit,
+) {
     val actions by viewModel.quickChatActions.collectAsStateWithLifecycle()
     var showActionDialog by remember { mutableStateOf<QuickChatAction?>(null) }
 
@@ -90,37 +96,50 @@ internal fun QuickChatScreen(modifier: Modifier = Modifier, viewModel: UIViewMod
             viewModel.updateActionPositions(list)
         }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        if (showActionDialog != null) {
-            val action = showActionDialog ?: return
-            EditQuickChatDialog(
-                action = action,
-                onSave = viewModel::addQuickChatAction,
-                onDelete = viewModel::deleteQuickChatAction,
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = stringResource(id = R.string.quick_chat),
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
+            )
+        },
+    ) { innerPadding ->
+        Box(modifier = modifier.fillMaxSize().padding(innerPadding)) {
+            showActionDialog?.let {
+                EditQuickChatDialog(
+                    action = it,
+                    onSave = viewModel::addQuickChatAction,
+                    onDelete = viewModel::deleteQuickChatAction,
+                ) {
+                    showActionDialog = null
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
+                state = listState,
+                contentPadding = PaddingValues(16.dp),
             ) {
-                showActionDialog = null
+                dragDropItemsIndexed(items = actions, dragDropState = dragDropState, key = { _, item -> item.uuid }) {
+                        _,
+                        action,
+                        isDragging,
+                    ->
+                    QuickChatItem(action = action, onEdit = { showActionDialog = it })
+                }
             }
-        }
 
-        LazyColumn(
-            modifier = Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
-            state = listState,
-            contentPadding = PaddingValues(16.dp),
-        ) {
-            dragDropItemsIndexed(items = actions, dragDropState = dragDropState, key = { _, item -> item.uuid }) {
-                    _,
-                    action,
-                    isDragging,
-                ->
-                QuickChatItem(action = action, onEdit = { showActionDialog = it })
+            FloatingActionButton(
+                onClick = { showActionDialog = QuickChatAction(position = actions.size) },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            ) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add))
             }
-        }
-
-        FloatingActionButton(
-            onClick = { showActionDialog = QuickChatAction(position = actions.size) },
-            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-        ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add))
         }
     }
 }

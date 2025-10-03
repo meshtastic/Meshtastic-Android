@@ -51,6 +51,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -115,6 +116,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
 import timber.log.Timber
 
@@ -129,6 +131,7 @@ fun ChannelScreen(
     viewModel: ChannelViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onNavigate: (Route) -> Unit,
+    onNavigateUp: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -274,73 +277,91 @@ fun ChannelScreen(
 
     requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { viewModel.clearRequestChannelUrl() }) }
 
-    val listState = rememberLazyListState()
-    LazyColumn(state = listState, contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)) {
-        item {
-            ChannelListView(
-                enabled = enabled,
-                channelSet = channelSet,
-                modemPresetName = modemPresetName,
-                channelSelections = channelSelections,
-                shouldAddChannel = shouldAddChannelsState,
-                onClick = {
-                    isWaiting = true
-                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
-                },
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
             )
-            EditChannelUrl(
-                enabled = enabled,
-                channelUrl = selectedChannelSet.getChannelUrl(shouldAdd = shouldAddChannelsState),
-                onConfirm = {
-                    viewModel.requestChannelUrl(it) {
-                        Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
-                    }
-                },
-            )
-        }
-        item {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                SegmentedButton(
-                    label = { Text(text = stringResource(R.string.replace)) },
-                    onClick = { shouldAddChannelsState = false },
-                    selected = !shouldAddChannelsState,
-                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+        },
+    ) { innerPadding ->
+        val listState = rememberLazyListState()
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.padding(innerPadding),
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+        ) {
+            item {
+                ChannelListView(
+                    enabled = enabled,
+                    channelSet = channelSet,
+                    modemPresetName = modemPresetName,
+                    channelSelections = channelSelections,
+                    shouldAddChannel = shouldAddChannelsState,
+                    onClick = {
+                        isWaiting = true
+                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
+                    },
                 )
-                SegmentedButton(
-                    label = { Text(text = stringResource(R.string.add)) },
-                    onClick = { shouldAddChannelsState = true },
-                    selected = shouldAddChannelsState,
-                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                EditChannelUrl(
+                    enabled = enabled,
+                    channelUrl = selectedChannelSet.getChannelUrl(shouldAdd = shouldAddChannelsState),
+                    onConfirm = {
+                        viewModel.requestChannelUrl(it) {
+                            Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                        }
+                    },
                 )
             }
-        }
-        item {
-            ModemPresetInfo(
-                modemPresetName = modemPresetName,
-                onClick = {
-                    isWaiting = true
-                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                },
-            )
-        }
-        item {
-            PreferenceFooter(
-                enabled = enabled,
-                negativeText = R.string.reset,
-                onNegativeClicked = {
-                    focusManager.clearFocus()
-                    showResetDialog = true
-                },
-                positiveText = R.string.scan,
-                onPositiveClicked = {
-                    focusManager.clearFocus()
-                    if (cameraPermissionState.status.isGranted) {
-                        zxingScan()
-                    } else {
-                        cameraPermissionState.launchPermissionRequest()
-                    }
-                },
-            )
+            item {
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                    SegmentedButton(
+                        label = { Text(text = stringResource(R.string.replace)) },
+                        onClick = { shouldAddChannelsState = false },
+                        selected = !shouldAddChannelsState,
+                        shape = SegmentedButtonDefaults.itemShape(0, 2),
+                    )
+                    SegmentedButton(
+                        label = { Text(text = stringResource(R.string.add)) },
+                        onClick = { shouldAddChannelsState = true },
+                        selected = shouldAddChannelsState,
+                        shape = SegmentedButtonDefaults.itemShape(1, 2),
+                    )
+                }
+            }
+            item {
+                ModemPresetInfo(
+                    modemPresetName = modemPresetName,
+                    onClick = {
+                        isWaiting = true
+                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                    },
+                )
+            }
+            item {
+                PreferenceFooter(
+                    enabled = enabled,
+                    negativeText = R.string.reset,
+                    onNegativeClicked = {
+                        focusManager.clearFocus()
+                        showResetDialog = true
+                    },
+                    positiveText = R.string.scan,
+                    onPositiveClicked = {
+                        focusManager.clearFocus()
+                        if (cameraPermissionState.status.isGranted) {
+                            zxingScan()
+                        } else {
+                            cameraPermissionState.launchPermissionRequest()
+                        }
+                    },
+                )
+            }
         }
     }
 }

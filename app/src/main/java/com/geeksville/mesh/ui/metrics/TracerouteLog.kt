@@ -41,6 +41,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -67,6 +68,7 @@ import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
 import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
 import org.meshtastic.core.ui.component.SimpleAlertDialog
@@ -79,7 +81,11 @@ import java.text.DateFormat
 @OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod")
 @Composable
-fun TracerouteLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewModel = hiltViewModel()) {
+fun TracerouteLogScreen(
+    modifier: Modifier = Modifier,
+    viewModel: MetricsViewModel = hiltViewModel(),
+    onNavigateUp: () -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) }
 
@@ -96,55 +102,75 @@ fun TracerouteLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewMod
         )
     }
 
-    LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
-        items(state.tracerouteRequests, key = { it.uuid }) { log ->
-            val result =
-                remember(state.tracerouteRequests, log.fromRadio.packet.id) {
-                    state.tracerouteResults.find { it.fromRadio.packet.decoded.requestId == log.fromRadio.packet.id }
-                }
-            val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
-
-            val time = dateFormat.format(log.received_date)
-            val (text, icon) = route.getTextAndIcon()
-            var expanded by remember { mutableStateOf(false) }
-
-            val tracerouteDetailsAnnotated: AnnotatedString? =
-                result?.let { res ->
-                    if (route != null && route.routeList.isNotEmpty() && route.routeBackList.isNotEmpty()) {
-                        val seconds = (res.received_date - log.received_date).coerceAtLeast(0).toDouble() / MS_PER_SEC
-                        val annotatedBase =
-                            annotateTraceroute(res.fromRadio.packet.getTracerouteResponse(::getUsername))
-                        buildAnnotatedString {
-                            append(annotatedBase)
-                            append("\n\nDuration: ${"%.1f".format(seconds)} s")
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = state.node?.user?.longName ?: "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
+            )
+        },
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = modifier.fillMaxSize().padding(innerPadding),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+        ) {
+            items(state.tracerouteRequests, key = { it.uuid }) { log ->
+                val result =
+                    remember(state.tracerouteRequests, log.fromRadio.packet.id) {
+                        state.tracerouteResults.find {
+                            it.fromRadio.packet.decoded.requestId == log.fromRadio.packet.id
                         }
-                    } else {
-                        // For cases where there's a result but no full route, display plain text
-                        res.fromRadio.packet.getTracerouteResponse(::getUsername)?.let { AnnotatedString(it) }
                     }
-                }
+                val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
 
-            Box {
-                TracerouteItem(
-                    icon = icon,
-                    text = "$time - $text",
-                    modifier =
-                    Modifier.combinedClickable(onLongClick = { expanded = true }) {
-                        if (tracerouteDetailsAnnotated != null) {
-                            showDialog = tracerouteDetailsAnnotated
-                        } else if (result != null) {
-                            // Fallback for results that couldn't be fully annotated but have basic info
-                            val basicInfo = result.fromRadio.packet.getTracerouteResponse(::getUsername)
-                            if (basicInfo != null) {
-                                showDialog = AnnotatedString(basicInfo)
+                val time = dateFormat.format(log.received_date)
+                val (text, icon) = route.getTextAndIcon()
+                var expanded by remember { mutableStateOf(false) }
+
+                val tracerouteDetailsAnnotated: AnnotatedString? =
+                    result?.let { res ->
+                        if (route != null && route.routeList.isNotEmpty() && route.routeBackList.isNotEmpty()) {
+                            val seconds =
+                                (res.received_date - log.received_date).coerceAtLeast(0).toDouble() / MS_PER_SEC
+                            val annotatedBase =
+                                annotateTraceroute(res.fromRadio.packet.getTracerouteResponse(::getUsername))
+                            buildAnnotatedString {
+                                append(annotatedBase)
+                                append("\n\nDuration: ${"%.1f".format(seconds)} s")
                             }
+                        } else {
+                            // For cases where there's a result but no full route, display plain text
+                            res.fromRadio.packet.getTracerouteResponse(::getUsername)?.let { AnnotatedString(it) }
                         }
-                    },
-                )
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                    DeleteItem {
-                        viewModel.deleteLog(log.uuid)
-                        expanded = false
+                    }
+
+                Box {
+                    TracerouteItem(
+                        icon = icon,
+                        text = "$time - $text",
+                        modifier =
+                        Modifier.combinedClickable(onLongClick = { expanded = true }) {
+                            if (tracerouteDetailsAnnotated != null) {
+                                showDialog = tracerouteDetailsAnnotated
+                            } else if (result != null) {
+                                // Fallback for results that couldn't be fully annotated but have basic info
+                                val basicInfo = result.fromRadio.packet.getTracerouteResponse(::getUsername)
+                                if (basicInfo != null) {
+                                    showDialog = AnnotatedString(basicInfo)
+                                }
+                            }
+                        },
+                    )
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        DeleteItem {
+                            viewModel.deleteLog(log.uuid)
+                            expanded = false
+                        }
                     }
                 }
             }

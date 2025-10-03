@@ -7,6 +7,7 @@
     <ID>CommentSpacing:Coroutines.kt$/// Wrap launch with an exception handler, FIXME, move into a utility lib</ID>
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableNaming:NodeDetailScreen.kt$notesSection</ID>
+    <ID>ComposableParamOrder:Channel.kt$ChannelScreen</ID>
     <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
     <ID>ComposableParamOrder:Debug.kt$DecodedPayloadBlock</ID>
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchState</ID>
@@ -34,6 +35,7 @@
     <ID>ComposableParamOrder:PermissionScreenLayout.kt$PermissionScreenLayout</ID>
     <ID>ComposableParamOrder:PowerMetrics.kt$PowerMetricsChart</ID>
     <ID>ComposableParamOrder:QuickChat.kt$OutlinedTextFieldWithCounter</ID>
+    <ID>ComposableParamOrder:Share.kt$ShareScreen</ID>
     <ID>ComposableParamOrder:SignalMetrics.kt$SignalMetricsChart</ID>
     <ID>ComposableParamOrder:TopLevelNavIcon.kt$ConnectionsNavIcon</ID>
     <ID>ComposableParamOrder:WarningDialog.kt$WarningDialog</ID>
@@ -72,6 +74,8 @@
     <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
     <ID>LambdaParameterEventTrailing:NodeDetailScreen.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:NodeDetailScreen.kt$onSaveNotes</ID>
+    <ID>LambdaParameterEventTrailing:QuickChat.kt$onNavigateUp</ID>
+    <ID>LambdaParameterEventTrailing:TracerouteLog.kt$onNavigateUp</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
     <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
@@ -81,6 +85,7 @@
     <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:DeviceConfigItemList.kt$@Composable fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:EnvironmentMetrics.kt$@Composable fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit)</ID>
     <ID>LongMethod:ExternalNotificationConfigItemList.kt$@Composable fun ExternalNotificationConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
@@ -193,9 +198,11 @@
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier.width(dp)</ID>
+    <ID>ModifierNotUsedAtRoot:QuickChat.kt$modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier.width(dp)</ID>
+    <ID>ModifierNotUsedAtRoot:TracerouteLog.kt$modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
     <ID>ModifierReused:DeviceMetrics.kt$Canvas(modifier = modifier.width(dp)) { val height = size.height val width = size.width for (i in telemetries.indices) { val telemetry = telemetries[i] /* x-value time */ val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff val x = xRatio * width /* Channel Utilization */ plotPoint( drawContext = drawContext, color = Device.CH_UTIL.color, x = x, value = telemetry.deviceMetrics.channelUtilization, divisor = MAX_PERCENT_VALUE, ) /* Air Utilization Transmit */ plotPoint( drawContext = drawContext, color = Device.AIR_UTIL.color, x = x, value = telemetry.deviceMetrics.airUtilTx, divisor = MAX_PERCENT_VALUE, ) } /* Battery Line */ var index = 0 while (index &lt; telemetries.size) { val path = Path() index = createPath( telemetries = telemetries, index = index, path = path, oldestTime = oldest.time, timeRange = timeDiff, width = width, timeThreshold = selectedTime.timeThreshold(), ) { i -> val telemetry = telemetries.getOrNull(i) ?: telemetries.last() val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE val y = height - (ratio * height) return@createPath y } drawPath( path = path, color = Device.BATTERY.color, style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round), ) } }</ID>
     <ID>ModifierReused:DeviceMetrics.kt$HorizontalLinesOverlay( modifier.width(dp), lineColors = listOf(graphColor, Color.Yellow, Color.Red, graphColor, graphColor), )</ID>
     <ID>ModifierReused:DeviceMetrics.kt$TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())</ID>
