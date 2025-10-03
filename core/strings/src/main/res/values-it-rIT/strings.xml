@@ -328,9 +328,9 @@
     <string name="air_util_definition">Percentuale di tempo di trasmissione utilizzato nell’ultima ora.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Chiave Condivisa</string>
-    <string name="encryption_psk_text">I messaggi privati usano la chiave condivisa del canale.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
-    <string name="encryption_pkc_text">I messaggi privati utilizzano la nuova infrastruttura a chiave pubblica per la crittografia. Richiede la versione 2.5 o superiore.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Chiave pubblica errata</string>
     <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l\'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
     <string name="exchange_userinfo">Scambia informazioni utente</string>
