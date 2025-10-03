@@ -22,6 +22,7 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import org.meshtastic.core.common.build.BuildConfigProvider
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
@@ -39,6 +40,7 @@ constructor(
     private val nodeRepository: NodeRepository,
     serviceRepository: ServiceRepository,
     radioConfigRepository: RadioConfigRepository,
+    buildConfigProvider: BuildConfigProvider,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
 
     var mapStyleId: Int
@@ -56,6 +58,8 @@ constructor(
 
     val config
         get() = localConfig.value
+
+    val applicationId = buildConfigProvider.applicationId
 
     fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 }

@@ -20,11 +20,15 @@ package com.geeksville.mesh.ui.map
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.common.build.BuildConfigProvider
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import javax.inject.Inject
 
 @HiltViewModel
-class NodeMapViewModel @Inject constructor(nodeRepository: NodeRepository) : ViewModel() {
+class NodeMapViewModel @Inject constructor(nodeRepository: NodeRepository, buildConfigProvider: BuildConfigProvider) :
+    ViewModel() {
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
+
+    val applicationId = buildConfigProvider.applicationId
 }

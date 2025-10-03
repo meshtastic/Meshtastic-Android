@@ -256,7 +256,12 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
     }
-    val map = rememberMapViewWithLifecycle(initialCameraView, loadOnlineTileSourceBase())
+    val map =
+        rememberMapViewWithLifecycle(
+            applicationId = mapViewModel.applicationId,
+            box = initialCameraView,
+            tileSource = loadOnlineTileSourceBase(),
+        )
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
