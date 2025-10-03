@@ -328,9 +328,9 @@
     <string name="air_util_definition">Az elmúlt órában az adásra használt adásidő százaléka.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Megosztott kulcs</string>
-    <string name="encryption_psk_text">A közvetlen üzenetek a csatorna megosztott kulcsát használják.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Publikus Kulcs Titkosítás</string>
-    <string name="encryption_pkc_text">A közvetlen üzenetek az új nyilvános kulcs-infrastruktúrát használják titkosításhoz. Firmware 2.5 vagy újabb szükséges.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Publikus kulcs nem egyezik</string>
     <string name="encryption_error_text">A nyilvános kulcs nem egyezik a rögzített kulccsal. Eltávolíthatod a csomópontot, hogy újra kulcsot cseréljen, de ez komolyabb biztonsági problémát jelezhet. Lépj kapcsolatba a felhasználóval egy megbízható csatornán, hogy kiderítsd, a kulcscsere gyári visszaállítás vagy más szándékos művelet miatt történt-e.</string>
     <string name="exchange_userinfo">Felhasználói adatok cseréje</string>
