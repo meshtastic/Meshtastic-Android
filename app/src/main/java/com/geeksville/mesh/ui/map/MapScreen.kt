@@ -28,6 +28,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.feature.map.MapView
 import org.meshtastic.feature.map.MapViewModel
 
 @Composable

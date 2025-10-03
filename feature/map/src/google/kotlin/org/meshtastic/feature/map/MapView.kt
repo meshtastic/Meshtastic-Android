@@ -17,7 +17,7 @@
 
 @file:Suppress("MagicNumber")
 
-package com.geeksville.mesh.ui.map
+package org.meshtastic.feature.map
 
 import android.app.Activity
 import android.content.Intent
@@ -67,8 +67,6 @@ import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.metrics.DEG_D
-import com.geeksville.mesh.ui.metrics.HEADING_DEG
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -107,10 +105,6 @@ import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.proto.formatPositionTime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.feature.map.LastHeardFilter
-import org.meshtastic.feature.map.LayerType
-import org.meshtastic.feature.map.LocationPermissionsHandler
-import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.component.ClusterItemsListDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.CustomTileProviderManagerSheet
@@ -123,6 +117,8 @@ import timber.log.Timber
 import java.text.DateFormat
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
+private const val DEG_D = 1e-7
+private const val HEADING_DEG = 1e-5
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -670,15 +666,9 @@ private fun PositionInfoWindowContent(
 
     Card {
         Column(modifier = Modifier.padding(8.dp)) {
-            PositionRow(
-                label = stringResource(R.string.latitude),
-                value = "%.5f".format(position.latitudeI * com.geeksville.mesh.ui.metrics.DEG_D),
-            )
+            PositionRow(label = stringResource(R.string.latitude), value = "%.5f".format(position.latitudeI * DEG_D))
 
-            PositionRow(
-                label = stringResource(R.string.longitude),
-                value = "%.5f".format(position.longitudeI * com.geeksville.mesh.ui.metrics.DEG_D),
-            )
+            PositionRow(label = stringResource(R.string.longitude), value = "%.5f".format(position.longitudeI * DEG_D))
 
             PositionRow(label = stringResource(R.string.sats), value = position.satsInView.toString())
 
