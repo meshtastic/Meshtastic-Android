@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Teenuse teavitused</string>
     <string name="about">Teave</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_decoded_payload">Dekodeeritud andmed:</string>
     <string name="debug_logs_export">Salvesta logi</string>
