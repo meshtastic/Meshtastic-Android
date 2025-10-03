@@ -66,7 +66,6 @@ import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
@@ -77,6 +76,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.SqlTileWriterExt
 import org.meshtastic.feature.map.addCopyright
 import org.meshtastic.feature.map.addScaleBarOverlay
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
