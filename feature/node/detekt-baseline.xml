@@ -14,6 +14,5 @@
     <ID>ParameterNaming:NodeFilterTextField.kt$onToggleShowIgnored</ID>
     <ID>PreviewPublic:NodeItem.kt$NodeInfoPreview</ID>
     <ID>PreviewPublic:NodeItem.kt$NodeInfoSimplePreview</ID>
-    <ID>TooManyFunctions:NodeListViewModel.kt$NodeListViewModel : ViewModel</ID>
   </CurrentIssues>
 </SmellBaseline>
