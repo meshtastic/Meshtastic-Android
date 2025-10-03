@@ -1,0 +1,191 @@
+name: Promote Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_stage:
+        description: "Stage to promote to (auto|closed|open|production)"
+        required: true
+        default: auto
+        type: choice
+        options: [auto, closed, open, production]
+      base_version:
+        description: "Explicit base version (e.g. 2.5.0 or 2.5.0-hotfix1). If omitted, latest internal tag base is used."
+        required: false
+      allow_skip:
+        description: "Allow skipping intermediate stages (e.g. internal->production)"
+        required: false
+        default: "false"
+      dry_run:
+        description: "If true, only compute next tag; don't push"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Determine Base Version
+        id: base
+        run: |
+          set -euo pipefail
+          INPUT_BASE='${{ inputs.base_version }}'
+          if [ -n "$INPUT_BASE" ]; then
+            # Validate an internal tag exists for provided base
+            if ! git tag --list | grep -q "^v${INPUT_BASE}-internal\."; then
+              echo "No internal tag found for base version v${INPUT_BASE}." >&2
+              exit 1
+            fi
+            BASE_VERSION="$INPUT_BASE"
+          else
+            LATEST_INTERNAL_TAG=$(git tag --list 'v*-internal.*' --sort=-taggerdate | head -n1 || true)
+            if [ -z "$LATEST_INTERNAL_TAG" ]; then
+              echo "No internal tags found; nothing to promote." >&2
+              exit 1
+            fi
+            # Strip leading v and suffix -internal.N
+            BASE_VERSION=$(echo "$LATEST_INTERNAL_TAG" | sed -E 's/^v(.*)-internal\.[0-9]+$/\1/')
+          fi
+          echo "Base version: $BASE_VERSION"
+          echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Gather Existing Stage Tags
+        id: scan
+        run: |
+          set -euo pipefail
+          BASE='${{ steps.base.outputs.base_version }}'
+          INTERNAL_TAGS=$(git tag --list "v${BASE}-internal.*" | sort -V || true)
+          CLOSED_TAGS=$(git tag --list "v${BASE}-closed.*" | sort -V || true)
+            OPEN_TAGS=$(git tag --list "v${BASE}-open.*" | sort -V || true)
+          PROD_TAG=$(git tag --list "v${BASE}" || true)
+          echo "internal_tags<<EOF" >> $GITHUB_OUTPUT
+          echo "$INTERNAL_TAGS" >> $GITHUB_OUTPUT
+          echo EOF >> $GITHUB_OUTPUT
+          echo "closed_tags<<EOF" >> $GITHUB_OUTPUT
+          echo "$CLOSED_TAGS" >> $GITHUB_OUTPUT
+          echo EOF >> $GITHUB_OUTPUT
+          echo "open_tags<<EOF" >> $GITHUB_OUTPUT
+          echo "$OPEN_TAGS" >> $GITHUB_OUTPUT
+          echo EOF >> $GITHUB_OUTPUT
+          if [ -n "$PROD_TAG" ]; then echo "production_present=true" >> $GITHUB_OUTPUT; else echo "production_present=false" >> $GITHUB_OUTPUT; fi
+          if [ -z "$INTERNAL_TAGS" ]; then
+            echo "No internal tags found for base version $BASE." >&2
+            exit 1
+          fi
+
+      - name: Determine Current Stage
+        id: current
+        run: |
+          set -euo pipefail
+          PROD='${{ steps.scan.outputs.production_present }}'
+          CLOSED='${{ steps.scan.outputs.closed_tags }}'
+          OPEN='${{ steps.scan.outputs.open_tags }}'
+          if [ "$PROD" = 'true' ]; then CUR=production
+          elif [ -n "$OPEN" ]; then CUR=open
+          elif [ -n "$CLOSED" ]; then CUR=closed
+          else CUR=internal; fi
+          echo "Current highest stage: $CUR"
+          echo "current_stage=$CUR" >> $GITHUB_OUTPUT
+
+      - name: Decide Target Stage
+        id: decide
+        run: |
+          set -euo pipefail
+          REQ='${{ inputs.target_stage }}'
+          CUR='${{ steps.current.outputs.current_stage }}'
+          ALLOW_SKIP='${{ inputs.allow_skip }}'
+          order=(internal closed open production)
+          # helper to get index
+          idx() { local i=0; for s in "${order[@]}"; do [ "$s" = "$1" ] && echo $i && return; i=$((i+1)); done; echo -1; }
+          if [ "$REQ" = auto ]; then
+            CUR_IDX=$(idx "$CUR")
+            TARGET_IDX=$((CUR_IDX+1))
+            TARGET_STAGE=${order[$TARGET_IDX]:-}
+            if [ -z "$TARGET_STAGE" ]; then
+              echo "Already at production; nothing to promote." >&2
+              exit 1
+            fi
+          else
+            TARGET_STAGE=$REQ
+            CUR_IDX=$(idx "$CUR")
+            REQ_IDX=$(idx "$TARGET_STAGE")
+            if [ $REQ_IDX -le $CUR_IDX ]; then
+              echo "Requested stage $TARGET_STAGE is not ahead of current stage $CUR." >&2
+              exit 1
+            fi
+            if [ "$ALLOW_SKIP" != 'true' ] && [ $((CUR_IDX+1)) -ne $REQ_IDX ]; then
+              echo "Skipping stages not allowed (current=$CUR, requested=$TARGET_STAGE). Enable allow_skip to override." >&2
+              exit 1
+            fi
+          fi
+          echo "Target stage: $TARGET_STAGE"
+          echo "target_stage=$TARGET_STAGE" >> $GITHUB_OUTPUT
+
+      - name: Compute New Tag
+        id: tag
+        run: |
+          set -euo pipefail
+          BASE='${{ steps.base.outputs.base_version }}'
+          TARGET='${{ steps.decide.outputs.target_stage }}'
+          if [ "$TARGET" = production ]; then
+            NEW_TAG="v${BASE}"
+            if git tag --list | grep -q "^${NEW_TAG}$"; then
+              echo "Production tag ${NEW_TAG} already exists." >&2
+              exit 1
+            fi
+          else
+            EXISTING=$(git tag --list "v${BASE}-${TARGET}.*" | sed -E "s/^v.*-${TARGET}\.([0-9]+)$/\1/" | sort -n | tail -1 || true)
+            if [ -z "$EXISTING" ]; then NEXT=1; else NEXT=$((EXISTING+1)); fi
+            NEW_TAG="v${BASE}-${TARGET}.${NEXT}"
+          fi
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "Will create tag: $NEW_TAG"
+
+      - name: Resolve Commit to Tag (latest internal for base)
+        id: commit
+        run: |
+          set -euo pipefail
+          BASE='${{ steps.base.outputs.base_version }}'
+          LATEST_INTERNAL=$(git tag --list "v${BASE}-internal.*" --sort=-version:refname | head -n1)
+          if [ -z "$LATEST_INTERNAL" ]; then
+            echo "No internal tag found for base $BASE (unexpected)." >&2
+            exit 1
+          fi
+          COMMIT=$(git rev-list -n1 "$LATEST_INTERNAL")
+          echo "commit_sha=$COMMIT" >> $GITHUB_OUTPUT
+          echo "Using commit $COMMIT from $LATEST_INTERNAL"
+
+      - name: Dry Run Summary
+        if: ${{ inputs.dry_run == 'true' }}
+        run: |
+          echo "DRY RUN: Would tag commit ${{ steps.commit.outputs.commit_sha }} with ${{ steps.tag.outputs.new_tag }}"
+          echo "Current stage: ${{ steps.current.outputs.current_stage }} -> Target: ${{ steps.decide.outputs.target_stage }}"
+          git log -1 --oneline ${{ steps.commit.outputs.commit_sha }}
+
+      - name: Create & Push Tag
+        if: ${{ inputs.dry_run != 'true' }}
+        run: |
+          TAG='${{ steps.tag.outputs.new_tag }}'
+          COMMIT='${{ steps.commit.outputs.commit_sha }}'
+          MSG="Promote ${TAG} from ${{ steps.current.outputs.current_stage }} to ${{ steps.decide.outputs.target_stage }}"
+          git tag -a "$TAG" "$COMMIT" -m "$MSG"
+          git push origin "$TAG"
+          echo "Created and pushed $TAG"
+
+      - name: Promotion Summary
+        run: |
+          echo "### Promotion Tag Created" >> $GITHUB_STEP_SUMMARY
+          echo "Base Version: ${{ steps.base.outputs.base_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Current Stage: ${{ steps.current.outputs.current_stage }}" >> $GITHUB_STEP_SUMMARY
+          echo "Target Stage: ${{ steps.decide.outputs.target_stage }}" >> $GITHUB_STEP_SUMMARY
+          echo "New Tag: ${{ steps.tag.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+
