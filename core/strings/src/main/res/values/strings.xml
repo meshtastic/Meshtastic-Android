@@ -354,7 +354,7 @@
     <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Shared Key</string>
-    <string name="encryption_psk_text">Direct messages are using the shared key for the channel.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require Public Key Infrastructure.</string>
     <string name="encryption_pkc">Public Key Encryption</string>
     <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption. Requires firmware version 2.5 or greater.</string>
     <string name="encryption_error">Public key mismatch</string>
