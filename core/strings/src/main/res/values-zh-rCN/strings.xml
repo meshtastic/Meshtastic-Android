@@ -786,7 +786,8 @@
     <string name="no_pax_metrics_logs">无可用的 PAX 计量日志。</string>
     <string name="wifi_devices">WiFi 设备</string>
     <string name="ble_devices">BLE 设备</string>
-    <string name="bluetooth_paired_devices">Paired Devices</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Connected Device</string>
     <string name="routing_error_rate_limit_exceeded">超过速率限制。请稍后再试。</string>
     <string name="view_release">查看发行版</string>
