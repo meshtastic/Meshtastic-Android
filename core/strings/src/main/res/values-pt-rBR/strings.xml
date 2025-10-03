@@ -328,9 +328,9 @@
     <string name="air_util_definition">Percentagem do tempo de ar utilizado na última hora para transmissões.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Chave Compartilhada</string>
-    <string name="encryption_psk_text">Mensagens diretas estão usando a chave compartilhada do canal.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Criptografia de Chave Pública</string>
-    <string name="encryption_pkc_text">Mensagens diretas estão usando a nova infraestrutura de chave pública para criptografia. Requer firmware versão 2.5 ou superior.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Chave pública não confere</string>
     <string name="encryption_error_text">A chave pública não corresponde à chave gravada. Você pode remover o nó e deixá-lo trocar as chaves novamente, mas isso pode indicar um problema de segurança mais sério. Contate o usuário através de outro canal confiável, para determinar se a chave mudou devido a uma restauração de fábrica ou outra ação intencional.</string>
     <string name="exchange_userinfo">Trocar informações de usuário</string>
