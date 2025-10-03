@@ -98,7 +98,6 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
-import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
