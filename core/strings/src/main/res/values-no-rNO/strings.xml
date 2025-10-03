@@ -328,9 +328,9 @@
     <string name="air_util_definition">Prosent av lufttiden brukt i løpet av den siste timen.</string>
     <string name="iaq">Luftkvalitet</string>
     <string name="encryption_psk">Delt nøkkel</string>
-    <string name="encryption_psk_text">Direktemeldinger bruker den delte nøkkelen til kanalen.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Offentlig-nøkkel kryptering</string>
-    <string name="encryption_pkc_text">Direktemeldinger bruker den nye offentlige nøkkelinfrastrukturen for kryptering. Krever firmware versjon 2.5 eller høyere.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Direktemeldinger bruker den nye offentlige nøkkelinfrastrukturen for kryptering. Krever firmware versjon 2.5 eller høyere.</string>
     <string name="encryption_error_text">Den offentlige nøkkelen samsvarer ikke med den lagrede nøkkelen. Du kan fjerne noden og la den utveksle nøkler igjen, men dette kan indikere et mer alvorlig sikkerhetsproblem. Ta kontakt med brukeren gjennom en annen klarert kanal for å avgjøre om nøkkelen endres på grunn av en tilbakestilling til fabrikkstandard eller andre tilsiktede tiltak.</string>
     <string name="exchange_userinfo">Exchange user info</string>
