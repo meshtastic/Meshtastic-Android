@@ -330,9 +330,9 @@
     <string name="air_util_definition">Odstotek časa oddajanja v zadnji uri.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Skupni ključ</string>
-    <string name="encryption_psk_text">Neposredna sporočila uporabljajo skupni ključ za kanal.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Šifriranje javnega ključa</string>
-    <string name="encryption_pkc_text">Neposredna sporočila za šifriranje uporabljajo novo infrastrukturo javnih ključev. Zahteva različico 2.5 ali novejšo.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Neujemanje javnega ključa</string>
     <string name="encryption_error_text">Javni ključ se ne ujema s zabeleženim ključem. Odstranite lahko vozlišče in pustite, da znova izmenja ključe, vendar to lahko pomeni resnejšo varnostno težavo. Obrnite se na uporabnika prek drugega zaupanja vrednega kanala, da ugotovite, ali je bila sprememba ključa posledica ponastavitve na tovarniške nastavitve ali drugega namernega dejanja.</string>
     <string name="exchange_userinfo">Exchange user info</string>
