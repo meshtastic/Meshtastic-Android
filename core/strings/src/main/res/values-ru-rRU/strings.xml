@@ -790,7 +790,8 @@
     <string name="no_pax_metrics_logs">Нет доступных журналов метрики пассажиров.</string>
     <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">Устройства BLE</string>
-    <string name="bluetooth_paired_devices">Сопряженные устройства</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Подключённые устройства</string>
     <string name="routing_error_rate_limit_exceeded">Превышен лимит запросов. Пожалуйста, повторите попытку позже.</string>
     <string name="view_release">Просмотреть релиз</string>
