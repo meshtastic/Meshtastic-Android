@@ -15,7 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.android.library) }
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.kover)
+}
 
 android { namespace = "org.meshtastic.core.common" }
 
