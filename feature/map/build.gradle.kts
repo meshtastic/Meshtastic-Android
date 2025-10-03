@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.bundles.osm)
     googleImplementation(libs.bundles.maps.compose)
 
+    implementation(libs.accompanist.permissions)
     implementation(libs.annotation)
     implementation(libs.timber)
 }

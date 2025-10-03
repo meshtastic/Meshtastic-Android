@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
 import android.content.Context
@@ -75,19 +75,13 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.R
-import org.meshtastic.feature.map.MapViewModel
-import org.meshtastic.feature.map.SqlTileWriterExt
-import org.meshtastic.feature.map.addCopyright
-import org.meshtastic.feature.map.addScaleBarOverlay
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
-import org.meshtastic.feature.map.createLatLongGrid
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
-import org.meshtastic.feature.map.zoomIn
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
