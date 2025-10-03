@@ -188,6 +188,7 @@
     <string name="meshtastic_service_notifications">通知サービス</string>
     <string name="about">概要</string>
     <string name="channel_invalid">このチャンネルURLは無効なため使用できません。</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">デバッグ</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
