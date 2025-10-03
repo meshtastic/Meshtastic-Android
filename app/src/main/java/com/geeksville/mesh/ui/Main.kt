@@ -150,7 +150,9 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     }
 
     if (connectionState == ConnectionState.CONNECTED) {
-        requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(uIViewModel, newChannelSet) }
+        requestChannelSet?.let { newChannelSet ->
+            ScannedQrCodeDialog(newChannelSet, onDismiss = { uIViewModel.clearRequestChannelUrl() })
+        }
     }
 
     analytics.addNavigationTrackingEffect(navController = navController)

@@ -49,24 +49,28 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
 
 @Composable
-fun ScannedQrCodeDialog(viewModel: UIViewModel, incoming: ChannelSet) {
+fun ScannedQrCodeDialog(
+    incoming: ChannelSet,
+    onDismiss: () -> Unit,
+    viewModel: ScannedQrCodeViewModel = hiltViewModel(),
+) {
     val channels by viewModel.channels.collectAsStateWithLifecycle()
 
     ScannedQrCodeDialog(
         channels = channels,
         incoming = incoming,
-        onDismiss = viewModel::clearRequestChannelUrl,
+        onDismiss = onDismiss,
         onConfirm = viewModel::setChannels,
     )
 }
