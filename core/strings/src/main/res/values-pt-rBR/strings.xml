@@ -786,7 +786,8 @@
     <string name="no_pax_metrics_logs">Não há logs de métricas de PAX disponíveis.</string>
     <string name="wifi_devices">Dispositivos WiFi</string>
     <string name="ble_devices">Dispositivos BLE</string>
-    <string name="bluetooth_paired_devices">Dispositivos Pareados</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Dispositivo Conectado</string>
     <string name="routing_error_rate_limit_exceeded">Limite excedido. Por favor, tente novamente mais tarde.</string>
     <string name="view_release">Ver Lançamento</string>
