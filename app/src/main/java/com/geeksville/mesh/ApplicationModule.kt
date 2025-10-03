@@ -26,6 +26,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.common.BuildConfigProvider
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -39,4 +41,15 @@ object ApplicationModule {
     @Provides
     fun providesMeshServiceNotifications(application: Application): MeshServiceNotifications =
         MeshServiceNotifications(application)
+
+    @Singleton
+    @Provides
+    fun provideBuildConfigProvider(): BuildConfigProvider = object : BuildConfigProvider {
+        override val isDebug: Boolean = BuildConfig.DEBUG
+        override val applicationId: String = BuildConfig.APPLICATION_ID
+        override val versionCode: Int = BuildConfig.VERSION_CODE
+        override val versionName: String = BuildConfig.VERSION_NAME
+        override val absoluteMinFwVersion: String = BuildConfig.ABS_MIN_FW_VERSION
+        override val minFwVersion: String = BuildConfig.MIN_FW_VERSION
+    }
 }

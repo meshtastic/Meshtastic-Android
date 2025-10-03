@@ -18,6 +18,7 @@
 include(
     ":app",
     ":core:analytics",
+    ":core:common",
     ":core:data",
     ":core:database",
     ":core:datastore",
