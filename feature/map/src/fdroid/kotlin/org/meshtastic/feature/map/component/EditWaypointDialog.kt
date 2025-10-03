@@ -15,9 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map.components
+package org.meshtastic.feature.map.component
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.text.format.DateFormat
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.compose.foundation.Image
@@ -76,7 +78,7 @@ import java.util.Locale
 @Suppress("LongMethod")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun EditWaypointDialog(
+fun EditWaypointDialog(
     waypoint: Waypoint,
     onSendClicked: (Waypoint) -> Unit,
     onDeleteClicked: (Waypoint) -> Unit,

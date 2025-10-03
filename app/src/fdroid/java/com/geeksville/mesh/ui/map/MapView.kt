@@ -66,7 +66,6 @@ import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
@@ -83,6 +82,7 @@ import org.meshtastic.feature.map.addScaleBarOverlay
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
+import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.createLatLongGrid
 import org.meshtastic.feature.map.model.CustomTileSource
