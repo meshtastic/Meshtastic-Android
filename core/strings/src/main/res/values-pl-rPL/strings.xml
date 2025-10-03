@@ -330,9 +330,9 @@
     <string name="air_util_definition">Procent czasu  wykorzystanego do transmisji w ciągu ostatniej godziny.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Klucz współdzielony</string>
-    <string name="encryption_psk_text">Wiadomości bezpośrednie korzystają ze współdzielonego klucza kanału.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Szyfrowanie klucza publicznego</string>
-    <string name="encryption_pkc_text">Wiadomości bezpośrednie używają nowego systemu klucza publicznego do szyfrowania. Wymagana jest wersja firmware 2.5 lub wyższa.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Niezgodność klucza publicznego</string>
     <string name="encryption_error_text">Klucz publiczny nie pasuje do otrzymanego wcześniej klucza. Możesz usunąć węzeł i pozwolić na ponowną wymianę kluczy, ale może również wskazywać to na poważniejszy problem z bezpieczeństwem. Skontaktuj się z użytkownikiem za pomocą innego zaufanego kanału, aby ustalić, czy zmiana klucza była spowodowana przywróceniem ustawień fabrycznych czy innym działaniem.</string>
     <string name="exchange_userinfo">Poproś o informacje</string>
