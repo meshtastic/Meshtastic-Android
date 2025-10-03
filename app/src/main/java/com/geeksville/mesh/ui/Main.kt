@@ -152,11 +152,11 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     }
 
     if (connectionState == ConnectionState.CONNECTED) {
-
         sharedContactRequested?.let {
             SharedContactDialog(sharedContact = it, onDismiss = { uIViewModel.clearSharedContactRequested() })
+        }
 
-         requestChannelSet?.let { newChannelSet ->
+        requestChannelSet?.let { newChannelSet ->
             ScannedQrCodeDialog(newChannelSet, onDismiss = { uIViewModel.clearRequestChannelUrl() })
         }
     }
