@@ -68,6 +68,7 @@ dependencies {
     kover(projects.meshServiceExample)
 
     kover(projects.core.analytics)
+    kover(projects.core.common)
     kover(projects.core.data)
     kover(projects.core.datastore)
     kover(projects.core.model)
