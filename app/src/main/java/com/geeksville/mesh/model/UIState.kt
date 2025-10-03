@@ -43,6 +43,7 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
+import com.geeksville.mesh.ui.sharing.toSharedContact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -297,8 +298,17 @@ constructor(
     val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
         get() = _sharedContactRequested.asStateFlow()
 
-    fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
-        _sharedContactRequested.value = sharedContact
+    fun setSharedContactRequested(url: Uri) {
+        runCatching { _sharedContactRequested.value = url.toSharedContact() }
+            .onFailure { ex ->
+                Timber.e(ex, "Shared contact error")
+                showSnackBar(R.string.contact_invalid)
+            }
+    }
+
+    /** Called immediately after activity observes requestChannelUrl */
+    fun clearSharedContactRequested() {
+        _sharedContactRequested.value = null
     }
 
     // Connection state to our radio device
@@ -345,23 +355,6 @@ constructor(
         } catch (ex: RemoteException) {
             Timber.e(ex, "Set config error")
         }
-    }
-
-    fun setChannel(channel: ChannelProtos.Channel) {
-        try {
-            meshService?.setChannel(channel.toByteArray())
-        } catch (ex: RemoteException) {
-            Timber.e(ex, "Set channel error")
-        }
-    }
-
-    /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
-        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
-
-        val newConfig = config { lora = channelSet.loraConfig }
-        if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
     fun addQuickChatAction(action: QuickChatAction) =

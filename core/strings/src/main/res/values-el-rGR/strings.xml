@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας</string>
     <string name="about">Σχετικά</string>
     <string name="channel_invalid">Αυτό το κανάλι URL δεν είναι ορθό και δεν μπορεί να χρησιμοποιηθεί</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Πίνακας αποσφαλμάτωσης</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>

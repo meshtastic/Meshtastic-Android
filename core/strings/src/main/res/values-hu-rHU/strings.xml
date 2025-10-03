@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Szolgáltatás értesítések</string>
     <string name="about">A programról</string>
     <string name="channel_invalid">Ez a csatorna URL érvénytelen, ezért nem használható.</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Hibakereső panel</string>
     <string name="debug_decoded_payload">Dekódolt adat:</string>
     <string name="debug_logs_export">Naplók exportálása</string>

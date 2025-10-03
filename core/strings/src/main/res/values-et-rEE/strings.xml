@@ -187,6 +187,7 @@
     <string name="meshtastic_service_notifications">Teenuse teavitused</string>
     <string name="about">Teave</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
+    <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_decoded_payload">Dekodeeritud andmed:</string>
     <string name="debug_logs_export">Salvesta logi</string>
@@ -786,8 +787,8 @@
     <string name="no_pax_metrics_logs">PAX andurite logi ei ole saadaval.</string>
     <string name="wifi_devices">WiFi seadmed</string>
     <string name="ble_devices">Sinihamba seadmed</string>
-    <string name="bluetooth_paired_devices">Paired devices</string>
-    <string name="bluetooth_available_devices">Available devices</string>
+    <string name="bluetooth_paired_devices">Seotud seadmed</string>
+    <string name="bluetooth_available_devices">Saadaolevad seadmed</string>
     <string name="connected_device">Ühendatud seadmed</string>
     <string name="routing_error_rate_limit_exceeded">Limiit ületatud. Proovi hiljem uuesti.</string>
     <string name="view_release">Näita versioon</string>
@@ -888,5 +889,5 @@
     <string name="last_heard_filter_label">Filtreeri viimase kuulmise aja järgi: %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Lingi haldamiseks pole rakendust saadaval.</string>
-    <string name="system_settings">System Settings</string>
+    <string name="system_settings">Süsteemi sätted</string>
 </resources>

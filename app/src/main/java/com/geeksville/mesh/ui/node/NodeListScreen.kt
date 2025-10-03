@@ -109,17 +109,15 @@ fun NodeListScreen(viewModel: NodeListViewModel = hiltViewModel(), navigateToNod
         floatingActionButton = {
             val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
             val shareCapable = firmwareVersion.supportsQrCodeSharing()
-            val scannedContact: AdminProtos.SharedContact? by
+            val sharedContact: AdminProtos.SharedContact? by
                 viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
             AddContactFAB(
-                unfilteredNodes = unfilteredNodes,
-                scannedContact = scannedContact,
+                sharedContact = sharedContact,
                 modifier =
                 Modifier.animateFloatingActionButton(
                     visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
-                onSharedContactImport = { contact -> viewModel.addSharedContact(contact) },
                 onSharedContactRequested = { contact -> viewModel.setSharedContactRequested(contact) },
             )
         },
