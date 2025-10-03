@@ -786,7 +786,8 @@
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="wifi_devices">WLAN Geräte</string>
     <string name="ble_devices">BLE Geräte</string>
-    <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Verbundene Geräte</string>
     <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
     <string name="view_release">Version ansehen</string>

@@ -786,7 +786,8 @@
     <string name="no_pax_metrics_logs">Aucun journal de métriques PAX disponible.</string>
     <string name="wifi_devices">Périphériques WiFi</string>
     <string name="ble_devices">Appareils BLE</string>
-    <string name="bluetooth_paired_devices">Périphériques appairés</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Périphérique connecté</string>
     <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="view_release">Voir la version</string>

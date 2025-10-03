@@ -786,7 +786,8 @@
     <string name="no_pax_metrics_logs">PAX andurite logi ei ole saadaval.</string>
     <string name="wifi_devices">WiFi seadmed</string>
     <string name="ble_devices">Sinihamba seadmed</string>
-    <string name="bluetooth_paired_devices">Seotud seadmed</string>
+    <string name="bluetooth_paired_devices">Paired devices</string>
+    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Ühendatud seadmed</string>
     <string name="routing_error_rate_limit_exceeded">Limiit ületatud. Proovi hiljem uuesti.</string>
     <string name="view_release">Näita versioon</string>
