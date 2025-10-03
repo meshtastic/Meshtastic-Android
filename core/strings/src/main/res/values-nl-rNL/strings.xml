@@ -328,9 +328,9 @@
     <string name="air_util_definition">Percentage van de zendtijd die het afgelopen uur werd gebruikt.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Gedeelde Key</string>
-    <string name="encryption_psk_text">Directe berichten gebruiken de gedeelde sleutel voor het kanaal.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Publieke sleutel encryptie</string>
-    <string name="encryption_pkc_text">Directe berichten gebruiken de nieuwe openbare sleutel infrastructuur voor versleuteling. Vereist firmware versie 2.5 of hoger.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Publieke sleutel komt niet overeen</string>
     <string name="encryption_error_text">De publieke sleutel komt niet overeen met de opgenomen sleutel. Je kan de node verwijderen en opnieuw een sleutel laten uitwisselen, maar dit kan duiden op een ernstiger beveiligingsprobleem. Neem contact op met de gebruiker via een ander vertrouwd kanaal, om te bepalen of de sleutel gewijzigd is door een reset naar de fabrieksinstellingen of andere opzettelijke actie.</string>
     <string name="exchange_userinfo">Gebruikersinformatie uitwisselen</string>
