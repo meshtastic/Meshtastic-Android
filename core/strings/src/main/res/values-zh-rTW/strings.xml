@@ -327,9 +327,9 @@
     <string name="air_util_definition">過去一小時内傳輸所使用的通話時間（airtime）百分比。</string>
     <string name="iaq">室内空氣品質指標(IAQ)</string>
     <string name="encryption_psk">共用金鑰</string>
-    <string name="encryption_psk_text">私訊使用頻道的共用金鑰進行加密。</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">加密公鑰</string>
-    <string name="encryption_pkc_text">私訊採用全新的公鑰加密技術進行加密。需要將韌體版本更新至 2.5 或以上。</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">公鑰不相符</string>
     <string name="encryption_error_text">公鑰與記錄的公鑰不符。您可以移除節點並讓其重新交換金鑰，但這可能表示存在更嚴重的安全問題。請透過其他可信賴的管道聯繫使用者，以確定金鑰更改是否由於出廠重置或其他有意行動所致。</string>
     <string name="exchange_userinfo">交換用戶信息</string>

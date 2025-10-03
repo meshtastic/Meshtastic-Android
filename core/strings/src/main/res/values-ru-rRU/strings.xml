@@ -330,9 +330,9 @@
     <string name="air_util_definition">Процент времени эфира для передачи в течение последнего часа.</string>
     <string name="iaq">Относительное качество воздуха в помещении</string>
     <string name="encryption_psk">Общедоступный ключ</string>
-    <string name="encryption_psk_text">Прямые сообщения используют общий ключ для канала.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Общий ключ шифрования</string>
-    <string name="encryption_pkc_text">Прямые сообщения используют новую инфраструктуру публичных ключей для шифрования. Требуется прошивка версии 2.5 или выше.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Несоответствие публичного ключа</string>
     <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить узел и снова обменяться ключами, но это может повлечь за собой более серьезную проблему безопасности. Свяжитесь с пользователем через другой доверенный канал, чтобы определить, было ли изменение ключа из-за заводского сброса или другого преднамеренного действия.</string>
     <string name="exchange_userinfo">Обменять информацию пользователя</string>

@@ -328,9 +328,9 @@
     <string name="air_util_definition">Viimase tunni jooksul kasutatud eetriaja protsent.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Jagatud võti</string>
-    <string name="encryption_psk_text">Otsesõnumid kasutavad selle kanali jaoks jagatud võtit.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Avaliku võtme krüpteerimine</string>
-    <string name="encryption_pkc_text">Otsesõnumid kasutavad krüpteerimiseks uut avaliku võtme taristut. Eeldab püsivara versiooni 2.5 või uuemat.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Kokkusobimatu avalik võti</string>
     <string name="encryption_error_text">Avalik võti ei ühti salvestatud võtmega. Võite sõlme eemaldada ja lasta sellel uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtme muudatuse põhjuseks oli tehaseseadete taastamine või muu tahtlik tegevus.</string>
     <string name="exchange_userinfo">Kasutajate teabe vahetamine</string>

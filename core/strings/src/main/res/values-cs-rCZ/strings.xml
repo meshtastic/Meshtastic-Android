@@ -330,9 +330,9 @@
     <string name="air_util_definition">Procento vysílacího času použitého během poslední hodiny.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Sdílený klíč</string>
-    <string name="encryption_psk_text">Přímé zprávy používají sdílený klíč kanálu.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
-    <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování. Vyžaduje firmware verze 2.5 nebo vyšší.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="encryption_error_text">Veřejný klíč neodpovídá zaznamenanému klíči. Můžete odebrat uzel a nechat jej znovu vyměnit klíče, ale to může naznačovat závažnější bezpečnostní problém. Kontaktujte uživatele prostřednictvím jiného důvěryhodného kanálu, abyste zjistili, zda byla změna klíče způsobena resetováním továrního zařízení nebo jiným záměrným jednáním.</string>
     <string name="exchange_userinfo">Vyžádat informace o uživateli</string>

@@ -328,9 +328,9 @@
     <string name="air_util_definition">Pourcentage de temps d\'antenne pour la transmission utilisée au cours de la dernière heure.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Clé partagée</string>
-    <string name="encryption_psk_text">Les messages directs utilisent la clé partagée du canal.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Chiffrement de clé publique</string>
-    <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement. Nécessite une version de firmware 2.5 ou plus.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement. Nécessite une version de firmware 2.5 ou plus.</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l\'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d\'usine ou à une autre action intentionnelle.</string>
     <string name="exchange_userinfo">Échanger les informations utilisateur</string>

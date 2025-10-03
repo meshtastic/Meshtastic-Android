@@ -329,9 +329,9 @@
     <string name="air_util_definition">过去一小时内用于传输的空中占用时间百分比。</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">共享密钥</string>
-    <string name="encryption_psk_text">私信使用频道的共享密钥进行加密。</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">公钥加密</string>
-    <string name="encryption_pkc_text">私信使用新的公钥基础设施（PKC）进行加密。需要固件版本 2.5 或更高。</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">公钥不匹配</string>
     <string name="encryption_error_text">公钥与记录的密钥不匹配。 您可以移除该节点并让它再次交换密钥，但这可能会显示一个更严重的安全问题。 通过另一个信任频道联系用户，以确定密钥更改是否是出厂重置或其他故意操作。</string>
     <string name="exchange_userinfo">交换用户信息</string>

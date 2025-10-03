@@ -331,9 +331,9 @@
     <string name="air_util_definition">Céatadán de na hamaitear úsáideach atá in úsáid laistigh de uair an chloig atá caite.</string>
     <string name="iaq">QAÍ (Cáilíocht Aeir Inmheánach)</string>
     <string name="encryption_psk">Eochair roinnte</string>
-    <string name="encryption_psk_text">Tá teachtaireachtaí díreacha á n-úsáid leis an eochair roinnte do na cainéil.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Cóid Poiblí Eochair</string>
-    <string name="encryption_pkc_text">Tá teachtaireachtaí díreacha á n-úsáid leis an gcórais eochair phoiblí nua do chriptiú. Riachtanach atá leagan firmware 2.5 nó níos mó.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
     <string name="encryption_error_text">Ní chomhoireann an eochair phoiblí leis an eochair atá cláraithe. Féachfaidh tú le hiarraidh na nod agus athmhaoin na heochrach ach seo féadfaidh a léiriú fadhb níos tromchúisí i gcúrsaí slándála. Téigh i dteagmháil leis an úsáideoir tríd an gcainéal eile atá ar fáil chun a fháil amach an bhfuil athrú eochrach de réir athshocrú monarcha nó aidhm eile ar do chuid.</string>
     <string name="exchange_userinfo">Exchange user info</string>

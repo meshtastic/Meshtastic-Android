@@ -328,9 +328,9 @@
     <string name="air_util_definition">Pousantaj tan lè transmisyon te itilize nan dènye èdtan an.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Kle Pataje</string>
-    <string name="encryption_psk_text">Mesaj dirèk yo ap itilize kle pataje pou kanal la.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Chifreman Kle Piblik</string>
-    <string name="encryption_pkc_text">Mesaj dirèk yo ap itilize nouvo enfrastrikti kle piblik pou chifreman. Sa mande vèsyon lojisyèl 2.5 oswa plis.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Pa matche kle piblik</string>
     <string name="encryption_error_text">Kle piblik la pa matche ak kle anrejistre a. Ou ka retire nœud la e kite li echanje kle ankò, men sa ka endike yon pwoblèm sekirite pi grav. Kontakte itilizatè a atravè yon lòt chanèl ki fè konfyans, pou detèmine si chanjman kle a te fèt akòz yon reyajisteman faktori oswa lòt aksyon entansyonèl.</string>
     <string name="exchange_userinfo">Exchange user info</string>

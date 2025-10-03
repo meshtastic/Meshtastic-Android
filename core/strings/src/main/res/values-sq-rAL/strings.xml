@@ -328,9 +328,9 @@
     <string name="air_util_definition">Përqindja e kohës së përdorur për transmetim brenda orës së kaluar.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Çelësi i Përbashkët</string>
-    <string name="encryption_psk_text">Mesazhet direkte po përdorin çelësin e përbashkët për kanalin.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Kriptimi me Çelës Publik</string>
-    <string name="encryption_pkc_text">Mesazhet direkte po përdorin infrastrukturën e re të çelësave publikë për kriptim. Kërkon versionin 2.5 të firmuerit ose më të ri.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
     <string name="encryption_error_text">Çelësi publik nuk përputhet me çelësin e regjistruar. Mund të hiqni nyjën dhe të lejoni që ajo të shkëmbejë përsëri çelësat, por kjo mund të tregojë një problem më serioz të sigurisë. Kontaktoni përdoruesin përmes një kanali tjetër të besuar për të përcaktuar nëse ndryshimi i çelësit ishte si pasojë e një rikthimi në fabrikë ose një veprim tjetër të qëllimshëm.</string>
     <string name="exchange_userinfo">Exchange user info</string>

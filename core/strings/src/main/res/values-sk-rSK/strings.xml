@@ -330,9 +330,9 @@
     <string name="air_util_definition">Percento vysielacieho času na prenos použitého za poslednú hodinu.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Zdieľaný kľúč</string>
-    <string name="encryption_psk_text">Priame správy používajú zdieľaný kľúč pre kanál.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Šifrovanie verejného kľúča</string>
-    <string name="encryption_pkc_text">Priame správy využívajú na šifrovanie novú infraštruktúru verejného kľúča. Vyžaduje verziu firmvéru 2.5 alebo vyššiu.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Nezhoda verejného kľúča</string>
     <string name="encryption_error_text">Verejný kľúč sa nezhoduje so zaznamenaným kľúčom. Môžete odstrániť uzol a nechať ho znova vymeniť kľúče, ale to môže naznačovať vážnejší bezpečnostný problém. Kontaktujte používateľa prostredníctvom iného dôveryhodného kanála a zistite, či bola zmena kľúča spôsobená obnovením továrenských nastavení alebo inou úmyselnou akciou.</string>
     <string name="exchange_userinfo">Vymeniť si používateľské informácie</string>

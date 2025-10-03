@@ -328,9 +328,9 @@
     <string name="air_util_definition">Porcentaje de tiempo de transmisión utilizado en la última hora.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Clave compartida</string>
-    <string name="encryption_psk_text">Los mensajes directos están usando la clave compartida para el canal.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Cifrado de Clave Pública</string>
-    <string name="encryption_pkc_text">Los Mensajes Directos Utilizan la nueva contraseña Pública de encriptación. (Se Necesita la Versión 2.5 o Posterior del Software).</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Clave pública no coincide</string>
     <string name="encryption_error_text">La clave pública no coincide con la clave guardada. Puedes eliminar el nodo y dejar que intercambie claves otra vez, esto podría indicar un problema de seguridad más serio. Contacta al usuario a través de otro canal confiable para saber si el cambio la de clave es por un restablecimiento de fábrica u otra acción intencional.</string>
     <string name="exchange_userinfo">Intercambiar información de usuario</string>

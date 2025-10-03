@@ -327,9 +327,9 @@
     <string name="air_util_definition">지난 1시간 동안 전송에 사용된 통신 시간의 백분율.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">공유 키</string>
-    <string name="encryption_psk_text">다이렉트 메시지는 채널의 공유 키를 사용합니다.</string>
+    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">공개 키 암호화</string>
-    <string name="encryption_pkc_text">다이렉트 메시지는 새로운 공개 키 인프라를 사용해 암호화합니다. 펌웨어 버전 2.5 이상이 필요합니다.</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="encryption_error_text">공개 키가 기록된 키와 일치하지 않습니다. 노드를 제거하고 키를 다시 교환할 수 있지만 이는 더 심각한 보안 문제를 나타낼 수 있습니다. 다른 신뢰할 수 있는 채널을 통해 사용자에게 연락하여 키 변경이 공장 초기화 또는 기타 의도적인 작업 때문인지 확인하세요.</string>
     <string name="exchange_userinfo">유저 정보 교환</string>
