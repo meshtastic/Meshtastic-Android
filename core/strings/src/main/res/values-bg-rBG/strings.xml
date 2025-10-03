@@ -187,7 +187,7 @@
     <string name="meshtastic_service_notifications">Сервизни известия</string>
     <string name="about">Относно</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
-    <string name="contact_invalid">This contact is invalid and can not be added</string>
+    <string name="contact_invalid">Този контакт е невалиден и не може да бъде добавен</string>
     <string name="debug_panel">Панел за отстраняване на грешки</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Експортиране на журнали</string>
@@ -273,7 +273,7 @@
     <string name="delivery_confirmed">Съобщението е доставено</string>
     <string name="error">Грешка</string>
     <string name="ignore">Игнорирай</string>
-    <string name="remove_ignored">Remove from ignored</string>
+    <string name="remove_ignored">Премахване от игнорирани</string>
     <string name="ignore_add">Добави \'%s\' към списъка с игнорирани?</string>
     <string name="ignore_remove">Изтрий \'%s\' от списъка с игнорирани?</string>
     <string name="map_select_download_region">Избор на регион за сваляне</string>
@@ -374,8 +374,8 @@
     <string name="alert_bell_text">Alert Bell Character!</string>
     <string name="critical_alert">Критичен сигнал!</string>
     <string name="favorite">Любим</string>
-    <string name="add_favorite">Add to favorites</string>
-    <string name="remove_favorite">Remove from favorites</string>
+    <string name="add_favorite">Добавяне към любими</string>
+    <string name="remove_favorite">Премахване от любими</string>
     <string name="favorite_add">Добавяне на \'%s\' като любим възел?</string>
     <string name="favorite_remove">Премахване на \'%s\' като любим възел?</string>
     <string name="power_metrics_log">Журнал на показателите на захранването</string>
@@ -787,8 +787,8 @@
     <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
     <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">BLE устройства</string>
-    <string name="bluetooth_paired_devices">Paired devices</string>
-    <string name="bluetooth_available_devices">Available devices</string>
+    <string name="bluetooth_paired_devices">Сдвоени устройства</string>
+    <string name="bluetooth_available_devices">Налични устройства</string>
     <string name="connected_device">Свързано устройство</string>
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
     <string name="view_release">Преглед на изданието</string>
@@ -818,7 +818,7 @@
     <string name="critical_alerts_description">Избраните пакети, изпратени като критични, ще игнорират превключвателя за изключване на звука и настройките \"Не безпокойте\" в центъра за известия на операционната система.</string>
     <string name="configure_notification_permissions">Конфигуриране на разрешенията за известия</string>
     <string name="phone_location">Местоположение на телефона</string>
-    <string name="phone_location_description">Meshtastic uses your phone\'s location to enable a number of features. You can update your location permissions at any time from settings.</string>
+    <string name="phone_location_description">Meshtastic използва местоположението на телефона ви, за да активира редица функции. Можете да актуализирате разрешенията си за местоположение по всяко време от настройките.</string>
     <string name="share_location">Споделяне на местоположение</string>
     <string name="share_location_description">Използвайте GPS на телефона си, за да изпращате местоположения до вашия възел, вместо да използвате хардуеренния GPS на вашия възел.</string>
     <string name="distance_measurements">Измервания на разстояния</string>
@@ -876,7 +876,7 @@
     <string name="uplink_feature_description">Съобщенията от mesh мрежата ще бъдат изпращани до публичния интернет през конфигурирания шлюз на всеки възел.</string>
     <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
     <string name="icon_meanings">Icon Meanings</string>
-    <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
+    <string name="secondary_channel_position_feature">Деактивирането на позицията на първичния канал позволява периодично излъчване на позиция на първия вторичен канал с активирана позиция, в противен случай е необходимо ръчно заявяване на позиция.</string>
     <string name="device_configuration">Конфигурация на устройството</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <string name="device_telemetry_enabled">Send Device Telemetry</string>
@@ -888,6 +888,6 @@
     <string name="two_days">48 часа</string>
     <string name="last_heard_filter_label">Филтриране по време на последното чуване: %s</string>
     <string name="dbm_value">%1$d dBm</string>
-    <string name="error_no_app_to_handle_link">No application available to handle link.</string>
-    <string name="system_settings">System Settings</string>
+    <string name="error_no_app_to_handle_link">Няма налично приложение за обработка на връзката.</string>
+    <string name="system_settings">Системни настройки</string>
 </resources>
