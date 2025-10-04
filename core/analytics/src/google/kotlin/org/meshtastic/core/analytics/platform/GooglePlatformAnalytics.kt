@@ -21,7 +21,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log.WARN
+import android.util.Log.DEBUG
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -76,7 +76,7 @@ constructor(
     analyticsPrefs: AnalyticsPrefs,
 ) : PlatformAnalytics {
 
-    private val sampleRate = 10f // For Datadog remote sample rate
+    private val sampleRate = 100f.takeIf { BuildConfig.DEBUG } ?: 10f // For Datadog remote sample rate
 
     private val isInTestLab: Boolean
         get() {
@@ -92,20 +92,16 @@ constructor(
     init {
         initDatadog(context as Application, analyticsPrefs)
         initCrashlytics(context, analyticsPrefs)
-        Timber.plant(Timber.DebugTree()) // Always plant DebugTree
 
-        if (isPlatformServicesAvailable) {
-            val datadogLogger =
-                Logger.Builder()
-                    .setService(SERVICE_NAME)
-                    .setNetworkInfoEnabled(true)
-                    .setRemoteSampleRate(sampleRate)
-                    .setBundleWithTraceEnabled(true)
-                    .setBundleWithRumEnabled(true)
-                    .build()
-            Timber.plant(DatadogTree(datadogLogger))
-            Timber.plant(CrashlyticsTree())
-        }
+        val datadogLogger =
+            Logger.Builder()
+                .setService(SERVICE_NAME)
+                .setNetworkInfoEnabled(true)
+                .setRemoteSampleRate(sampleRate)
+                .setBundleWithTraceEnabled(true)
+                .setBundleWithRumEnabled(true)
+                .build()
+        Timber.plant(DatadogTree(datadogLogger), CrashlyticsTree())
         // Initial consent state
         updateAnalyticsConsent(analyticsPrefs.analyticsAllowed)
 
@@ -130,7 +126,7 @@ constructor(
         // Initialize with PENDING, consent will be updated via updateAnalyticsConsent
         Datadog.initialize(application, configuration, TrackingConsent.PENDING)
         Datadog.setUserInfo(analyticsPrefs.installId)
-        Datadog.setVerbosity(WARN)
+        Datadog.setVerbosity(DEBUG)
 
         val rumConfiguration =
             RumConfiguration.Builder(BuildConfig.datadogApplicationId)
