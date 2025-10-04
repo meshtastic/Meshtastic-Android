@@ -210,12 +210,6 @@ jobs:
             echo "lane=production" >> $GITHUB_OUTPUT
           fi
 
-      - name: Ensure internal track has version for promotion
-        if: "!contains(github.ref_name, '-internal') && needs.check-versioncode-google-play.outputs.exists != 'true'"
-        run: |
-          echo "::error::Cannot promote: versionCode ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }} not found on Google Play internal track. Run internal build first." >&2
-          exit 1
-
       - name: Promote on Google Play
         if: "steps.fastlane_lane.outputs.lane != '' && needs.check-versioncode-google-play.outputs.exists == 'true'"
         env:
