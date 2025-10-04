@@ -70,7 +70,7 @@ jobs:
   call-release-workflow:
     if: ${{ !inputs.dry_run }}
     needs: create-tag
-    uses: ./.github/workflows/release.yml@main
+    uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.create-tag.outputs.new_tag }}
       release_type: ${{ inputs.channel == 'internal' && 'internal' || 'promotion' }}
