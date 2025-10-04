@@ -745,19 +745,12 @@ private fun MessageInput(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
         state = textFieldState,
-        lineLimits = TextFieldLineLimits.SingleLine,
+        lineLimits = TextFieldLineLimits.MultiLine(1,3),
         label = { Text(stringResource(R.string.message_input_label)) },
         enabled = isEnabled,
         shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
         isError = isOverLimit,
         placeholder = { Text(stringResource(R.string.type_a_message)) },
-        keyboardOptions =
-        KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
-        onKeyboardAction = {
-            if (canSend) {
-                onSendMessage()
-            }
-        },
         supportingText = {
             if (isEnabled) { // Only show supporting text if input is enabled
                 Text(
