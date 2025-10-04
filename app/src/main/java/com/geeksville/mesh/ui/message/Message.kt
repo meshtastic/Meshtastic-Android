@@ -711,6 +711,8 @@ private fun QuickChatRow(
     }
 }
 
+private const val MAX_LINES = 3
+
 /**
  * The text input field for composing messages.
  *
@@ -742,7 +744,7 @@ private fun MessageInput(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
         state = textFieldState,
-        lineLimits = TextFieldLineLimits.MultiLine(1, 3),
+        lineLimits = TextFieldLineLimits.MultiLine(1, MAX_LINES),
         label = { Text(stringResource(R.string.message_input_label)) },
         enabled = isEnabled,
         shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
