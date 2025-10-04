@@ -21,7 +21,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log.DEBUG
+import android.util.Log.WARN
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -76,13 +76,11 @@ constructor(
     analyticsPrefs: AnalyticsPrefs,
 ) : PlatformAnalytics {
 
-    private val sampleRate =
-        100f.takeIf { BuildConfig.DEBUG } ?: 10f // For Datadog remote sample rate
+    private val sampleRate = 10f // For Datadog remote sample rate
 
     private val isInTestLab: Boolean
         get() {
-            val testLabSetting =
-                Settings.System.getString(context.contentResolver, "firebase.test.lab")
+            val testLabSetting = Settings.System.getString(context.contentResolver, "firebase.test.lab")
             return "true" == testLabSetting
         }
 
@@ -94,16 +92,20 @@ constructor(
     init {
         initDatadog(context as Application, analyticsPrefs)
         initCrashlytics(context, analyticsPrefs)
+        Timber.plant(Timber.DebugTree()) // Always plant DebugTree
 
-        val datadogLogger =
-            Logger.Builder()
-                .setService(SERVICE_NAME)
-                .setNetworkInfoEnabled(true)
-                .setRemoteSampleRate(sampleRate)
-                .setBundleWithTraceEnabled(true)
-                .setBundleWithRumEnabled(true)
-                .build()
-        Timber.plant(DatadogTree(datadogLogger), CrashlyticsTree())
+        if (isPlatformServicesAvailable) {
+            val datadogLogger =
+                Logger.Builder()
+                    .setService(SERVICE_NAME)
+                    .setNetworkInfoEnabled(true)
+                    .setRemoteSampleRate(sampleRate)
+                    .setBundleWithTraceEnabled(true)
+                    .setBundleWithRumEnabled(true)
+                    .build()
+            Timber.plant(DatadogTree(datadogLogger))
+            Timber.plant(CrashlyticsTree())
+        }
         // Initial consent state
         updateAnalyticsConsent(analyticsPrefs.analyticsAllowed)
 
@@ -128,7 +130,7 @@ constructor(
         // Initialize with PENDING, consent will be updated via updateAnalyticsConsent
         Datadog.initialize(application, configuration, TrackingConsent.PENDING)
         Datadog.setUserInfo(analyticsPrefs.installId)
-        Datadog.setVerbosity(DEBUG)
+        Datadog.setVerbosity(WARN)
 
         val rumConfiguration =
             RumConfiguration.Builder(BuildConfig.datadogApplicationId)
@@ -187,8 +189,7 @@ constructor(
 
     override fun setDeviceAttributes(firmwareVersion: String, model: String) {
         if (!Datadog.isInitialized() || !GlobalRumMonitor.isRegistered()) return
-        GlobalRumMonitor.get()
-            .addAttribute("firmware_version", firmwareVersion.extractSemanticVersion())
+        GlobalRumMonitor.get().addAttribute("firmware_version", firmwareVersion.extractSemanticVersion())
         GlobalRumMonitor.get().addAttribute("device_hardware", model)
     }
 
@@ -243,8 +244,7 @@ constructor(
     private fun String.extractSemanticVersion(): String {
         val regex = "^(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?".toRegex()
         val matchResult = regex.find(this)
-        return matchResult?.groupValues?.drop(1)?.filter { it.isNotEmpty() }?.joinToString(".")
-            ?: this
+        return matchResult?.groupValues?.drop(1)?.filter { it.isNotEmpty() }?.joinToString(".") ?: this
     }
 
     override fun track(event: String, vararg properties: DataPair) {
@@ -253,16 +253,10 @@ constructor(
             when (it.value) {
                 is Double -> bundle.putDouble(it.name, it.value)
                 is Int ->
-                    bundle.putLong(
-                        it.name,
-                        it.value.toLong()
-                    ) // Firebase expects Long for integer values in bundles
+                    bundle.putLong(it.name, it.value.toLong()) // Firebase expects Long for integer values in bundles
                 is Long -> bundle.putLong(it.name, it.value)
                 is Float -> bundle.putDouble(it.name, it.value.toDouble())
-                is String -> bundle.putString(
-                    it.name,
-                    it.value as String?
-                ) // Explicitly handle String
+                is String -> bundle.putString(it.name, it.value as String?) // Explicitly handle String
                 else -> bundle.putString(it.name, it.value.toString()) // Fallback for other types
             }
             Timber.tag(TAG).d("Analytics: track $event (${it.name} : ${it.value})")
