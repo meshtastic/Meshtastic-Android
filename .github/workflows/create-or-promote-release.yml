@@ -71,10 +71,21 @@ jobs:
           git push origin ${{ steps.calculate_new_tag.outputs.new_tag }}
 
   call-release-workflow:
-    if: ${{ !inputs.dry_run }}
+    if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
     needs: create-tag
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.create-tag.outputs.new_tag }}
       channel: ${{ inputs.channel }}
+      base_version: ${{ inputs.base_version }}
+    secrets: inherit
+
+  call-promote-workflow:
+    if: ${{ !inputs.dry_run && inputs.channel != 'internal' }}
+    needs: create-tag
+    uses: ./.github/workflows/promote.yml
+    with:
+      tag_name: ${{ needs.create-tag.outputs.new_tag }}
+      channel: ${{ inputs.channel }}
+      base_version: ${{ inputs.base_version }}
     secrets: inherit

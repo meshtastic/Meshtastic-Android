@@ -16,11 +16,6 @@
 default_platform(:android)
 
 platform :android do
-  desc "Runs all the tests"
-  lane :test do
-    gradle(task: "test")
-  end
-
   desc "Deploy a new version to the internal track on Google Play"
   lane :internal do
     aab_path = build_google_release
@@ -34,70 +29,5 @@ platform :android do
       skip_upload_images: true,
       skip_upload_screenshots: true,
     )
-  end
-
-  desc "Promote from internal track to the closed track on Google Play"
-  lane :closed do
-    upload_to_play_store(
-      track: 'internal',
-      track_promote_to: 'NewAlpha',
-      release_status: 'completed',
-      skip_upload_apk: true,
-      skip_upload_metadata: true,
-      skip_upload_changelogs: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-    )
-  end
-
-  desc "Promote from closed track to the open track on Google Play"
-  lane :open do
-    upload_to_play_store(
-      track: 'internal',
-      track_promote_to: 'beta',
-      release_status: 'draft',
-      skip_upload_apk: true,
-      skip_upload_metadata: true,
-      skip_upload_changelogs: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-    )
-  end
-
-  desc "Promote from open track to the production track on Google Play"
-  lane :production do
-    upload_to_play_store(
-      track: 'internal',
-      track_promote_to: 'production',
-      release_status: 'draft',
-      skip_upload_apk: true,
-      skip_upload_metadata: true,
-      skip_upload_changelogs: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-    )
-  end
-
-  desc "Build the F-Droid release"
-  lane :fdroid_build do
-    gradle(
-      task: "clean assembleFdroidRelease",
-      properties: {
-        "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE']
-      }
-    )
-  end
-
-  private_lane :build_google_release do
-    gradle(
-      task: "clean bundleGoogleRelease assembleGoogleRelease",
-      print_command: false,
-      properties: {
-        "android.injected.version.name" => ENV['VERSION_NAME'],
-        "android.injected.version.code" => ENV['VERSION_CODE']
-      }
-    )
-    lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
   end
 end

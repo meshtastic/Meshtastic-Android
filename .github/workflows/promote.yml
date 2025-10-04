@@ -1,0 +1,104 @@
+name: Make Release
+
+on:
+  workflow_call:
+    inputs:
+      base_version:
+        description: 'The base version for the release (e.g., 2.3.0)'
+        required: true
+        type: string
+      tag_name:
+        description: 'The tag that triggered the release'
+        required: true
+        type: string
+      channel:
+        description: 'The channel to promote to'
+        required: true
+        type: string
+    secrets:
+      GSERVICES:
+        required: true
+      KEYSTORE:
+        required: true
+      KEYSTORE_FILENAME:
+        required: true
+      KEYSTORE_PROPERTIES:
+        required: true
+      DATADOG_APPLICATION_ID:
+        required: true
+      DATADOG_CLIENT_TOKEN:
+        required: true
+      GOOGLE_MAPS_API_KEY:
+        required: true
+      GOOGLE_PLAY_JSON_KEY:
+        required: true
+      GRADLE_ENCRYPTION_KEY:
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.tag_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: read
+  id-token: write
+  attestations: write
+
+jobs:
+  prepare-build-info:
+    runs-on: ubuntu-latest
+    outputs:
+      APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
+      APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.tag_name }}
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Determine Version Name from Tag
+        id: get_version_name
+        run: echo "APP_VERSION_NAME=$(echo ${{ inputs.tag_name }} | sed 's/-.*//' | sed 's/v//')" >> $GITHUB_OUTPUT
+
+      - name: Extract VERSION_CODE_OFFSET from config.properties
+        id: get_version_code_offset
+        run: |
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
+          echo "VERSION_CODE_OFFSET=$OFFSET" >> $GITHUB_OUTPUT
+
+      - name: Calculate Version Code from Git Commit Count
+        id: calculate_version_code
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
+          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
+          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+        shell: bash
+
+  promote-release:
+    runs-on: ubuntu-latest
+    needs: [ prepare-build-info ]
+    steps:
+      - name: Promote to next channel
+        uses: kevin-david/promote-play-release@v1
+        with:
+          service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
+          package-name: 'com.geeksville.mesh'
+          from-track: 'internal'
+          to-track: ${{ inputs.channel == 'closed' && 'alpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
+
+  update-github-release:
+    runs-on: ubuntu-latest
+    needs: [ prepare-build-info, promote-release ]
+    steps:
+      - name: Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.base_version }}
+          name: ${{ inputs.tag_name }}
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ inputs.channel != 'production' }}
