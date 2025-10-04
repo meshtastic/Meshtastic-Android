@@ -259,7 +259,6 @@ jobs:
   github-release:
     runs-on: ubuntu-latest
     needs: [prepare-build-info, release-google, release-fdroid]
-    environment: Release
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v5
