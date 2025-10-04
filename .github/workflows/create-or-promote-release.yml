@@ -50,16 +50,16 @@ jobs:
           else
             # Pre-release channels get an incrementing number
             LATEST_TAG=$(git tag --list "v${BASE_VERSION}-${CHANNEL}.*" --sort=-v:refname | head -n 1)
-            
+
             if [ -z "$LATEST_TAG" ]; then
               INCREMENT=1
             else
               INCREMENT=$(echo "$LATEST_TAG" | sed -n "s/.*-${CHANNEL}\.\([0-9]*\)/\1/p" | awk '{print $1+1}')
             fi
-            
+
             NEW_TAG="v${BASE_VERSION}-${CHANNEL}.${INCREMENT}"
           fi
-          
+
           echo "Calculated new tag: $NEW_TAG"
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
         shell: bash
@@ -69,12 +69,12 @@ jobs:
         run: |
           git tag ${{ steps.calculate_new_tag.outputs.new_tag }}
           git push origin ${{ steps.calculate_new_tag.outputs.new_tag }}
-  
+
   call-release-workflow:
     if: ${{ !inputs.dry_run }}
     needs: create-tag
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.create-tag.outputs.new_tag }}
-      release_type: ${{ inputs.channel == 'internal' && 'internal' || 'promotion' }}
+      channel: ${{ inputs.channel }}
     secrets: inherit
