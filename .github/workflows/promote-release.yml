@@ -65,7 +65,7 @@ jobs:
           BASE='${{ steps.base.outputs.base_version }}'
           INTERNAL_TAGS=$(git tag --list "v${BASE}-internal.*" | sort -V || true)
           CLOSED_TAGS=$(git tag --list "v${BASE}-closed.*" | sort -V || true)
-          OPEN_TAGS=$(git tag --list "v${BASE}-open.*" | sort -V || true)
+            OPEN_TAGS=$(git tag --list "v${BASE}-open.*" | sort -V || true)
           PROD_TAG=$(git tag --list "v${BASE}" || true)
           echo "internal_tags<<EOF" >> $GITHUB_OUTPUT
           echo "$INTERNAL_TAGS" >> $GITHUB_OUTPUT
@@ -103,82 +103,30 @@ jobs:
           REQ='${{ inputs.target_stage }}'
           CUR='${{ steps.current.outputs.current_stage }}'
           ALLOW_SKIP='${{ inputs.allow_skip }}'
-          BASE='${{ steps.base.outputs.base_version }}'
           order=(internal closed open production)
           # helper to get index
           idx() { local i=0; for s in "${order[@]}"; do [ "$s" = "$1" ] && echo $i && return; i=$((i+1)); done; echo -1; }
-
-          # default outputs
-          TARGET_STAGE=""
-
           if [ "$REQ" = auto ]; then
             CUR_IDX=$(idx "$CUR")
-            # Auto supports same-stage increments for closed/open when a newer internal exists
-            if [ "$CUR" = closed ] || [ "$CUR" = open ]; then
-              LATEST_INTERNAL=$(git tag --list "v${BASE}-internal.*" --sort=-version:refname | head -n1 || true)
-              if [ -n "$LATEST_INTERNAL" ]; then
-                INTERNAL_COMMIT=$(git rev-list -n1 "$LATEST_INTERNAL")
-                LATEST_CUR_TAG=$(git tag --list "v${BASE}-${CUR}.*" --sort=-version:refname | head -n1 || true)
-                if [ -n "$LATEST_CUR_TAG" ]; then
-                  CUR_COMMIT=$(git rev-list -n1 "$LATEST_CUR_TAG")
-                  if [ "$INTERNAL_COMMIT" != "$CUR_COMMIT" ]; then
-                    TARGET_STAGE="$CUR"
-                  fi
-                fi
-              fi
-            fi
+            TARGET_IDX=$((CUR_IDX+1))
+            TARGET_STAGE=${order[$TARGET_IDX]:-}
             if [ -z "$TARGET_STAGE" ]; then
-              TARGET_IDX=$((CUR_IDX+1))
-              TARGET_STAGE=${order[$TARGET_IDX]:-}
-              if [ -z "$TARGET_STAGE" ]; then
-                echo "Already at production; nothing to promote." >&2
-                exit 1
-              fi
+              echo "Already at production; nothing to promote." >&2
+              exit 1
             fi
           else
             TARGET_STAGE=$REQ
             CUR_IDX=$(idx "$CUR")
             REQ_IDX=$(idx "$TARGET_STAGE")
-
-            if [ "$TARGET_STAGE" = "$CUR" ]; then
-              # Same-stage request. Allow closed/open re-promotion only if a newer internal commit exists.
-              if [ "$TARGET_STAGE" = production ]; then
-                echo "Cannot re-promote to production for the same base; production tag v${BASE} is unique." >&2
-                exit 1
-              fi
-              # Compute latest internal commit for base
-              LATEST_INTERNAL=$(git tag --list "v${BASE}-internal.*" --sort=-version:refname | head -n1 || true)
-              if [ -z "$LATEST_INTERNAL" ]; then
-                echo "No internal tag found for base $BASE (unexpected)." >&2
-                exit 1
-              fi
-              INTERNAL_COMMIT=$(git rev-list -n1 "$LATEST_INTERNAL")
-              # Compute latest tag commit for this stage
-              LATEST_STAGE_TAG=$(git tag --list "v${BASE}-${TARGET_STAGE}.*" --sort=-version:refname | head -n1 || true)
-              if [ -z "$LATEST_STAGE_TAG" ]; then
-                # No prior tag for this stage even though CUR==TARGET_STAGE; proceed to create .1 normally
-                :
-              else
-                STAGE_COMMIT=$(git rev-list -n1 "$LATEST_STAGE_TAG")
-                if [ "$INTERNAL_COMMIT" = "$STAGE_COMMIT" ]; then
-                  echo "Requested re-promotion to $TARGET_STAGE but latest internal commit matches latest ${TARGET_STAGE} tag ($LATEST_STAGE_TAG). Nothing new to promote." >&2
-                  exit 1
-                fi
-              fi
-              # Allowed: TARGET_STAGE remains as requested (closed/open)
-            else
-              # Different stage request; must be ahead of current unless allow_skip permits skipping
-              if [ $REQ_IDX -le $CUR_IDX ]; then
-                echo "Requested stage $TARGET_STAGE is not ahead of current stage $CUR." >&2
-                exit 1
-              fi
-              if [ "$ALLOW_SKIP" != 'true' ] && [ $((CUR_IDX+1)) -ne $REQ_IDX ]; then
-                echo "Skipping stages not allowed (current=$CUR, requested=$TARGET_STAGE). Enable allow_skip to override." >&2
-                exit 1
-              fi
+            if [ $REQ_IDX -le $CUR_IDX ]; then
+              echo "Requested stage $TARGET_STAGE is not ahead of current stage $CUR." >&2
+              exit 1
+            fi
+            if [ "$ALLOW_SKIP" != 'true' ] && [ $((CUR_IDX+1)) -ne $REQ_IDX ]; then
+              echo "Skipping stages not allowed (current=$CUR, requested=$TARGET_STAGE). Enable allow_skip to override." >&2
+              exit 1
             fi
           fi
-
           echo "Target stage: $TARGET_STAGE"
           echo "target_stage=$TARGET_STAGE" >> $GITHUB_OUTPUT
 
