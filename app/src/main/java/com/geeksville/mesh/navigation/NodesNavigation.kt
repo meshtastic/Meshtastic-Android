@@ -57,6 +57,7 @@ import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.map.node.NodeMapViewModel
 
 fun NavGraphBuilder.nodesGraph(navController: NavHostController) {
     navigation<NodesRoutes.NodesGraph>(startDestination = NodesRoutes.Nodes) {
@@ -90,16 +91,25 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController) {
             )
         }
 
+        composable<NodeDetailRoutes.NodeMap>(
+            deepLinks =
+            listOf(
+                navDeepLink<NodeDetailRoutes.NodeMap>(basePath = "$DEEP_LINK_BASE_URI/node/{destNum}/node_map"),
+                navDeepLink<NodeDetailRoutes.NodeMap>(basePath = "$DEEP_LINK_BASE_URI/node/node_map"),
+            ),
+        ) { backStackEntry ->
+            val parentGraphBackStackEntry =
+                remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
+            NodeMapScreen(
+                hiltViewModel<NodeMapViewModel>(parentGraphBackStackEntry),
+                onNavigateUp = navController::navigateUp,
+            )
+        }
+
         NodeDetailRoute.entries.forEach { entry ->
             when (entry.route) {
                 is NodeDetailRoutes.DeviceMetrics ->
                     addNodeDetailScreenComposable<NodeDetailRoutes.DeviceMetrics>(
-                        navController,
-                        entry,
-                        entry.screenComposable,
-                    )
-                is NodeDetailRoutes.NodeMap ->
-                    addNodeDetailScreenComposable<NodeDetailRoutes.NodeMap>(
                         navController,
                         entry,
                         entry.screenComposable,
@@ -198,12 +208,6 @@ enum class NodeDetailRoute(
         NodeDetailRoutes.DeviceMetrics,
         Icons.Default.Router,
         { metricsVM, onNavigateUp -> DeviceMetricsScreen(metricsVM, onNavigateUp) },
-    ),
-    NODE_MAP(
-        R.string.node_map,
-        NodeDetailRoutes.NodeMap,
-        Icons.Default.LocationOn,
-        { metricsVM, onNavigateUp -> NodeMapScreen(metricsVM, onNavigateUp = onNavigateUp) },
     ),
     POSITION_LOG(
         R.string.position_log,
