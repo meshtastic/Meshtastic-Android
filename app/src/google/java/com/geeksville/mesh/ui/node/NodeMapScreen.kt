@@ -21,32 +21,24 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.MetricsViewModel
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.map.MapView
 import org.meshtastic.feature.map.node.NodeMapViewModel
 
 @Composable
-fun NodeMapScreen(
-    metricsViewModel: MetricsViewModel = hiltViewModel(),
-    nodeMapViewModel: NodeMapViewModel = hiltViewModel(),
-    onNavigateUp: () -> Unit,
-) {
-    val state by metricsViewModel.state.collectAsState()
-    val positions = state.positionLogs
-    val destNum = state.node?.num
-    val ourNodeInfo by nodeMapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) {
+    val node by nodeMapViewModel.node.collectAsStateWithLifecycle()
+    val positions by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
+    val destNum = node?.num
 
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
-                ourNode = ourNodeInfo,
+                title = node?.user?.longName ?: "",
+                ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,

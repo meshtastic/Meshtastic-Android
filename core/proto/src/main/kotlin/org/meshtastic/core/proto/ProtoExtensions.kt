@@ -20,6 +20,8 @@ package org.meshtastic.core.proto
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MeshProtos.MeshPacket
+import com.geeksville.mesh.MeshProtos.Position
 import java.text.DateFormat
 import kotlin.time.Duration.Companion.days
 
@@ -37,4 +39,10 @@ fun MeshProtos.Position.formatPositionTime(dateFormat: DateFormat): String {
             dateFormat.format(time * SECONDS_TO_MILLIS)
         }
     return timeText
+}
+
+fun MeshPacket.toPosition(): Position? = if (!decoded.wantResponse) {
+    runCatching { Position.parseFrom(decoded.payload) }.getOrNull()
+} else {
+    null
 }

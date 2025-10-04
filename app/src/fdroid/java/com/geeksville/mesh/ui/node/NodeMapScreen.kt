@@ -24,9 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.MetricsViewModel
 import org.meshtastic.feature.map.addCopyright
 import org.meshtastic.feature.map.addPolyline
 import org.meshtastic.feature.map.addPositionMarkers
@@ -39,20 +37,16 @@ import org.osmdroid.util.GeoPoint
 private const val DEG_D = 1e-7
 
 @Composable
-fun NodeMapScreen(
-    metricsViewModel: MetricsViewModel = hiltViewModel(),
-    nodeMapViewModel: NodeMapViewModel = hiltViewModel(),
-    onNavigateUp: () -> Unit,
-) {
+fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) {
     val density = LocalDensity.current
-    val state by metricsViewModel.state.collectAsStateWithLifecycle()
-    val geoPoints = state.positionLogs.map { GeoPoint(it.latitudeI * DEG_D, it.longitudeI * DEG_D) }
+    val positionLogs by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
+    val geoPoints = positionLogs.map { GeoPoint(it.latitudeI * DEG_D, it.longitudeI * DEG_D) }
     val cameraView = remember { BoundingBox.fromGeoPoints(geoPoints) }
     val mapView =
         rememberMapViewWithLifecycle(
             applicationId = nodeMapViewModel.applicationId,
             box = cameraView,
-            tileSource = metricsViewModel.tileSource,
+            tileSource = nodeMapViewModel.tileSource,
         )
 
     AndroidView(
@@ -64,7 +58,7 @@ fun NodeMapScreen(
             map.addScaleBarOverlay(density)
 
             map.addPolyline(density, geoPoints) {}
-            map.addPositionMarkers(state.positionLogs) {}
+            map.addPositionMarkers(positionLogs) {}
         },
     )
 }
