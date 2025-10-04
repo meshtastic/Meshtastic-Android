@@ -187,7 +187,7 @@
     <string name="meshtastic_service_notifications">Teenuse teavitused</string>
     <string name="about">Teave</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
-    <string name="contact_invalid">This contact is invalid and can not be added</string>
+    <string name="contact_invalid">See kontakt on sobimatu ja seda ei saa lisada</string>
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_decoded_payload">Dekodeeritud andmed:</string>
     <string name="debug_logs_export">Salvesta logi</string>
@@ -328,9 +328,9 @@
     <string name="air_util_definition">Viimase tunni jooksul kasutatud eetriaja protsent.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Jagatud võti</string>
-    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
+    <string name="encryption_psk_text">Saata/vastuvõtta saab ainult kanali-sõnumeid. Otsesõnumid nõuavad avaliku võtme infrastruktuuri funktsiooni püsivara versioonist 2.5 alates.</string>
     <string name="encryption_pkc">Avaliku võtme krüpteerimine</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
+    <string name="encryption_pkc_text">Otsesõnumid kasutavad krüpteerimiseks uut avaliku võtme infrastruktuuri.</string>
     <string name="encryption_error">Kokkusobimatu avalik võti</string>
     <string name="encryption_error_text">Avalik võti ei ühti salvestatud võtmega. Võite sõlme eemaldada ja lasta sellel uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtme muudatuse põhjuseks oli tehaseseadete taastamine või muu tahtlik tegevus.</string>
     <string name="exchange_userinfo">Kasutajate teabe vahetamine</string>
