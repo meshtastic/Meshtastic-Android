@@ -17,7 +17,6 @@ permissions:
 jobs:
   create-internal-tag:
     runs-on: ubuntu-latest
-    environment: Release
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

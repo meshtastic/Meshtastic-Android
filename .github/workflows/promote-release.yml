@@ -27,7 +27,6 @@ permissions:
 jobs:
   promote:
     runs-on: ubuntu-latest
-    environment: Release
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -189,3 +188,4 @@ jobs:
           echo "Target Stage: ${{ steps.decide.outputs.target_stage }}" >> $GITHUB_STEP_SUMMARY
           echo "New Tag: ${{ steps.tag.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+
