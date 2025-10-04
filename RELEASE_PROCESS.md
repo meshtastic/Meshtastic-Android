@@ -1,58 +1,59 @@
-# Meshtastic-Android Release Process (Condensed)
+# Meshtastic-Android Release Process
 
-This guide summarizes the steps for releasing a new version of Meshtastic-Android. The process is automated via GitHub Actions and Fastlane, triggered by pushing a Git tag from a `release/*` branch.
+This guide summarizes the steps for releasing a new version of Meshtastic-Android. The process is fully automated via GitHub Actions and Fastlane.
 
 ## Overview
-- **Tagging:** Push a tag (`vX.X.X[-track.Y]`) from a `release/*` branch to start the release workflow.
-- **CI Automation:** Builds both flavors, uploads to Google Play (correct track), and creates/updates a draft GitHub release.
-- **Changelog:** Release notes are auto-generated from PR labels via [`.github/release.yml`](.github/release.yml). Label PRs for accurate changelogs.
-- **Draft Release:** All tags for the same base version (e.g., `v2.3.5`) update the same draft release. The release title uses the full tag (e.g., `v2.3.5-internal.1`).
 
-## Tagging & Tracks
-- **Internal:** `vX.X.X-internal.Y`
-- **Closed:** `vX.X.X-closed.Y`
-- **Open:** `vX.X.X-open.Y`
-- **Production:** `vX.X.X`
-- Increment `.Y` for fixes/iterations.
+The entire release process is managed by a single, manually-triggered GitHub Action: **`Create or Promote Release`**.
+
+-   **Trigger:** To start a new release or promote an existing one, a developer manually runs the workflow from the GitHub Actions tab.
+-   **Inputs:** The workflow requires two inputs:
+    1.  `version`: The base version number you are releasing (e.g., `2.4.0`).
+    2.  `channel`: The release channel you are targeting (`internal`, `closed`, `open`, or `production`).
+-   **Automation:** The workflow handles everything automatically:
+    -   Calculates the correct Git tag based on the channel (e.g., `v2.4.0-internal.1` or `v2.4.0`).
+    -   Pushes the new tag to the repository.
+    -   Calls a reusable workflow that builds the app, deploys it to the correct Google Play track, and attaches the artifacts (`.aab`/`.apk`) to a GitHub Release.
+-   **Changelog:** Release notes are auto-generated from PR labels. Ensure PRs are labeled correctly to maintain an accurate changelog.
 
 ## Release Steps
-1. **Branch:** Create `release/X.X.X` from `main`. Only critical fixes allowed.
-2. **Tag & Push:** Tag the release commit and push (see below).
-3. **CI:** Wait for CI to finish. Artifacts are uploaded, and a draft GitHub release is created/updated.
-4. **Verify:** Check Google Play Console and GitHub draft release.
-5. **Promote:** Tag the same commit for the next track as needed.
-6. **Finalize:**
-   - **Production:** Publish the GitHub release, then promote in Google Play Console.
-   - **Other tracks:** Verify with testers.
-7. **Merge:** After production, merge `release/X.X.X` back to `main` and delete the branch.
 
-## Tagging Example
-```bash
-# On release branch
-git tag v2.3.5-internal.1
-git push origin v2.3.5-internal.1
-# For fixes:
-git tag v2.3.5-internal.2
-git push origin v2.3.5-internal.2
-# Promote:
-git tag v2.3.5-closed.1
-git push origin v2.3.5-closed.1
-```
+### 1. Start an Internal Release
 
-## Manual Checklist
-- [ ] Verify build in Google Play Console
-- [ ] Review and publish GitHub draft release (for production)
-- [ ] Merge release branch to main after production
-- [ ] Label PRs for changelog accuracy
+1.  Navigate to the **Actions** tab in the GitHub repository.
+2.  Select the **`Create or Promote Release`** workflow.
+3.  Click the **"Run workflow"** dropdown.
+4.  Enter the base `version` (e.g., `2.4.0`).
+5.  Select the `internal` channel.
+6.  Click **"Run workflow"**.
+
+The workflow will create an incremental internal tag (e.g., `v2.4.0-internal.1`) and publish a **draft** pre-release on GitHub.
+
+### 2. Promote to the Next Channel
+
+Once an internal build has been verified, you can promote it to a wider audience.
+
+1.  Run the **`Create or Promote Release`** workflow again with the same base `version`.
+2.  Select the next channel in the sequence (e.g., `closed`, then `open`).
+3.  The workflow will create a new incremental tag for that channel (e.g., `v2.4.0-closed.1`) and create a **published** pre-release on GitHub.
+
+### 3. Promote to Production
+
+After testing is complete on all pre-release channels, you can create the final public release.
+
+1.  Run the **`Create or Promote Release`** workflow one last time.
+2.  Use the same base `version`.
+3.  Select the `production` channel.
+4.  The workflow will create a clean version tag (e.g., `v2.4.0`) and create a **published, stable** (non-prerelease) release on GitHub.
+
+### 4. Post-Release
+
+1.  **Verify:** Check the Google Play Console to ensure the build is available on the correct track.
+2.  **Merge:** Merge the release branch (if one was used for stabilization) back into `main`.
 
 ## Build Attestations & Provenance
 
-All release artifacts are accompanied by explicit GitHub build attestations (provenance). After each artifact is uploaded in the release workflow, a provenance attestation is generated using the `actions/attest-build-provenance` action. This provides cryptographic proof that the artifacts were built by our trusted GitHub Actions workflow, ensuring supply chain integrity and allowing users to verify the origin of each release.
+All release artifacts are accompanied by explicit GitHub build attestations (provenance). This provides cryptographic proof that the artifacts were built by our trusted GitHub Actions workflow, ensuring supply chain integrity.
 
-- Attestations are generated immediately after each artifact upload in the workflow.
-- You can view and verify provenance in the GitHub UI under each release asset.
-- For more details, see [GitHub's documentation on build provenance](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#provenance-attestations).
-
-> **Note:** The GitHub release is always attached to the base version tag (e.g., `v2.3.5`). All track tags for the same version update the same draft release. Look for the draft under the base version tag.
-
-> **Best Practice:** Always promote the last verified build from the previous track to the next track. Do not introduce new changes between tracks unless absolutely necessary. This ensures consistency, traceability, and minimizes risk.
+-   You can view and verify provenance in the GitHub UI under each release asset.
+-   For more details, see [GitHub's documentation on build provenance](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#provenance-attestations).

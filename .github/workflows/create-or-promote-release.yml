@@ -1,0 +1,67 @@
+name: Create or Promote Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Base version for the release (e.g., 2.3.0)'
+        required: true
+      channel:
+        description: 'The channel to create a release for or promote to'
+        required: true
+        type: choice
+        options:
+          - internal
+          - closed
+          - open
+          - production
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.calculate_new_tag.outputs.new_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Calculate new release tag
+        id: calculate_new_tag
+        run: |
+          BASE_VERSION="${{ inputs.version }}"
+          CHANNEL="${{ inputs.channel }}"
+
+          if [[ "$CHANNEL" == "production" ]]; then
+            # Production tags are simple, without a channel or increment
+            NEW_TAG="v${BASE_VERSION}"
+          else
+            # Pre-release channels get an incrementing number
+            LATEST_TAG=$(git tag --list "v${BASE_VERSION}-${CHANNEL}.*" --sort=-v:refname | head -n 1)
+            
+            if [ -z "$LATEST_TAG" ]; then
+              INCREMENT=1
+            else
+              INCREMENT=$(echo "$LATEST_TAG" | sed -n "s/.*-${CHANNEL}\.\([0-9]*\)/\1/p" | awk '{print $1+1}')
+            fi
+            
+            NEW_TAG="v${BASE_VERSION}-${CHANNEL}.${INCREMENT}"
+          fi
+          
+          echo "Calculated new tag: $NEW_TAG"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Create and push new tag
+        run: |
+          git tag ${{ steps.calculate_new_tag.outputs.new_tag }}
+          git push origin ${{ steps.calculate_new_tag.outputs.new_tag }}
+  
+  call-release-workflow:
+    needs: create-tag
+    uses: ./.github/workflows/release.yml@main
+    with:
+      tag_name: ${{ needs.create-tag.outputs.new_tag }}
+      release_type: ${{ inputs.channel == 'internal' && 'internal' || 'promotion' }}
+    secrets: inherit
