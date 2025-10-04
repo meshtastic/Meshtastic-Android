@@ -84,7 +84,7 @@ jobs:
     needs: [ prepare-build-info ]
     steps:
       - name: Promote to next channel
-        uses: kevin-david/promote-play-release@v1
+        uses: kevin-david/promote-play-release@v1.2.0
         with:
           service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
           package-name: 'com.geeksville.mesh'
@@ -99,7 +99,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.base_version }}
-          name: ${{ inputs.tag_name }}
+          name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
           generate_release_notes: true
           draft: false
           prerelease: ${{ inputs.channel != 'production' }}
