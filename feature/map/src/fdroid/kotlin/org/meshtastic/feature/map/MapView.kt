@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
 import android.content.Context
@@ -63,31 +63,25 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.map.components.EditWaypointDialog
-import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.meshtastic.core.common.gpsDisabled
+import org.meshtastic.core.common.hasGps
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.R
-import org.meshtastic.feature.map.MapViewModel
-import org.meshtastic.feature.map.addCopyright
-import org.meshtastic.feature.map.addScaleBarOverlay
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
+import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
-import org.meshtastic.feature.map.createLatLongGrid
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
-import org.meshtastic.feature.map.zoomIn
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -277,10 +271,11 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 MyLocationNewOverlay(this).apply {
                     enableMyLocation()
                     enableFollowLocation()
-                    getBitmapFromVectorDrawable(context, com.geeksville.mesh.R.drawable.ic_map_location_dot_24)?.let {
-                        setPersonIcon(it)
-                        setPersonAnchor(0.5f, 0.5f)
-                    }
+                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_location_dot_24)
+                        ?.let {
+                            setPersonIcon(it)
+                            setPersonAnchor(0.5f, 0.5f)
+                        }
                     getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_navigation_24)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
@@ -309,7 +304,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember {
-        AppCompatResources.getDrawable(context, com.geeksville.mesh.R.drawable.ic_baseline_location_on_24)
+        AppCompatResources.getDrawable(context, org.meshtastic.core.ui.R.drawable.ic_baseline_location_on_24)
     }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {

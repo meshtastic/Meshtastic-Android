@@ -17,7 +17,7 @@
 
 @file:Suppress("MagicNumber")
 
-package com.geeksville.mesh.ui.map
+package org.meshtastic.feature.map
 
 import android.app.Activity
 import android.content.Intent
@@ -67,13 +67,6 @@ import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
-import com.geeksville.mesh.ui.map.components.EditWaypointDialog
-import com.geeksville.mesh.ui.map.components.NodeClusterMarkers
-import com.geeksville.mesh.ui.map.components.WaypointMarkers
-import com.geeksville.mesh.ui.metrics.HEADING_DEG
-import com.geeksville.mesh.ui.metrics.formatPositionTime
-import com.geeksville.mesh.ui.node.DEG_D
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -87,7 +80,6 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -110,19 +102,23 @@ import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.proto.formatPositionTime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.feature.map.LastHeardFilter
-import org.meshtastic.feature.map.LayerType
-import org.meshtastic.feature.map.LocationPermissionsHandler
-import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.component.ClusterItemsListDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.CustomTileProviderManagerSheet
+import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.NodeClusterMarkers
+import org.meshtastic.feature.map.component.WaypointMarkers
+import org.meshtastic.feature.map.model.NodeClusterItem
 import timber.log.Timber
 import java.text.DateFormat
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
+private const val DEG_D = 1e-7
+private const val HEADING_DEG = 1e-5
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -651,34 +647,6 @@ fun Uri.getFileName(context: android.content.Context): String {
     return name
 }
 
-data class NodeClusterItem(val node: Node, val nodePosition: LatLng, val nodeTitle: String, val nodeSnippet: String) :
-    ClusterItem {
-    override fun getPosition(): LatLng = nodePosition
-
-    override fun getTitle(): String = nodeTitle
-
-    override fun getSnippet(): String = nodeSnippet
-
-    override fun getZIndex(): Float? = null
-
-    fun getPrecisionMeters(): Double? {
-        val precisionMap =
-            mapOf(
-                10 to 23345.484932,
-                11 to 11672.7369,
-                12 to 5836.36288,
-                13 to 2918.175876,
-                14 to 1459.0823719999053,
-                15 to 729.53562,
-                16 to 364.7622,
-                17 to 182.375556,
-                18 to 91.182212,
-                19 to 45.58554,
-            )
-        return precisionMap[this.node.position.precisionBits]
-    }
-}
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
@@ -698,15 +666,9 @@ private fun PositionInfoWindowContent(
 
     Card {
         Column(modifier = Modifier.padding(8.dp)) {
-            PositionRow(
-                label = stringResource(R.string.latitude),
-                value = "%.5f".format(position.latitudeI * com.geeksville.mesh.ui.metrics.DEG_D),
-            )
+            PositionRow(label = stringResource(R.string.latitude), value = "%.5f".format(position.latitudeI * DEG_D))
 
-            PositionRow(
-                label = stringResource(R.string.longitude),
-                value = "%.5f".format(position.longitudeI * com.geeksville.mesh.ui.metrics.DEG_D),
-            )
+            PositionRow(label = stringResource(R.string.longitude), value = "%.5f".format(position.longitudeI * DEG_D))
 
             PositionRow(label = stringResource(R.string.sats), value = position.satsInView.toString())
 
@@ -722,7 +684,7 @@ private fun PositionInfoWindowContent(
                 value = "%.0f°".format(position.groundTrack * HEADING_DEG),
             )
 
-            PositionRow(label = stringResource(R.string.timestamp), value = formatPositionTime(position, dateFormat))
+            PositionRow(label = stringResource(R.string.timestamp), value = position.formatPositionTime(dateFormat))
         }
     }
 }

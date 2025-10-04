@@ -15,12 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map.components
+package org.meshtastic.feature.map.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
-import com.geeksville.mesh.ui.map.NodeClusterItem
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
@@ -28,6 +27,7 @@ import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.model.NodeClusterItem
 
 @OptIn(MapsComposeExperimentalApi::class)
 @Suppress("NestedBlockDepth")

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package org.meshtastic.feature.map
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -33,7 +33,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import org.meshtastic.feature.map.requiredZoomLevel
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -72,7 +71,7 @@ private const val DEFAULT_ZOOM_LEVEL = 15.0
 
 @Suppress("MagicNumber")
 @Composable
-internal fun rememberMapViewWithLifecycle(
+fun rememberMapViewWithLifecycle(
     applicationId: String,
     box: BoundingBox,
     tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
