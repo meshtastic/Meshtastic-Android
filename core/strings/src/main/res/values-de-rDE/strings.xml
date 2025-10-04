@@ -328,9 +328,9 @@
     <string name="air_util_definition">Prozentuale Sendezeit für die Übertragung innerhalb der letzten Stunde.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Geteilter Schlüssel</string>
-    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
+    <string name="encryption_psk_text">Es können nur Kanalnachrichten gesendet/empfangen werden. Direktnachrichten erfordern die Verschlüsselung mit öffentlichem Knotenschlüssel seit Firmware 2.5+.</string>
     <string name="encryption_pkc">Verschlüsselung mit öffentlichen Schlüssel</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
+    <string name="encryption_pkc_text">Direktnachrichten verwenden zur den öffentlichen Knotenschlüssel zur Verschlüsselung.</string>
     <string name="encryption_error">Öffentlicher Schlüssel stimmt nicht überein</string>
     <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem gespeicherten Schlüssel überein. Sie können den Knoten entfernen und ihn erneut Schlüssel austauschen lassen. Dies kann jedoch auf ein schwerwiegenderes Sicherheitsproblem hinweisen. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um festzustellen, ob die Schlüsseländerung durch Zurücksetzung auf die Werkseinstellungen oder eine andere absichtliche Aktion zurückzuführen ist.</string>
     <string name="exchange_userinfo">Benutzer Informationen teilen</string>
