@@ -381,8 +381,7 @@ class MeshService : Service() {
                 notification,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (hasLocationPermission()) {
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or
-                            ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
                     } else {
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
                     }
