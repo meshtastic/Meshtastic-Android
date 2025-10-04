@@ -62,6 +62,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.proto.toPosition
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
@@ -189,12 +190,6 @@ enum class TimeFrame(val seconds: Long, @StringRes val strRes: Int) {
 
 private fun MeshPacket.hasValidSignal(): Boolean =
     rxTime > 0 && (rxSnr != 0f && rxRssi != 0) && (hopStart > 0 && hopStart - hopLimit == 0)
-
-private fun MeshPacket.toPosition(): Position? = if (!decoded.wantResponse) {
-    runCatching { Position.parseFrom(decoded.payload) }.getOrNull()
-} else {
-    null
-}
 
 @Suppress("LongParameterList")
 @HiltViewModel
