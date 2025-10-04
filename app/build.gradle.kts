@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.datadog.gradle.plugin.InstrumentationMode
 import com.geeksville.mesh.buildlogic.GitVersionValueSource
 import java.io.FileInputStream
 import java.util.Properties
@@ -255,4 +256,8 @@ dokka {
         // Configures heap size
         maxHeapSize = "6g"
     }
+}
+
+datadog {
+    composeInstrumentation = InstrumentationMode.AUTO
 }
