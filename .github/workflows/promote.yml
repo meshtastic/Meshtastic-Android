@@ -80,6 +80,7 @@ jobs:
 
   promote-release:
     runs-on: ubuntu-latest
+    environment: Release
     needs: [ prepare-build-info ]
     steps:
       - name: Promote to next channel
