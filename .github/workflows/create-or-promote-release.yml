@@ -23,6 +23,9 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
+  id-token: write
+  attestations: write
 
 jobs:
   create-tag:
