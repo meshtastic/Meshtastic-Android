@@ -53,7 +53,7 @@ platform :android do
   desc "Promote from closed track to the open track on Google Play"
   lane :open do
     upload_to_play_store(
-      track: 'NewAlpha',
+      track: 'internal',
       track_promote_to: 'beta',
       release_status: 'draft',
       skip_upload_apk: true,
@@ -67,7 +67,7 @@ platform :android do
   desc "Promote from open track to the production track on Google Play"
   lane :production do
     upload_to_play_store(
-      track: 'open',
+      track: 'internal',
       track_promote_to: 'production',
       release_status: 'draft',
       skip_upload_apk: true,
