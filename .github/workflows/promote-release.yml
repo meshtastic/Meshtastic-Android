@@ -171,12 +171,6 @@ jobs:
           echo "Current stage: ${{ steps.current.outputs.current_stage }} -> Target: ${{ steps.decide.outputs.target_stage }}"
           git log -1 --oneline ${{ steps.commit.outputs.commit_sha }}
 
-      - name: Configure Git User
-        if: ${{ inputs.dry_run != 'true' }}
-        run: |
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
       - name: Create & Push Tag
         if: ${{ inputs.dry_run != 'true' }}
         run: |
