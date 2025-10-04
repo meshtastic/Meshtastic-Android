@@ -15,6 +15,11 @@ on:
           - closed
           - open
           - production
+      dry_run:
+        description: 'If true, calculates the tag but does not push it or start the release'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   create-tag:
@@ -54,11 +59,13 @@ jobs:
         shell: bash
 
       - name: Create and push new tag
+        if: ${{ !inputs.dry_run }}
         run: |
           git tag ${{ steps.calculate_new_tag.outputs.new_tag }}
           git push origin ${{ steps.calculate_new_tag.outputs.new_tag }}
   
   call-release-workflow:
+    if: ${{ !inputs.dry_run }}
     needs: create-tag
     uses: ./.github/workflows/release.yml@main
     with:
