@@ -22,7 +22,6 @@ jobs:
     outputs:
       APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
-      BASE_TAG: ${{ steps.get_base_tag.outputs.BASE_TAG }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -46,12 +45,6 @@ jobs:
         id: get_version_name
         run: echo "APP_VERSION_NAME=$(echo ${GITHUB_REF_NAME#v} | sed 's/-.*//')" >> $GITHUB_OUTPUT
 
-      - name: Get Base Tag (for release/artifact naming)
-        id: get_base_tag
-        run: |
-          VERSION_NAME=$(echo ${GITHUB_REF_NAME#v} | sed 's/-.*//')
-          echo "BASE_TAG=v${VERSION_NAME}" >> $GITHUB_OUTPUT
-
       - name: Extract VERSION_CODE_OFFSET from config.properties
         id: get_version_code_offset
         run: |
@@ -66,78 +59,11 @@ jobs:
           VERSION_CODE=$((COMMIT_COUNT + OFFSET))
           echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
         shell: bash
-
-  prepare-release-environment:
-    runs-on: ubuntu-latest
-    needs: prepare-build-info
-    outputs:
-      exists: ${{ steps.check_and_clean.outputs.exists }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-      - name: Check for Existing Release and Clean if Superseded
-        id: check_and_clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BASE_TAG=${{ needs.prepare-build-info.outputs.BASE_TAG }}
-          COMMIT_SHA=$(git rev-parse HEAD)
-          RELEASE_INFO=$(gh release view $BASE_TAG --json targetCommitish -q ".targetCommitish.oid" || echo "")
-          if [ -z "$RELEASE_INFO" ]; then
-            echo "No existing release for tag '${BASE_TAG}'. Starting fresh."
-            echo "exists=false" >> $GITHUB_OUTPUT
-          elif [ "$RELEASE_INFO" == "$COMMIT_SHA" ]; then
-            echo "Existing release for '${BASE_TAG}' found on the current commit. This is a promotion."
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "Existing release for '${BASE_TAG}' found on a DIFFERENT commit ($RELEASE_INFO)."
-            echo "This new tag supersedes the old one. Deleting old release and tag to restart the process."
-            gh release delete $BASE_TAG --cleanup-tag --yes || echo "Could not delete release. It might have been deleted already."
-            echo "Old release and tag deleted. A new build will be created."
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
-  check-versioncode-google-play:
-    runs-on: ubuntu-latest
-    needs: prepare-build-info
-    outputs:
-      exists: ${{ steps.check_versioncode.outputs.exists }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-      - name: Setup Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-      - name: Check if versionCode exists on Google Play Internal Track
-        id: check_versioncode
-        env:
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-          GOOGLE_PLAY_JSON_KEY: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
-        run: |
-          set -euo pipefail
-          echo "$GOOGLE_PLAY_JSON_KEY" > /tmp/play-store-credentials.json
-          exists=false
-          if bundle exec fastlane supply --help | grep -q -- '--json'; then
-            JSON=$(bundle exec fastlane supply --json_key /tmp/play-store-credentials.json --package_name com.geeksville.mesh --track internal --json || true)
-            if echo "$JSON" | jq -e ".tracks.internal.releases[].versionCodes[] | select(. == ${VERSION_CODE})" >/dev/null 2>&1; then
-              exists=true
-            fi
-          else
-            # Fallback: use fastlane action output and parse array from stdout
-            OUTFILE=$(mktemp)
-            bundle exec fastlane run google_play_track_version_codes json_key:/tmp/play-store-credentials.json package_name:com.geeksville.mesh track:internal --capture_output | tee "$OUTFILE" || true
-            ARR=$(grep -oE '\\[[^]]*\\]' "$OUTFILE" | head -n1)
-            if echo "$ARR" | tr -d '[] ' | tr ',' '\n' | grep -x "${VERSION_CODE}" >/dev/null 2>&1; then
-              exists=true
-            fi
-          fi
-          echo "exists=${exists}" >> $GITHUB_OUTPUT
+        # This matches the reproducible versionCode strategy: versionCode = git commit count + offset
 
   release-google:
     runs-on: ubuntu-latest
-    needs: [prepare-build-info, prepare-release-environment, check-versioncode-google-play]
+    needs: prepare-build-info
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -150,6 +76,7 @@ jobs:
           java-version: '21'
           distribution: 'jetbrains'
       - name: Setup Gradle
+        if: contains(github.ref_name, '-internal')
         uses: gradle/actions/setup-gradle@v5
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
@@ -183,26 +110,13 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Build and Deploy to Internal Track
-        if: contains(github.ref_name, '-internal') && needs.prepare-release-environment.outputs.exists == 'false' && needs.check-versioncode-google-play.outputs.exists == 'false'
-        env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-        run: bundle exec fastlane internal
-
-      - name: Build Google artifacts without upload
-        if: contains(github.ref_name, '-internal') && needs.prepare-release-environment.outputs.exists == 'false' && needs.check-versioncode-google-play.outputs.exists == 'true'
-        env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-        run: ./gradlew clean bundleGoogleRelease assembleGoogleRelease -Pandroid.injected.version.name=${VERSION_NAME} -Pandroid.injected.version.code=${VERSION_CODE}
-
-      - name: Determine Fastlane Promotion Lane
+      - name: Determine Fastlane Lane
         id: fastlane_lane
-        if: "!contains(github.ref_name, '-internal')"
         run: |
           TAG_NAME="${{ github.ref_name }}"
-          if [[ "$TAG_NAME" == *"-closed"* ]]; then
+          if [[ "$TAG_NAME" == *"-internal"* ]]; then
+            echo "lane=internal" >> $GITHUB_OUTPUT
+          elif [[ "$TAG_NAME" == *"-closed"* ]]; then
             echo "lane=closed" >> $GITHUB_OUTPUT
           elif [[ "$TAG_NAME" == *"-open"* ]]; then
             echo "lane=open" >> $GITHUB_OUTPUT
@@ -210,15 +124,14 @@ jobs:
             echo "lane=production" >> $GITHUB_OUTPUT
           fi
 
-      - name: Promote on Google Play
-        if: "steps.fastlane_lane.outputs.lane != '' && needs.check-versioncode-google-play.outputs.exists == 'true'"
+      - name: Build and Deploy Google Play Tracks with Fastlane
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane ${{ steps.fastlane_lane.outputs.lane }}
 
       - name: Upload Google AAB artifact
-        if: needs.prepare-release-environment.outputs.exists == 'false' && contains(github.ref_name, '-internal')
+        if: contains(github.ref_name, '-internal')
         uses: actions/upload-artifact@v4
         with:
           name: google-aab
@@ -226,7 +139,7 @@ jobs:
           retention-days: 1
 
       - name: Upload Google APK artifact
-        if: needs.prepare-release-environment.outputs.exists == 'false' && contains(github.ref_name, '-internal')
+        if: contains(github.ref_name, '-internal')
         uses: actions/upload-artifact@v4
         with:
           name: google-apk
@@ -234,7 +147,7 @@ jobs:
           retention-days: 1
 
       - name: Attest Google artifacts provenance
-        if: needs.prepare-release-environment.outputs.exists == 'false' && contains(github.ref_name, '-internal')
+        if: contains(github.ref_name, '-internal')
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: |
@@ -242,9 +155,9 @@ jobs:
             app/build/outputs/apk/google/release/app-google-release.apk
 
   release-fdroid:
-    if: contains(github.ref_name, '-internal') && needs.prepare-release-environment.outputs.exists == 'false' && needs.check-versioncode-google-play.outputs.exists == 'false'
+    if: contains(github.ref_name, '-internal')
     runs-on: ubuntu-latest
-    needs: [prepare-build-info, prepare-release-environment, check-versioncode-google-play]
+    needs: prepare-build-info
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -297,22 +210,21 @@ jobs:
         with:
           subject-path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
 
-  manage-github-release:
+  create-internal-release:
     runs-on: ubuntu-latest
-    needs: [prepare-build-info, prepare-release-environment, check-versioncode-google-play, release-google, release-fdroid]
+    needs: [prepare-build-info, release-google, release-fdroid]
+    if: contains(github.ref_name, '-internal')
     steps:
       - name: Download all artifacts
-        if: needs.prepare-release-environment.outputs.exists == 'false'
         uses: actions/download-artifact@v5
         with:
           path: ./artifacts
 
       - name: Create GitHub Release
-        if: needs.prepare-release-environment.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.prepare-build-info.outputs.BASE_TAG }}
-          name: v${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}-internal
+          tag_name: v${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          name: ${{ github.ref_name }}
           generate_release_notes: true
           files: ./artifacts/*/*
           draft: true
@@ -320,13 +232,32 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Promote GitHub Release
-        if: "!contains(github.ref_name, '-internal')"
+  promote-release:
+    runs-on: ubuntu-latest
+    needs: [prepare-build-info, release-google]
+    if: "!contains(github.ref_name, '-internal')"
+    steps:
+      - name: Determine Release Properties
+        id: release_properties
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          if [[ "$TAG_NAME" == *"-closed"* ]]; then
+            echo "draft=false" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          elif [[ "$TAG_NAME" == *"-open"* ]]; then
+            echo "draft=false" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "draft=false" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.prepare-build-info.outputs.BASE_TAG }}
+          tag_name: v${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           name: ${{ github.ref_name }}
-          draft: false
-          prerelease: ${{ contains(github.ref_name, '-closed') || contains(github.ref_name, '-open') }}
+          draft: ${{ steps.release_properties.outputs.draft }}
+          prerelease: ${{ steps.release_properties.outputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
