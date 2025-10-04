@@ -89,7 +89,7 @@ jobs:
           service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
           package-name: 'com.geeksville.mesh'
           from-track: 'internal'
-          to-track: ${{ inputs.channel == 'closed' && 'newAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
+          to-track: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
 
   update-github-release:
     runs-on: ubuntu-latest
