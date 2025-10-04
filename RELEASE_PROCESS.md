@@ -39,31 +39,6 @@ git tag v2.3.5-closed.1
 git push origin v2.3.5-closed.1
 ```
 
-## Hotfixes & Patch Releases
-
-If you need to release a hotfix or patch for a previous version (not the latest mainline), follow this process:
-
-- **Tagging:** Use a tag with a suffix, such as `vX.X.X-hotfix1` or `vX.X.X-patch1` (e.g., `v2.3.5-hotfix1`).
-- **Uniqueness:** The release workflow uses the full tag (including suffix) for all artifact and release naming, so each hotfix/patch is uniquely identified.
-- **Version Code:** The workflow automatically ensures the version code for a hotfix/patch is strictly greater than any previous release, even if the hotfix is created from an older commit. This prevents Play Store upload errors due to version code regressions.
-- **Multiple Releases:** You can have multiple releases for the same base version (e.g., `v2.3.5`, `v2.3.5-hotfix1`, `v2.3.5-patch2`). Each will be published and promoted independently.
-
-### Hotfix Tagging Example
-```bash
-# On a release branch or after checking out the commit to hotfix
-# Tag and push a hotfix release
-git tag v2.3.5-hotfix1
-git push origin v2.3.5-hotfix1
-# For additional hotfixes/patches:
-git tag v2.3.5-hotfix2
-git push origin v2.3.5-hotfix2
-```
-
-### Policy
-- Always use a unique tag for each hotfix/patch.
-- The version code will always increase, regardless of commit history.
-- The full tag is used for all release and artifact naming.
-
 ## Manual Checklist
 - [ ] Verify build in Google Play Console
 - [ ] Review and publish GitHub draft release (for production)
