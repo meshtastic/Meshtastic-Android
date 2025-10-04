@@ -1,70 +1,83 @@
-# Release Process
+# Meshtastic-Android Release Process (Condensed)
 
-This document outlines the process for creating and promoting releases for the Meshtastic Android application. The system is designed to be robust, auditable, and highly automated, using a combination of user-facing GitHub Actions "wizards" and a central, tag-triggered "engine".
+This guide summarizes the steps for releasing a new version of Meshtastic-Android. The process is automated via GitHub Actions and Fastlane, triggered by pushing a Git tag from a `release/*` branch.
 
-## Philosophy
+## Overview
+- **Tagging:** Push a tag (`vX.X.X[-track.Y]`) from a `release/*` branch to start the release workflow.
+- **CI Automation:** Builds both flavors, uploads to Google Play (correct track), and creates/updates a draft GitHub release.
+- **Changelog:** Release notes are auto-generated from PR labels via [`.github/release.yml`](.github/release.yml). Label PRs for accurate changelogs.
+- **Draft Release:** All tags for the same base version (e.g., `v2.3.5`) update the same draft release. The release title uses the full tag (e.g., `v2.3.5-internal.1`).
 
--   **Git Tag Driven**: The entire release lifecycle is initiated and controlled by pushing version tags to the repository.
--   **Automated Engine**: A central workflow (`release.yml`) acts as the engine, listening for new version tags. It handles all the heavy lifting: building, versioning, uploading to Google Play, and managing GitHub Releases.
--   **User-Friendly Wizards**: Manually creating tags is discouraged. Instead, two "wizard" workflows (`create-internal-release.yml` and `promote-release.yml`) provide a simple UI in the GitHub Actions tab to guide developers through creating and promoting releases safely.
+## Tagging & Tracks
+- **Internal:** `vX.X.X-internal.Y`
+- **Closed:** `vX.X.X-closed.Y`
+- **Open:** `vX.X.X-open.Y`
+- **Production:** `vX.X.X`
+- Increment `.Y` for fixes/iterations.
 
-## Versioning Scheme
+## Release Steps
+1. **Branch:** Create `release/X.X.X` from `main`. Only critical fixes allowed.
+2. **Tag & Push:** Tag the release commit and push (see below).
+3. **CI:** Wait for CI to finish. Artifacts are uploaded, and a draft GitHub release is created/updated.
+4. **Verify:** Check Google Play Console and GitHub draft release.
+5. **Promote:** Tag the same commit for the next track as needed.
+6. **Finalize:**
+   - **Production:** Publish the GitHub release, then promote in Google Play Console.
+   - **Other tracks:** Verify with testers.
+7. **Merge:** After production, merge `release/X.X.X` back to `main` and delete the branch.
 
-Releases follow a semantic versioning scheme, `vX.Y.Z`, with suffixes to denote the release channel and iteration.
+## Tagging Example
+```bash
+# On release branch
+git tag v2.3.5-internal.1
+git push origin v2.3.5-internal.1
+# For fixes:
+git tag v2.3.5-internal.2
+git push origin v2.3.5-internal.2
+# Promote:
+git tag v2.3.5-closed.1
+git push origin v2.3.5-closed.1
+```
 
--   `v2.8.0-internal.1`: An internal build, iteration 1.
--   `v2.8.0-closed.1`: A closed testing (Alpha) build.
--   `v2.8.0-open.1`: An open testing (Beta) build.
--   `v2.8.0`: The final production release.
+## Hotfixes & Patch Releases
 
----
+If you need to release a hotfix or patch for a previous version (not the latest mainline), follow this process:
 
-## The Release Lifecycle
+- **Tagging:** Use a tag with a suffix, such as `vX.X.X-hotfix1` or `vX.X.X-patch1` (e.g., `v2.3.5-hotfix1`).
+- **Uniqueness:** The release workflow uses the full tag (including suffix) for all artifact and release naming, so each hotfix/patch is uniquely identified.
+- **Version Code:** The workflow automatically ensures the version code for a hotfix/patch is strictly greater than any previous release, even if the hotfix is created from an older commit. This prevents Play Store upload errors due to version code regressions.
+- **Multiple Releases:** You can have multiple releases for the same base version (e.g., `v2.3.5`, `v2.3.5-hotfix1`, `v2.3.5-patch2`). Each will be published and promoted independently.
 
-### Step 1: Creating a New Internal Build
+### Hotfix Tagging Example
+```bash
+# On a release branch or after checking out the commit to hotfix
+# Tag and push a hotfix release
+git tag v2.3.5-hotfix1
+git push origin v2.3.5-hotfix1
+# For additional hotfixes/patches:
+git tag v2.3.5-hotfix2
+git push origin v2.3.5-hotfix2
+```
 
-This is the starting point for any new release, whether it's a brand-new version, a patch, or a hotfix.
+### Policy
+- Always use a unique tag for each hotfix/patch.
+- The version code will always increase, regardless of commit history.
+- The full tag is used for all release and artifact naming.
 
-1.  Navigate to the **Actions** tab in the GitHub repository.
-2.  Select the **"Create Internal Release Tag"** workflow.
-3.  Click **"Run workflow"**.
-4.  Fill in the `base_version` field with the version you want to create (e.g., `2.8.0`).
-5.  Run the workflow.
+## Manual Checklist
+- [ ] Verify build in Google Play Console
+- [ ] Review and publish GitHub draft release (for production)
+- [ ] Merge release branch to main after production
+- [ ] Label PRs for changelog accuracy
 
-**What Happens Automatically:**
+## Build Attestations & Provenance
 
--   The wizard calculates the next iteration number (e.g., `.1`, `.2`, etc.) and pushes a new tag to the commit (e.g., `v2.8.0-internal.1`).
--   The push triggers the `release.yml` engine, which builds the application, uploads it to the Google Play **Internal** track, and creates a corresponding **draft pre-release** on GitHub.
+All release artifacts are accompanied by explicit GitHub build attestations (provenance). After each artifact is uploaded in the release workflow, a provenance attestation is generated using the `actions/attest-build-provenance` action. This provides cryptographic proof that the artifacts were built by our trusted GitHub Actions workflow, ensuring supply chain integrity and allowing users to verify the origin of each release.
 
-### Step 2: Promoting an Existing Build
+- Attestations are generated immediately after each artifact upload in the workflow.
+- You can view and verify provenance in the GitHub UI under each release asset.
+- For more details, see [GitHub's documentation on build provenance](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#provenance-attestations).
 
-Once an internal build has been tested and is ready for a wider audience, you promote it.
+> **Note:** The GitHub release is always attached to the base version tag (e.g., `v2.3.5`). All track tags for the same version update the same draft release. Look for the draft under the base version tag.
 
-1.  Navigate to the **Actions** tab in the GitHub repository.
-2.  Select the **"Promote Release"** workflow.
-3.  Click **"Run workflow"**.
-4.  Specify the `target_stage` (`closed`, `open`, or `production`). The default, `auto`, will automatically promote to the next logical stage.
-5.  Optionally, specify the `base_version` to promote. If left blank, the wizard will find the latest internal tag and use its base version.
-6.  Run the workflow.
-
-**What Happens Automatically:**
-
--   The wizard determines the correct commit from the latest internal tag for that `base_version`.
--   It pushes a new promotion tag (e.g., `v2.8.0-closed.1`) to that commit.
--   The push triggers the `release.yml` engine. It intelligently **skips the build steps** and proceeds to:
-    -   Promote the build on Google Play to the target track.
-    -   Update the existing draft GitHub Release, renaming it and marking it as a non-draft pre-release (or full release for production).
-
-### Special Case: Hotfixes / Superseding a Release
-
-The system is designed to handle hotfixes gracefully. If `v2.8.0-internal.1` has been created, but a critical bug is found, the process is simple:
-
-1.  Merge the fix into your main branch.
-2.  Go to the **"Create Internal Release Tag"** workflow again.
-3.  Enter the *same* `base_version`: `2.8.0`.
-
-**What Happens Automatically:**
-
--   The wizard creates and pushes a new tag, `v2.8.0-internal.2`, to the **new commit**.
--   The `release.yml` engine detects that an existing release for `v2.8.0` points to an *older* commit.
--   It correctly interprets this as a "superseding" event. It **automatically deletes the old GitHub release and its base tag**, effectively restarting the release process for `v2.8.0` from the new, corrected commit. This prevents a broken or outdated build from ever being promoted.
+> **Best Practice:** Always promote the last verified build from the previous track to the next track. Do not introduce new changes between tracks unless absolutely necessary. This ensures consistency, traceability, and minimizes risk.

@@ -104,11 +104,11 @@ platform :android do
   lane :get_highest_version_code do
     require 'set'
     all_codes = Set.new
-    tracks = ['internal', 'alpha', 'beta', 'production']
+    tracks = ['internal', 'closed', 'open', 'production']
     tracks.each do |track|
       begin
-        codes = google_play_track_version_codes(track: track)
-        all_codes.merge(codes.map(&:to_i)) if codes
+        codes = google_play_track_version_codes(track: track, package_name: 'com.geeksville.mesh')
+        all_codes.merge(codes.map(&:to_i))
       rescue => e
         UI.message("Could not fetch version codes for track #{track}: #{e.message}")
       end
@@ -116,6 +116,17 @@ platform :android do
     highest = all_codes.max || 0
     UI.message("Highest version code on Google Play: #{highest}")
     File.write('highest_version_code.txt', highest.to_s)
+  end
+
+  desc "Get the version code currently on the internal track (max if multiple)"
+  lane :get_internal_track_version_code do
+    codes = google_play_track_version_codes(track: 'internal', package_name: 'com.geeksville.mesh')
+    if codes.nil? || codes.empty?
+      UI.user_error!("No version codes found on internal track. Ensure an internal build has been published before promoting.")
+    end
+    max_code = codes.map(&:to_i).max
+    UI.message("Internal track version code: #{max_code}")
+    File.write('internal_version_code.txt', max_code.to_s)
   end
 
   private_lane :build_google_release do
