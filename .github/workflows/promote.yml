@@ -1,4 +1,4 @@
-name: Make Release
+name: Promote Release
 
 on:
   workflow_call:
