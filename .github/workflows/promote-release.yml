@@ -23,7 +23,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
 
 jobs:
   promote:
@@ -187,27 +186,6 @@ jobs:
           git push origin "$TAG"
           echo "Created and pushed $TAG"
 
-      - name: Trigger Release Workflow for Tag
-        if: ${{ inputs.dry_run != 'true' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          TAG='${{ steps.tag.outputs.new_tag }}'
-          echo "Dispatching release workflow for $TAG"
-          for i in {1..5}; do
-            if gh api \
-              -X POST \
-              -H "Accept: application/vnd.github+json" \
-              repos/${{ github.repository }}/actions/workflows/release.yml/dispatches \
-              -f ref="$TAG"; then
-              echo "Triggered release workflow for $TAG"
-              break
-            fi
-            echo "Retry $i/5 in 5s..."
-            sleep 5
-          done
-
       - name: Promotion Summary
         run: |
           echo "### Promotion Tag Created" >> $GITHUB_STEP_SUMMARY
@@ -216,6 +194,3 @@ jobs:
           echo "Target Stage: ${{ steps.decide.outputs.target_stage }}" >> $GITHUB_STEP_SUMMARY
           echo "New Tag: ${{ steps.tag.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ inputs.dry_run }}" != "true" ]; then
-            echo "Release workflow dispatched for tag ${{ steps.tag.outputs.new_tag }}" >> $GITHUB_STEP_SUMMARY
-          fi

@@ -13,7 +13,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
 
 jobs:
   create-internal-tag:
@@ -61,33 +60,9 @@ jobs:
           git push origin "$TAG"
           echo "Created and pushed $TAG"
 
-      - name: Trigger Release Workflow for Tag
-        if: ${{ inputs.dry_run != 'true' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          TAG='${{ steps.tag.outputs.internal_tag }}'
-          echo "Dispatching release workflow for $TAG"
-          for i in {1..5}; do
-            if gh api \
-              -X POST \
-              -H "Accept: application/vnd.github+json" \
-              repos/${{ github.repository }}/actions/workflows/release.yml/dispatches \
-              -f ref="$TAG"; then
-              echo "Triggered release workflow for $TAG"
-              break
-            fi
-            echo "Retry $i/5 in 5s..."
-            sleep 5
-          done
-
       - name: Output Summary
         run: |
           echo "### Internal Tag Created" >> $GITHUB_STEP_SUMMARY
           echo "Tag: ${{ steps.tag.outputs.internal_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "Base Version: ${{ inputs.base_version }}" >> $GITHUB_STEP_SUMMARY
           echo "Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ inputs.dry_run }}" != "true" ]; then
-            echo "Release workflow dispatched for tag ${{ steps.tag.outputs.internal_tag }}" >> $GITHUB_STEP_SUMMARY
-          fi
