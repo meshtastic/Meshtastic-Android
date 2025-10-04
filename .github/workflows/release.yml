@@ -7,8 +7,8 @@ on:
         description: 'The tag that triggered the release'
         required: true
         type: string
-      release_type:
-        description: 'Type of release (internal or promotion)'
+      channel:
+        description: 'The channel to create a release for or promote to'
         required: true
         type: string
     secrets:
@@ -43,6 +43,7 @@ permissions:
 
 jobs:
   prepare-build-info:
+    if: ${{ inputs.channel == 'internal' }}
     runs-on: ubuntu-latest
     outputs:
       APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
@@ -91,6 +92,14 @@ jobs:
     needs: prepare-build-info
     environment: Release
     steps:
+      - name: Check if build is required
+        id: check_build
+        run: |
+            if [[ "${{ inputs.channel }}" == "internal" ]]; then
+             echo "should_build=true" >> $GITHUB_OUTPUT
+            else
+              echo "should_build=false" >> $GITHUB_OUTPUT
+            fi
       - name: Checkout code
         uses: actions/checkout@v5
         with:
@@ -98,11 +107,13 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
       - name: Set up JDK 21
+        if: steps.check_build.outputs.should_build == 'true'
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'jetbrains'
       - name: Setup Gradle
+        if: steps.check_build.outputs.should_build == 'true'
         uses: gradle/actions/setup-gradle@v5
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
@@ -156,6 +167,7 @@ jobs:
         run: bundle exec fastlane ${{ steps.fastlane_lane.outputs.lane }}
 
       - name: Upload Google AAB artifact
+        if: steps.check_build.outputs.should_build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: google-aab
@@ -163,6 +175,7 @@ jobs:
           retention-days: 1
 
       - name: Upload Google APK artifact
+        if: steps.check_build.outputs.should_build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: google-apk
@@ -170,6 +183,7 @@ jobs:
           retention-days: 1
 
       - name: Attest Google artifacts provenance
+        if: steps.check_build.outputs.should_build == 'true'
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: |
@@ -177,6 +191,7 @@ jobs:
             app/build/outputs/apk/google/release/app-google-release.apk
 
   release-fdroid:
+    if: ${{ inputs.channel == 'internal'}}
     runs-on: ubuntu-latest
     needs: prepare-build-info
     environment: Release
@@ -246,13 +261,13 @@ jobs:
       - name: Determine Release Properties
         id: release_properties
         run: |
-          if [[ "${{ inputs.release_type }}" == "internal" ]]; then
+          if [[ "${{ inputs.channel }}" == "internal" ]]; then
             echo "draft=true" >> $GITHUB_OUTPUT
             echo "prerelease=true" >> $GITHUB_OUTPUT
-          elif [[ "${{ inputs.tag_name }}" == *"-closed"* ]]; then
+          elif [[ "${{ inputs.channel }}" == "closed" ]]; then
             echo "draft=false" >> $GITHUB_OUTPUT
             echo "prerelease=true" >> $GITHUB_OUTPUT
-          elif [[ "${{ inputs.tag_name }}" == *"-open"* ]]; then
+          elif [[ "${{ inputs.channel }}" == "open" ]]; then
             echo "draft=false" >> $GITHUB_OUTPUT
             echo "prerelease=true" >> $GITHUB_OUTPUT
           else
