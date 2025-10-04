@@ -3,7 +3,7 @@ name: Create or Promote Release
 on:
   workflow_dispatch:
     inputs:
-      version:
+      base_version:
         description: 'Base version for the release (e.g., 2.3.0)'
         required: true
       channel:
@@ -38,7 +38,7 @@ jobs:
       - name: Calculate new release tag
         id: calculate_new_tag
         run: |
-          BASE_VERSION="${{ inputs.version }}"
+          BASE_VERSION="${{ inputs.base_version }}"
           CHANNEL="${{ inputs.channel }}"
 
           if [[ "$CHANNEL" == "production" ]]; then
