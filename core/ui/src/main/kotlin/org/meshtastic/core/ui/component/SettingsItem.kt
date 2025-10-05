@@ -122,10 +122,7 @@ fun SettingsItemDetail(
             leading = { icon.Icon(iconTint) },
             text = text,
             textColor = textColor,
-            trailing = { trailingText?.let { Text(
-                text = it,
-                style = MaterialTheme.typography.titleMedium
-            ) } },
+            trailing = { trailingText?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) } },
         )
     }
 
