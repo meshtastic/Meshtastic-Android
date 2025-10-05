@@ -21,19 +21,25 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.meshtastic.core.model.FixedUpdateIntervals
+import org.meshtastic.core.model.IntervalConfiguration
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
+import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
+
+private fun FixedUpdateIntervals.toDisplayString(): String =
+    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
 @Composable
 fun PaxcounterConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
@@ -67,12 +73,13 @@ fun PaxcounterConfigScreen(navController: NavController, viewModel: RadioConfigV
         item { HorizontalDivider() }
 
         item {
-            EditTextPreference(
+            val items = remember { IntervalConfiguration.PAX_COUNTER.allowedIntervals }
+            SliderPreference(
                 title = stringResource(R.string.update_interval_seconds),
-                value = formState.value.paxcounterUpdateInterval,
+                selectedValue = formState.value.paxcounterUpdateInterval.toLong(),
                 enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { paxcounterUpdateInterval = it } },
+                items = items.map { it.value to it.toDisplayString() },
+                onValueChange = { formState.value = formState.value.copy { paxcounterUpdateInterval = it.toInt() } },
             )
         }
 

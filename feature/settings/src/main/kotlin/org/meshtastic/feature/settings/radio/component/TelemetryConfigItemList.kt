@@ -17,29 +17,37 @@
 
 package org.meshtastic.feature.settings.radio.component
 
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.FixedUpdateIntervals
+import org.meshtastic.core.model.IntervalConfiguration
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
+import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
+
+private const val MIN_FW_FOR_TELEMETRY_TOGGLE = "2.7.12"
+
+private fun FixedUpdateIntervals.toDisplayString(): String =
+    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
 @Composable
 fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val telemetryConfig = state.moduleConfig.telemetry
     val formState = rememberConfigState(initialValue = telemetryConfig)
-    val focusManager = LocalFocusManager.current
+
+    val firmwareVersion = state.metadata?.firmwareVersion ?: "1"
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.telemetry),
@@ -55,33 +63,26 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
     ) {
         item { PreferenceCategory(text = stringResource(R.string.telemetry_config)) }
 
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.device_telemetry_enabled),
-                summary = stringResource(R.string.device_telemetry_enabled_summary),
-                checked = formState.value.deviceTelemetryEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { deviceTelemetryEnabled = it } },
-            )
+        if (DeviceVersion(firmwareVersion) >= DeviceVersion(MIN_FW_FOR_TELEMETRY_TOGGLE)) {
+            item {
+                SwitchPreference(
+                    title = stringResource(R.string.device_telemetry_enabled),
+                    summary = stringResource(R.string.device_telemetry_enabled_summary),
+                    checked = formState.value.deviceTelemetryEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { deviceTelemetryEnabled = it } },
+                )
+            }
         }
 
         item {
-            EditTextPreference(
+            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
+            SliderPreference(
                 title = stringResource(R.string.device_metrics_update_interval_seconds),
-                value = formState.value.deviceUpdateInterval,
+                selectedValue = formState.value.deviceUpdateInterval.toLong(),
                 enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { deviceUpdateInterval = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.environment_metrics_update_interval_seconds),
-                value = formState.value.environmentUpdateInterval,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { environmentUpdateInterval = it } },
+                items = items.map { it.value to it.toDisplayString() },
+                onValueChange = { formState.value = formState.value.copy { deviceUpdateInterval = it.toInt() } },
             )
         }
 
@@ -91,6 +92,17 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
                 checked = formState.value.environmentMeasurementEnabled,
                 enabled = state.connected,
                 onCheckedChange = { formState.value = formState.value.copy { environmentMeasurementEnabled = it } },
+            )
+        }
+
+        item {
+            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
+            SliderPreference(
+                title = stringResource(R.string.environment_metrics_update_interval_seconds),
+                selectedValue = formState.value.environmentUpdateInterval.toLong(),
+                enabled = state.connected,
+                items = items.map { it.value to it.toDisplayString() },
+                onValueChange = { formState.value = formState.value.copy { environmentUpdateInterval = it.toInt() } },
             )
         }
         item { HorizontalDivider() }
@@ -126,12 +138,13 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
         item { HorizontalDivider() }
 
         item {
-            EditTextPreference(
+            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
+            SliderPreference(
                 title = stringResource(R.string.air_quality_metrics_update_interval_seconds),
-                value = formState.value.airQualityInterval,
+                selectedValue = formState.value.airQualityInterval.toLong(),
                 enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { airQualityInterval = it } },
+                items = items.map { it.value to it.toDisplayString() },
+                onValueChange = { formState.value = formState.value.copy { airQualityInterval = it.toInt() } },
             )
         }
 
@@ -146,12 +159,13 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
         item { HorizontalDivider() }
 
         item {
-            EditTextPreference(
+            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
+            SliderPreference(
                 title = stringResource(R.string.power_metrics_update_interval_seconds),
-                value = formState.value.powerUpdateInterval,
+                selectedValue = formState.value.powerUpdateInterval.toLong(),
                 enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { powerUpdateInterval = it } },
+                items = items.map { it.value to it.toDisplayString() },
+                onValueChange = { formState.value = formState.value.copy { powerUpdateInterval = it.toInt() } },
             )
         }
 

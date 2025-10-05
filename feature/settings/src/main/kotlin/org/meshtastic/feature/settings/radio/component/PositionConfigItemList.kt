@@ -42,18 +42,24 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
+import org.meshtastic.core.model.FixedUpdateIntervals
+import org.meshtastic.core.model.IntervalConfiguration
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.BitwisePreference
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
+import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.ConfigProtos.Config.PositionConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
+
+private fun FixedUpdateIntervals.toDisplayString(): String =
+    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -125,13 +131,14 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
         item { PreferenceCategory(text = stringResource(R.string.position_packet)) }
 
         item {
-            EditTextPreference(
+            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
+            SliderPreference(
                 title = stringResource(R.string.broadcast_interval),
                 summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
-                value = formState.value.positionBroadcastSecs,
+                selectedValue = formState.value.positionBroadcastSecs.toLong(),
                 enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { positionBroadcastSecs = it } },
+                items = items.map { it.value to it.toDisplayString() },
+                onValueChange = { formState.value = formState.value.copy { positionBroadcastSecs = it.toInt() } },
             )
         }
 
@@ -147,15 +154,16 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
 
         if (formState.value.positionBroadcastSmartEnabled) {
             item {
-                EditTextPreference(
+                val items = remember { IntervalConfiguration.SMART_BROADCAST_MINIMUM.allowedIntervals }
+                SliderPreference(
                     title = stringResource(R.string.minimum_interval),
                     summary =
                     stringResource(id = R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
-                    value = formState.value.broadcastSmartMinimumIntervalSecs,
+                    selectedValue = formState.value.broadcastSmartMinimumIntervalSecs.toLong(),
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = {
-                        formState.value = formState.value.copy { broadcastSmartMinimumIntervalSecs = it }
+                    items = items.map { it.value to it.toDisplayString() },
+                    onValueChange = {
+                        formState.value = formState.value.copy { broadcastSmartMinimumIntervalSecs = it.toInt() }
                     },
                 )
             }
@@ -242,13 +250,14 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
         item { HorizontalDivider() }
 
         item {
-            EditTextPreference(
+            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
+            SliderPreference(
                 title = stringResource(R.string.update_interval),
                 summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
-                value = formState.value.gpsUpdateInterval,
+                selectedValue = formState.value.gpsUpdateInterval.toLong(),
                 enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { gpsUpdateInterval = it } },
+                items = items.map { it.value to it.toDisplayString() },
+                onValueChange = { formState.value = formState.value.copy { gpsUpdateInterval = it.toInt() } },
             )
         }
         item { PreferenceCategory(text = stringResource(R.string.position_flags)) }
