@@ -46,7 +46,6 @@ import androidx.navigation.NavController
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.util.encodeToString

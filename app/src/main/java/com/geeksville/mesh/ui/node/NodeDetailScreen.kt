@@ -1121,31 +1121,6 @@ private fun PowerMetrics(node: Node) {
     }
 }
 
-@Composable
-fun NodeActionButton(
-    modifier: Modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).height(48.dp),
-    title: String,
-    enabled: Boolean,
-    icon: ImageVector? = null,
-    iconTint: Color? = null,
-    onClick: () -> Unit,
-) {
-    Button(onClick = { onClick() }, enabled = enabled, modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.size(24.dp),
-                    tint = iconTint ?: LocalContentColor.current,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun NodeDetailsPreview(@PreviewParameter(NodePreviewParameterProvider::class) node: Node) {
