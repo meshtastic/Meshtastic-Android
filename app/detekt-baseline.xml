@@ -32,7 +32,6 @@
     <ID>ComposableParamOrder:NodeDetailScreen.kt$NodeActionButton</ID>
     <ID>ComposableParamOrder:NodeDetailScreen.kt$NodeDetailList</ID>
     <ID>ComposableParamOrder:PaxMetrics.kt$PaxMetricsChart</ID>
-    <ID>ComposableParamOrder:PermissionScreenLayout.kt$PermissionScreenLayout</ID>
     <ID>ComposableParamOrder:PowerMetrics.kt$PowerMetricsChart</ID>
     <ID>ComposableParamOrder:QuickChat.kt$OutlinedTextFieldWithCounter</ID>
     <ID>ComposableParamOrder:Share.kt$ShareScreen</ID>
@@ -281,7 +280,6 @@
     <ID>ParameterNaming:MessageList.kt$onUnreadChanged</ID>
     <ID>ParameterNaming:NodeDetailScreen.kt$onFirmwareSelected</ID>
     <ID>ParameterNaming:UsbDevices.kt$onDeviceSelected</ID>
-    <ID>ParameterNaming:WelcomeScreen.kt$onGetStarted</ID>
     <ID>PreviewPublic:Channel.kt$ModemPresetInfoPreview</ID>
     <ID>PreviewPublic:EmptyStateContent.kt$EmptyStateContentPreview</ID>
     <ID>PreviewPublic:MapReportingPreference.kt$MapReportingPreview</ID>
