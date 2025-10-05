@@ -42,7 +42,6 @@ import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceProfile
-import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
@@ -72,6 +71,7 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
+import org.meshtastic.core.proto.getChannelList
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
