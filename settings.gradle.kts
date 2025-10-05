@@ -31,6 +31,7 @@ include(
     ":core:service",
     ":core:strings",
     ":core:ui",
+    ":feature:intro",
     ":feature:map",
     ":feature:node",
     ":mesh_service_example",

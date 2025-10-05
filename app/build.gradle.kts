@@ -197,6 +197,7 @@ dependencies {
     implementation(projects.core.service)
     implementation(projects.core.strings)
     implementation(projects.core.ui)
+    implementation(projects.feature.intro)
     implementation(projects.feature.map)
     implementation(projects.feature.node)
 
