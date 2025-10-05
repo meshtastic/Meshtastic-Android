@@ -1,0 +1,85 @@
+name: Post-Release Cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_version:
+        description: 'The base version to clean up (e.g., v1.2.3)'
+        required: true
+        type: string
+      confirm_deletion:
+        description: 'WARNING: This is a destructive action. Set to true to perform deletion. Defaults to a dry run.'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup_tags:
+    runs-on: ubuntu-latest
+    environment: Release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Cleanup pre-release tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_VERSION="${{ github.event.inputs.base_version }}"
+          
+          echo "Base version is $BASE_VERSION"
+          echo "Deletion confirmed: ${{ github.event.inputs.confirm_deletion }}"
+          
+          git fetch --tags
+          
+          TAGS_TO_DELETE=$(git tag -l "${BASE_VERSION}-*")
+          
+          if [ -z "$TAGS_TO_DELETE" ]; then
+            echo "No pre-release tags found for base version $BASE_VERSION to delete."
+          else
+            if [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]]; then
+              echo "!!! DELETING TAGS !!!"
+              echo "The following pre-release tags will be deleted:"
+              echo "$TAGS_TO_DELETE"
+              echo "$TAGS_TO_DELETE" | xargs -n 1 git push --delete origin
+            else
+              echo "DRY RUN: The following pre-release tags would be deleted:"
+              echo "$TAGS_TO_DELETE"
+            fi
+          fi
+
+  cleanup_releases:
+    runs-on: ubuntu-latest
+    environment: Release
+    steps:
+      - name: Cleanup draft releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_VERSION="${{ github.event.inputs.base_version }}"
+
+          echo "Base version is $BASE_VERSION"
+          echo "Deletion confirmed: ${{ github.event.inputs.confirm_deletion }}"
+
+          echo "Searching for draft releases with '$BASE_VERSION' in their name."
+
+          DRAFT_RELEASES=$(gh release list --json name,isDraft,url --limit 100 | jq -r --arg ver "$BASE_VERSION" '.[] | select(.isDraft == true and (.name | contains($ver))) | .url')
+
+          if [ -z "$DRAFT_RELEASES" ]; then
+            echo "No draft releases found with '$BASE_VERSION' in their name."
+          else
+            if [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]]; then
+              echo "!!! DELETING RELEASES !!!"
+              echo "The following draft releases will be deleted:"
+              echo "$DRAFT_RELEASES"
+              echo "$DRAFT_RELEASES" | xargs -n 1 gh release delete --yes
+            else
+              echo "DRY RUN: The following draft releases would be deleted:"
+              echo "$DRAFT_RELEASES"
+            fi
+          fi
