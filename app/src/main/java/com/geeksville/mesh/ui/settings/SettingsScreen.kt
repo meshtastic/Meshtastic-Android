@@ -58,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
@@ -371,7 +370,12 @@ fun SettingsScreen(
                     settingsLauncher.launch(intent)
                 }
 
-                AppVersionButton(excludedModulesUnlocked) { settingsViewModel.unlockExcludedModules() }
+                AppVersionButton(
+                    excludedModulesUnlocked = excludedModulesUnlocked,
+                    appVersionName = settingsViewModel.appVersionName,
+                ) {
+                    settingsViewModel.unlockExcludedModules()
+                }
             }
         }
     }
@@ -383,7 +387,11 @@ private const val UNLOCK_TIMEOUT_SECONDS = 1 // Timeout in seconds to reset the 
 
 /** A button to display the app version. Clicking it 5 times will unlock the excluded modules. */
 @Composable
-private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedModules: () -> Unit) {
+private fun AppVersionButton(
+    excludedModulesUnlocked: Boolean,
+    appVersionName: String,
+    onUnlockExcludedModules: () -> Unit,
+) {
     val context = LocalContext.current
     var clickCount by remember { mutableIntStateOf(0) }
 
@@ -397,7 +405,7 @@ private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedM
     SettingsItemDetail(
         text = stringResource(R.string.app_version),
         icon = Icons.Rounded.Memory,
-        trailingText = BuildConfig.VERSION_NAME,
+        trailingText = appVersionName,
     ) {
         clickCount = clickCount.inc().coerceIn(0, UNLOCK_CLICK_COUNT)
 
