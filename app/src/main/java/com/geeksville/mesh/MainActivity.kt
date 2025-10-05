@@ -41,12 +41,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.MainScreen
-import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import dagger.hilt.android.AndroidEntryPoint
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import org.meshtastic.feature.intro.AppIntroductionScreen
 import timber.log.Timber
 import javax.inject.Inject
 

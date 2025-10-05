@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.intro
+package org.meshtastic.feature.intro
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.detectTapGestures
