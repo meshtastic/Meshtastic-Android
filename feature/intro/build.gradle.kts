@@ -23,4 +23,7 @@ plugins {
 
 android { namespace = "org.meshtastic.feature.intro" }
 
-dependencies {}
+dependencies {
+    implementation(projects.core.strings)
+    implementation(libs.accompanist.permissions)
+}
