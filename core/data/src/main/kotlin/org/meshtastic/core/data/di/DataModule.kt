@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.location
+package org.meshtastic.core.data.di
 
 import android.content.Context
 import android.location.LocationManager
@@ -28,7 +28,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object LocationRepositoryModule {
+object DataModule {
 
     @Provides
     @Singleton
