@@ -19,8 +19,23 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.hilt)
 }
 
 android { namespace = "org.meshtastic.feature.settings" }
 
-dependencies { implementation(projects.core.strings) }
+dependencies {
+    implementation(projects.core.data)
+    implementation(projects.core.database)
+    implementation(projects.core.model)
+    implementation(projects.core.navigation)
+    implementation(projects.core.prefs)
+    implementation(projects.core.proto)
+    implementation(projects.core.service)
+    implementation(projects.core.strings)
+    implementation(projects.core.ui)
+
+    implementation(libs.accompanist.permissions)
+    implementation(libs.timber)
+    implementation(libs.zxing.android.embedded)
+}
