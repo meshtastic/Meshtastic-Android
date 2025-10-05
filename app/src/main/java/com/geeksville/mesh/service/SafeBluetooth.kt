@@ -31,7 +31,6 @@ import android.os.Build
 import android.os.DeadObjectException
 import android.os.Handler
 import android.os.Looper
-import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.concurrent.CallbackContinuation
 import com.geeksville.mesh.concurrent.Continuation
 import com.geeksville.mesh.concurrent.SyncContinuation
@@ -43,6 +42,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import timber.log.Timber
 import java.io.Closeable
 import java.util.Random
@@ -63,7 +63,11 @@ fun longBLEUUID(hexFour: String): UUID = UUID.fromString("0000$hexFour-0000-1000
  *
  * This class fixes the API by using coroutines to let you safely do a series of BTLE operations.
  */
-class SafeBluetooth(private val context: Context, private val device: BluetoothDevice) : Closeable {
+class SafeBluetooth(
+    private val context: Context,
+    private val device: BluetoothDevice,
+    private val analytics: PlatformAnalytics,
+) : Closeable {
 
     // / Timeout before we declare a bluetooth operation failed (used for synchronous API operations only)
     var timeoutMsec = 20 * 1000L
@@ -430,7 +434,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 try {
                     it.completion.resumeWithException(ex)
                 } catch (ex: Exception) {
-                    Timber.e("Mystery exception, why were we informed about our own exceptions?", ex)
+                    Timber.e(ex, "Mystery exception, why were we informed about our own exceptions?")
                 }
             }
             workQueue.clear()

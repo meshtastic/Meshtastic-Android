@@ -27,13 +27,13 @@ import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
 import androidx.core.location.altitude.AltitudeConverterCompat
-import com.geeksville.mesh.MeshUtilApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -44,6 +44,7 @@ class LocationRepository
 constructor(
     private val context: Application,
     private val locationManager: dagger.Lazy<LocationManager>,
+    private val analytics: PlatformAnalytics,
 ) {
 
     /** Status of whether the app is actively subscribed to location changes. */
@@ -88,7 +89,7 @@ constructor(
             "Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m",
         )
         _receivingLocationUpdates.value = true
-        MeshUtilApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
+        analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
         try {
             providerList.forEach { provider ->
@@ -107,7 +108,7 @@ constructor(
         awaitClose {
             Timber.i("Stopping location requests")
             _receivingLocationUpdates.value = false
-            MeshUtilApplication.analytics.track("location_stop")
+            analytics.track("location_stop")
 
             LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
         }
