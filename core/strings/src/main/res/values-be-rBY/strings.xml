@@ -444,10 +444,10 @@
     <string name="precise_location">Precise location</string>
     <string name="gpio_pin">GPIO pin</string>
     <string name="type">Type</string>
-    <string name="hide_password">Hide password</string>
-    <string name="show_password">Show password</string>
+    <string name="hide_password">Схаваць пароль</string>
+    <string name="show_password">Паказаць пароль</string>
     <string name="details">Details</string>
-    <string name="environment">Environment</string>
+    <string name="environment">Асяроддзе</string>
     <string name="ambient_lighting_config">Ambient Lighting Config</string>
     <string name="led_state">LED state</string>
     <string name="red">Чырвоны</string>
