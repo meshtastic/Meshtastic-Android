@@ -68,7 +68,7 @@ jobs:
 
           echo "Searching for draft releases with '$BASE_VERSION' in their name."
 
-          DRAFT_RELEASES=$(gh release list --json name,isDraft,url --limit 100 | jq -r --arg ver "$BASE_VERSION" '.[] | select(.isDraft == true and (.name | contains($ver))) | .url')
+          DRAFT_RELEASES=$(gh release list --json name,isDraft,tagName --limit 100 | jq -r --arg ver "$BASE_VERSION" '.[] | select(.isDraft == true and (.name | contains($ver))) | .tagName')
 
           if [ -z "$DRAFT_RELEASES" ]; then
             echo "No draft releases found with '$BASE_VERSION' in their name."
