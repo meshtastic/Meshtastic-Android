@@ -38,6 +38,7 @@ dependencies {
     implementation(projects.core.ui)
 
     implementation(libs.accompanist.permissions)
+    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.timber)
     implementation(libs.zxing.android.embedded)
 }
