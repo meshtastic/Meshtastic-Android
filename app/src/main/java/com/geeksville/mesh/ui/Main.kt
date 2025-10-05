@@ -75,6 +75,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MeshUtilApplication
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.channelsGraph
@@ -157,7 +158,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         }
     }
 
-    analytics.addNavigationTrackingEffect(navController = navController)
+    MeshUtilApplication.analytics.addNavigationTrackingEffect(navController = navController)
 
     VersionChecks(uIViewModel)
     val alertDialogState by uIViewModel.currentAlert.collectAsStateWithLifecycle()
