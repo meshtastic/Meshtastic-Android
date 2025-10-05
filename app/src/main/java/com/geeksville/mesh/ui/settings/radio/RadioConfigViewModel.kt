@@ -46,7 +46,6 @@ import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
-import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -77,6 +76,7 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.settings.util.UiText
 import timber.log.Timber
 import java.io.FileOutputStream
 import javax.inject.Inject

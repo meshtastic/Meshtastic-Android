@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh.ui.settings.radio
 
-import com.geeksville.mesh.util.UiText
+import org.meshtastic.feature.settings.util.UiText
 
 /** Generic sealed class defines each possible state of a response. */
 sealed class ResponseState<out T> {
