@@ -52,7 +52,6 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.position
-import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.telemetry
@@ -77,6 +76,7 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.hasLocationPermission
+import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository

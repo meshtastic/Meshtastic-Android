@@ -46,7 +46,6 @@ import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
-import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -63,6 +62,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
