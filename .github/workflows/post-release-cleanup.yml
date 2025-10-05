@@ -37,7 +37,7 @@ jobs:
           
           git fetch --tags
           
-          TAGS_TO_DELETE=$(git tag -l "${BASE_VERSION}-*")
+          TAGS_TO_DELETE=$(git tag -l "v${BASE_VERSION}-*")
           
           if [ -z "$TAGS_TO_DELETE" ]; then
             echo "No pre-release tags found for base version $BASE_VERSION to delete."
