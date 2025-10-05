@@ -729,8 +729,8 @@
     <string name="regenerate_keys_confirmation">Сигурни ли сте, че искате да генерирате отново своя частен ключ?\n\nВъзлите, които може да са обменяли преди това ключове с възела, ще трябва да го премахнат и да обменят отново ключове, за да възобновят защитената комуникация.</string>
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
-    <string name="modules_unlocked">Modules unlocked</string>
-    <string name="modules_already_unlocked">Modules already unlocked</string>
+    <string name="modules_unlocked">Модулите са отключени</string>
+    <string name="modules_already_unlocked">Модулите вече са отключени</string>
     <string name="remote">Отдалечен</string>
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
     <string name="react">React</string>
@@ -743,8 +743,8 @@
     <string name="meshtastic">Meshtastic</string>
     <string name="scanning">Сканиране</string>
     <string name="security_icon_description">Състояние на сигурността</string>
-    <string name="security_icon_secure">Secure</string>
-    <string name="security_icon_badge_warning_description">Warning Badge</string>
+    <string name="security_icon_secure">Сигурно</string>
+    <string name="security_icon_badge_warning_description">Предупредителна значка</string>
     <string name="unknown_channel">Неизвестен канал</string>
     <string name="warning">Предупреждение</string>
     <string name="overflow_menu">Overflow menu</string>
@@ -863,7 +863,7 @@
     <string name="edit_custom_tile_source">Edit Custom Tile Source</string>
     <string name="delete_custom_tile_source">Delete Custom Tile Source</string>
     <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
-    <string name="provider_name_exists">Provider name exists.</string>
+    <string name="provider_name_exists">Името на доставчика съществува.</string>
     <string name="url_cannot_be_empty">URL не може да бъде празен.</string>
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">Шаблон за URL</string>
