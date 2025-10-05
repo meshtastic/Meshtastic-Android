@@ -65,8 +65,6 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
-import com.geeksville.mesh.util.LanguageUtils
-import com.geeksville.mesh.util.LanguageUtils.getLanguageMap
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
@@ -80,6 +78,8 @@ import org.meshtastic.core.ui.component.SettingsItemDetail
 import org.meshtastic.core.ui.component.SettingsItemSwitch
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import org.meshtastic.feature.settings.util.LanguageUtils
+import org.meshtastic.feature.settings.util.LanguageUtils.getLanguageMap
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

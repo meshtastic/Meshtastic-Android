@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.feature.settings.util
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
@@ -46,7 +46,7 @@ object LanguageUtils {
             add(SYSTEM_DEFAULT)
 
             try {
-                resources.getXml(com.geeksville.mesh.R.xml.locales_config).use { parser ->
+                resources.getXml(org.meshtastic.feature.settings.R.xml.locales_config).use { parser ->
                     while (parser.eventType != XmlPullParser.END_DOCUMENT) {
                         if (parser.eventType == XmlPullParser.START_TAG && parser.name == "locale") {
                             val languageTag =
