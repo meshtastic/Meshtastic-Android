@@ -54,7 +54,6 @@ import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
-import com.google.firebase.perf.performance
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.opentelemetry.api.GlobalOpenTelemetry
 import kotlinx.coroutines.flow.launchIn
@@ -63,6 +62,8 @@ import org.meshtastic.core.analytics.BuildConfig
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import timber.log.Timber
+import timber.log.Timber.DebugTree
+import timber.log.Timber.Tree
 import javax.inject.Inject
 
 /**
@@ -101,7 +102,7 @@ constructor(
                 .setBundleWithTraceEnabled(true)
                 .setBundleWithRumEnabled(true)
                 .build()
-        Timber.plant(DatadogTree(datadogLogger), CrashlyticsTree())
+        Timber.plant(DatadogTree(datadogLogger), CrashlyticsTree(), DebugTree())
         // Initial consent state
         updateAnalyticsConsent(analyticsPrefs.analyticsAllowed)
 
@@ -176,7 +177,6 @@ constructor(
         Datadog.setTrackingConsent(if (allowed) TrackingConsent.GRANTED else TrackingConsent.NOT_GRANTED)
         Firebase.crashlytics.isCrashlyticsCollectionEnabled = allowed
         Firebase.analytics.setAnalyticsCollectionEnabled(allowed)
-        Firebase.performance.isPerformanceCollectionEnabled = allowed
 
         if (allowed) {
             Firebase.crashlytics.sendUnsentReports()
@@ -213,7 +213,7 @@ constructor(
     override val isPlatformServicesAvailable: Boolean
         get() = isGooglePlayAvailable && isDatadogAvailable
 
-    private class CrashlyticsTree : Timber.Tree() {
+    private class CrashlyticsTree : Tree() {
         companion object {
             private const val KEY_PRIORITY = "priority"
             private const val KEY_TAG = "tag"
