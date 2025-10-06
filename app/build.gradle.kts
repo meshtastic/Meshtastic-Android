@@ -203,6 +203,10 @@ dependencies {
     implementation(projects.feature.settings)
 
     // Bundles
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.lifecycle.process)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.runtime.compose)
     implementation(libs.markdown.renderer)
     implementation(libs.markdown.renderer.android)
     implementation(libs.markdown.renderer.m3)

@@ -44,7 +44,6 @@ internal fun Project.configureAndroidCompose(
             "androidTestImplementation"(platform(bom))
             "implementation"(libs.findBundle("ui").get())
             "implementation"(libs.findBundle("adaptive").get())
-            "implementation"(libs.findBundle("lifecycle").get())
             "implementation"(libs.findBundle("navigation").get())
             "androidTestImplementation"(libs.findBundle("testing.navigation").get())
             "implementation"(libs.findBundle("ui-tooling").get())
