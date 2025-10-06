@@ -28,7 +28,7 @@ class HiltConventionPlugin : Plugin<Project> {
 
             dependencies {
                 "ksp"(libs.findLibrary("hilt.compiler").get())
-                "implementation"(libs.findBundle("hilt").get())
+                "implementation"(libs.findLibrary("hilt-android").get())
                 "androidTestImplementation"(libs.findBundle("testing.hilt").get())
             }
 

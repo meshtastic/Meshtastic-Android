@@ -26,6 +26,8 @@ dependencies {
     implementation(project(":core:model"))
     implementation(libs.timber)
     implementation(libs.appcompat)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.navigation.compose)
     implementation(libs.lifecycle.process)
     googleImplementation(platform(libs.firebase.bom))
     googleImplementation(libs.bundles.firebase) {

@@ -221,6 +221,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
 
     // ZXing
     implementation(libs.zxing.android.embedded) { isTransitive = false }

@@ -45,5 +45,6 @@ dependencies {
 
     implementation(libs.accompanist.permissions)
     implementation(libs.annotation)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
     implementation(libs.timber)
 }
