@@ -8,6 +8,7 @@
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableNaming:NodeDetailScreen.kt$notesSection</ID>
     <ID>ComposableParamOrder:Channel.kt$ChannelScreen</ID>
+    <ID>ComposableParamOrder:Channel.kt$EditChannelUrl</ID>
     <ID>ComposableParamOrder:DeviceMetrics.kt$DeviceMetricsChart</ID>
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$ChartContent</ID>
