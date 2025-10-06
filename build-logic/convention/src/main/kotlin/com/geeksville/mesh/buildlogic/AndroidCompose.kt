@@ -49,7 +49,6 @@ internal fun Project.configureAndroidCompose(
             "implementation"(libs.findLibrary("androidx-compose-runtime").get())
             "implementation"(libs.findLibrary("androidx-compose-runtime-tracing").get())
             "debugImplementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
-            "debugImplementation"(libs.findLibrary("androidx-compose-ui-testManifest").get())
         }
     }
 
