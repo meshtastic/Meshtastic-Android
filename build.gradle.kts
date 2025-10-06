@@ -91,3 +91,9 @@ dependencies {
     kover(projects.feature.node)
     kover(projects.feature.settings)
 }
+
+dependencyAnalysis {
+    structure {
+        ignoreKtx(true)
+    }
+}
