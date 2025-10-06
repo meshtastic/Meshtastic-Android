@@ -62,7 +62,7 @@ fun CurrentlyConnectedInfo(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            MaterialBatteryInfo(level = node.batteryLevel)
+            MaterialBatteryInfo(level = node.batteryLevel, voltage = node.voltage)
             if (bluetoothRssi != null) {
                 MaterialBluetoothSignalInfo(rssi = bluetoothRssi)
             }

@@ -68,7 +68,9 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Flo
             )
         } else if (level > 100) {
             Icon(
-                modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
+                modifier = Modifier
+                    .size(SIZE_ICON.dp)
+                    .rotate(90f),
                 imageVector = Icons.Rounded.Power,
                 tint = MaterialTheme.colorScheme.onSurface,
                 contentDescription = levelString,
@@ -90,23 +92,25 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Flo
 
             Icon(
                 modifier =
-                Modifier.size(SIZE_ICON.dp).drawBehind {
-                    val insetVertical = size.height * .28f
-                    val insetLeft = size.width * .11f
-                    val insetRight = size.width * .22f
+                    Modifier
+                        .size(SIZE_ICON.dp)
+                        .drawBehind {
+                            val insetVertical = size.height * .28f
+                            val insetLeft = size.width * .11f
+                            val insetRight = size.width * .22f
 
-                    val availableWidth = size.width - (insetLeft + insetRight)
-                    val availableHeight = size.height - (insetVertical * 2)
+                            val availableWidth = size.width - (insetLeft + insetRight)
+                            val availableHeight = size.height - (insetVertical * 2)
 
-                    // Fill (grow from left to right)
-                    val fillWidth = availableWidth * (level / 100f)
+                            // Fill (grow from left to right)
+                            val fillWidth = availableWidth * (level / 100f)
 
-                    drawRect(
-                        color = fillColor,
-                        topLeft = Offset(insetLeft, insetVertical),
-                        size = Size(fillWidth, availableHeight),
-                    )
-                },
+                            drawRect(
+                                color = fillColor,
+                                topLeft = Offset(insetLeft, insetVertical),
+                                size = Size(fillWidth, availableHeight),
+                            )
+                        },
                 imageVector = MeshtasticIcons.BatteryEmpty,
                 tint = MaterialTheme.colorScheme.onSurface,
                 contentDescription = levelString,
@@ -117,13 +121,13 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Flo
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.labelMedium,
             )
-            voltage?.let {
-                Text(
-                    text = "%.2fV".format(it),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelMedium,
-                )
-            }
+        }
+        voltage?.takeIf { it > 0 }?.let {
+            Text(
+                text = "%.2fV".format(it),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelMedium,
+            )
         }
     }
 }

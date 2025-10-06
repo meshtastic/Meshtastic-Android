@@ -78,7 +78,9 @@ fun NodeItem(
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
-        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+        remember(thisNode, thatNode) {
+            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
+        }
 
     var contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors =
@@ -90,7 +92,8 @@ fun NodeItem(
             ?.let {
                 val containerColor = Color(it).copy(alpha = 0.2f)
                 contentColor = contentColorFor(containerColor)
-                CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
+                CardDefaults.cardColors()
+                    .copy(containerColor = containerColor, contentColor = contentColor)
             } ?: (CardDefaults.cardColors())
 
     val style =
@@ -108,12 +111,23 @@ fun NodeItem(
             }
         }
 
-    Card(modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 80.dp), colors = cardColors) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 80.dp),
+        colors = cardColors
+    ) {
         Column(
             modifier =
-            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(8.dp),
+                Modifier
+                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                    .fillMaxWidth()
+                    .padding(8.dp),
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 NodeChip(node = thatNode)
 
                 NodeKeyStatusIcon(
@@ -126,9 +140,9 @@ fun NodeItem(
                     modifier = Modifier.weight(1f),
                     text = longName,
                     style =
-                    MaterialTheme.typography.titleMediumEmphasized.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
+                        MaterialTheme.typography.titleMediumEmphasized.copy(
+                            color = MaterialTheme.colorScheme.onSurface,
+                        ),
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
                 )
@@ -181,7 +195,10 @@ fun NodeItem(
 
             if (telemetryStrings.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(2.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     telemetryStrings.forEach { telemetryString ->
                         Text(
                             text = telemetryString,
@@ -220,7 +237,13 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, currentTimeMillis = System.currentTimeMillis())
+        NodeItem(
+            thisNode = thisNode,
+            thatNode = thatNode,
+            0,
+            true,
+            currentTimeMillis = System.currentTimeMillis()
+        )
     }
 }
 
