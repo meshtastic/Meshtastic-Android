@@ -109,7 +109,7 @@ fun SnrAndRssi(snr: Float, rssi: Int) {
 
 /** Displays a human readable description and icon representing the signal quality. */
 @Composable
-fun LoraSignalIndicator(snr: Float, rssi: Int) {
+fun LoraSignalIndicator(snr: Float, rssi: Int, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     val quality = determineSignalQuality(snr, rssi)
     Column(
         verticalArrangement = Arrangement.Center,
@@ -125,6 +125,7 @@ fun LoraSignalIndicator(snr: Float, rssi: Int) {
         Text(
             text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
             style = MaterialTheme.typography.labelSmall,
+            color = contentColor,
         )
     }
 }

@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -95,9 +94,9 @@ fun NodeItem(
 
     val style =
         if (thatNode.isUnknownUser) {
-            LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
+            FontStyle.Italic
         } else {
-            LocalTextStyle.current
+            FontStyle.Normal
         }
 
     val unmessageable =
@@ -125,14 +124,15 @@ fun NodeItem(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = longName,
-                    style =
-                    MaterialTheme.typography.titleMediumEmphasized.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
+                    style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
                 )
-                LastHeardInfo(lastHeard = thatNode.lastHeard, currentTimeMillis = currentTimeMillis)
+                LastHeardInfo(
+                    lastHeard = thatNode.lastHeard,
+                    currentTimeMillis = currentTimeMillis,
+                    contentColor = contentColor,
+                )
                 NodeStatusIcons(
                     isThisNode = isThisNode,
                     isFavorite = isFavorite,
@@ -148,23 +148,28 @@ fun NodeItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                MaterialBatteryInfo(level = thatNode.batteryLevel, voltage = thatNode.voltage)
+                MaterialBatteryInfo(
+                    level = thatNode.batteryLevel,
+                    voltage = thatNode.voltage,
+                    contentColor = contentColor,
+                )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (distance != null) {
-                        DistanceInfo(distance = distance)
+                        DistanceInfo(distance = distance, contentColor = contentColor)
                     }
                     thatNode.validPosition?.let { position ->
                         ElevationInfo(
                             altitude = position.altitude,
                             system = system,
                             suffix = stringResource(id = R.string.elevation_suffix),
+                            contentColor = contentColor,
                         )
                         val satCount = position.satsInView
                         if (satCount > 0) {
-                            SatelliteCountInfo(satCount = satCount)
+                            SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
                         }
                     }
                 }
@@ -175,7 +180,7 @@ fun NodeItem(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
-                SignalInfo(node = thatNode, isThisNode = isThisNode)
+                SignalInfo(node = thatNode, isThisNode = isThisNode, contentColor = contentColor)
             }
             val telemetryStrings = thatNode.getTelemetryStrings(tempInFahrenheit)
 
@@ -183,11 +188,7 @@ fun NodeItem(
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     telemetryStrings.forEach { telemetryString ->
-                        Text(
-                            text = telemetryString,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
+                        Text(text = telemetryString, style = MaterialTheme.typography.bodySmall, color = contentColor)
                     }
                 }
             }
@@ -199,12 +200,9 @@ fun NodeItem(
             ) {
                 val labelStyle =
                     if (thatNode.isUnknownUser) {
-                        MaterialTheme.typography.labelSmall.copy(
-                            fontStyle = FontStyle.Italic,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
+                        MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic)
                     } else {
-                        MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface)
+                        MaterialTheme.typography.labelSmall
                     }
                 Text(text = thatNode.user.hwModel.name, style = labelStyle)
                 Text(text = thatNode.user.role.name, style = labelStyle)

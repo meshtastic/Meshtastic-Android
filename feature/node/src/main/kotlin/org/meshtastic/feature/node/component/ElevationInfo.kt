@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.component
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
@@ -35,12 +36,14 @@ fun ElevationInfo(
     altitude: Int,
     system: DisplayUnits,
     suffix: String = stringResource(R.string.elevation_suffix),
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Elevation,
         contentDescription = stringResource(R.string.altitude),
         text = altitude.metersIn(system).toString(system) + " " + suffix,
+        contentColor = contentColor,
     )
 }
 
