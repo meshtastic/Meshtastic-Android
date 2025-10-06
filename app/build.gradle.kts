@@ -203,6 +203,12 @@ dependencies {
     implementation(projects.feature.settings)
 
     // Bundles
+    implementation(libs.material)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.compose.runtime.livedata)
+    implementation(libs.androidx.compose.ui.text)
     implementation(libs.lifecycle.livedata.ktx)
     implementation(libs.lifecycle.process)
     implementation(libs.lifecycle.viewmodel.compose)

@@ -34,5 +34,6 @@ dependencies {
     implementation(projects.core.strings)
     implementation(projects.core.ui)
 
+    implementation(libs.bundles.ui)
     implementation(libs.timber)
 }
