@@ -202,6 +202,8 @@ dependencies {
     implementation(projects.feature.settings)
 
     // Bundles
+    implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.navigationSuite)
     implementation(libs.material)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
