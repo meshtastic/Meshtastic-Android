@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.repository.radio
@@ -22,7 +22,6 @@ import android.app.Application
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
-import android.os.Build
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.service.BLECharacteristicNotFoundException
@@ -147,46 +146,44 @@ constructor(
     private lateinit var fromNum: BluetoothGattCharacteristic
 
     /**
-     * RSSI flow, which polls the remote device for RSSI only when there are active subscribers.
-     * The polling stops automatically when the last collector stops.
+     * RSSI flow, which polls the remote device for RSSI only when there are active subscribers. The polling stops
+     * automatically when the last collector stops.
      */
-    val rssiFlow: StateFlow<Int?> = callbackFlow {
-        // Initial read for faster UI update
-        safe?.asyncReadRemoteRssi { first ->
-            first.getOrNull()?.let { trySend(it) }
-        }
+    val rssiFlow: StateFlow<Int?> =
+        callbackFlow {
+            // Initial read for faster UI update
+            safe?.asyncReadRemoteRssi { first -> first.getOrNull()?.let { trySend(it) } }
 
-        // Launch the polling loop on the service scope
-        @Suppress("LoopWithTooManyJumpStatements", "MagicNumber")
-        val pollingJob = service.serviceScope.handledLaunch {
-            while (true) {
-                try {
-                    delay(2500) // Poll every 5 seconds
-                    safe?.asyncReadRemoteRssi { res ->
-                        res.getOrNull()?.let { trySend(it) }
+            // Launch the polling loop on the service scope
+            @Suppress("LoopWithTooManyJumpStatements", "MagicNumber")
+            val pollingJob =
+                service.serviceScope.handledLaunch {
+                    while (true) {
+                        try {
+                            delay(2500) // Poll every 5 seconds
+                            safe?.asyncReadRemoteRssi { res -> res.getOrNull()?.let { trySend(it) } }
+                        } catch (ex: CancellationException) {
+                            break // Stop polling on cancellation
+                        } catch (ex: Exception) {
+                            Timber.d("RSSI polling error: ${ex.message}")
+                        }
                     }
-                } catch (ex: CancellationException) {
-                    break // Stop polling on cancellation
-                } catch (ex: Exception) {
-                    Timber.d("RSSI polling error: ${ex.message}")
                 }
+
+            // This block executes when the last collector stops.
+            awaitClose {
+                pollingJob.cancel()
+                // Clear the value when the flow is closed (no active subscribers).
+                trySend(null)
             }
         }
-
-        // This block executes when the last collector stops.
-        awaitClose {
-            pollingJob.cancel()
-            // Clear the value when the flow is closed (no active subscribers).
-            trySend(null)
-        }
-    }
-        .distinctUntilChanged()
-        .stateIn(
-            scope = service.serviceScope,
-            // Keep the polling running for 5 seconds after the last collector disappears
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
-            initialValue = null,
-        )
+            .distinctUntilChanged()
+            .stateIn(
+                scope = service.serviceScope,
+                // Keep the polling running for 5 seconds after the last collector disappears
+                started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
+                initialValue = null,
+            )
 
     /**
      * If we think we are connected, but we don't hear anything from the device, we might be in a zombie state. This
