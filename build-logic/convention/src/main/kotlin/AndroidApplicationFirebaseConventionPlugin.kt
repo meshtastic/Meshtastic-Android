@@ -28,7 +28,6 @@ class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = libs.findPlugin("firebase-crashlytics").get().get().pluginId)
-            apply(plugin = libs.findPlugin("firebase-perf").get().get().pluginId)
             apply(plugin = libs.findPlugin("google-services").get().get().pluginId)
             extensions.configure<ApplicationExtension> {
                 dependencies {
