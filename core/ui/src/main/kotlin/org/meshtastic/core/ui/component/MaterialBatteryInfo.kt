@@ -117,14 +117,16 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Flo
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.labelMedium,
             )
-            voltage?.let {
+        }
+        voltage
+            ?.takeIf { it > 0 }
+            ?.let {
                 Text(
                     text = "%.2fV".format(it),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
-        }
     }
 }
 
