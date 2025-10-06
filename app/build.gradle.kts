@@ -216,7 +216,6 @@ dependencies {
     implementation(libs.markdown.renderer.android)
     implementation(libs.markdown.renderer.m3)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.coroutines.guava)
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
