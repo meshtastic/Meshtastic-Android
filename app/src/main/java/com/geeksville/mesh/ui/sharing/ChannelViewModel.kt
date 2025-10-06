@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.analytics.DataPair
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.proto.getChannelList
@@ -47,6 +49,7 @@ class ChannelViewModel
 constructor(
     private val serviceRepository: ServiceRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
     val connectionState = serviceRepository.connectionState
@@ -119,6 +122,10 @@ constructor(
         } catch (ex: RemoteException) {
             Timber.e(ex, "Set config error")
         }
+    }
+
+    fun trackShare() {
+        analytics.track("share", DataPair("content_type", "channel"))
     }
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {

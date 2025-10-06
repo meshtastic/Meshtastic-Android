@@ -24,7 +24,6 @@ import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshUtilApplication
 import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.concurrent.handledLaunch
@@ -46,6 +45,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState
@@ -74,6 +74,7 @@ constructor(
     private val processLifecycle: Lifecycle,
     private val radioPrefs: RadioPrefs,
     private val interfaceFactory: InterfaceFactory,
+    private val analytics: PlatformAnalytics,
 ) {
 
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
@@ -307,7 +308,7 @@ constructor(
             false
         } else {
             // Record that this use has configured a new radio
-            MeshUtilApplication.analytics.track("mesh_bond")
+            analytics.track("mesh_bond")
 
             // Ignore any errors that happen while closing old device
             ignoreException { stopInterface() }

@@ -27,6 +27,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ConfigProtos.Config
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
@@ -130,6 +132,7 @@ constructor(
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val meshServiceNotifications: MeshServiceNotifications,
+    private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme
@@ -350,5 +353,9 @@ constructor(
 
     fun onAppIntroCompleted() {
         uiPreferencesDataSource.setAppIntroCompleted(true)
+    }
+
+    fun addNavigationTrackingEffect(navController: NavHostController) {
+        analytics.addNavigationTrackingEffect(navController)
     }
 }
