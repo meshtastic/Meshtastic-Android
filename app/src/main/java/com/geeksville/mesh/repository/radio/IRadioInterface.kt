@@ -21,5 +21,10 @@ import java.io.Closeable
 
 interface IRadioInterface : Closeable {
     fun handleSendToRadio(p: ByteArray)
-}
 
+    /**
+     * If we think we are connected, but we don't hear anything from the device, we might be in a zombie state. This
+     * function can be implemented by interfaces to see if we are really connected.
+     */
+    fun keepAlive() {}
+}
