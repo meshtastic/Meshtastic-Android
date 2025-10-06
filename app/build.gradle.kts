@@ -203,10 +203,14 @@ dependencies {
     implementation(projects.feature.settings)
 
     // Bundles
-    implementation(libs.bundles.markdown)
-    implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.datastore)
-    implementation(libs.bundles.coil)
+    implementation(libs.markdown.renderer)
+    implementation(libs.markdown.renderer.android)
+    implementation(libs.markdown.renderer.m3)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.guava)
+    implementation(libs.coil)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.svg)
 
     // ZXing
     implementation(libs.zxing.android.embedded) { isTransitive = false }
@@ -215,7 +219,6 @@ dependencies {
     // Individual dependencies (flavor-specific ones removed)
     implementation(libs.core.splashscreen)
     implementation(libs.emoji2.emojipicker)
-    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.eclipse.paho.client.mqttv3)
     implementation(libs.streamsupport.minifuture)
