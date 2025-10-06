@@ -47,7 +47,6 @@ internal fun Project.configureAndroidCompose(
             "implementation"(libs.findBundle("lifecycle").get())
             "implementation"(libs.findBundle("navigation").get())
             "androidTestImplementation"(libs.findBundle("testing.navigation").get())
-            "implementation"(libs.findBundle("navigation3").get())
             "implementation"(libs.findBundle("ui-tooling").get())
             "implementation"(libs.findLibrary("androidx-compose-ui-tooling-preview").get())
             "implementation"(libs.findLibrary("androidx-compose-runtime").get())
