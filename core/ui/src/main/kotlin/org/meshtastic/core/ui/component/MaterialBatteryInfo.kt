@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -51,7 +52,12 @@ private const val SIZE_ICON = 20
 
 @Suppress("MagicNumber", "LongMethod")
 @Composable
-fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Float? = null) {
+fun MaterialBatteryInfo(
+    modifier: Modifier = Modifier,
+    level: Int?,
+    voltage: Float? = null,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
     val levelString = FORMAT.format(level)
 
     Row(
@@ -63,22 +69,18 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Flo
             Icon(
                 modifier = Modifier.size(SIZE_ICON.dp),
                 imageVector = MeshtasticIcons.BatteryUnknown,
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = contentColor,
                 contentDescription = stringResource(R.string.unknown),
             )
         } else if (level > 100) {
             Icon(
                 modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
                 imageVector = Icons.Rounded.Power,
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = contentColor,
                 contentDescription = levelString,
             )
 
-            Text(
-                text = "PWD",
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelMedium,
-            )
+            Text(text = "PWD", color = contentColor, style = MaterialTheme.typography.labelMedium)
         } else {
             // Map battery percentage to color
             val fillColor =
@@ -108,24 +110,16 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int?, voltage: Flo
                     )
                 },
                 imageVector = MeshtasticIcons.BatteryEmpty,
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = contentColor,
                 contentDescription = levelString,
             )
 
-            Text(
-                text = levelString,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelMedium,
-            )
+            Text(text = levelString, color = contentColor, style = MaterialTheme.typography.labelMedium)
         }
         voltage
             ?.takeIf { it > 0 }
             ?.let {
-                Text(
-                    text = "%.2fV".format(it),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelMedium,
-                )
+                Text(text = "%.2fV".format(it), color = contentColor, style = MaterialTheme.typography.labelMedium)
             }
     }
 }

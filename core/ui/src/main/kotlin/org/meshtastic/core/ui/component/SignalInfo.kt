@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -42,7 +43,12 @@ const val MAX_VALID_RSSI = 0
 
 @Suppress("LongMethod")
 @Composable
-fun SignalInfo(modifier: Modifier = Modifier, node: Node, isThisNode: Boolean) {
+fun SignalInfo(
+    modifier: Modifier = Modifier,
+    node: Node,
+    isThisNode: Boolean,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
     val text =
         if (isThisNode) {
             stringResource(R.string.channel_air_util)
@@ -72,7 +78,7 @@ fun SignalInfo(modifier: Modifier = Modifier, node: Node, isThisNode: Boolean) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (text.isNotEmpty()) {
-            Text(text = text, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelSmall)
+            Text(text = text, color = contentColor, style = MaterialTheme.typography.labelSmall)
         }
         /* We only know the Signal Quality from direct nodes aka 0 hop. */
         if (node.hopsAway <= 0) {
@@ -98,7 +104,7 @@ fun SignalInfo(modifier: Modifier = Modifier, node: Node, isThisNode: Boolean) {
                     Text(
                         text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = contentColor,
                         maxLines = 1,
                     )
                 }

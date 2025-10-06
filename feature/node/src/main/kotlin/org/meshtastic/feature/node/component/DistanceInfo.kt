@@ -19,20 +19,27 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.SocialDistance
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun DistanceInfo(distance: String, modifier: Modifier = Modifier) {
+fun DistanceInfo(
+    distance: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
     IconInfo(
         modifier = modifier,
         icon = Icons.Rounded.SocialDistance,
         contentDescription = stringResource(R.string.distance),
         text = distance,
+        contentColor = contentColor,
     )
 }
 

@@ -17,8 +17,10 @@
 
 package org.meshtastic.feature.node.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -28,12 +30,18 @@ import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun LastHeardInfo(modifier: Modifier = Modifier, lastHeard: Int, currentTimeMillis: Long) {
+fun LastHeardInfo(
+    modifier: Modifier = Modifier,
+    lastHeard: Int,
+    currentTimeMillis: Long,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
     IconInfo(
         modifier = modifier,
         icon = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
         contentDescription = stringResource(org.meshtastic.core.strings.R.string.node_sort_last_heard),
         text = formatAgo(lastHeard, currentTimeMillis),
+        contentColor = contentColor,
     )
 }
 

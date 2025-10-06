@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,7 @@ fun IconInfo(
     contentDescription: String,
     modifier: Modifier = Modifier,
     text: String? = null,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
     content: @Composable () -> Unit = {},
 ) {
     Row(
@@ -51,11 +53,9 @@ fun IconInfo(
             modifier = Modifier.size(SIZE_ICON.dp),
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface,
+            tint = contentColor,
         )
-        text?.let {
-            Text(text = it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
-        }
+        text?.let { Text(text = it, style = MaterialTheme.typography.labelMedium, color = contentColor) }
         content()
     }
 }
