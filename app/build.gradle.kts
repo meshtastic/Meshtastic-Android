@@ -229,6 +229,11 @@ dependencies {
     implementation(libs.timber)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
+
+    fdroidImplementation(libs.osmdroid.android)
+    fdroidImplementation(libs.osmdroid.geopackage) {
+        exclude(group = "com.j256.ormlite")
+    }
 }
 
 val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
