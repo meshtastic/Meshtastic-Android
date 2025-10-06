@@ -1,0 +1,70 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
+    <ID>ComposableParamOrder:Debug.kt$DecodedPayloadBlock</ID>
+    <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchState</ID>
+    <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchStateviewModelDefaults</ID>
+    <ID>ComposableParamOrder:MapReportingPreference.kt$MapReportingPreference</ID>
+    <ID>ComposableParamOrder:NodeActionButton.kt$NodeActionButton</ID>
+    <ID>ComposableParamOrder:WarningDialog.kt$WarningDialog</ID>
+    <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
+    <ID>LambdaParameterEventTrailing:NodeActionButton.kt$onClick</ID>
+    <ID>LongMethod:AmbientLightingConfigItemList.kt$@Composable fun AmbientLightingConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:DeviceConfigItemList.kt$@Composable fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:ExternalNotificationConfigItemList.kt$@Composable fun ExternalNotificationConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
+    <ID>LongMethod:SecurityConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun SecurityConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:SerialConfigItemList.kt$@Composable fun SerialConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>MagicNumber:Debug.kt$3</ID>
+    <ID>MagicNumber:EditChannelDialog.kt$16</ID>
+    <ID>MagicNumber:EditChannelDialog.kt$32</ID>
+    <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
+    <ID>MagicNumber:PowerConfigItemList.kt$3600</ID>
+    <ID>ModifierMissing:ChannelSettingsItemList.kt$ChannelSelection</ID>
+    <ID>ModifierMissing:CleanNodeDatabaseScreen.kt$CleanNodeDatabaseScreen</ID>
+    <ID>ModifierMissing:LoRaConfigItemList.kt$LoRaConfigScreen</ID>
+    <ID>ModifierMissing:MapReportingPreference.kt$MapReportingPreference</ID>
+    <ID>ModifierMissing:NetworkConfigItemList.kt$NetworkConfigScreen</ID>
+    <ID>ModifierMissing:PositionConfigItemList.kt$PositionConfigScreen</ID>
+    <ID>ModifierMissing:RadioConfig.kt$RadioConfigItemList</ID>
+    <ID>ModifierMissing:RadioConfigScreenList.kt$RadioConfigScreenList</ID>
+    <ID>ModifierMissing:SecurityConfigItemList.kt$SecurityConfigScreen</ID>
+    <ID>ModifierMissing:SettingsScreen.kt$SettingsScreen</ID>
+    <ID>ModifierNotUsedAtRoot:EditChannelDialog.kt$modifier = modifier.weight(1f)</ID>
+    <ID>ModifierNotUsedAtRoot:EditDeviceProfileDialog.kt$modifier = modifier.weight(1f)</ID>
+    <ID>MultipleEmitters:CleanNodeDatabaseScreen.kt$NodesDeletionPreview</ID>
+    <ID>MultipleEmitters:RadioConfig.kt$RadioConfigItemList</ID>
+    <ID>NestedBlockDepth:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
+    <ID>ParameterNaming:ChannelSettingsItemList.kt$onPositiveClicked</ID>
+    <ID>ParameterNaming:ChannelSettingsItemList.kt$onSelected</ID>
+    <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onCheckedChanged</ID>
+    <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onDaysChanged</ID>
+    <ID>ParameterNaming:MapReportingPreference.kt$onMapReportingEnabledChanged</ID>
+    <ID>ParameterNaming:MapReportingPreference.kt$onPositionPrecisionChanged</ID>
+    <ID>ParameterNaming:MapReportingPreference.kt$onPublishIntervalSecsChanged</ID>
+    <ID>ParameterNaming:MapReportingPreference.kt$onShouldReportLocationChanged</ID>
+    <ID>PreviewPublic:MapReportingPreference.kt$MapReportingPreview</ID>
+    <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
+    <ID>TooGenericExceptionCaught:LanguageUtils.kt$LanguageUtils$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RadioConfigViewModel.kt$RadioConfigViewModel$ex: Exception</ID>
+    <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
+    <ID>UnusedParameter:ChannelSettingsItemList.kt$onBack: () -&gt; Unit</ID>
+    <ID>UnusedParameter:ChannelSettingsItemList.kt$title: String</ID>
+    <ID>ViewModelInjection:DebugSearch.kt$viewModel</ID>
+  </CurrentIssues>
+</SmellBaseline>
