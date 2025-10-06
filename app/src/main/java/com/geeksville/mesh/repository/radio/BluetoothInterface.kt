@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.repository.radio
@@ -36,9 +36,13 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.model.util.anonymize
 import timber.log.Timber
@@ -142,11 +146,47 @@ constructor(
 
     private lateinit var fromNum: BluetoothGattCharacteristic
 
-    // RSSI flow & polling job (null when unavailable / disconnected)
-    private val _rssiFlow = MutableStateFlow<Int?>(null)
-    val rssiFlow: StateFlow<Int?> = _rssiFlow
+    /**
+     * RSSI flow, which polls the remote device for RSSI only when there are active subscribers.
+     * The polling stops automatically when the last collector stops.
+     */
+    val rssiFlow: StateFlow<Int?> = callbackFlow {
+        // Initial read for faster UI update
+        safe?.asyncReadRemoteRssi { first ->
+            first.getOrNull()?.let { trySend(it) }
+        }
 
-    @Volatile private var rssiPollingJob: Job? = null
+        // Launch the polling loop on the service scope
+        @Suppress("LoopWithTooManyJumpStatements", "MagicNumber")
+        val pollingJob = service.serviceScope.handledLaunch {
+            while (true) {
+                try {
+                    delay(2500) // Poll every 5 seconds
+                    safe?.asyncReadRemoteRssi { res ->
+                        res.getOrNull()?.let { trySend(it) }
+                    }
+                } catch (ex: CancellationException) {
+                    break // Stop polling on cancellation
+                } catch (ex: Exception) {
+                    Timber.d("RSSI polling error: ${ex.message}")
+                }
+            }
+        }
+
+        // This block executes when the last collector stops.
+        awaitClose {
+            pollingJob.cancel()
+            // Clear the value when the flow is closed (no active subscribers).
+            trySend(null)
+        }
+    }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = service.serviceScope,
+            // Keep the polling running for 5 seconds after the last collector disappears
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
+            initialValue = null,
+        )
 
     /**
      * If we think we are connected, but we don't hear anything from the device, we might be in a zombie state. This
@@ -163,36 +203,6 @@ constructor(
                 }
             }
         }
-    }
-
-    // Start polling RSSI every 5 seconds (immediate first read)
-    @Suppress("MagicNumber", "LoopWithTooManyJumpStatements")
-    private fun startRssiPolling() {
-        rssiPollingJob?.cancel()
-        val s = safe ?: return
-        // Immediate read for faster UI update
-        s.asyncReadRemoteRssi { first -> first.getOrNull()?.let { _rssiFlow.value = it } }
-        rssiPollingJob =
-            service.serviceScope.handledLaunch {
-                while (true) {
-                    try {
-                        delay(5000)
-                        if (safe == null) break
-                        safe?.asyncReadRemoteRssi { res -> res.getOrNull()?.let { _rssiFlow.value = it } }
-                    } catch (ex: CancellationException) {
-                        break
-                    } catch (ex: Exception) {
-                        Timber.d("RSSI polling error: ${ex.message}")
-                    }
-                }
-            }
-    }
-
-    // Stop polling and clear current value
-    private fun stopRssiPolling() {
-        rssiPollingJob?.cancel()
-        rssiPollingJob = null
-        _rssiFlow.value = null
     }
 
     /**
@@ -259,7 +269,7 @@ constructor(
 
     /** We had some problem, schedule a reconnection attempt (if one isn't already queued) */
     private fun scheduleReconnect(reason: String) {
-        stopRssiPolling()
+        // stopRssiPolling() is no longer needed, as flow management handles polling lifecycle
         if (reconnectJob == null) {
             Timber.w("Scheduling reconnect because $reason")
             reconnectJob = service.serviceScope.handledLaunch { retryDueToException() }
@@ -450,7 +460,7 @@ constructor(
 
         service.serviceScope.handledLaunch {
             Timber.i("Connected to radio!")
-            startRssiPolling()
+            // The RSSI flow is now managed by its subscription count (WhileSubscribed)
 
             // After connecting, request a high connection priority for better stability
             val success = safe?.gatt?.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
@@ -495,7 +505,7 @@ constructor(
 
     override fun close() {
         reconnectJob?.cancel() // Cancel any queued reconnect attempts
-        stopRssiPolling()
+        // stopRssiPolling() is no longer needed, as flow management handles polling lifecycle
 
         if (safe != null) {
             Timber.i("Closing BluetoothInterface")
