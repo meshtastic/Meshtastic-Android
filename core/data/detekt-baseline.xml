@@ -2,7 +2,11 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>MagicNumber:LocationRepository.kt$LocationRepository$1000L</ID>
+    <ID>MagicNumber:LocationRepository.kt$LocationRepository$30</ID>
+    <ID>MagicNumber:LocationRepository.kt$LocationRepository$31</ID>
     <ID>MagicNumber:PacketRepository.kt$PacketRepository$500</ID>
+    <ID>TooGenericExceptionCaught:LocationRepository.kt$LocationRepository$e: Exception</ID>
     <ID>TooManyFunctions:PacketRepository.kt$PacketRepository</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -37,6 +37,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.model.util.anonymize
 import timber.log.Timber
 import java.lang.reflect.Method
@@ -104,6 +105,7 @@ constructor(
     context: Application,
     bluetoothRepository: BluetoothRepository,
     private val service: RadioInterfaceService,
+    analytics: PlatformAnalytics,
     @Assisted val address: String,
 ) : IRadioInterface {
 
@@ -195,7 +197,7 @@ constructor(
             Timber.i("Creating radio interface service.  device=${address.anonymize}")
 
             // Note this constructor also does no comm
-            val s = SafeBluetooth(context, device)
+            val s = SafeBluetooth(context, device, analytics)
             safe = s
 
             startConnect()

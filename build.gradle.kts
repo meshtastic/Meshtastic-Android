@@ -78,4 +78,5 @@ dependencies {
     kover(projects.feature.intro)
     kover(projects.feature.map)
     kover(projects.feature.node)
+    kover(projects.feature.settings)
 }

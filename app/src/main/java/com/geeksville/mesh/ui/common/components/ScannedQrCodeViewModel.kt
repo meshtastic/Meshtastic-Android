@@ -26,12 +26,12 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.config
-import com.geeksville.mesh.model.getChannelList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.proto.getChannelList
 import org.meshtastic.core.service.ServiceRepository
 import timber.log.Timber
 import javax.inject.Inject

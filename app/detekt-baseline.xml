@@ -8,10 +8,6 @@
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableNaming:NodeDetailScreen.kt$notesSection</ID>
     <ID>ComposableParamOrder:Channel.kt$ChannelScreen</ID>
-    <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
-    <ID>ComposableParamOrder:Debug.kt$DecodedPayloadBlock</ID>
-    <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchState</ID>
-    <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchStateviewModelDefaults</ID>
     <ID>ComposableParamOrder:DeviceMetrics.kt$DeviceMetricsChart</ID>
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$ChartContent</ID>
@@ -19,7 +15,6 @@
     <ID>ComposableParamOrder:EnvironmentCharts.kt$MetricPlottingCanvas</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt$HostMetricsItem</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt$LogLine</ID>
-    <ID>ComposableParamOrder:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ComposableParamOrder:Message.kt$MessageScreen</ID>
     <ID>ComposableParamOrder:Message.kt$QuickChatRow</ID>
     <ID>ComposableParamOrder:MessageActions.kt$MessageActions</ID>
@@ -29,7 +24,6 @@
     <ID>ComposableParamOrder:MessageList.kt$MessageList</ID>
     <ID>ComposableParamOrder:NodeDetailScreen.kt$DeviceActions</ID>
     <ID>ComposableParamOrder:NodeDetailScreen.kt$EnvironmentMetrics</ID>
-    <ID>ComposableParamOrder:NodeDetailScreen.kt$NodeActionButton</ID>
     <ID>ComposableParamOrder:NodeDetailScreen.kt$NodeDetailList</ID>
     <ID>ComposableParamOrder:PaxMetrics.kt$PaxMetricsChart</ID>
     <ID>ComposableParamOrder:PowerMetrics.kt$PowerMetricsChart</ID>
@@ -37,11 +31,7 @@
     <ID>ComposableParamOrder:Share.kt$ShareScreen</ID>
     <ID>ComposableParamOrder:SignalMetrics.kt$SignalMetricsChart</ID>
     <ID>ComposableParamOrder:TopLevelNavIcon.kt$ConnectionsNavIcon</ID>
-    <ID>ComposableParamOrder:WarningDialog.kt$WarningDialog</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
     <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided>${ }</ID>
@@ -71,44 +61,20 @@
     <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
     <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
-    <ID>LambdaParameterEventTrailing:NodeDetailScreen.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:NodeDetailScreen.kt$onSaveNotes</ID>
     <ID>LambdaParameterEventTrailing:QuickChat.kt$onNavigateUp</ID>
     <ID>LambdaParameterEventTrailing:TracerouteLog.kt$onNavigateUp</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
     <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
-    <ID>LongMethod:AmbientLightingConfigItemList.kt$@Composable fun AmbientLightingConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:DeviceConfigItemList.kt$@Composable fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:EnvironmentMetrics.kt$@Composable fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit)</ID>
-    <ID>LongMethod:ExternalNotificationConfigItemList.kt$@Composable fun ExternalNotificationConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>LongMethod:SecurityConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun SecurityConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:SerialConfigItemList.kt$@Composable fun SerialConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongParameterList:MessageViewModel.kt$MessageViewModel$( private val nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, quickChatActionRepository: QuickChatActionRepository, private val serviceRepository: ServiceRepository, private val packetRepository: PacketRepository, private val uiPrefs: UiPrefs, private val meshServiceNotifications: MeshServiceNotifications, )</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1000</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$500</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$512</ID>
     <ID>MagicNumber:Contacts.kt$7</ID>
     <ID>MagicNumber:Contacts.kt$8</ID>
-    <ID>MagicNumber:Debug.kt$3</ID>
-    <ID>MagicNumber:EditChannelDialog.kt$16</ID>
-    <ID>MagicNumber:EditChannelDialog.kt$32</ID>
-    <ID>MagicNumber:LocationRepository.kt$LocationRepository$1000L</ID>
-    <ID>MagicNumber:LocationRepository.kt$LocationRepository$30</ID>
-    <ID>MagicNumber:LocationRepository.kt$LocationRepository$31</ID>
     <ID>MagicNumber:MQTTRepository.kt$MQTTRepository$512</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$0xffffffff</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$1000</ID>
@@ -122,8 +88,6 @@
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1000L</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
-    <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
-    <ID>MagicNumber:PowerConfigItemList.kt$3600</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$21972</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$32809</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
@@ -149,8 +113,6 @@
     <ID>ModifierClickableOrder:Channel.kt$clickable(onClick = onClick)</ID>
     <ID>ModifierMissing:BLEDevices.kt$BLEDevices</ID>
     <ID>ModifierMissing:Channel.kt$ChannelScreen</ID>
-    <ID>ModifierMissing:ChannelSettingsItemList.kt$ChannelSelection</ID>
-    <ID>ModifierMissing:CleanNodeDatabaseScreen.kt$CleanNodeDatabaseScreen</ID>
     <ID>ModifierMissing:CommonCharts.kt$ChartHeader</ID>
     <ID>ModifierMissing:CommonCharts.kt$Legend</ID>
     <ID>ModifierMissing:CommonCharts.kt$TimeLabels</ID>
@@ -162,26 +124,18 @@
     <ID>ModifierMissing:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ModifierMissing:EnvironmentMetrics.kt$EnvironmentMetricsScreen</ID>
     <ID>ModifierMissing:HostMetricsLog.kt$HostMetricsLogScreen</ID>
-    <ID>ModifierMissing:LoRaConfigItemList.kt$LoRaConfigScreen</ID>
     <ID>ModifierMissing:Main.kt$MainScreen</ID>
-    <ID>ModifierMissing:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ModifierMissing:MessageActions.kt$MessageStatusButton</ID>
     <ID>ModifierMissing:MessageActions.kt$ReactionButton</ID>
     <ID>ModifierMissing:MessageActions.kt$ReplyButton</ID>
-    <ID>ModifierMissing:NetworkConfigItemList.kt$NetworkConfigScreen</ID>
     <ID>ModifierMissing:NetworkDevices.kt$NetworkDevices</ID>
     <ID>ModifierMissing:NodeListScreen.kt$NodeListScreen</ID>
     <ID>ModifierMissing:PaxMetrics.kt$PaxMetricsItem</ID>
     <ID>ModifierMissing:PaxMetrics.kt$PaxMetricsScreen</ID>
-    <ID>ModifierMissing:PositionConfigItemList.kt$PositionConfigScreen</ID>
     <ID>ModifierMissing:PositionLog.kt$PositionItem</ID>
     <ID>ModifierMissing:PositionLog.kt$PositionLogScreen</ID>
     <ID>ModifierMissing:PowerMetrics.kt$PowerMetricsScreen</ID>
-    <ID>ModifierMissing:RadioConfig.kt$RadioConfigItemList</ID>
-    <ID>ModifierMissing:RadioConfigScreenList.kt$RadioConfigScreenList</ID>
     <ID>ModifierMissing:Reaction.kt$ReactionDialog</ID>
-    <ID>ModifierMissing:SecurityConfigItemList.kt$SecurityConfigScreen</ID>
-    <ID>ModifierMissing:SettingsScreen.kt$SettingsScreen</ID>
     <ID>ModifierMissing:Share.kt$ShareScreen</ID>
     <ID>ModifierMissing:SharedContactDialog.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:SignalMetrics.kt$SignalMetricsScreen</ID>
@@ -189,8 +143,6 @@
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier.width(dp)</ID>
-    <ID>ModifierNotUsedAtRoot:EditChannelDialog.kt$modifier = modifier.weight(1f)</ID>
-    <ID>ModifierNotUsedAtRoot:EditDeviceProfileDialog.kt$modifier = modifier.weight(1f)</ID>
     <ID>ModifierNotUsedAtRoot:EnvironmentCharts.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:EnvironmentCharts.kt$modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:PaxMetrics.kt$modifier.width(dp)</ID>
@@ -224,7 +176,6 @@
     <ID>ModifierReused:SignalMetrics.kt$YAxisLabels( modifier = modifier.weight(weight = Y_AXIS_WEIGHT), Metric.SNR.color, minValue = Metric.SNR.min, maxValue = Metric.SNR.max, )</ID>
     <ID>ModifierWithoutDefault:CommonCharts.kt$modifier</ID>
     <ID>ModifierWithoutDefault:EnvironmentCharts.kt$modifier</ID>
-    <ID>MultipleEmitters:CleanNodeDatabaseScreen.kt$NodesDeletionPreview</ID>
     <ID>MultipleEmitters:CommonCharts.kt$LegendLabel</ID>
     <ID>MultipleEmitters:DeviceMetrics.kt$DeviceMetricsChart</ID>
     <ID>MultipleEmitters:EnvironmentCharts.kt$EnvironmentMetricsChart</ID>
@@ -232,13 +183,11 @@
     <ID>MultipleEmitters:NodeDetailScreen.kt$MetricsSection</ID>
     <ID>MultipleEmitters:PaxMetrics.kt$PaxMetricsChart</ID>
     <ID>MultipleEmitters:PowerMetrics.kt$PowerMetricsChart</ID>
-    <ID>MultipleEmitters:RadioConfig.kt$RadioConfigItemList</ID>
     <ID>MultipleEmitters:SignalMetrics.kt$SignalMetricsChart</ID>
     <ID>MutableStateAutoboxing:Contacts.kt$mutableStateOf(2)</ID>
     <ID>MutableStateParam:MessageList.kt$selectedIds</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>NestedBlockDepth:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>NewLineAtEndOfFile:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
@@ -266,27 +215,17 @@
     <ID>NoEmptyClassBody:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>NoSemicolons:DateUtils.kt$DateUtils$;</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
-    <ID>ParameterNaming:ChannelSettingsItemList.kt$onPositiveClicked</ID>
-    <ID>ParameterNaming:ChannelSettingsItemList.kt$onSelected</ID>
-    <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onCheckedChanged</ID>
-    <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onDaysChanged</ID>
     <ID>ParameterNaming:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>ParameterNaming:Contacts.kt$onDeleteSelected</ID>
     <ID>ParameterNaming:Contacts.kt$onMuteSelected</ID>
-    <ID>ParameterNaming:MapReportingPreference.kt$onMapReportingEnabledChanged</ID>
-    <ID>ParameterNaming:MapReportingPreference.kt$onPositionPrecisionChanged</ID>
-    <ID>ParameterNaming:MapReportingPreference.kt$onPublishIntervalSecsChanged</ID>
-    <ID>ParameterNaming:MapReportingPreference.kt$onShouldReportLocationChanged</ID>
     <ID>ParameterNaming:MessageList.kt$onUnreadChanged</ID>
     <ID>ParameterNaming:NodeDetailScreen.kt$onFirmwareSelected</ID>
     <ID>ParameterNaming:UsbDevices.kt$onDeviceSelected</ID>
     <ID>PreviewPublic:Channel.kt$ModemPresetInfoPreview</ID>
     <ID>PreviewPublic:EmptyStateContent.kt$EmptyStateContentPreview</ID>
-    <ID>PreviewPublic:MapReportingPreference.kt$MapReportingPreview</ID>
     <ID>PreviewPublic:Reaction.kt$ReactionItemPreview</ID>
     <ID>PreviewPublic:Reaction.kt$ReactionRowPreview</ID>
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
-    <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>SwallowedException:BluetoothInterface.kt$BluetoothInterface$ex: CancellationException</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
     <ID>SwallowedException:MeshService.kt$MeshService$ex: BLEException</ID>
@@ -299,13 +238,10 @@
     <ID>TooGenericExceptionCaught:BTScanModel.kt$BTScanModel$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:BluetoothInterface.kt$BluetoothInterface$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:Exceptions.kt$ex: Throwable</ID>
-    <ID>TooGenericExceptionCaught:LanguageUtils.kt$LanguageUtils$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:LocationRepository.kt$LocationRepository$e: Exception</ID>
     <ID>TooGenericExceptionCaught:MQTTRepository.kt$MQTTRepository$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService.&lt;no name provided>$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshServiceStarter.kt$ServiceStarter$ex: Exception</ID>
-    <ID>TooGenericExceptionCaught:RadioConfigViewModel.kt$RadioConfigViewModel$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:SafeBluetooth.kt$SafeBluetooth$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:SafeBluetooth.kt$SafeBluetooth$ex: NullPointerException</ID>
     <ID>TooGenericExceptionCaught:SyncContinuation.kt$Continuation$ex: Throwable</ID>
@@ -321,16 +257,12 @@
     <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided> : Stub</ID>
     <ID>TooManyFunctions:MessageViewModel.kt$MessageViewModel : ViewModel</ID>
     <ID>TooManyFunctions:NodeDetailScreen.kt$com.geeksville.mesh.ui.node.NodeDetailScreen.kt</ID>
-    <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
     <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService</ID>
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : Closeable</ID>
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModel</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
-    <ID>UnusedParameter:ChannelSettingsItemList.kt$onBack: () -> Unit</ID>
-    <ID>UnusedParameter:ChannelSettingsItemList.kt$title: String</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
     <ID>ViewModelForwarding:Main.kt$VersionChecks(uIViewModel)</ID>
-    <ID>ViewModelInjection:DebugSearch.kt$viewModel</ID>
     <ID>Wrapping:Message.kt${ event -> when (event) { is MessageScreenEvent.SendMessage -> { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -> viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -> { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -> viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.NodeDetails -> navigateToNodeDetails(event.node.num) is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -> onNavigateBack() is MessageScreenEvent.CopyToClipboard -> { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -40,8 +40,6 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.FromRadio.PayloadVariantCase
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.mesh.MeshUtilApplication
-import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.Portnums
@@ -54,7 +52,6 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.position
-import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.telemetry
@@ -77,7 +74,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.DataPair
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.hasLocationPermission
+import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -151,6 +150,8 @@ class MeshService : Service() {
     @Inject lateinit var packetHandler: PacketHandler
 
     @Inject lateinit var serviceBroadcasts: MeshServiceBroadcasts
+
+    @Inject lateinit var analytics: PlatformAnalytics
 
     private val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
 
@@ -869,13 +870,9 @@ class MeshService : Service() {
                     serviceBroadcasts.broadcastReceivedData(dataPacket)
                 }
 
-                MeshUtilApplication.analytics.track("num_data_receive", DataPair("num_data_receive", 1))
+                analytics.track("num_data_receive", DataPair("num_data_receive", 1))
 
-                MeshUtilApplication.analytics.track(
-                    "data_receive",
-                    DataPair("num_bytes", bytes.size),
-                    DataPair("type", data.portnumValue),
-                )
+                analytics.track("data_receive", DataPair("num_bytes", bytes.size), DataPair("type", data.portnumValue))
             }
         }
     }
@@ -1122,7 +1119,7 @@ class MeshService : Service() {
                 sendNow(p)
                 sentPackets.add(p)
             } catch (ex: Exception) {
-                Timber.e("Error sending queued message:", ex)
+                Timber.e(ex, "Error sending queued message:")
             }
         }
         offlineSentPackets.removeAll(sentPackets)
@@ -1239,7 +1236,7 @@ class MeshService : Service() {
     /** Send in analytics about mesh connection */
     private fun reportConnection() {
         val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
-        MeshUtilApplication.analytics.track(
+        analytics.track(
             "mesh_connect",
             DataPair("num_nodes", numNodes),
             DataPair("num_online", numOnlineNodes),
@@ -1266,10 +1263,7 @@ class MeshService : Service() {
                 val now = System.currentTimeMillis()
                 connectTimeMsec = 0L
 
-                MeshUtilApplication.analytics.track(
-                    "connected_seconds",
-                    DataPair("connected_seconds", (now - connectTimeMsec) / 1000.0),
-                )
+                analytics.track("connected_seconds", DataPair("connected_seconds", (now - connectTimeMsec) / 1000.0))
             }
 
             // Have our timeout fire in the appropriate number of seconds
@@ -1298,12 +1292,8 @@ class MeshService : Service() {
             stopLocationRequests()
             stopMqttClientProxy()
 
-            MeshUtilApplication.analytics.track(
-                "mesh_disconnect",
-                DataPair("num_nodes", numNodes),
-                DataPair("num_online", numOnlineNodes),
-            )
-            MeshUtilApplication.analytics.track("num_nodes", DataPair("num_nodes", numNodes))
+            analytics.track("mesh_disconnect", DataPair("num_nodes", numNodes), DataPair("num_online", numOnlineNodes))
+            analytics.track("num_nodes", DataPair("num_nodes", numNodes))
 
             // broadcast an intent with our new connection state
             serviceBroadcasts.broadcastConnection()
@@ -1315,7 +1305,7 @@ class MeshService : Service() {
                 connectTimeMsec = System.currentTimeMillis()
                 startConfig()
             } catch (ex: InvalidProtocolBufferException) {
-                Timber.e("Invalid protocol buffer sent by device - update device software and try again", ex)
+                Timber.e(ex, "Invalid protocol buffer sent by device - update device software and try again")
             } catch (ex: RadioNotConnectedException) {
                 // note: no need to call startDeviceSleep(), because this exception could only have
                 // reached us if it was
@@ -2104,7 +2094,7 @@ class MeshService : Service() {
                         try {
                             sendNow(p)
                         } catch (ex: Exception) {
-                            Timber.e("Error sending message, so enqueueing", ex)
+                            Timber.e(ex, "Error sending message, so enqueueing")
                             enqueueForSending(p)
                         }
                     } else {
@@ -2115,11 +2105,7 @@ class MeshService : Service() {
                     // Keep a record of DataPackets, so GUIs can show proper chat history
                     rememberDataPacket(p, false)
 
-                    MeshUtilApplication.analytics.track(
-                        "data_send",
-                        DataPair("num_bytes", bytes.size),
-                        DataPair("type", p.dataType),
-                    )
+                    analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
                 }
             }
 

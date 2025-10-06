@@ -75,7 +75,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
+import com.geeksville.mesh.MeshUtilApplication
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.channelsGraph
@@ -83,7 +83,6 @@ import com.geeksville.mesh.navigation.connectionsGraph
 import com.geeksville.mesh.navigation.contactsGraph
 import com.geeksville.mesh.navigation.mapGraph
 import com.geeksville.mesh.navigation.nodesGraph
-import com.geeksville.mesh.navigation.settingsGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
@@ -114,6 +113,7 @@ import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.feature.settings.navigation.settingsGraph
 import timber.log.Timber
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
@@ -158,7 +158,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         }
     }
 
-    analytics.addNavigationTrackingEffect(navController = navController)
+    MeshUtilApplication.analytics.addNavigationTrackingEffect(navController = navController)
 
     VersionChecks(uIViewModel)
     val alertDialogState by uIViewModel.currentAlert.collectAsStateWithLifecycle()

@@ -29,15 +29,11 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.channel
 import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.repository.radio.MeshActivity
@@ -105,34 +101,6 @@ fun getInitials(fullName: String): String {
 }
 
 private fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
-
-/**
- * Builds a [Channel] list from the difference between two [ChannelSettings] lists. Only changes are included in the
- * resulting list.
- *
- * @param new The updated [ChannelSettings] list.
- * @param old The current [ChannelSettings] list (required when disabling unused channels).
- * @return A [Channel] list containing only the modified channels.
- */
-internal fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List<ChannelProtos.Channel> =
-    buildList {
-        for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
-            if (old.getOrNull(i) != new.getOrNull(i)) {
-                add(
-                    channel {
-                        role =
-                            when (i) {
-                                0 -> ChannelProtos.Channel.Role.PRIMARY
-                                in 1..new.lastIndex -> ChannelProtos.Channel.Role.SECONDARY
-                                else -> ChannelProtos.Channel.Role.DISABLED
-                            }
-                        index = i
-                        settings = new.getOrNull(i) ?: channelSettings {}
-                    },
-                )
-            }
-        }
-    }
 
 data class Contact(
     val contactKey: String,

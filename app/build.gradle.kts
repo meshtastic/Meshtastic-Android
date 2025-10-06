@@ -200,6 +200,7 @@ dependencies {
     implementation(projects.feature.intro)
     implementation(projects.feature.map)
     implementation(projects.feature.node)
+    implementation(projects.feature.settings)
 
     // Bundles
     implementation(libs.bundles.markdown)

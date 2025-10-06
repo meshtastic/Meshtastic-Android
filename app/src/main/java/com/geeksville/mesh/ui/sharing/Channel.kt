@@ -95,12 +95,7 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.navigation.ConfigRoute
-import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
-import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
-import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
-import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -118,6 +113,11 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.navigation.getNavRouteFrom
+import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.component.ChannelSelection
+import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import timber.log.Timber
 
 /**
