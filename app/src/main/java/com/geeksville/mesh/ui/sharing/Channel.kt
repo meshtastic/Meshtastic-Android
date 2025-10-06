@@ -92,7 +92,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.MeshUtilApplication.Companion.analytics
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
@@ -102,7 +101,6 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
-import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.qrCode
@@ -311,6 +309,7 @@ fun ChannelScreen(
                 EditChannelUrl(
                     enabled = enabled,
                     channelUrl = selectedChannelSet.getChannelUrl(shouldAdd = shouldAddChannelsState),
+                    onTrackShare = viewModel::trackShare,
                     onConfirm = {
                         viewModel.requestChannelUrl(it) {
                             Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
@@ -368,7 +367,13 @@ fun ChannelScreen(
 
 @Suppress("LongMethod")
 @Composable
-private fun EditChannelUrl(enabled: Boolean, channelUrl: Uri, modifier: Modifier = Modifier, onConfirm: (Uri) -> Unit) {
+private fun EditChannelUrl(
+    enabled: Boolean,
+    channelUrl: Uri,
+    modifier: Modifier = Modifier,
+    onTrackShare: () -> Unit,
+    onConfirm: (Uri) -> Unit,
+) {
     val focusManager = LocalFocusManager.current
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -416,7 +421,7 @@ private fun EditChannelUrl(enabled: Boolean, channelUrl: Uri, modifier: Modifier
 
                         else -> {
                             // track how many times users share channels
-                            analytics.track("share", DataPair("content_type", "channel"))
+                            onTrackShare()
                             coroutineScope.launch {
                                 clipboardManager.setClipEntry(
                                     ClipEntry(ClipData.newPlainText(label, valueState.toString())),

@@ -19,9 +19,7 @@ package com.geeksville.mesh
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
-import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import timber.log.Timber
-import javax.inject.Inject
 
 /**
  * The main application class for Meshtastic.
@@ -30,26 +28,7 @@ import javax.inject.Inject
  * application components, including analytics and platform-specific helpers, and manages analytics consent based on
  * user preferences.
  */
-@HiltAndroidApp
-class MeshUtilApplication : Application() {
-
-    @Inject lateinit var platformAnalytics: PlatformAnalytics
-
-    companion object {
-        /**
-         * Provides access to the platform-specific analytics provider. Initialized via the injected [PlatformAnalytics]
-         * during [onCreate].
-         */
-        lateinit var analytics: PlatformAnalytics
-            private set
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        // Initialize platform-specific features (analytics, crash reporting, etc.)
-        analytics = platformAnalytics
-    }
-}
+@HiltAndroidApp class MeshUtilApplication : Application()
 
 fun logAssert(executeReliableWrite: Boolean) {
     if (!executeReliableWrite) {
