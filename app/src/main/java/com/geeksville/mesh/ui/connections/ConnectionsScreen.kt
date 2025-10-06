@@ -72,7 +72,7 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.components.PacketResponseStateDialog
+import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 
 fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
     @Suppress("DEPRECATION")

@@ -75,8 +75,8 @@ import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.components.EditDeviceProfileDialog
-import org.meshtastic.feature.settings.radio.components.PacketResponseStateDialog
+import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
+import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.getLanguageMap
 import java.text.SimpleDateFormat

@@ -51,7 +51,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
-import org.meshtastic.feature.settings.radio.components.WarningDialog
+import org.meshtastic.feature.settings.radio.component.WarningDialog
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

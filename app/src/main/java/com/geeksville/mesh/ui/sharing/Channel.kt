@@ -116,8 +116,8 @@ import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.components.ChannelSelection
-import org.meshtastic.feature.settings.radio.components.PacketResponseStateDialog
+import org.meshtastic.feature.settings.radio.component.ChannelSelection
+import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import timber.log.Timber
 
 /**
