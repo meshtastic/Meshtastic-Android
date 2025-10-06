@@ -187,7 +187,7 @@
     <string name="meshtastic_service_notifications">Notifications de service</string>
     <string name="about">A propros</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
-    <string name="contact_invalid">This contact is invalid and can not be added</string>
+    <string name="contact_invalid">Ce contact est invalide et ne peut pas être ajouté</string>
     <string name="debug_panel">Panneau de débogage</string>
     <string name="debug_decoded_payload">Contenu décodé :</string>
     <string name="debug_logs_export">Exporter les logs</string>
@@ -328,9 +328,9 @@
     <string name="air_util_definition">Pourcentage de temps d\'antenne pour la transmission utilisée au cours de la dernière heure.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Clé partagée</string>
-    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
+    <string name="encryption_psk_text">Seuls les messages vers les canaux peuvent être senvoyés/reçus. Les messages directs nécessitent la fonctionnalité d\'infrastructure de clé publique disponible dans le firmware 2.5+.</string>
     <string name="encryption_pkc">Chiffrement de clé publique</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
+    <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement.</string>
     <string name="encryption_error">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement. Nécessite une version de firmware 2.5 ou plus.</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l\'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d\'usine ou à une autre action intentionnelle.</string>
     <string name="exchange_userinfo">Échanger les informations utilisateur</string>
@@ -787,8 +787,8 @@
     <string name="no_pax_metrics_logs">Aucun journal de métriques PAX disponible.</string>
     <string name="wifi_devices">Périphériques WiFi</string>
     <string name="ble_devices">Appareils BLE</string>
-    <string name="bluetooth_paired_devices">Paired devices</string>
-    <string name="bluetooth_available_devices">Available devices</string>
+    <string name="bluetooth_paired_devices">Périphériques appairés</string>
+    <string name="bluetooth_available_devices">Périphériques disponibles</string>
     <string name="connected_device">Périphérique connecté</string>
     <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="view_release">Voir la version</string>
@@ -886,5 +886,5 @@
     <string name="last_heard_filter_label">Filtrer par la dernière écoute : %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Aucune application disponible pour gérer ce lien.</string>
-    <string name="system_settings">System Settings</string>
+    <string name="system_settings">Paramètres système</string>
 </resources>
