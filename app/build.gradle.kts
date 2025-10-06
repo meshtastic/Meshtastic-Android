@@ -27,7 +27,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.secrets)
     alias(libs.plugins.dokka)
