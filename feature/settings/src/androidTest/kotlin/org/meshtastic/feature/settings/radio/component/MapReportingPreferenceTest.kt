@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.compose
+package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.platform.LocalFocusManager
@@ -26,7 +26,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.geeksville.mesh.ui.settings.radio.components.MapReportingPreference
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test

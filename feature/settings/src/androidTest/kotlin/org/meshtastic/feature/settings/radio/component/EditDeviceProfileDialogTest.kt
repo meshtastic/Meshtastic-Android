@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.compose
+package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -26,7 +26,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.position
-import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
