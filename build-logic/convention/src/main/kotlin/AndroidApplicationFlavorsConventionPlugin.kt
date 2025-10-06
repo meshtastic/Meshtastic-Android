@@ -36,11 +36,6 @@ class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
                         if (name == MeshtasticFlavor.google.name) {
                             apply(plugin = "meshtastic.android.application.firebase")
                             apply(plugin = "meshtastic.android.application.datadog")
-                            dependencies {
-                                // Google specific dependencies
-                                "googleImplementation"(libs.findBundle("maps-compose").get())
-                                "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
-                            }
                         }
                     }
                 }
