@@ -31,14 +31,6 @@ class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
         with(target) {
             extensions.configure<ApplicationExtension> {
                 configureFlavors(this)
-                productFlavors {
-                    all {
-                        if (name == MeshtasticFlavor.google.name) {
-                            apply(plugin = "meshtastic.android.application.firebase")
-                            apply(plugin = "meshtastic.android.application.datadog")
-                        }
-                    }
-                }
             }
         }
     }

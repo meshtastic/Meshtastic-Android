@@ -257,8 +257,6 @@ spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
 # Meshtastic
 meshtastic-android-application = { id = "meshtastic.android.application" }
 meshtastic-android-application-compose = { id = "meshtastic.android.application.compose" }
-meshtastic-android-application-datadog = { id = "meshtastic.android.application.datadog" }
-meshtastic-android-application-firebase = { id = "meshtastic.android.application.firebase" }
 meshtastic-android-application-flavors = { id = "meshtastic.android.application.flavors" }
 meshtastic-android-library = { id = "meshtastic.android.library" }
 meshtastic-android-library-compose = { id = "meshtastic.android.library.compose" }

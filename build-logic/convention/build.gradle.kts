@@ -82,14 +82,6 @@ gradlePlugin {
             id = libs.plugins.meshtastic.android.lint.get().pluginId
             implementationClass = "AndroidLintConventionPlugin"
         }
-        register("androidFirebase") {
-            id = libs.plugins.meshtastic.android.application.firebase.get().pluginId
-            implementationClass = "AndroidApplicationFirebaseConventionPlugin"
-        }
-        register("androidDatadog") {
-            id = libs.plugins.meshtastic.android.application.datadog.get().pluginId
-            implementationClass = "AndroidApplicationDatadogConventionPlugin"
-        }
         register("androidLibraryCompose") {
             id = libs.plugins.meshtastic.android.library.compose.get().pluginId
             implementationClass = "AndroidLibraryComposeConventionPlugin"
