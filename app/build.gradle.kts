@@ -234,14 +234,12 @@ dependencies {
     implementation(libs.streamsupport.minifuture)
     implementation(libs.usb.serial.android)
     implementation(libs.work.runtime.ktx)
-    implementation(libs.core.location.altitude)
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 
     googleImplementation(libs.location.services)
-    googleImplementation(libs.maps.compose)
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
