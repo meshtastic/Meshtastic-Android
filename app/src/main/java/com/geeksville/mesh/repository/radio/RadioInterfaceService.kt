@@ -132,17 +132,22 @@ constructor(
     }
 
     companion object {
-        private const val HEARTBEAT_INTERVAL_MILLIS = 5 * 60 * 1000L
+        private const val HEARTBEAT_INTERVAL_MILLIS = 30 * 1000L
     }
 
     private var lastHeartbeatMillis = 0L
 
     fun keepAlive(now: Long = System.currentTimeMillis()) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
-            Timber.i("Sending ToRadio heartbeat")
-            val heartbeat =
-                MeshProtos.ToRadio.newBuilder().setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
-            handleSendToRadio(heartbeat.toByteArray())
+            if (radioIf is SerialInterface) {
+                Timber.i("Sending ToRadio heartbeat")
+                val heartbeat =
+                    MeshProtos.ToRadio.newBuilder().setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
+                handleSendToRadio(heartbeat.toByteArray())
+            } else {
+                // For BLE and TCP this will check if the connection is still alive
+                radioIf.keepAlive()
+            }
             lastHeartbeatMillis = now
         }
     }

@@ -19,8 +19,10 @@ package com.geeksville.mesh.repository.radio
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
+import android.os.Build
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.service.BLECharacteristicNotFoundException
@@ -145,6 +147,23 @@ constructor(
     val rssiFlow: StateFlow<Int?> = _rssiFlow
 
     @Volatile private var rssiPollingJob: Job? = null
+
+    /**
+     * If we think we are connected, but we don't hear anything from the device, we might be in a zombie state. This
+     * function forces a read of a characteristic to see if we are really connected.
+     */
+    override fun keepAlive() {
+        if (reconnectJob == null) {
+            // We are not currently trying to reconnect, so lets see if we are really connected
+            Timber.d("Bluetooth keep-alive, checking connection by reading fromNum")
+            // This will force a reconnect if the read fails
+            service.serviceScope.handledLaunch {
+                if (safe != null) { // if we are closing this will be null
+                    doReadFromRadio(false)
+                }
+            }
+        }
+    }
 
     // Start polling RSSI every 5 seconds (immediate first read)
     @Suppress("MagicNumber", "LoopWithTooManyJumpStatements")
@@ -432,6 +451,10 @@ constructor(
         service.serviceScope.handledLaunch {
             Timber.i("Connected to radio!")
             startRssiPolling()
+
+            // After connecting, request a high connection priority for better stability
+            val success = safe?.gatt?.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+            Timber.d("Requested high connection priority: $success")
 
             if (
                 needForceRefresh
