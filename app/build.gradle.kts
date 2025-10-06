@@ -243,6 +243,12 @@ dependencies {
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+
+    androidTestImplementation(libs.androidx.compose.ui.test)
+    androidTestImplementation(libs.espresso.core)
+
+    testImplementation(libs.ext.junit)
+    testImplementation(libs.junit)
 }
 
 val googleServiceKeywords = listOf("crashlytics", "google", "datadog")

@@ -64,12 +64,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 buildFeatures {
                     buildConfig = true
                 }
-
-                dependencies {
-                    "testImplementation"(libs.findBundle("testing").get())
-                    "androidTestImplementation"(libs.findBundle("testing.android").get())
-                }
-
             }
         }
     }
