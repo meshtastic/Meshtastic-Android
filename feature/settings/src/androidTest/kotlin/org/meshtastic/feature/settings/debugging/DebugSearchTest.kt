@@ -15,12 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.compose
+package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
@@ -36,13 +37,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.strings.R
-import org.meshtastic.feature.settings.debugging.DebugActiveFilters
-import org.meshtastic.feature.settings.debugging.DebugCustomFilterInput
-import org.meshtastic.feature.settings.debugging.DebugFilterBar
-import org.meshtastic.feature.settings.debugging.DebugSearchBar
-import org.meshtastic.feature.settings.debugging.DebugViewModel
-import org.meshtastic.feature.settings.debugging.FilterMode
-import org.meshtastic.feature.settings.debugging.LogSearchManager
+import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
+import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchMatch
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState
 
 @RunWith(AndroidJUnit4::class)
@@ -71,7 +67,7 @@ class DebugSearchTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val placeholder = context.getString(R.string.debug_default_search)
         composeTestRule.setContent {
-            var searchText by androidx.compose.runtime.remember { mutableStateOf("test") }
+            var searchText by remember { mutableStateOf("test") }
             DebugSearchBar(
                 searchState = SearchState(searchText = searchText),
                 onSearchTextChange = { searchText = it },
@@ -96,10 +92,7 @@ class DebugSearchTest {
                 SearchState(
                     searchText = searchText,
                     currentMatchIndex = currentMatchIndex,
-                    allMatches =
-                    List(matchCount) {
-                        com.geeksville.mesh.model.LogSearchManager.SearchMatch(it, 0, 6, "Packet")
-                    },
+                    allMatches = List(matchCount) { SearchMatch(it, 0, 6, "Packet") },
                     hasMatches = true,
                 ),
                 onSearchTextChange = {},
@@ -122,19 +115,19 @@ class DebugSearchTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val filterLabel = context.getString(R.string.debug_filters)
         composeTestRule.setContent {
-            var filterTexts by androidx.compose.runtime.remember { mutableStateOf(listOf<String>()) }
-            var customFilterText by androidx.compose.runtime.remember { mutableStateOf("") }
+            var filterTexts by remember { mutableStateOf(listOf<String>()) }
+            var customFilterText by remember { mutableStateOf("") }
             val presetFilters = listOf("Error", "Warning", "Info")
             val logs =
                 listOf(
-                    com.geeksville.mesh.model.DebugViewModel.UiMeshLog(
+                    UiMeshLog(
                         uuid = "1",
                         messageType = "Info",
                         formattedReceivedDate = "2024-01-01 12:00:00",
                         logMessage = "Sample log message",
                     ),
                 )
-            com.geeksville.mesh.ui.debug.DebugFilterBar(
+            DebugFilterBar(
                 filterTexts = filterTexts,
                 onFilterTextsChange = { filterTexts = it },
                 customFilterText = customFilterText,
@@ -152,16 +145,16 @@ class DebugSearchTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val activeFiltersLabel = context.getString(R.string.debug_active_filters)
         composeTestRule.setContent {
-            var filterTexts by androidx.compose.runtime.remember { mutableStateOf(listOf<String>()) }
-            var customFilterText by androidx.compose.runtime.remember { mutableStateOf("") }
+            var filterTexts by remember { mutableStateOf(listOf<String>()) }
+            var customFilterText by remember { mutableStateOf("") }
             Column(modifier = Modifier.padding(16.dp)) {
-                com.geeksville.mesh.ui.debug.DebugActiveFilters(
+                DebugActiveFilters(
                     filterTexts = filterTexts,
                     onFilterTextsChange = { filterTexts = it },
                     filterMode = FilterMode.OR,
                     onFilterModeChange = {},
                 )
-                com.geeksville.mesh.ui.debug.DebugCustomFilterInput(
+                DebugCustomFilterInput(
                     customFilterText = customFilterText,
                     onCustomFilterTextChange = { customFilterText = it },
                     filterTexts = filterTexts,
@@ -182,8 +175,8 @@ class DebugSearchTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val activeFiltersLabel = context.getString(R.string.debug_active_filters)
         composeTestRule.setContent {
-            var filterTexts by androidx.compose.runtime.remember { mutableStateOf(listOf("A", "B")) }
-            com.geeksville.mesh.ui.debug.DebugActiveFilters(
+            var filterTexts by remember { mutableStateOf(listOf("A", "B")) }
+            DebugActiveFilters(
                 filterTexts = filterTexts,
                 onFilterTextsChange = { filterTexts = it },
                 filterMode = FilterMode.OR,
