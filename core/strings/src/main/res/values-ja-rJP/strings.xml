@@ -877,16 +877,16 @@
     <string name="icon_meanings">Icon Meanings</string>
     <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
     <string name="device_configuration">Device configuration</string>
-    <string name="remotely_administrating">"[Remote] %1$s"</string>
+    <string name="remotely_administrating">"[リモート] %1$s"</string>
     <string name="device_telemetry_enabled">Send Device Telemetry</string>
     <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
-    <string name="any">Any</string>
-    <string name="one_hour">1 Hour</string>
-    <string name="eight_hours">8 Hours</string>
-    <string name="one_day">24 Hours</string>
-    <string name="two_days">48 Hours</string>
-    <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
+    <string name="any">すべて</string>
+    <string name="one_hour">1時間</string>
+    <string name="eight_hours">8時間</string>
+    <string name="one_day">24時間</string>
+    <string name="two_days">48時間</string>
+    <string name="last_heard_filter_label">最後に受信した時間でフィルター: %s</string>
     <string name="dbm_value">%1$d dBm</string>
-    <string name="error_no_app_to_handle_link">No application available to handle link.</string>
-    <string name="system_settings">System Settings</string>
+    <string name="error_no_app_to_handle_link">リンクを処理できるアプリケーションがありません。</string>
+    <string name="system_settings">システム設定</string>
 </resources>
