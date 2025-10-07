@@ -35,9 +35,6 @@ internal fun Project.configureAndroidCompose(
             compose = true
         }
 
-        //needed for navigation3
-        pluginManager.apply(libs.findPlugin("meshtastic-kotlinx-serialization").get().get().pluginId)
-
         dependencies {
             val bom = libs.findLibrary("androidx-compose-bom").get()
             "implementation"(platform(bom))
