@@ -34,6 +34,9 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.proto)
     implementation(projects.core.strings)
+
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
+
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
