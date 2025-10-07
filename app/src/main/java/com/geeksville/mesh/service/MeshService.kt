@@ -18,6 +18,7 @@
 package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -207,9 +208,6 @@ class MeshService : Service() {
         private var configNonce = 1
     }
 
-    private var previousSummary: String? = null
-    private var previousStats: LocalStats? = null
-
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
@@ -227,22 +225,6 @@ class MeshService : Service() {
         val name = nodeDBbyID[packet?.from]?.user?.longName
         return name ?: getString(R.string.unknown_username)
     }
-
-    private val notificationSummary
-        get() =
-            when (connectionStateHolder.getState()) {
-                ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
-
-                ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
-                ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
-            }
-
-    private var localStatsTelemetry: TelemetryProtos.Telemetry? = null
-    private val localStats: LocalStats?
-        get() = localStatsTelemetry?.localStats
-
-    private val localStatsUpdatedAtMillis: Long?
-        get() = localStatsTelemetry?.time?.let { it * 1000L }
 
     /** start our location requests (if they weren't already running) */
     private fun startLocationRequests() {
@@ -368,12 +350,7 @@ class MeshService : Service() {
         val wantForeground = a != null && a != NO_DEVICE_SELECTED
 
         Timber.i("Requesting foreground service=$wantForeground")
-
-        // We always start foreground because that's how our service is always started (if we didn't
-        // then android would
-        // kill us)
-        // but if we don't really need foreground we immediately stop it.
-        val notification = serviceNotifications.updateServiceStateNotification(notificationSummary)
+        val notification = maybeUpdateServiceStatusNotification()
 
         try {
             ServiceCompat.startForeground(
@@ -976,35 +953,34 @@ class MeshService : Service() {
     }
 
     // Update our DB of users based on someone sending out a Telemetry subpacket
-    private fun handleReceivedTelemetry(fromNum: Int, t: TelemetryProtos.Telemetry) {
+    private fun handleReceivedTelemetry(fromNum: Int, telemetry: TelemetryProtos.Telemetry) {
         val isRemote = (fromNum != myNodeNum)
-        if (!isRemote && t.hasLocalStats()) {
-            localStatsTelemetry = t
-            maybeUpdateServiceStatusNotification()
+        if (!isRemote) {
+            maybeUpdateServiceStatusNotification(telemetry = telemetry)
         }
-        updateNodeInfo(fromNum) {
+        updateNodeInfo(fromNum) { nodeEntity ->
             when {
-                t.hasDeviceMetrics() -> {
-                    it.deviceTelemetry = t
-                    if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
+                telemetry.hasDeviceMetrics() -> {
+                    nodeEntity.deviceTelemetry = telemetry
+                    if (fromNum == myNodeNum || (isRemote && nodeEntity.isFavorite)) {
                         if (
-                            t.deviceMetrics.voltage > batteryPercentUnsupported &&
-                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
+                            telemetry.deviceMetrics.voltage > batteryPercentUnsupported &&
+                            telemetry.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
                         ) {
-                            if (shouldBatteryNotificationShow(fromNum, t)) {
-                                serviceNotifications.showOrUpdateLowBatteryNotification(it, isRemote)
+                            if (shouldBatteryNotificationShow(fromNum, telemetry)) {
+                                serviceNotifications.showOrUpdateLowBatteryNotification(nodeEntity, isRemote)
                             }
                         } else {
                             if (batteryPercentCooldowns.containsKey(fromNum)) {
                                 batteryPercentCooldowns.remove(fromNum)
                             }
-                            serviceNotifications.cancelLowBatteryNotification(it)
+                            serviceNotifications.cancelLowBatteryNotification(nodeEntity)
                         }
                     }
                 }
 
-                t.hasEnvironmentMetrics() -> it.environmentTelemetry = t
-                t.hasPowerMetrics() -> it.powerTelemetry = t
+                telemetry.hasEnvironmentMetrics() -> nodeEntity.environmentTelemetry = telemetry
+                telemetry.hasPowerMetrics() -> nodeEntity.powerTelemetry = telemetry
             }
         }
     }
@@ -1095,7 +1071,6 @@ class MeshService : Service() {
                     }
                     .build(),
             )
-            onNodeDBChanged()
         } else {
             Timber.w("Ignoring early received packet: ${packet.toOneLineString()}")
             // earlyReceivedPackets.add(packet)
@@ -1228,11 +1203,6 @@ class MeshService : Service() {
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
 
-    // If we just changed our nodedb, we might want to do somethings
-    private fun onNodeDBChanged() {
-        maybeUpdateServiceStatusNotification()
-    }
-
     /** Send in analytics about mesh connection */
     private fun reportConnection() {
         val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
@@ -1338,29 +1308,21 @@ class MeshService : Service() {
         }
 
         // Update the android notification in the status bar
-        maybeUpdateServiceStatusNotification()
+        maybeUpdateServiceStatusNotification(connectionState = c)
     }
 
-    private fun maybeUpdateServiceStatusNotification() {
-        var update = false
-        val currentSummary = notificationSummary
-        val currentStats = localStats
-        val currentStatsUpdatedAtMillis = localStatsUpdatedAtMillis
-        if (currentSummary.isNotBlank() && (previousSummary == null || !previousSummary.equals(currentSummary))) {
-            previousSummary = currentSummary
-            update = true
-        }
-        if (currentStats != null && (previousStats == null || !(previousStats?.equals(currentStats) ?: false))) {
-            previousStats = currentStats
-            update = true
-        }
-        if (update) {
-            serviceNotifications.updateServiceStateNotification(
-                summaryString = currentSummary,
-                localStats = currentStats,
-                currentStatsUpdatedAtMillis = currentStatsUpdatedAtMillis,
-            )
-        }
+    private fun maybeUpdateServiceStatusNotification(
+        telemetry: TelemetryProtos.Telemetry? = null,
+        connectionState: ConnectionState? = connectionStateHolder.getState(),
+    ): Notification {
+        val notificationSummary =
+            when (connectionState) {
+                ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
+                ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
+                ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
+                else -> ""
+            }
+        return serviceNotifications.updateServiceStateNotification(summaryString = notificationSummary, telemetry = telemetry)
     }
 
     private fun onRadioConnectionState(newState: ConnectionState) {
@@ -1600,7 +1562,7 @@ class MeshService : Service() {
                     )
                 }
             serviceScope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
-            newMyNodeInfo = mi
+            newMyNodeInfo = nodeRepository.myNodeInfo.value
         }
     }
 
@@ -1809,7 +1771,6 @@ class MeshService : Service() {
             haveNodeDB = true // we now have nodes from real hardware
             sendAnalytics()
             onHasSettings()
-            onNodeDBChanged()
         }
     }
 
