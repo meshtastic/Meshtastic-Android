@@ -56,7 +56,7 @@ fun LinkedCoordinates(modifier: Modifier = Modifier, latitude: Double, longitude
     val style =
         SpanStyle(
             color = HyperlinkBlue,
-            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            fontStyle = MaterialTheme.typography.titleLarge.fontStyle,
             textDecoration = TextDecoration.Underline,
         )
 
@@ -74,6 +74,7 @@ fun LinkedCoordinates(modifier: Modifier = Modifier, latitude: Double, longitude
             },
         ),
         text = annotatedString,
+        style = MaterialTheme.typography.titleLarge,
     )
 }
 

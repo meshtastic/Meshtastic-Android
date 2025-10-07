@@ -166,6 +166,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.feature.node.component.LinkedCoordinates
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.TracerouteButton
@@ -449,6 +450,15 @@ private fun NodeDetailList(
             node = node,
             onAction = onAction,
         )
+
+        PositionSection(
+            node = node,
+            ourNode = ourNode,
+            metricsState = metricsState,
+            availableLogs = availableLogs,
+            onAction = onAction,
+        )
+
         MetricsSection(node, metricsState, availableLogs, onAction)
 
         if (!metricsState.isManaged) {
@@ -461,6 +471,77 @@ private fun NodeDetailList(
                     showFirmwareSheet = true
                 },
             )
+        }
+    }
+}
+
+/**
+ * Displays node position details, last update time, distance, and related actions like requesting position and
+ * accessing map/position logs.
+ */
+@Composable
+private fun PositionSection(
+    node: Node,
+    ourNode: Node?,
+    metricsState: MetricsState,
+    availableLogs: Set<LogsType>,
+    onAction: (NodeDetailAction) -> Unit,
+) {
+    val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(metricsState.displayUnits)
+    val hasValidPosition = node.latitude != 0.0 || node.longitude != 0.0
+    TitledCard(title = stringResource(R.string.position)) {
+        // Current position coordinates (linked)
+        if (hasValidPosition) {
+            SettingsItemDetail(
+                text = stringResource(R.string.last_position_update),
+                icon = Icons.Default.LocationOn,
+                supportingContent = {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(formatAgo(node.position.time), style = MaterialTheme.typography.titleLarge)
+                        LinkedCoordinates(
+                            latitude = node.latitude,
+                            longitude = node.longitude,
+                            nodeName = node.user.longName,
+                        )
+                    }
+                },
+            )
+        }
+
+        // Distance (if available)
+        if (distance != null && distance.isNotEmpty()) {
+            SettingsItemDetail(
+                text = stringResource(R.string.node_sort_distance),
+                icon = Icons.Default.SocialDistance,
+                supportingText = distance,
+            )
+        }
+
+        // Exchange position action
+        if (!node.isEffectivelyUnmessageable) {
+            SettingsItem(
+                text = stringResource(id = R.string.exchange_position),
+                leadingIcon = Icons.Default.LocationOn,
+                trailingContent = {},
+                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
+            )
+        }
+
+        // Node Map log
+        if (availableLogs.contains(LogsType.NODE_MAP)) {
+            SettingsItem(text = stringResource(LogsType.NODE_MAP.titleRes), leadingIcon = LogsType.NODE_MAP.icon) {
+                onAction(NodeDetailAction.Navigate(LogsType.NODE_MAP.route))
+            }
+        }
+
+        // Positions Log
+        if (availableLogs.contains(LogsType.POSITIONS)) {
+            SettingsItem(text = stringResource(LogsType.POSITIONS.titleRes), leadingIcon = LogsType.POSITIONS.icon) {
+                onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.route))
+            }
         }
     }
 }
@@ -484,13 +565,13 @@ private fun MetricsSection(
         Spacer(modifier = Modifier.height(8.dp))
     }
 
-    if (availableLogs.isNotEmpty()) {
+    val nonPositionLogs = availableLogs.filter { it != LogsType.NODE_MAP && it != LogsType.POSITIONS }
+
+    if (nonPositionLogs.isNotEmpty()) {
         TitledCard(title = stringResource(id = R.string.logs)) {
-            LogsType.entries.forEach { type ->
-                if (availableLogs.contains(type)) {
-                    SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
-                        onAction(NodeDetailAction.Navigate(type.route))
-                    }
+            nonPositionLogs.forEach { type ->
+                SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
+                    onAction(NodeDetailAction.Navigate(type.route))
                 }
             }
         }
@@ -702,12 +783,6 @@ private fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction:
         )
     }
     SettingsItem(
-        text = stringResource(id = R.string.exchange_position),
-        leadingIcon = Icons.Default.LocationOn,
-        trailingContent = {},
-        onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
-    )
-    SettingsItem(
         text = stringResource(id = R.string.exchange_userinfo),
         leadingIcon = Icons.Default.Person,
         trailingContent = {},
@@ -857,20 +932,6 @@ private fun MainNodeDetails(node: Node, ourNode: Node?, displayUnits: ConfigProt
         text = stringResource(R.string.node_sort_last_heard),
         icon = Icons.Default.History,
         supportingText = formatAgo(node.lastHeard),
-    )
-    val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(displayUnits)
-    if (distance != null && distance.isNotEmpty()) {
-        SettingsItemDetail(
-            text = stringResource(R.string.node_sort_distance),
-            icon = Icons.Default.SocialDistance,
-            supportingText = distance,
-        )
-    }
-
-    SettingsItemDetail(
-        text = stringResource(R.string.last_position_update),
-        icon = Icons.Default.LocationOn,
-        supportingText = formatAgo(node.position.time),
     )
 }
 

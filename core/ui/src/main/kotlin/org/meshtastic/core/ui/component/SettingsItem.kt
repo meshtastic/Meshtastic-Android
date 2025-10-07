@@ -122,6 +122,28 @@ fun SettingsItemDetail(
     )
 }
 
+/** A settings detail item with composable content for the detail. */
+@Composable
+fun SettingsItemDetail(
+    text: String,
+    textColor: Color = LocalContentColor.current,
+    icon: ImageVector? = null,
+    iconTint: Color = LocalContentColor.current,
+    enabled: Boolean = true,
+    onClick: (() -> Unit)? = null,
+    supportingContent: @Composable () -> Unit,
+) {
+    SettingsListItem(
+        text = text,
+        textColor = textColor,
+        enabled = enabled,
+        onClick = onClick,
+        leadingContent = { icon.Icon(iconTint) },
+        supportingContent = supportingContent,
+        trailingContent = {},
+    )
+}
+
 /**
  * Base composable for all settings screen list items. It handles the Material3 [ListItem] structure and the conditional
  * click wrapper.
