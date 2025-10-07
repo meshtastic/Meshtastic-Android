@@ -148,6 +148,7 @@ dd-sdk-android-timber = { module = "com.datadoghq:dd-sdk-android-timber", versio
 dd-sdk-android-trace = { module = "com.datadoghq:dd-sdk-android-trace", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace-otel = { module = "com.datadoghq:dd-sdk-android-trace-otel", version.ref = "dd-sdk-android" }
 dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-documentation-plugin", version = "2.0.0" }
+javax-inject = { module = "javax.inject:javax.inject", version = "1" }
 markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }

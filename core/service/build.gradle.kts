@@ -15,10 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.hilt)
-}
+plugins { alias(libs.plugins.meshtastic.android.library) }
 
 android {
     buildFeatures { aidl = true }
@@ -29,6 +26,7 @@ dependencies {
     implementation(projects.core.database)
     implementation(projects.core.model)
     implementation(projects.core.proto)
+    implementation(libs.javax.inject)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.timber)
 }
