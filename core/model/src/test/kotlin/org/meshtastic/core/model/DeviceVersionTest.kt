@@ -15,11 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.core.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.meshtastic.core.model.DeviceVersion
 
 class DeviceVersionTest {
     /** make sure we match the python and device code behavior */
