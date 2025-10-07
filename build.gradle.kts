@@ -96,4 +96,12 @@ dependencyAnalysis {
     structure {
         ignoreKtx(true)
     }
+
+    issues {
+        all {
+            onUnusedDependencies {
+                exclude("androidx.compose.ui:ui-test-manifest")
+            }
+        }
+    }
 }

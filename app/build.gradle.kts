@@ -245,8 +245,10 @@ dependencies {
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
 
+    debugImplementation(libs.androidx.compose.ui.testManifest)
+
     androidTestImplementation(libs.androidx.compose.ui.test)
-    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
 
     testImplementation(libs.ext.junit)
     testImplementation(libs.junit)
