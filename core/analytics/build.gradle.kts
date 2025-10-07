@@ -22,10 +22,8 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.core.model)
     implementation(projects.core.prefs)
 
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.process)
@@ -33,7 +31,6 @@ dependencies {
 
     googleImplementation(libs.dd.sdk.android.compose)
     googleImplementation(libs.dd.sdk.android.logs)
-    googleImplementation(libs.dd.sdk.android.okhttp)
     googleImplementation(libs.dd.sdk.android.rum)
     googleImplementation(libs.dd.sdk.android.session.replay)
     googleImplementation(libs.dd.sdk.android.session.replay.compose)
