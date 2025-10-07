@@ -239,6 +239,8 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
+    googleImplementation(libs.maps.compose)
+    googleImplementation(libs.maps.compose.utils)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

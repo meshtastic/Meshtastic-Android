@@ -135,6 +135,12 @@ import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.thenIf
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.MapsComposeExperimentalApi
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.mikepenz.markdown.m3.Markdown
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
@@ -166,6 +172,10 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.component.NodeClusterMarkers
+import org.meshtastic.feature.map.model.NodeClusterItem
 import org.meshtastic.feature.node.component.LinkedCoordinates
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeMenuAction
@@ -492,6 +502,7 @@ private fun PositionSection(
     TitledCard(title = stringResource(R.string.position)) {
         // Current position coordinates (linked)
         if (hasValidPosition) {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp)) { InlineMap(node = node) }
             SettingsItemDetail(
                 text = stringResource(R.string.last_position_update),
                 icon = Icons.Default.LocationOn,
@@ -1184,6 +1195,49 @@ private fun PowerMetrics(node: Node) {
                 }
             }
         }
+    }
+}
+
+@OptIn(MapsComposeExperimentalApi::class)
+@Composable
+fun InlineMap(node: Node) {
+    val location = LatLng(node.latitude, node.longitude)
+    val cameraState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(location, 15f) }
+    GoogleMap(
+        uiSettings =
+        MapUiSettings(
+            zoomControlsEnabled = true,
+            mapToolbarEnabled = false,
+            compassEnabled = false,
+            myLocationButtonEnabled = false,
+            rotationGesturesEnabled = false,
+            scrollGesturesEnabled = false,
+            tiltGesturesEnabled = false,
+            zoomGesturesEnabled = false,
+        ),
+        cameraPositionState = cameraState,
+    ) {
+        NodeClusterMarkers(
+            nodeClusterItems =
+            listOf(
+                NodeClusterItem(
+                    node = node,
+                    nodePosition = location,
+                    nodeTitle = node.user.shortName,
+                    nodeSnippet = node.user.longName,
+                ),
+            ),
+            mapFilterState =
+            BaseMapViewModel.MapFilterState(
+                showWaypoints = false,
+                showPrecisionCircle = true,
+                onlyFavorites = false,
+                lastHeardFilter = LastHeardFilter.Any,
+                lastHeardTrackFilter = LastHeardFilter.Any,
+            ),
+            navigateToNodeDetails = {},
+            onClusterClick = { false },
+        )
     }
 }
 
