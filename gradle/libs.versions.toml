@@ -210,11 +210,6 @@ testing-hilt = ["hilt-android-testing"]
 testing-navigation = ["androidx-navigation-testing"]
 testing-room = ["androidx-room-testing"]
 
-# UI
-adaptive = ["androidx-compose-material3-adaptive", "androidx-compose-material3-adaptive-layout", "androidx-compose-material3-adaptive-navigation", "androidx-compose-material3-navigationSuite"]
-ui = ["material", "androidx-constraintlayout", "androidx-compose-material3", "androidx-compose-material-iconsExtended", "androidx-compose-ui-tooling-preview", "androidx-compose-runtime-livedata", "androidx-compose-ui-text"]
-ui-tooling = ["androidx-compose-ui-tooling"] #Separate for debugImplementation
-
 [plugins]
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
