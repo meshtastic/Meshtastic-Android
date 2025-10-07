@@ -40,7 +40,7 @@ dependencies {
     implementation(libs.bundles.ui)
 
     implementation(libs.accompanist.permissions)
-    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.timber)
     implementation(libs.zxing.android.embedded)

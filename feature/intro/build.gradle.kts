@@ -29,6 +29,6 @@ dependencies {
 
     implementation(libs.bundles.ui)
     implementation(libs.accompanist.permissions)
-    implementation(libs.navigation3.runtime)
-    implementation(libs.navigation3.ui)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 }

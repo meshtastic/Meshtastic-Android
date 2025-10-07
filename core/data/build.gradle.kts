@@ -34,7 +34,7 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
 
-    implementation(libs.core.location.altitude)
+    implementation(libs.androidx.core.location.altitude)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)

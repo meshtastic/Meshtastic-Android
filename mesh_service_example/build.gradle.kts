@@ -55,12 +55,11 @@ dependencies {
     implementation(projects.core.proto)
     implementation(projects.core.service)
 
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.activity)
-    implementation(libs.constraintlayout)
-
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.material)
 
     // OSM
     implementation(libs.bundles.osm)

@@ -50,7 +50,7 @@ dependencies {
     compileOnly(libs.hilt.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
-    compileOnly(libs.room.gradlePlugin)
+    compileOnly(libs.androidx.room.gradlePlugin)
     compileOnly(libs.secrets.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
     compileOnly(libs.truth)

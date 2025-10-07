@@ -25,6 +25,6 @@ android { namespace = "org.meshtastic.core.prefs" }
 
 dependencies {
     implementation(libs.bundles.coroutines)
-    implementation(libs.appcompat)
+    implementation(libs.androidx.appcompat)
     googleImplementation(libs.maps.compose)
 }

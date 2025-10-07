@@ -22,13 +22,15 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":core:prefs"))
-    implementation(project(":core:model"))
+    implementation(projects.core.model)
+    implementation(projects.core.prefs)
+
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.process)
     implementation(libs.timber)
-    implementation(libs.appcompat)
-    implementation(libs.hilt.lifecycle.viewmodel.compose)
-    implementation(libs.navigation.compose)
-    implementation(libs.lifecycle.process)
+
     googleImplementation(platform(libs.firebase.bom))
     googleImplementation(libs.bundles.firebase) {
         /*
