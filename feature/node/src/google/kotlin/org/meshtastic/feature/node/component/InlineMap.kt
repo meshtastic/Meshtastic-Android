@@ -17,12 +17,15 @@
 
 package org.meshtastic.feature.node.component
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
+import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
@@ -36,9 +39,17 @@ import org.meshtastic.core.ui.component.precisionBitsToMeters
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
 internal fun InlineMap(node: Node, modifier: Modifier = Modifier) {
+    val dark = isSystemInDarkTheme()
+    val mapColorScheme =
+        when (dark) {
+            true -> ComposeMapColorScheme.DARK
+            else -> ComposeMapColorScheme.LIGHT
+        }
+
     val location = LatLng(node.latitude, node.longitude)
     val cameraState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(location, 15f) }
     GoogleMap(
+        mapColorScheme = mapColorScheme,
         modifier = modifier,
         uiSettings =
         MapUiSettings(

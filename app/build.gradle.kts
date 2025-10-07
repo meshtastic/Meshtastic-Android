@@ -220,9 +220,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.markdown.renderer)
-    implementation(libs.markdown.renderer.android)
-    implementation(libs.markdown.renderer.m3)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
@@ -239,8 +236,6 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
-    googleImplementation(libs.maps.compose)
-    googleImplementation(libs.maps.compose.utils)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

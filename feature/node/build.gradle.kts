@@ -44,7 +44,6 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material)
     implementation(libs.timber)
-    implementation(libs.coil)
     implementation(libs.markdown.renderer.android)
     implementation(libs.markdown.renderer.m3)
     implementation(libs.markdown.renderer)
