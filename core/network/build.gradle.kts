@@ -33,8 +33,10 @@ android {
 dependencies {
     implementation(projects.core.model)
 
-    implementation(libs.bundles.coil)
-
+    implementation(libs.coil)
+    implementation(libs.coil.network.core)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.svg)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.okhttp)
