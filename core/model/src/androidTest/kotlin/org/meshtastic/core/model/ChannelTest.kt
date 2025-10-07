@@ -15,14 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.geeksville.mesh.channelSet
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.model.util.URL_PREFIX
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.toChannelSet
