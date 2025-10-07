@@ -48,11 +48,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             extensions.configure<LibraryAndroidComponentsExtension> {
                 disableUnnecessaryAndroidTests(target)
             }
-            dependencies {
-                "androidTestImplementation"(libs.findLibrary("kotlin.test").get())
-                "androidTestImplementation"(libs.findLibrary("androidx-test-espresso-core").get())
-                "androidTestImplementation"(libs.findLibrary("androidx-compose-ui-test-junit4").get())
-            }
         }
     }
 }
