@@ -840,7 +840,11 @@ private fun MainNodeDetails(node: Node, ourNode: Node?, displayUnits: ConfigProt
         supportingText = node.user.role.name,
     )
     if (node.isEffectivelyUnmessageable) {
-        SettingsItemDetail(text = stringResource(R.string.unmonitored_or_infrastructure), icon = Icons.Outlined.NoCell, supportingText = null)
+        SettingsItemDetail(
+            text = stringResource(R.string.unmonitored_or_infrastructure),
+            icon = Icons.Outlined.NoCell,
+            supportingText = null,
+        )
     }
     if (node.deviceMetrics.uptimeSeconds > 0) {
         SettingsItemDetail(

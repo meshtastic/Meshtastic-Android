@@ -42,8 +42,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
 
-/** A clickable settings item with optional supporting text and trailing content.
- *  Defaults to a trailing arrow icon if no custom trailing content is provided. */
+/**
+ * A clickable settings item with optional supporting text and trailing content. Defaults to a trailing arrow icon if no
+ * custom trailing content is provided.
+ */
 @Composable
 fun SettingsItem(
     text: String,
@@ -55,9 +57,8 @@ fun SettingsItem(
     trailingContent: @Composable (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
-    val finalTrailingContent: @Composable (() -> Unit) = trailingContent ?: {
-        Icons.AutoMirrored.Rounded.KeyboardArrowRight.Icon(LocalContentColor.current)
-    }
+    val finalTrailingContent: @Composable (() -> Unit) =
+        trailingContent ?: { Icons.AutoMirrored.Rounded.KeyboardArrowRight.Icon(LocalContentColor.current) }
 
     SettingsListItem(
         text = text,
@@ -65,11 +66,7 @@ fun SettingsItem(
         enabled = enabled,
         onClick = onClick,
         leadingContent = { leadingIcon.Icon(leadingIconTint) },
-        supportingContent = {
-            supportingText?.let {
-                Text(text = it, style = MaterialTheme.typography.titleMedium)
-            }
-        },
+        supportingContent = { supportingText?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) } },
         trailingContent = finalTrailingContent,
     )
 }
@@ -117,17 +114,17 @@ fun SettingsItemDetail(
                 Text(
                     text = it,
                     style = MaterialTheme.typography.titleLarge,
-                    color = textColor // Detail style explicitly sets color
+                    color = textColor, // Detail style explicitly sets color
                 )
             }
         },
-        trailingContent = { },
+        trailingContent = {},
     )
 }
 
 /**
- * Base composable for all settings screen list items.
- * It handles the Material3 [ListItem] structure and the conditional click wrapper.
+ * Base composable for all settings screen list items. It handles the Material3 [ListItem] structure and the conditional
+ * click wrapper.
  */
 @Composable
 private fun SettingsListItem(
@@ -144,9 +141,7 @@ private fun SettingsListItem(
             modifier = Modifier.padding(horizontal = 8.dp),
             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             headlineContent = { Text(text = text, color = textColor) },
-            supportingContent = {
-                SelectionContainer { supportingContent?.invoke() }
-            },
+            supportingContent = { SelectionContainer { supportingContent?.invoke() } },
             leadingContent = leadingContent,
             trailingContent = trailingContent,
         )
@@ -157,10 +152,7 @@ private fun SettingsListItem(
             onClick = onClick,
             enabled = enabled,
             colors =
-                CardDefaults.cardColors(
-                    containerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent
-                ),
+            CardDefaults.cardColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent),
             content = listItemContent,
         )
     } else {
@@ -170,14 +162,7 @@ private fun SettingsListItem(
 
 @Composable
 private fun ImageVector?.Icon(tint: Color = LocalContentColor.current) =
-    this?.let {
-        Icon(
-            imageVector = it,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = tint
-        )
-    }
+    this?.let { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint) }
 
 @Preview(showBackground = true)
 @Composable
@@ -188,35 +173,17 @@ private fun SettingsItemPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SettingsItemDisabledPreview() {
-    AppTheme {
-        SettingsItem(
-            text = "Text",
-            leadingIcon = Icons.Rounded.Android,
-            enabled = false
-        ) {}
-    }
+    AppTheme { SettingsItem(text = "Text", leadingIcon = Icons.Rounded.Android, enabled = false) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SettingsItemSwitchPreview() {
-    AppTheme {
-        SettingsItemSwitch(
-            text = "Text",
-            leadingIcon = Icons.Rounded.Android,
-            checked = true
-        ) {}
-    }
+    AppTheme { SettingsItemSwitch(text = "Text", leadingIcon = Icons.Rounded.Android, checked = true) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun SettingsItemDetailPreview() {
-    AppTheme {
-        SettingsItemDetail(
-            text = "Text 1",
-            icon = Icons.Rounded.Android,
-            supportingText = "Text2"
-        )
-    }
+    AppTheme { SettingsItemDetail(text = "Text 1", icon = Icons.Rounded.Android, supportingText = "Text2") }
 }

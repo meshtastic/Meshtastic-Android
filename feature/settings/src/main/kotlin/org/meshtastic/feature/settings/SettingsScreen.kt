@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.FormatPaint
@@ -124,11 +123,7 @@ fun SettingsScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
                 showEditDeviceProfileDialog = true
-                it.data?.data?.let { uri ->
-                    viewModel.importProfile(uri) { profile ->
-                        deviceProfile = profile
-                    }
-                }
+                it.data?.data?.let { uri -> viewModel.importProfile(uri) { profile -> deviceProfile = profile } }
             }
         }
 
@@ -142,11 +137,11 @@ fun SettingsScreen(
     if (showEditDeviceProfileDialog) {
         EditDeviceProfileDialog(
             title =
-                if (deviceProfile != null) {
-                    stringResource(R.string.import_configuration)
-                } else {
-                    stringResource(R.string.export_configuration)
-                },
+            if (deviceProfile != null) {
+                stringResource(R.string.import_configuration)
+            } else {
+                stringResource(R.string.export_configuration)
+            },
             deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
             onConfirm = {
                 showEditDeviceProfileDialog = false
@@ -155,8 +150,7 @@ fun SettingsScreen(
                 } else {
                     deviceProfile = it
                     val nodeName = it.shortName.ifBlank { "node" }
-                    val dateFormat =
-                        java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
+                    val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
                     val dateStr = dateFormat.format(java.util.Date())
                     val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
                     val intent =
@@ -193,12 +187,12 @@ fun SettingsScreen(
             MainAppBar(
                 title = stringResource(R.string.bottom_nav_settings),
                 subtitle =
-                    if (state.isLocal) {
-                        ourNode?.user?.longName
-                    } else {
-                        val remoteName = viewModel.destNode.value?.user?.longName ?: ""
-                        stringResource(R.string.remotely_administrating, remoteName)
-                    },
+                if (state.isLocal) {
+                    ourNode?.user?.longName
+                } else {
+                    val remoteName = viewModel.destNode.value?.user?.longName ?: ""
+                    stringResource(R.string.remotely_administrating, remoteName)
+                },
                 ourNode = ourNode,
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
                 canNavigateUp = false,
@@ -208,12 +202,7 @@ fun SettingsScreen(
             )
         },
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp)) {
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security.isManaged,
@@ -242,10 +231,7 @@ fun SettingsScreen(
 
             val context = LocalContext.current
 
-            TitledCard(
-                title = stringResource(R.string.app_settings),
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
+            TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
                 if (state.analyticsAvailable) {
                     val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
                     SettingsItemSwitch(
@@ -261,11 +247,7 @@ fun SettingsScreen(
                 val isGpsDisabled = context.gpsDisabled()
                 val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
 
-                LaunchedEffect(
-                    provideLocation,
-                    locationPermissionsState.allPermissionsGranted,
-                    isGpsDisabled
-                ) {
+                LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
                     if (provideLocation) {
                         if (locationPermissionsState.allPermissionsGranted) {
                             if (!isGpsDisabled) {
@@ -305,17 +287,17 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
-                    trailingContent = if (useInAppLangPicker) null else {
+                    trailingContent =
+                    if (useInAppLangPicker) {
+                        null
+                    } else {
                         {}
                     },
                 ) {
                     if (useInAppLangPicker) {
                         showLanguagePickerDialog = true
                     } else {
-                        val intent = Intent(
-                            ACTION_APP_LOCALE_SETTINGS,
-                            "package:${context.packageName}".toUri()
-                        )
+                        val intent = Intent(ACTION_APP_LOCALE_SETTINGS, "package:${context.packageName}".toUri())
                         if (intent.resolveActivity(context.packageManager) != null) {
                             settingsLauncher.launch(intent)
                         } else {
@@ -328,7 +310,7 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.theme),
                     leadingIcon = Icons.Rounded.FormatPaint,
-                    trailingContent = { },
+                    trailingContent = {},
                 ) {
                     showThemePickerDialog = true
                 }
@@ -363,7 +345,7 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.export_data_csv),
                     leadingIcon = Icons.Rounded.Output,
-                    trailingContent = { },
+                    trailingContent = {},
                 ) {
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -404,8 +386,7 @@ fun SettingsScreen(
 }
 
 private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock excluded modules.
-private const val UNLOCKED_CLICK_COUNT =
-    3 // Number of clicks before we toast that modules are already unlocked.
+private const val UNLOCKED_CLICK_COUNT = 3 // Number of clicks before we toast that modules are already unlocked.
 private const val UNLOCK_TIMEOUT_SECONDS = 1 // Timeout in seconds to reset the click counter.
 
 /** A button to display the app version. Clicking it 5 times will unlock the excluded modules. */
@@ -435,21 +416,13 @@ private fun AppVersionButton(
         when {
             clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
                 clickCount = 0
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.modules_already_unlocked),
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(context, context.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG).show()
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
                 onUnlockExcludedModules()
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.modules_unlocked),
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(context, context.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -461,13 +434,7 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
     val choices = remember {
         context
             .getLanguageMap()
-            .map { (languageTag, languageName) ->
-                languageName to {
-                    LanguageUtils.setAppLocale(
-                        languageTag
-                    )
-                }
-            }
+            .map { (languageTag, languageName) -> languageName to { LanguageUtils.setAppLocale(languageTag) } }
             .toMap()
     }
 
