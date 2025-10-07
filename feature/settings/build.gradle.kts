@@ -50,4 +50,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.timber)
     implementation(libs.zxing.android.embedded)
+
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
