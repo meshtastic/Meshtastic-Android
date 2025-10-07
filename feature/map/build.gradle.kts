@@ -44,7 +44,7 @@ dependencies {
     googleImplementation(libs.bundles.maps.compose)
 
     implementation(libs.accompanist.permissions)
-    implementation(libs.annotation)
-    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.timber)
 }

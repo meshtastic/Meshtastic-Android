@@ -22,4 +22,4 @@ plugins {
 
 android { namespace = "org.meshtastic.core.common" }
 
-dependencies { implementation(libs.core.ktx) }
+dependencies { implementation(libs.androidx.core.ktx) }

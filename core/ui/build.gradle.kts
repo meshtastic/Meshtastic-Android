@@ -35,6 +35,6 @@ dependencies {
     implementation(libs.bundles.markdown)
     implementation(libs.bundles.ui)
 
-    implementation(libs.emoji2.emojipicker)
-    implementation(libs.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.emoji2.emojipicker)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
 }
