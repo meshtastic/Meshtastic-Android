@@ -17,6 +17,7 @@
 
 package org.meshtastic.core.analytics.platform
 
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import org.meshtastic.core.analytics.DataPair
 
@@ -41,7 +42,7 @@ interface PlatformAnalytics {
      *
      * @param navController The [NavHostController] to track.
      */
-    fun addNavigationTrackingEffect(navController: NavHostController): () -> Unit
+    @Composable fun AddNavigationTrackingEffect(navController: NavHostController)
 
     /**
      * Indicates whether platform-specific services (like Google Play Services or Datadog) are available and

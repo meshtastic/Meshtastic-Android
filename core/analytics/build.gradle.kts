@@ -16,6 +16,7 @@
  */
 plugins {
     alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.secrets)
     alias(libs.plugins.kover)
@@ -24,9 +25,9 @@ plugins {
 dependencies {
     implementation(projects.core.prefs)
 
-    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.navigation.runtime)
     implementation(libs.timber)
 
     googleImplementation(libs.dd.sdk.android.compose)

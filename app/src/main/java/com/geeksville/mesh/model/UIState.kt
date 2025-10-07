@@ -23,6 +23,7 @@ import android.os.RemoteException
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
@@ -355,7 +356,8 @@ constructor(
         uiPreferencesDataSource.setAppIntroCompleted(true)
     }
 
-    fun addNavigationTrackingEffect(navController: NavHostController) {
-        analytics.addNavigationTrackingEffect(navController)
+    @Composable
+    fun AddNavigationTrackingEffect(navController: NavHostController) {
+        analytics.AddNavigationTrackingEffect(navController)
     }
 }

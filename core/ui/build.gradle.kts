@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.guava)
     implementation(libs.markdown.renderer)

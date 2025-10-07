@@ -191,7 +191,7 @@ constructor(
 
     @OptIn(ExperimentalTrackingApi::class)
     @Composable
-    override fun addNavigationTrackingEffect(navController: NavHostController) = {
+    override fun AddNavigationTrackingEffect(navController: NavHostController) {
         if (Datadog.isInitialized()) {
             NavigationViewTrackingEffect(
                 navController = navController,
