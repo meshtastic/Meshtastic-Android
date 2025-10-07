@@ -182,7 +182,6 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 
 [bundles]
 # Other
-markdown = ["markdown-renderer", "markdown-renderer-m3", "markdown-renderer-android"]
 osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 
 [plugins]
