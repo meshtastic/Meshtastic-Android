@@ -37,8 +37,6 @@ dependencies {
     implementation(projects.core.strings)
     implementation(projects.core.ui)
 
-    implementation(libs.bundles.osm)
-
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.compose.material.iconsExtended)
@@ -57,6 +55,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.material)
+    implementation(libs.mgrs)
+    implementation(libs.osmbonuspack)
+    implementation(libs.osmdroid.android)
     implementation(libs.timber)
 
     googleImplementation(libs.location.services)
