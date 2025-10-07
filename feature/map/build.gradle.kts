@@ -39,8 +39,6 @@ dependencies {
 
     implementation(libs.bundles.osm)
 
-    googleImplementation(libs.bundles.maps.compose)
-
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.compose.material.iconsExtended)
@@ -60,4 +58,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.material)
     implementation(libs.timber)
+
+    googleImplementation(libs.location.services)
+    googleImplementation(libs.maps.compose)
+    googleImplementation(libs.maps.compose.utils)
+    googleImplementation(libs.maps.compose.widgets)
 }

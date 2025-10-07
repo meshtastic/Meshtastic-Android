@@ -32,18 +32,8 @@ dependencies {
     implementation(libs.timber)
 
     googleImplementation(platform(libs.firebase.bom))
-    googleImplementation(libs.bundles.firebase) {
-        /*
-        Exclusion of protobuf / protolite dependencies is necessary as the
-        datastore-proto brings in protobuf dependencies. These are the source of truth
-        for Now in Android.
-        That's why the duplicate classes from below dependencies are excluded.
-         */
-        exclude(group = "com.google.protobuf", module = "protobuf-java")
-        exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
-        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
-        exclude(group = "com.google.firebase", module = "protolite-well-known-types")
-    }
+    googleImplementation(libs.firebase.analytics)
+    googleImplementation(libs.firebase.crashlytics)
     googleImplementation(libs.bundles.datadog)
 }
 

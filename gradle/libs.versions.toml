@@ -181,10 +181,6 @@ serialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.serializati
 spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "8.0.0" }
 
 [bundles]
-# Google
-firebase = ["firebase-analytics", "firebase-crashlytics"]
-maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets"]
-
 # Other
 coil = ["coil", "coil-network-core", "coil-network-okhttp", "coil-svg"]
 datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace", "dd-sdk-android-trace-otel"]
