@@ -31,20 +31,18 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.timber)
 
+    googleImplementation(libs.dd.sdk.android.compose)
+    googleImplementation(libs.dd.sdk.android.logs)
+    googleImplementation(libs.dd.sdk.android.okhttp)
+    googleImplementation(libs.dd.sdk.android.rum)
+    googleImplementation(libs.dd.sdk.android.session.replay)
+    googleImplementation(libs.dd.sdk.android.session.replay.compose)
+    googleImplementation(libs.dd.sdk.android.timber)
+    googleImplementation(libs.dd.sdk.android.trace)
+    googleImplementation(libs.dd.sdk.android.trace.otel)
     googleImplementation(platform(libs.firebase.bom))
-    googleImplementation(libs.bundles.firebase) {
-        /*
-        Exclusion of protobuf / protolite dependencies is necessary as the
-        datastore-proto brings in protobuf dependencies. These are the source of truth
-        for Now in Android.
-        That's why the duplicate classes from below dependencies are excluded.
-         */
-        exclude(group = "com.google.protobuf", module = "protobuf-java")
-        exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
-        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
-        exclude(group = "com.google.firebase", module = "protolite-well-known-types")
-    }
-    googleImplementation(libs.bundles.datadog)
+    googleImplementation(libs.firebase.analytics)
+    googleImplementation(libs.firebase.crashlytics)
 }
 
 val googleServiceKeywords = listOf("crashlytics", "google", "datadog")

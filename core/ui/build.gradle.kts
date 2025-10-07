@@ -31,10 +31,18 @@ dependencies {
     implementation(projects.core.proto)
     implementation(projects.core.strings)
 
-    implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.markdown)
-    implementation(libs.bundles.ui)
-
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.guava)
+    implementation(libs.markdown.renderer)
+    implementation(libs.markdown.renderer.m3)
+    implementation(libs.markdown.renderer.android)
+    implementation(libs.material)
 }

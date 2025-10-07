@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.material)
 
     // OSM
-    implementation(libs.bundles.osm)
+    implementation(libs.mgrs)
+    implementation(libs.osmbonuspack)
+    implementation(libs.osmdroid.android)
     implementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
 }

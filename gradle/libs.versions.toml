@@ -180,44 +180,6 @@ secrets-gradlePlugin = {module = "com.google.android.secrets-gradle-plugin:com.g
 serialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "8.0.0" }
 
-[bundles]
-# AndroidX
-androidx = ["androidx-core-ktx", "androidx-appcompat", "androidx-appcompat-resources", "androidx-activity-ktx", "androidx-activity-compose"]
-datastore = ["androidx-datastore", "androidx-datastore-preferences"]
-lifecycle = ["androidx-lifecycle-runtime-ktx", "androidx-lifecycle-livedata-ktx", "androidx-lifecycle-viewmodel-ktx", "androidx-lifecycle-common-java8", "androidx-lifecycle-process", "androidx-lifecycle-viewmodel-compose", "androidx-lifecycle-runtime-compose"]
-navigation = ["androidx-navigation-compose"]
-navigation3 = ["androidx-navigation3-runtime", "androidx-navigation3-ui"]
-room = ["androidx-room-runtime", "androidx-room-ktx"]
-
-# Coroutines
-coroutines = ["kotlinx-coroutines-android", "kotlinx-coroutines-guava"]
-
-# Google
-firebase = ["firebase-analytics", "firebase-crashlytics"]
-maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets"]
-
-# Networking
-ktor = ["ktor-client-content-negotiation", "ktor-client-okhttp", "ktor-serialization-kotlinx-json", "ktorfit", "okhttp3-logging-interceptor"]
-
-# Other
-coil = ["coil", "coil-network-core", "coil-network-okhttp", "coil-svg"]
-datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace", "dd-sdk-android-trace-otel"]
-markdown = ["markdown-renderer", "markdown-renderer-m3", "markdown-renderer-android"]
-osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
-
-# Testing
-testing = ["junit", "androidx-test-ext-junit"]
-testing-android = ["androidx-test-espresso-core", "androidx-compose-ui-test-junit4"]
-testing-android-manifest = ["androidx-compose-ui-test-manifest"]
-testing-hilt = ["hilt-android-testing"]
-testing-navigation = ["androidx-navigation-testing"]
-testing-room = ["androidx-room-testing"]
-
-# UI
-adaptive = ["androidx-compose-material3-adaptive", "androidx-compose-material3-adaptive-layout", "androidx-compose-material3-adaptive-navigation", "androidx-compose-material3-navigationSuite"]
-ui = ["material", "androidx-constraintlayout", "androidx-compose-material3", "androidx-compose-material-iconsExtended", "androidx-compose-ui-tooling-preview", "androidx-compose-runtime-livedata", "androidx-compose-ui-text"]
-ui-tooling = ["androidx-compose-ui-tooling"] #Separate for debugImplementation
-
 [plugins]
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
