@@ -236,7 +236,7 @@ jobs:
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.base_version }}
+          tag_name: ${{ inputs.tag_name }}
           name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
           generate_release_notes: true
           files: ./artifacts/*/*
