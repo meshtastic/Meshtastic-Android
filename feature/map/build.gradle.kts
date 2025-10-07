@@ -37,7 +37,6 @@ dependencies {
     implementation(projects.core.strings)
     implementation(projects.core.ui)
 
-    implementation(libs.bundles.coroutines)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.osm)
     implementation(libs.bundles.ui)
@@ -46,5 +45,6 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.timber)
 }

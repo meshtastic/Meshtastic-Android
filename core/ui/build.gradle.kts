@@ -31,10 +31,11 @@ dependencies {
     implementation(projects.core.proto)
     implementation(projects.core.strings)
 
-    implementation(libs.bundles.coroutines)
     implementation(libs.bundles.markdown)
     implementation(libs.bundles.ui)
 
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.guava)
 }
