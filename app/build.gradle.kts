@@ -140,6 +140,13 @@ android {
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
+        all {
+            if (name == "google") {
+                apply(plugin = libs.plugins.google.services.get().pluginId)
+                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+            }
+        }
+
         named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
         named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
     }
