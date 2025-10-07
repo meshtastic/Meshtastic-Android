@@ -40,4 +40,5 @@ dependencies {
     implementation(libs.zxing.core)
 
     testImplementation(libs.androidx.core.ktx)
+    testImplementation(libs.kotlin.test)
 }
