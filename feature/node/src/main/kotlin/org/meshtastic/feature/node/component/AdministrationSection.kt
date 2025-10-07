@@ -58,15 +58,7 @@ fun AdministrationSection(
             text = stringResource(id = R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
             trailingContent = {},
-            onClick = {
-                onAction(
-                    NodeDetailAction.TriggerServiceAction(
-                        ServiceAction.GetDeviceMetadata(
-                            node.num
-                        )
-                    )
-                )
-            },
+            onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
         SettingsItem(
             text = stringResource(id = R.string.remote_admin),
@@ -98,8 +90,7 @@ fun AdministrationSection(
                 val latestAlpha = metricsState.latestAlphaFirmware
 
                 val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
-                val statusColor =
-                    deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
+                val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
                 SettingsItemDetail(
                     text = stringResource(R.string.installed_firmware_version),
