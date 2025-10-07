@@ -32,8 +32,15 @@ android {
 
 dependencies {
     implementation(projects.core.model)
-    implementation(libs.bundles.ktor)
+
     implementation(libs.bundles.coil)
-    "googleImplementation"(libs.bundles.datadog)
+
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktorfit)
+    implementation(libs.okhttp3.logging.interceptor)
+
+    googleImplementation(libs.bundles.datadog)
 }

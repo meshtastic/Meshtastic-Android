@@ -193,9 +193,6 @@ room = ["androidx-room-runtime", "androidx-room-ktx"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets"]
 
-# Networking
-ktor = ["ktor-client-content-negotiation", "ktor-client-okhttp", "ktor-serialization-kotlinx-json", "ktorfit", "okhttp3-logging-interceptor"]
-
 # Other
 coil = ["coil", "coil-network-core", "coil-network-okhttp", "coil-svg"]
 datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace", "dd-sdk-android-trace-otel"]
