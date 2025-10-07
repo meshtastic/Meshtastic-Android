@@ -96,8 +96,8 @@ fun SettingsItemSwitch(
 @Composable
 fun SettingsItemDetail(
     text: String,
-    textColor: Color = LocalContentColor.current,
     supportingText: String?,
+    textColor: Color = LocalContentColor.current,
     icon: ImageVector? = null,
     iconTint: Color = LocalContentColor.current,
     enabled: Boolean = true,
