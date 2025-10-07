@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,7 +42,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.TitledCard
 
 @Composable
-internal fun notesSection(node: Node, onSaveNotes: (Int, String) -> Unit) {
+fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit) {
     if (node.isFavorite) {
         TitledCard(title = stringResource(R.string.notes)) {
             val originalNotes = node.notes

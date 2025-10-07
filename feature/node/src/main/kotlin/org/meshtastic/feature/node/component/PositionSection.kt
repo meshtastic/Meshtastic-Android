@@ -15,14 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.spacedBy
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.SocialDistance
@@ -33,10 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.model.MetricsState
-import com.geeksville.mesh.ui.node.NodeDetailAction
-import com.geeksville.mesh.ui.node.isEffectivelyUnmessageable
-import com.geeksville.mesh.ui.node.model.LogsType
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.toDistanceString
@@ -44,15 +38,17 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItem
 import org.meshtastic.core.ui.component.SettingsItemDetail
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.feature.node.component.LinkedCoordinates
-import org.meshtastic.feature.node.component.NodeMenuAction
+import org.meshtastic.feature.node.model.LogsType
+import org.meshtastic.feature.node.model.MetricsState
+import org.meshtastic.feature.node.model.NodeDetailAction
+import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 /**
  * Displays node position details, last update time, distance, and related actions like requesting position and
  * accessing map/position logs.
  */
 @Composable
-internal fun PositionSection(
+fun PositionSection(
     node: Node,
     ourNode: Node?,
     metricsState: MetricsState,
@@ -64,7 +60,7 @@ internal fun PositionSection(
     TitledCard(title = stringResource(R.string.position)) {
         // Current position coordinates (linked)
         if (hasValidPosition) {
-            Box(modifier = Modifier.fillMaxWidth().height(200.dp)) { InlineMap(node = node) }
+            InlineMap(node = node, Modifier.fillMaxWidth().height(200.dp))
             SettingsItemDetail(
                 text = stringResource(R.string.last_position_update),
                 icon = Icons.Default.LocationOn,

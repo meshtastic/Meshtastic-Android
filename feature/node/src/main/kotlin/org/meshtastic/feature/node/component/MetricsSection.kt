@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -23,16 +23,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.model.MetricsState
-import com.geeksville.mesh.ui.node.NodeDetailAction
-import com.geeksville.mesh.ui.node.model.LogsType
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItem
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.node.model.LogsType
+import org.meshtastic.feature.node.model.MetricsState
+import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
-internal fun MetricsSection(
+fun MetricsSection(
     node: Node,
     metricsState: MetricsState,
     availableLogs: Set<LogsType>,

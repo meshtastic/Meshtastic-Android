@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ForkLeft
@@ -28,8 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.model.MetricsState
-import com.geeksville.mesh.ui.node.NodeDetailAction
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.model.Node
@@ -40,11 +38,16 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItem
 import org.meshtastic.core.ui.component.SettingsItemDetail
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.ui.theme.StatusColors
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.feature.node.model.MetricsState
+import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Suppress("LongMethod")
 @Composable
-internal fun AdministrationSection(
+fun AdministrationSection(
     node: Node,
     metricsState: MetricsState,
     onAction: (NodeDetailAction) -> Unit,
@@ -55,7 +58,15 @@ internal fun AdministrationSection(
             text = stringResource(id = R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
             trailingContent = {},
-            onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
+            onClick = {
+                onAction(
+                    NodeDetailAction.TriggerServiceAction(
+                        ServiceAction.GetDeviceMetadata(
+                            node.num
+                        )
+                    )
+                )
+            },
         )
         SettingsItem(
             text = stringResource(id = R.string.remote_admin),
@@ -65,10 +76,10 @@ internal fun AdministrationSection(
             onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
         }
     }
-
-    TitledCard(stringResource(R.string.firmware)) {
-        if (metricsState.isLocal) {
-            val firmwareEdition = metricsState.firmwareEdition
+    val firmwareVersion = node.metadata?.firmwareVersion
+    val firmwareEdition = metricsState.firmwareEdition
+    if (firmwareVersion != null || (firmwareEdition != null && metricsState.isLocal)) {
+        TitledCard(stringResource(R.string.firmware)) {
             firmwareEdition?.let {
                 val icon =
                     when (it) {
@@ -82,35 +93,36 @@ internal fun AdministrationSection(
                     supportingText = it.name,
                 )
             }
-        }
-        node.metadata?.firmwareVersion?.let { firmwareVersion ->
-            val latestStable = metricsState.latestStableFirmware
-            val latestAlpha = metricsState.latestAlphaFirmware
+            firmwareVersion?.let { firmwareVersion ->
+                val latestStable = metricsState.latestStableFirmware
+                val latestAlpha = metricsState.latestAlphaFirmware
 
-            val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
-            val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
+                val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
+                val statusColor =
+                    deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
-            SettingsItemDetail(
-                text = stringResource(R.string.installed_firmware_version),
-                icon = Icons.Default.Memory,
-                supportingText = firmwareVersion.substringBeforeLast("."),
-                iconTint = statusColor,
-            )
-            HorizontalDivider()
-            SettingsItemDetail(
-                text = stringResource(R.string.latest_stable_firmware),
-                icon = Icons.Default.Memory,
-                supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
-                iconTint = MaterialTheme.colorScheme.StatusColors.StatusGreen,
-                onClick = { onFirmwareSelected(latestStable) },
-            )
-            SettingsItemDetail(
-                text = stringResource(R.string.latest_alpha_firmware),
-                icon = Icons.Default.Memory,
-                supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
-                iconTint = MaterialTheme.colorScheme.StatusColors.StatusYellow,
-                onClick = { onFirmwareSelected(latestAlpha) },
-            )
+                SettingsItemDetail(
+                    text = stringResource(R.string.installed_firmware_version),
+                    icon = Icons.Default.Memory,
+                    supportingText = firmwareVersion.substringBeforeLast("."),
+                    iconTint = statusColor,
+                )
+                HorizontalDivider()
+                SettingsItemDetail(
+                    text = stringResource(R.string.latest_stable_firmware),
+                    icon = Icons.Default.Memory,
+                    supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
+                    iconTint = MaterialTheme.colorScheme.StatusGreen,
+                    onClick = { onFirmwareSelected(latestStable) },
+                )
+                SettingsItemDetail(
+                    text = stringResource(R.string.latest_alpha_firmware),
+                    icon = Icons.Default.Memory,
+                    supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
+                    iconTint = MaterialTheme.colorScheme.StatusYellow,
+                    onClick = { onFirmwareSelected(latestAlpha) },
+                )
+            }
         }
     }
 }
@@ -123,10 +135,10 @@ private fun DeviceVersion.determineFirmwareStatusColor(
     val stableVersion = latestStable.asDeviceVersion()
     val alphaVersion = latestAlpha.asDeviceVersion()
     return when {
-        this < stableVersion -> MaterialTheme.colorScheme.StatusColors.StatusRed
-        this == stableVersion -> MaterialTheme.colorScheme.StatusColors.StatusGreen
-        this in stableVersion..alphaVersion -> MaterialTheme.colorScheme.StatusColors.StatusYellow
-        this > alphaVersion -> MaterialTheme.colorScheme.StatusColors.StatusOrange
+        this < stableVersion -> MaterialTheme.colorScheme.StatusRed
+        this == stableVersion -> MaterialTheme.colorScheme.StatusGreen
+        this in stableVersion..alphaVersion -> MaterialTheme.colorScheme.StatusYellow
+        this > alphaVersion -> MaterialTheme.colorScheme.StatusOrange
         else -> MaterialTheme.colorScheme.onSurface
     }
 }

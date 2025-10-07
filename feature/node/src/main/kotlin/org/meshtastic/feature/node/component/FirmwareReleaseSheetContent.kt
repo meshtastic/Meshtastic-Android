@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -48,7 +48,7 @@ import org.meshtastic.core.strings.R
 import timber.log.Timber
 
 @Composable
-internal fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
+fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
     val context = LocalContext.current
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp).fillMaxWidth(),

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,19 +42,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.ui.node.isEffectivelyUnmessageable
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItemDetail
+import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 @Composable
-internal fun NodeDetailsContent(
-    node: Node,
-    ourNode: Node?,
-    displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits,
-) {
+fun NodeDetailsContent(node: Node, ourNode: Node?, displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits) {
     if (node.mismatchKey) {
         EncryptionErrorContent()
     }

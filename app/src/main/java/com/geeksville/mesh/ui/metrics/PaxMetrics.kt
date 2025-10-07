@@ -57,13 +57,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.model.TimeFrame
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
+import org.meshtastic.feature.node.model.TimeFrame
 import java.text.DateFormat
 import java.util.Date
 

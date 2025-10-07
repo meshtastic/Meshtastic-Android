@@ -15,12 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.model
 
-import androidx.compose.runtime.Composable
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.database.model.isUnmessageableRole
 
-@Composable
-internal actual fun InlineMap(node: Node) {
-    // No-op for F-Droid builds
-}
+val Node.isEffectivelyUnmessageable: Boolean
+    get() =
+        if (user.hasIsUnmessagable()) {
+            user.isUnmessagable
+        } else {
+            user.role?.isUnmessageableRole() == true
+        }

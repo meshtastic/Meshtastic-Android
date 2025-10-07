@@ -43,10 +43,10 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.Environment
 import com.geeksville.mesh.model.EnvironmentGraphingData
-import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.node.model.TimeFrame
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f

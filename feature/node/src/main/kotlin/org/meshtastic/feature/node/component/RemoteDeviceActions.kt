@@ -15,20 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.ui.node.NodeDetailAction
-import com.geeksville.mesh.ui.node.isEffectivelyUnmessageable
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItem
-import org.meshtastic.feature.node.component.NodeMenuAction
-import org.meshtastic.feature.node.component.TracerouteButton
+import org.meshtastic.feature.node.model.NodeDetailAction
+import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 @Composable
 internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction: (NodeDetailAction) -> Unit) {

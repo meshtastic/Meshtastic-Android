@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -32,17 +32,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.ui.node.NodeDetailAction
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItem
 import org.meshtastic.core.ui.component.SettingsItemSwitch
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.feature.node.component.NodeActionDialogs
-import org.meshtastic.feature.node.component.NodeMenuAction
+import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
-internal fun DeviceActions(
+fun DeviceActions(
     isLocal: Boolean = false,
     node: Node,
     lastTracerouteTime: Long?,

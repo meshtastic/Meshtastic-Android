@@ -33,6 +33,8 @@ dependencies {
     implementation(projects.core.service)
     implementation(projects.core.strings)
     implementation(projects.core.ui)
+    implementation(projects.core.navigation)
+    implementation(projects.core.common)
 
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.material3)
@@ -42,4 +44,12 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.material)
     implementation(libs.timber)
+    implementation(libs.coil)
+    implementation(libs.markdown.renderer.android)
+    implementation(libs.markdown.renderer.m3)
+    implementation(libs.markdown.renderer)
+
+    googleImplementation(libs.location.services)
+    googleImplementation(libs.maps.compose)
+    googleImplementation(libs.maps.compose.utils)
 }

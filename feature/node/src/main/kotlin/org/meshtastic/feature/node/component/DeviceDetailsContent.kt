@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -44,14 +44,15 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import com.geeksville.mesh.R
-import com.geeksville.mesh.model.MetricsState
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItemDetail
-import org.meshtastic.core.ui.theme.StatusColors
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.feature.node.model.MetricsState
 
 @Composable
-internal fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
+fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
     val node = state.node ?: return
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
@@ -70,25 +71,25 @@ internal fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
     Spacer(modifier = Modifier.height(16.dp))
 
     SettingsItemDetail(
-        text = stringResource(org.meshtastic.core.strings.R.string.hardware),
+        text = stringResource(R.string.hardware),
         icon = Icons.Default.Router,
         supportingText = hwModelName,
     )
     SettingsItemDetail(
         text =
         if (isSupported) {
-            stringResource(org.meshtastic.core.strings.R.string.supported)
+            stringResource(R.string.supported)
         } else {
-            stringResource(org.meshtastic.core.strings.R.string.supported_by_community)
+            stringResource(R.string.supported_by_community)
         },
         icon =
         if (isSupported) {
             Icons.TwoTone.Verified
         } else {
-            ImageVector.vectorResource(R.drawable.unverified)
+            ImageVector.vectorResource(org.meshtastic.feature.node.R.drawable.unverified)
         },
         supportingText = null,
-        iconTint = if (isSupported) colorScheme.StatusColors.StatusGreen else colorScheme.StatusColors.StatusRed,
+        iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
     )
 }
 
@@ -100,9 +101,9 @@ private fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifi
         model = ImageRequest.Builder(LocalContext.current).data(imageUrl).build(),
         contentScale = ContentScale.Inside,
         contentDescription = deviceHardware.displayName,
-        placeholder = painterResource(R.drawable.hw_unknown),
-        error = painterResource(R.drawable.hw_unknown),
-        fallback = painterResource(R.drawable.hw_unknown),
+        placeholder = painterResource(org.meshtastic.feature.node.R.drawable.hw_unknown),
+        error = painterResource(org.meshtastic.feature.node.R.drawable.hw_unknown),
+        fallback = painterResource(org.meshtastic.feature.node.R.drawable.hw_unknown),
         modifier = modifier.padding(16.dp),
     )
 }

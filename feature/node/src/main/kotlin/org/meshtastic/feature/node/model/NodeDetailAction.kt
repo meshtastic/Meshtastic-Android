@@ -15,22 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.model
+package org.meshtastic.feature.node.model
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.vector.ImageVector
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.service.ServiceAction
+import org.meshtastic.feature.node.component.NodeMenuAction
 
-internal data class VectorMetricInfo(
-    @StringRes val label: Int,
-    val value: String,
-    val icon: ImageVector,
-    val rotateIcon: Float = 0f,
-)
+sealed interface NodeDetailAction {
+    data class Navigate(val route: Route) : NodeDetailAction
 
-internal data class DrawableMetricInfo(
-    @StringRes val label: Int,
-    val value: String,
-    @DrawableRes val icon: Int,
-    val rotateIcon: Float = 0f,
-)
+    data class TriggerServiceAction(val action: ServiceAction) : NodeDetailAction
+
+    data class HandleNodeMenuAction(val action: NodeMenuAction) : NodeDetailAction
+
+    data object ShareContact : NodeDetailAction
+}

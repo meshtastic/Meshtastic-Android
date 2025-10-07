@@ -15,9 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import org.meshtastic.core.database.model.Node
 
-@Composable internal expect fun InlineMap(node: Node)
+@Composable
+internal fun InlineMap(node: Node, modifier: Modifier = Modifier) {
+    // No-op for F-Droid builds
+}

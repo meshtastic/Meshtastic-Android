@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,9 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.ui.node.model.VectorMetricInfo
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**
  * Displays environmental metrics for a node, including temperature, humidity, pressure, and other sensor data.

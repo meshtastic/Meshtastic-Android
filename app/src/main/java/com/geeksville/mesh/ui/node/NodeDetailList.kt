@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package com.geeksville.mesh.ui.node
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,9 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.model.MetricsState
-import com.geeksville.mesh.ui.node.NodeDetailAction
-import com.geeksville.mesh.ui.node.model.LogsType
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.model.Node
@@ -46,16 +43,27 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.node.component.AdministrationSection
+import org.meshtastic.feature.node.component.DeviceActions
+import org.meshtastic.feature.node.component.DeviceDetailsContent
+import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
+import org.meshtastic.feature.node.component.MetricsSection
+import org.meshtastic.feature.node.component.NodeDetailsContent
+import org.meshtastic.feature.node.component.NotesSection
+import org.meshtastic.feature.node.component.PositionSection
+import org.meshtastic.feature.node.model.LogsType
+import org.meshtastic.feature.node.model.MetricsState
+import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
-internal fun NodeDetailContent(
+fun NodeDetailContent(
     node: Node,
     ourNode: Node?,
     metricsState: MetricsState,
     lastTracerouteTime: Long?,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.Companion,
     onSaveNotes: (nodeNum: Int, notes: String) -> Unit,
 ) {
     var showShareDialog by remember { mutableStateOf(false) }
@@ -83,8 +91,8 @@ internal fun NodeDetailContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun NodeDetailList(
-    modifier: Modifier = Modifier,
+fun NodeDetailList(
+    modifier: Modifier = Modifier.Companion,
     node: Node,
     lastTracerouteTime: Long?,
     ourNode: Node?,
@@ -114,7 +122,7 @@ internal fun NodeDetailList(
         TitledCard(title = stringResource(R.string.details)) {
             NodeDetailsContent(node, ourNode, metricsState.displayUnits)
         }
-        notesSection(node = node, onSaveNotes = onSaveNotes)
+        NotesSection(node = node, onSaveNotes = onSaveNotes)
 
         DeviceActions(
             isLocal = metricsState.isLocal,
@@ -155,7 +163,7 @@ private fun NodeDetailsPreview(@PreviewParameter(NodePreviewParameterProvider::c
             node = node,
             ourNode = node,
             lastTracerouteTime = null,
-            metricsState = MetricsState.Empty,
+            metricsState = MetricsState.Companion.Empty,
             availableLogs = emptySet(),
             onAction = {},
             onSaveNotes = { _, _ -> },

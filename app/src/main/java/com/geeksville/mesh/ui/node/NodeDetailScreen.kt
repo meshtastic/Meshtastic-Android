@@ -31,16 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.ui.node.components.NodeDetailContent
-import com.geeksville.mesh.ui.node.model.LogsType
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
+import org.meshtastic.feature.node.model.LogsType
+import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Suppress("LongMethod")
 @Composable
@@ -158,21 +156,3 @@ private fun handleNodeAction(
         }
     }
 }
-
-sealed interface NodeDetailAction {
-    data class Navigate(val route: Route) : NodeDetailAction
-
-    data class TriggerServiceAction(val action: ServiceAction) : NodeDetailAction
-
-    data class HandleNodeMenuAction(val action: NodeMenuAction) : NodeDetailAction
-
-    data object ShareContact : NodeDetailAction
-}
-
-val Node.isEffectivelyUnmessageable: Boolean
-    get() =
-        if (user.hasIsUnmessagable()) {
-            user.isUnmessagable
-        } else {
-            user.role?.isUnmessageableRole() == true
-        }

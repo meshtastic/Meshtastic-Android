@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
@@ -38,10 +38,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.util.thenIf
 
 @Composable
-internal fun InfoCard(icon: ImageVector, text: String, value: String, rotateIcon: Float = 0f) {
+fun InfoCard(icon: ImageVector, text: String, value: String, rotateIcon: Float = 0f) {
     Card(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp)) {
         Box(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp), contentAlignment = Alignment.Center) {
             Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -95,3 +94,6 @@ internal fun DrawableInfoCard(@DrawableRes iconRes: Int, text: String, value: St
         }
     }
 }
+
+inline fun Modifier.thenIf(precondition: Boolean, action: Modifier.() -> Modifier): Modifier =
+    if (precondition) action() else this

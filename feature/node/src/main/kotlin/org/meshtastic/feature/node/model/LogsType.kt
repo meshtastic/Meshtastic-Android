@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.model
+package org.meshtastic.feature.node.model
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
@@ -33,7 +33,7 @@ import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
 
-internal enum class LogsType(@StringRes val titleRes: Int, val icon: ImageVector, val route: Route) {
+enum class LogsType(@StringRes val titleRes: Int, val icon: ImageVector, val route: Route) {
     DEVICE(R.string.device_metrics_log, Icons.Default.ChargingStation, NodeDetailRoutes.DeviceMetrics),
     NODE_MAP(R.string.node_map, Icons.Default.Map, NodeDetailRoutes.NodeMap),
     POSITIONS(R.string.position_log, Icons.Default.LocationOn, NodeDetailRoutes.PositionLog),

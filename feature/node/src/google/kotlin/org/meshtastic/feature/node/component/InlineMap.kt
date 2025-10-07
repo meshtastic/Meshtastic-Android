@@ -15,27 +15,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node.components
+package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
+import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberUpdatedMarkerState
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.feature.map.BaseMapViewModel
-import org.meshtastic.feature.map.LastHeardFilter
-import org.meshtastic.feature.map.component.NodeClusterMarkers
-import org.meshtastic.feature.map.model.NodeClusterItem
+import org.meshtastic.core.ui.component.NodeChip
 
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
-internal actual fun InlineMap(node: Node) {
+internal fun InlineMap(node: Node, modifier: Modifier = Modifier) {
     val location = LatLng(node.latitude, node.longitude)
     val cameraState = rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(location, 15f) }
     GoogleMap(
+        modifier = modifier,
         uiSettings =
         MapUiSettings(
             zoomControlsEnabled = true,
@@ -49,26 +50,8 @@ internal actual fun InlineMap(node: Node) {
         ),
         cameraPositionState = cameraState,
     ) {
-        NodeClusterMarkers(
-            nodeClusterItems =
-            listOf(
-                NodeClusterItem(
-                    node = node,
-                    nodePosition = location,
-                    nodeTitle = node.user.shortName,
-                    nodeSnippet = node.user.longName,
-                ),
-            ),
-            mapFilterState =
-            BaseMapViewModel.MapFilterState(
-                showWaypoints = false,
-                showPrecisionCircle = true,
-                onlyFavorites = false,
-                lastHeardFilter = LastHeardFilter.Any,
-                lastHeardTrackFilter = LastHeardFilter.Any,
-            ),
-            navigateToNodeDetails = {},
-            onClusterClick = { false },
-        )
+        MarkerComposable(state = rememberUpdatedMarkerState(position = LatLng(node.latitude, node.longitude))) {
+            NodeChip(node = node)
+        }
     }
 }
