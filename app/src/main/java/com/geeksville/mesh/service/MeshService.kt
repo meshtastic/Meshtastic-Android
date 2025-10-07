@@ -1313,6 +1313,7 @@ class MeshService : Service() {
         val notificationSummary =
             when (connectionStateHolder.getState()) {
                 ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
+
                 ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
                 ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
             }
@@ -1532,7 +1533,7 @@ class MeshService : Service() {
      * Regenerate the myNodeInfo model. We call this twice. Once after we receive myNodeInfo from the device and again
      * after we have the node DB (which might allow us a better notion of our HwModel.
      */
-    private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata) {
+    private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata? = MeshProtos.DeviceMetadata.getDefaultInstance()) {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
             val mi =
@@ -1540,26 +1541,28 @@ class MeshService : Service() {
                     MyNodeEntity(
                         myNodeNum = myNodeNum,
                         model =
-                        when (val hwModel = metadata.hwModel) {
+                        when (val hwModel = metadata?.hwModel) {
                             null,
                             MeshProtos.HardwareModel.UNSET,
                             -> null
 
                             else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                         },
-                        firmwareVersion = metadata.firmwareVersion,
+                        firmwareVersion = metadata?.firmwareVersion,
                         couldUpdate = false,
                         shouldUpdate = false, // TODO add check after re-implementing firmware updates
                         currentPacketId = currentPacketId and 0xffffffffL,
                         messageTimeoutMsec = 5 * 60 * 1000, // constants from current firmware code
                         minAppVersion = minAppVersion,
                         maxChannels = 8,
-                        hasWifi = metadata.hasWifi,
+                        hasWifi = metadata?.hasWifi == true,
                         deviceId = deviceId.toStringUtf8(),
                     )
                 }
-            serviceScope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
-            newMyNodeInfo = nodeRepository.myNodeInfo.value
+            if (metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()) {
+                serviceScope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
+            }
+            newMyNodeInfo = mi
         }
     }
 
@@ -1585,6 +1588,7 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
 
         rawMyNodeInfo = myInfo
+        regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
         serviceScope.handledLaunch {
