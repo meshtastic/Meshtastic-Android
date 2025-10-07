@@ -46,7 +46,6 @@ import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.XmodemProtos
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.copy
@@ -350,7 +349,7 @@ class MeshService : Service() {
         val wantForeground = a != null && a != NO_DEVICE_SELECTED
 
         Timber.i("Requesting foreground service=$wantForeground")
-        val notification = maybeUpdateServiceStatusNotification()
+        val notification = updateServiceStatusNotification()
 
         try {
             ServiceCompat.startForeground(
@@ -956,7 +955,7 @@ class MeshService : Service() {
     private fun handleReceivedTelemetry(fromNum: Int, telemetry: TelemetryProtos.Telemetry) {
         val isRemote = (fromNum != myNodeNum)
         if (!isRemote) {
-            maybeUpdateServiceStatusNotification(telemetry = telemetry)
+            updateServiceStatusNotification(telemetry = telemetry)
         }
         updateNodeInfo(fromNum) { nodeEntity ->
             when {
@@ -1307,22 +1306,20 @@ class MeshService : Service() {
             ConnectionState.DISCONNECTED -> startDisconnect()
         }
 
-        // Update the android notification in the status bar
-        maybeUpdateServiceStatusNotification(connectionState = c)
+        updateServiceStatusNotification()
     }
 
-    private fun maybeUpdateServiceStatusNotification(
-        telemetry: TelemetryProtos.Telemetry? = null,
-        connectionState: ConnectionState? = connectionStateHolder.getState(),
-    ): Notification {
+    private fun updateServiceStatusNotification(telemetry: TelemetryProtos.Telemetry? = null): Notification {
         val notificationSummary =
-            when (connectionState) {
+            when (connectionStateHolder.getState()) {
                 ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
                 ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
                 ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
-                else -> ""
             }
-        return serviceNotifications.updateServiceStateNotification(summaryString = notificationSummary, telemetry = telemetry)
+        return serviceNotifications.updateServiceStateNotification(
+            summaryString = notificationSummary,
+            telemetry = telemetry,
+        )
     }
 
     private fun onRadioConnectionState(newState: ConnectionState) {
