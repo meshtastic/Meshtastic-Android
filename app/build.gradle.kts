@@ -250,6 +250,7 @@ dependencies {
 
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.hilt.android.testing)
 
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.junit)

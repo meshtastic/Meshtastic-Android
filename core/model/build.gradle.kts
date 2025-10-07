@@ -41,4 +41,6 @@ dependencies {
 
     testImplementation(libs.androidx.core.ktx)
     testImplementation(libs.kotlin.test)
+
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
