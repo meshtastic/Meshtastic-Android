@@ -15,19 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.core.model
 
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Test
-import org.meshtastic.core.model.DeviceVersion
 
-class DeviceVersionTest {
-    /** make sure we match the python and device code behavior */
+class PositionTest {
     @Test
-    fun canParse() {
-        assertEquals(10000, DeviceVersion("1.0.0").asInt)
-        assertEquals(10101, DeviceVersion("1.1.1").asInt)
-        assertEquals(12357, DeviceVersion("1.23.57").asInt)
-        assertEquals(12357, DeviceVersion("1.23.57.abde123").asInt)
+    fun degGood() {
+        Assert.assertEquals(Position.degI(89.0), 890000000)
+        Assert.assertEquals(Position.degI(-89.0), -890000000)
+
+        Assert.assertEquals(Position.degD(Position.degI(89.0)), 89.0, 0.01)
+        Assert.assertEquals(Position.degD(Position.degI(-89.0)), -89.0, 0.01)
+    }
+
+    @Test
+    fun givenPositionCreatedWithoutTime_thenTimeIsSet() {
+        val position = Position(37.1, 121.1, 35)
+        Assert.assertTrue(position.time != 0)
     }
 }

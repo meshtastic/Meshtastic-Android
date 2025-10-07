@@ -38,4 +38,9 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
+
+    testImplementation(libs.androidx.core.ktx)
+    testImplementation(libs.kotlin.test)
+
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }

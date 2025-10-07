@@ -95,6 +95,13 @@ dependencies {
 dependencyAnalysis {
     structure {
         ignoreKtx(true)
+
+        // Hilt Android is required by the Hilt plugin, but isn't directly used in many cases. Group
+        // these dependencies together so warnings aren't triggered.
+        bundle("hilt-core") {
+            includeDependency("com.google.dagger:hilt-core")
+            includeDependency(libs.hilt.android)
+        }
     }
 
     issues {

@@ -15,28 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.model.util
 
 import android.net.Uri
-import dagger.hilt.android.testing.HiltAndroidRule
-import dagger.hilt.android.testing.HiltAndroidTest
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.meshtastic.core.model.util.getChannelUrl
-import org.meshtastic.core.model.util.primaryChannel
-import org.meshtastic.core.model.util.toChannelSet
+import org.junit.runner.RunWith
 
-@HiltAndroidTest
+@RunWith(AndroidJUnit4::class)
 class ChannelSetTest {
-
-    @get:Rule var hiltRule = HiltAndroidRule(this)
-
-    @Before
-    fun init() {
-        hiltRule.inject()
-    }
 
     /** make sure we match the python and device code behavior */
     @Test
