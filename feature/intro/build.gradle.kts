@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 android { namespace = "org.meshtastic.feature.intro" }
