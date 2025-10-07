@@ -243,7 +243,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.androidx.test.runner)
 
-    testImplementation(libs.ext.junit)
+    testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.junit)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
