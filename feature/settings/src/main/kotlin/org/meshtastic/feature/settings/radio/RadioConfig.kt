@@ -147,7 +147,7 @@ fun RadioConfigItemList(
                 enabled = enabled,
                 text = stringResource(route.title),
                 leadingIcon = route.icon,
-                trailingIcon = null,
+                trailingContent = {},
             ) {
                 showDialog = true
             }

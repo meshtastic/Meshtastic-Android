@@ -509,7 +509,7 @@ private fun AdministrationSection(
         SettingsItem(
             text = stringResource(id = R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
-            trailingIcon = null,
+            trailingContent = {},
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
         SettingsItem(
@@ -534,7 +534,7 @@ private fun AdministrationSection(
                 SettingsItemDetail(
                     text = stringResource(R.string.firmware_edition),
                     icon = icon,
-                    trailingText = it.name,
+                    supportingText = it.name,
                 )
             }
         }
@@ -548,21 +548,21 @@ private fun AdministrationSection(
             SettingsItemDetail(
                 text = stringResource(R.string.installed_firmware_version),
                 icon = Icons.Default.Memory,
-                trailingText = firmwareVersion.substringBeforeLast("."),
+                supportingText = firmwareVersion.substringBeforeLast("."),
                 iconTint = statusColor,
             )
             HorizontalDivider()
             SettingsItemDetail(
                 text = stringResource(R.string.latest_stable_firmware),
                 icon = Icons.Default.Memory,
-                trailingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
+                supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
                 iconTint = colorScheme.StatusGreen,
                 onClick = { onFirmwareSelected(latestStable) },
             )
             SettingsItemDetail(
                 text = stringResource(R.string.latest_alpha_firmware),
                 icon = Icons.Default.Memory,
-                trailingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
+                supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
                 iconTint = colorScheme.StatusYellow,
                 onClick = { onFirmwareSelected(latestAlpha) },
             )
@@ -662,7 +662,7 @@ private fun DeviceActions(
         SettingsItem(
             text = stringResource(id = R.string.share_contact),
             leadingIcon = Icons.Rounded.QrCode2,
-            trailingIcon = null,
+            trailingContent = {},
             onClick = { onAction(NodeDetailAction.ShareContact) },
         )
         if (!isLocal) {
@@ -685,7 +685,7 @@ private fun DeviceActions(
         SettingsItem(
             text = stringResource(id = R.string.remove),
             leadingIcon = Icons.Rounded.Delete,
-            trailingIcon = null,
+            trailingContent = {},
             onClick = { displayRemoveDialog = true },
         )
     }
@@ -697,20 +697,20 @@ private fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction:
         SettingsItem(
             text = stringResource(id = R.string.direct_message),
             leadingIcon = Icons.AutoMirrored.TwoTone.Message,
-            trailingIcon = null,
+            trailingContent = {},
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
         )
     }
     SettingsItem(
         text = stringResource(id = R.string.exchange_position),
         leadingIcon = Icons.Default.LocationOn,
-        trailingIcon = null,
+        trailingContent = {},
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
     )
     SettingsItem(
         text = stringResource(id = R.string.exchange_userinfo),
         leadingIcon = Icons.Default.Person,
-        trailingIcon = null,
+        trailingContent = {},
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
     )
     TracerouteButton(
@@ -741,7 +741,7 @@ private fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
     SettingsItemDetail(
         text = stringResource(R.string.hardware),
         icon = Icons.Default.Router,
-        trailingText = hwModelName,
+        supportingText = hwModelName,
     )
     SettingsItemDetail(
         text =
@@ -756,7 +756,7 @@ private fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
         } else {
             ImageVector.vectorResource(com.geeksville.mesh.R.drawable.unverified)
         },
-        trailingText = "",
+        supportingText = null,
         iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
     )
 }
@@ -817,55 +817,60 @@ private fun MainNodeDetails(node: Node, ourNode: Node?, displayUnits: ConfigProt
     SettingsItemDetail(
         text = stringResource(R.string.long_name),
         icon = Icons.TwoTone.Person,
-        trailingText = node.user.longName.ifEmpty { "???" },
+        supportingText = node.user.longName.ifEmpty { "???" },
     )
     SettingsItemDetail(
         text = stringResource(R.string.short_name),
         icon = Icons.Outlined.Person,
-        trailingText = node.user.shortName.ifEmpty { "???" },
+        supportingText = node.user.shortName.ifEmpty { "???" },
     )
     SettingsItemDetail(
         text = stringResource(R.string.node_number),
         icon = Icons.Default.Numbers,
-        trailingText = node.num.toUInt().toString(),
+        supportingText = node.num.toUInt().toString(),
     )
     SettingsItemDetail(
         text = stringResource(R.string.user_id),
         icon = Icons.Default.Person,
-        trailingText = node.user.id,
+        supportingText = node.user.id,
     )
     SettingsItemDetail(
         text = stringResource(R.string.role),
         icon = Icons.Default.Work,
-        trailingText = node.user.role.name,
+        supportingText = node.user.role.name,
     )
     if (node.isEffectivelyUnmessageable) {
-        SettingsItemDetail(text = stringResource(R.string.unmonitored_or_infrastructure), icon = Icons.Outlined.NoCell)
+        SettingsItemDetail(
+            text = stringResource(R.string.unmonitored_or_infrastructure),
+            icon = Icons.Outlined.NoCell,
+            supportingText = null,
+        )
     }
     if (node.deviceMetrics.uptimeSeconds > 0) {
         SettingsItemDetail(
             text = stringResource(R.string.uptime),
             icon = Icons.Default.CheckCircle,
-            trailingText = formatUptime(node.deviceMetrics.uptimeSeconds),
+            supportingText = formatUptime(node.deviceMetrics.uptimeSeconds),
         )
     }
     SettingsItemDetail(
         text = stringResource(R.string.node_sort_last_heard),
         icon = Icons.Default.History,
-        trailingText = formatAgo(node.lastHeard),
+        supportingText = formatAgo(node.lastHeard),
     )
     val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(displayUnits)
     if (distance != null && distance.isNotEmpty()) {
         SettingsItemDetail(
             text = stringResource(R.string.node_sort_distance),
             icon = Icons.Default.SocialDistance,
-            trailingText = distance,
+            supportingText = distance,
         )
     }
+
     SettingsItemDetail(
         text = stringResource(R.string.last_position_update),
         icon = Icons.Default.LocationOn,
-        trailingText = formatAgo(node.position.time),
+        supportingText = formatAgo(node.position.time),
     )
 }
 

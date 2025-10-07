@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.FormatPaint
@@ -288,7 +287,12 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
-                    trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                    trailingContent =
+                    if (useInAppLangPicker) {
+                        null
+                    } else {
+                        {}
+                    },
                 ) {
                     if (useInAppLangPicker) {
                         showLanguagePickerDialog = true
@@ -306,7 +310,7 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.theme),
                     leadingIcon = Icons.Rounded.FormatPaint,
-                    trailingIcon = null,
+                    trailingContent = {},
                 ) {
                     showThemePickerDialog = true
                 }
@@ -321,7 +325,7 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.save_rangetest),
                     leadingIcon = Icons.Rounded.Output,
-                    trailingIcon = null,
+                    trailingContent = {},
                 ) {
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -341,7 +345,7 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.export_data_csv),
                     leadingIcon = Icons.Rounded.Output,
-                    trailingIcon = null,
+                    trailingContent = {},
                 ) {
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -355,7 +359,7 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.intro_show),
                     leadingIcon = Icons.Rounded.WavingHand,
-                    trailingIcon = null,
+                    trailingContent = {},
                 ) {
                     settingsViewModel.showAppIntro()
                 }
@@ -363,7 +367,7 @@ fun SettingsScreen(
                 SettingsItem(
                     text = stringResource(R.string.system_settings),
                     leadingIcon = Icons.Rounded.AppSettingsAlt,
-                    trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                    trailingContent = null,
                 ) {
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.fromParts("package", context.packageName, null)
@@ -405,7 +409,7 @@ private fun AppVersionButton(
     SettingsItemDetail(
         text = stringResource(R.string.app_version),
         icon = Icons.Rounded.Memory,
-        trailingText = appVersionName,
+        supportingText = appVersionName,
     ) {
         clickCount = clickCount.inc().coerceIn(0, UNLOCK_CLICK_COUNT)
 
