@@ -201,7 +201,6 @@ dependencies {
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
 
-    // Bundles
     implementation(libs.androidx.compose.material3.adaptive)
     implementation(libs.androidx.compose.material3.navigationSuite)
     implementation(libs.material)
@@ -222,12 +221,8 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
     implementation(libs.hilt.lifecycle.viewmodel.compose)
-
-    // ZXing
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
-
-    // Individual dependencies (flavor-specific ones removed)
     implementation(libs.core.splashscreen)
     implementation(libs.emoji2.emojipicker)
     implementation(libs.kotlinx.serialization.json)
@@ -238,20 +233,20 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
 
-    dokkaPlugin(libs.dokka.android.documentation.plugin)
+    debugImplementation(libs.androidx.compose.ui.testManifest)
 
     googleImplementation(libs.location.services)
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
 
-    debugImplementation(libs.androidx.compose.ui.testManifest)
-
     androidTestImplementation(libs.androidx.compose.ui.test)
     androidTestImplementation(libs.androidx.test.runner)
 
     testImplementation(libs.ext.junit)
     testImplementation(libs.junit)
+
+    dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
 val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
