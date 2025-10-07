@@ -220,6 +220,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.markdown.renderer)
     implementation(libs.markdown.renderer.android)
     implementation(libs.markdown.renderer.m3)

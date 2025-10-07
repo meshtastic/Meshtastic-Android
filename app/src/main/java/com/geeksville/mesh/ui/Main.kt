@@ -157,7 +157,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         }
     }
 
-    uIViewModel.addNavigationTrackingEffect(navController)
+    uIViewModel.AddNavigationTrackingEffect(navController)
 
     VersionChecks(uIViewModel)
     val alertDialogState by uIViewModel.currentAlert.collectAsStateWithLifecycle()
