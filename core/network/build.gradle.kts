@@ -44,5 +44,13 @@ dependencies {
     implementation(libs.ktorfit)
     implementation(libs.okhttp3.logging.interceptor)
 
-    googleImplementation(libs.bundles.datadog)
+    googleImplementation(libs.dd.sdk.android.compose)
+    googleImplementation(libs.dd.sdk.android.logs)
+    googleImplementation(libs.dd.sdk.android.okhttp)
+    googleImplementation(libs.dd.sdk.android.rum)
+    googleImplementation(libs.dd.sdk.android.session.replay)
+    googleImplementation(libs.dd.sdk.android.session.replay.compose)
+    googleImplementation(libs.dd.sdk.android.timber)
+    googleImplementation(libs.dd.sdk.android.trace)
+    googleImplementation(libs.dd.sdk.android.trace.otel)
 }

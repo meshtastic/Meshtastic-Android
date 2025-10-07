@@ -182,7 +182,6 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 
 [bundles]
 # Other
-datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace", "dd-sdk-android-trace-otel"]
 markdown = ["markdown-renderer", "markdown-renderer-m3", "markdown-renderer-android"]
 osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 

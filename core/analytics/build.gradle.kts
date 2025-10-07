@@ -31,10 +31,18 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.timber)
 
+    googleImplementation(libs.dd.sdk.android.compose)
+    googleImplementation(libs.dd.sdk.android.logs)
+    googleImplementation(libs.dd.sdk.android.okhttp)
+    googleImplementation(libs.dd.sdk.android.rum)
+    googleImplementation(libs.dd.sdk.android.session.replay)
+    googleImplementation(libs.dd.sdk.android.session.replay.compose)
+    googleImplementation(libs.dd.sdk.android.timber)
+    googleImplementation(libs.dd.sdk.android.trace)
+    googleImplementation(libs.dd.sdk.android.trace.otel)
     googleImplementation(platform(libs.firebase.bom))
     googleImplementation(libs.firebase.analytics)
     googleImplementation(libs.firebase.crashlytics)
-    googleImplementation(libs.bundles.datadog)
 }
 
 val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
