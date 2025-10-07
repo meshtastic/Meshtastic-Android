@@ -202,14 +202,6 @@ datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okht
 markdown = ["markdown-renderer", "markdown-renderer-m3", "markdown-renderer-android"]
 osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 
-# Testing
-testing = ["junit", "androidx-test-ext-junit"]
-testing-android = ["androidx-test-espresso-core", "androidx-compose-ui-test-junit4"]
-testing-android-manifest = ["androidx-compose-ui-test-manifest"]
-testing-hilt = ["hilt-android-testing"]
-testing-navigation = ["androidx-navigation-testing"]
-testing-room = ["androidx-room-testing"]
-
 [plugins]
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
