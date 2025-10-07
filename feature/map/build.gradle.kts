@@ -37,7 +37,6 @@ dependencies {
     implementation(projects.core.strings)
     implementation(projects.core.ui)
 
-    implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.osm)
 
     googleImplementation(libs.bundles.maps.compose)
@@ -51,6 +50,13 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.common.java8)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.material)
     implementation(libs.timber)

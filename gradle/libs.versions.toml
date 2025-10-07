@@ -181,14 +181,6 @@ serialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.serializati
 spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "8.0.0" }
 
 [bundles]
-# AndroidX
-androidx = ["androidx-core-ktx", "androidx-appcompat", "androidx-appcompat-resources", "androidx-activity-ktx", "androidx-activity-compose"]
-datastore = ["androidx-datastore", "androidx-datastore-preferences"]
-lifecycle = ["androidx-lifecycle-runtime-ktx", "androidx-lifecycle-livedata-ktx", "androidx-lifecycle-viewmodel-ktx", "androidx-lifecycle-common-java8", "androidx-lifecycle-process", "androidx-lifecycle-viewmodel-compose", "androidx-lifecycle-runtime-compose"]
-navigation = ["androidx-navigation-compose"]
-navigation3 = ["androidx-navigation3-runtime", "androidx-navigation3-ui"]
-room = ["androidx-room-runtime", "androidx-room-ktx"]
-
 # Google
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets"]
