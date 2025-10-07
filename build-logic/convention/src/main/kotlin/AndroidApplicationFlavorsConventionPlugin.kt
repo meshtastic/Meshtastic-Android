@@ -31,29 +31,6 @@ class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
         with(target) {
             extensions.configure<ApplicationExtension> {
                 configureFlavors(this)
-                productFlavors {
-                    all {
-                        if (name == MeshtasticFlavor.google.name) {
-                            apply(plugin = "meshtastic.android.application.firebase")
-                            apply(plugin = "meshtastic.android.application.datadog")
-                            dependencies {
-                                // Google specific dependencies
-                                "googleImplementation"(libs.findBundle("maps-compose").get())
-                                "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
-                            }
-                        } else if (name == MeshtasticFlavor.fdroid.name) {
-                            dependencies {
-                                // F-Droid specific dependencies
-                                "fdroidImplementation"(libs.findBundle("osm").get())
-                                "fdroidImplementation"(
-                                    libs.findLibrary("osmdroid-geopackage").get()
-                                ) {
-                                    exclude(group = "com.j256.ormlite")
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
     }

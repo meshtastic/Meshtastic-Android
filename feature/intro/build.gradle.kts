@@ -19,11 +19,16 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 android { namespace = "org.meshtastic.feature.intro" }
 
 dependencies {
     implementation(projects.core.strings)
+
+    implementation(libs.bundles.ui)
     implementation(libs.accompanist.permissions)
+    implementation(libs.navigation3.runtime)
+    implementation(libs.navigation3.ui)
 }

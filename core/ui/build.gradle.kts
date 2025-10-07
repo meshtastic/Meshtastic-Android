@@ -33,5 +33,8 @@ dependencies {
 
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.markdown)
+    implementation(libs.bundles.ui)
+
     implementation(libs.emoji2.emojipicker)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
 }

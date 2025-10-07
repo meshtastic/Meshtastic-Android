@@ -40,9 +40,11 @@ dependencies {
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.osm)
+    implementation(libs.bundles.ui)
     googleImplementation(libs.bundles.maps.compose)
 
     implementation(libs.accompanist.permissions)
     implementation(libs.annotation)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
     implementation(libs.timber)
 }

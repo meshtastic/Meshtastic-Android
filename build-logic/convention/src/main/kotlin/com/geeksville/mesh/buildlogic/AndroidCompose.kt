@@ -35,25 +35,16 @@ internal fun Project.configureAndroidCompose(
             compose = true
         }
 
-        //needed for navigation3
-        pluginManager.apply(libs.findPlugin("meshtastic-kotlinx-serialization").get().get().pluginId)
-
         dependencies {
             val bom = libs.findLibrary("androidx-compose-bom").get()
             "implementation"(platform(bom))
             "androidTestImplementation"(platform(bom))
-            "implementation"(libs.findBundle("ui").get())
-            "implementation"(libs.findBundle("adaptive").get())
-            "implementation"(libs.findBundle("lifecycle").get())
             "implementation"(libs.findBundle("navigation").get())
-            "androidTestImplementation"(libs.findBundle("testing.navigation").get())
-            "implementation"(libs.findBundle("navigation3").get())
             "implementation"(libs.findBundle("ui-tooling").get())
             "implementation"(libs.findLibrary("androidx-compose-ui-tooling-preview").get())
             "implementation"(libs.findLibrary("androidx-compose-runtime").get())
             "implementation"(libs.findLibrary("androidx-compose-runtime-tracing").get())
             "debugImplementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
-            "debugImplementation"(libs.findLibrary("androidx-compose-ui-testManifest").get())
         }
     }
 

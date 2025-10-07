@@ -27,7 +27,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.secrets)
     alias(libs.plugins.dokka)
@@ -202,28 +201,50 @@ dependencies {
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
 
-    // Bundles
-    implementation(libs.bundles.markdown)
-    implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.datastore)
-    implementation(libs.bundles.coil)
-
-    // ZXing
+    implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.navigationSuite)
+    implementation(libs.material)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.compose.runtime.livedata)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.lifecycle.process)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.markdown.renderer)
+    implementation(libs.markdown.renderer.android)
+    implementation(libs.markdown.renderer.m3)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.coil)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.svg)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
-
-    // Individual dependencies (flavor-specific ones removed)
     implementation(libs.core.splashscreen)
     implementation(libs.emoji2.emojipicker)
-    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.eclipse.paho.client.mqttv3)
     implementation(libs.streamsupport.minifuture)
     implementation(libs.usb.serial.android)
     implementation(libs.work.runtime.ktx)
-    implementation(libs.core.location.altitude)
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
+
+    debugImplementation(libs.androidx.compose.ui.testManifest)
+
+    googleImplementation(libs.location.services)
+
+    fdroidImplementation(libs.osmdroid.android)
+    fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+
+    androidTestImplementation(libs.androidx.compose.ui.test)
+    androidTestImplementation(libs.androidx.test.runner)
+
+    testImplementation(libs.ext.junit)
+    testImplementation(libs.junit)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
