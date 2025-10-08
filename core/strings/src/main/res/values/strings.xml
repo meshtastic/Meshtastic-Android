@@ -28,7 +28,7 @@
 
     <string name="default_mqtt_address" translatable="false">mqtt.meshtastic.org</string>
 
-    <string name="fallback_node_name">Meshtastic %s</string>
+    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_title">Filter by</string>
