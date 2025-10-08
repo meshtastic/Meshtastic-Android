@@ -102,6 +102,11 @@ dependencyAnalysis {
             includeDependency("com.google.dagger:hilt-core")
             includeDependency(libs.hilt.android)
         }
+
+        bundle("ktorfit") {
+            includeDependency("de.jensklingenberg.ktorfit:ktorfit-lib")
+            includeDependency("de.jensklingenberg.ktorfit:ktorfit-annotations")
+        }
     }
 
     issues {

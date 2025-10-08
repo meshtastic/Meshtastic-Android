@@ -40,7 +40,7 @@ dependencies {
     implementation(libs.zxing.core)
 
     testImplementation(libs.androidx.core.ktx)
-    testImplementation(libs.kotlin.test)
+    testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
 }
