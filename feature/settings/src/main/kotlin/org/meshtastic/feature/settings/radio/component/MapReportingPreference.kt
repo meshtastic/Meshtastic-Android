@@ -105,7 +105,7 @@ fun MapReportingPreference(
                 )
                 if (shouldReportLocation && mapReportingEnabled) {
                     Slider(
-                        modifier = Modifier.Companion.padding(horizontal = 16.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         value = positionPrecision.toFloat(),
                         onValueChange = { onPositionPrecisionChanged(it.roundToInt()) },
                         enabled = enabled,
@@ -116,13 +116,13 @@ fun MapReportingPreference(
                     val unit = DistanceUnit.Companion.getFromLocale()
                     Text(
                         text = precisionMeters.toDistanceString(unit),
-                        modifier = Modifier.Companion.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                         fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                         overflow = TextOverflow.Companion.Ellipsis,
                         maxLines = 1,
                     )
                     EditTextPreference(
-                        modifier = Modifier.Companion.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = 16.dp),
                         title = stringResource(R.string.map_reporting_interval_seconds),
                         value = publishIntervalSecs,
                         isError = publishIntervalSecs < 3600,

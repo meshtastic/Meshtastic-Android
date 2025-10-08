@@ -29,6 +29,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.core.ui.theme.GraphColors.Yellow
+import org.meshtastic.feature.node.model.TimeFrame
 
 @Suppress("MagicNumber")
 enum class Environment(val color: Color) {
@@ -83,7 +84,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
 
     /**
-     * Filters [environmentMetrics] based on a [TimeFrame].
+     * Filters [environmentMetrics] based on a [org.meshtastic.feature.node.model.TimeFrame].
      *
      * @param timeFrame used to filter
      * @return [EnvironmentGraphingData]
