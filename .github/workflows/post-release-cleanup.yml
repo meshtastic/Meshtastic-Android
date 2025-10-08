@@ -34,7 +34,7 @@ jobs:
           BASE_VERSION="${{ github.event.inputs.base_version }}"
           TAG_PREFIX="v${BASE_VERSION}-"
           echo "Searching for pre-releases with tag prefix '$TAG_PREFIX'."
-          RELEASES_TO_DELETE=$(gh release list --json tagName,isPrerelease --limit 100 | jq -r --arg prefix "$TAG_PREFIX" '.[] | select(.isPrerelease == true and .tagName | startswith($prefix)) | .tagName')
+          RELEASES_TO_DELETE=$(gh release list --json tagName,isPrerelease --limit 100 | jq -r --arg prefix "$TAG_PREFIX" '.[] | select(.isPrerelease == true and .tagName != null and (.tagName | startswith($prefix))) | .tagName')
 
           if [ -z "$RELEASES_TO_DELETE" ]; then
             echo "No pre-releases found for base version $BASE_VERSION."
