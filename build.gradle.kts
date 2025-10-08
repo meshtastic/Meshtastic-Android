@@ -97,7 +97,8 @@ dependencyAnalysis {
         ignoreKtx(true)
 
         // Hilt Android is required by the Hilt plugin, but isn't directly used in many cases. Group
-        // these dependencies together so warnings aren't triggered.
+        // these dependencies together so warnings aren't triggered. If neither of these are being
+        // used, the module likely shouldn't be applying the Hilt plugin.
         bundle("hilt-core") {
             includeDependency("com.google.dagger:hilt-core")
             includeDependency(libs.hilt.android)
@@ -112,6 +113,7 @@ dependencyAnalysis {
     issues {
         all {
             onUnusedDependencies {
+                severity("fail")
                 exclude("androidx.compose.ui:ui-test-manifest")
             }
         }

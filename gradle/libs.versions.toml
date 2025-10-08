@@ -40,10 +40,8 @@ protobuf = "4.32.1"
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose" }
-androidx-activity-ktx = { module = "androidx.activity:activity-ktx" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
-androidx-appcompat-resources = { module = "androidx.appcompat:appcompat-resources", version.ref = "appcompat" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0-alpha03" }
@@ -52,37 +50,27 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", version = "1.6.0" }
 androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version = "1.3.0" }
-androidx-lifecycle-common-java8 = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "lifecycle" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
-androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-navigation-common = { module = "androidx.navigation:navigation-common", version.ref = "navigation" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 androidx-navigation-runtime = { module = "androidx.navigation:navigation-runtime", version.ref = "navigation" }
-androidx-navigation-testing = { module = "androidx.navigation:navigation-testing", version.ref = "navigation" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
-androidx-tracing-ktx = { module = "androidx.tracing:tracing-ktx", version.ref = "androidxTracing" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.10.5" }
 
 # Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.09.01" }
-androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
-androidx-compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
 androidx-compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "androidxComposeMaterial3Adaptive" }
-androidx-compose-material3-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "androidxComposeMaterial3Adaptive" }
-androidx-compose-material3-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation", version.ref = "androidxComposeMaterial3Adaptive" }
-androidx-compose-material3-windowSizeClass = { module = "androidx.compose.material3:material3-window-size-class" }
 androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata" }
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidxTracing" }
@@ -97,7 +85,6 @@ android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", versio
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.3.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
-firebase-performance = { module = "com.google.firebase:firebase-perf" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
@@ -113,9 +100,8 @@ truth = { module = "com.google.truth:truth", version = "1.4.5" }
 
 # Kotlin
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
@@ -127,13 +113,11 @@ ktorfit = { module = "de.jensklingenberg.ktorfit:ktorfit-lib", version.ref = "kt
 okhttp3-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version = "5.2.0" }
 
 # Testing
-androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.7.0" }
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version = "1.3.0" }
 androidx-test-runner = { module = "androidx.test:runner", version = "1.7.0" }
 junit = { module = "junit:junit", version = "4.13.2" }
 
 # Other
-awesome-app-rating = { module = "com.suddenh4x.ratingdialog:awesome-app-rating", version = "2.8.0" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-core = { module = "io.coil-kt.coil3:coil-network-core", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
@@ -166,7 +150,6 @@ zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", ve
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
 android-tools-common = { module = "com.android.tools:common", version = "31.13.0" }
-androidx-lint-gradle = { module = "androidx.lint:lint-gradle", version = "1.0.0-alpha05" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.21.0" }
@@ -174,7 +157,6 @@ detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.4.27"
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version = "3.0.6" }
-firebase-performance-gradlePlugin = { module = "com.google.firebase:perf-plugin", version = "2.0.1" }
 google-services-gradlePlugin = { module = "com.google.gms.google-services:com.google.gms.google-services.gradle.plugin", version = "4.4.3" }
 hilt-gradlePlugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }

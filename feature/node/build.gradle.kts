@@ -34,15 +34,11 @@ dependencies {
     implementation(projects.core.strings)
     implementation(projects.core.ui)
     implementation(projects.core.navigation)
-    implementation(projects.core.common)
 
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.material)
     implementation(libs.timber)
     implementation(libs.coil)
     implementation(libs.markdown.renderer.android)
@@ -51,5 +47,4 @@ dependencies {
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.maps.compose)
-    googleImplementation(libs.maps.compose.utils)
 }
