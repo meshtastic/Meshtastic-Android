@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
@@ -149,14 +150,13 @@ fun ConnectionsScreen(
     LaunchedEffect(connectionState, regionUnset) {
         when (connectionState) {
             ConnectionState.CONNECTED -> {
-                if (regionUnset) R.string.must_set_region else R.string.connected_to
+                if (regionUnset) R.string.must_set_region else R.string.connected
             }
 
             ConnectionState.DISCONNECTED -> R.string.not_connected
             ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
         }.let {
-            val firmwareString = info?.firmwareString ?: context.getString(R.string.unknown)
-            scanModel.setErrorText(context.getString(it, firmwareString))
+            scanModel.setErrorText(context.getString(it))
         }
     }
 
