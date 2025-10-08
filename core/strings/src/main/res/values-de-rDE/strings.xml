@@ -890,4 +890,5 @@
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Keine Anwendung zum Bearbeiten des Links verfügbar.</string>
     <string name="system_settings">Systemeinstellungen</string>
+    <string name="no_local_stats">No Stats Available</string>
 </resources>
