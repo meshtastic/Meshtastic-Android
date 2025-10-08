@@ -38,11 +38,8 @@ dependencies {
 
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.material)
     implementation(libs.timber)
     implementation(libs.coil)
     implementation(libs.markdown.renderer.android)
