@@ -26,9 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.AdminProtos
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.proto.AdminProtos
 
 /** A dialog for importing a shared contact that was scanned from a QR code. */
 @Composable

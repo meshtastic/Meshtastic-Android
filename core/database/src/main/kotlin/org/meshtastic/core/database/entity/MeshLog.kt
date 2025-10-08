@@ -21,10 +21,10 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshProtos.FromRadio
-import com.geeksville.mesh.Portnums
 import com.google.protobuf.TextFormat
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.MeshProtos.FromRadio
+import org.meshtastic.proto.Portnums
 import java.io.IOException
 
 @Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")

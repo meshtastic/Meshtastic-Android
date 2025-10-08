@@ -18,10 +18,10 @@
 package org.meshtastic.core.model
 
 import androidx.annotation.StringRes
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.RegionCode
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
+import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.RegionCode
 import kotlin.math.floor
 
 /** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */

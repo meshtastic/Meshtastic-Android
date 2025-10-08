@@ -55,8 +55,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
-import com.geeksville.mesh.AdminProtos
-import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
@@ -89,6 +87,8 @@ import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
+import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.MeshProtos.DeviceMetadata
 
 fun getNavRouteFrom(routeName: String): Route? =
     ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route

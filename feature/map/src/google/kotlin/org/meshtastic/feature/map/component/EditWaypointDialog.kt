@@ -62,10 +62,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.copy
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
+import org.meshtastic.proto.MeshProtos.Waypoint
+import org.meshtastic.proto.copy
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

@@ -24,10 +24,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshProtos.MeshPacket
-import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,6 +57,10 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.Portnums.PortNum
 import timber.log.Timber
 import java.io.BufferedWriter
 import java.io.FileNotFoundException

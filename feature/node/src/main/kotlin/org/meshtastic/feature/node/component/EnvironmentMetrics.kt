@@ -36,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.ConfigProtos
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.model.util.UnitConversions.toTempString
@@ -45,6 +44,7 @@ import org.meshtastic.core.model.util.toSpeedString
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.node.model.DrawableMetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
+import org.meshtastic.proto.ConfigProtos
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable

@@ -18,13 +18,13 @@
 package org.meshtastic.core.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.geeksville.mesh.channelSet
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.util.URL_PREFIX
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.toChannelSet
+import org.meshtastic.proto.channelSet
 
 @RunWith(AndroidJUnit4::class)
 class ChannelTest {

@@ -89,11 +89,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.AppOnlyProtos.ChannelSet
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -116,6 +111,11 @@ import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.ChannelSelection
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
+import org.meshtastic.proto.AppOnlyProtos.ChannelSet
+import org.meshtastic.proto.ChannelProtos
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.copy
 import timber.log.Timber
 
 /**

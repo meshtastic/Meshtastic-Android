@@ -23,10 +23,6 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.PaxcountProtos
-import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.copy
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
 import org.meshtastic.core.database.model.Node
@@ -36,6 +32,10 @@ import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.PaxcountProtos
+import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.copy
 
 data class NodeWithRelations(
     @Embedded val node: NodeEntity,

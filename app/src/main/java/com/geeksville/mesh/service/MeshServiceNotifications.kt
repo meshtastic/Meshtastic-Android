@@ -35,15 +35,15 @@ import androidx.core.app.RemoteInput
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R.raw
-import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.TelemetryProtos.LocalStats
 
 /**
  * Manages the creation and display of all app notifications.

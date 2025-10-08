@@ -44,8 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.geeksville.mesh.AdminProtos
-import com.geeksville.mesh.MeshProtos
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -62,6 +60,8 @@ import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import java.net.MalformedURLException
 

@@ -17,8 +17,8 @@
 
 package org.meshtastic.core.service
 
-import com.geeksville.mesh.AdminProtos
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.proto.AdminProtos
 
 sealed class ServiceAction {
     data class GetDeviceMetadata(val destNum: Int) : ServiceAction()

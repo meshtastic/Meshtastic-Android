@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh.util
 
-import com.geeksville.mesh.MeshProtos
+import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 
 /**

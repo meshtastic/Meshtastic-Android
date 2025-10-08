@@ -36,9 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.PaxcountProtos
-import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
@@ -46,6 +43,9 @@ import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.PaxcountProtos
+import org.meshtastic.proto.TelemetryProtos
 
 /** Converts Bluetooth RSSI to a 0-4 bar signal strength level. */
 @Composable

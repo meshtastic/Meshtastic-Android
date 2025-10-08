@@ -91,7 +91,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -104,6 +103,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.component.NodeKeyStatusIcon
+import org.meshtastic.proto.AppOnlyProtos
 import java.nio.charset.StandardCharsets
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200

@@ -20,12 +20,6 @@ package org.meshtastic.feature.settings.debugging
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.AdminProtos
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.PaxcountProtos
-import com.geeksville.mesh.Portnums.PortNum
-import com.geeksville.mesh.StoreAndForwardProtos
-import com.geeksville.mesh.TelemetryProtos
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -43,6 +37,12 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.PaxcountProtos
+import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.StoreAndForwardProtos
+import org.meshtastic.proto.TelemetryProtos
 import timber.log.Timber
 import java.text.DateFormat
 import java.util.Date

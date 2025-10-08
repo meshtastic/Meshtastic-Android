@@ -43,9 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
-import com.geeksville.mesh.config
-import com.geeksville.mesh.copy
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.model.util.toByteString
@@ -56,6 +53,9 @@ import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.proto.ConfigProtos.Config.SecurityConfig
+import org.meshtastic.proto.config
+import org.meshtastic.proto.copy
 import java.security.SecureRandom
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

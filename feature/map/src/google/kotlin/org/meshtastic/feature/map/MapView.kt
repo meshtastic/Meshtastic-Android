@@ -63,11 +63,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import com.geeksville.mesh.MeshProtos.Position
-import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.copy
-import com.geeksville.mesh.waypoint
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -113,6 +108,11 @@ import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.NodeClusterMarkers
 import org.meshtastic.feature.map.component.WaypointMarkers
 import org.meshtastic.feature.map.model.NodeClusterItem
+import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.MeshProtos.Position
+import org.meshtastic.proto.MeshProtos.Waypoint
+import org.meshtastic.proto.copy
+import org.meshtastic.proto.waypoint
 import timber.log.Timber
 import java.text.DateFormat
 

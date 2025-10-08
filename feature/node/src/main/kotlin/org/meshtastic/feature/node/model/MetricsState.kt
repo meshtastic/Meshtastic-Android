@@ -20,14 +20,14 @@ package org.meshtastic.feature.node.model
 import androidx.annotation.StringRes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.TelemetryProtos
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.TelemetryProtos
 import java.util.concurrent.TimeUnit
 
 data class MetricsState(

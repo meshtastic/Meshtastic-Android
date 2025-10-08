@@ -17,12 +17,12 @@
 
 package org.meshtastic.core.model
 
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ConfigKt.loRaConfig
-import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
-import com.geeksville.mesh.channelSettings
 import com.google.protobuf.ByteString
+import org.meshtastic.proto.ChannelProtos
+import org.meshtastic.proto.ConfigKt.loRaConfig
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.channelSettings
 import java.security.SecureRandom
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */

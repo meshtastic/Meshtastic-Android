@@ -20,13 +20,13 @@ package org.meshtastic.feature.map.component
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import com.geeksville.mesh.MeshProtos
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.proto.MeshProtos
 
 private const val DEG_D = 1e-7
 

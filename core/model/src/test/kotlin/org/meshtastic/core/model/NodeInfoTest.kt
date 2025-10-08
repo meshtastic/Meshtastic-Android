@@ -18,12 +18,12 @@
 package org.meshtastic.core.model
 
 import androidx.core.os.LocaleListCompat
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import com.geeksville.mesh.MeshProtos
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.MeshProtos
 import java.util.Locale
 
 class NodeInfoTest {

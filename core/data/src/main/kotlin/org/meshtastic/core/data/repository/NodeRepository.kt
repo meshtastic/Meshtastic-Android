@@ -19,7 +19,6 @@ package org.meshtastic.core.data.repository
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.mesh.MeshProtos
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +40,7 @@ import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.di.annotation.IoDispatcher
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.proto.MeshProtos
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.collections.map

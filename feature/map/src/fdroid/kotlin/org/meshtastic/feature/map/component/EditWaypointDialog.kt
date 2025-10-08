@@ -64,13 +64,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.copy
-import com.geeksville.mesh.waypoint
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.proto.MeshProtos.Waypoint
+import org.meshtastic.proto.copy
+import org.meshtastic.proto.waypoint
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

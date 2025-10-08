@@ -57,7 +57,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.ui.sharing.AddContactFAB
 import com.geeksville.mesh.ui.sharing.supportsQrCodeSharing
 import org.meshtastic.core.database.model.Node
@@ -71,6 +70,7 @@ import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 import org.meshtastic.feature.node.list.NodeListViewModel
+import org.meshtastic.proto.AdminProtos
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")

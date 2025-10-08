@@ -23,14 +23,14 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
-import com.geeksville.mesh.deviceProfile
-import com.geeksville.mesh.position
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
+import org.meshtastic.proto.deviceProfile
+import org.meshtastic.proto.position
 
 @RunWith(AndroidJUnit4::class)
 class EditDeviceProfileDialogTest {

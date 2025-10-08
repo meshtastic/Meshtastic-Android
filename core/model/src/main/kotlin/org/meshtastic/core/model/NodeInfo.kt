@@ -19,14 +19,14 @@ package org.meshtastic.core.model
 
 import android.graphics.Color
 import android.os.Parcelable
-import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.TelemetryProtos
 import kotlinx.parcelize.Parcelize
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.TelemetryProtos
 
 //
 // model objects that directly map to the corresponding protobufs
