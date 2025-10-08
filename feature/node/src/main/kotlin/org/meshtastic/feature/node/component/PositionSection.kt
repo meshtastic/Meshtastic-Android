@@ -41,7 +41,6 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 /**
  * Displays node position details, last update time, distance, and related actions like requesting position and
@@ -91,14 +90,12 @@ fun PositionSection(
         }
 
         // Exchange position action
-        if (!node.isEffectivelyUnmessageable) {
-            SettingsItem(
-                text = stringResource(id = R.string.exchange_position),
-                leadingIcon = Icons.Default.LocationOn,
-                trailingContent = {},
-                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
-            )
-        }
+        SettingsItem(
+            text = stringResource(id = R.string.exchange_position),
+            leadingIcon = Icons.Default.LocationOn,
+            trailingContent = {},
+            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
+        )
 
         // Node Map log
         if (availableLogs.contains(LogsType.NODE_MAP)) {
