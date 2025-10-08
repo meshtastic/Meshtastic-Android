@@ -24,6 +24,5 @@ plugins {
 android { namespace = "org.meshtastic.core.prefs" }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.android)
     googleImplementation(libs.maps.compose)
 }

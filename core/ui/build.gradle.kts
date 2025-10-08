@@ -38,5 +38,4 @@ dependencies {
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.guava)
-    implementation(libs.kotlinx.coroutines.android)
 }
