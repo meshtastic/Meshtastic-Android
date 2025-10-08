@@ -887,4 +887,5 @@
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Aucune application disponible pour gérer ce lien.</string>
     <string name="system_settings">Paramètres système</string>
+    <string name="no_local_stats">No Stats Available</string>
 </resources>
