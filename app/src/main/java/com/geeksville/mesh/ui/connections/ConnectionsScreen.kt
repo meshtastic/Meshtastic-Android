@@ -104,7 +104,6 @@ fun ConnectionsScreen(
         connectionsViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val context = LocalContext.current
-    val info by connectionsViewModel.myNodeInfo.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
