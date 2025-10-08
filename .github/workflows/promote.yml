@@ -90,6 +90,7 @@ jobs:
           package-name: 'com.geeksville.mesh'
           from-track: 'internal'
           to-track: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
+          user-fraction: ${{ inputs.channel == 'production' && '0.1' || (inputs.channel == 'open' && '0.5') || '1.0' }}
 
   update-github-release:
     runs-on: ubuntu-latest
