@@ -18,7 +18,6 @@
 package org.meshtastic.core.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.geeksville.mesh.channelSet
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
