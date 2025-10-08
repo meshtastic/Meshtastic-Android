@@ -42,9 +42,9 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.TitledCard
 
 @Composable
-fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit) {
+fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modifier = Modifier) {
     if (node.isFavorite) {
-        TitledCard(title = stringResource(R.string.notes)) {
+        TitledCard(title = stringResource(R.string.notes), modifier = modifier) {
             val originalNotes = node.notes
             var notes by remember(node.notes) { mutableStateOf(node.notes) }
             val edited = notes.trim() != originalNotes.trim()

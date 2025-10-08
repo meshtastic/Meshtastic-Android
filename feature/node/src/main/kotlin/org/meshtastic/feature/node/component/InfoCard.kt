@@ -40,8 +40,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun InfoCard(icon: ImageVector, text: String, value: String, rotateIcon: Float = 0f) {
-    Card(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp)) {
+fun InfoCard(icon: ImageVector, text: String, value: String, modifier: Modifier = Modifier, rotateIcon: Float = 0f) {
+    Card(modifier = modifier.padding(4.dp).width(100.dp).height(100.dp)) {
         Box(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp), contentAlignment = Alignment.Center) {
             Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(

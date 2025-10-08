@@ -48,10 +48,10 @@ import org.meshtastic.core.strings.R
 import timber.log.Timber
 
 @Composable
-fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
+fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     Column(
-        modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp).fillMaxWidth(),
+        modifier = modifier.verticalScroll(rememberScrollState()).padding(16.dp).fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(text = firmwareRelease.title, style = MaterialTheme.typography.titleLarge)

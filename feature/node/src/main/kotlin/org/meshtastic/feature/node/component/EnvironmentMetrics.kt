@@ -50,8 +50,8 @@ import org.meshtastic.feature.node.model.VectorMetricInfo
 @Composable
 internal fun EnvironmentMetrics(
     node: Node,
-    isFahrenheit: Boolean = false,
     displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits,
+    isFahrenheit: Boolean = false,
 ) {
     val vectorMetrics =
         remember(node.environmentMetrics, isFahrenheit, displayUnits) {

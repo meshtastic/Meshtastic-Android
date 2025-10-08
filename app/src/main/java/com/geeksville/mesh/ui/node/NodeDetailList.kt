@@ -45,10 +45,10 @@ import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.component.AdministrationSection
 import org.meshtastic.feature.node.component.DeviceActions
-import org.meshtastic.feature.node.component.DeviceDetailsContent
+import org.meshtastic.feature.node.component.DeviceDetailsSection
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
 import org.meshtastic.feature.node.component.MetricsSection
-import org.meshtastic.feature.node.component.NodeDetailsContent
+import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NotesSection
 import org.meshtastic.feature.node.component.PositionSection
 import org.meshtastic.feature.node.model.LogsType
@@ -63,8 +63,8 @@ fun NodeDetailContent(
     lastTracerouteTime: Long?,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
-    modifier: Modifier = Modifier.Companion,
     onSaveNotes: (nodeNum: Int, notes: String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var showShareDialog by remember { mutableStateOf(false) }
     if (showShareDialog) {
@@ -92,7 +92,6 @@ fun NodeDetailContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NodeDetailList(
-    modifier: Modifier = Modifier.Companion,
     node: Node,
     lastTracerouteTime: Long?,
     ourNode: Node?,
@@ -100,6 +99,7 @@ fun NodeDetailList(
     onAction: (NodeDetailAction) -> Unit,
     availableLogs: Set<LogsType>,
     onSaveNotes: (Int, String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var showFirmwareSheet by remember { mutableStateOf(false) }
     var selectedFirmware by remember { mutableStateOf<FirmwareRelease?>(null) }
@@ -116,12 +116,10 @@ fun NodeDetailList(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (metricsState.deviceHardware != null) {
-            TitledCard(title = stringResource(R.string.device)) { DeviceDetailsContent(metricsState) }
+            TitledCard(title = stringResource(R.string.device)) { DeviceDetailsSection(metricsState) }
         }
 
-        TitledCard(title = stringResource(R.string.details)) {
-            NodeDetailsContent(node, ourNode, metricsState.displayUnits)
-        }
+        NodeDetailsSection(node)
         NotesSection(node = node, onSaveNotes = onSaveNotes)
 
         DeviceActions(
@@ -146,7 +144,7 @@ fun NodeDetailList(
                 node = node,
                 metricsState = metricsState,
                 onAction = onAction,
-                onFirmwareSelected = { firmware ->
+                onFirmwareSelect = { firmware ->
                     selectedFirmware = firmware
                     showFirmwareSheet = true
                 },

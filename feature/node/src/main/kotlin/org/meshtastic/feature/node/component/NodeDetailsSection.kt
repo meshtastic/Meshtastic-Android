@@ -41,48 +41,45 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ConfigProtos
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItemDetail
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 @Composable
-fun NodeDetailsContent(node: Node, ourNode: Node?, displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits) {
-    if (node.mismatchKey) {
-        EncryptionErrorContent()
+fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
+    TitledCard(title = stringResource(R.string.details), modifier = modifier) {
+        if (node.mismatchKey) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.KeyOff,
+                    contentDescription = stringResource(id = R.string.encryption_error),
+                    tint = Color.Red,
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = stringResource(id = R.string.encryption_error),
+                    style = MaterialTheme.typography.titleLarge.copy(color = Color.Red),
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(id = R.string.encryption_error_text),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(16.dp))
+        }
+        MainNodeDetails(node)
     }
-    MainNodeDetails(node, ourNode, displayUnits)
 }
 
 @Composable
-private fun EncryptionErrorContent() {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = Icons.Default.KeyOff,
-            contentDescription = stringResource(id = R.string.encryption_error),
-            tint = Color.Red,
-        )
-        Spacer(Modifier.width(12.dp))
-        Text(
-            text = stringResource(id = R.string.encryption_error),
-            style = MaterialTheme.typography.titleLarge.copy(color = Color.Red),
-            textAlign = TextAlign.Center,
-        )
-    }
-    Spacer(Modifier.height(16.dp))
-    Text(
-        text = stringResource(id = R.string.encryption_error_text),
-        style = MaterialTheme.typography.bodyMedium,
-        textAlign = TextAlign.Center,
-    )
-    Spacer(Modifier.height(16.dp))
-}
-
-@Composable
-private fun MainNodeDetails(node: Node, ourNode: Node?, displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits) {
+private fun MainNodeDetails(node: Node) {
     SettingsItemDetail(
         text = stringResource(R.string.long_name),
         icon = Icons.TwoTone.Person,

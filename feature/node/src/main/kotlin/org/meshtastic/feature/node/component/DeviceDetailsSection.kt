@@ -19,7 +19,6 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -47,50 +46,53 @@ import coil3.request.ImageRequest
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItemDetail
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.model.MetricsState
 
 @Composable
-fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
+fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
     val node = state.node ?: return
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
-    Box(
-        modifier =
-        Modifier.align(Alignment.CenterHorizontally)
-            .size(100.dp)
-            .clip(CircleShape)
-            .background(color = Color(node.colors.second).copy(alpha = .5f), shape = CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
+    TitledCard(stringResource(R.string.device), modifier = modifier) {
+        Box(
+            modifier =
+            Modifier.align(Alignment.CenterHorizontally)
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(color = Color(node.colors.second).copy(alpha = .5f), shape = CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        SettingsItemDetail(
+            text = stringResource(R.string.hardware),
+            icon = Icons.Default.Router,
+            supportingText = hwModelName,
+        )
+        SettingsItemDetail(
+            text =
+            if (isSupported) {
+                stringResource(R.string.supported)
+            } else {
+                stringResource(R.string.supported_by_community)
+            },
+            icon =
+            if (isSupported) {
+                Icons.TwoTone.Verified
+            } else {
+                ImageVector.vectorResource(org.meshtastic.feature.node.R.drawable.unverified)
+            },
+            supportingText = null,
+            iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
+        )
     }
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    SettingsItemDetail(
-        text = stringResource(R.string.hardware),
-        icon = Icons.Default.Router,
-        supportingText = hwModelName,
-    )
-    SettingsItemDetail(
-        text =
-        if (isSupported) {
-            stringResource(R.string.supported)
-        } else {
-            stringResource(R.string.supported_by_community)
-        },
-        icon =
-        if (isSupported) {
-            Icons.TwoTone.Verified
-        } else {
-            ImageVector.vectorResource(org.meshtastic.feature.node.R.drawable.unverified)
-        },
-        supportingText = null,
-        iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
-    )
 }
 
 @Composable

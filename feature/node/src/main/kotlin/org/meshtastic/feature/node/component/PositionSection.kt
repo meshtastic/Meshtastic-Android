@@ -54,10 +54,11 @@ fun PositionSection(
     metricsState: MetricsState,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(metricsState.displayUnits)
     val hasValidPosition = node.latitude != 0.0 || node.longitude != 0.0
-    TitledCard(title = stringResource(R.string.position)) {
+    TitledCard(title = stringResource(R.string.position), modifier = modifier) {
         // Current position coordinates (linked)
         if (hasValidPosition) {
             InlineMap(node = node, Modifier.fillMaxWidth().height(200.dp))

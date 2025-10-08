@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.database.model.Node
@@ -41,10 +42,11 @@ import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
 fun DeviceActions(
-    isLocal: Boolean = false,
     node: Node,
     lastTracerouteTime: Long?,
     onAction: (NodeDetailAction) -> Unit,
+    modifier: Modifier = Modifier,
+    isLocal: Boolean = false,
 ) {
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
@@ -64,7 +66,7 @@ fun DeviceActions(
         onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
         onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
     )
-    TitledCard(title = stringResource(R.string.actions)) {
+    TitledCard(title = stringResource(R.string.actions), modifier = modifier) {
         SettingsItem(
             text = stringResource(id = R.string.share_contact),
             leadingIcon = Icons.Rounded.QrCode2,

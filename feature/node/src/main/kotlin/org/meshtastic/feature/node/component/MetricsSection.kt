@@ -32,20 +32,22 @@ import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
+@Suppress("MultipleEmitters")
 fun MetricsSection(
     node: Node,
     metricsState: MetricsState,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     if (node.hasEnvironmentMetrics) {
-        TitledCard(stringResource(R.string.environment)) {}
-        EnvironmentMetrics(node, metricsState.isFahrenheit, metricsState.displayUnits)
+        TitledCard(stringResource(R.string.environment), modifier = modifier) {}
+        EnvironmentMetrics(node, isFahrenheit = metricsState.isFahrenheit, displayUnits = metricsState.displayUnits)
         Spacer(modifier = Modifier.height(8.dp))
     }
 
     if (node.hasPowerMetrics) {
-        TitledCard(stringResource(R.string.power)) {}
+        TitledCard(stringResource(R.string.power), modifier = modifier) {}
         PowerMetrics(node)
         Spacer(modifier = Modifier.height(8.dp))
     }
@@ -53,12 +55,13 @@ fun MetricsSection(
     val nonPositionLogs = availableLogs.filter { it != LogsType.NODE_MAP && it != LogsType.POSITIONS }
 
     if (nonPositionLogs.isNotEmpty()) {
-        TitledCard(title = stringResource(id = R.string.logs)) {
+        TitledCard(title = stringResource(id = R.string.logs), modifier = modifier) {
             nonPositionLogs.forEach { type ->
                 SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
                     onAction(NodeDetailAction.Navigate(type.route))
                 }
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
