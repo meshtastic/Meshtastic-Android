@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.geeksville.mesh.config
@@ -49,7 +48,7 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 @Composable
-fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val loraConfig = state.radioConfig.lora
     val primarySettings = state.channelList.getOrNull(0) ?: return
