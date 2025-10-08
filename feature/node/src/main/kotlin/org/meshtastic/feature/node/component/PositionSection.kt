@@ -41,7 +41,6 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 /**
  * Displays node position details, last update time, distance, and related actions like requesting position and
