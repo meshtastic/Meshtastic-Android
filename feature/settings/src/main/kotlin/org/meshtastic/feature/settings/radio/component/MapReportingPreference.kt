@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,7 +64,6 @@ fun MapReportingPreference(
     publishIntervalSecs: Int = 3600,
     onPublishIntervalSecsChanged: (Int) -> Unit = {},
     enabled: Boolean,
-    focusManager: FocusManager,
 ) {
     Column {
         var showMapReportingWarning by rememberSaveable { mutableStateOf(mapReportingEnabled) }

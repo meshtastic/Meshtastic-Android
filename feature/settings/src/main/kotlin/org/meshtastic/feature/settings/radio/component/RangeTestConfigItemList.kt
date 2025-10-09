@@ -22,7 +22,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,7 +41,6 @@ fun RangeTestConfigScreen(navController: NavController, viewModel: RadioConfigVi
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val rangeTestConfig = state.moduleConfig.rangeTest
     val formState = rememberConfigState(initialValue = rangeTestConfig)
-    val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.range_test),

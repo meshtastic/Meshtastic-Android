@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.feature.settings.util
 
 import java.util.concurrent.TimeUnit
@@ -366,33 +368,5 @@ sealed class UpdateInterval {
          */
         fun fromValue(value: Long): UpdateInterval =
             FixedUpdateIntervals.fromValue(value)?.let { Fixed(it) } ?: Manual(value)
-    }
-}
-
-/**
- * Defines a set of fixed time intervals in milliseconds.
- *
- * @param value The interval duration in milliseconds.
- */
-enum class OutputIntervals(val value: Long) {
-    UNSET(0L),
-    ONE_SECOND(1_000L),
-    TWO_SECONDS(2_000L),
-    THREE_SECONDS(3_000L),
-    FOUR_SECONDS(4_000L),
-    FIVE_SECONDS(5_000L),
-    TEN_SECONDS(10_000L),
-    FIFTEEN_SECONDS(15_000L),
-    THIRTY_SECONDS(30_000L),
-    ONE_MINUTE(60_000L),
-    ;
-
-    companion object {
-        /**
-         * Finds a [OutputIntervals] that matches the given value.
-         *
-         * @return The corresponding [OutputIntervals] or null if no match is found.
-         */
-        fun fromValue(value: Long): OutputIntervals? = entries.find { it.value == value }
     }
 }

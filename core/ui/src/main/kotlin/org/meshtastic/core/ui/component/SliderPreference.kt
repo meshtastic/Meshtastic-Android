@@ -77,6 +77,7 @@ fun <T> SliderPreference(
     )
 }
 
+@Suppress("MagicNumber")
 @Preview(showBackground = true)
 @Composable
 private fun SliderPreferencePreview() {
@@ -93,6 +94,7 @@ private fun SliderPreferencePreview() {
     }
 }
 
+@Suppress("MagicNumber")
 @Preview(showBackground = true)
 @Composable
 private fun SliderPreferenceDisabledPreview() {

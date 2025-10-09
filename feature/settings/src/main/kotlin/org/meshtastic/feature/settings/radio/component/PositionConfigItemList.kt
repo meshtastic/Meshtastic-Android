@@ -144,7 +144,7 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
     ) {
         item {
             TitledCard(title = stringResource(R.string.position_packet)) {
-                val items = remember { IntervalConfiguration.POSITION_BROADCAST.allowedIntervals }
+                val items = remember { IntervalConfiguration.BROADCAST_MEDIUM.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(R.string.broadcast_interval),
                     summary = stringResource(id = R.string.config_position_broadcast_secs_summary),

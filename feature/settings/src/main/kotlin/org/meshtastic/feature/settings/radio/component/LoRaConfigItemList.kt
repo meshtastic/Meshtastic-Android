@@ -147,6 +147,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
+                @Suppress("MagicNumber")
                 val hopLimitItems = (0..7).map { it to it.toString() }
                 DropDownPreference(
                     title = stringResource(R.string.hop_limit),
