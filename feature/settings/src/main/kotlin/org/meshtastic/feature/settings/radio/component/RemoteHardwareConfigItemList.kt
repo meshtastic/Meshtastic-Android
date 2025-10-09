@@ -18,6 +18,7 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,8 +29,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditListPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -53,43 +54,39 @@ fun RemoteHardwareConfigScreen(navController: NavController, viewModel: RadioCon
             viewModel.setModuleConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.remote_hardware_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.remote_hardware_enabled),
-                checked = formState.value.enabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.allow_undefined_pin_access),
-                checked = formState.value.allowUndefinedPinAccess,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { allowUndefinedPinAccess = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            EditListPreference(
-                title = stringResource(R.string.available_pins),
-                list = formState.value.availablePinsList,
-                maxCount = 4, // available_pins max_count:4
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValuesChanged = { list ->
-                    formState.value =
-                        formState.value.copy {
-                            availablePins.clear()
-                            availablePins.addAll(list)
-                        }
-                },
-            )
+            TitledCard(title = stringResource(R.string.remote_hardware_config)) {
+                SwitchPreference(
+                    title = stringResource(R.string.remote_hardware_enabled),
+                    checked = formState.value.enabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.allow_undefined_pin_access),
+                    checked = formState.value.allowUndefinedPinAccess,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { allowUndefinedPinAccess = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                EditListPreference(
+                    title = stringResource(R.string.available_pins),
+                    list = formState.value.availablePinsList,
+                    maxCount = 4, // available_pins max_count:4
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValuesChanged = { list ->
+                        formState.value =
+                            formState.value.copy {
+                                availablePins.clear()
+                                availablePins.addAll(list)
+                            }
+                    },
+                )
+            }
         }
     }
 }

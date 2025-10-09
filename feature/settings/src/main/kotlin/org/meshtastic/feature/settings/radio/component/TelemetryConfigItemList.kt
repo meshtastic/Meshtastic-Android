@@ -17,6 +17,7 @@
 
 package org.meshtastic.feature.settings.radio.component
 
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,9 +30,9 @@ import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.FixedUpdateIntervals
 import org.meshtastic.core.model.IntervalConfiguration
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -61,122 +62,105 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
             viewModel.setModuleConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.telemetry_config)) }
-
-        if (DeviceVersion(firmwareVersion) >= DeviceVersion(MIN_FW_FOR_TELEMETRY_TOGGLE)) {
-            item {
-                SwitchPreference(
-                    title = stringResource(R.string.device_telemetry_enabled),
-                    summary = stringResource(R.string.device_telemetry_enabled_summary),
-                    checked = formState.value.deviceTelemetryEnabled,
+        item {
+            TitledCard(title = stringResource(R.string.telemetry_config)) {
+                if (DeviceVersion(firmwareVersion) >= DeviceVersion(MIN_FW_FOR_TELEMETRY_TOGGLE)) {
+                    SwitchPreference(
+                        title = stringResource(R.string.device_telemetry_enabled),
+                        summary = stringResource(R.string.device_telemetry_enabled_summary),
+                        checked = formState.value.deviceTelemetryEnabled,
+                        enabled = state.connected,
+                        onCheckedChange = { formState.value = formState.value.copy { deviceTelemetryEnabled = it } },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                }
+                val items = remember { IntervalConfiguration.ALL.allowedIntervals }
+                SliderPreference(
+                    title = stringResource(R.string.device_metrics_update_interval_seconds),
+                    selectedValue = formState.value.deviceUpdateInterval.toLong(),
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { deviceTelemetryEnabled = it } },
+                    items = items.map { it.value to it.toDisplayString() },
+                    onValueChange = { formState.value = formState.value.copy { deviceUpdateInterval = it.toInt() } },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.environment_metrics_module_enabled),
+                    checked = formState.value.environmentMeasurementEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { environmentMeasurementEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                val envItems = remember { IntervalConfiguration.ALL.allowedIntervals }
+                SliderPreference(
+                    title = stringResource(R.string.environment_metrics_update_interval_seconds),
+                    selectedValue = formState.value.environmentUpdateInterval.toLong(),
+                    enabled = state.connected,
+                    items = envItems.map { it.value to it.toDisplayString() },
+                    onValueChange = {
+                        formState.value = formState.value.copy { environmentUpdateInterval = it.toInt() }
+                    },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.environment_metrics_on_screen_enabled),
+                    checked = formState.value.environmentScreenEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { environmentScreenEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.environment_metrics_use_fahrenheit),
+                    checked = formState.value.environmentDisplayFahrenheit,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { environmentDisplayFahrenheit = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.air_quality_metrics_module_enabled),
+                    checked = formState.value.airQualityEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { airQualityEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                val airItems = remember { IntervalConfiguration.ALL.allowedIntervals }
+                SliderPreference(
+                    title = stringResource(R.string.air_quality_metrics_update_interval_seconds),
+                    selectedValue = formState.value.airQualityInterval.toLong(),
+                    enabled = state.connected,
+                    items = airItems.map { it.value to it.toDisplayString() },
+                    onValueChange = { formState.value = formState.value.copy { airQualityInterval = it.toInt() } },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.power_metrics_module_enabled),
+                    checked = formState.value.powerMeasurementEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { powerMeasurementEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                val powerItems = remember { IntervalConfiguration.ALL.allowedIntervals }
+                SliderPreference(
+                    title = stringResource(R.string.power_metrics_update_interval_seconds),
+                    selectedValue = formState.value.powerUpdateInterval.toLong(),
+                    enabled = state.connected,
+                    items = powerItems.map { it.value to it.toDisplayString() },
+                    onValueChange = { formState.value = formState.value.copy { powerUpdateInterval = it.toInt() } },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.power_metrics_on_screen_enabled),
+                    checked = formState.value.powerScreenEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { powerScreenEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
         }
-
-        item {
-            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
-            SliderPreference(
-                title = stringResource(R.string.device_metrics_update_interval_seconds),
-                selectedValue = formState.value.deviceUpdateInterval.toLong(),
-                enabled = state.connected,
-                items = items.map { it.value to it.toDisplayString() },
-                onValueChange = { formState.value = formState.value.copy { deviceUpdateInterval = it.toInt() } },
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.environment_metrics_module_enabled),
-                checked = formState.value.environmentMeasurementEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { environmentMeasurementEnabled = it } },
-            )
-        }
-
-        item {
-            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
-            SliderPreference(
-                title = stringResource(R.string.environment_metrics_update_interval_seconds),
-                selectedValue = formState.value.environmentUpdateInterval.toLong(),
-                enabled = state.connected,
-                items = items.map { it.value to it.toDisplayString() },
-                onValueChange = { formState.value = formState.value.copy { environmentUpdateInterval = it.toInt() } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.environment_metrics_on_screen_enabled),
-                checked = formState.value.environmentScreenEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { environmentScreenEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.environment_metrics_use_fahrenheit),
-                checked = formState.value.environmentDisplayFahrenheit,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { environmentDisplayFahrenheit = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.air_quality_metrics_module_enabled),
-                checked = formState.value.airQualityEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { airQualityEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
-            SliderPreference(
-                title = stringResource(R.string.air_quality_metrics_update_interval_seconds),
-                selectedValue = formState.value.airQualityInterval.toLong(),
-                enabled = state.connected,
-                items = items.map { it.value to it.toDisplayString() },
-                onValueChange = { formState.value = formState.value.copy { airQualityInterval = it.toInt() } },
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.power_metrics_module_enabled),
-                checked = formState.value.powerMeasurementEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { powerMeasurementEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            val items = remember { IntervalConfiguration.ALL.allowedIntervals }
-            SliderPreference(
-                title = stringResource(R.string.power_metrics_update_interval_seconds),
-                selectedValue = formState.value.powerUpdateInterval.toLong(),
-                enabled = state.connected,
-                items = items.map { it.value to it.toDisplayString() },
-                onValueChange = { formState.value = formState.value.copy { powerUpdateInterval = it.toInt() } },
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.power_metrics_on_screen_enabled),
-                checked = formState.value.powerScreenEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { powerScreenEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
     }
 }

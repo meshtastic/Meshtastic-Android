@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -50,8 +51,8 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditListPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ConfigProtos.Config.SecurityConfig
 import org.meshtastic.proto.config
@@ -134,121 +135,114 @@ fun SecurityConfigScreen(navController: NavController, viewModel: RadioConfigVie
             viewModel.setConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.direct_message_key)) }
-
         item {
-            EditBase64Preference(
-                title = stringResource(R.string.public_key),
-                summary = stringResource(id = R.string.config_security_public_key),
-                value = publicKey,
-                enabled = state.connected,
-                readOnly = true,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChange = {
-                    if (it.size() == 32) {
-                        formState.value = formState.value.copy { this.publicKey = it }
-                    }
-                },
-                trailingIcon = { CopyIconButton(valueToCopy = formState.value.publicKey.encodeToString()) },
-            )
-        }
-
-        item {
-            EditBase64Preference(
-                title = stringResource(R.string.private_key),
-                summary = stringResource(id = R.string.config_security_private_key),
-                value = formState.value.privateKey,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChange = {
-                    if (it.size() == 32) {
-                        formState.value = formState.value.copy { privateKey = it }
-                    }
-                },
-                trailingIcon = { CopyIconButton(valueToCopy = formState.value.privateKey.encodeToString()) },
-            )
-        }
-
-        item {
-            NodeActionButton(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                title = stringResource(R.string.regenerate_private_key),
-                enabled = state.connected,
-                icon = Icons.TwoTone.Warning,
-                onClick = { showKeyGenerationDialog = true },
-            )
-        }
-
-        item {
-            NodeActionButton(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                title = stringResource(R.string.export_keys),
-                enabled = state.connected,
-                icon = Icons.TwoTone.Warning,
-                onClick = { showEditSecurityConfigDialog = true },
-            )
-        }
-        item { PreferenceCategory(text = stringResource(R.string.admin_keys)) }
-        item {
-            EditListPreference(
-                title = stringResource(R.string.admin_key),
-                summary = stringResource(id = R.string.config_security_admin_key),
-                list = formState.value.adminKeyList,
-                maxCount = 3,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValuesChanged = {
-                    formState.value =
-                        formState.value.copy {
-                            adminKey.clear()
-                            adminKey.addAll(it)
+            TitledCard(title = stringResource(R.string.direct_message_key)) {
+                EditBase64Preference(
+                    title = stringResource(R.string.public_key),
+                    summary = stringResource(id = R.string.config_security_public_key),
+                    value = publicKey,
+                    enabled = state.connected,
+                    readOnly = true,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChange = {
+                        if (it.size() == 32) {
+                            formState.value = formState.value.copy { this.publicKey = it }
                         }
-                },
-            )
+                    },
+                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.publicKey.encodeToString()) },
+                )
+                HorizontalDivider()
+                EditBase64Preference(
+                    title = stringResource(R.string.private_key),
+                    summary = stringResource(id = R.string.config_security_private_key),
+                    value = formState.value.privateKey,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChange = {
+                        if (it.size() == 32) {
+                            formState.value = formState.value.copy { privateKey = it }
+                        }
+                    },
+                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.privateKey.encodeToString()) },
+                )
+                HorizontalDivider()
+                NodeActionButton(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    title = stringResource(R.string.regenerate_private_key),
+                    enabled = state.connected,
+                    icon = Icons.TwoTone.Warning,
+                    onClick = { showKeyGenerationDialog = true },
+                )
+                HorizontalDivider()
+                NodeActionButton(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    title = stringResource(R.string.export_keys),
+                    enabled = state.connected,
+                    icon = Icons.TwoTone.Warning,
+                    onClick = { showEditSecurityConfigDialog = true },
+                )
+            }
         }
-        item { PreferenceCategory(text = stringResource(R.string.logs)) }
         item {
-            SwitchPreference(
-                title = stringResource(R.string.serial_console),
-                summary = stringResource(id = R.string.config_security_serial_enabled),
-                checked = formState.value.serialEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { serialEnabled = it } },
-            )
+            TitledCard(title = stringResource(R.string.admin_keys)) {
+                EditListPreference(
+                    title = stringResource(R.string.admin_key),
+                    summary = stringResource(id = R.string.config_security_admin_key),
+                    list = formState.value.adminKeyList,
+                    maxCount = 3,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValuesChanged = {
+                        formState.value =
+                            formState.value.copy {
+                                adminKey.clear()
+                                adminKey.addAll(it)
+                            }
+                    },
+                )
+            }
         }
-        item { HorizontalDivider() }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.debug_log_api_enabled),
-                summary = stringResource(id = R.string.config_security_debug_log_api_enabled),
-                checked = formState.value.debugLogApiEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { debugLogApiEnabled = it } },
-            )
+            TitledCard(title = stringResource(R.string.logs)) {
+                SwitchPreference(
+                    title = stringResource(R.string.serial_console),
+                    summary = stringResource(id = R.string.config_security_serial_enabled),
+                    checked = formState.value.serialEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { serialEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.debug_log_api_enabled),
+                    summary = stringResource(id = R.string.config_security_debug_log_api_enabled),
+                    checked = formState.value.debugLogApiEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { debugLogApiEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+            }
         }
-        item { HorizontalDivider() }
-        item { PreferenceCategory(text = stringResource(R.string.administration)) }
         item {
-            SwitchPreference(
-                title = stringResource(R.string.managed_mode),
-                summary = stringResource(id = R.string.config_security_is_managed),
-                checked = formState.value.isManaged,
-                enabled = state.connected && formState.value.adminKeyCount > 0,
-                onCheckedChange = { formState.value = formState.value.copy { isManaged = it } },
-            )
+            TitledCard(title = stringResource(R.string.administration)) {
+                SwitchPreference(
+                    title = stringResource(R.string.managed_mode),
+                    summary = stringResource(id = R.string.config_security_is_managed),
+                    checked = formState.value.isManaged,
+                    enabled = state.connected && formState.value.adminKeyCount > 0,
+                    onCheckedChange = { formState.value = formState.value.copy { isManaged = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.legacy_admin_channel),
+                    checked = formState.value.adminChannelEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { adminChannelEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+            }
         }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.legacy_admin_channel),
-                checked = formState.value.adminChannelEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { adminChannelEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
     }
 }
 

@@ -18,6 +18,7 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,10 +31,10 @@ import androidx.navigation.NavController
 import org.meshtastic.core.model.FixedUpdateIntervals
 import org.meshtastic.core.model.IntervalConfiguration
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -60,47 +61,43 @@ fun PaxcounterConfigScreen(navController: NavController, viewModel: RadioConfigV
             viewModel.setModuleConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.paxcounter_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.paxcounter_enabled),
-                checked = formState.value.enabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            val items = remember { IntervalConfiguration.PAX_COUNTER.allowedIntervals }
-            SliderPreference(
-                title = stringResource(R.string.update_interval_seconds),
-                selectedValue = formState.value.paxcounterUpdateInterval.toLong(),
-                enabled = state.connected,
-                items = items.map { it.value to it.toDisplayString() },
-                onValueChange = { formState.value = formState.value.copy { paxcounterUpdateInterval = it.toInt() } },
-            )
-        }
-
-        item {
-            SignedIntegerEditTextPreference(
-                title = stringResource(R.string.wifi_rssi_threshold_defaults_to_80),
-                value = formState.value.wifiThreshold,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { wifiThreshold = it } },
-            )
-        }
-
-        item {
-            SignedIntegerEditTextPreference(
-                title = stringResource(R.string.ble_rssi_threshold_defaults_to_80),
-                value = formState.value.bleThreshold,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { bleThreshold = it } },
-            )
+            TitledCard(title = stringResource(R.string.paxcounter_config)) {
+                SwitchPreference(
+                    title = stringResource(R.string.paxcounter_enabled),
+                    checked = formState.value.enabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                val items = remember { IntervalConfiguration.PAX_COUNTER.allowedIntervals }
+                SliderPreference(
+                    title = stringResource(R.string.update_interval_seconds),
+                    selectedValue = formState.value.paxcounterUpdateInterval.toLong(),
+                    enabled = state.connected,
+                    items = items.map { it.value to it.toDisplayString() },
+                    onValueChange = {
+                        formState.value = formState.value.copy { paxcounterUpdateInterval = it.toInt() }
+                    },
+                )
+                HorizontalDivider()
+                SignedIntegerEditTextPreference(
+                    title = stringResource(R.string.wifi_rssi_threshold_defaults_to_80),
+                    value = formState.value.wifiThreshold,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { wifiThreshold = it } },
+                )
+                HorizontalDivider()
+                SignedIntegerEditTextPreference(
+                    title = stringResource(R.string.ble_rssi_threshold_defaults_to_80),
+                    value = formState.value.bleThreshold,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { bleThreshold = it } },
+                )
+            }
         }
     }
 }

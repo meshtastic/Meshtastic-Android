@@ -27,9 +27,11 @@ import java.util.concurrent.TimeUnit
 enum class FixedUpdateIntervals(val value: Long) {
     UNSET(0L),
     ONE_SECOND(1L),
+    TWO_SECONDS(2L),
     FIVE_SECONDS(5L),
     TEN_SECONDS(10L),
     FIFTEEN_SECONDS(15L),
+    TWENTY_SECONDS(20L),
     THIRTY_SECONDS(30L),
     FORTY_FIVE_SECONDS(45L),
     ONE_MINUTE(TimeUnit.MINUTES.toSeconds(1)),
@@ -75,6 +77,7 @@ enum class IntervalConfiguration {
     DETECTION_SENSOR_STATE,
     NAG_TIMEOUT,
     PAX_COUNTER,
+    POSITION,
     RANGE_TEST_SENDER,
     SMART_BROADCAST_MINIMUM,
     ;
@@ -195,6 +198,24 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.THIRTY_SIX_HOURS,
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
+                )
+            POSITION ->
+                listOf(
+                    FixedUpdateIntervals.ONE_SECOND,
+                    FixedUpdateIntervals.TWO_SECONDS,
+                    FixedUpdateIntervals.FIVE_SECONDS,
+                    FixedUpdateIntervals.TEN_SECONDS,
+                    FixedUpdateIntervals.FIFTEEN_SECONDS,
+                    FixedUpdateIntervals.TWENTY_SECONDS,
+                    FixedUpdateIntervals.THIRTY_SECONDS,
+                    FixedUpdateIntervals.FORTY_FIVE_SECONDS,
+                    FixedUpdateIntervals.ONE_MINUTE,
+                    FixedUpdateIntervals.TWO_MINUTES,
+                    FixedUpdateIntervals.FIVE_MINUTES,
+                    FixedUpdateIntervals.TEN_MINUTES,
+                    FixedUpdateIntervals.FIFTEEN_MINUTES,
+                    FixedUpdateIntervals.THIRTY_MINUTES,
+                    FixedUpdateIntervals.ONE_HOUR,
                 )
             RANGE_TEST_SENDER ->
                 listOf(

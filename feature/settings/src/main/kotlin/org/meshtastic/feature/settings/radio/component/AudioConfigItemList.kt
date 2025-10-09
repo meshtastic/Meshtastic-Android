@@ -18,6 +18,7 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,8 +30,8 @@ import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig.AudioConfig
 import org.meshtastic.proto.copy
@@ -55,80 +56,63 @@ fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewMo
             viewModel.setModuleConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.audio_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.codec_2_enabled),
-                checked = formState.value.codec2Enabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { codec2Enabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.ptt_pin),
-                value = formState.value.pttPin,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { pttPin = it } },
-            )
-        }
-
-        item {
-            DropDownPreference(
-                title = stringResource(R.string.codec2_sample_rate),
-                enabled = state.connected,
-                items =
-                AudioConfig.Audio_Baud.entries
-                    .filter { it != AudioConfig.Audio_Baud.UNRECOGNIZED }
-                    .map { it to it.name },
-                selectedItem = formState.value.bitrate,
-                onItemSelected = { formState.value = formState.value.copy { bitrate = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.i2s_word_select),
-                value = formState.value.i2SWs,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { i2SWs = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.i2s_data_in),
-                value = formState.value.i2SSd,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { i2SSd = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.i2s_data_out),
-                value = formState.value.i2SDin,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { i2SDin = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.i2s_clock),
-                value = formState.value.i2SSck,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { i2SSck = it } },
-            )
+            TitledCard(title = stringResource(R.string.audio_config)) {
+                SwitchPreference(
+                    title = stringResource(R.string.codec_2_enabled),
+                    checked = formState.value.codec2Enabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { codec2Enabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.ptt_pin),
+                    value = formState.value.pttPin,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { pttPin = it } },
+                )
+                DropDownPreference(
+                    title = stringResource(R.string.codec2_sample_rate),
+                    enabled = state.connected,
+                    items =
+                    AudioConfig.Audio_Baud.entries
+                        .filter { it != AudioConfig.Audio_Baud.UNRECOGNIZED }
+                        .map { it to it.name },
+                    selectedItem = formState.value.bitrate,
+                    onItemSelected = { formState.value = formState.value.copy { bitrate = it } },
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.i2s_word_select),
+                    value = formState.value.i2SWs,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { i2SWs = it } },
+                )
+                EditTextPreference(
+                    title = stringResource(R.string.i2s_data_in),
+                    value = formState.value.i2SSd,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { i2SSd = it } },
+                )
+                EditTextPreference(
+                    title = stringResource(R.string.i2s_data_out),
+                    value = formState.value.i2SDin,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { i2SDin = it } },
+                )
+                EditTextPreference(
+                    title = stringResource(R.string.i2s_clock),
+                    value = formState.value.i2SSck,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { i2SSck = it } },
+                )
+            }
         }
     }
 }

@@ -18,6 +18,7 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,8 +29,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -53,36 +54,32 @@ fun RangeTestConfigScreen(navController: NavController, viewModel: RadioConfigVi
             viewModel.setModuleConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.range_test_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.range_test_enabled),
-                checked = formState.value.enabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
-            )
+            TitledCard(title = stringResource(R.string.range_test_config)) {
+                SwitchPreference(
+                    title = stringResource(R.string.range_test_enabled),
+                    checked = formState.value.enabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.sender_message_interval_seconds),
+                    value = formState.value.sender,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { sender = it } },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.save_csv_in_storage_esp32_only),
+                    checked = formState.value.save,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { save = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+            }
         }
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.sender_message_interval_seconds),
-                value = formState.value.sender,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { sender = it } },
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.save_csv_in_storage_esp32_only),
-                checked = formState.value.save,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { save = it } },
-            )
-        }
-        item { HorizontalDivider() }
     }
 }

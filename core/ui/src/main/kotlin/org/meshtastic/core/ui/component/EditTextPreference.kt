@@ -211,15 +211,11 @@ fun EditTextPreference(
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.fillMaxWidth().padding(8.dp)) {
         OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().onFocusEvent { onFocusChanged(it) },
             value = value,
             singleLine = true,
-            modifier =
-            Modifier.fillMaxWidth().onFocusEvent {
-                isFocused = it.isFocused
-                onFocusChanged(it)
-            },
             enabled = enabled,
             isError = isError,
             onValueChange = {
@@ -231,7 +227,7 @@ fun EditTextPreference(
                     onValueChanged(it)
                 }
             },
-            prefix = { Text(title) },
+            label = { Text(title) },
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             visualTransformation = visualTransformation,
@@ -249,14 +245,6 @@ fun EditTextPreference(
             } else {
                 null
             },
-            colors =
-            OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                disabledBorderColor = Color.Transparent,
-                errorBorderColor = Color.Transparent,
-            ),
-            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End),
         )
         if (summary != null) {
             Text(
