@@ -18,19 +18,24 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 
@@ -53,107 +58,83 @@ fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewMo
             viewModel.setConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.power_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.enable_power_saving_mode),
-                summary = stringResource(id = R.string.config_power_is_power_saving_summary),
-                checked = formState.value.isPowerSaving,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { isPowerSaving = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.shutdown_on_power_loss),
-                checked = formState.value.onBatteryShutdownAfterSecs > 0,
-                enabled = state.connected,
-                onCheckedChange = {
-                    formState.value = formState.value.copy { onBatteryShutdownAfterSecs = if (it) 3600 else 0 }
-                },
-            )
-        }
-
-        if (formState.value.onBatteryShutdownAfterSecs > 0) {
-            item {
+            TitledCard(title = stringResource(R.string.power_config)) {
+                SwitchPreference(
+                    title = stringResource(R.string.enable_power_saving_mode),
+                    summary = stringResource(id = R.string.config_power_is_power_saving_summary),
+                    checked = formState.value.isPowerSaving,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { isPowerSaving = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                val items = remember { IntervalConfiguration.ALL.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.shutdown_on_power_loss),
+                    selectedItem = formState.value.onBatteryShutdownAfterSecs.toLong(),
+                    enabled = state.connected,
+                    items = items.map { it.value to it.toDisplayString() },
+                    onItemSelected = {
+                        formState.value = formState.value.copy { onBatteryShutdownAfterSecs = it.toInt() }
+                    },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.adc_multiplier_override),
+                    checked = formState.value.adcMultiplierOverride > 0f,
+                    enabled = state.connected,
+                    onCheckedChange = {
+                        formState.value = formState.value.copy { adcMultiplierOverride = if (it) 1.0f else 0.0f }
+                    },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                if (formState.value.adcMultiplierOverride > 0f) {
+                    HorizontalDivider()
+                    EditTextPreference(
+                        title = stringResource(R.string.adc_multiplier_override_ratio),
+                        value = formState.value.adcMultiplierOverride,
+                        enabled = state.connected,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { formState.value = formState.value.copy { adcMultiplierOverride = it } },
+                    )
+                }
+                HorizontalDivider()
+                val waitBluetoothItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.wait_for_bluetooth_duration_seconds),
+                    selectedItem = formState.value.waitBluetoothSecs.toLong(),
+                    enabled = state.connected,
+                    items = waitBluetoothItems.map { it.value to it.toDisplayString() },
+                    onItemSelected = { formState.value = formState.value.copy { waitBluetoothSecs = it.toInt() } },
+                )
+                HorizontalDivider()
+                val sdsSecsItems = remember { IntervalConfiguration.ALL.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.super_deep_sleep_duration_seconds),
+                    selectedItem = formState.value.sdsSecs.toLong(),
+                    onItemSelected = { formState.value = formState.value.copy { sdsSecs = it.toInt() } },
+                    enabled = state.connected,
+                    items = sdsSecsItems.map { it.value to it.toDisplayString() },
+                )
+                HorizontalDivider()
+                val minWakeItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.minimum_wake_time_seconds),
+                    selectedItem = formState.value.minWakeSecs.toLong(),
+                    enabled = state.connected,
+                    items = minWakeItems.map { it.value to it.toDisplayString() },
+                    onItemSelected = { formState.value = formState.value.copy { minWakeSecs = it.toInt() } },
+                )
+                HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.shutdown_on_battery_delay_seconds),
-                    value = formState.value.onBatteryShutdownAfterSecs,
+                    title = stringResource(R.string.battery_ina_2xx_i2c_address),
+                    value = formState.value.deviceBatteryInaAddress,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { onBatteryShutdownAfterSecs = it } },
+                    onValueChanged = { formState.value = formState.value.copy { deviceBatteryInaAddress = it } },
                 )
             }
-        }
-
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.adc_multiplier_override),
-                checked = formState.value.adcMultiplierOverride > 0f,
-                enabled = state.connected,
-                onCheckedChange = {
-                    formState.value = formState.value.copy { adcMultiplierOverride = if (it) 1.0f else 0.0f }
-                },
-            )
-        }
-
-        if (formState.value.adcMultiplierOverride > 0f) {
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.adc_multiplier_override_ratio),
-                    value = formState.value.adcMultiplierOverride,
-                    enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { adcMultiplierOverride = it } },
-                )
-            }
-        }
-
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.wait_for_bluetooth_duration_seconds),
-                value = formState.value.waitBluetoothSecs,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { waitBluetoothSecs = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.super_deep_sleep_duration_seconds),
-                value = formState.value.sdsSecs,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { sdsSecs = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.minimum_wake_time_seconds),
-                value = formState.value.minWakeSecs,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { minWakeSecs = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.battery_ina_2xx_i2c_address),
-                value = formState.value.deviceBatteryInaAddress,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { deviceBatteryInaAddress = it } },
-            )
         }
     }
 }

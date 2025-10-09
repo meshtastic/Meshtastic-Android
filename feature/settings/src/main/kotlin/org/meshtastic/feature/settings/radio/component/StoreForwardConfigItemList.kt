@@ -18,6 +18,7 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,8 +29,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -53,66 +54,56 @@ fun StoreForwardConfigScreen(navController: NavController, viewModel: RadioConfi
             viewModel.setModuleConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.store_forward_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.store_forward_enabled),
-                checked = formState.value.enabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
-            )
+            TitledCard(title = stringResource(R.string.store_forward_config)) {
+                SwitchPreference(
+                    title = stringResource(R.string.store_forward_enabled),
+                    checked = formState.value.enabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.heartbeat),
+                    checked = formState.value.heartbeat,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { heartbeat = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.number_of_records),
+                    value = formState.value.records,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { records = it } },
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.history_return_max),
+                    value = formState.value.historyReturnMax,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { historyReturnMax = it } },
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.history_return_window),
+                    value = formState.value.historyReturnWindow,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { historyReturnWindow = it } },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.server),
+                    checked = formState.value.isServer,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { isServer = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+            }
         }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.heartbeat),
-                checked = formState.value.heartbeat,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { heartbeat = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.number_of_records),
-                value = formState.value.records,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { records = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.history_return_max),
-                value = formState.value.historyReturnMax,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { historyReturnMax = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.history_return_window),
-                value = formState.value.historyReturnWindow,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { historyReturnWindow = it } },
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.server),
-                checked = formState.value.isServer,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { isServer = it } },
-            )
-        }
-        item { HorizontalDivider() }
     }
 }

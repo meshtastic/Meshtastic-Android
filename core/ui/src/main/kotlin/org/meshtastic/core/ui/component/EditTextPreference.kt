@@ -26,10 +26,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,12 +38,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.strings.R
@@ -211,15 +207,11 @@ fun EditTextPreference(
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.fillMaxWidth().padding(8.dp)) {
         OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().onFocusEvent { onFocusChanged(it) },
             value = value,
             singleLine = true,
-            modifier =
-            Modifier.fillMaxWidth().onFocusEvent {
-                isFocused = it.isFocused
-                onFocusChanged(it)
-            },
             enabled = enabled,
             isError = isError,
             onValueChange = {
@@ -231,7 +223,7 @@ fun EditTextPreference(
                     onValueChanged(it)
                 }
             },
-            prefix = { Text(title) },
+            label = { Text(title) },
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             visualTransformation = visualTransformation,
@@ -249,14 +241,6 @@ fun EditTextPreference(
             } else {
                 null
             },
-            colors =
-            OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                disabledBorderColor = Color.Transparent,
-                errorBorderColor = Color.Transparent,
-            ),
-            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End),
         )
         if (summary != null) {
             Text(

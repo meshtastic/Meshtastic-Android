@@ -22,6 +22,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Build
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,10 +48,13 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.BitwisePreference
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.feature.settings.util.FixedUpdateIntervals
+import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.gpioPins
+import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ConfigProtos.Config.PositionConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
@@ -70,7 +74,23 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
             time = 1, // ignore time for fixed_position
         )
     val positionConfig = state.radioConfig.position
-    val formState = rememberConfigState(initialValue = positionConfig)
+    val sanitizedPositionConfig =
+        remember(positionConfig) {
+            val positionItems = IntervalConfiguration.POSITION.allowedIntervals
+            val smartBroadcastItems = IntervalConfiguration.SMART_BROADCAST_MINIMUM.allowedIntervals
+            positionConfig.copy {
+                if (FixedUpdateIntervals.fromValue(positionBroadcastSecs.toLong()) == null) {
+                    positionBroadcastSecs = positionItems.first().value.toInt()
+                }
+                if (FixedUpdateIntervals.fromValue(broadcastSmartMinimumIntervalSecs.toLong()) == null) {
+                    broadcastSmartMinimumIntervalSecs = smartBroadcastItems.first().value.toInt()
+                }
+                if (FixedUpdateIntervals.fromValue(gpsUpdateInterval.toLong()) == null) {
+                    gpsUpdateInterval = positionItems.first().value.toInt()
+                }
+            }
+        }
+    val formState = rememberConfigState(initialValue = sanitizedPositionConfig)
     var locationInput by rememberSaveable { mutableStateOf(currentPosition) }
 
     val locationPermissionState =
@@ -122,182 +142,182 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
             viewModel.setConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.position_packet)) }
-
         item {
-            EditTextPreference(
-                title = stringResource(R.string.broadcast_interval),
-                summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
-                value = formState.value.positionBroadcastSecs,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { positionBroadcastSecs = it } },
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.smart_position),
-                checked = formState.value.positionBroadcastSmartEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { positionBroadcastSmartEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        if (formState.value.positionBroadcastSmartEnabled) {
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.minimum_interval),
-                    summary =
-                    stringResource(id = R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
-                    value = formState.value.broadcastSmartMinimumIntervalSecs,
+            TitledCard(title = stringResource(R.string.position_packet)) {
+                val items = remember { IntervalConfiguration.BROADCAST_MEDIUM.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.broadcast_interval),
+                    summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = {
-                        formState.value = formState.value.copy { broadcastSmartMinimumIntervalSecs = it }
+                    items = items.map { it to it.toDisplayString() },
+                    selectedItem =
+                    FixedUpdateIntervals.fromValue(formState.value.positionBroadcastSecs.toLong()) ?: items.first(),
+                    onItemSelected = {
+                        formState.value = formState.value.copy { positionBroadcastSecs = it.value.toInt() }
                     },
                 )
-            }
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.minimum_distance),
-                    summary = stringResource(id = R.string.config_position_broadcast_smart_minimum_distance_summary),
-                    value = formState.value.broadcastSmartMinimumDistance,
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.smart_position),
+                    checked = formState.value.positionBroadcastSmartEnabled,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { broadcastSmartMinimumDistance = it } },
+                    onCheckedChange = { formState.value = formState.value.copy { positionBroadcastSmartEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
-            }
-        }
-        item { PreferenceCategory(text = stringResource(R.string.device_gps)) }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.fixed_position),
-                checked = formState.value.fixedPosition,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { fixedPosition = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        if (formState.value.fixedPosition) {
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.latitude),
-                    value = locationInput.latitude,
-                    enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { value ->
-                        if (value >= -90 && value <= 90.0) {
-                            locationInput = locationInput.copy(latitude = value)
-                        }
-                    },
-                )
-            }
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.longitude),
-                    value = locationInput.longitude,
-                    enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { value ->
-                        if (value >= -180 && value <= 180.0) {
-                            locationInput = locationInput.copy(longitude = value)
-                        }
-                    },
-                )
-            }
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.altitude),
-                    value = locationInput.altitude,
-                    enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { value -> locationInput = locationInput.copy(altitude = value) },
-                )
-            }
-            item {
-                TextButton(
-                    enabled = state.connected,
-                    onClick = { coroutineScope.launch { locationPermissionState.launchPermissionRequest() } },
-                ) {
-                    Text(text = stringResource(R.string.position_config_set_fixed_from_phone))
+                if (formState.value.positionBroadcastSmartEnabled) {
+                    HorizontalDivider()
+                    val smartItems = remember { IntervalConfiguration.SMART_BROADCAST_MINIMUM.allowedIntervals }
+                    DropDownPreference(
+                        title = stringResource(R.string.minimum_interval),
+                        summary =
+                        stringResource(id = R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
+                        enabled = state.connected,
+                        items = smartItems.map { it to it.toDisplayString() },
+                        selectedItem =
+                        FixedUpdateIntervals.fromValue(formState.value.broadcastSmartMinimumIntervalSecs.toLong())
+                            ?: smartItems.first(),
+                        onItemSelected = {
+                            formState.value =
+                                formState.value.copy { broadcastSmartMinimumIntervalSecs = it.value.toInt() }
+                        },
+                    )
+                    HorizontalDivider()
+                    EditTextPreference(
+                        title = stringResource(R.string.minimum_distance),
+                        summary =
+                        stringResource(id = R.string.config_position_broadcast_smart_minimum_distance_summary),
+                        value = formState.value.broadcastSmartMinimumDistance,
+                        enabled = state.connected,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = {
+                            formState.value = formState.value.copy { broadcastSmartMinimumDistance = it }
+                        },
+                    )
                 }
             }
         }
-
         item {
-            DropDownPreference(
-                title = stringResource(R.string.gps_mode),
-                enabled = state.connected,
-                items =
-                ConfigProtos.Config.PositionConfig.GpsMode.entries
-                    .filter { it != ConfigProtos.Config.PositionConfig.GpsMode.UNRECOGNIZED }
-                    .map { it to it.name },
-                selectedItem = formState.value.gpsMode,
-                onItemSelected = { formState.value = formState.value.copy { gpsMode = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.update_interval),
-                summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
-                value = formState.value.gpsUpdateInterval,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { gpsUpdateInterval = it } },
-            )
-        }
-        item { PreferenceCategory(text = stringResource(R.string.position_flags)) }
-        item {
-            BitwisePreference(
-                title = stringResource(R.string.position_flags),
-                summary = stringResource(id = R.string.config_position_flags_summary),
-                value = formState.value.positionFlags,
-                enabled = state.connected,
-                items =
-                ConfigProtos.Config.PositionConfig.PositionFlags.entries
-                    .filter {
-                        it != PositionConfig.PositionFlags.UNSET && it != PositionConfig.PositionFlags.UNRECOGNIZED
+            TitledCard(title = stringResource(R.string.device_gps)) {
+                SwitchPreference(
+                    title = stringResource(R.string.fixed_position),
+                    checked = formState.value.fixedPosition,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { fixedPosition = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                if (formState.value.fixedPosition) {
+                    HorizontalDivider()
+                    EditTextPreference(
+                        title = stringResource(R.string.latitude),
+                        value = locationInput.latitude,
+                        enabled = state.connected,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { value ->
+                            if (value >= -90 && value <= 90.0) {
+                                locationInput = locationInput.copy(latitude = value)
+                            }
+                        },
+                    )
+                    HorizontalDivider()
+                    EditTextPreference(
+                        title = stringResource(R.string.longitude),
+                        value = locationInput.longitude,
+                        enabled = state.connected,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { value ->
+                            if (value >= -180 && value <= 180.0) {
+                                locationInput = locationInput.copy(longitude = value)
+                            }
+                        },
+                    )
+                    HorizontalDivider()
+                    EditTextPreference(
+                        title = stringResource(R.string.altitude),
+                        value = locationInput.altitude,
+                        enabled = state.connected,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { value -> locationInput = locationInput.copy(altitude = value) },
+                    )
+                    HorizontalDivider()
+                    TextButton(
+                        enabled = state.connected,
+                        onClick = { coroutineScope.launch { locationPermissionState.launchPermissionRequest() } },
+                    ) {
+                        Text(text = stringResource(R.string.position_config_set_fixed_from_phone))
                     }
-                    .map { it.number to it.name },
-                onItemSelected = { formState.value = formState.value.copy { positionFlags = it } },
-            )
+                } else {
+                    HorizontalDivider()
+                    DropDownPreference(
+                        title = stringResource(R.string.gps_mode),
+                        enabled = state.connected,
+                        items =
+                        PositionConfig.GpsMode.entries
+                            .filter { it != PositionConfig.GpsMode.UNRECOGNIZED }
+                            .map { it to it.name },
+                        selectedItem = formState.value.gpsMode,
+                        onItemSelected = { formState.value = formState.value.copy { gpsMode = it } },
+                    )
+                    HorizontalDivider()
+                    val items = remember { IntervalConfiguration.GPS_UPDATE.allowedIntervals }
+                    DropDownPreference(
+                        title = stringResource(R.string.update_interval),
+                        summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
+                        enabled = state.connected,
+                        items = items.map { it to it.toDisplayString() },
+                        selectedItem =
+                        FixedUpdateIntervals.fromValue(formState.value.gpsUpdateInterval.toLong()) ?: items.first(),
+                        onItemSelected = {
+                            formState.value = formState.value.copy { gpsUpdateInterval = it.value.toInt() }
+                        },
+                    )
+                }
+            }
         }
-        item { HorizontalDivider() }
-        item { PreferenceCategory(text = stringResource(R.string.advanced_device_gps)) }
-
         item {
-            EditTextPreference(
-                title = stringResource(R.string.gps_receive_gpio),
-                value = formState.value.rxGpio,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { rxGpio = it } },
-            )
+            TitledCard(title = stringResource(R.string.position_flags)) {
+                BitwisePreference(
+                    title = stringResource(R.string.position_flags),
+                    summary = stringResource(id = R.string.config_position_flags_summary),
+                    value = formState.value.positionFlags,
+                    enabled = state.connected,
+                    items =
+                    PositionConfig.PositionFlags.entries
+                        .filter {
+                            it != PositionConfig.PositionFlags.UNSET &&
+                                it != PositionConfig.PositionFlags.UNRECOGNIZED
+                        }
+                        .map { it.number to it.name },
+                    onItemSelected = { formState.value = formState.value.copy { positionFlags = it } },
+                )
+            }
         }
-
         item {
-            EditTextPreference(
-                title = stringResource(R.string.gps_transmit_gpio),
-                value = formState.value.txGpio,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { txGpio = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.gps_en_gpio),
-                value = formState.value.gpsEnGpio,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { gpsEnGpio = it } },
-            )
+            TitledCard(title = stringResource(R.string.advanced_device_gps)) {
+                val pins = remember { gpioPins }
+                DropDownPreference(
+                    title = stringResource(R.string.gps_receive_gpio),
+                    enabled = state.connected,
+                    items = pins,
+                    selectedItem = formState.value.rxGpio,
+                    onItemSelected = { formState.value = formState.value.copy { rxGpio = it } },
+                )
+                HorizontalDivider()
+                DropDownPreference(
+                    title = stringResource(R.string.gps_transmit_gpio),
+                    enabled = state.connected,
+                    items = pins,
+                    selectedItem = formState.value.txGpio,
+                    onItemSelected = { formState.value = formState.value.copy { txGpio = it } },
+                )
+                HorizontalDivider()
+                DropDownPreference(
+                    title = stringResource(R.string.gps_en_gpio),
+                    enabled = state.connected,
+                    items = pins,
+                    selectedItem = formState.value.gpsEnGpio,
+                    onItemSelected = { formState.value = formState.value.copy { gpsEnGpio = it } },
+                )
+            }
         }
     }
 }

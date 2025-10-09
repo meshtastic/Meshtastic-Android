@@ -18,6 +18,7 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,8 +29,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -53,56 +54,46 @@ fun AmbientLightingConfigScreen(navController: NavController, viewModel: RadioCo
             viewModel.setModuleConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.ambient_lighting_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.led_state),
-                checked = formState.value.ledState,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { ledState = it } },
-            )
-        }
-        item { HorizontalDivider() }
+            TitledCard(title = stringResource(R.string.ambient_lighting_config)) {
+                SwitchPreference(
+                    title = stringResource(R.string.led_state),
+                    checked = formState.value.ledState,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { ledState = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.current),
+                    value = formState.value.current,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { current = it } },
+                )
+                EditTextPreference(
+                    title = stringResource(R.string.red),
+                    value = formState.value.red,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { red = it } },
+                )
+                EditTextPreference(
+                    title = stringResource(R.string.green),
+                    value = formState.value.green,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { green = it } },
+                )
 
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.current),
-                value = formState.value.current,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { current = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.red),
-                value = formState.value.red,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { red = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.green),
-                value = formState.value.green,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { green = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.blue),
-                value = formState.value.blue,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { blue = it } },
-            )
+                EditTextPreference(
+                    title = stringResource(R.string.blue),
+                    value = formState.value.blue,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { blue = it } },
+                )
+            }
         }
     }
 }

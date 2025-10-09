@@ -19,10 +19,12 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
@@ -33,11 +35,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
-import org.meshtastic.core.ui.component.TextDividerPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.gpioPins
+import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
 
@@ -67,183 +72,159 @@ fun ExternalNotificationConfigScreen(navController: NavController, viewModel: Ra
             }
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.external_notification_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.external_notification_enabled),
-                checked = formState.value.enabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
-            )
-        }
-
-        item {
-            TextDividerPreference(stringResource(R.string.notifications_on_message_receipt), enabled = state.connected)
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.alert_message_led),
-                checked = formState.value.alertMessage,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { alertMessage = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.alert_message_buzzer),
-                checked = formState.value.alertMessageBuzzer,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { alertMessageBuzzer = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.alert_message_vibra),
-                checked = formState.value.alertMessageVibra,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { alertMessageVibra = it } },
-            )
-        }
-
-        item {
-            TextDividerPreference(
-                stringResource(R.string.notifications_on_alert_bell_receipt),
-                enabled = state.connected,
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.alert_bell_led),
-                checked = formState.value.alertBell,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { alertBell = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.alert_bell_buzzer),
-                checked = formState.value.alertBellBuzzer,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { alertBellBuzzer = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.alert_bell_vibra),
-                checked = formState.value.alertBellVibra,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { alertBellVibra = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.output_led_gpio),
-                value = formState.value.output,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { output = it } },
-            )
-        }
-
-        if (formState.value.output != 0) {
-            item {
+            TitledCard(title = stringResource(R.string.external_notification_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.output_led_active_high),
-                    checked = formState.value.active,
+                    title = stringResource(R.string.external_notification_enabled),
+                    checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { active = it } },
+                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
         }
-        item { HorizontalDivider() }
 
         item {
-            EditTextPreference(
-                title = stringResource(R.string.output_buzzer_gpio),
-                value = formState.value.outputBuzzer,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { outputBuzzer = it } },
-            )
-        }
-
-        if (formState.value.outputBuzzer != 0) {
-            item {
+            TitledCard(title = stringResource(R.string.notifications_on_message_receipt)) {
                 SwitchPreference(
-                    title = stringResource(R.string.use_pwm_buzzer),
-                    checked = formState.value.usePwm,
+                    title = stringResource(R.string.alert_message_led),
+                    checked = formState.value.alertMessage,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { usePwm = it } },
+                    onCheckedChange = { formState.value = formState.value.copy { alertMessage = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.alert_message_buzzer),
+                    checked = formState.value.alertMessageBuzzer,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { alertMessageBuzzer = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.alert_message_vibra),
+                    checked = formState.value.alertMessageVibra,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { alertMessageVibra = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
         }
-        item { HorizontalDivider() }
 
         item {
-            EditTextPreference(
-                title = stringResource(R.string.output_vibra_gpio),
-                value = formState.value.outputVibra,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { outputVibra = it } },
-            )
+            TitledCard(title = stringResource(R.string.notifications_on_alert_bell_receipt)) {
+                SwitchPreference(
+                    title = stringResource(R.string.alert_bell_led),
+                    checked = formState.value.alertBell,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { alertBell = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.alert_bell_buzzer),
+                    checked = formState.value.alertBellBuzzer,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { alertBellBuzzer = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.alert_bell_vibra),
+                    checked = formState.value.alertBellVibra,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { alertBellVibra = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+            }
         }
 
         item {
-            EditTextPreference(
-                title = stringResource(R.string.output_duration_milliseconds),
-                value = formState.value.outputMs,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { outputMs = it } },
-            )
+            TitledCard(title = stringResource(R.string.advanced)) {
+                val gpio = remember { gpioPins }
+                DropDownPreference(
+                    title = stringResource(R.string.output_led_gpio),
+                    items = gpio,
+                    selectedItem = formState.value.output,
+                    enabled = state.connected,
+                    onItemSelected = { formState.value = formState.value.copy { output = it } },
+                )
+                if (formState.value.output != 0) {
+                    HorizontalDivider()
+                    SwitchPreference(
+                        title = stringResource(R.string.output_led_active_high),
+                        checked = formState.value.active,
+                        enabled = state.connected,
+                        onCheckedChange = { formState.value = formState.value.copy { active = it } },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                }
+                HorizontalDivider()
+                DropDownPreference(
+                    title = stringResource(R.string.output_buzzer_gpio),
+                    items = gpio,
+                    selectedItem = formState.value.outputBuzzer,
+                    enabled = state.connected,
+                    onItemSelected = { formState.value = formState.value.copy { outputBuzzer = it } },
+                )
+                if (formState.value.outputBuzzer != 0) {
+                    HorizontalDivider()
+                    SwitchPreference(
+                        title = stringResource(R.string.use_pwm_buzzer),
+                        checked = formState.value.usePwm,
+                        enabled = state.connected,
+                        onCheckedChange = { formState.value = formState.value.copy { usePwm = it } },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                }
+                HorizontalDivider()
+                DropDownPreference(
+                    title = stringResource(R.string.output_vibra_gpio),
+                    items = gpio,
+                    selectedItem = formState.value.outputVibra,
+                    enabled = state.connected,
+                    onItemSelected = { formState.value = formState.value.copy { outputVibra = it } },
+                )
+                HorizontalDivider()
+                val outputItems = remember { IntervalConfiguration.OUTPUT.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.output_duration_milliseconds),
+                    items = outputItems.map { it.value to it.toDisplayString() },
+                    selectedItem = formState.value.outputMs,
+                    enabled = state.connected,
+                    onItemSelected = { formState.value = formState.value.copy { outputMs = it.toInt() } },
+                )
+                HorizontalDivider()
+                val nagItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.nag_timeout_seconds),
+                    items = nagItems.map { it.value to it.toDisplayString() },
+                    selectedItem = formState.value.nagTimeout,
+                    enabled = state.connected,
+                    onItemSelected = { formState.value = formState.value.copy { nagTimeout = it.toInt() } },
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.ringtone),
+                    value = ringtoneInput,
+                    maxSize = 230, // ringtone max_size:231
+                    enabled = state.connected,
+                    isError = false,
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { ringtoneInput = it },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.use_i2s_as_buzzer),
+                    checked = formState.value.useI2SAsBuzzer,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { useI2SAsBuzzer = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+            }
         }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.nag_timeout_seconds),
-                value = formState.value.nagTimeout,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { nagTimeout = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.ringtone),
-                value = ringtoneInput,
-                maxSize = 230, // ringtone max_size:231
-                enabled = state.connected,
-                isError = false,
-                keyboardOptions =
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { ringtoneInput = it },
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.use_i2s_as_buzzer),
-                checked = formState.value.useI2SAsBuzzer,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { useI2SAsBuzzer = it } },
-            )
-        }
-        item { HorizontalDivider() }
     }
 }

@@ -21,6 +21,7 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,8 +35,8 @@ import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -77,141 +78,125 @@ fun MQTTConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
             viewModel.setModuleConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.mqtt_config)) }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.mqtt_enabled),
-                checked = formState.value.enabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.address),
-                value = formState.value.address,
-                maxSize = 63, // address max_size:64
-                enabled = state.connected,
-                isError = false,
-                keyboardOptions =
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { address = it } },
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.username),
-                value = formState.value.username,
-                maxSize = 63, // username max_size:64
-                enabled = state.connected,
-                isError = false,
-                keyboardOptions =
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { username = it } },
-            )
-        }
-
-        item {
-            EditPasswordPreference(
-                title = stringResource(R.string.password),
-                value = formState.value.password,
-                maxSize = 63, // password max_size:64
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { password = it } },
-            )
-        }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.encryption_enabled),
-                checked = formState.value.encryptionEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { encryptionEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.json_output_enabled),
-                checked = formState.value.jsonEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { jsonEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            val defaultAddress = stringResource(R.string.default_mqtt_address)
-            val isDefault = formState.value.address.isEmpty() || formState.value.address.contains(defaultAddress)
-            val enforceTls = isDefault && formState.value.proxyToClientEnabled
-            SwitchPreference(
-                title = stringResource(R.string.tls_enabled),
-                checked = formState.value.tlsEnabled || enforceTls,
-                enabled = state.connected && !enforceTls,
-                onCheckedChange = { formState.value = formState.value.copy { tlsEnabled = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.root_topic),
-                value = formState.value.root,
-                maxSize = 31, // root max_size:32
-                enabled = state.connected,
-                isError = false,
-                keyboardOptions =
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { root = it } },
-            )
+            TitledCard(title = stringResource(R.string.mqtt_config)) {
+                SwitchPreference(
+                    title = stringResource(R.string.mqtt_enabled),
+                    checked = formState.value.enabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.address),
+                    value = formState.value.address,
+                    maxSize = 63, // address max_size:64
+                    enabled = state.connected,
+                    isError = false,
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { address = it } },
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.username),
+                    value = formState.value.username,
+                    maxSize = 63, // username max_size:64
+                    enabled = state.connected,
+                    isError = false,
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { username = it } },
+                )
+                HorizontalDivider()
+                EditPasswordPreference(
+                    title = stringResource(R.string.password),
+                    value = formState.value.password,
+                    maxSize = 63, // password max_size:64
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { password = it } },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.encryption_enabled),
+                    checked = formState.value.encryptionEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { encryptionEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.json_output_enabled),
+                    checked = formState.value.jsonEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { jsonEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                val defaultAddress = stringResource(R.string.default_mqtt_address)
+                val isDefault = formState.value.address.isEmpty() || formState.value.address.contains(defaultAddress)
+                val enforceTls = isDefault && formState.value.proxyToClientEnabled
+                SwitchPreference(
+                    title = stringResource(R.string.tls_enabled),
+                    checked = formState.value.tlsEnabled || enforceTls,
+                    enabled = state.connected && !enforceTls,
+                    onCheckedChange = { formState.value = formState.value.copy { tlsEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(R.string.root_topic),
+                    value = formState.value.root,
+                    maxSize = 31, // root max_size:32
+                    enabled = state.connected,
+                    isError = false,
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { root = it } },
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.proxy_to_client_enabled),
+                    checked = formState.value.proxyToClientEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { proxyToClientEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+            }
         }
 
         item {
-            SwitchPreference(
-                title = stringResource(R.string.proxy_to_client_enabled),
-                checked = formState.value.proxyToClientEnabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { proxyToClientEnabled = it } },
-            )
+            TitledCard(title = stringResource(R.string.map_reporting)) {
+                MapReportingPreference(
+                    mapReportingEnabled = formState.value.mapReportingEnabled,
+                    onMapReportingEnabledChanged = {
+                        formState.value = formState.value.copy { mapReportingEnabled = it }
+                    },
+                    shouldReportLocation = formState.value.mapReportSettings.shouldReportLocation,
+                    onShouldReportLocationChanged = {
+                        viewModel.setShouldReportLocation(destNum, it)
+                        val settings = formState.value.mapReportSettings.copy { this.shouldReportLocation = it }
+                        formState.value = formState.value.copy { mapReportSettings = settings }
+                    },
+                    positionPrecision = formState.value.mapReportSettings.positionPrecision,
+                    onPositionPrecisionChanged = {
+                        val settings = formState.value.mapReportSettings.copy { positionPrecision = it }
+                        formState.value = formState.value.copy { mapReportSettings = settings }
+                    },
+                    publishIntervalSecs = formState.value.mapReportSettings.publishIntervalSecs,
+                    onPublishIntervalSecsChanged = {
+                        val settings = formState.value.mapReportSettings.copy { publishIntervalSecs = it }
+                        formState.value = formState.value.copy { mapReportSettings = settings }
+                    },
+                    enabled = state.connected,
+                )
+            }
         }
-        item { HorizontalDivider() }
-        // mqtt map reporting opt in
-        item { PreferenceCategory(text = stringResource(R.string.map_reporting)) }
-
-        item {
-            MapReportingPreference(
-                mapReportingEnabled = formState.value.mapReportingEnabled,
-                onMapReportingEnabledChanged = { formState.value = formState.value.copy { mapReportingEnabled = it } },
-                shouldReportLocation = formState.value.mapReportSettings.shouldReportLocation,
-                onShouldReportLocationChanged = {
-                    viewModel.setShouldReportLocation(destNum, it)
-                    val settings = formState.value.mapReportSettings.copy { this.shouldReportLocation = it }
-                    formState.value = formState.value.copy { mapReportSettings = settings }
-                },
-                positionPrecision = formState.value.mapReportSettings.positionPrecision,
-                onPositionPrecisionChanged = {
-                    val settings = formState.value.mapReportSettings.copy { positionPrecision = it }
-                    formState.value = formState.value.copy { mapReportSettings = settings }
-                },
-                publishIntervalSecs = formState.value.mapReportSettings.publishIntervalSecs,
-                onPublishIntervalSecsChanged = {
-                    val settings = formState.value.mapReportSettings.copy { publishIntervalSecs = it }
-                    formState.value = formState.value.copy { mapReportSettings = settings }
-                },
-                enabled = state.connected,
-                focusManager = focusManager,
-            )
-        }
-        item { HorizontalDivider() }
     }
 }
 

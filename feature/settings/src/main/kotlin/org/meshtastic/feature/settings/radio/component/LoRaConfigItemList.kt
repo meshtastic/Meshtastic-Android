@@ -17,19 +17,16 @@
 
 package org.meshtastic.feature.settings.radio.component
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.meshtastic.core.model.Channel
@@ -39,11 +36,11 @@ import org.meshtastic.core.model.numChannels
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceDivider
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.util.hopLimits
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 
@@ -79,19 +76,15 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                     selectedItem = formState.value.region,
                     onItemSelected = { formState.value = formState.value.copy { region = it } },
                 )
-
-                PreferenceDivider()
-
+                HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.use_modem_preset),
                     checked = formState.value.usePreset,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { usePreset = it } },
-                    containerColor = Color.Transparent,
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
-
-                PreferenceDivider()
-
+                HorizontalDivider()
                 if (formState.value.usePreset) {
                     DropDownPreference(
                         title = stringResource(R.string.modem_preset),
@@ -109,9 +102,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = { formState.value = formState.value.copy { bandwidth = it } },
                     )
-
-                    PreferenceDivider()
-
+                    HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(R.string.spread_factor),
                         value = formState.value.spreadFactor,
@@ -119,9 +110,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = { formState.value = formState.value.copy { spreadFactor = it } },
                     )
-
-                    PreferenceDivider()
-
+                    HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(R.string.coding_rate),
                         value = formState.value.codingRate,
@@ -133,8 +122,6 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
             }
         }
 
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-
         item {
             TitledCard(title = stringResource(R.string.advanced)) {
                 SwitchPreference(
@@ -142,42 +129,35 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                     checked = formState.value.ignoreMqtt,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { ignoreMqtt = it } },
-                    containerColor = Color.Transparent,
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
-
-                PreferenceDivider()
-
+                HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.ok_to_mqtt),
                     checked = formState.value.configOkToMqtt,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { configOkToMqtt = it } },
-                    containerColor = Color.Transparent,
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
-
-                PreferenceDivider()
-
+                HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.tx_enabled),
                     checked = formState.value.txEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { txEnabled = it } },
-                    containerColor = Color.Transparent,
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
-
-                PreferenceDivider()
-
-                EditTextPreference(
+                HorizontalDivider()
+                val hopLimitItems = remember { hopLimits }
+                DropDownPreference(
                     title = stringResource(R.string.hop_limit),
                     summary = stringResource(id = R.string.config_lora_hop_limit_summary),
-                    value = formState.value.hopLimit,
+                    items = hopLimitItems,
+                    selectedItem = formState.value.hopLimit,
+                    onItemSelected = { formState.value = formState.value.copy { hopLimit = it } },
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { hopLimit = it } },
                 )
-
-                PreferenceDivider()
-
+                HorizontalDivider()
                 var isFocusedSlot by remember { mutableStateOf(false) }
                 EditTextPreference(
                     title = stringResource(R.string.frequency_slot),
@@ -197,19 +177,15 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                         }
                     },
                 )
-
-                PreferenceDivider()
-
+                HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.sx126x_rx_boosted_gain),
                     checked = formState.value.sx126XRxBoostedGain,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { sx126XRxBoostedGain = it } },
-                    containerColor = Color.Transparent,
+                    containerColor = CardDefaults.cardColors().containerColor,
                 )
-
-                PreferenceDivider()
-
+                HorizontalDivider()
                 var isFocusedOverride by remember { mutableStateOf(false) }
                 EditTextPreference(
                     title = stringResource(R.string.override_frequency_mhz),
@@ -224,9 +200,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                     onFocusChanged = { isFocusedOverride = it.isFocused },
                     onValueChanged = { formState.value = formState.value.copy { overrideFrequency = it } },
                 )
-
-                PreferenceDivider()
-
+                HorizontalDivider()
                 SignedIntegerEditTextPreference(
                     title = stringResource(R.string.tx_power_dbm),
                     value = formState.value.txPower,
@@ -234,14 +208,14 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { txPower = it } },
                 )
-
                 if (viewModel.hasPaFan) {
+                    HorizontalDivider()
                     SwitchPreference(
                         title = stringResource(R.string.pa_fan_disabled),
                         checked = formState.value.paFanDisabled,
                         enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy { paFanDisabled = it } },
-                        containerColor = Color.Transparent,
+                        containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
             }

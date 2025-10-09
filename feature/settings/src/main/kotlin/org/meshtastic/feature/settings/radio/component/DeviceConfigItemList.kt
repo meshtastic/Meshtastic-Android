@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,9 +52,11 @@ import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
@@ -117,102 +121,105 @@ fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewM
             viewModel.setConfig(config)
         },
     ) {
-        item { PreferenceCategory(text = stringResource(R.string.options)) }
         item {
-            DropDownPreference(
-                title = stringResource(R.string.role),
-                enabled = state.connected,
-                selectedItem = formState.value.role,
-                onItemSelected = { selectedRole = it },
-                summary = stringResource(id = formState.value.role.description),
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            DropDownPreference(
-                title = stringResource(R.string.rebroadcast_mode),
-                enabled = state.connected,
-                selectedItem = formState.value.rebroadcastMode,
-                onItemSelected = { formState.value = formState.value.copy { rebroadcastMode = it } },
-                summary = stringResource(id = formState.value.rebroadcastMode.description),
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.nodeinfo_broadcast_interval),
-                value = formState.value.nodeInfoBroadcastSecs,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it } },
-            )
-        }
-        item { PreferenceCategory(text = stringResource(R.string.hardware)) }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.double_tap_as_button_press),
-                summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
-                checked = formState.value.doubleTapAsButtonPress,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { doubleTapAsButtonPress = it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.triple_click_adhoc_ping),
-                summary = stringResource(id = R.string.config_device_tripleClickAsAdHocPing_summary),
-                checked = !formState.value.disableTripleClick,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { disableTripleClick = !it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.led_heartbeat),
-                summary = stringResource(id = R.string.config_device_ledHeartbeatEnabled_summary),
-                checked = !formState.value.ledHeartbeatDisabled,
-                enabled = state.connected,
-                onCheckedChange = { formState.value = formState.value.copy { ledHeartbeatDisabled = !it } },
-            )
-        }
-        item { HorizontalDivider() }
+            TitledCard(title = stringResource(R.string.options)) {
+                DropDownPreference(
+                    title = stringResource(R.string.role),
+                    enabled = state.connected,
+                    selectedItem = formState.value.role,
+                    onItemSelected = { selectedRole = it },
+                    summary = stringResource(id = formState.value.role.description),
+                )
+                HorizontalDivider()
 
-        item { PreferenceCategory(text = stringResource(R.string.debug)) }
+                DropDownPreference(
+                    title = stringResource(R.string.rebroadcast_mode),
+                    enabled = state.connected,
+                    selectedItem = formState.value.rebroadcastMode,
+                    onItemSelected = { formState.value = formState.value.copy { rebroadcastMode = it } },
+                    summary = stringResource(id = formState.value.rebroadcastMode.description),
+                )
+                HorizontalDivider()
+
+                val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.nodeinfo_broadcast_interval),
+                    selectedItem = formState.value.nodeInfoBroadcastSecs.toLong(),
+                    enabled = state.connected,
+                    items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
+                    onItemSelected = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it.toInt() } },
+                )
+            }
+        }
         item {
-            EditTextPreference(
-                title = stringResource(R.string.time_zone),
-                value = formState.value.tzdef,
-                summary = stringResource(id = R.string.config_device_tzdef_summary),
-                maxSize = 64, // tzdef max_size:65
-                enabled = state.connected,
-                isError = false,
-                keyboardOptions =
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { tzdef = it } },
-            )
+            TitledCard(title = stringResource(R.string.hardware)) {
+                SwitchPreference(
+                    title = stringResource(R.string.double_tap_as_button_press),
+                    summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
+                    checked = formState.value.doubleTapAsButtonPress,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { doubleTapAsButtonPress = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+
+                SwitchPreference(
+                    title = stringResource(R.string.triple_click_adhoc_ping),
+                    summary = stringResource(id = R.string.config_device_tripleClickAsAdHocPing_summary),
+                    checked = !formState.value.disableTripleClick,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { disableTripleClick = !it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(R.string.led_heartbeat),
+                    summary = stringResource(id = R.string.config_device_ledHeartbeatEnabled_summary),
+                    checked = !formState.value.ledHeartbeatDisabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { ledHeartbeatDisabled = !it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+            }
+        }
+        item {
+            TitledCard(title = stringResource(R.string.debug)) {
+                EditTextPreference(
+                    title = stringResource(R.string.time_zone),
+                    value = formState.value.tzdef,
+                    summary = stringResource(id = R.string.config_device_tzdef_summary),
+                    maxSize = 64, // tzdef max_size:65
+                    enabled = state.connected,
+                    isError = false,
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { tzdef = it } },
+                )
+            }
         }
 
-        item { PreferenceCategory(text = stringResource(R.string.gpio)) }
         item {
-            EditTextPreference(
-                title = stringResource(R.string.button_gpio),
-                value = formState.value.buttonGpio,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { buttonGpio = it } },
-            )
-        }
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.buzzer_gpio),
-                value = formState.value.buzzerGpio,
-                enabled = state.connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { formState.value = formState.value.copy { buzzerGpio = it } },
-            )
+            TitledCard(title = stringResource(R.string.gpio)) {
+                EditTextPreference(
+                    title = stringResource(R.string.button_gpio),
+                    value = formState.value.buttonGpio,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { buttonGpio = it } },
+                )
+
+                HorizontalDivider()
+
+                EditTextPreference(
+                    title = stringResource(R.string.buzzer_gpio),
+                    value = formState.value.buzzerGpio,
+                    enabled = state.connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy { buzzerGpio = it } },
+                )
+            }
         }
     }
 }
