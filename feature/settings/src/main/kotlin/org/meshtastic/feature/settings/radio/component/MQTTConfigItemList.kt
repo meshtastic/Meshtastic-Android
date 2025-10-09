@@ -194,7 +194,6 @@ fun MQTTConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                         formState.value = formState.value.copy { mapReportSettings = settings }
                     },
                     enabled = state.connected,
-                    focusManager = focusManager,
                 )
             }
         }

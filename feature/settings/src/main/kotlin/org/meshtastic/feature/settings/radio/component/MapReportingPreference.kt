@@ -148,6 +148,5 @@ fun MapReportingPreview() {
         positionPrecision = 5,
         onPositionPrecisionChanged = {},
         enabled = true,
-        focusManager = focusManager,
     )
 }
