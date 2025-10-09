@@ -15,9 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.core.ui.component
-
-import org.meshtastic.core.model.FixedUpdateIntervals
+package org.meshtastic.feature.settings.util
 
 fun FixedUpdateIntervals.toDisplayString(): String = if (this == FixedUpdateIntervals.UNSET) {
     "Never"
