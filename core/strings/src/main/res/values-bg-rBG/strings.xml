@@ -891,4 +891,7 @@
     <string name="error_no_app_to_handle_link">Няма налично приложение за обработка на връзката.</string>
     <string name="system_settings">Системни настройки</string>
     <string name="no_local_stats">No Stats Available</string>
+    <string name="analytics_notice">Analytics are collected to help us improve the Android app (thank you), we will receive anonymized information about user behavior. This includes crash reports, screens used in the app, etc.</string>
+    <string name="analytics_platforms">"Analytics platforms: "</string>
+    <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
 </resources>
