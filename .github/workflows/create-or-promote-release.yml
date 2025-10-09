@@ -28,64 +28,95 @@ permissions:
   attestations: write
 
 jobs:
-  create-tag:
+  determine-tags:
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.calculate_new_tag.outputs.new_tag }}
+      tag_to_process: ${{ steps.calculate_tags.outputs.tag_to_process }}
+      release_name: ${{ steps.calculate_tags.outputs.release_name }}
+      final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Calculate new release tag
-        id: calculate_new_tag
+      - name: Calculate tags
+        id: calculate_tags
         run: |
           BASE_VERSION="${{ inputs.base_version }}"
           CHANNEL="${{ inputs.channel }}"
 
-          if [[ "$CHANNEL" == "production" ]]; then
-            # Production tags are simple, without a channel or increment
-            NEW_TAG="v${BASE_VERSION}"
-          else
-            # Pre-release channels get an incrementing number
-            LATEST_TAG=$(git tag --list "v${BASE_VERSION}-${CHANNEL}.*" --sort=-v:refname | head -n 1)
+          if [[ "$CHANNEL" == "internal" ]]; then
+            # This is a new build, create a new internal tag
+            LATEST_TAG=$(git tag --list "v${BASE_VERSION}-internal.*" --sort=-v:refname | head -n 1)
 
             if [ -z "$LATEST_TAG" ]; then
               INCREMENT=1
             else
-              INCREMENT=$(echo "$LATEST_TAG" | sed -n "s/.*-${CHANNEL}\.\([0-9]*\)/\1/p" | awk '{print $1+1}')
+              INCREMENT=$(echo "$LATEST_TAG" | sed -n "s/.*-internal\.\([0-9]*\)/\1/p" | awk '{print $1+1}')
             fi
 
-            NEW_TAG="v${BASE_VERSION}-${CHANNEL}.${INCREMENT}"
-          fi
+            NEW_TAG="v${BASE_VERSION}-internal.${INCREMENT}"
+            echo "Calculated new tag: $NEW_TAG"
+            echo "tag_to_process=$NEW_TAG" >> $GITHUB_OUTPUT
+            echo "release_name=$NEW_TAG" >> $GITHUB_OUTPUT
+            echo "final_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          else
+            # This is a promotion, find the latest internal tag to promote
+            LATEST_INTERNAL_TAG=$(git tag --list "v${BASE_VERSION}-internal.*" --sort=-v:refname | head -n 1)
 
-          echo "Calculated new tag: $NEW_TAG"
-          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+            if [ -z "$LATEST_INTERNAL_TAG" ]; then
+              echo "::error::No internal release found for base version ${BASE_VERSION} to promote."
+              exit 1
+            fi
+
+            echo "Found latest internal tag to promote: $LATEST_INTERNAL_TAG"
+            INCREMENT=$(echo "$LATEST_INTERNAL_TAG" | sed -n "s/.*-internal\.\([0-9]*\)/\1/p")
+
+            if [[ "$CHANNEL" == "production" ]]; then
+              NEW_TAG="v${BASE_VERSION}"
+            else
+              NEW_TAG="v${BASE_VERSION}-${CHANNEL}.${INCREMENT}"
+            fi
+
+            echo "New release name will be: $NEW_TAG"
+            echo "Final tag will be: $NEW_TAG"
+            echo "tag_to_process=$LATEST_INTERNAL_TAG" >> $GITHUB_OUTPUT
+            echo "release_name=$NEW_TAG" >> $GITHUB_OUTPUT
+            echo "final_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          fi
         shell: bash
 
       - name: Create and push new tag
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
         run: |
-          git tag ${{ steps.calculate_new_tag.outputs.new_tag }}
-          git push origin ${{ steps.calculate_new_tag.outputs.new_tag }}
+          git tag ${{ steps.calculate_tags.outputs.tag_to_process }}
+          git push origin ${{ steps.calculate_tags.outputs.tag_to_process }}
+
+      - name: Create and push final tag
+        if: ${{ !inputs.dry_run && inputs.channel != 'internal' }}
+        run: |
+          git tag ${{ steps.calculate_tags.outputs.final_tag }} ${{ steps.calculate_tags.outputs.tag_to_process }}
+          git push origin ${{ steps.calculate_tags.outputs.final_tag }}
 
   call-release-workflow:
     if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
-    needs: create-tag
+    needs: determine-tags
     uses: ./.github/workflows/release.yml
     with:
-      tag_name: ${{ needs.create-tag.outputs.new_tag }}
+      tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
     secrets: inherit
 
   call-promote-workflow:
     if: ${{ !inputs.dry_run && inputs.channel != 'internal' }}
-    needs: create-tag
+    needs: determine-tags
     uses: ./.github/workflows/promote.yml
     with:
-      tag_name: ${{ needs.create-tag.outputs.new_tag }}
+      tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}
+      release_name: ${{ needs.determine-tags.outputs.release_name }}
+      final_tag: ${{ needs.determine-tags.outputs.final_tag }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
     secrets: inherit
