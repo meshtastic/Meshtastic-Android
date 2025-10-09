@@ -47,7 +47,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.precisionBitsToMeters
-import org.meshtastic.core.ui.component.toDisplayString
+import org.meshtastic.feature.settings.util.toDisplayString
 import kotlin.math.roundToInt
 
 private const val POSITION_PRECISION_MIN = 12
