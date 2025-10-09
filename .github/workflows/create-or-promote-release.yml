@@ -71,12 +71,21 @@ jobs:
             fi
 
             echo "Found latest internal tag to promote: $LATEST_INTERNAL_TAG"
-            INCREMENT=$(echo "$LATEST_INTERNAL_TAG" | sed -n "s/.*-internal\.\([0-9]*\)/\1/p")
 
-            if [[ "$CHANNEL" == "production" ]]; then
-              NEW_TAG="v${BASE_VERSION}"
+            # Calculate the increment for the TARGET channel
+            if [[ "$CHANNEL" != "production" ]]; then
+                LATEST_CHANNEL_TAG=$(git tag --list "v${BASE_VERSION}-${CHANNEL}.*" --sort=-v:refname | head -n 1)
+
+                if [ -z "$LATEST_CHANNEL_TAG" ]; then
+                  INCREMENT=1
+                else
+                  INCREMENT=$(echo "$LATEST_CHANNEL_TAG" | sed -n "s/.*-${CHANNEL}\.\([0-9]*\)/\1/p" | awk '{print $1+1}')
+                fi
+                
+                NEW_TAG="v${BASE_VERSION}-${CHANNEL}.${INCREMENT}"
             else
-              NEW_TAG="v${BASE_VERSION}-${CHANNEL}.${INCREMENT}"
+                # Production is special, it has no increment
+                NEW_TAG="v${BASE_VERSION}"
             fi
 
             echo "New release name will be: $NEW_TAG"
