@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.strings.R
 
@@ -99,6 +100,14 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
                 FeatureRow(feature = feature)
                 Spacer(modifier = Modifier.height(16.dp))
             }
+            Spacer(modifier = Modifier.weight(1f))
+            AnalyticsIntro()
         }
     }
+}
+
+@Preview
+@Composable
+private fun WelcomeScreenPreview() {
+    WelcomeScreen(onGetStarted = {})
 }
