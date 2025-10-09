@@ -52,6 +52,7 @@ enum class FixedUpdateIntervals(val value: Long) {
     THIRTY_SIX_HOURS(TimeUnit.HOURS.toSeconds(36)),
     FORTY_EIGHT_HOURS(TimeUnit.HOURS.toSeconds(48)),
     SEVENTY_TWO_HOURS(TimeUnit.HOURS.toSeconds(72)),
+    ALWAYS_ON(Int.MAX_VALUE.toLong()),
     ;
 
     companion object {
@@ -73,6 +74,7 @@ enum class IntervalConfiguration {
     BROADCAST_SHORT,
     BROADCAST_MEDIUM,
     BROADCAST_LONG,
+    NODE_INFO_BROADCAST,
     DETECTION_SENSOR_MINIMUM,
     DETECTION_SENSOR_STATE,
     NAG_TIMEOUT,
@@ -80,6 +82,8 @@ enum class IntervalConfiguration {
     POSITION,
     RANGE_TEST_SENDER,
     SMART_BROADCAST_MINIMUM,
+    DISPLAY_SCREEN_ON,
+    DISPLAY_CAROUSEL,
     ;
 
     /** A list of [FixedUpdateIntervals] that are permissible for this configuration. */
@@ -119,6 +123,20 @@ enum class IntervalConfiguration {
                 )
             BROADCAST_LONG ->
                 listOf(
+                    FixedUpdateIntervals.THREE_HOURS,
+                    FixedUpdateIntervals.FOUR_HOURS,
+                    FixedUpdateIntervals.FIVE_HOURS,
+                    FixedUpdateIntervals.SIX_HOURS,
+                    FixedUpdateIntervals.TWELVE_HOURS,
+                    FixedUpdateIntervals.EIGHTEEN_HOURS,
+                    FixedUpdateIntervals.TWENTY_FOUR_HOURS,
+                    FixedUpdateIntervals.THIRTY_SIX_HOURS,
+                    FixedUpdateIntervals.FORTY_EIGHT_HOURS,
+                    FixedUpdateIntervals.SEVENTY_TWO_HOURS,
+                )
+            NODE_INFO_BROADCAST ->
+                listOf(
+                    FixedUpdateIntervals.UNSET,
                     FixedUpdateIntervals.THREE_HOURS,
                     FixedUpdateIntervals.FOUR_HOURS,
                     FixedUpdateIntervals.FIVE_HOURS,
@@ -241,6 +259,30 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FIFTEEN_MINUTES,
                     FixedUpdateIntervals.THIRTY_MINUTES,
                     FixedUpdateIntervals.ONE_HOUR,
+                )
+
+            DISPLAY_SCREEN_ON ->
+                listOf(
+                    FixedUpdateIntervals.FIFTEEN_SECONDS,
+                    FixedUpdateIntervals.THIRTY_SECONDS,
+                    FixedUpdateIntervals.ONE_MINUTE,
+                    FixedUpdateIntervals.FIVE_MINUTES,
+                    FixedUpdateIntervals.TEN_MINUTES,
+                    FixedUpdateIntervals.FIFTEEN_MINUTES,
+                    FixedUpdateIntervals.THIRTY_MINUTES,
+                    FixedUpdateIntervals.ONE_HOUR,
+                    FixedUpdateIntervals.ALWAYS_ON,
+                )
+
+            DISPLAY_CAROUSEL ->
+                listOf(
+                    FixedUpdateIntervals.UNSET,
+                    FixedUpdateIntervals.FIFTEEN_SECONDS,
+                    FixedUpdateIntervals.THIRTY_SECONDS,
+                    FixedUpdateIntervals.ONE_MINUTE,
+                    FixedUpdateIntervals.FIVE_MINUTES,
+                    FixedUpdateIntervals.TEN_MINUTES,
+                    FixedUpdateIntervals.FIFTEEN_MINUTES,
                 )
         }
     }

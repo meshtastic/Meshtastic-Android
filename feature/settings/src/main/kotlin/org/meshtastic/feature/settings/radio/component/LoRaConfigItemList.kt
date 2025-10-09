@@ -37,6 +37,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
+import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -147,13 +148,14 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                EditTextPreference(
+                val hopLimitItems = (0..7).map {  it to it.toString() }
+                DropDownPreference(
                     title = stringResource(R.string.hop_limit),
                     summary = stringResource(id = R.string.config_lora_hop_limit_summary),
-                    value = formState.value.hopLimit,
+                    items = hopLimitItems,
+                    selectedItem = formState.value.hopLimit,
+                    onItemSelected = { formState.value = formState.value.copy { hopLimit = it } },
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { hopLimit = it } },
                 )
                 HorizontalDivider()
                 var isFocusedSlot by remember { mutableStateOf(false) }

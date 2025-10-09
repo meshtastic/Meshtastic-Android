@@ -32,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,11 +49,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.meshtastic.core.model.IntervalConfiguration
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.component.toDisplayString
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig
 import org.meshtastic.proto.config
@@ -137,12 +141,16 @@ fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewM
                     summary = stringResource(id = formState.value.rebroadcastMode.description),
                 )
                 HorizontalDivider()
-                EditTextPreference(
+
+                val nodeInfoBroadcastIntervals = remember {
+                    IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals
+                }
+                SliderPreference(
                     title = stringResource(R.string.nodeinfo_broadcast_interval),
-                    value = formState.value.nodeInfoBroadcastSecs,
+                    selectedValue = formState.value.nodeInfoBroadcastSecs.toLong(),
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it } },
+                    items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
+                    onValueChange = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it.toInt() } },
                 )
             }
         }
