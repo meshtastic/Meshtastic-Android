@@ -32,15 +32,12 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
 
 private const val MIN_FW_FOR_TELEMETRY_TOGGLE = "2.7.12"
-
-private fun FixedUpdateIntervals.toDisplayString(): String =
-    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
 @Composable
 fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {

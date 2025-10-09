@@ -66,7 +66,7 @@ fun RangeTestConfigScreen(navController: NavController, viewModel: RadioConfigVi
                 HorizontalDivider()
                 val rangeItems = remember { IntervalConfiguration.RANGE_TEST_SENDER.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.power_metrics_update_interval_seconds),
+                    title = stringResource(R.string.sender_message_interval_seconds),
                     selectedItem = formState.value.sender.toLong(),
                     enabled = state.connected,
                     items = rangeItems.map { it.value to it.toDisplayString() },

@@ -34,13 +34,10 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
-
-private fun FixedUpdateIntervals.toDisplayString(): String =
-    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
 @Composable
 fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {

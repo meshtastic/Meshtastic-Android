@@ -37,15 +37,12 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.gpioPins
+import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-
-private fun FixedUpdateIntervals.toDisplayString(): String =
-    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
 @Composable
 fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
