@@ -15,23 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.kover)
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.compose)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
-}
+package org.meshtastic.feature.intro
 
-android { namespace = "org.meshtastic.feature.intro" }
+import androidx.compose.runtime.Composable
 
-dependencies {
-    implementation(projects.core.strings)
-    googleImplementation(projects.core.ui)
-
-    implementation(libs.accompanist.permissions)
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
+@Composable
+fun AnalyticsIntro() {
+    // no-op for fdroid
 }
