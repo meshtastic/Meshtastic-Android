@@ -98,15 +98,18 @@ jobs:
 
       - name: Create and push new tag
         if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git tag ${{ steps.calculate_tags.outputs.tag_to_process }}
           git push origin ${{ steps.calculate_tags.outputs.tag_to_process }}
 
       - name: Create and push final tag
         if: ${{ !inputs.dry_run && inputs.channel != 'internal' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git tag ${{ steps.calculate_tags.outputs.final_tag }} ${{ steps.calculate_tags.outputs.tag_to_process }}
-          git push origin ${{ steps.calculate_tags.outputs.final_tag }}
+          gh release edit ${{ steps.calculate_tags.outputs.tag_to_process }} --tag ${{ steps.calculate_tags.outputs.final_tag }} --title "${{ steps.calculate_tags.outputs.release_name }}"
 
   call-release-workflow:
     if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
