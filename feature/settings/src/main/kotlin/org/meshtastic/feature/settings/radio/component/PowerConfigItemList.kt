@@ -105,12 +105,12 @@ fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewMo
                 }
                 HorizontalDivider()
                 val waitBluetoothItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
-                SliderPreference(
+                DropDownPreference(
                     title = stringResource(R.string.wait_for_bluetooth_duration_seconds),
-                    selectedValue = formState.value.waitBluetoothSecs.toLong(),
+                    selectedItem = formState.value.waitBluetoothSecs.toLong(),
                     enabled = state.connected,
                     items = waitBluetoothItems.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { waitBluetoothSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy { waitBluetoothSecs = it.toInt() } },
                 )
                 HorizontalDivider()
                 val sdsSecsItems = remember { IntervalConfiguration.ALL.allowedIntervals }
