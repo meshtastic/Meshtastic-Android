@@ -143,12 +143,12 @@ fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewM
                 HorizontalDivider()
 
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
-                SliderPreference(
+                DropDownPreference(
                     title = stringResource(R.string.nodeinfo_broadcast_interval),
-                    selectedValue = formState.value.nodeInfoBroadcastSecs.toLong(),
+                    selectedItem = formState.value.nodeInfoBroadcastSecs.toLong(),
                     enabled = state.connected,
                     items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it.toInt() } },
                 )
             }
         }
