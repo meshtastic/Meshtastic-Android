@@ -40,6 +40,7 @@ import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.util.hopLimits
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 
@@ -147,8 +148,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                @Suppress("MagicNumber")
-                val hopLimitItems = (0..7).map { it to it.toString() }
+                val hopLimitItems = remember { hopLimits }
                 DropDownPreference(
                     title = stringResource(R.string.hop_limit),
                     summary = stringResource(id = R.string.config_lora_hop_limit_summary),

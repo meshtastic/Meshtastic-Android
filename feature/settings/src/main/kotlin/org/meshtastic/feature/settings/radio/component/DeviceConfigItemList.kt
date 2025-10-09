@@ -199,7 +199,6 @@ fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewM
                 )
             }
         }
-        item {}
 
         item {
             TitledCard(title = stringResource(R.string.gpio)) {
@@ -210,6 +209,8 @@ fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewM
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { buttonGpio = it } },
                 )
+
+                HorizontalDivider()
 
                 EditTextPreference(
                     title = stringResource(R.string.buzzer_gpio),
