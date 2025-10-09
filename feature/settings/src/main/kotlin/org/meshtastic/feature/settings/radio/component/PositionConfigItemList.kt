@@ -298,24 +298,24 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
                     title = stringResource(R.string.gps_receive_gpio),
                     enabled = state.connected,
                     items = pins,
-                    selectedItem = pins.find { it.first == formState.value.rxGpio } ?: pins.first(),
-                    onItemSelected = { formState.value = formState.value.copy { rxGpio = pins.indexOf(it) } },
+                    selectedItem = formState.value.rxGpio,
+                    onItemSelected = { formState.value = formState.value.copy { rxGpio = it } },
                 )
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(R.string.gps_transmit_gpio),
                     enabled = state.connected,
                     items = pins,
-                    selectedItem = pins.find { it.first == formState.value.txGpio } ?: pins.first(),
-                    onItemSelected = { formState.value = formState.value.copy { txGpio = pins.indexOf(it) } },
+                    selectedItem = formState.value.txGpio,
+                    onItemSelected = { formState.value = formState.value.copy { txGpio = it } },
                 )
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(R.string.gps_en_gpio),
                     enabled = state.connected,
                     items = pins,
-                    selectedItem = pins.find { it.first == formState.value.gpsEnGpio } ?: pins.first(),
-                    onItemSelected = { formState.value = formState.value.copy { gpsEnGpio = pins.indexOf(it) } },
+                    selectedItem = formState.value.gpsEnGpio,
+                    onItemSelected = { formState.value = formState.value.copy { gpsEnGpio = it } },
                 )
             }
         }
