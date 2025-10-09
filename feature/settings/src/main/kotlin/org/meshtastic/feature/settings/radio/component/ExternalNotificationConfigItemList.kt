@@ -24,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
@@ -33,10 +34,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.component.toDisplayString
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -137,12 +142,13 @@ fun ExternalNotificationConfigScreen(navController: NavController, viewModel: Ra
 
         item {
             TitledCard(title = stringResource(R.string.advanced)) {
-                EditTextPreference(
+                val gpio = remember { gpioPins }
+                DropDownPreference(
                     title = stringResource(R.string.output_led_gpio),
-                    value = formState.value.output,
+                    items = gpio,
+                    selectedItem = formState.value.output,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { output = it } },
+                    onItemSelected = { formState.value = formState.value.copy { output = it } },
                 )
                 if (formState.value.output != 0) {
                     HorizontalDivider()
@@ -155,12 +161,12 @@ fun ExternalNotificationConfigScreen(navController: NavController, viewModel: Ra
                     )
                 }
                 HorizontalDivider()
-                EditTextPreference(
+                DropDownPreference(
                     title = stringResource(R.string.output_buzzer_gpio),
-                    value = formState.value.outputBuzzer,
+                    items = gpio,
+                    selectedItem = formState.value.outputBuzzer,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { outputBuzzer = it } },
+                    onItemSelected = { formState.value = formState.value.copy { outputBuzzer = it } },
                 )
                 if (formState.value.outputBuzzer != 0) {
                     HorizontalDivider()
@@ -173,28 +179,30 @@ fun ExternalNotificationConfigScreen(navController: NavController, viewModel: Ra
                     )
                 }
                 HorizontalDivider()
-                EditTextPreference(
+                DropDownPreference(
                     title = stringResource(R.string.output_vibra_gpio),
-                    value = formState.value.outputVibra,
+                    items = gpio,
+                    selectedItem = formState.value.outputVibra,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { outputVibra = it } },
+                    onItemSelected = { formState.value = formState.value.copy { outputVibra = it } },
                 )
                 HorizontalDivider()
-                EditTextPreference(
+                val outputItems = remember { IntervalConfiguration.OUTPUT.allowedIntervals }
+                DropDownPreference(
                     title = stringResource(R.string.output_duration_milliseconds),
-                    value = formState.value.outputMs,
+                    items = outputItems.map { it.value to it.toDisplayString() },
+                    selectedItem = formState.value.outputMs,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { outputMs = it } },
+                    onItemSelected = { formState.value = formState.value.copy { outputMs = it.toInt() } },
                 )
                 HorizontalDivider()
-                EditTextPreference(
+                val nagItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
+                DropDownPreference(
                     title = stringResource(R.string.nag_timeout_seconds),
-                    value = formState.value.nagTimeout,
+                    items = nagItems.map { it.value to it.toDisplayString() },
+                    selectedItem = formState.value.nagTimeout,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { nagTimeout = it } },
+                    onItemSelected = { formState.value = formState.value.copy { nagTimeout = it.toInt() } },
                 )
                 HorizontalDivider()
                 EditTextPreference(

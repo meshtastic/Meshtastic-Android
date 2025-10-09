@@ -43,22 +43,21 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
-import org.meshtastic.core.model.FixedUpdateIntervals
-import org.meshtastic.core.model.IntervalConfiguration
+import org.meshtastic.feature.settings.util.FixedUpdateIntervals
+import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.core.model.Position
+import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.BitwisePreference
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.component.toDisplayString
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ConfigProtos.Config.PositionConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
-
-private fun FixedUpdateIntervals.toDisplayString(): String =
-    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -145,7 +144,7 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
     ) {
         item {
             TitledCard(title = stringResource(R.string.position_packet)) {
-                val items = remember { IntervalConfiguration.POSITION.allowedIntervals }
+                val items = remember { IntervalConfiguration.POSITION_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(R.string.broadcast_interval),
                     summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
@@ -259,7 +258,7 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
                         onItemSelected = { formState.value = formState.value.copy { gpsMode = it } },
                     )
                     HorizontalDivider()
-                    val items = remember { IntervalConfiguration.POSITION.allowedIntervals }
+                    val items = remember { IntervalConfiguration.GPS_UPDATE.allowedIntervals }
                     DropDownPreference(
                         title = stringResource(R.string.update_interval),
                         summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
@@ -294,28 +293,29 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
         }
         item {
             TitledCard(title = stringResource(R.string.advanced_device_gps)) {
-                EditTextPreference(
+                val pins = remember { gpioPins }
+                DropDownPreference(
                     title = stringResource(R.string.gps_receive_gpio),
-                    value = formState.value.rxGpio,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { rxGpio = it } },
+                    items = pins,
+                    selectedItem = pins.find { it.first == formState.value.rxGpio } ?: pins.first(),
+                    onItemSelected = { formState.value = formState.value.copy { rxGpio = pins.indexOf(it) } },
                 )
                 HorizontalDivider()
-                EditTextPreference(
+                DropDownPreference(
                     title = stringResource(R.string.gps_transmit_gpio),
-                    value = formState.value.txGpio,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { txGpio = it } },
+                    items = pins,
+                    selectedItem = pins.find { it.first == formState.value.txGpio } ?: pins.first(),
+                    onItemSelected = { formState.value = formState.value.copy { txGpio = pins.indexOf(it) } },
                 )
                 HorizontalDivider()
-                EditTextPreference(
+                DropDownPreference(
                     title = stringResource(R.string.gps_en_gpio),
-                    value = formState.value.gpsEnGpio,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { gpsEnGpio = it } },
+                    items = pins,
+                    selectedItem = pins.find { it.first == formState.value.gpsEnGpio } ?: pins.first(),
+                    onItemSelected = { formState.value = formState.value.copy { gpsEnGpio = pins.indexOf(it) } },
                 )
             }
         }

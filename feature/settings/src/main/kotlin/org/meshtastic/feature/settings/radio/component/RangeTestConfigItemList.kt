@@ -17,20 +17,22 @@
 
 package org.meshtastic.feature.settings.radio.component
 
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.component.toDisplayString
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
@@ -64,12 +66,13 @@ fun RangeTestConfigScreen(navController: NavController, viewModel: RadioConfigVi
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                EditTextPreference(
-                    title = stringResource(R.string.sender_message_interval_seconds),
-                    value = formState.value.sender,
+                val rangeItems = remember { IntervalConfiguration.RANGE_TEST_SENDER.allowedIntervals }
+                DropDownPreference(
+                    title = stringResource(R.string.power_metrics_update_interval_seconds),
+                    selectedItem = formState.value.sender.toLong(),
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { sender = it } },
+                    items = rangeItems.map { it.value to it.toDisplayString() },
+                    onItemSelected = { formState.value = formState.value.copy { sender = it.toInt() } },
                 )
                 HorizontalDivider()
                 SwitchPreference(

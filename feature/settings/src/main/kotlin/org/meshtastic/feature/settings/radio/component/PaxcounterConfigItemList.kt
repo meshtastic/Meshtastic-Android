@@ -28,19 +28,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import org.meshtastic.core.model.FixedUpdateIntervals
-import org.meshtastic.core.model.IntervalConfiguration
+import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
-import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.component.toDisplayString
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-
-private fun FixedUpdateIntervals.toDisplayString(): String =
-    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 
 @Composable
 fun PaxcounterConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
@@ -72,12 +69,12 @@ fun PaxcounterConfigScreen(navController: NavController, viewModel: RadioConfigV
                 )
                 HorizontalDivider()
                 val items = remember { IntervalConfiguration.PAX_COUNTER.allowedIntervals }
-                SliderPreference(
+                DropDownPreference(
                     title = stringResource(R.string.update_interval_seconds),
-                    selectedValue = formState.value.paxcounterUpdateInterval.toLong(),
+                    selectedItem = formState.value.paxcounterUpdateInterval.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
-                    onValueChange = {
+                    onItemSelected = {
                         formState.value = formState.value.copy { paxcounterUpdateInterval = it.toInt() }
                     },
                 )

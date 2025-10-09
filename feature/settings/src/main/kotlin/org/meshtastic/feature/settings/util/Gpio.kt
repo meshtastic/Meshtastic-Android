@@ -15,12 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.core.ui.component
+package org.meshtastic.feature.settings.util
 
-import org.meshtastic.core.model.FixedUpdateIntervals
-
-fun FixedUpdateIntervals.toDisplayString(): String = if (this == FixedUpdateIntervals.UNSET) {
-    "Never"
-} else {
-    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
-}
+val gpioPins = (0..48).map { it to "Pin $it" }

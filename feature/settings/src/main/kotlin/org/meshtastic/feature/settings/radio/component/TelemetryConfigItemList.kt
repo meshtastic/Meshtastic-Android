@@ -27,10 +27,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.model.FixedUpdateIntervals
-import org.meshtastic.core.model.IntervalConfiguration
+import org.meshtastic.feature.settings.util.FixedUpdateIntervals
+import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SliderPreference
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -75,13 +75,13 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
                     )
                     HorizontalDivider()
                 }
-                val items = remember { IntervalConfiguration.ALL.allowedIntervals }
-                SliderPreference(
+                val items = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
+                DropDownPreference(
                     title = stringResource(R.string.device_metrics_update_interval_seconds),
-                    selectedValue = formState.value.deviceUpdateInterval.toLong(),
+                    selectedItem = formState.value.deviceUpdateInterval.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { deviceUpdateInterval = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy { deviceUpdateInterval = it.toInt() } },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -92,13 +92,13 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                val envItems = remember { IntervalConfiguration.ALL.allowedIntervals }
-                SliderPreference(
+                val envItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
+                DropDownPreference(
                     title = stringResource(R.string.environment_metrics_update_interval_seconds),
-                    selectedValue = formState.value.environmentUpdateInterval.toLong(),
+                    selectedItem = formState.value.environmentUpdateInterval.toLong(),
                     enabled = state.connected,
                     items = envItems.map { it.value to it.toDisplayString() },
-                    onValueChange = {
+                    onItemSelected = {
                         formState.value = formState.value.copy { environmentUpdateInterval = it.toInt() }
                     },
                 )
@@ -127,13 +127,13 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                val airItems = remember { IntervalConfiguration.ALL.allowedIntervals }
-                SliderPreference(
+                val airItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
+                DropDownPreference(
                     title = stringResource(R.string.air_quality_metrics_update_interval_seconds),
-                    selectedValue = formState.value.airQualityInterval.toLong(),
+                    selectedItem = formState.value.airQualityInterval.toLong(),
                     enabled = state.connected,
                     items = airItems.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { airQualityInterval = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy { airQualityInterval = it.toInt() } },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -144,13 +144,13 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                val powerItems = remember { IntervalConfiguration.ALL.allowedIntervals }
-                SliderPreference(
+                val powerItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
+                DropDownPreference(
                     title = stringResource(R.string.power_metrics_update_interval_seconds),
-                    selectedValue = formState.value.powerUpdateInterval.toLong(),
+                    selectedItem = formState.value.powerUpdateInterval.toLong(),
                     enabled = state.connected,
                     items = powerItems.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { powerUpdateInterval = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy { powerUpdateInterval = it.toInt() } },
                 )
                 HorizontalDivider()
                 SwitchPreference(

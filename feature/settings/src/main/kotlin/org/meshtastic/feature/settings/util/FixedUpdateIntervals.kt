@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.core.model
+package org.meshtastic.feature.settings.util
 
 import java.util.concurrent.TimeUnit
 
@@ -28,6 +28,8 @@ enum class FixedUpdateIntervals(val value: Long) {
     UNSET(0L),
     ONE_SECOND(1L),
     TWO_SECONDS(2L),
+    THREE_SECONDS(3L),
+    FOUR_SECONDS(4L),
     FIVE_SECONDS(5L),
     TEN_SECONDS(10L),
     FIFTEEN_SECONDS(15L),
@@ -78,8 +80,11 @@ enum class IntervalConfiguration {
     DETECTION_SENSOR_MINIMUM,
     DETECTION_SENSOR_STATE,
     NAG_TIMEOUT,
+    OUTPUT,
     PAX_COUNTER,
     POSITION,
+    POSITION_BROADCAST,
+    GPS_UPDATE,
     RANGE_TEST_SENDER,
     SMART_BROADCAST_MINIMUM,
     DISPLAY_SCREEN_ON,
@@ -147,6 +152,16 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.THIRTY_SIX_HOURS,
                     FixedUpdateIntervals.FORTY_EIGHT_HOURS,
                     FixedUpdateIntervals.SEVENTY_TWO_HOURS,
+                )
+            OUTPUT ->
+                listOf(
+                    FixedUpdateIntervals.UNSET,
+                    FixedUpdateIntervals.ONE_SECOND,
+                    FixedUpdateIntervals.TWO_SECONDS,
+                    FixedUpdateIntervals.THREE_SECONDS,
+                    FixedUpdateIntervals.FOUR_SECONDS,
+                    FixedUpdateIntervals.FIVE_SECONDS,
+                    FixedUpdateIntervals.TEN_SECONDS,
                 )
             DETECTION_SENSOR_MINIMUM ->
                 listOf(
@@ -234,6 +249,36 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.FIFTEEN_MINUTES,
                     FixedUpdateIntervals.THIRTY_MINUTES,
                     FixedUpdateIntervals.ONE_HOUR,
+                )
+            POSITION_BROADCAST ->
+                listOf(
+                    FixedUpdateIntervals.UNSET,
+                    FixedUpdateIntervals.ONE_HOUR,
+                    FixedUpdateIntervals.TWO_HOURS,
+                    FixedUpdateIntervals.THREE_HOURS,
+                    FixedUpdateIntervals.FOUR_HOURS,
+                    FixedUpdateIntervals.FIVE_HOURS,
+                    FixedUpdateIntervals.SIX_HOURS,
+                    FixedUpdateIntervals.TWELVE_HOURS,
+                    FixedUpdateIntervals.EIGHTEEN_HOURS,
+                    FixedUpdateIntervals.TWENTY_FOUR_HOURS,
+                    FixedUpdateIntervals.THIRTY_SIX_HOURS,
+                    FixedUpdateIntervals.FORTY_EIGHT_HOURS,
+                    FixedUpdateIntervals.SEVENTY_TWO_HOURS,
+                )
+            GPS_UPDATE ->
+                listOf(
+                    FixedUpdateIntervals.THIRTY_SECONDS,
+                    FixedUpdateIntervals.ONE_MINUTE,
+                    FixedUpdateIntervals.TWO_MINUTES,
+                    FixedUpdateIntervals.FIVE_MINUTES,
+                    FixedUpdateIntervals.TEN_MINUTES,
+                    FixedUpdateIntervals.FIFTEEN_MINUTES,
+                    FixedUpdateIntervals.THIRTY_MINUTES,
+                    FixedUpdateIntervals.ONE_HOUR,
+                    FixedUpdateIntervals.SIX_HOURS,
+                    FixedUpdateIntervals.TWELVE_HOURS,
+                    FixedUpdateIntervals.TWENTY_FOUR_HOURS,
                 )
             RANGE_TEST_SENDER ->
                 listOf(

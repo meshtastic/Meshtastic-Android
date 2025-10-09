@@ -28,9 +28,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import org.meshtastic.core.model.FixedUpdateIntervals
-import org.meshtastic.core.model.IntervalConfiguration
+import org.meshtastic.feature.settings.util.FixedUpdateIntervals
+import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -73,12 +74,12 @@ fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewMo
                 )
                 HorizontalDivider()
                 val items = remember { IntervalConfiguration.ALL.allowedIntervals }
-                SliderPreference(
+                DropDownPreference(
                     title = stringResource(R.string.shutdown_on_power_loss),
-                    selectedValue = formState.value.onBatteryShutdownAfterSecs.toLong(),
+                    selectedItem = formState.value.onBatteryShutdownAfterSecs.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
-                    onValueChange = {
+                    onItemSelected = {
                         formState.value = formState.value.copy { onBatteryShutdownAfterSecs = it.toInt() }
                     },
                 )
@@ -113,21 +114,21 @@ fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewMo
                 )
                 HorizontalDivider()
                 val sdsSecsItems = remember { IntervalConfiguration.ALL.allowedIntervals }
-                SliderPreference(
+                DropDownPreference(
                     title = stringResource(R.string.super_deep_sleep_duration_seconds),
-                    selectedValue = formState.value.sdsSecs.toLong(),
+                    selectedItem = formState.value.sdsSecs.toLong(),
+                    onItemSelected = { formState.value = formState.value.copy { sdsSecs = it.toInt() } },
                     enabled = state.connected,
                     items = sdsSecsItems.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { sdsSecs = it.toInt() } },
                 )
                 HorizontalDivider()
                 val minWakeItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
-                SliderPreference(
+                DropDownPreference(
                     title = stringResource(R.string.minimum_wake_time_seconds),
-                    selectedValue = formState.value.minWakeSecs.toLong(),
+                    selectedItem = formState.value.minWakeSecs.toLong(),
                     enabled = state.connected,
                     items = minWakeItems.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { minWakeSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy { minWakeSecs = it.toInt() } },
                 )
                 HorizontalDivider()
                 EditTextPreference(

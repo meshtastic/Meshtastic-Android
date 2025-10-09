@@ -31,12 +31,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import org.meshtastic.core.model.FixedUpdateIntervals
-import org.meshtastic.core.model.IntervalConfiguration
+import org.meshtastic.feature.settings.util.FixedUpdateIntervals
+import org.meshtastic.feature.settings.util.IntervalConfiguration
+import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
-import org.meshtastic.core.ui.component.SliderPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -79,21 +79,21 @@ fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioCo
                 val minimumBroadcastIntervals = remember {
                     IntervalConfiguration.DETECTION_SENSOR_MINIMUM.allowedIntervals
                 }
-                SliderPreference(
+                DropDownPreference(
                     title = stringResource(R.string.minimum_broadcast_seconds),
-                    selectedValue = formState.value.minimumBroadcastSecs.toLong(),
+                    selectedItem = formState.value.minimumBroadcastSecs.toLong(),
                     enabled = state.connected,
                     items = minimumBroadcastIntervals.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { minimumBroadcastSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy { minimumBroadcastSecs = it.toInt() } },
                 )
 
                 val stateBroadcastIntervals = remember { IntervalConfiguration.DETECTION_SENSOR_STATE.allowedIntervals }
-                SliderPreference(
+                DropDownPreference(
                     title = stringResource(R.string.state_broadcast_seconds),
-                    selectedValue = formState.value.stateBroadcastSecs.toLong(),
+                    selectedItem = formState.value.stateBroadcastSecs.toLong(),
                     enabled = state.connected,
                     items = stateBroadcastIntervals.map { it.value to it.toDisplayString() },
-                    onValueChange = { formState.value = formState.value.copy { stateBroadcastSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy { stateBroadcastSecs = it.toInt() } },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -116,12 +116,13 @@ fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioCo
                     onValueChanged = { formState.value = formState.value.copy { name = it } },
                 )
                 HorizontalDivider()
-                EditTextPreference(
+                val pins = remember { gpioPins }
+                DropDownPreference(
                     title = stringResource(R.string.gpio_pin_to_monitor),
-                    value = formState.value.monitorPin,
+                    items = pins,
+                    selectedItem = formState.value.monitorPin,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { monitorPin = it } },
+                    onItemSelected = { formState.value = formState.value.copy { monitorPin = it } },
                 )
                 HorizontalDivider()
                 DropDownPreference(

@@ -26,7 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import org.meshtastic.core.model.IntervalConfiguration
+import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -38,10 +38,7 @@ import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 
 @Composable
-fun DisplayConfigScreen(
-    navController: NavController,
-    viewModel: RadioConfigViewModel = hiltViewModel()
-) {
+fun DisplayConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val displayConfig = state.radioConfig.display
     val formState = rememberConfigState(initialValue = displayConfig)
@@ -65,9 +62,7 @@ fun DisplayConfigScreen(
                     summary = stringResource(id = R.string.config_display_compass_north_top_summary),
                     checked = formState.value.compassNorthTop,
                     enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.copy { compassNorthTop = it }
-                    },
+                    onCheckedChange = { formState.value = formState.value.copy { compassNorthTop = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -76,9 +71,7 @@ fun DisplayConfigScreen(
                     summary = stringResource(R.string.display_time_in_12h_format),
                     enabled = state.connected,
                     checked = formState.value.use12HClock,
-                    onCheckedChange = {
-                        formState.value = formState.value.copy { use12HClock = it }
-                    },
+                    onCheckedChange = { formState.value = formState.value.copy { use12HClock = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -87,9 +80,7 @@ fun DisplayConfigScreen(
                     summary = stringResource(id = R.string.config_display_heading_bold_summary),
                     checked = formState.value.headingBold,
                     enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.copy { headingBold = it }
-                    },
+                    onCheckedChange = { formState.value = formState.value.copy { headingBold = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -98,9 +89,9 @@ fun DisplayConfigScreen(
                     summary = stringResource(id = R.string.config_display_units_summary),
                     enabled = state.connected,
                     items =
-                        DisplayConfig.DisplayUnits.entries
-                            .filter { it != DisplayConfig.DisplayUnits.UNRECOGNIZED }
-                            .map { it to it.name },
+                    DisplayConfig.DisplayUnits.entries
+                        .filter { it != DisplayConfig.DisplayUnits.UNRECOGNIZED }
+                        .map { it to it.name },
                     selectedItem = formState.value.units,
                     onItemSelected = { formState.value = formState.value.copy { units = it } },
                 )
@@ -108,20 +99,17 @@ fun DisplayConfigScreen(
         }
         item {
             TitledCard(title = stringResource(R.string.advanced)) {
-                val screenOnIntervals =
-                    remember { IntervalConfiguration.DISPLAY_SCREEN_ON.allowedIntervals }
-                val carouselIntervals =
-                    remember { IntervalConfiguration.DISPLAY_CAROUSEL.allowedIntervals }
+                val screenOnIntervals = remember { IntervalConfiguration.DISPLAY_SCREEN_ON.allowedIntervals }
+                val carouselIntervals = remember { IntervalConfiguration.DISPLAY_CAROUSEL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(R.string.screen_on_for),
                     summary = stringResource(id = R.string.config_display_screen_on_secs_summary),
                     enabled = state.connected,
                     items = screenOnIntervals.map { it to it.toDisplayString() },
-                    selectedItem = screenOnIntervals.find { it.value == formState.value.screenOnSecs.toLong() }
+                    selectedItem =
+                    screenOnIntervals.find { it.value == formState.value.screenOnSecs.toLong() }
                         ?: screenOnIntervals.first(),
-                    onItemSelected = {
-                        formState.value = formState.value.copy { screenOnSecs = it.value.toInt() }
-                    },
+                    onItemSelected = { formState.value = formState.value.copy { screenOnSecs = it.value.toInt() } },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -129,11 +117,11 @@ fun DisplayConfigScreen(
                     summary = stringResource(id = R.string.config_display_auto_screen_carousel_secs_summary),
                     enabled = state.connected,
                     items = carouselIntervals.map { it to it.toDisplayString() },
-                    selectedItem = carouselIntervals.find { it.value == formState.value.autoScreenCarouselSecs.toLong() }
+                    selectedItem =
+                    carouselIntervals.find { it.value == formState.value.autoScreenCarouselSecs.toLong() }
                         ?: carouselIntervals.first(),
                     onItemSelected = {
-                        formState.value =
-                            formState.value.copy { autoScreenCarouselSecs = it.value.toInt() }
+                        formState.value = formState.value.copy { autoScreenCarouselSecs = it.value.toInt() }
                     },
                 )
                 HorizontalDivider()
@@ -142,9 +130,7 @@ fun DisplayConfigScreen(
                     summary = stringResource(id = R.string.config_display_wake_on_tap_or_motion_summary),
                     checked = formState.value.wakeOnTapOrMotion,
                     enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.copy { wakeOnTapOrMotion = it }
-                    },
+                    onCheckedChange = { formState.value = formState.value.copy { wakeOnTapOrMotion = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -153,9 +139,7 @@ fun DisplayConfigScreen(
                     summary = stringResource(id = R.string.config_display_flip_screen_summary),
                     checked = formState.value.flipScreen,
                     enabled = state.connected,
-                    onCheckedChange = {
-                        formState.value = formState.value.copy { flipScreen = it }
-                    },
+                    onCheckedChange = { formState.value = formState.value.copy { flipScreen = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -164,13 +148,11 @@ fun DisplayConfigScreen(
                     summary = stringResource(id = R.string.config_display_displaymode_summary),
                     enabled = state.connected,
                     items =
-                        DisplayConfig.DisplayMode.entries
-                            .filter { it != DisplayConfig.DisplayMode.UNRECOGNIZED }
-                            .map { it to it.name },
+                    DisplayConfig.DisplayMode.entries
+                        .filter { it != DisplayConfig.DisplayMode.UNRECOGNIZED }
+                        .map { it to it.name },
                     selectedItem = formState.value.displaymode,
-                    onItemSelected = {
-                        formState.value = formState.value.copy { displaymode = it }
-                    },
+                    onItemSelected = { formState.value = formState.value.copy { displaymode = it } },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -178,9 +160,9 @@ fun DisplayConfigScreen(
                     summary = stringResource(id = R.string.config_display_oled_summary),
                     enabled = state.connected,
                     items =
-                        DisplayConfig.OledType.entries
-                            .filter { it != DisplayConfig.OledType.UNRECOGNIZED }
-                            .map { it to it.name },
+                    DisplayConfig.OledType.entries
+                        .filter { it != DisplayConfig.OledType.UNRECOGNIZED }
+                        .map { it to it.name },
                     selectedItem = formState.value.oled,
                     onItemSelected = { formState.value = formState.value.copy { oled = it } },
                 )
@@ -189,13 +171,11 @@ fun DisplayConfigScreen(
                     title = stringResource(R.string.compass_orientation),
                     enabled = state.connected,
                     items =
-                        DisplayConfig.CompassOrientation.entries
-                            .filter { it != DisplayConfig.CompassOrientation.UNRECOGNIZED }
-                            .map { it to it.name },
+                    DisplayConfig.CompassOrientation.entries
+                        .filter { it != DisplayConfig.CompassOrientation.UNRECOGNIZED }
+                        .map { it to it.name },
                     selectedItem = formState.value.compassOrientation,
-                    onItemSelected = {
-                        formState.value = formState.value.copy { compassOrientation = it }
-                    },
+                    onItemSelected = { formState.value = formState.value.copy { compassOrientation = it } },
                 )
             }
         }

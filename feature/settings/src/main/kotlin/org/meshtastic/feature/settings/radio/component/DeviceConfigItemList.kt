@@ -49,7 +49,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import org.meshtastic.core.model.IntervalConfiguration
+import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -142,9 +142,7 @@ fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewM
                 )
                 HorizontalDivider()
 
-                val nodeInfoBroadcastIntervals = remember {
-                    IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals
-                }
+                val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 SliderPreference(
                     title = stringResource(R.string.nodeinfo_broadcast_interval),
                     selectedValue = formState.value.nodeInfoBroadcastSecs.toLong(),
