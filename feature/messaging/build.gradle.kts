@@ -19,12 +19,14 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 android { namespace = "org.meshtastic.feature.messaging" }
 
 dependencies {
+    implementation(projects.core.data)
     implementation(projects.core.database)
     implementation(projects.core.model)
     implementation(projects.core.proto)

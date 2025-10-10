@@ -71,7 +71,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.UIViewModel
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
@@ -79,11 +78,12 @@ import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.messaging.QuickChatViewModel
 
 @Composable
 internal fun QuickChatScreen(
     modifier: Modifier = Modifier,
-    viewModel: UIViewModel = hiltViewModel(),
+    viewModel: QuickChatViewModel = hiltViewModel(),
     onNavigateUp: () -> Unit,
 ) {
     val actions by viewModel.quickChatActions.collectAsStateWithLifecycle()
