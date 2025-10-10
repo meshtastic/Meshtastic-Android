@@ -31,7 +31,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.ui.sharing.toSharedContact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,6 +56,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
 import org.meshtastic.proto.AdminProtos

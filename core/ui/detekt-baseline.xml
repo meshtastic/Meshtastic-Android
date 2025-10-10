@@ -12,7 +12,6 @@
     <ID>ComposableParamOrder:SwitchPreference.kt$SwitchPreference</ID>
     <ID>ContentSlotReused:AdaptiveTwoPane.kt$second</ID>
     <ID>LambdaParameterEventTrailing:MainAppBar.kt$onClickChip</ID>
-    <ID>LongMethod:EditTextPreference.kt$@Composable fun EditTextPreference( title: String, value: String, enabled: Boolean, isError: Boolean, keyboardOptions: KeyboardOptions, keyboardActions: KeyboardActions, onValueChanged: (String) -&gt; Unit, modifier: Modifier = Modifier, summary: String? = null, maxSize: Int = 0, // max_size - 1 (in bytes) onFocusChanged: (FocusState) -&gt; Unit = {}, trailingIcon: (@Composable () -&gt; Unit)? = null, visualTransformation: VisualTransformation = VisualTransformation.None, )</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$0xff</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$16</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$24</ID>
@@ -60,6 +59,5 @@
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoPreview</ID>
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoSelfPreview</ID>
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoSimplePreview</ID>
-    <ID>UnusedParameter:DropDownPreference.kt$modifier: Modifier = Modifier</ID>
   </CurrentIssues>
 </SmellBaseline>

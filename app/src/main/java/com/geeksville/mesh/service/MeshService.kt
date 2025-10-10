@@ -81,6 +81,8 @@ import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
@@ -354,7 +356,7 @@ class MeshService : Service() {
         try {
             ServiceCompat.startForeground(
                 this,
-                MeshServiceNotifications.SERVICE_NOTIFY_ID,
+                SERVICE_NOTIFY_ID,
                 notification,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (hasLocationPermission()) {

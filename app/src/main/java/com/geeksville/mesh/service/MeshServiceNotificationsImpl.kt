@@ -37,13 +37,17 @@ import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R.raw
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.strings.R
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.LocalStats
+import javax.inject.Inject
 
 /**
  * Manages the creation and display of all app notifications.
@@ -52,14 +56,14 @@ import org.meshtastic.proto.TelemetryProtos.LocalStats
  * notifications for various events like new messages, alerts, and service status changes.
  */
 @Suppress("TooManyFunctions")
-class MeshServiceNotifications(private val context: Context) {
+class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext private val context: Context) :
+    MeshServiceNotifications {
 
     private val notificationManager = context.getSystemService<NotificationManager>()!!
 
     companion object {
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val MAX_BATTERY_LEVEL = 100
-        const val SERVICE_NOTIFY_ID = 101
         private val NOTIFICATION_LIGHT_COLOR = Color.BLUE
     }
 
@@ -139,7 +143,7 @@ class MeshServiceNotifications(private val context: Context) {
         }
     }
 
-    fun clearNotifications() {
+    override fun clearNotifications() {
         notificationManager.cancelAll()
     }
 
@@ -147,7 +151,7 @@ class MeshServiceNotifications(private val context: Context) {
      * Creates all necessary notification channels on devices running Android O or newer. This should be called once
      * when the service is created.
      */
-    fun initChannels() {
+    override fun initChannels() {
         NotificationType.allTypes().forEach { type -> createNotificationChannel(type) }
     }
 
@@ -212,9 +216,9 @@ class MeshServiceNotifications(private val context: Context) {
     var cachedMessage: String? = null
 
     // region Public Notification Methods
-    fun updateServiceStateNotification(
+    override fun updateServiceStateNotification(
         summaryString: String?,
-        telemetry: TelemetryProtos.Telemetry? = cachedTelemetry,
+        telemetry: TelemetryProtos.Telemetry?,
     ): Notification {
         val hasLocalStats = telemetry?.hasLocalStats() == true
         val hasDeviceMetrics = telemetry?.hasDeviceMetrics() == true
@@ -249,39 +253,39 @@ class MeshServiceNotifications(private val context: Context) {
         return notification
     }
 
-    fun updateMessageNotification(contactKey: String, name: String, message: String, isBroadcast: Boolean) {
+    override fun updateMessageNotification(contactKey: String, name: String, message: String, isBroadcast: Boolean) {
         val notification = createMessageNotification(contactKey, name, message, isBroadcast)
         // Use a consistent, unique ID for each message conversation.
         notificationManager.notify(contactKey.hashCode(), notification)
     }
 
-    fun showAlertNotification(contactKey: String, name: String, alert: String) {
+    override fun showAlertNotification(contactKey: String, name: String, alert: String) {
         val notification = createAlertNotification(contactKey, name, alert)
         // Use a consistent, unique ID for each alert source.
         notificationManager.notify(name.hashCode(), notification)
     }
 
-    fun showNewNodeSeenNotification(node: NodeEntity) {
+    override fun showNewNodeSeenNotification(node: NodeEntity) {
         val notification = createNewNodeSeenNotification(node.user.shortName, node.user.longName)
         notificationManager.notify(node.num, notification)
     }
 
-    fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {
+    override fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {
         val notification = createLowBatteryNotification(node, isRemote)
         notificationManager.notify(node.num, notification)
     }
 
-    fun showClientNotification(clientNotification: MeshProtos.ClientNotification) {
+    override fun showClientNotification(clientNotification: MeshProtos.ClientNotification) {
         val notification =
             createClientNotification(context.getString(R.string.client_notification), clientNotification.message)
         notificationManager.notify(clientNotification.toString().hashCode(), notification)
     }
 
-    fun cancelMessageNotification(contactKey: String) = notificationManager.cancel(contactKey.hashCode())
+    override fun cancelMessageNotification(contactKey: String) = notificationManager.cancel(contactKey.hashCode())
 
-    fun cancelLowBatteryNotification(node: NodeEntity) = notificationManager.cancel(node.num)
+    override fun cancelLowBatteryNotification(node: NodeEntity) = notificationManager.cancel(node.num)
 
-    fun clearClientNotification(notification: MeshProtos.ClientNotification) =
+    override fun clearClientNotification(notification: MeshProtos.ClientNotification) =
         notificationManager.cancel(notification.toString().hashCode())
 
     // endregion

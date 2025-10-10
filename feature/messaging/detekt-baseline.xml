@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComposableParamOrder:MessageActions.kt$MessageActions</ID>
+    <ID>ComposableParamOrder:MessageActions.kt$MessageStatusButton</ID>
+    <ID>ComposableParamOrder:MessageItem.kt$MessageItem</ID>
+    <ID>ComposableParamOrder:MessageList.kt$DeliveryInfo</ID>
+    <ID>ComposableParamOrder:MessageList.kt$MessageList</ID>
+    <ID>ComposableParamOrder:QuickChat.kt$OutlinedTextFieldWithCounter</ID>
+    <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
+    <ID>LambdaParameterEventTrailing:QuickChat.kt$onNavigateUp</ID>
+    <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
+    <ID>ModifierMissing:MessageActions.kt$MessageStatusButton</ID>
+    <ID>ModifierMissing:MessageActions.kt$ReactionButton</ID>
+    <ID>ModifierMissing:MessageActions.kt$ReplyButton</ID>
+    <ID>ModifierMissing:Reaction.kt$ReactionDialog</ID>
+    <ID>ModifierNotUsedAtRoot:QuickChat.kt$modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
+    <ID>MutableStateParam:MessageList.kt$selectedIds</ID>
+    <ID>ParameterNaming:MessageList.kt$onUnreadChanged</ID>
+    <ID>PreviewPublic:Reaction.kt$ReactionItemPreview</ID>
+    <ID>PreviewPublic:Reaction.kt$ReactionRowPreview</ID>
+  </CurrentIssues>
+</SmellBaseline>
