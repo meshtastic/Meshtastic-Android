@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.message
+package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -78,10 +78,9 @@ import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.messaging.QuickChatViewModel
 
 @Composable
-internal fun QuickChatScreen(
+fun QuickChatScreen(
     modifier: Modifier = Modifier,
     viewModel: QuickChatViewModel = hiltViewModel(),
     onNavigateUp: () -> Unit,
