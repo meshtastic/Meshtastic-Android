@@ -102,6 +102,7 @@ import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.messaging.MessageList
 import org.meshtastic.feature.messaging.MessageScreenEvent
 import org.meshtastic.feature.node.component.NodeKeyStatusIcon
 import org.meshtastic.proto.AppOnlyProtos

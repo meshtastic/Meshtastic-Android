@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.message
+package org.meshtastic.feature.messaging
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
@@ -103,7 +103,7 @@ fun DeliveryInfo(
 
 @Suppress("LongMethod")
 @Composable
-internal fun MessageList(
+fun MessageList(
     nodes: List<Node>,
     ourNode: Node?,
     modifier: Modifier = Modifier,
