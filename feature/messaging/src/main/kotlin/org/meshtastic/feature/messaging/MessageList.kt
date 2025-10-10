@@ -103,7 +103,7 @@ fun DeliveryInfo(
 
 @Suppress("LongMethod")
 @Composable
-fun MessageList(
+internal fun MessageList(
     nodes: List<Node>,
     ourNode: Node?,
     modifier: Modifier = Modifier,

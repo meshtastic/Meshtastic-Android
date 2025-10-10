@@ -64,7 +64,7 @@ import org.meshtastic.core.ui.theme.MessageItemColors
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MessageItem(
+internal fun MessageItem(
     modifier: Modifier = Modifier,
     node: Node,
     ourNode: Node,

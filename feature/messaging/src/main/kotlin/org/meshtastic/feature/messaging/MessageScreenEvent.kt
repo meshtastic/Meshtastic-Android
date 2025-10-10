@@ -20,7 +20,7 @@ package org.meshtastic.feature.messaging
 import org.meshtastic.core.database.model.Node
 
 /** Defines the various user interactions that can occur on the MessageScreen. */
-sealed interface MessageScreenEvent {
+internal sealed interface MessageScreenEvent {
     /** Send a new text message. */
     data class SendMessage(val text: String, val replyingToPacketId: Int? = null) : MessageScreenEvent
 

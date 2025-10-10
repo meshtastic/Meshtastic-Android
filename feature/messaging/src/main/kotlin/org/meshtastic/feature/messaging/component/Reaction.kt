@@ -77,7 +77,7 @@ private fun ReactionItem(emoji: String, emojiCount: Int = 1, onClick: () -> Unit
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ReactionRow(
+internal fun ReactionRow(
     modifier: Modifier = Modifier,
     reactions: List<Reaction> = emptyList(),
     onSendReaction: (String) -> Unit = {},
@@ -104,10 +104,10 @@ fun ReactionRow(
     }
 }
 
-fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
+private fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
 
 @Composable
-fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
+internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
     BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
         val groupedEmojis = reactions.groupBy { it.emoji }
         var selectedEmoji by remember { mutableStateOf<String?>(null) }
@@ -145,7 +145,7 @@ fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
 
 @PreviewLightDark
 @Composable
-fun ReactionItemPreview() {
+private fun ReactionItemPreview() {
     AppTheme {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             ReactionItem(emoji = "\uD83D\uDE42")
@@ -157,7 +157,7 @@ fun ReactionItemPreview() {
 
 @Preview
 @Composable
-fun ReactionRowPreview() {
+private fun ReactionRowPreview() {
     AppTheme {
         ReactionRow(
             reactions =
