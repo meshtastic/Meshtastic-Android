@@ -99,13 +99,13 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.MessageList
 import org.meshtastic.feature.messaging.MessageScreenEvent
 import org.meshtastic.feature.messaging.MessageViewModel
-import org.meshtastic.feature.node.component.NodeKeyStatusIcon
 import org.meshtastic.proto.AppOnlyProtos
 import java.nio.charset.StandardCharsets
 
