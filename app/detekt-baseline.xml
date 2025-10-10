@@ -48,7 +48,6 @@
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
-    <ID>LambdaParameterEventTrailing:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
     <ID>LambdaParameterEventTrailing:TracerouteLog.kt$onNavigateUp</ID>
@@ -102,7 +101,6 @@
     <ID>ModifierMissing:CommonCharts.kt$ChartHeader</ID>
     <ID>ModifierMissing:CommonCharts.kt$Legend</ID>
     <ID>ModifierMissing:CommonCharts.kt$TimeLabels</ID>
-    <ID>ModifierMissing:ContactSharing.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:Contacts.kt$ContactListView</ID>
     <ID>ModifierMissing:Contacts.kt$ContactsScreen</ID>
     <ID>ModifierMissing:Contacts.kt$SelectionToolbar</ID>
@@ -119,7 +117,6 @@
     <ID>ModifierMissing:PositionLog.kt$PositionLogScreen</ID>
     <ID>ModifierMissing:PowerMetrics.kt$PowerMetricsScreen</ID>
     <ID>ModifierMissing:Share.kt$ShareScreen</ID>
-    <ID>ModifierMissing:SharedContactDialog.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:SignalMetrics.kt$SignalMetricsScreen</ID>
     <ID>ModifierMissing:TopLevelNavIcon.kt$TopLevelNavIcon</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
@@ -192,7 +189,6 @@
     <ID>NoEmptyClassBody:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>NoSemicolons:DateUtils.kt$DateUtils$;</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
-    <ID>ParameterNaming:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>ParameterNaming:Contacts.kt$onDeleteSelected</ID>
     <ID>ParameterNaming:Contacts.kt$onMuteSelected</ID>
     <ID>ParameterNaming:UsbDevices.kt$onDeviceSelected</ID>

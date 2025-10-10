@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.sharing
+package org.meshtastic.core.ui.share
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.HorizontalDivider
@@ -28,6 +28,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.component.compareUsers
+import org.meshtastic.core.ui.component.userFieldsToString
 import org.meshtastic.proto.AdminProtos
 
 /** A dialog for importing a shared contact that was scanned from a QR code. */
