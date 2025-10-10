@@ -127,7 +127,7 @@
     <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
-    <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
+    <string name="config_security_public_key">Генерира се от вашия публичен ключ и се изпраща до други възли в мрежата, за да им позволи да изчислят споделен секретен ключ.</string>
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
     <string name="config_security_admin_key">Публичният ключ, оторизиран за изпращане на администраторски съобщения до този възел.</string>
     <string name="config_security_is_managed">Устройството се управлява от mesh администратор, потребителят няма достъп до никоя от настройките на устройството.</string>
@@ -328,9 +328,9 @@
     <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Споделен ключ</string>
-    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
+    <string name="encryption_psk_text">Могат да се изпращат/получават само съобщения в каналите. Директните съобщения изискват функцията Инфраструктура с публичен ключ във фърмуер 2.5+.</string>
     <string name="encryption_pkc">Криптиране с публичния ключ</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
+    <string name="encryption_pkc_text">Директните съобщения използват новата инфраструктура с публичен ключ за криптиране.</string>
     <string name="encryption_error">Несъответствие на публичния ключ</string>
     <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да означава по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
     <string name="exchange_userinfo">Обмяна на потребителска информация</string>
@@ -710,7 +710,7 @@
     <string name="set_your_region">Задайте вашия регион</string>
     <string name="reply">Отговор</string>
     <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
-    <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
+    <string name="map_reporting_consent_header">Съгласие за споделяне на некриптирани данни от възела чрез MQTT</string>
     <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
     <string name="i_agree_to_share_my_location">Прочетох и разбирам горепосоченото. Доброволно се съгласявам с некриптираното предаване на данните от моя възел чрез MQTT.</string>
     <string name="i_agree">Съгласен съм.</string>
@@ -879,8 +879,8 @@
     <string name="secondary_channel_position_feature">Деактивирането на позицията на първичния канал позволява периодично излъчване на позиция на първия вторичен канал с активирана позиция, в противен случай е необходимо ръчно заявяване на позиция.</string>
     <string name="device_configuration">Конфигурация на устройството</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
-    <string name="device_telemetry_enabled">Send Device Telemetry</string>
-    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
+    <string name="device_telemetry_enabled">Изпращане на телеметрия на устройството</string>
+    <string name="device_telemetry_enabled_summary">Активиране/дезактивиране на модула за телеметрия на устройството за изпращане на метрики към mesh</string>
     <string name="any">Any</string>
     <string name="one_hour">1 час</string>
     <string name="eight_hours">8 часа</string>
@@ -890,8 +890,8 @@
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Няма налично приложение за обработка на връзката.</string>
     <string name="system_settings">Системни настройки</string>
-    <string name="no_local_stats">No Stats Available</string>
-    <string name="analytics_notice">Analytics are collected to help us improve the Android app (thank you), we will receive anonymized information about user behavior. This includes crash reports, screens used in the app, etc.</string>
+    <string name="no_local_stats">Няма налична статистика</string>
+    <string name="analytics_notice">Анализите се събират, за да ни помогнат да подобрим приложението за Android (благодарим ви). Ще получаваме анонимизирана информация за поведението на потребителите. Това включва отчети за сривове, екрани, използвани в приложението и др.</string>
     <string name="analytics_platforms">"Analytics platforms: "</string>
-    <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
+    <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
 </resources>
