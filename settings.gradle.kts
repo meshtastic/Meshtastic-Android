@@ -32,6 +32,7 @@ include(
     ":core:strings",
     ":core:ui",
     ":feature:intro",
+    ":feature:messaging",
     ":feature:map",
     ":feature:node",
     ":feature:settings",

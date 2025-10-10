@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.feature.node.component
+package org.meshtastic.core.ui.component
 
 import android.util.Base64
 import androidx.annotation.StringRes
@@ -57,7 +57,6 @@ import androidx.compose.ui.window.Dialog
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.message
+package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,7 +71,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.UIViewModel
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
@@ -81,9 +80,9 @@ import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-internal fun QuickChatScreen(
+fun QuickChatScreen(
     modifier: Modifier = Modifier,
-    viewModel: UIViewModel = hiltViewModel(),
+    viewModel: QuickChatViewModel = hiltViewModel(),
     onNavigateUp: () -> Unit,
 ) {
     val actions by viewModel.quickChatActions.collectAsStateWithLifecycle()

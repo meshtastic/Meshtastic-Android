@@ -17,7 +17,7 @@
 
 @file:Suppress("TooManyFunctions")
 
-package com.geeksville.mesh.ui.message
+package org.meshtastic.feature.messaging
 
 import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
@@ -91,7 +91,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.entity.QuickChatAction
@@ -100,9 +99,10 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.node.component.NodeKeyStatusIcon
 import org.meshtastic.proto.AppOnlyProtos
 import java.nio.charset.StandardCharsets
 
@@ -122,7 +122,7 @@ private const val ROUNDED_CORNER_PERCENT = 100
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod") // Due to multiple states and event handling
 @Composable
-internal fun MessageScreen(
+fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: MessageViewModel = hiltViewModel(),

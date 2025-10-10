@@ -469,7 +469,7 @@ private fun QrCodeImage(
 ) = Image(
     painter =
     channelSet.qrCode(shouldAddChannel)?.let { BitmapPainter(it.asImageBitmap()) }
-        ?: painterResource(id = com.geeksville.mesh.R.drawable.qrcode),
+        ?: painterResource(id = org.meshtastic.core.ui.R.drawable.qrcode),
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,

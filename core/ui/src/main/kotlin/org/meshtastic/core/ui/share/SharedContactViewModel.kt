@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.sharing
+package org.meshtastic.core.ui.share
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

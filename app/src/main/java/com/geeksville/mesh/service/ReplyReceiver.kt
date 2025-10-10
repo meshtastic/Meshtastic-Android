@@ -22,6 +22,7 @@ import androidx.core.app.RemoteInput
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 
 /**
@@ -58,7 +59,7 @@ class ReplyReceiver : BroadcastReceiver() {
             val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
             val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString() ?: ""
             sendMessage(message, contactKey)
-            MeshServiceNotifications(context).cancelMessageNotification(contactKey)
+            MeshServiceNotificationsImpl(context).cancelMessageNotification(contactKey)
         }
     }
 }

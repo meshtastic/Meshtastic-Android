@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.message.components
+package org.meshtastic.feature.messaging.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Row
@@ -44,7 +44,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 
 @Composable
-fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
+internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
     var showEmojiPickerDialog by remember { mutableStateOf(false) }
     if (showEmojiPickerDialog) {
         EmojiPickerDialog(
@@ -61,7 +61,7 @@ fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
 }
 
 @Composable
-fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
+private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
     onClick = onClick,
     content = {
         Icon(imageVector = Icons.AutoMirrored.Filled.Reply, contentDescription = stringResource(R.string.reply))
@@ -69,7 +69,7 @@ fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
 )
 
 @Composable
-fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
+private fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
     AnimatedVisibility(visible = fromLocal) {
         IconButton(onClick = onStatusClick) {
             Icon(
@@ -89,7 +89,7 @@ fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, f
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MessageActions(
+internal fun MessageActions(
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
     status: MessageStatus?,

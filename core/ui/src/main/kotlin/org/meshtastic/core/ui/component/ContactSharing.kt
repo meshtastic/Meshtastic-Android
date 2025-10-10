@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.sharing
+package org.meshtastic.core.ui.component
 
 import android.Manifest
 import android.graphics.Bitmap
@@ -57,9 +57,8 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.CopyIconButton
-import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.R
+import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
@@ -128,16 +127,17 @@ fun AddContactFAB(
             }
         },
     ) {
-        Icon(imageVector = Icons.TwoTone.QrCodeScanner, contentDescription = stringResource(R.string.scan_qr_code))
+        Icon(
+            imageVector = Icons.TwoTone.QrCodeScanner,
+            contentDescription = stringResource(org.meshtastic.core.strings.R.string.scan_qr_code),
+        )
     }
 }
 
 @Composable
 private fun QrCodeImage(uri: Uri, modifier: Modifier = Modifier) = Image(
-    painter =
-    uri.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
-        ?: painterResource(id = com.geeksville.mesh.R.drawable.qrcode),
-    contentDescription = stringResource(R.string.qr_code),
+    painter = uri.qrCode?.let { BitmapPainter(it.asImageBitmap()) } ?: painterResource(id = R.drawable.qrcode),
+    contentDescription = stringResource(org.meshtastic.core.strings.R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
 )
@@ -165,7 +165,7 @@ fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     val sharedContact = AdminProtos.SharedContact.newBuilder().setUser(contact.user).setNodeNum(contact.num).build()
     val uri = sharedContact.getSharedContactUrl()
     SimpleAlertDialog(
-        title = R.string.share_contact,
+        title = org.meshtastic.core.strings.R.string.share_contact,
         text = {
             Column {
                 Text(contact.user.longName)

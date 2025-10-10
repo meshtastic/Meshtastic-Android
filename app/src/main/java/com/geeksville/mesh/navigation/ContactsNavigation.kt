@@ -24,13 +24,13 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.geeksville.mesh.ui.contact.ContactsScreen
-import com.geeksville.mesh.ui.message.MessageScreen
-import com.geeksville.mesh.ui.message.QuickChatScreen
 import com.geeksville.mesh.ui.sharing.ShareScreen
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.feature.messaging.MessageScreen
+import org.meshtastic.feature.messaging.QuickChatScreen
 
 @Suppress("LongMethod")
 fun NavGraphBuilder.contactsGraph(navController: NavHostController) {
