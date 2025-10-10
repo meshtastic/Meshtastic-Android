@@ -11,6 +11,7 @@
     <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
     <ID>LambdaParameterEventTrailing:QuickChat.kt$onNavigateUp</ID>
     <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
+    <ID>LongParameterList:MessageViewModel.kt$MessageViewModel$( private val nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, quickChatActionRepository: QuickChatActionRepository, private val serviceRepository: ServiceRepository, private val packetRepository: PacketRepository, private val uiPrefs: UiPrefs, private val meshServiceNotifications: MeshServiceNotifications, )</ID>
     <ID>ModifierMissing:MessageActions.kt$MessageStatusButton</ID>
     <ID>ModifierMissing:MessageActions.kt$ReactionButton</ID>
     <ID>ModifierMissing:MessageActions.kt$ReplyButton</ID>
@@ -20,5 +21,6 @@
     <ID>ParameterNaming:MessageList.kt$onUnreadChanged</ID>
     <ID>PreviewPublic:Reaction.kt$ReactionItemPreview</ID>
     <ID>PreviewPublic:Reaction.kt$ReactionRowPreview</ID>
+    <ID>TooManyFunctions:MessageViewModel.kt$MessageViewModel : ViewModel</ID>
   </CurrentIssues>
 </SmellBaseline>

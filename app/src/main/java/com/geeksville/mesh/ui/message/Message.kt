@@ -104,6 +104,7 @@ import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.MessageList
 import org.meshtastic.feature.messaging.MessageScreenEvent
+import org.meshtastic.feature.messaging.MessageViewModel
 import org.meshtastic.feature.node.component.NodeKeyStatusIcon
 import org.meshtastic.proto.AppOnlyProtos
 import java.nio.charset.StandardCharsets

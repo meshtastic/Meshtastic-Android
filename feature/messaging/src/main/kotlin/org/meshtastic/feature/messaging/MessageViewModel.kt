@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.message
+package org.meshtastic.feature.messaging
 
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel

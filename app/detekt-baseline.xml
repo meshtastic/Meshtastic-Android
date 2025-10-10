@@ -56,7 +56,6 @@
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
     <ID>LongMethod:EnvironmentMetrics.kt$@Composable fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -&gt; Unit)</ID>
     <ID>LongMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>LongParameterList:MessageViewModel.kt$MessageViewModel$( private val nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, quickChatActionRepository: QuickChatActionRepository, private val serviceRepository: ServiceRepository, private val packetRepository: PacketRepository, private val uiPrefs: UiPrefs, private val meshServiceNotifications: MeshServiceNotifications, )</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1000</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$500</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$512</ID>
@@ -229,7 +228,6 @@
     <ID>TooManyFunctions:BluetoothInterface.kt$BluetoothInterface : IRadioInterface</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService : Service</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided&gt; : Stub</ID>
-    <ID>TooManyFunctions:MessageViewModel.kt$MessageViewModel : ViewModel</ID>
     <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService</ID>
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : Closeable</ID>
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModel</ID>
