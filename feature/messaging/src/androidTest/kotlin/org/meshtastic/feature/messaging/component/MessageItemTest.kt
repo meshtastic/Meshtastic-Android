@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.compose
+package org.meshtastic.feature.messaging.component
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -27,7 +27,6 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
-import org.meshtastic.feature.messaging.component.MessageItem
 
 @RunWith(AndroidJUnit4::class)
 class MessageItemTest {
