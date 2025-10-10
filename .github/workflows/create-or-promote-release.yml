@@ -34,6 +34,7 @@ jobs:
       tag_to_process: ${{ steps.calculate_tags.outputs.tag_to_process }}
       release_name: ${{ steps.calculate_tags.outputs.release_name }}
       final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
+      from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -62,15 +63,22 @@ jobs:
             echo "release_name=$NEW_TAG" >> $GITHUB_OUTPUT
             echo "final_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           else
-            # This is a promotion, find the latest internal tag to promote
-            LATEST_INTERNAL_TAG=$(git tag --list "v${BASE_VERSION}-internal.*" --sort=-v:refname | head -n 1)
+            # This is a promotion, find the latest tag from the previous channel to promote
+            FROM_CHANNEL="internal"
+            if [[ "$CHANNEL" == "open" ]]; then
+              FROM_CHANNEL="closed"
+            elif [[ "$CHANNEL" == "production" ]]; then
+              FROM_CHANNEL="open"
+            fi
+            
+            LATEST_TAG_TO_PROMOTE=$(git tag --list "v${BASE_VERSION}-${FROM_CHANNEL}.*" --sort=-v:refname | head -n 1)
 
-            if [ -z "$LATEST_INTERNAL_TAG" ]; then
-              echo "::error::No internal release found for base version ${BASE_VERSION} to promote."
+            if [ -z "$LATEST_TAG_TO_PROMOTE" ]; then
+              echo "::error::No ${FROM_CHANNEL} release found for base version ${BASE_VERSION} to promote."
               exit 1
             fi
 
-            echo "Found latest internal tag to promote: $LATEST_INTERNAL_TAG"
+            echo "Found latest ${FROM_CHANNEL} tag to promote: $LATEST_TAG_TO_PROMOTE"
 
             # Calculate the increment for the TARGET channel
             if [[ "$CHANNEL" != "production" ]]; then
@@ -90,19 +98,29 @@ jobs:
 
             echo "New release name will be: $NEW_TAG"
             echo "Final tag will be: $NEW_TAG"
-            echo "tag_to_process=$LATEST_INTERNAL_TAG" >> $GITHUB_OUTPUT
-            echo "release_name=$NEW_TAG" >> $GITHUB_OUTPUT
-            echo "final_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+            echo "from_channel=${FROM_CHANNEL}" >> $GITHUB_OUTPUT
+            echo "tag_to_process=${LATEST_TAG_TO_PROMOTE}" >> $GITHUB_OUTPUT
+            echo "release_name=${NEW_TAG}" >> $GITHUB_OUTPUT
+            echo "final_tag=${NEW_TAG}" >> $GITHUB_OUTPUT
           fi
         shell: bash
 
       - name: Create and push new tag
-        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git tag ${{ steps.calculate_tags.outputs.tag_to_process }}
-          git push origin ${{ steps.calculate_tags.outputs.tag_to_process }}
+          FINAL_TAG="${{ steps.calculate_tags.outputs.final_tag }}"
+          if [[ "${{ inputs.channel }}" == "internal" ]]; then
+            # For internal, tag the current HEAD. tag_to_process and final_tag are the same.
+            git tag $FINAL_TAG
+          else
+            # For promotions, create the new tag pointing to the same commit as the old tag.
+            TAG_TO_PROCESS="${{ steps.calculate_tags.outputs.tag_to_process }}"
+            git tag $FINAL_TAG $TAG_TO_PROCESS
+          fi
+          git push origin $FINAL_TAG
+        shell: bash
 
   call-release-workflow:
     if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
@@ -124,4 +142,5 @@ jobs:
       final_tag: ${{ needs.determine-tags.outputs.final_tag }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
+      from_channel: ${{ needs.determine-tags.outputs.from_channel }}
     secrets: inherit
