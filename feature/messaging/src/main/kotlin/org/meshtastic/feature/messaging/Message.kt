@@ -17,7 +17,7 @@
 
 @file:Suppress("TooManyFunctions")
 
-package com.geeksville.mesh.ui.message
+package org.meshtastic.feature.messaging
 
 import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
@@ -103,9 +103,6 @@ import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.messaging.MessageList
-import org.meshtastic.feature.messaging.MessageScreenEvent
-import org.meshtastic.feature.messaging.MessageViewModel
 import org.meshtastic.proto.AppOnlyProtos
 import java.nio.charset.StandardCharsets
 
@@ -125,7 +122,7 @@ private const val ROUNDED_CORNER_PERCENT = 100
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod") // Due to multiple states and event handling
 @Composable
-internal fun MessageScreen(
+fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: MessageViewModel = hiltViewModel(),
