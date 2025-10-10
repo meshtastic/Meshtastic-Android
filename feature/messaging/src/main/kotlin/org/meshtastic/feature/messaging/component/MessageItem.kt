@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.message.components
+package org.meshtastic.feature.messaging.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -64,7 +64,7 @@ import org.meshtastic.core.ui.theme.MessageItemColors
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-internal fun MessageItem(
+fun MessageItem(
     modifier: Modifier = Modifier,
     node: Node,
     ourNode: Node,
