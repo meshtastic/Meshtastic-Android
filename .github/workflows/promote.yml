@@ -23,6 +23,10 @@ on:
         description: 'The channel to promote to'
         required: true
         type: string
+      from_channel:
+        description: 'The channel to promote from'
+        required: true
+        type: string
     secrets:
       GSERVICES:
         required: true
@@ -96,7 +100,7 @@ jobs:
         with:
           service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
           package-name: 'com.geeksville.mesh'
-          from-track: 'internal'
+          from-track: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
           to-track: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
           user-fraction: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
 
