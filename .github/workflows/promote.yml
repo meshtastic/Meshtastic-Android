@@ -11,8 +11,20 @@ on:
         description: 'The tag that triggered the release'
         required: true
         type: string
+      release_name:
+        description: 'The desired name for the GitHub release'
+        required: true
+        type: string
+      final_tag:
+        description: 'The final tag for the release'
+        required: true
+        type: string
       channel:
         description: 'The channel to promote to'
+        required: true
+        type: string
+      from_channel:
+        description: 'The channel to promote from'
         required: true
         type: string
     secrets:
@@ -88,18 +100,25 @@ jobs:
         with:
           service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
           package-name: 'com.geeksville.mesh'
-          from-track: 'internal'
+          from-track: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
           to-track: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
+          user-fraction: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
 
   update-github-release:
     runs-on: ubuntu-latest
     needs: [ prepare-build-info, promote-release ]
     steps:
-      - name: Update GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Checkout code
+        uses: actions/checkout@v5
         with:
-          tag_name: ${{ inputs.tag_name }}
-          name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
-          generate_release_notes: true
-          draft: false
-          prerelease: ${{ inputs.channel != 'production' }}
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Update GitHub Release with gh CLI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit ${{ inputs.tag_name }} \
+            --tag ${{ inputs.final_tag }} \
+            --title "${{ inputs.release_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
+            --prerelease=${{ inputs.channel != 'production' }}

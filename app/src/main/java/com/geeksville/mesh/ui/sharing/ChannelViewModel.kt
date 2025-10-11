@@ -21,13 +21,6 @@ import android.net.Uri
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
-import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.config
-import com.geeksville.mesh.copy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,6 +33,13 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.proto.getChannelList
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.ChannelProtos
+import org.meshtastic.proto.ConfigProtos.Config
+import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
+import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.config
+import org.meshtastic.proto.copy
 import timber.log.Timber
 import javax.inject.Inject
 

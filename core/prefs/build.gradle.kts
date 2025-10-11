@@ -23,8 +23,4 @@ plugins {
 
 android { namespace = "org.meshtastic.core.prefs" }
 
-dependencies {
-    implementation(libs.bundles.coroutines)
-    implementation(libs.androidx.appcompat)
-    googleImplementation(libs.maps.compose)
-}
+dependencies { googleImplementation(libs.maps.compose) }

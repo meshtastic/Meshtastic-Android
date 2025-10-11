@@ -20,9 +20,6 @@ package org.meshtastic.core.database.dao
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.copy
-import com.geeksville.mesh.user
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -40,6 +37,9 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.copy
+import org.meshtastic.proto.user
 
 @RunWith(AndroidJUnit4::class)
 class NodeInfoDaoTest {

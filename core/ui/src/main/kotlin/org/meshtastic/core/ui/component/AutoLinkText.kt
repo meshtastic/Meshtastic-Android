@@ -82,9 +82,3 @@ private fun Spannable.toAnnotatedString(linkStyles: TextLinkStyles): AnnotatedSt
 private fun AutoLinkTextPreview() {
     AutoLinkText("A text containing a link https://example.com")
 }
-
-@Preview(showBackground = true)
-@Composable
-private fun AutoLinkTextPreview2() {
-    AutoLinkText("<script>alert(0);Android users can't see this</script>")
-}

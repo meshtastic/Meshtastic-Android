@@ -20,9 +20,7 @@ package com.geeksville.mesh.ui.message
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.service.MeshServiceNotifications
-import com.geeksville.mesh.sharedContact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +43,8 @@ import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.sharedContact
 import timber.log.Timber
 import javax.inject.Inject
 

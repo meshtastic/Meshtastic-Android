@@ -35,14 +35,15 @@ import androidx.core.app.RemoteInput
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R.raw
-import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.TelemetryProtos.LocalStats
 
 /**
  * Manages the creation and display of all app notifications.
@@ -164,6 +165,7 @@ class MeshServiceNotifications(private val context: Context) {
                     NotificationType.ServiceState -> {
                         lockscreenVisibility = Notification.VISIBILITY_PRIVATE
                     }
+
                     NotificationType.DirectMessage,
                     NotificationType.BroadcastMessage,
                     NotificationType.NewNode,
@@ -180,6 +182,7 @@ class MeshServiceNotifications(private val context: Context) {
                         )
                         if (type == NotificationType.LowBatteryRemote) enableVibration(true)
                     }
+
                     NotificationType.Alert -> {
                         setShowBadge(true)
                         enableLights(true)
@@ -194,6 +197,7 @@ class MeshServiceNotifications(private val context: Context) {
                                 .build(),
                         )
                     }
+
                     NotificationType.Client -> {
                         setShowBadge(true)
                     }
@@ -202,17 +206,44 @@ class MeshServiceNotifications(private val context: Context) {
         notificationManager.createNotificationChannel(channel)
     }
 
+    var cachedTelemetry: TelemetryProtos.Telemetry? = null
+    var cachedLocalStats: LocalStats? = null
+    var nextStatsUpdateMillis: Long = 0
+    var cachedMessage: String? = null
+
     // region Public Notification Methods
     fun updateServiceStateNotification(
         summaryString: String?,
-        localStats: LocalStats? = null,
-        currentStatsUpdatedAtMillis: Long? = System.currentTimeMillis(),
+        telemetry: TelemetryProtos.Telemetry? = cachedTelemetry,
     ): Notification {
+        val hasLocalStats = telemetry?.hasLocalStats() == true
+        val hasDeviceMetrics = telemetry?.hasDeviceMetrics() == true
+        val message =
+            if (hasLocalStats) {
+                val localStats = telemetry.localStats
+                val localStatsMessage = localStats?.formatToString()
+                cachedTelemetry = telemetry
+                nextStatsUpdateMillis = System.currentTimeMillis() + FIFTEEN_MINUTES_IN_MILLIS
+                localStatsMessage
+            } else if (cachedTelemetry == null && hasDeviceMetrics) {
+                val deviceMetrics = telemetry.deviceMetrics
+                val deviceMetricsMessage = deviceMetrics.formatToString()
+                if (cachedLocalStats == null) {
+                    cachedTelemetry = telemetry
+                }
+                nextStatsUpdateMillis = System.currentTimeMillis()
+                deviceMetricsMessage
+            } else {
+                null
+            }
+
+        cachedMessage = message ?: cachedMessage ?: context.getString(R.string.no_local_stats)
+
         val notification =
             createServiceStateNotification(
                 name = summaryString.orEmpty(),
-                message = localStats.formatToString(),
-                nextUpdateAt = currentStatsUpdatedAtMillis?.plus(FIFTEEN_MINUTES_IN_MILLIS),
+                message = cachedMessage,
+                nextUpdateAt = nextStatsUpdateMillis,
             )
         notificationManager.notify(SERVICE_NOTIFY_ID, notification)
         return notification
@@ -270,11 +301,13 @@ class MeshServiceNotifications(private val context: Context) {
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
         }
 
-        nextUpdateAt?.let {
-            builder.setWhen(it)
-            builder.setUsesChronometer(true)
-            builder.setChronometerCountDown(true)
-        }
+        nextUpdateAt
+            ?.takeIf { it > System.currentTimeMillis() }
+            ?.let {
+                builder.setWhen(it)
+                builder.setUsesChronometer(true)
+                builder.setChronometerCountDown(true)
+            }
 
         return builder.build()
     }
@@ -427,23 +460,34 @@ class MeshServiceNotifications(private val context: Context) {
 }
 
 // Extension function to format LocalStats into a readable string.
-private fun LocalStats?.formatToString(): String {
-    if (this == null) return "No Local Stats"
-
-    return this.allFields
-        .mapNotNull { (k, v) ->
-            when (k.name) {
-                "num_online_nodes",
-                "num_total_nodes",
-                -> null // Exclude these fields
-                "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
-                "channel_utilization" -> "ChUtil: %.2f%%".format(v)
-                "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
-                else -> {
-                    val formattedKey = k.name.replace('_', ' ').replaceFirstChar { it.titlecase() }
-                    "$formattedKey: $v"
-                }
+private fun LocalStats?.formatToString(): String? = this?.allFields
+    ?.mapNotNull { (k, v) ->
+        when (k.name) {
+            "num_online_nodes",
+            "num_total_nodes",
+            -> null // Exclude these fields
+            "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
+            "channel_utilization" -> "ChUtil: %.2f%%".format(v)
+            "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
+            else -> {
+                val formattedKey = k.name.replace('_', ' ').replaceFirstChar { it.titlecase() }
+                "$formattedKey: $v"
             }
         }
-        .joinToString("\n")
-}
+    }
+    ?.joinToString("\n")
+
+private fun TelemetryProtos.DeviceMetrics?.formatToString(): String? = this?.allFields
+    ?.mapNotNull { (k, v) ->
+        when (k.name) {
+            "battery_level" -> "Battery Level: $v"
+            "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
+            "channel_utilization" -> "ChUtil: %.2f%%".format(v)
+            "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
+            else -> {
+                val formattedKey = k.name.replace('_', ' ').replaceFirstChar { it.titlecase() }
+                "$formattedKey: $v"
+            }
+        }
+    }
+    ?.joinToString("\n")

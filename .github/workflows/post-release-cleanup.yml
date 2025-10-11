@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       base_version:
-        description: 'The base version to clean up (e.g., v1.2.3)'
+        description: 'The base version to clean up (e.g., 2.3.0)'
         required: true
         type: string
       confirm_deletion:
@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 jobs:
-  cleanup_tags:
+  cleanup_prereleases:
     runs-on: ubuntu-latest
     environment: Release
     steps:
@@ -26,60 +26,53 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cleanup pre-release tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BASE_VERSION="${{ github.event.inputs.base_version }}"
-          
-          echo "Base version is $BASE_VERSION"
-          echo "Deletion confirmed: ${{ github.event.inputs.confirm_deletion }}"
-          
-          git fetch --tags
-          
-          TAGS_TO_DELETE=$(git tag -l "v${BASE_VERSION}-*")
-          
-          if [ -z "$TAGS_TO_DELETE" ]; then
-            echo "No pre-release tags found for base version $BASE_VERSION to delete."
-          else
-            if [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]]; then
-              echo "!!! DELETING TAGS !!!"
-              echo "The following pre-release tags will be deleted:"
-              echo "$TAGS_TO_DELETE"
-              echo "$TAGS_TO_DELETE" | xargs -n 1 git push --delete origin
-            else
-              echo "DRY RUN: The following pre-release tags would be deleted:"
-              echo "$TAGS_TO_DELETE"
-            fi
-          fi
-
-  cleanup_releases:
-    runs-on: ubuntu-latest
-    environment: Release
-    steps:
-      - name: Cleanup draft releases
+      - name: Cleanup pre-releases and their tags
+        id: cleanup_releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BASE_VERSION="${{ github.event.inputs.base_version }}"
+          TAG_PREFIX="v${BASE_VERSION}-"
+          echo "Searching for pre-releases with tag prefix '$TAG_PREFIX'."
+          RELEASES_TO_DELETE=$(gh release list --json tagName,isPrerelease --limit 100 | jq -r --arg prefix "$TAG_PREFIX" '.[] | select(.isPrerelease == true and .tagName != null and (.tagName | startswith($prefix))) | .tagName')
 
-          echo "Base version is $BASE_VERSION"
-          echo "Deletion confirmed: ${{ github.event.inputs.confirm_deletion }}"
-
-          echo "Searching for draft releases with '$BASE_VERSION' in their name."
-
-          DRAFT_RELEASES=$(gh release list --json name,isDraft,tagName --limit 100 | jq -r --arg ver "$BASE_VERSION" '.[] | select(.isDraft == true and (.name | contains($ver))) | .tagName')
-
-          if [ -z "$DRAFT_RELEASES" ]; then
-            echo "No draft releases found with '$BASE_VERSION' in their name."
+          if [ -z "$RELEASES_TO_DELETE" ]; then
+            echo "No pre-releases found for base version $BASE_VERSION."
           else
             if [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]]; then
-              echo "!!! DELETING RELEASES !!!"
-              echo "The following draft releases will be deleted:"
-              echo "$DRAFT_RELEASES"
-              echo "$DRAFT_RELEASES" | xargs -n 1 gh release delete --yes
+              echo "!!! DELETING RELEASES AND TAGS !!!"
+              echo "The following pre-releases and their tags will be deleted:"
+              echo "$RELEASES_TO_DELETE"
+              echo "$RELEASES_TO_DELETE" | xargs -n 1 gh release delete --cleanup-tag --yes
             else
-              echo "DRY RUN: The following draft releases would be deleted:"
-              echo "$DRAFT_RELEASES"
+              echo "DRY RUN: The following pre-releases and their tags would be deleted:"
+              echo "$RELEASES_TO_DELETE"
+            fi
+          fi
+
+      - name: Cleanup dangling pre-release tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BASE_VERSION="${{ github.event.inputs.base_version }}"
+          TAG_PREFIX="v${BASE_VERSION}-"
+          echo "Searching for any remaining remote pre-release tags with prefix '$TAG_PREFIX'."
+
+          # This finds all remote tags matching the pattern. Some may have been deleted in the previous step.
+          TAGS_TO_DELETE=$(git ls-remote --tags origin "refs/tags/${TAG_PREFIX}*" | awk '{print $2}' | sed 's|refs/tags/||')
+
+          if [ -z "$TAGS_TO_DELETE" ]; then
+            echo "No dangling pre-release tags found."
+          else
+            if [[ "${{ github.event.inputs.confirm_deletion }}" == "true" ]]; then
+              echo "!!! DELETING DANGLING TAGS !!!"
+              echo "The following pre-release tags will be deleted:"
+              # We pipe to xargs which will run the command for each tag.
+              # If a tag was already deleted by the previous 'release delete' step, this will fail for that tag.
+              # We add '|| true' to ignore any errors and ensure the workflow doesn't fail.
+              echo "$TAGS_TO_DELETE" | xargs -n 1 -I {} sh -c 'git push --delete origin {} || true'
+            else
+              echo "DRY RUN: The following dangling pre-release tags would be deleted:"
+              echo "$TAGS_TO_DELETE"
             fi
           fi

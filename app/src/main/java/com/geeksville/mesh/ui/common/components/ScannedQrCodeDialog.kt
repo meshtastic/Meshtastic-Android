@@ -51,13 +51,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.AppOnlyProtos.ChannelSet
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
-import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.copy
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.settings.radio.component.ChannelSelection
+import org.meshtastic.proto.AppOnlyProtos.ChannelSet
+import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.copy
 
 @Composable
 fun ScannedQrCodeDialog(

@@ -26,15 +26,16 @@ android { namespace = "org.meshtastic.core.ui" }
 dependencies {
     implementation(projects.core.database)
     implementation(projects.core.model)
-    implementation(projects.core.navigation)
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.strings)
 
-    implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.markdown)
-    implementation(libs.bundles.ui)
-
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.guava)
 }

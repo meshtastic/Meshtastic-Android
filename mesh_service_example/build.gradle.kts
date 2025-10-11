@@ -58,10 +58,8 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.material)
 
     // OSM
-    implementation(libs.bundles.osm)
     implementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
 }

@@ -28,7 +28,7 @@
 
     <string name="default_mqtt_address" translatable="false">mqtt.meshtastic.org</string>
 
-    <string name="fallback_node_name">Meshtastic %s</string>
+    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_title">Filter by</string>
@@ -928,4 +928,13 @@
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">No application available to handle link.</string>
     <string name="system_settings">System Settings</string>
+    <string name="no_local_stats">No Stats Available</string>
+
+
+    <string name="analytics_notice">Analytics are collected to help us improve the Android app (thank you), we will receive anonymized information about user behavior. This includes crash reports, screens used in the app, etc.</string>
+    <string name="analytics_platforms">"Analytics platforms: "</string>
+    <string name="firebase_link" translatable="false">Firebase https://firebase.google.com/</string>
+    <string name="datadog_link" translatable="false">Datadog  https://www.datadoghq.com/</string>
+    <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
+    <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
 </resources>

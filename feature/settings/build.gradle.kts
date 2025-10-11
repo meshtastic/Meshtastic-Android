@@ -37,11 +37,18 @@ dependencies {
     implementation(projects.core.strings)
     implementation(projects.core.ui)
 
-    implementation(libs.bundles.ui)
-
     implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.compose.material.iconsExtended)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.timber)
     implementation(libs.zxing.android.embedded)
+
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }

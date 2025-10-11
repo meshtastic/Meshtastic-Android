@@ -23,20 +23,12 @@ import android.os.RemoteException
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.geeksville.mesh.AdminProtos
-import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
-import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.config
-import com.geeksville.mesh.copy
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
@@ -71,6 +63,15 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.ConfigProtos.Config
+import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
+import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.config
+import org.meshtastic.proto.copy
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -355,7 +356,8 @@ constructor(
         uiPreferencesDataSource.setAppIntroCompleted(true)
     }
 
-    fun addNavigationTrackingEffect(navController: NavHostController) {
-        analytics.addNavigationTrackingEffect(navController)
+    @Composable
+    fun AddNavigationTrackingEffect(navController: NavHostController) {
+        analytics.AddNavigationTrackingEffect(navController)
     }
 }

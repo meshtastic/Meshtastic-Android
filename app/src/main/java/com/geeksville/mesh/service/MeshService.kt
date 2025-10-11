@@ -18,6 +18,7 @@
 package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
+import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -27,35 +28,12 @@ import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
 import androidx.core.location.LocationCompat
-import com.geeksville.mesh.AdminProtos
-import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.DeviceUIProtos
-import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
-import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshProtos.FromRadio.PayloadVariantCase
-import com.geeksville.mesh.MeshProtos.MeshPacket
-import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.mesh.ModuleConfigProtos
-import com.geeksville.mesh.PaxcountProtos
-import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.StoreAndForwardProtos
-import com.geeksville.mesh.TelemetryProtos
-import com.geeksville.mesh.TelemetryProtos.LocalStats
-import com.geeksville.mesh.XmodemProtos
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.copy
-import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
-import com.geeksville.mesh.position
 import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.telemetry
-import com.geeksville.mesh.user
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
 import com.google.protobuf.ByteString
@@ -106,6 +84,28 @@ import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.ChannelProtos
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.DeviceUIProtos
+import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
+import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.MeshProtos.FromRadio.PayloadVariantCase
+import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshProtos.ToRadio
+import org.meshtastic.proto.ModuleConfigProtos
+import org.meshtastic.proto.PaxcountProtos
+import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.StoreAndForwardProtos
+import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.XmodemProtos
+import org.meshtastic.proto.copy
+import org.meshtastic.proto.fromRadio
+import org.meshtastic.proto.position
+import org.meshtastic.proto.telemetry
+import org.meshtastic.proto.user
 import timber.log.Timber
 import java.util.Random
 import java.util.UUID
@@ -207,9 +207,6 @@ class MeshService : Service() {
         private var configNonce = 1
     }
 
-    private var previousSummary: String? = null
-    private var previousStats: LocalStats? = null
-
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
@@ -227,22 +224,6 @@ class MeshService : Service() {
         val name = nodeDBbyID[packet?.from]?.user?.longName
         return name ?: getString(R.string.unknown_username)
     }
-
-    private val notificationSummary
-        get() =
-            when (connectionStateHolder.getState()) {
-                ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
-
-                ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
-                ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
-            }
-
-    private var localStatsTelemetry: TelemetryProtos.Telemetry? = null
-    private val localStats: LocalStats?
-        get() = localStatsTelemetry?.localStats
-
-    private val localStatsUpdatedAtMillis: Long?
-        get() = localStatsTelemetry?.time?.let { it * 1000L }
 
     /** start our location requests (if they weren't already running) */
     private fun startLocationRequests() {
@@ -368,12 +349,7 @@ class MeshService : Service() {
         val wantForeground = a != null && a != NO_DEVICE_SELECTED
 
         Timber.i("Requesting foreground service=$wantForeground")
-
-        // We always start foreground because that's how our service is always started (if we didn't
-        // then android would
-        // kill us)
-        // but if we don't really need foreground we immediately stop it.
-        val notification = serviceNotifications.updateServiceStateNotification(notificationSummary)
+        val notification = updateServiceStatusNotification()
 
         try {
             ServiceCompat.startForeground(
@@ -976,35 +952,34 @@ class MeshService : Service() {
     }
 
     // Update our DB of users based on someone sending out a Telemetry subpacket
-    private fun handleReceivedTelemetry(fromNum: Int, t: TelemetryProtos.Telemetry) {
+    private fun handleReceivedTelemetry(fromNum: Int, telemetry: TelemetryProtos.Telemetry) {
         val isRemote = (fromNum != myNodeNum)
-        if (!isRemote && t.hasLocalStats()) {
-            localStatsTelemetry = t
-            maybeUpdateServiceStatusNotification()
+        if (!isRemote) {
+            updateServiceStatusNotification(telemetry = telemetry)
         }
-        updateNodeInfo(fromNum) {
+        updateNodeInfo(fromNum) { nodeEntity ->
             when {
-                t.hasDeviceMetrics() -> {
-                    it.deviceTelemetry = t
-                    if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
+                telemetry.hasDeviceMetrics() -> {
+                    nodeEntity.deviceTelemetry = telemetry
+                    if (fromNum == myNodeNum || (isRemote && nodeEntity.isFavorite)) {
                         if (
-                            t.deviceMetrics.voltage > batteryPercentUnsupported &&
-                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
+                            telemetry.deviceMetrics.voltage > batteryPercentUnsupported &&
+                            telemetry.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
                         ) {
-                            if (shouldBatteryNotificationShow(fromNum, t)) {
-                                serviceNotifications.showOrUpdateLowBatteryNotification(it, isRemote)
+                            if (shouldBatteryNotificationShow(fromNum, telemetry)) {
+                                serviceNotifications.showOrUpdateLowBatteryNotification(nodeEntity, isRemote)
                             }
                         } else {
                             if (batteryPercentCooldowns.containsKey(fromNum)) {
                                 batteryPercentCooldowns.remove(fromNum)
                             }
-                            serviceNotifications.cancelLowBatteryNotification(it)
+                            serviceNotifications.cancelLowBatteryNotification(nodeEntity)
                         }
                     }
                 }
 
-                t.hasEnvironmentMetrics() -> it.environmentTelemetry = t
-                t.hasPowerMetrics() -> it.powerTelemetry = t
+                telemetry.hasEnvironmentMetrics() -> nodeEntity.environmentTelemetry = telemetry
+                telemetry.hasPowerMetrics() -> nodeEntity.powerTelemetry = telemetry
             }
         }
     }
@@ -1095,7 +1070,6 @@ class MeshService : Service() {
                     }
                     .build(),
             )
-            onNodeDBChanged()
         } else {
             Timber.w("Ignoring early received packet: ${packet.toOneLineString()}")
             // earlyReceivedPackets.add(packet)
@@ -1228,11 +1202,6 @@ class MeshService : Service() {
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
 
-    // If we just changed our nodedb, we might want to do somethings
-    private fun onNodeDBChanged() {
-        maybeUpdateServiceStatusNotification()
-    }
-
     /** Send in analytics about mesh connection */
     private fun reportConnection() {
         val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
@@ -1337,30 +1306,21 @@ class MeshService : Service() {
             ConnectionState.DISCONNECTED -> startDisconnect()
         }
 
-        // Update the android notification in the status bar
-        maybeUpdateServiceStatusNotification()
+        updateServiceStatusNotification()
     }
 
-    private fun maybeUpdateServiceStatusNotification() {
-        var update = false
-        val currentSummary = notificationSummary
-        val currentStats = localStats
-        val currentStatsUpdatedAtMillis = localStatsUpdatedAtMillis
-        if (currentSummary.isNotBlank() && (previousSummary == null || !previousSummary.equals(currentSummary))) {
-            previousSummary = currentSummary
-            update = true
-        }
-        if (currentStats != null && (previousStats == null || !(previousStats?.equals(currentStats) ?: false))) {
-            previousStats = currentStats
-            update = true
-        }
-        if (update) {
-            serviceNotifications.updateServiceStateNotification(
-                summaryString = currentSummary,
-                localStats = currentStats,
-                currentStatsUpdatedAtMillis = currentStatsUpdatedAtMillis,
-            )
-        }
+    private fun updateServiceStatusNotification(telemetry: TelemetryProtos.Telemetry? = null): Notification {
+        val notificationSummary =
+            when (connectionStateHolder.getState()) {
+                ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
+
+                ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
+                ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
+            }
+        return serviceNotifications.updateServiceStateNotification(
+            summaryString = notificationSummary,
+            telemetry = telemetry,
+        )
     }
 
     private fun onRadioConnectionState(newState: ConnectionState) {
@@ -1573,7 +1533,7 @@ class MeshService : Service() {
      * Regenerate the myNodeInfo model. We call this twice. Once after we receive myNodeInfo from the device and again
      * after we have the node DB (which might allow us a better notion of our HwModel.
      */
-    private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata) {
+    private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata? = MeshProtos.DeviceMetadata.getDefaultInstance()) {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
             val mi =
@@ -1581,25 +1541,27 @@ class MeshService : Service() {
                     MyNodeEntity(
                         myNodeNum = myNodeNum,
                         model =
-                        when (val hwModel = metadata.hwModel) {
+                        when (val hwModel = metadata?.hwModel) {
                             null,
                             MeshProtos.HardwareModel.UNSET,
                             -> null
 
                             else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                         },
-                        firmwareVersion = metadata.firmwareVersion,
+                        firmwareVersion = metadata?.firmwareVersion,
                         couldUpdate = false,
                         shouldUpdate = false, // TODO add check after re-implementing firmware updates
                         currentPacketId = currentPacketId and 0xffffffffL,
                         messageTimeoutMsec = 5 * 60 * 1000, // constants from current firmware code
                         minAppVersion = minAppVersion,
                         maxChannels = 8,
-                        hasWifi = metadata.hasWifi,
+                        hasWifi = metadata?.hasWifi == true,
                         deviceId = deviceId.toStringUtf8(),
                     )
                 }
-            serviceScope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
+            if (metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()) {
+                serviceScope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
+            }
             newMyNodeInfo = mi
         }
     }
@@ -1626,6 +1588,7 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
 
         rawMyNodeInfo = myInfo
+        regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
         serviceScope.handledLaunch {
@@ -1809,7 +1772,6 @@ class MeshService : Service() {
             haveNodeDB = true // we now have nodes from real hardware
             sendAnalytics()
             onHasSettings()
-            onNodeDBChanged()
         }
     }
 

@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="fallback_node_name">Kärgvõrgustik %s</string>
+    <string name="fallback_node_name">Kärgvõrgustik</string>
     <string name="node_filter_placeholder">Filtreeri</string>
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
     <string name="node_filter_title">Filtreeri </string>
@@ -890,4 +890,8 @@
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Lingi haldamiseks pole rakendust saadaval.</string>
     <string name="system_settings">Süsteemi sätted</string>
+    <string name="no_local_stats">Statistikat pole saadaval</string>
+    <string name="analytics_notice">Analüüsiandmeid kogutakse Androidi rakenduse täiustamiseks (tänan). Me saame anonüümset teavet kasutajate käitumise kohta. See hõlmab krahhiaruandeid, rakenduse ekraanipilte jms.</string>
+    <string name="analytics_platforms">"Analüütika platvormid: "</string>
+    <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
 </resources>

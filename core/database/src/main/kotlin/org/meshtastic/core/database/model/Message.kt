@@ -18,10 +18,10 @@
 package org.meshtastic.core.database.model
 
 import androidx.annotation.StringRes
-import com.geeksville.mesh.MeshProtos.Routing
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.R
+import org.meshtastic.proto.MeshProtos.Routing
 
 @Suppress("CyclomaticComplexMethod")
 @StringRes

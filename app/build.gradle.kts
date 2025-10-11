@@ -140,6 +140,13 @@ android {
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
+        all {
+            if (name == "google") {
+                apply(plugin = libs.plugins.google.services.get().pluginId)
+                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+            }
+        }
+
         named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
         named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
     }
@@ -213,18 +220,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.markdown.renderer)
-    implementation(libs.markdown.renderer.android)
-    implementation(libs.markdown.renderer.m3)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.coil)
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
     implementation(libs.androidx.core.splashscreen)
-    implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.eclipse.paho.client.mqttv3)
     implementation(libs.streamsupport.minifuture)
@@ -242,6 +244,7 @@ dependencies {
 
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.hilt.android.testing)
 
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.junit)

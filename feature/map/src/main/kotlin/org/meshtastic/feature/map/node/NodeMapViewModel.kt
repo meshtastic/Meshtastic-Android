@@ -21,8 +21,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.geeksville.mesh.MeshProtos.Position
-import com.geeksville.mesh.Portnums.PortNum
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +37,8 @@ import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.proto.toPosition
 import org.meshtastic.feature.map.model.CustomTileSource
+import org.meshtastic.proto.MeshProtos.Position
+import org.meshtastic.proto.Portnums.PortNum
 import javax.inject.Inject
 
 @HiltViewModel

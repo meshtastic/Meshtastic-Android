@@ -54,7 +54,7 @@ fun CustomMapLayersSheet(
     LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text(
-                modifier = Modifier.Companion.padding(16.dp),
+                modifier = Modifier.padding(16.dp),
                 text = stringResource(R.string.manage_map_layers),
                 style = MaterialTheme.typography.headlineSmall,
             )
@@ -71,7 +71,7 @@ fun CustomMapLayersSheet(
         if (mapLayers.isEmpty()) {
             item {
                 Text(
-                    modifier = Modifier.Companion.padding(16.dp),
+                    modifier = Modifier.padding(16.dp),
                     text = stringResource(R.string.no_map_layers_loaded),
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -113,7 +113,7 @@ fun CustomMapLayersSheet(
             }
         }
         item {
-            Button(modifier = Modifier.Companion.fillMaxWidth().padding(16.dp), onClick = onAddLayerClicked) {
+            Button(modifier = Modifier.fillMaxWidth().padding(16.dp), onClick = onAddLayerClicked) {
                 Text(stringResource(R.string.add_layer))
             }
         }

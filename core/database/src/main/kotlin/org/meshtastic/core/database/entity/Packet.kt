@@ -23,11 +23,11 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.geeksville.mesh.MeshProtos.User
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getShortDateTime
+import org.meshtastic.proto.MeshProtos.User
 
 data class PacketEntity(
     @Embedded val packet: Packet,

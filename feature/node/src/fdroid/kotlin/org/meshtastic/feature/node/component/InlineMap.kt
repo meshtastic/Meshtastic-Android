@@ -15,25 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.feature.node.component
 
-import org.junit.Assert
-import org.junit.Test
-import org.meshtastic.core.model.Position
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import org.meshtastic.core.database.model.Node
 
-class PositionTest {
-    @Test
-    fun degGood() {
-        Assert.assertEquals(Position.degI(89.0), 890000000)
-        Assert.assertEquals(Position.degI(-89.0), -890000000)
-
-        Assert.assertEquals(Position.degD(Position.degI(89.0)), 89.0, 0.01)
-        Assert.assertEquals(Position.degD(Position.degI(-89.0)), -89.0, 0.01)
-    }
-
-    @Test
-    fun givenPositionCreatedWithoutTime_thenTimeIsSet() {
-        val position = Position(37.1, 121.1, 35)
-        Assert.assertTrue(position.time != 0)
-    }
+@Composable
+internal fun InlineMap(node: Node, modifier: Modifier = Modifier) {
+    // No-op for F-Droid builds
 }

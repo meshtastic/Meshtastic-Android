@@ -49,11 +49,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.model.Contact
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.proto.AppOnlyProtos
 
 @Suppress("LongMethod")
 @Composable

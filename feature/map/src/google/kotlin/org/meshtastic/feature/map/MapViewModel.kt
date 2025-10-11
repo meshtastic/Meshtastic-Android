@@ -21,7 +21,6 @@ import android.app.Application
 import android.net.Uri
 import androidx.core.net.toFile
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.ConfigProtos
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
@@ -54,6 +53,7 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.proto.ConfigProtos
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream

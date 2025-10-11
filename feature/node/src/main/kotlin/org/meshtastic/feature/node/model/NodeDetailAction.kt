@@ -15,19 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.feature.node.model
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
-import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.service.ServiceAction
+import org.meshtastic.feature.node.component.NodeMenuAction
 
-class DeviceVersionTest {
-    /** make sure we match the python and device code behavior */
-    @Test
-    fun canParse() {
-        assertEquals(10000, DeviceVersion("1.0.0").asInt)
-        assertEquals(10101, DeviceVersion("1.1.1").asInt)
-        assertEquals(12357, DeviceVersion("1.23.57").asInt)
-        assertEquals(12357, DeviceVersion("1.23.57.abde123").asInt)
-    }
+sealed interface NodeDetailAction {
+    data class Navigate(val route: Route) : NodeDetailAction
+
+    data class TriggerServiceAction(val action: ServiceAction) : NodeDetailAction
+
+    data class HandleNodeMenuAction(val action: NodeMenuAction) : NodeDetailAction
+
+    data object ShareContact : NodeDetailAction
 }

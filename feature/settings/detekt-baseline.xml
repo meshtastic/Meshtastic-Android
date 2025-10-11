@@ -20,7 +20,7 @@
     <ID>LongMethod:DeviceConfigItemList.kt$@Composable fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:ExternalNotificationConfigItemList.kt$@Composable fun ExternalNotificationConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
-    <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
+    <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel)</ID>
     <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>

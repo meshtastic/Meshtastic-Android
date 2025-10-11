@@ -48,12 +48,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             extensions.configure<LibraryAndroidComponentsExtension> {
                 disableUnnecessaryAndroidTests(target)
             }
-            dependencies {
-                "androidTestImplementation"(libs.findLibrary("kotlin.test").get())
-                "androidTestImplementation"(libs.findBundle("testing.android").get())
-                "testImplementation"(libs.findLibrary("kotlin.test").get())
-
-            }
         }
     }
 }

@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.ui.connections.components.BLEDevices
@@ -73,6 +72,7 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
+import org.meshtastic.proto.ConfigProtos
 
 fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
     @Suppress("DEPRECATION")
@@ -104,7 +104,6 @@ fun ConnectionsScreen(
         connectionsViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val context = LocalContext.current
-    val info by connectionsViewModel.myNodeInfo.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
@@ -149,15 +148,12 @@ fun ConnectionsScreen(
     LaunchedEffect(connectionState, regionUnset) {
         when (connectionState) {
             ConnectionState.CONNECTED -> {
-                if (regionUnset) R.string.must_set_region else R.string.connected_to
+                if (regionUnset) R.string.must_set_region else R.string.connected
             }
 
             ConnectionState.DISCONNECTED -> R.string.not_connected
             ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
-        }.let {
-            val firmwareString = info?.firmwareString ?: context.getString(R.string.unknown)
-            scanModel.setErrorText(context.getString(it, firmwareString))
-        }
+        }.let { scanModel.setErrorText(context.getString(it)) }
     }
 
     Scaffold(

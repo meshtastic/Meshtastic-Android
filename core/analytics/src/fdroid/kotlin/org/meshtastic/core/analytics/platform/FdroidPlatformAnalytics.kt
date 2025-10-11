@@ -42,7 +42,7 @@ class FdroidPlatformAnalytics @Inject constructor() : PlatformAnalytics {
     }
 
     @Composable
-    override fun addNavigationTrackingEffect(navController: NavHostController) = {
+    override fun AddNavigationTrackingEffect(navController: NavHostController) {
         // No-op for F-Droid, but we can log navigation if needed for debugging
         if (BuildConfig.DEBUG) {
             navController.addOnDestinationChangedListener { _, destination, _ ->
