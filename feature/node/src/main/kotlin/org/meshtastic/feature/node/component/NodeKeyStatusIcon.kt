@@ -21,28 +21,25 @@ import android.util.Base64
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -63,7 +60,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
@@ -120,80 +116,64 @@ enum class NodeKeySecurityState(
 }
 
 @Composable
-private fun KeyStatusDialog(
-    @StringRes title: Int,
-    @StringRes text: Int,
-    key: ByteString?,
-    onDismiss: () -> Unit = {}
-) {
+private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: ByteString?, onDismiss: () -> Unit = {}) {
     var showAll by rememberSaveable { mutableStateOf(false) }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            color = colorScheme.background,
-        ) {
-            LazyColumn(
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                item {
-                    if (showAll) {
-                        AllKeyStates()
+    AlertDialog(
+        modifier =
+        if (showAll) {
+            Modifier.fillMaxSize()
+        } else {
+            Modifier
+        },
+        onDismissRequest = onDismiss,
+        title = {
+            if (showAll) {
+                Text(stringResource(R.string.show_all_key_title))
+            } else {
+                Text(stringResource(id = title))
+            }
+        },
+        text = {
+            if (showAll) {
+                AllKeyStates()
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = stringResource(id = text), textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(16.dp))
+                    if (key != null && title == R.string.encryption_pkc) {
+                        val keyString = Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
+                        Text(
+                            text = stringResource(id = R.string.config_security_public_key) + ":",
+                            textAlign = TextAlign.Center,
+                        )
                         Spacer(Modifier.height(8.dp))
-                    } else {
-                        Text(text = stringResource(id = title), textAlign = TextAlign.Center)
+                        SelectionContainer { Text(text = keyString, textAlign = TextAlign.Center) }
+                        Spacer(Modifier.height(8.dp))
+                        CopyIconButton(valueToCopy = keyString, modifier = Modifier.padding(start = 8.dp))
                         Spacer(Modifier.height(16.dp))
-                        Text(text = stringResource(id = text), textAlign = TextAlign.Center)
-                        Spacer(Modifier.height(16.dp))
-                        if (key != null && title == R.string.encryption_pkc) {
-                            val keyString = Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
-                            Text(
-                                text = stringResource(id = R.string.config_security_public_key) + ":",
-                                textAlign = TextAlign.Center,
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            SelectionContainer {
-                                Text(
-                                    text = keyString,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                            Spacer(Modifier.height(8.dp))
-                            CopyIconButton(
-                                valueToCopy = keyString,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                            Spacer(Modifier.height(16.dp))
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        TextButton(onClick = { showAll = !showAll }) {
-                            Text(
-                                if (showAll) {
-                                    stringResource(R.string.security_icon_help_show_less)
-                                } else {
-                                    stringResource(R.string.security_icon_help_show_all)
-                                },
-                            )
-                        }
-                        TextButton(
-                            onClick = onDismiss,
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = colorScheme.onSurface,
-                            ),
-                        ) {
-                            Text(text = stringResource(id = R.string.close))
-                        }
                     }
                 }
             }
-        }
-    }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = { showAll = !showAll }) {
+                    Text(
+                        if (showAll) {
+                            stringResource(R.string.security_icon_help_show_less)
+                        } else {
+                            stringResource(R.string.security_icon_help_show_all)
+                        },
+                    )
+                }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.security_icon_help_dismiss)) }
+            }
+        },
+    )
 }
 
 @Composable
@@ -220,21 +200,21 @@ fun NodeKeyStatusIcon(
             hasPKC -> Icons.Default.Lock to colorScheme.StatusGreen
             else ->
                 ImageVector.vectorResource(org.meshtastic.core.ui.R.drawable.ic_lock_open_right_24) to
-                        colorScheme.StatusYellow
+                    colorScheme.StatusYellow
         }
 
     IconButton(onClick = { showEncryptionDialog = true }, modifier = modifier) {
         Icon(
             imageVector = icon,
             contentDescription =
-                stringResource(
-                    id =
-                        when {
-                            mismatchKey -> R.string.encryption_error
-                            hasPKC -> R.string.encryption_pkc
-                            else -> R.string.encryption_psk
-                        },
-                ),
+            stringResource(
+                id =
+                when {
+                    mismatchKey -> R.string.encryption_error
+                    hasPKC -> R.string.encryption_pkc
+                    else -> R.string.encryption_psk
+                },
+            ),
             tint = tint,
         )
     }
@@ -242,7 +222,7 @@ fun NodeKeyStatusIcon(
 
 /**
  * Displays a list of all possible node key states with their icons and descriptions within the help dialog. Iterates
- * over `SecurityState.entries` which is provided by the enum class.
+ * over `NodeKeySecurityState.entries` which is provided by the enum class.
  */
 @Composable
 private fun AllKeyStates() {
@@ -254,28 +234,16 @@ private fun AllKeyStates() {
             // Uses enum entries
             Row(verticalAlignment = Alignment.CenterVertically) {
                 when (state) {
-                    NodeKeySecurityState.PKM -> NodeKeyStatusIcon(
-                        hasPKC = false,
-                        mismatchKey = true
-                    )
+                    NodeKeySecurityState.PKM -> NodeKeyStatusIcon(hasPKC = false, mismatchKey = true)
 
-                    NodeKeySecurityState.PKC -> NodeKeyStatusIcon(
-                        hasPKC = true,
-                        mismatchKey = false
-                    )
+                    NodeKeySecurityState.PKC -> NodeKeyStatusIcon(hasPKC = true, mismatchKey = false)
 
                     else -> NodeKeyStatusIcon(hasPKC = false, mismatchKey = false)
                 }
 
                 Column(modifier = Modifier.padding(start = 16.dp)) {
-                    Text(
-                        text = stringResource(state.descriptionResId),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = stringResource(state.helpTextResId),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Text(text = stringResource(state.descriptionResId), style = MaterialTheme.typography.titleMedium)
+                    Text(text = stringResource(state.helpTextResId), style = MaterialTheme.typography.bodyMedium)
                 }
             }
             if (state != NodeKeySecurityState.entries.lastOrNull()) {
@@ -288,13 +256,7 @@ private fun AllKeyStates() {
 @PreviewLightDark
 @Composable
 private fun KeyStatusDialogErrorPreview() {
-    AppTheme {
-        KeyStatusDialog(
-            title = R.string.encryption_error,
-            text = R.string.encryption_error_text,
-            key = null
-        )
-    }
+    AppTheme { KeyStatusDialog(title = R.string.encryption_error, text = R.string.encryption_error_text, key = null) }
 }
 
 @PreviewLightDark
@@ -312,13 +274,7 @@ private fun KeyStatusDialogPkcPreview() {
 @PreviewLightDark
 @Composable
 private fun KeyStatusDialogPskPreview() {
-    AppTheme {
-        KeyStatusDialog(
-            title = R.string.encryption_psk,
-            text = R.string.encryption_psk_text,
-            key = null
-        )
-    }
+    AppTheme { KeyStatusDialog(title = R.string.encryption_psk, text = R.string.encryption_psk_text, key = null) }
 }
 
 @Preview
