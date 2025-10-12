@@ -210,6 +210,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                 }
                 uIViewModel.clearClientNotification(notification)
             },
+            onDismiss = { uIViewModel.clearClientNotification(notification) },
         )
     }
 
