@@ -23,6 +23,8 @@
     <ID>MagicNumber:EditListPreference.kt$67890</ID>
     <ID>MagicNumber:LazyColumnDragAndDropDemo.kt$50</ID>
     <ID>ModifierMissing:AdaptiveTwoPane.kt$AdaptiveTwoPane</ID>
+    <ID>ModifierMissing:ChannelItem.kt$ChannelItem</ID>
+    <ID>ModifierMissing:ChannelSelection.kt$ChannelSelection</ID>
     <ID>ModifierMissing:ContactSharing.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:EmojiPicker.kt$EmojiPicker</ID>
     <ID>ModifierMissing:EmojiPicker.kt$EmojiPickerDialog</ID>
@@ -48,6 +50,7 @@
     <ID>ModifierReused:TextDividerPreference.kt$Row(modifier = modifier.fillMaxWidth().padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)) } }</ID>
     <ID>MultipleEmitters:PreferenceCategory.kt$PreferenceCategory</ID>
     <ID>ParameterNaming:BitwisePreference.kt$onItemSelected</ID>
+    <ID>ParameterNaming:ChannelSelection.kt$onSelected</ID>
     <ID>ParameterNaming:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>ParameterNaming:DropDownPreference.kt$onItemSelected</ID>
     <ID>ParameterNaming:EditIPv4Preference.kt$onValueChanged</ID>
