@@ -42,7 +42,7 @@ fun SimpleAlertDialog(
     confirmText: String? = null,
     onConfirm: (() -> Unit)? = null,
     dismissText: String? = null,
-    onDismiss: () -> Unit = {},
+    onDismiss: () -> Unit,
 ) = AlertDialog(
     onDismissRequest = onDismiss,
     dismissButton = {
