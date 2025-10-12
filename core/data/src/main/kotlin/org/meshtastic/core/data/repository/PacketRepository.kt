@@ -44,6 +44,8 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: Lazy<Packe
 
     suspend fun getUnreadCount(contact: String): Int = withContext(Dispatchers.IO) { packetDao.getUnreadCount(contact) }
 
+    fun getUnreadCountTotal(): Flow<Int> = packetDao.getUnreadCountTotal()
+
     suspend fun clearUnreadCount(contact: String, timestamp: Long) =
         withContext(Dispatchers.IO) { packetDao.clearUnreadCount(contact, timestamp) }
 

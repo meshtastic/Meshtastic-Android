@@ -13,7 +13,6 @@
     <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>LambdaParameterEventTrailing:NodeActionButton.kt$onClick</ID>
-    <ID>LongMethod:AmbientLightingConfigItemList.kt$@Composable fun AmbientLightingConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
     <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel())</ID>
@@ -34,10 +33,8 @@
     <ID>MagicNumber:EditChannelDialog.kt$16</ID>
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
-    <ID>MagicNumber:PowerConfigItemList.kt$3600</ID>
     <ID>ModifierMissing:ChannelSettingsItemList.kt$ChannelSelection</ID>
     <ID>ModifierMissing:CleanNodeDatabaseScreen.kt$CleanNodeDatabaseScreen</ID>
-    <ID>ModifierMissing:LoRaConfigItemList.kt$LoRaConfigScreen</ID>
     <ID>ModifierMissing:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ModifierMissing:NetworkConfigItemList.kt$NetworkConfigScreen</ID>
     <ID>ModifierMissing:PositionConfigItemList.kt$PositionConfigScreen</ID>
