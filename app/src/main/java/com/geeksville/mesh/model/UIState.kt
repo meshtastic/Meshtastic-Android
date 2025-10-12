@@ -31,10 +31,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.service.MeshServiceNotifications
-import com.geeksville.mesh.ui.sharing.toSharedContact
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,17 +50,17 @@ import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
-import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.toSharedContact
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ConfigProtos.Config
@@ -130,7 +127,6 @@ constructor(
     private val serviceRepository: ServiceRepository,
     radioInterfaceService: RadioInterfaceService,
     meshLogRepository: MeshLogRepository,
-    private val quickChatActionRepository: QuickChatActionRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val meshServiceNotifications: MeshServiceNotifications,
@@ -216,12 +212,6 @@ constructor(
             .getUnreadCountTotal()
             .map { it.coerceAtLeast(0) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), 0)
-
-    val quickChatActions
-        get() =
-            quickChatActionRepository
-                .getAllActions()
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
@@ -334,20 +324,6 @@ constructor(
             meshService?.setConfig(config.toByteArray())
         } catch (ex: RemoteException) {
             Timber.e(ex, "Set config error")
-        }
-    }
-
-    fun addQuickChatAction(action: QuickChatAction) =
-        viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.upsert(action) }
-
-    fun deleteQuickChatAction(action: QuickChatAction) =
-        viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.delete(action) }
-
-    fun updateActionPositions(actions: List<QuickChatAction>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            for (position in actions.indices) {
-                quickChatActionRepository.setItemPosition(actions[position].uuid, position)
-            }
         }
     }
 

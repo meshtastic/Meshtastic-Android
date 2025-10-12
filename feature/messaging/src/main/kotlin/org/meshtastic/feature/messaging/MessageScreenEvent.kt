@@ -15,14 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.message
+package org.meshtastic.feature.messaging
 
 import org.meshtastic.core.database.model.Node
 
-/**
- * Defines the various user interactions that can occur on the [MessageScreen]. These events are typically handled by
- * the [com.geeksville.mesh.model.UIViewModel].
- */
+/** Defines the various user interactions that can occur on the MessageScreen. */
 internal sealed interface MessageScreenEvent {
     /** Send a new text message. */
     data class SendMessage(val text: String, val replyingToPacketId: Int? = null) : MessageScreenEvent
