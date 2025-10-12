@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.compose
+package org.meshtastic.core.ui.qr
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -29,7 +29,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.channelSet
