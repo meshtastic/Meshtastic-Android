@@ -103,19 +103,6 @@ fun getInitials(fullName: String): String {
 
 private fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
 
-data class Contact(
-    val contactKey: String,
-    val shortName: String,
-    val longName: String,
-    val lastMessageTime: String?,
-    val lastMessageText: String?,
-    val unreadCount: Int,
-    val messageCount: Int,
-    val isMuted: Boolean,
-    val isUnmessageable: Boolean,
-    val nodeColors: Pair<Int, Int>? = null,
-)
-
 @Suppress("LongParameterList", "LargeClass", "UnusedPrivateProperty")
 @HiltViewModel
 class UIViewModel
