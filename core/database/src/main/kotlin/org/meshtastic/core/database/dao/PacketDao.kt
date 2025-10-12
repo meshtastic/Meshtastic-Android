@@ -81,6 +81,15 @@ interface PacketDao {
 
     @Query(
         """
+    SELECT COUNT(*) FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND port_num = 1 AND read = 0
+    """,
+    )
+    fun getUnreadCountTotal(): Flow<Int>
+
+    @Query(
+        """
     UPDATE packet
     SET read = 1
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
