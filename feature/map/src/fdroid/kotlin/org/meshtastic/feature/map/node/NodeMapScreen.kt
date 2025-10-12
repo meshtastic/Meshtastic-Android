@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node
+package org.meshtastic.feature.map.node
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -29,7 +29,6 @@ import org.meshtastic.feature.map.addCopyright
 import org.meshtastic.feature.map.addPolyline
 import org.meshtastic.feature.map.addPositionMarkers
 import org.meshtastic.feature.map.addScaleBarOverlay
-import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.feature.map.rememberMapViewWithLifecycle
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
