@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
