@@ -53,7 +53,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.R
-import org.meshtastic.feature.settings.radio.component.ChannelSelection
+import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.channelSet
