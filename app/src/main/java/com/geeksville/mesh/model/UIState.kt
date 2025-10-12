@@ -19,7 +19,6 @@ package com.geeksville.mesh.model
 
 import android.app.Application
 import android.net.Uri
-import android.os.RemoteException
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -50,10 +49,8 @@ import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.asDeviceVersion
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
@@ -63,13 +60,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.toSharedContact
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.AppOnlyProtos
-import org.meshtastic.proto.ConfigProtos.Config
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
 import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.config
-import org.meshtastic.proto.copy
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -103,19 +94,6 @@ fun getInitials(fullName: String): String {
 
 private fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
 
-data class Contact(
-    val contactKey: String,
-    val shortName: String,
-    val longName: String,
-    val lastMessageTime: String?,
-    val lastMessageText: String?,
-    val unreadCount: Int,
-    val messageCount: Int,
-    val isMuted: Boolean,
-    val isUnmessageable: Boolean,
-    val nodeColors: Pair<Int, Int>? = null,
-)
-
 @Suppress("LongParameterList", "LargeClass", "UnusedPrivateProperty")
 @HiltViewModel
 class UIViewModel
@@ -123,7 +101,6 @@ class UIViewModel
 constructor(
     private val app: Application,
     private val nodeDB: NodeRepository,
-    private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     radioInterfaceService: RadioInterfaceService,
     meshLogRepository: MeshLogRepository,
@@ -193,20 +170,6 @@ constructor(
     val meshService: IMeshService?
         get() = serviceRepository.meshService
 
-    private val localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
-
-    val config
-        get() = localConfig.value
-
-    private val _moduleConfig = MutableStateFlow<LocalModuleConfig>(LocalModuleConfig.getDefaultInstance())
-    val moduleConfig: StateFlow<LocalModuleConfig> = _moduleConfig
-    val module
-        get() = _moduleConfig.value
-
-    private val _channels = MutableStateFlow(channelSet {})
-    val channels: StateFlow<AppOnlyProtos.ChannelSet>
-        get() = _channels
-
     val unreadMessageCount =
         packetRepository
             .getUnreadCountTotal()
@@ -216,9 +179,6 @@ constructor(
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo
-
-    val ourNodeInfo: StateFlow<Node?>
-        get() = nodeDB.ourNodeInfo
 
     val snackBarHostState = SnackbarHostState()
 
@@ -251,14 +211,6 @@ constructor(
                     dismissable = false,
                 )
             }
-            .launchIn(viewModelScope)
-
-        radioConfigRepository.localConfigFlow.onEach { config -> localConfig.value = config }.launchIn(viewModelScope)
-        radioConfigRepository.moduleConfigFlow
-            .onEach { config -> _moduleConfig.value = config }
-            .launchIn(viewModelScope)
-        radioConfigRepository.channelSetFlow
-            .onEach { channelSet -> _channels.value = channelSet }
             .launchIn(viewModelScope)
 
         Timber.d("ViewModel created")
@@ -302,29 +254,9 @@ constructor(
         _requestChannelSet.value = null
     }
 
-    var region: Config.LoRaConfig.RegionCode
-        get() = config.lora.region
-        set(value) {
-            updateLoraConfig { it.copy { region = value } }
-        }
-
     override fun onCleared() {
         super.onCleared()
         Timber.d("ViewModel cleared")
-    }
-
-    private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
-        val data = body(config.lora)
-        setConfig(config { lora = data })
-    }
-
-    // Set the radio config (also updates our saved copy in preferences)
-    fun setConfig(config: Config) {
-        try {
-            meshService?.setConfig(config.toByteArray())
-        } catch (ex: RemoteException) {
-            Timber.e(ex, "Set config error")
-        }
     }
 
     val tracerouteResponse: LiveData<String?>
