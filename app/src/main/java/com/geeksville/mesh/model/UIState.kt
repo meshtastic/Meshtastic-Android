@@ -432,7 +432,66 @@ class UIViewModel @Inject constructor(
                 val nodesById = nodes.values.associateBy { it.num }.toMutableMap()
                 val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
 
-                writer.appendLine("\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"rx rssi\",\"distance\",\"hop limit\",\"payload\"")
+                writer.appendLine("\"date\"," +
+                        "\"time\"," +
+                        "\"from\"," +
+                        "\"sender name\"," +
+                        "\"sender lat\"," +
+                        "\"sender long\"," +
+                        "\"distance\"," +
+                        "\"hop limit\"," +
+                        "\"payload\"," +
+                        "\"airtime\"," +
+                        "\"rx pos lat\"," +
+                        "\"rx pos long\"," +
+                        "\"rx pos alt\"," +
+                        "\"rx pos snr\"," +
+                        "\"rx pos rssi\"," +
+                        "\"rx position alt hae\"," +
+                        "\"rx position alt geoidal separation\"," +
+                        "\"rx position alt source\"," +
+                        "\"rx position alt source value\"," +
+                        "\"rx position gps accuracy\"," +
+                        "\"rx position ground speed\"," +
+                        "\"rx position ground track\"," +
+                        "\"rx position hdop\"," +
+                        "\"rx position pdop\"," +
+                        "\"rx position vdop\"," +
+                        "\"rx position timestamp\"," +
+                        "\"rx position timestamp millis adjust\"," +
+                        "\"rx position location source\"," +
+                        "\"rx position location source value\"," +
+                        "\"rx position fix quality\"," +
+                        "\"rx position latitudeI\"," +
+                        "\"rx position longitudeI\"," +
+                        "\"rx device metrics air util tx\"," +
+                        "\"rx message serialized size\"," +
+                        "\"rx message priority\"," +
+                        "\"rx message priority value\"," +
+                        "\"rx message via mqtt\"," +
+                        "\"rx message want ack\"," +
+                        "\"LoRa region\"," +
+                        "\"LoRa region value\"," +
+                        "\"LoRa tx enabled\"," +
+                        "\"LoRa tx power\"," +
+                        "\"LoRa bandwidth\"," +
+                        "\"LoRa coding rate\"," +
+                        "\"LoRa frequency offset\"," +
+                        "\"LoRa hop limit\"," +
+                        "\"LoRa ignore mqtt\"," +
+                        "\"LoRa use preset\"," +
+                        "\"LoRa modem preset name\"," +
+                        "\"LoRa modem preset value\"," +
+                        "\"LoRa ignore incoming count\"," +
+                        "\"LoRa ignore incoming list\"," +
+                        "\"LoRa override duty cycle\"," +
+                        "\"LoRa override frequency\"," +
+                        "\"LoRa spread factor\"," +
+                        "\"LoRa sx126XRx boosted gain\"," +
+                        "\"environment metrics relative humidity\"," +
+                        "\"environment metrics temperature\"," +
+                        "\"environment metrics barometric pressure\"," +
+                        "\"environment metrics gas resistance\"")
 
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
@@ -445,12 +504,14 @@ class UIViewModel @Inject constructor(
                         }
                     }
 
+
                     packet.meshPacket?.let { proto ->
                         // If the packet contains position data then use it to update, if valid
                         packet.position?.let { position ->
                             positionToPos.invoke(position)?.let {
                                 nodePositions[proto.from.takeIf { it != 0 } ?: myNodeNum] = position
                             }
+
                         }
 
                         // Filter out of our results any packet that doesn't report SNR.  This
@@ -465,15 +526,68 @@ class UIViewModel @Inject constructor(
                             val senderPos = positionToPos.invoke(senderPosition)
                             val senderLat = senderPos?.latitude ?: ""
                             val senderLong = senderPos?.longitude ?: ""
+                            val rxSenderTime = senderPos?.time ?: 0
 
                             // rx lat, long, and elevation
                             val rxPosition = nodePositions[myNodeNum]
                             val rxPos = positionToPos.invoke(rxPosition)
-                            val rxLat = rxPos?.latitude ?: ""
-                            val rxLong = rxPos?.longitude ?: ""
-                            val rxAlt = rxPos?.altitude ?: ""
-                            val rxSnr = "%f".format(proto.rxSnr)
-                            val rxRssi = "%d".format(proto.rxRssi)
+                            val rxPosLat = rxPos?.latitude ?: ""
+                            val rxPosLong = rxPos?.longitude ?: ""
+                            val rxPosAlt = rxPos?.altitude
+                            val rxPosSnr = "%f".format(proto.rxSnr)
+                            val rxPosRssi = "%d".format(proto.rxRssi)
+                            val rxTime = rxPos?.time ?: 0
+
+                            //added
+                            val rxPositionAltHae = rxPosition?.altitudeHae ?: ""
+                            val rxPositionAltGeoidalSeparation = rxPosition?.altitudeGeoidalSeparation ?: ""
+                            val rxPositionAltSource = rxPosition?.altitudeSource ?: ""
+                            val rxPositionAltSourceValue = rxPosition?.altitudeSourceValue ?: ""
+                            val rxPositionGpsAccuracy = rxPosition?.gpsAccuracy ?: ""
+                            val rxPositionGroundSpeed = rxPosition?.groundSpeed ?: ""
+                            val rxPositionGroundTrack = rxPosition?.groundTrack ?: ""
+                            val rxPositionHDOP = rxPosition?.hdop ?: ""
+                            val rxPositonPDOP = rxPosition?.pdop ?: ""
+                            val rxPositionVDOP = rxPosition?.vdop ?: ""
+                            val rxPositionTimestamp = rxPosition?.timestamp ?: ""
+                            val rxPositionTimestampMillisAdjust = rxPosition?.timestampMillisAdjust ?: ""
+                            val rxPositionLocationSource = rxPosition?.locationSource ?: ""
+                            val rxPositionLocationSourceValue = rxPosition?.locationSourceValue ?: ""
+                            val rxPositionFixQuaility = rxPosition?.fixQuality ?: ""
+                            val rxPositionLatitudeI = rxPosition?.latitudeI ?: ""
+                            val rxPositionLongitudeI = rxPosition?.longitudeI ?: ""
+
+                            val rxDeviceMetricsAirUtilTx = myNodeInfo.value?.airUtilTx ?: ""
+
+                            val rxMessageSerializedSize = proto.serializedSize
+                            val rxMessagePriority = proto.priority
+                            val rxMessagePriorityValue = proto.priorityValue
+                            val rxMessageViaMqtt = proto.viaMqtt
+                            val rxMessageWantAck = proto.wantAck
+
+                            val LoRaRegion = localConfig.value.lora.region
+                            val LoRaRegionValue = localConfig.value.lora.regionValue
+                            val LoRaTXEnabled = localConfig.value.lora.txEnabled
+                            val LoRaTXPower = localConfig.value.lora.txPower
+                            val LoRaBandwith = localConfig.value.lora.bandwidth
+                            val LoRaCodingRate = localConfig.value.lora.codingRate
+                            val LoRaFrequencyOffset = localConfig.value.lora.frequencyOffset
+                            val LoRaHopLimit = localConfig.value.lora.hopLimit
+                            val LoRaIgnoreMQTT = localConfig.value.lora.ignoreMqtt
+                            val LoRaUsePreset = localConfig.value.lora.usePreset
+                            val LoRaModemPresetName = localConfig.value.lora.modemPreset.name
+                            val LoRaModemPresetValue = localConfig.value.lora.modemPresetValue
+                            val LoRaIgnoreIncomingCount = localConfig.value.lora.ignoreIncomingCount
+                            val LoRaIgnoreIncomingList = localConfig.value.lora.ignoreIncomingList
+                            val LoRaOverrideDutyCycle = localConfig.value.lora.overrideDutyCycle
+                            val LoRaOverrideFrequency = localConfig.value.lora.overrideFrequency
+                            val LoRaSpreadFactor = localConfig.value.lora.spreadFactor
+                            val LoRaSX126XRxBosstedGain = localConfig.value.lora.sx126XRxBoostedGain
+
+                            val EnvironmentMetricsRelativeHumidity = meshService!!.nodes[myNodeNum]?.environmentMetrics?.relativeHumidity
+                            val EnvironmentMetricsTemperature = meshService!!.nodes[myNodeNum]?.environmentMetrics?.temperature
+                            val EnvironmentMetricsBarometricPressure = meshService!!.nodes[myNodeNum]?.environmentMetrics?.barometricPressure
+                            val EnvironmentMetricsGasResistance = meshService!!.nodes[myNodeNum]?.environmentMetrics?.gasResistance
 
                             // Calculate the distance if both positions are valid
 
@@ -499,8 +613,68 @@ class UIViewModel @Inject constructor(
                                 else -> ""
                             }
 
-                            //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
-                            writer.appendLine("$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$rxRssi\",\"$dist\",\"$hopLimit\",\"$payload\"")
+                            val airtime = (rxTime - rxSenderTime)
+
+                            //  datetime,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
+                            writer.appendLine("$rxDateTime," +
+                                    "\"$rxFrom\"," +
+                                    "\"$senderName\"," +
+                                    "\"$senderLat\"," +
+                                    "\"$senderLong\"," +
+                                    "\"$dist\"," +
+                                    "\"$hopLimit\"," +
+                                    "\"$payload\"," +
+                                    "\"$airtime\"," +
+                                    "\"$rxPosLat\"," +
+                                    "\"$rxPosLong\"," +
+                                    "\"$rxPosAlt\"," +
+                                    "\"$rxPosSnr\"," +
+                                    "\"$rxPosRssi\"," +
+                                    "\"$rxPositionAltHae\"," +
+                                    "\"$rxPositionAltGeoidalSeparation\"," +
+                                    "\"$rxPositionAltSource\"," +
+                                    "\"$rxPositionAltSourceValue\"," +
+                                    "\"$rxPositionGpsAccuracy\"," +
+                                    "\"$rxPositionGroundSpeed\"," +
+                                    "\"$rxPositionGroundTrack\"," +
+                                    "\"$rxPositionHDOP\"," +
+                                    "\"$rxPositonPDOP\"," +
+                                    "\"$rxPositionVDOP\"," +
+                                    "\"$rxPositionTimestamp\"," +
+                                    "\"$rxPositionTimestampMillisAdjust\"," +
+                                    "\"$rxPositionLocationSource\"," +
+                                    "\"$rxPositionLocationSourceValue\"," +
+                                    "\"$rxPositionFixQuaility\"," +
+                                    "\"$rxPositionLatitudeI\"," +
+                                    "\"$rxPositionLongitudeI\"," +
+                                    "\"$rxDeviceMetricsAirUtilTx\"," +
+                                    "\"$rxMessageSerializedSize\"," +
+                                    "\"$rxMessagePriority\"," +
+                                    "\"$rxMessagePriorityValue\"," +
+                                    "\"$rxMessageViaMqtt\"," +
+                                    "\"$rxMessageWantAck\"," +
+                                    "\"$LoRaRegion\"," +
+                                    "\"$LoRaRegionValue\"," +
+                                    "\"$LoRaTXEnabled\"," +
+                                    "\"$LoRaTXPower\"," +
+                                    "\"$LoRaBandwith\"," +
+                                    "\"$LoRaCodingRate\"," +
+                                    "\"$LoRaFrequencyOffset\"," +
+                                    "\"$LoRaHopLimit\"," +
+                                    "\"$LoRaIgnoreMQTT\"," +
+                                    "\"$LoRaUsePreset\"," +
+                                    "\"$LoRaModemPresetName\"," +
+                                    "\"$LoRaModemPresetValue\"," +
+                                    "\"$LoRaIgnoreIncomingCount\"," +
+                                    "\"$LoRaIgnoreIncomingList\"," +
+                                    "\"$LoRaOverrideDutyCycle\"," +
+                                    "\"$LoRaOverrideFrequency\"," +
+                                    "\"$LoRaSpreadFactor\"," +
+                                    "\"$LoRaSX126XRxBosstedGain\"," +
+                                    "\"$EnvironmentMetricsRelativeHumidity\"," +
+                                    "\"$EnvironmentMetricsTemperature\"," +
+                                    "\"$EnvironmentMetricsBarometricPressure\"," +
+                                    "\"$EnvironmentMetricsGasResistance\"")
                         }
                     }
                 }
