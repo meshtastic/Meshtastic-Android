@@ -89,7 +89,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -107,6 +106,7 @@ import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
