@@ -8,6 +8,7 @@
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableParamOrder:Channel.kt$ChannelScreen</ID>
     <ID>ComposableParamOrder:Channel.kt$EditChannelUrl</ID>
+    <ID>ComposableParamOrder:ConnectionsNavIcon.kt$ConnectionsNavIcon</ID>
     <ID>ComposableParamOrder:DeviceMetrics.kt$DeviceMetricsChart</ID>
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$ChartContent</ID>
@@ -19,7 +20,6 @@
     <ID>ComposableParamOrder:PowerMetrics.kt$PowerMetricsChart</ID>
     <ID>ComposableParamOrder:Share.kt$ShareScreen</ID>
     <ID>ComposableParamOrder:SignalMetrics.kt$SignalMetricsChart</ID>
-    <ID>ComposableParamOrder:TopLevelNavIcon.kt$ConnectionsNavIcon</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
@@ -114,7 +114,6 @@
     <ID>ModifierMissing:PowerMetrics.kt$PowerMetricsScreen</ID>
     <ID>ModifierMissing:Share.kt$ShareScreen</ID>
     <ID>ModifierMissing:SignalMetrics.kt$SignalMetricsScreen</ID>
-    <ID>ModifierMissing:TopLevelNavIcon.kt$TopLevelNavIcon</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier.width(dp)</ID>

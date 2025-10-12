@@ -23,7 +23,6 @@ import androidx.compose.material.icons.rounded.Snooze
 import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,12 +30,10 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.geeksville.mesh.ui.TopLevelDestination
 import com.geeksville.mesh.ui.connections.DeviceType
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.icon.Device
@@ -48,24 +45,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 @Composable
-fun TopLevelNavIcon(destination: TopLevelDestination, connectionState: ConnectionState, deviceType: DeviceType?) {
-    if (destination == TopLevelDestination.Connections) {
-        ConnectionsNavIcon(connectionState = connectionState, deviceType = deviceType)
-    } else {
-        Icon(
-            imageVector = destination.icon,
-            contentDescription = stringResource(id = destination.label),
-            tint = LocalContentColor.current,
-        )
-    }
-}
-
-@Composable
-private fun ConnectionsNavIcon(
-    modifier: Modifier = Modifier,
-    connectionState: ConnectionState,
-    deviceType: DeviceType?,
-) {
+fun ConnectionsNavIcon(modifier: Modifier = Modifier, connectionState: ConnectionState, deviceType: DeviceType?) {
     val tint =
         when (connectionState) {
             ConnectionState.DISCONNECTED -> colorScheme.StatusRed
@@ -105,10 +85,6 @@ private fun ConnectionsNavIcon(
     )
 }
 
-class TopLevelDestinationProvider : PreviewParameterProvider<TopLevelDestination> {
-    override val values: Sequence<TopLevelDestination> = TopLevelDestination.entries.asSequence()
-}
-
 class ConnectionStateProvider : PreviewParameterProvider<ConnectionState> {
     override val values: Sequence<ConnectionState> =
         sequenceOf(ConnectionState.CONNECTED, ConnectionState.DEVICE_SLEEP, ConnectionState.DISCONNECTED)
@@ -116,20 +92,6 @@ class ConnectionStateProvider : PreviewParameterProvider<ConnectionState> {
 
 class DeviceTypeProvider : PreviewParameterProvider<DeviceType> {
     override val values: Sequence<DeviceType> = sequenceOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
-}
-
-@PreviewLightDark
-@Composable
-private fun TopLevelNavIconPreviewConnectionStates(
-    @PreviewParameter(TopLevelDestinationProvider::class) destination: TopLevelDestination,
-) {
-    AppTheme {
-        TopLevelNavIcon(
-            destination = destination,
-            connectionState = ConnectionState.CONNECTED,
-            deviceType = DeviceType.BLE,
-        )
-    }
 }
 
 @PreviewLightDark

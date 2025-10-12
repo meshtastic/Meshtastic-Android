@@ -48,6 +48,7 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.asDeviceVersion
@@ -129,6 +130,7 @@ constructor(
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val meshServiceNotifications: MeshServiceNotifications,
     private val analytics: PlatformAnalytics,
+    packetRepository: PacketRepository,
 ) : ViewModel() {
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme
@@ -203,6 +205,12 @@ constructor(
     private val _channels = MutableStateFlow(channelSet {})
     val channels: StateFlow<AppOnlyProtos.ChannelSet>
         get() = _channels
+
+    val unreadMessageCount =
+        packetRepository
+            .getUnreadCountTotal()
+            .map { it.coerceAtLeast(0) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), 0)
 
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
