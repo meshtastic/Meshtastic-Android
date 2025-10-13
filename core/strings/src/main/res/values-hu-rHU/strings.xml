@@ -159,7 +159,7 @@
     <string name="analytics_okay">Analitika és hibajelentések engedélyezése.</string>
     <string name="accept">Elfogadni</string>
     <string name="cancel">Megszakítani</string>
-    <string name="discard_changes">Discard changes</string>
+    <string name="discard_changes">Discard</string>
     <string name="save_changes">Mentés</string>
     <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
     <string name="permission_missing">A Meshtastic helyhozzáférést igényel az új eszközök Bluetooth-os kereséséhez. Használaton kívül kikapcsolható.</string>
