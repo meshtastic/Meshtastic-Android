@@ -241,67 +241,67 @@ private fun NavGraphBuilder.moduleRoutesScreens(navController: NavHostController
         when (entry) {
             ModuleRoute.MQTT ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    MQTTConfigScreen(navController, it)
+                    MQTTConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.SERIAL ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    SerialConfigScreen(navController, it)
+                    SerialConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.EXT_NOTIFICATION ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    ExternalNotificationConfigScreen(navController, it)
+                    ExternalNotificationConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.STORE_FORWARD ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    StoreForwardConfigScreen(navController, it)
+                    StoreForwardConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.RANGE_TEST ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    RangeTestConfigScreen(navController, it)
+                    RangeTestConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.TELEMETRY ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    TelemetryConfigScreen(navController, it)
+                    TelemetryConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.CANNED_MESSAGE ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    CannedMessageConfigScreen(navController, it)
+                    CannedMessageConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.AUDIO ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    AudioConfigScreen(navController, it)
+                    AudioConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.REMOTE_HARDWARE ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    RemoteHardwareConfigScreen(navController, it)
+                    RemoteHardwareConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.NEIGHBOR_INFO ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    NeighborInfoConfigScreen(navController, it)
+                    NeighborInfoConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.AMBIENT_LIGHTING ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    AmbientLightingConfigScreen(navController, it)
+                    AmbientLightingConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.DETECTION_SENSOR ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    DetectionSensorConfigScreen(navController, it)
+                    DetectionSensorConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ModuleRoute.PAXCOUNTER ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    PaxcounterConfigScreen(navController, it)
+                    PaxcounterConfigScreen(it, onBack = navController::popBackStack)
                 }
         }
     }

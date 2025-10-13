@@ -32,7 +32,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -44,7 +43,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
 
 @Composable
-fun CannedMessageConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val cannedMessageConfig = state.moduleConfig.cannedMessage
     val messages = state.cannedMessageMessages
@@ -54,7 +53,7 @@ fun CannedMessageConfigScreen(navController: NavController, viewModel: RadioConf
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.canned_message),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

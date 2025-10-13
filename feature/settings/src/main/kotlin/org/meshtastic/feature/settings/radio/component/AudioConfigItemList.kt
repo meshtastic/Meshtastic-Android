@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -38,7 +37,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
 
 @Composable
-fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val audioConfig = state.moduleConfig.audio
     val formState = rememberConfigState(initialValue = audioConfig)
@@ -46,7 +45,7 @@ fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewMo
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.audio),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
