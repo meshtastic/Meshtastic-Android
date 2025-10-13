@@ -181,56 +181,28 @@ private fun <R : Route> NavGraphBuilder.addRadioConfigScreenComposable(
 @Suppress("LongMethod")
 private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController) {
     ConfigRoute.entries.forEach { entry ->
-        when (entry) {
-            ConfigRoute.USER ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    UserConfigScreen(it, onBack = navController::popBackStack)
-                }
+        addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
+            when (entry) {
+                ConfigRoute.USER -> UserConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.CHANNELS ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    ChannelConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.CHANNELS -> ChannelConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.DEVICE ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    DeviceConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.DEVICE -> DeviceConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.POSITION ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    PositionConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.POSITION -> PositionConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.POWER ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    PowerConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.POWER -> PowerConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.NETWORK ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    NetworkConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.NETWORK -> NetworkConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.DISPLAY ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    DisplayConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.DISPLAY -> DisplayConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.LORA ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    LoRaConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.LORA -> LoRaConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.BLUETOOTH ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    BluetoothConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.BLUETOOTH -> BluetoothConfigScreen(it, onBack = navController::popBackStack)
 
-            ConfigRoute.SECURITY ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    SecurityConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ConfigRoute.SECURITY -> SecurityConfigScreen(it, onBack = navController::popBackStack)
+            }
         }
     }
 }
@@ -238,71 +210,35 @@ private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 private fun NavGraphBuilder.moduleRoutesScreens(navController: NavHostController) {
     ModuleRoute.entries.forEach { entry ->
-        when (entry) {
-            ModuleRoute.MQTT ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    MQTTConfigScreen(it, onBack = navController::popBackStack)
-                }
+        addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
+            when (entry) {
+                ModuleRoute.MQTT -> MQTTConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.SERIAL ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    SerialConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.SERIAL -> SerialConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.EXT_NOTIFICATION ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
+                ModuleRoute.EXT_NOTIFICATION ->
                     ExternalNotificationConfigScreen(it, onBack = navController::popBackStack)
-                }
 
-            ModuleRoute.STORE_FORWARD ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    StoreForwardConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.STORE_FORWARD -> StoreForwardConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.RANGE_TEST ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    RangeTestConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.RANGE_TEST -> RangeTestConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.TELEMETRY ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    TelemetryConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.TELEMETRY -> TelemetryConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.CANNED_MESSAGE ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    CannedMessageConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.CANNED_MESSAGE -> CannedMessageConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.AUDIO ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    AudioConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.AUDIO -> AudioConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.REMOTE_HARDWARE ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    RemoteHardwareConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.REMOTE_HARDWARE -> RemoteHardwareConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.NEIGHBOR_INFO ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    NeighborInfoConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.NEIGHBOR_INFO -> NeighborInfoConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.AMBIENT_LIGHTING ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    AmbientLightingConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.AMBIENT_LIGHTING -> AmbientLightingConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.DETECTION_SENSOR ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    DetectionSensorConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.DETECTION_SENSOR -> DetectionSensorConfigScreen(it, onBack = navController::popBackStack)
 
-            ModuleRoute.PAXCOUNTER ->
-                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    PaxcounterConfigScreen(it, onBack = navController::popBackStack)
-                }
+                ModuleRoute.PAXCOUNTER -> PaxcounterConfigScreen(it, onBack = navController::popBackStack)
+            }
         }
     }
 }
