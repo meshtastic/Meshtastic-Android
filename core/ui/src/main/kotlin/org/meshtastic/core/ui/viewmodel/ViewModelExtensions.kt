@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("Wrapping", "UnusedImports", "SpacingAroundColon")
+
 package org.meshtastic.core.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
