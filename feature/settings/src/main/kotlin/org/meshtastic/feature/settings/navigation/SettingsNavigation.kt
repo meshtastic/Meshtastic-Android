@@ -88,6 +88,7 @@ import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos.DeviceMetadata
+import kotlin.reflect.KClass
 
 fun getNavRouteFrom(routeName: String): Route? =
     ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route
@@ -144,24 +145,30 @@ fun NavDestination.isConfigRoute(): Boolean =
  * - Retrieving the parent [NavBackStackEntry] for the [SettingsRoutes.SettingsGraph].
  * - Providing the [RadioConfigViewModel] scoped to the parent graph, which the [screenContent] will use.
  *
- * @param R The type of the [Route] object, must be serializable.
+ * @param route The [Route] class.
  * @param navController The [NavHostController] for navigation.
  * @param routeNameString The string name of the route (from the enum entry's name) used for deep link paths.
  * @param screenContent A lambda that defines the composable content for the screen. It receives the parent-scoped
  *   [RadioConfigViewModel].
  */
-private inline fun <reified R : Route> NavGraphBuilder.addRadioConfigScreenComposable(
+private fun <R : Route> NavGraphBuilder.addRadioConfigScreenComposable(
+    route: KClass<R>,
     navController: NavHostController,
     routeNameString: String,
-    crossinline screenContent: @Composable (viewModel: RadioConfigViewModel) -> Unit,
+    screenContent: @Composable (viewModel: RadioConfigViewModel) -> Unit,
 ) {
-    composable<R>(
+    composable(
+        route = route,
         deepLinks =
         listOf(
-            navDeepLink<R>(
+            navDeepLink(
+                route = route,
                 basePath = "$DEEP_LINK_BASE_URI/settings/radio/{destNum}/${routeNameString.lowercase()}",
-            ),
-            navDeepLink<R>(basePath = "$DEEP_LINK_BASE_URI/settings/radio/${routeNameString.lowercase()}"),
+            ) {},
+            navDeepLink(
+                route = route,
+                basePath = "$DEEP_LINK_BASE_URI/settings/radio/${routeNameString.lowercase()}",
+            ) {},
         ),
     ) { backStackEntry ->
         val parentEntry =
@@ -176,52 +183,52 @@ private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController
     ConfigRoute.entries.forEach { entry ->
         when (entry) {
             ConfigRoute.USER ->
-                addRadioConfigScreenComposable<SettingsRoutes.User>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     UserConfigScreen(navController, it)
                 }
 
             ConfigRoute.CHANNELS ->
-                addRadioConfigScreenComposable<SettingsRoutes.ChannelConfig>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     ChannelConfigScreen(navController, it)
                 }
 
             ConfigRoute.DEVICE ->
-                addRadioConfigScreenComposable<SettingsRoutes.Device>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     DeviceConfigScreen(navController, it)
                 }
 
             ConfigRoute.POSITION ->
-                addRadioConfigScreenComposable<SettingsRoutes.Position>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     PositionConfigScreen(navController, it)
                 }
 
             ConfigRoute.POWER ->
-                addRadioConfigScreenComposable<SettingsRoutes.Power>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     PowerConfigScreen(navController, it)
                 }
 
             ConfigRoute.NETWORK ->
-                addRadioConfigScreenComposable<SettingsRoutes.Network>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     NetworkConfigScreen(navController, it)
                 }
 
             ConfigRoute.DISPLAY ->
-                addRadioConfigScreenComposable<SettingsRoutes.Display>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     DisplayConfigScreen(navController, it)
                 }
 
             ConfigRoute.LORA ->
-                addRadioConfigScreenComposable<SettingsRoutes.LoRa>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     LoRaConfigScreen(navController, it)
                 }
 
             ConfigRoute.BLUETOOTH ->
-                addRadioConfigScreenComposable<SettingsRoutes.Bluetooth>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     BluetoothConfigScreen(navController, it)
                 }
 
             ConfigRoute.SECURITY ->
-                addRadioConfigScreenComposable<SettingsRoutes.Security>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     SecurityConfigScreen(navController, it)
                 }
         }
@@ -233,67 +240,67 @@ private fun NavGraphBuilder.moduleRoutesScreens(navController: NavHostController
     ModuleRoute.entries.forEach { entry ->
         when (entry) {
             ModuleRoute.MQTT ->
-                addRadioConfigScreenComposable<SettingsRoutes.MQTT>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     MQTTConfigScreen(navController, it)
                 }
 
             ModuleRoute.SERIAL ->
-                addRadioConfigScreenComposable<SettingsRoutes.Serial>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     SerialConfigScreen(navController, it)
                 }
 
             ModuleRoute.EXT_NOTIFICATION ->
-                addRadioConfigScreenComposable<SettingsRoutes.ExtNotification>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     ExternalNotificationConfigScreen(navController, it)
                 }
 
             ModuleRoute.STORE_FORWARD ->
-                addRadioConfigScreenComposable<SettingsRoutes.StoreForward>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     StoreForwardConfigScreen(navController, it)
                 }
 
             ModuleRoute.RANGE_TEST ->
-                addRadioConfigScreenComposable<SettingsRoutes.RangeTest>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     RangeTestConfigScreen(navController, it)
                 }
 
             ModuleRoute.TELEMETRY ->
-                addRadioConfigScreenComposable<SettingsRoutes.Telemetry>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     TelemetryConfigScreen(navController, it)
                 }
 
             ModuleRoute.CANNED_MESSAGE ->
-                addRadioConfigScreenComposable<SettingsRoutes.CannedMessage>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     CannedMessageConfigScreen(navController, it)
                 }
 
             ModuleRoute.AUDIO ->
-                addRadioConfigScreenComposable<SettingsRoutes.Audio>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     AudioConfigScreen(navController, it)
                 }
 
             ModuleRoute.REMOTE_HARDWARE ->
-                addRadioConfigScreenComposable<SettingsRoutes.RemoteHardware>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     RemoteHardwareConfigScreen(navController, it)
                 }
 
             ModuleRoute.NEIGHBOR_INFO ->
-                addRadioConfigScreenComposable<SettingsRoutes.NeighborInfo>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     NeighborInfoConfigScreen(navController, it)
                 }
 
             ModuleRoute.AMBIENT_LIGHTING ->
-                addRadioConfigScreenComposable<SettingsRoutes.AmbientLighting>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     AmbientLightingConfigScreen(navController, it)
                 }
 
             ModuleRoute.DETECTION_SENSOR ->
-                addRadioConfigScreenComposable<SettingsRoutes.DetectionSensor>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     DetectionSensorConfigScreen(navController, it)
                 }
 
             ModuleRoute.PAXCOUNTER ->
-                addRadioConfigScreenComposable<SettingsRoutes.Paxcounter>(navController, entry.name) {
+                addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
                     PaxcounterConfigScreen(navController, it)
                 }
         }
