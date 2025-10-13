@@ -28,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
@@ -45,7 +44,7 @@ import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 
 @Composable
-fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel) {
+fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val loraConfig = state.radioConfig.lora
     val primarySettings = state.channelList.getOrNull(0) ?: return
@@ -56,7 +55,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.lora),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

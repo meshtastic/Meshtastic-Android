@@ -43,7 +43,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.model.util.toByteString
@@ -61,7 +60,7 @@ import java.security.SecureRandom
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SecurityConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val node by viewModel.destNode.collectAsStateWithLifecycle()
     val securityConfig = state.radioConfig.security
@@ -125,7 +124,7 @@ fun SecurityConfigScreen(navController: NavController, viewModel: RadioConfigVie
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
         title = stringResource(id = R.string.security),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

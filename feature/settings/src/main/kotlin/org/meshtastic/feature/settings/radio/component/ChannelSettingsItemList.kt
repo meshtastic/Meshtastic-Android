@@ -60,7 +60,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
@@ -120,7 +119,7 @@ private fun ChannelCard(
 }
 
 @Composable
-fun ChannelConfigScreen(navController: NavController, viewModel: RadioConfigViewModel) {
+fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     if (state.responseState.isWaiting()) {
@@ -129,7 +128,7 @@ fun ChannelConfigScreen(navController: NavController, viewModel: RadioConfigView
 
     ChannelSettingsItemList(
         title = stringResource(id = R.string.channels),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         settingsList = state.channelList,
         loraConfig = state.radioConfig.lora,
         maxChannels = viewModel.maxChannels,

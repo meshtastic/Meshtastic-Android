@@ -184,52 +184,52 @@ private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController
         when (entry) {
             ConfigRoute.USER ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    UserConfigScreen(navController, it)
+                    UserConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.CHANNELS ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    ChannelConfigScreen(navController, it)
+                    ChannelConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.DEVICE ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    DeviceConfigScreen(navController, it)
+                    DeviceConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.POSITION ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    PositionConfigScreen(navController, it)
+                    PositionConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.POWER ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    PowerConfigScreen(navController, it)
+                    PowerConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.NETWORK ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    NetworkConfigScreen(navController, it)
+                    NetworkConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.DISPLAY ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    DisplayConfigScreen(navController, it)
+                    DisplayConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.LORA ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    LoRaConfigScreen(navController, it)
+                    LoRaConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.BLUETOOTH ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    BluetoothConfigScreen(navController, it)
+                    BluetoothConfigScreen(it, onBack = navController::popBackStack)
                 }
 
             ConfigRoute.SECURITY ->
                 addRadioConfigScreenComposable(entry.route::class, navController, entry.name) {
-                    SecurityConfigScreen(navController, it)
+                    SecurityConfigScreen(it, onBack = navController::popBackStack)
                 }
         }
     }

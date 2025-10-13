@@ -48,7 +48,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -92,7 +91,7 @@ private val DeviceConfig.RebroadcastMode.description: Int
         }
 
 @Composable
-fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val deviceConfig = state.radioConfig.device
     val formState = rememberConfigState(initialValue = deviceConfig)
@@ -111,7 +110,7 @@ fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewM
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
         title = stringResource(id = R.string.device),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
