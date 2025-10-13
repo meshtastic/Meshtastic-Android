@@ -30,7 +30,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -45,7 +44,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
 
 @Composable
-fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val detectionSensorConfig = state.moduleConfig.detectionSensor
     val formState = rememberConfigState(initialValue = detectionSensorConfig)
@@ -53,7 +52,7 @@ fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioCo
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.detection_sensor),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

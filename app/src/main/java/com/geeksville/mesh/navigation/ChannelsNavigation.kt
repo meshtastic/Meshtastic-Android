@@ -53,8 +53,8 @@ private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
         composable(configRoute.route::class) { backStackEntry ->
             val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
             when (configRoute) {
-                ConfigRoute.CHANNELS -> ChannelConfigScreen(navController, hiltViewModel(parentEntry))
-                ConfigRoute.LORA -> LoRaConfigScreen(navController, hiltViewModel(parentEntry))
+                ConfigRoute.CHANNELS -> ChannelConfigScreen(hiltViewModel(parentEntry), navController::popBackStack)
+                ConfigRoute.LORA -> LoRaConfigScreen(hiltViewModel(parentEntry), navController::popBackStack)
                 else -> Unit // Should not happen if ConfigRoute enum is exhaustive for this context
             }
         }

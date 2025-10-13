@@ -39,7 +39,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.location.LocationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
@@ -61,7 +60,7 @@ import org.meshtastic.proto.copy
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     var phoneLocation: Location? by remember { mutableStateOf(null) }
@@ -122,7 +121,7 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.position),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

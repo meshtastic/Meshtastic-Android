@@ -29,7 +29,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
@@ -41,7 +40,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 
 @Composable
-fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val userConfig = state.userConfig
     val formState = rememberConfigState(initialValue = userConfig)
@@ -54,7 +53,7 @@ fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.user),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected && validNames,
         responseState = state.responseState,

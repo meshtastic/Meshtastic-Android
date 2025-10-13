@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -38,7 +37,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
 
 @Composable
-fun SerialConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val serialConfig = state.moduleConfig.serial
     val formState = rememberConfigState(initialValue = serialConfig)
@@ -46,7 +45,7 @@ fun SerialConfigScreen(navController: NavController, viewModel: RadioConfigViewM
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.serial),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
