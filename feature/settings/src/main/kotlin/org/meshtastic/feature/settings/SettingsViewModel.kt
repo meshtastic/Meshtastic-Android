@@ -24,14 +24,12 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,6 +45,7 @@ import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.Portnums
@@ -81,16 +80,10 @@ constructor(
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     val isConnected =
-        serviceRepository.connectionState
-            .map { it.isConnected() }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), false)
+        serviceRepository.connectionState.map { it.isConnected() }.stateInWhileSubscribed(initialValue = false)
 
     val localConfig: StateFlow<LocalConfig> =
-        radioConfigRepository.localConfigFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            LocalConfig.getDefaultInstance(),
-        )
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
 
     val meshService: IMeshService?
         get() = serviceRepository.meshService
@@ -105,7 +98,7 @@ constructor(
                     uiPrefs.shouldProvideNodeLocation(myNodeEntity.myNodeNum)
                 }
             }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+            .stateInWhileSubscribed(initialValue = false)
 
     private val _excludedModulesUnlocked = MutableStateFlow(false)
     val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()

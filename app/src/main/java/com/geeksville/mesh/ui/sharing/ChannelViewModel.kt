@@ -23,9 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -33,6 +31,7 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.proto.getChannelList
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ConfigProtos.Config
@@ -55,18 +54,9 @@ constructor(
     val connectionState = serviceRepository.connectionState
 
     val localConfig =
-        radioConfigRepository.localConfigFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            LocalConfig.getDefaultInstance(),
-        )
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
 
-    val channels =
-        radioConfigRepository.channelSetFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            channelSet {},
-        )
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = channelSet {})
 
     // managed mode disables all access to configuration
     val isManaged: Boolean

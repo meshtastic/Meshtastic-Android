@@ -32,13 +32,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -53,6 +51,7 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ConfigProtos
 import timber.log.Timber
 import java.io.File
@@ -97,9 +96,7 @@ constructor(
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()
 
     val customTileProviderConfigs: StateFlow<List<CustomTileProviderConfig>> =
-        customTileProviderRepository
-            .getCustomTileProviders()
-            .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptyList())
+        customTileProviderRepository.getCustomTileProviders().stateInWhileSubscribed(initialValue = emptyList())
 
     private val _selectedCustomTileProviderUrl = MutableStateFlow<String?>(null)
     val selectedCustomTileProviderUrl: StateFlow<String?> = _selectedCustomTileProviderUrl.asStateFlow()
@@ -110,11 +107,7 @@ constructor(
     val displayUnits =
         radioConfigRepository.deviceProfileFlow
             .mapNotNull { it.config.display.units }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC,
-            )
+            .stateInWhileSubscribed(initialValue = ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC)
 
     fun addCustomTileProvider(name: String, urlTemplate: String) {
         viewModelScope.launch {

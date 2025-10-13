@@ -18,20 +18,18 @@
 package com.geeksville.mesh.ui.connections
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import javax.inject.Inject
 
@@ -46,11 +44,7 @@ constructor(
     private val uiPrefs: UiPrefs,
 ) : ViewModel() {
     val localConfig: StateFlow<LocalConfig> =
-        radioConfigRepository.localConfigFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            LocalConfig.getDefaultInstance(),
-        )
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
 
     val connectionState = serviceRepository.connectionState
 

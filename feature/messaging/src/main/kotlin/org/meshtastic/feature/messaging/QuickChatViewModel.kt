@@ -21,21 +21,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import javax.inject.Inject
 
 @HiltViewModel
 class QuickChatViewModel @Inject constructor(private val quickChatActionRepository: QuickChatActionRepository) :
     ViewModel() {
     val quickChatActions
-        get() =
-            quickChatActionRepository
-                .getAllActions()
-                .stateIn(viewModelScope, SharingStarted.Companion.WhileSubscribed(5_000), emptyList())
+        get() = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
     fun updateActionPositions(actions: List<QuickChatAction>) {
         viewModelScope.launch(Dispatchers.IO) {
