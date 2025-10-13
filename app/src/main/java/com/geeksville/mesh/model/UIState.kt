@@ -42,7 +42,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
@@ -58,6 +57,7 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.toSharedContact
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.MeshProtos
@@ -171,10 +171,7 @@ constructor(
         get() = serviceRepository.meshService
 
     val unreadMessageCount =
-        packetRepository
-            .getUnreadCountTotal()
-            .map { it.coerceAtLeast(0) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), 0)
+        packetRepository.getUnreadCountTotal().map { it.coerceAtLeast(0) }.stateInWhileSubscribed(initialValue = 0)
 
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>

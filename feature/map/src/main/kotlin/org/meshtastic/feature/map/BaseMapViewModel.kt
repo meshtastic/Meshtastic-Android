@@ -23,12 +23,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -38,6 +36,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -78,11 +77,7 @@ abstract class BaseMapViewModel(
         nodeRepository
             .getNodes()
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
+            .stateInWhileSubscribed(initialValue = emptyList())
 
     val waypoints: StateFlow<Map<Int, Packet>> =
         packetRepository
@@ -94,7 +89,7 @@ abstract class BaseMapViewModel(
                         it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
                     }
             }
-            .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = emptyMap())
+            .stateInWhileSubscribed(initialValue = emptyMap())
 
     private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites)
 
@@ -119,9 +114,7 @@ abstract class BaseMapViewModel(
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     val isConnected =
-        serviceRepository.connectionState
-            .map { it.isConnected() }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+        serviceRepository.connectionState.map { it.isConnected() }.stateInWhileSubscribed(initialValue = false)
 
     fun toggleOnlyFavorites() {
         val current = showOnlyFavorites.value
@@ -187,9 +180,7 @@ abstract class BaseMapViewModel(
         ) { favoritesOnly, showWaypoints, showPrecisionCircle, lastHeardFilter, lastHeardTrackFilter ->
             MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, lastHeardFilter, lastHeardTrackFilter)
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
+            .stateInWhileSubscribed(
                 initialValue =
                 MapFilterState(
                     showOnlyFavorites.value,

@@ -24,13 +24,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
@@ -39,6 +37,7 @@ import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import timber.log.Timber
 import javax.inject.Inject
@@ -55,19 +54,9 @@ constructor(
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
-    val onlineNodeCount =
-        nodeRepository.onlineNodeCount.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = 0,
-        )
+    val onlineNodeCount = nodeRepository.onlineNodeCount.stateInWhileSubscribed(initialValue = 0)
 
-    val totalNodeCount =
-        nodeRepository.totalNodeCount.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = 0,
-        )
+    val totalNodeCount = nodeRepository.totalNodeCount.stateInWhileSubscribed(initialValue = 0)
 
     val connectionState = serviceRepository.connectionState
 
@@ -103,11 +92,7 @@ constructor(
                 tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
             )
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = NodesUiState(),
-            )
+            .stateInWhileSubscribed(initialValue = NodesUiState())
 
     val nodeList: StateFlow<List<Node>> =
         combine(nodeFilter, nodeSortOption, ::Pair)
@@ -122,20 +107,10 @@ constructor(
                     )
                     .map { list -> list.filter { it.isIgnored == filter.showIgnored } }
             }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
+            .stateInWhileSubscribed(initialValue = emptyList())
 
     val unfilteredNodeList: StateFlow<List<Node>> =
-        nodeRepository
-            .getNodes()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
+        nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
     fun setNodeFilterText(text: String) {
         nodeFilterText.value = text

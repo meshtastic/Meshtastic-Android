@@ -27,16 +27,15 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.PaxcountProtos
@@ -205,10 +204,7 @@ constructor(
 ) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
-        meshLogRepository
-            .getAllLogs()
-            .map(::toUiState)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), persistentListOf())
+        meshLogRepository.getAllLogs().map(::toUiState).stateInWhileSubscribed(initialValue = persistentListOf())
 
     // --- Managers ---
     val searchManager = LogSearchManager()

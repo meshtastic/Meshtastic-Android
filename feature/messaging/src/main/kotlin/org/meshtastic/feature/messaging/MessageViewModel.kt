@@ -23,12 +23,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
@@ -43,6 +41,7 @@ import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.sharedContact
 import timber.log.Timber
@@ -69,40 +68,21 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
-    val nodeList: StateFlow<List<Node>> =
-        nodeRepository
-            .getNodes()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
+    val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    val channels =
-        radioConfigRepository.channelSetFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            channelSet {},
-        )
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(channelSet {})
 
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
-    val quickChatActions =
-        quickChatActionRepository
-            .getAllActions()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val quickChatActions = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
     private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val messagesForContactKey: StateFlow<List<Message>> =
         contactKeyForMessages
             .filterNotNull()
             .flatMapLatest { contactKey -> packetRepository.getMessagesFrom(contactKey, ::getNode) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
+            .stateInWhileSubscribed(initialValue = emptyList())
 
     fun setTitle(title: String) {
         viewModelScope.launch { _title.value = title }

@@ -21,12 +21,11 @@ import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.proto.getChannelList
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ConfigProtos.Config
@@ -44,19 +43,10 @@ constructor(
     private val serviceRepository: ServiceRepository,
 ) : ViewModel() {
 
-    val channels =
-        radioConfigRepository.channelSetFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            channelSet {},
-        )
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = channelSet {})
 
     private val localConfig =
-        radioConfigRepository.localConfigFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            LocalConfig.getDefaultInstance(),
-        )
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
 
     /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {

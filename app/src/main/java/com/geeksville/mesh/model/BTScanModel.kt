@@ -52,6 +52,7 @@ import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -168,33 +169,21 @@ constructor(
     val mockDevice = DeviceListEntry.Mock("Demo Mode")
 
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        bleDevicesFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS), emptyList())
+        bleDevicesFlow.stateInWhileSubscribed(initialValue = emptyList())
 
     /** UI StateFlow for discovered TCP devices. */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        processedDiscoveredTcpDevicesFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-            listOf(),
-        )
+        processedDiscoveredTcpDevicesFlow.stateInWhileSubscribed(initialValue = listOf())
 
     /** UI StateFlow for recently connected TCP devices that are not currently discovered. */
     val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        filteredRecentTcpDevicesFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-            listOf(),
-        )
+        filteredRecentTcpDevicesFlow.stateInWhileSubscribed(initialValue = listOf())
 
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
         combine(usbDevicesFlow, showMockInterface) { usb, showMock ->
             usb + if (showMock) listOf(mockDevice) else emptyList()
         }
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-                if (showMockInterface.value) listOf(mockDevice) else emptyList(),
-            )
+            .stateInWhileSubscribed(initialValue = if (showMockInterface.value) listOf(mockDevice) else emptyList())
 
     init {
         serviceRepository.statusMessage.onEach { errorText.value = it }.launchIn(viewModelScope)
@@ -217,11 +206,7 @@ constructor(
     val selectedNotNullFlow: StateFlow<String> =
         selectedAddressFlow
             .map { it ?: NO_DEVICE_SELECTED }
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-                selectedAddressFlow.value ?: NO_DEVICE_SELECTED,
-            )
+            .stateInWhileSubscribed(initialValue = selectedAddressFlow.value ?: NO_DEVICE_SELECTED)
 
     val scanResult = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
 
@@ -385,4 +370,3 @@ constructor(
 }
 
 const val NO_DEVICE_SELECTED = "n"
-private const val SHARING_STARTED_TIMEOUT_MS = 5000L
