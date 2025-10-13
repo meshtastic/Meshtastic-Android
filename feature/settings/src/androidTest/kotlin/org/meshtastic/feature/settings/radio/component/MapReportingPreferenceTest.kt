@@ -61,7 +61,6 @@ class MapReportingPreferenceTest {
                 publishIntervalSecs = positionReportingInterval,
                 onPublishIntervalSecsChanged = positionReportingIntervalChanged,
                 enabled = true,
-                focusManager = LocalFocusManager.current,
             )
         }
     }
