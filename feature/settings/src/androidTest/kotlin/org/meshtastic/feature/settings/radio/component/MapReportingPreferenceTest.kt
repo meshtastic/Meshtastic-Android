@@ -18,7 +18,6 @@
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
