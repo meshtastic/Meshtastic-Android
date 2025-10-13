@@ -33,7 +33,6 @@
     <ID>MagicNumber:EditChannelDialog.kt$16</ID>
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
-    <ID>ModifierMissing:ChannelSettingsItemList.kt$ChannelSelection</ID>
     <ID>ModifierMissing:CleanNodeDatabaseScreen.kt$CleanNodeDatabaseScreen</ID>
     <ID>ModifierMissing:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ModifierMissing:NetworkConfigItemList.kt$NetworkConfigScreen</ID>
@@ -48,7 +47,6 @@
     <ID>MultipleEmitters:RadioConfig.kt$RadioConfigItemList</ID>
     <ID>NestedBlockDepth:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>ParameterNaming:ChannelSettingsItemList.kt$onPositiveClicked</ID>
-    <ID>ParameterNaming:ChannelSettingsItemList.kt$onSelected</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onCheckedChanged</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onDaysChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onMapReportingEnabledChanged</ID>

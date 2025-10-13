@@ -93,7 +93,6 @@ import com.geeksville.mesh.navigation.mapGraph
 import com.geeksville.mesh.navigation.nodesGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.ConnectionsNavIcon
 import com.geeksville.mesh.ui.metrics.annotateTraceroute
@@ -118,6 +117,7 @@ import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen

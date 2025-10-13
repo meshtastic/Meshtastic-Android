@@ -38,6 +38,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -85,6 +86,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -750,6 +752,7 @@ private fun MessageInput(
         shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
         isError = isOverLimit,
         placeholder = { Text(stringResource(R.string.type_a_message)) },
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         supportingText = {
             if (isEnabled) { // Only show supporting text if input is enabled
                 Text(

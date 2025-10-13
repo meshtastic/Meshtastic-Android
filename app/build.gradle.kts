@@ -226,7 +226,6 @@ dependencies {
     implementation(libs.coil.svg)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.zxing.android.embedded) { isTransitive = false }
-    implementation(libs.zxing.core)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.eclipse.paho.client.mqttv3)
@@ -243,11 +242,9 @@ dependencies {
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
 
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.hilt.android.testing)
 
-    testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.junit)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
