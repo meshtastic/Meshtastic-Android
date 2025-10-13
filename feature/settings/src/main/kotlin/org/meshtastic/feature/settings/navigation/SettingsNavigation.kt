@@ -17,38 +17,10 @@
 
 package org.meshtastic.feature.settings.navigation
 
-import androidx.annotation.StringRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Forward
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.CellTower
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.DataUsage
-import androidx.compose.material.icons.filled.DisplaySettings
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.PermScanWifi
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Power
-import androidx.compose.material.icons.filled.Router
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Sensors
-import androidx.compose.material.icons.filled.SettingsRemote
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Usb
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -86,8 +58,6 @@ import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.MeshProtos.DeviceMetadata
 import kotlin.reflect.KClass
 
 fun getNavRouteFrom(routeName: String): Route? =
@@ -133,9 +103,6 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
         }
     }
 }
-
-fun NavDestination.isConfigRoute(): Boolean =
-    ConfigRoute.entries.any { hasRoute(it.route::class) } || ModuleRoute.entries.any { hasRoute(it.route::class) }
 
 /**
  * Helper to define a composable route for a radio configuration screen within the radio config graph.
@@ -238,172 +205,6 @@ private fun NavGraphBuilder.moduleRoutesScreens(navController: NavHostController
                 ModuleRoute.DETECTION_SENSOR -> DetectionSensorConfigScreen(it, onBack = navController::popBackStack)
 
                 ModuleRoute.PAXCOUNTER -> PaxcounterConfigScreen(it, onBack = navController::popBackStack)
-            }
-        }
-    }
-}
-
-@Suppress("MagicNumber")
-enum class ConfigRoute(@StringRes val title: Int, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    USER(R.string.user, SettingsRoutes.User, Icons.Default.Person, 0),
-    CHANNELS(R.string.channels, SettingsRoutes.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
-    DEVICE(
-        R.string.device,
-        SettingsRoutes.Device,
-        Icons.Default.Router,
-        AdminProtos.AdminMessage.ConfigType.DEVICE_CONFIG_VALUE,
-    ),
-    POSITION(
-        R.string.position,
-        SettingsRoutes.Position,
-        Icons.Default.LocationOn,
-        AdminProtos.AdminMessage.ConfigType.POSITION_CONFIG_VALUE,
-    ),
-    POWER(
-        R.string.power,
-        SettingsRoutes.Power,
-        Icons.Default.Power,
-        AdminProtos.AdminMessage.ConfigType.POWER_CONFIG_VALUE,
-    ),
-    NETWORK(
-        R.string.network,
-        SettingsRoutes.Network,
-        Icons.Default.Wifi,
-        AdminProtos.AdminMessage.ConfigType.NETWORK_CONFIG_VALUE,
-    ),
-    DISPLAY(
-        R.string.display,
-        SettingsRoutes.Display,
-        Icons.Default.DisplaySettings,
-        AdminProtos.AdminMessage.ConfigType.DISPLAY_CONFIG_VALUE,
-    ),
-    LORA(
-        R.string.lora,
-        SettingsRoutes.LoRa,
-        Icons.Default.CellTower,
-        AdminProtos.AdminMessage.ConfigType.LORA_CONFIG_VALUE,
-    ),
-    BLUETOOTH(
-        R.string.bluetooth,
-        SettingsRoutes.Bluetooth,
-        Icons.Default.Bluetooth,
-        AdminProtos.AdminMessage.ConfigType.BLUETOOTH_CONFIG_VALUE,
-    ),
-    SECURITY(
-        R.string.security,
-        SettingsRoutes.Security,
-        Icons.Default.Security,
-        AdminProtos.AdminMessage.ConfigType.SECURITY_CONFIG_VALUE,
-    ),
-    ;
-
-    companion object {
-        private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
-            when {
-                metadata == null -> true // Include all routes if metadata is null
-                it == BLUETOOTH -> metadata.hasBluetooth
-                it == NETWORK -> metadata.hasWifi || metadata.hasEthernet
-                else -> true // Include all other routes by default
-            }
-        }
-
-        val radioConfigRoutes = listOf(LORA, CHANNELS, SECURITY)
-
-        fun deviceConfigRoutes(metadata: DeviceMetadata?): List<ConfigRoute> =
-            filterExcludedFrom(metadata) - radioConfigRoutes
-    }
-}
-
-@Suppress("MagicNumber")
-enum class ModuleRoute(@StringRes val title: Int, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    MQTT(
-        R.string.mqtt,
-        SettingsRoutes.MQTT,
-        Icons.Default.Cloud,
-        AdminProtos.AdminMessage.ModuleConfigType.MQTT_CONFIG_VALUE,
-    ),
-    SERIAL(
-        R.string.serial,
-        SettingsRoutes.Serial,
-        Icons.Default.Usb,
-        AdminProtos.AdminMessage.ModuleConfigType.SERIAL_CONFIG_VALUE,
-    ),
-    EXT_NOTIFICATION(
-        R.string.external_notification,
-        SettingsRoutes.ExtNotification,
-        Icons.Default.Notifications,
-        AdminProtos.AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG_VALUE,
-    ),
-    STORE_FORWARD(
-        R.string.store_forward,
-        SettingsRoutes.StoreForward,
-        Icons.AutoMirrored.Default.Forward,
-        AdminProtos.AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG_VALUE,
-    ),
-    RANGE_TEST(
-        R.string.range_test,
-        SettingsRoutes.RangeTest,
-        Icons.Default.Speed,
-        AdminProtos.AdminMessage.ModuleConfigType.RANGETEST_CONFIG_VALUE,
-    ),
-    TELEMETRY(
-        R.string.telemetry,
-        SettingsRoutes.Telemetry,
-        Icons.Default.DataUsage,
-        AdminProtos.AdminMessage.ModuleConfigType.TELEMETRY_CONFIG_VALUE,
-    ),
-    CANNED_MESSAGE(
-        R.string.canned_message,
-        SettingsRoutes.CannedMessage,
-        Icons.AutoMirrored.Default.Message,
-        AdminProtos.AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG_VALUE,
-    ),
-    AUDIO(
-        R.string.audio,
-        SettingsRoutes.Audio,
-        Icons.AutoMirrored.Default.VolumeUp,
-        AdminProtos.AdminMessage.ModuleConfigType.AUDIO_CONFIG_VALUE,
-    ),
-    REMOTE_HARDWARE(
-        R.string.remote_hardware,
-        SettingsRoutes.RemoteHardware,
-        Icons.Default.SettingsRemote,
-        AdminProtos.AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG_VALUE,
-    ),
-    NEIGHBOR_INFO(
-        R.string.neighbor_info,
-        SettingsRoutes.NeighborInfo,
-        Icons.Default.People,
-        AdminProtos.AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG_VALUE,
-    ),
-    AMBIENT_LIGHTING(
-        R.string.ambient_lighting,
-        SettingsRoutes.AmbientLighting,
-        Icons.Default.LightMode,
-        AdminProtos.AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG_VALUE,
-    ),
-    DETECTION_SENSOR(
-        R.string.detection_sensor,
-        SettingsRoutes.DetectionSensor,
-        Icons.Default.Sensors,
-        AdminProtos.AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG_VALUE,
-    ),
-    PAXCOUNTER(
-        R.string.paxcounter,
-        SettingsRoutes.Paxcounter,
-        Icons.Default.PermScanWifi,
-        AdminProtos.AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG_VALUE,
-    ),
-    ;
-
-    val bitfield: Int
-        get() = 1 shl ordinal
-
-    companion object {
-        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
-            when (metadata) {
-                null -> true // Include all routes if metadata is null
-                else -> metadata.excludedModules and it.bitfield == 0
             }
         }
     }
