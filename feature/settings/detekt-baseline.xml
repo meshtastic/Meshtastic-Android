@@ -12,6 +12,7 @@
     <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
+    <ID>CyclomaticComplexMethod:SettingsNavigation.kt$@Suppress("LongMethod") fun NavGraphBuilder.settingsGraph(navController: NavHostController)</ID>
     <ID>LambdaParameterEventTrailing:NodeActionButton.kt$onClick</ID>
     <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
