@@ -34,7 +34,7 @@ import kotlin.time.Duration.Companion.seconds
  *   sharing coroutine.
  */
 context(viewModel: ViewModel)
-fun <T> Flow<T>.stateInWhileSubscribed(initialValue: T, stopTimeout: Duration = 5.seconds): StateFlow<T> = this.stateIn(
+fun <T> Flow<T>.stateInWhileSubscribed(initialValue: T, stopTimeout: Duration = 5.seconds): StateFlow<T> = stateIn(
     scope = viewModel.viewModelScope,
     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = stopTimeout.inWholeMilliseconds),
     initialValue = initialValue,
