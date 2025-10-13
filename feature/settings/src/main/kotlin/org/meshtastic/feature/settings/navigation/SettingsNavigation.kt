@@ -124,7 +124,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
         ModuleRoute.entries.forEach { entry ->
             composable(entry.route::class) { backStackEntry ->
                 val parentEntry =
-                    remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
+                    remember(backStackEntry) { navController.getBackStackEntry<SettingsRoutes.SettingsGraph>() }
                 val viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry)
 
                 when (entry) {
