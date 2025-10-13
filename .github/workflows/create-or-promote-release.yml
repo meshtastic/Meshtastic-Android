@@ -26,6 +26,7 @@ permissions:
   pull-requests: read
   id-token: write
   attestations: write
+  workflows: write
 
 jobs:
   determine-tags:
