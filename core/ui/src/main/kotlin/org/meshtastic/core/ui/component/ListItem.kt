@@ -73,7 +73,7 @@ fun ListItem(
         trailingContent = trailingIcon.icon(trailingIconTint),
         onClick = onClick,
         onLongClick =
-        if (supportingText != null && copyable) {
+        if (!supportingText.isNullOrBlank() && copyable) {
             {
                 coroutineScope.launch {
                     clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", supportingText)))
