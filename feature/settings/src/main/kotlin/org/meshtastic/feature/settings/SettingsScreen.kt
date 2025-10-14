@@ -53,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -230,6 +231,7 @@ fun SettingsScreen(
             )
 
             val context = LocalContext.current
+            val resources = LocalResources.current
 
             TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
                 if (state.analyticsAvailable) {
@@ -255,7 +257,7 @@ fun SettingsScreen(
                             } else {
                                 Toast.makeText(
                                     context,
-                                    context.getString(R.string.location_disabled),
+                                    resources.getString(R.string.location_disabled),
                                     Toast.LENGTH_LONG,
                                 )
                                     .show()
@@ -391,6 +393,7 @@ private fun AppVersionButton(
     onUnlockExcludedModules: () -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     var clickCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(clickCount) {
@@ -411,13 +414,14 @@ private fun AppVersionButton(
         when {
             clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
                 clickCount = 0
-                Toast.makeText(context, context.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, resources.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG)
+                    .show()
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
                 onUnlockExcludedModules()
-                Toast.makeText(context, context.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, resources.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -443,13 +447,13 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
 
 @Composable
 private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    val context = LocalContext.current
+    val resources = LocalResources.current
     val themeMap = remember {
         mapOf(
-            context.getString(R.string.dynamic) to MODE_DYNAMIC,
-            context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-            context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-            context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            resources.getString(R.string.dynamic) to MODE_DYNAMIC,
+            resources.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            resources.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            resources.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
         )
             .mapValues { (_, value) -> { onClickTheme(value) } }
     }
