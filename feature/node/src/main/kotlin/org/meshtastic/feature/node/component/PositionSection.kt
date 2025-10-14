@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
@@ -60,7 +60,7 @@ fun PositionSection(
 
         // Distance (if available)
         if (distance != null && distance.isNotEmpty()) {
-            SettingsItem(
+            ListItem(
                 text = stringResource(R.string.node_sort_distance),
                 leadingIcon = Icons.Default.SocialDistance,
                 supportingText = distance,
@@ -69,7 +69,7 @@ fun PositionSection(
         }
 
         // Exchange position action
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.exchange_position),
             leadingIcon = Icons.Default.LocationOn,
             trailingIcon = null,
@@ -78,14 +78,14 @@ fun PositionSection(
 
         // Node Map log
         if (availableLogs.contains(LogsType.NODE_MAP)) {
-            SettingsItem(text = stringResource(LogsType.NODE_MAP.titleRes), leadingIcon = LogsType.NODE_MAP.icon) {
+            ListItem(text = stringResource(LogsType.NODE_MAP.titleRes), leadingIcon = LogsType.NODE_MAP.icon) {
                 onAction(NodeDetailAction.Navigate(LogsType.NODE_MAP.route))
             }
         }
 
         // Positions Log
         if (availableLogs.contains(LogsType.POSITIONS)) {
-            SettingsItem(text = stringResource(LogsType.POSITIONS.titleRes), leadingIcon = LogsType.POSITIONS.icon) {
+            ListItem(text = stringResource(LogsType.POSITIONS.titleRes), leadingIcon = LogsType.POSITIONS.icon) {
                 onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.route))
             }
         }

@@ -35,7 +35,7 @@ import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
@@ -55,13 +55,13 @@ fun AdministrationSection(
     modifier: Modifier = Modifier,
 ) {
     TitledCard(stringResource(id = R.string.administration), modifier = modifier) {
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.remote_admin),
             leadingIcon = Icons.Default.Settings,
             enabled = metricsState.isLocal || node.metadata != null,
@@ -80,7 +80,7 @@ fun AdministrationSection(
                         else -> Icons.Default.ForkLeft
                     }
 
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.firmware_edition),
                     leadingIcon = icon,
                     supportingText = it.name,
@@ -94,7 +94,7 @@ fun AdministrationSection(
                 val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
                 val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.installed_firmware_version),
                     leadingIcon = Icons.Default.Memory,
                     supportingText = firmwareVersion.substringBeforeLast("."),
@@ -102,7 +102,7 @@ fun AdministrationSection(
                     trailingIcon = null,
                 )
                 HorizontalDivider()
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.latest_stable_firmware),
                     leadingIcon = Icons.Default.Memory,
                     supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
@@ -110,7 +110,7 @@ fun AdministrationSection(
                     trailingIcon = null,
                     onClick = { onFirmwareSelect(latestStable) },
                 )
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.latest_alpha_firmware),
                     leadingIcon = Icons.Default.Memory,
                     supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),

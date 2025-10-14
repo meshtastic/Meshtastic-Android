@@ -45,7 +45,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
@@ -80,52 +80,52 @@ fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
 
 @Composable
 private fun MainNodeDetails(node: Node) {
-    SettingsItem(
+    ListItem(
         text = stringResource(R.string.long_name),
         leadingIcon = Icons.TwoTone.Person,
         supportingText = node.user.longName.ifEmpty { "???" },
         trailingIcon = null,
     )
-    SettingsItem(
+    ListItem(
         text = stringResource(R.string.short_name),
         leadingIcon = Icons.Outlined.Person,
         supportingText = node.user.shortName.ifEmpty { "???" },
         trailingIcon = null,
     )
-    SettingsItem(
+    ListItem(
         text = stringResource(R.string.node_number),
         leadingIcon = Icons.Default.Numbers,
         supportingText = node.num.toUInt().toString(),
         trailingIcon = null,
     )
-    SettingsItem(
+    ListItem(
         text = stringResource(R.string.user_id),
         leadingIcon = Icons.Default.Person,
         supportingText = node.user.id,
         trailingIcon = null,
     )
-    SettingsItem(
+    ListItem(
         text = stringResource(R.string.role),
         leadingIcon = Icons.Default.Work,
         supportingText = node.user.role.name,
         trailingIcon = null,
     )
     if (node.isEffectivelyUnmessageable) {
-        SettingsItem(
+        ListItem(
             text = stringResource(R.string.unmonitored_or_infrastructure),
             leadingIcon = Icons.Outlined.NoCell,
             trailingIcon = null,
         )
     }
     if (node.deviceMetrics.uptimeSeconds > 0) {
-        SettingsItem(
+        ListItem(
             text = stringResource(R.string.uptime),
             leadingIcon = Icons.Default.CheckCircle,
             supportingText = formatUptime(node.deviceMetrics.uptimeSeconds),
             trailingIcon = null,
         )
     }
-    SettingsItem(
+    ListItem(
         text = stringResource(R.string.node_sort_last_heard),
         leadingIcon = Icons.Default.History,
         supportingText = formatAgo(node.lastHeard),

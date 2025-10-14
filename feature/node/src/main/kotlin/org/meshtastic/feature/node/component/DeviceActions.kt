@@ -35,8 +35,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
-import org.meshtastic.core.ui.component.SettingsItemSwitch
+import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.NodeDetailAction
 
@@ -67,7 +67,7 @@ fun DeviceActions(
         onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
     )
     TitledCard(title = stringResource(R.string.actions), modifier = modifier) {
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.share_contact),
             leadingIcon = Icons.Rounded.QrCode2,
             trailingIcon = null,
@@ -76,21 +76,21 @@ fun DeviceActions(
         if (!isLocal) {
             RemoteDeviceActions(node = node, lastTracerouteTime = lastTracerouteTime, onAction = onAction)
         }
-        SettingsItemSwitch(
+        SwitchListItem(
             text = stringResource(R.string.favorite),
             leadingIcon = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
             leadingIconTint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
             checked = node.isFavorite,
             onClick = { displayFavoriteDialog = true },
         )
-        SettingsItemSwitch(
+        SwitchListItem(
             text = stringResource(R.string.ignore),
             leadingIcon =
             if (node.isIgnored) Icons.AutoMirrored.Outlined.VolumeMute else Icons.AutoMirrored.Default.VolumeUp,
             checked = node.isIgnored,
             onClick = { displayIgnoreDialog = true },
         )
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.remove),
             leadingIcon = Icons.Rounded.Delete,
             trailingIcon = null,

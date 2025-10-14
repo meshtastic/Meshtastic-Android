@@ -38,7 +38,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.BasicSettingsItem
+import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.theme.AppTheme
 import timber.log.Timber
 import java.net.URLEncoder
@@ -53,7 +53,7 @@ fun LinkedCoordinatesItem(node: Node) {
     val ago = formatAgo(node.position.time)
     val coordinates = GPSFormat.toDec(node.latitude, node.longitude)
 
-    BasicSettingsItem(
+    BasicListItem(
         text = stringResource(R.string.last_position_update),
         leadingIcon = Icons.Default.LocationOn,
         supportingText = "$ago • $coordinates",

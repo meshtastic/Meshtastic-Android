@@ -43,11 +43,10 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.ui.theme.AppTheme
 
 /**
- * A settings item with an optional [leadingIcon], headline [text], optional [supportingText], and optional
- * [trailingIcon].
+ * A list item with an optional [leadingIcon], headline [text], optional [supportingText], and optional [trailingIcon].
  */
 @Composable
-fun SettingsItem(
+fun ListItem(
     text: String,
     supportingText: String? = null,
     textColor: Color = LocalContentColor.current,
@@ -63,7 +62,7 @@ fun SettingsItem(
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
 
-    BasicSettingsItem(
+    BasicListItem(
         text = text,
         textColor = textColor,
         supportingText = supportingText,
@@ -87,11 +86,11 @@ fun SettingsItem(
 }
 
 /**
- * The foundational settings item. It supports a [leadingIcon] (optional), headline [text] and [supportingText]
- * (optional), and a [trailingContent] composable (optional).
+ * The foundational list item. It supports a [leadingIcon] (optional), headline [text] and [supportingText] (optional),
+ * and a [trailingContent] composable (optional).
  */
 @Composable
-fun BasicSettingsItem(
+fun BasicListItem(
     text: String,
     textColor: Color = LocalContentColor.current,
     supportingText: String? = null,
@@ -120,9 +119,9 @@ fun BasicSettingsItem(
     )
 }
 
-/** A toggleable settings switch item. */
+/** A toggleable switch list item. */
 @Composable
-fun SettingsItemSwitch(
+fun SwitchListItem(
     checked: Boolean,
     text: String,
     textColor: Color = LocalContentColor.current,
@@ -131,7 +130,7 @@ fun SettingsItemSwitch(
     leadingIconTint: Color = LocalContentColor.current,
     onClick: () -> Unit,
 ) {
-    BasicSettingsItem(
+    BasicListItem(
         text = text,
         textColor = textColor,
         enabled = enabled,
@@ -148,31 +147,26 @@ private fun ImageVector?.icon(tint: Color = LocalContentColor.current): @Composa
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsItemPreview() {
-    AppTheme { SettingsItem(text = "Text", leadingIcon = Icons.Rounded.Android, enabled = true) {} }
+private fun ListItemPreview() {
+    AppTheme { ListItem(text = "Text", leadingIcon = Icons.Rounded.Android, enabled = true) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsItemDisabledPreview() {
-    AppTheme { SettingsItem(text = "Text", leadingIcon = Icons.Rounded.Android, enabled = false) {} }
+private fun ListItemDisabledPreview() {
+    AppTheme { ListItem(text = "Text", leadingIcon = Icons.Rounded.Android, enabled = false) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsItemSwitchPreview() {
-    AppTheme { SettingsItemSwitch(text = "Text", leadingIcon = Icons.Rounded.Android, checked = true) {} }
+private fun SwitchListItemPreview() {
+    AppTheme { SwitchListItem(text = "Text", leadingIcon = Icons.Rounded.Android, checked = true) {} }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun SettingsItemDetailPreview() {
+private fun ListItemPreview_SupportingText() {
     AppTheme {
-        SettingsItem(
-            text = "Text 1",
-            leadingIcon = Icons.Rounded.Android,
-            supportingText = "Text2",
-            trailingIcon = null,
-        )
+        ListItem(text = "Text 1", leadingIcon = Icons.Rounded.Android, supportingText = "Text2", trailingIcon = null)
     }
 }

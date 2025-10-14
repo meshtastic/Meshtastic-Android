@@ -64,10 +64,10 @@ import kotlinx.coroutines.delay
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
-import org.meshtastic.core.ui.component.SettingsItem
-import org.meshtastic.core.ui.component.SettingsItemSwitch
+import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
@@ -234,7 +234,7 @@ fun SettingsScreen(
             TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
                 if (state.analyticsAvailable) {
                     val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
-                    SettingsItemSwitch(
+                    SwitchListItem(
                         text = stringResource(R.string.analytics_okay),
                         checked = allowed,
                         leadingIcon = Icons.Default.BugReport,
@@ -269,7 +269,7 @@ fun SettingsScreen(
                     }
                 }
 
-                SettingsItemSwitch(
+                SwitchListItem(
                     text = stringResource(R.string.provide_location_to_mesh),
                     leadingIcon = Icons.Rounded.LocationOn,
                     enabled = !isGpsDisabled,
@@ -284,7 +284,7 @@ fun SettingsScreen(
                 // On Android 12 and below, system app settings for language are not available. Use the in-app language
                 // picker for these devices.
                 val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
                     trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
@@ -302,7 +302,7 @@ fun SettingsScreen(
                     }
                 }
 
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.theme),
                     leadingIcon = Icons.Rounded.FormatPaint,
                     trailingIcon = null,
@@ -317,7 +317,7 @@ fun SettingsScreen(
                             it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.save_rangetest),
                     leadingIcon = Icons.Rounded.Output,
                     trailingIcon = null,
@@ -337,7 +337,7 @@ fun SettingsScreen(
                             it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.export_data_csv),
                     leadingIcon = Icons.Rounded.Output,
                     trailingIcon = null,
@@ -351,7 +351,7 @@ fun SettingsScreen(
                     exportDataLauncher.launch(intent)
                 }
 
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.intro_show),
                     leadingIcon = Icons.Rounded.WavingHand,
                     trailingIcon = null,
@@ -359,7 +359,7 @@ fun SettingsScreen(
                     settingsViewModel.showAppIntro()
                 }
 
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.system_settings),
                     leadingIcon = Icons.Rounded.AppSettingsAlt,
                     trailingIcon = null,
@@ -401,7 +401,7 @@ private fun AppVersionButton(
         }
     }
 
-    SettingsItem(
+    ListItem(
         text = stringResource(R.string.app_version),
         leadingIcon = Icons.Rounded.Memory,
         supportingText = appVersionName,
