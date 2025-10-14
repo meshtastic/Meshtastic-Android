@@ -159,7 +159,7 @@
     <string name="analytics_okay">Разрешить аналитику и отчеты о сбоях.</string>
     <string name="accept">Принять</string>
     <string name="cancel">Отмена</string>
-    <string name="discard_changes">Отменить изменения</string>
+    <string name="discard_changes">Discard</string>
     <string name="save_changes">Сохранить</string>
     <string name="new_channel_rcvd">URL нового канала получен</string>
     <string name="permission_missing">Meshtastic требуется разрешение, чтобы найти новые устройства через Bluetooth. Вы можете отключить если они не используются.</string>

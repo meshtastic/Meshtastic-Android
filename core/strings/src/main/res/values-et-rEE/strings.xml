@@ -159,7 +159,7 @@
     <string name="analytics_okay">Luba analüüsi ja krahhi aruandlus.</string>
     <string name="accept">Nõustu</string>
     <string name="cancel">Tühista</string>
-    <string name="discard_changes">Tühista muudatused</string>
+    <string name="discard_changes">Discard</string>
     <string name="save_changes">Salvesta</string>
     <string name="new_channel_rcvd">Uued kanalid vastu võetud</string>
     <string name="permission_missing">Meshtastic vajab sinihambaga kaudu seadmete leidmiseks asukohalubasid. Saate need keelata, kui neid ei kasutata.</string>

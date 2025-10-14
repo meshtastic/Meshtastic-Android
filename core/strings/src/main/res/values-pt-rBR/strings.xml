@@ -159,7 +159,7 @@
     <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="accept">Aceitar</string>
     <string name="cancel">Cancelar</string>
-    <string name="discard_changes">Discard changes</string>
+    <string name="discard_changes">Discard</string>
     <string name="save_changes">Salvar</string>
     <string name="new_channel_rcvd">Novo link de canal recebido</string>
     <string name="permission_missing">Meshtastic precisa de permissões de localização ativadas para encontrar novos dispositivos via Bluetooth. Você pode desativar quando não estiver usando.</string>

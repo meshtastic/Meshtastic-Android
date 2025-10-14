@@ -159,7 +159,7 @@
     <string name="analytics_okay">Autoriser les statistiques et les rapports de plantage.</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
-    <string name="discard_changes">Ignorer les modifications</string>
+    <string name="discard_changes">Discard</string>
     <string name="save_changes">Sauvegarder</string>
     <string name="new_channel_rcvd">Réception de l\'URL d\'un nouveau cana</string>
     <string name="permission_missing">Meshtastic a besoin d\'autorisations de localisation activées pour trouver de nouveaux appareils via Bluetooth. Vous pouvez désactiver lorsque la localisation n\'est pas utilisée.</string>
