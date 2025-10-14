@@ -114,6 +114,11 @@ fun SwitchListItem(
 /**
  * The foundational list item. It supports a [leadingIcon] (optional), headline [text] and [supportingText] (optional),
  * and a [trailingContent] composable (optional).
+ *
+ * This is a core component that should facilitate most list item use cases. Please carefully consider if modifying this
+ * is really necessary before doing so.
+ *
+ * @see [LinkedCoordinatesItem] for example usage
  */
 @Suppress("UnusedParameter")
 @Composable
@@ -146,7 +151,7 @@ fun BasicListItem(
 }
 
 @Composable
-private fun ImageVector?.icon(tint: Color = LocalContentColor.current): @Composable (() -> Unit)? =
+fun ImageVector?.icon(tint: Color = LocalContentColor.current): @Composable (() -> Unit)? =
     this?.let { { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint) } }
 
 @Preview(showBackground = true)

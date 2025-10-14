@@ -23,6 +23,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,6 +40,7 @@ import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.BasicListItem
+import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
 import timber.log.Timber
 import java.net.URLEncoder
@@ -57,6 +59,7 @@ fun LinkedCoordinatesItem(node: Node) {
         text = stringResource(R.string.last_position_update),
         leadingIcon = Icons.Default.LocationOn,
         supportingText = "$ago • $coordinates",
+        trailingContent = Icons.AutoMirrored.Rounded.KeyboardArrowRight.icon(),
         onClick = {
             val label = URLEncoder.encode(node.user.longName, "utf-8")
             val uri = "geo:0,0?q=${node.latitude},${node.longitude}&z=17&label=$label".toUri()
