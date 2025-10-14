@@ -84,6 +84,5 @@ fun LinkedCoordinatesItem(node: Node) {
 @PreviewLightDark
 @Composable
 private fun LinkedCoordinatesPreview() {
-    Node(0)
     AppTheme { LinkedCoordinatesItem(Node(0)) }
 }
