@@ -48,6 +48,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 @Composable
 fun ListItem(
     text: String,
+    modifier: Modifier = Modifier,
     supportingText: String? = null,
     textColor: Color = LocalContentColor.current,
     supportingTextColor: Color = LocalContentColor.current,
@@ -64,6 +65,7 @@ fun ListItem(
 
     BasicListItem(
         text = text,
+        modifier = modifier,
         textColor = textColor,
         supportingText = supportingText,
         supportingTextColor = supportingTextColor,
@@ -90,14 +92,16 @@ fun ListItem(
 fun SwitchListItem(
     checked: Boolean,
     text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     textColor: Color = LocalContentColor.current,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
     leadingIconTint: Color = LocalContentColor.current,
-    onClick: () -> Unit,
 ) {
     BasicListItem(
         text = text,
+        modifier = modifier,
         textColor = textColor,
         enabled = enabled,
         leadingIcon = leadingIcon,
@@ -111,9 +115,11 @@ fun SwitchListItem(
  * The foundational list item. It supports a [leadingIcon] (optional), headline [text] and [supportingText] (optional),
  * and a [trailingContent] composable (optional).
  */
+@Suppress("UnusedParameter")
 @Composable
 fun BasicListItem(
     text: String,
+    modifier: Modifier = Modifier,
     textColor: Color = LocalContentColor.current,
     supportingText: String? = null,
     supportingTextColor: Color = LocalContentColor.current,
@@ -124,15 +130,13 @@ fun BasicListItem(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
-    val modifier =
-        if (onLongClick != null || onClick != null) {
-            Modifier.combinedClickable(onLongClick = onLongClick, onClick = onClick ?: {})
-        } else {
-            Modifier
-        }
-
     ListItem(
-        modifier = modifier,
+        modifier =
+        if (onLongClick != null || onClick != null) {
+            modifier.combinedClickable(onLongClick = onLongClick, onClick = onClick ?: {})
+        } else {
+            modifier
+        },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         headlineContent = { Text(text = text, color = textColor) },
         supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
@@ -160,12 +164,12 @@ private fun ListItemDisabledPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SwitchListItemPreview() {
-    AppTheme { SwitchListItem(text = "Text", leadingIcon = Icons.Rounded.Android, checked = true) {} }
+    AppTheme { SwitchListItem(text = "Text", leadingIcon = Icons.Rounded.Android, checked = true, onClick = {}) }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ListItemPreview_SupportingText() {
+private fun ListItemPreviewSupportingText() {
     AppTheme {
         ListItem(text = "Text 1", leadingIcon = Icons.Rounded.Android, supportingText = "Text2", trailingIcon = null)
     }

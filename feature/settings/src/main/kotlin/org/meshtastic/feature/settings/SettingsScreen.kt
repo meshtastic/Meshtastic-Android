@@ -274,9 +274,8 @@ fun SettingsScreen(
                     leadingIcon = Icons.Rounded.LocationOn,
                     enabled = !isGpsDisabled,
                     checked = provideLocation,
-                ) {
-                    settingsViewModel.setProvideLocation(!provideLocation)
-                }
+                    onClick = { settingsViewModel.setProvideLocation(!provideLocation) },
+                )
 
                 val settingsLauncher =
                     rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
