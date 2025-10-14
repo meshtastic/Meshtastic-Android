@@ -1,0 +1,89 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package org.meshtastic.feature.node.component
+
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.Intent
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.core.net.toUri
+import kotlinx.coroutines.launch
+import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.util.GPSFormat
+import org.meshtastic.core.model.util.formatAgo
+import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.BasicSettingsItem
+import org.meshtastic.core.ui.theme.AppTheme
+import timber.log.Timber
+import java.net.URLEncoder
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun LinkedCoordinatesItem(node: Node) {
+    val context = LocalContext.current
+    val clipboard: Clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val ago = formatAgo(node.position.time)
+    val coordinates = GPSFormat.toDec(node.latitude, node.longitude)
+
+    BasicSettingsItem(
+        text = stringResource(R.string.last_position_update),
+        leadingIcon = Icons.Default.LocationOn,
+        supportingText = "$ago • $coordinates",
+        onClick = {
+            val label = URLEncoder.encode(node.user.longName, "utf-8")
+            val uri = "geo:0,0?q=${node.latitude},${node.longitude}&z=17&label=$label".toUri()
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+
+            try {
+                if (intent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(intent)
+                } else {
+                    Toast.makeText(context, "No application available to open this location!", Toast.LENGTH_LONG).show()
+                }
+            } catch (ex: ActivityNotFoundException) {
+                Timber.d("Failed to open geo intent: $ex")
+            }
+        },
+        onLongClick = {
+            coroutineScope.launch {
+                clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", coordinates)))
+                Timber.d("Copied to clipboard")
+            }
+        },
+    )
+}
+
+@PreviewLightDark
+@Composable
+private fun LinkedCoordinatesPreview() {
+    Node(0)
+    AppTheme { LinkedCoordinatesItem(Node(0)) }
+}

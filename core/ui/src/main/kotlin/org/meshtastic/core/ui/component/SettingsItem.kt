@@ -17,14 +17,12 @@
 
 package org.meshtastic.core.ui.component
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import android.content.ClipData
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Android
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -32,12 +30,18 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.meshtastic.core.ui.theme.AppTheme
+import timber.log.Timber
 
 /**
  * A settings item with an optional [leadingIcon], headline [text], optional [supportingText], and optional
@@ -49,6 +53,7 @@ fun SettingsItem(
     supportingText: String? = null,
     textColor: Color = LocalContentColor.current,
     supportingTextColor: Color = LocalContentColor.current,
+    copyable: Boolean = false,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
     leadingIconTint: Color = LocalContentColor.current,
@@ -56,6 +61,9 @@ fun SettingsItem(
     trailingIconTint: Color = LocalContentColor.current,
     onClick: (() -> Unit)? = null,
 ) {
+    val clipboard: Clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
+
     BasicSettingsItem(
         text = text,
         textColor = textColor,
@@ -66,6 +74,17 @@ fun SettingsItem(
         leadingIconTint = leadingIconTint,
         trailingContent = trailingIcon.icon(trailingIconTint),
         onClick = onClick,
+        onLongClick =
+        if (supportingText != null && copyable) {
+            {
+                coroutineScope.launch {
+                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", supportingText)))
+                    Timber.d("Copied to clipboard")
+                }
+            }
+        } else {
+            null
+        },
     )
 }
 
@@ -84,29 +103,23 @@ fun BasicSettingsItem(
     leadingIconTint: Color = LocalContentColor.current,
     trailingContent: @Composable (() -> Unit)? = null,
     onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
-    val content: @Composable ColumnScope.() -> Unit = {
-        ListItem(
-            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-            headlineContent = { Text(text = text, color = textColor) },
-            supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
-            leadingContent = leadingIcon.icon(leadingIconTint),
-            trailingContent = trailingContent,
-        )
-    }
+    val modifier =
+        if (onLongClick != null || onClick != null) {
+            Modifier.combinedClickable(onLongClick = onLongClick, onClick = onClick ?: {})
+        } else {
+            Modifier
+        }
 
-    // Ensures that click ripples are disabled for non-clickable list items
-    if (onClick != null) {
-        Card(
-            onClick = onClick,
-            enabled = enabled,
-            colors =
-            CardDefaults.cardColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent),
-            content = content,
-        )
-    } else {
-        Column(content = content)
-    }
+    ListItem(
+        modifier = modifier,
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        headlineContent = { Text(text = text, color = textColor) },
+        supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
+        leadingContent = leadingIcon.icon(leadingIconTint),
+        trailingContent = trailingContent,
+    )
 }
 
 /** A toggleable settings switch item. */
@@ -156,5 +169,12 @@ private fun SettingsItemSwitchPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun SettingsItemDetailPreview() {
-    AppTheme { SettingsItem(text = "Text 1", leadingIcon = Icons.Rounded.Android, supportingText = "Text2") }
+    AppTheme {
+        SettingsItem(
+            text = "Text 1",
+            leadingIcon = Icons.Rounded.Android,
+            supportingText = "Text2",
+            trailingIcon = null,
+        )
+    }
 }
