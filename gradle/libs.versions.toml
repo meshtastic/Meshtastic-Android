@@ -28,7 +28,7 @@ ktorfit = "2.6.4"
 
 # Other
 coil = "3.3.0"
-dd-sdk-android = "3.1.0"
+dd-sdk-android = "3.2.0"
 detekt = "1.23.8"
 devtools-ksp = "2.2.20-2.0.3"
 markdownRenderer = "0.37.0"
