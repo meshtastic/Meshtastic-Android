@@ -85,6 +85,28 @@ fun ListItem(
     )
 }
 
+/** A toggleable switch list item. */
+@Composable
+fun SwitchListItem(
+    checked: Boolean,
+    text: String,
+    textColor: Color = LocalContentColor.current,
+    enabled: Boolean = true,
+    leadingIcon: ImageVector? = null,
+    leadingIconTint: Color = LocalContentColor.current,
+    onClick: () -> Unit,
+) {
+    BasicListItem(
+        text = text,
+        textColor = textColor,
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+        leadingIconTint = leadingIconTint,
+        trailingContent = { Switch(checked = checked, enabled = enabled, onCheckedChange = null) },
+        onClick = onClick,
+    )
+}
+
 /**
  * The foundational list item. It supports a [leadingIcon] (optional), headline [text] and [supportingText] (optional),
  * and a [trailingContent] composable (optional).
@@ -116,28 +138,6 @@ fun BasicListItem(
         supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
         leadingContent = leadingIcon.icon(leadingIconTint),
         trailingContent = trailingContent,
-    )
-}
-
-/** A toggleable switch list item. */
-@Composable
-fun SwitchListItem(
-    checked: Boolean,
-    text: String,
-    textColor: Color = LocalContentColor.current,
-    enabled: Boolean = true,
-    leadingIcon: ImageVector? = null,
-    leadingIconTint: Color = LocalContentColor.current,
-    onClick: () -> Unit,
-) {
-    BasicListItem(
-        text = text,
-        textColor = textColor,
-        enabled = enabled,
-        leadingIcon = leadingIcon,
-        leadingIconTint = leadingIconTint,
-        trailingContent = { Switch(checked = checked, enabled = enabled, onCheckedChange = null) },
-        onClick = onClick,
     )
 }
 
