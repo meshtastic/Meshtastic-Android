@@ -45,6 +45,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
@@ -87,6 +88,9 @@ private fun MainNodeDetails(node: Node) {
         copyable = true,
         trailingIcon = null,
     )
+
+    InsetDivider()
+
     ListItem(
         text = stringResource(R.string.short_name),
         leadingIcon = Icons.Outlined.Person,
@@ -94,6 +98,9 @@ private fun MainNodeDetails(node: Node) {
         copyable = true,
         trailingIcon = null,
     )
+
+    InsetDivider()
+
     ListItem(
         text = stringResource(R.string.node_number),
         leadingIcon = Icons.Default.Numbers,
@@ -101,6 +108,9 @@ private fun MainNodeDetails(node: Node) {
         copyable = true,
         trailingIcon = null,
     )
+
+    InsetDivider()
+
     ListItem(
         text = stringResource(R.string.user_id),
         leadingIcon = Icons.Default.Person,
@@ -108,13 +118,19 @@ private fun MainNodeDetails(node: Node) {
         copyable = true,
         trailingIcon = null,
     )
+
+    InsetDivider()
+
     ListItem(
         text = stringResource(R.string.role),
         leadingIcon = Icons.Default.Work,
         supportingText = node.user.role.name,
         trailingIcon = null,
     )
+
     if (node.isEffectivelyUnmessageable) {
+        InsetDivider()
+
         ListItem(
             text = stringResource(R.string.unmonitored_or_infrastructure),
             leadingIcon = Icons.Outlined.NoCell,
@@ -122,6 +138,8 @@ private fun MainNodeDetails(node: Node) {
         )
     }
     if (node.deviceMetrics.uptimeSeconds > 0) {
+        InsetDivider()
+
         ListItem(
             text = stringResource(R.string.uptime),
             leadingIcon = Icons.Default.CheckCircle,
@@ -129,6 +147,9 @@ private fun MainNodeDetails(node: Node) {
             trailingIcon = null,
         )
     }
+
+    InsetDivider()
+
     ListItem(
         text = stringResource(R.string.node_sort_last_heard),
         leadingIcon = Icons.Default.History,

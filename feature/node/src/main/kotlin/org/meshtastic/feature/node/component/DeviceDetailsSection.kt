@@ -45,6 +45,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
@@ -58,6 +59,8 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
     TitledCard(stringResource(R.string.device), modifier = modifier) {
+        Spacer(modifier = Modifier.height(16.dp))
+
         Box(
             modifier =
             Modifier.align(Alignment.CenterHorizontally)
@@ -71,6 +74,8 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        InsetDivider()
+
         ListItem(
             text = stringResource(R.string.hardware),
             leadingIcon = Icons.Default.Router,
@@ -78,6 +83,9 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
             copyable = true,
             trailingIcon = null,
         )
+
+        InsetDivider()
+
         ListItem(
             text =
             if (isSupported) {

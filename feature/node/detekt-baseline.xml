@@ -8,6 +8,7 @@
     <ID>ComposableParamOrder:NodeItem.kt$NodeItem</ID>
     <ID>ComposableParamOrder:SatelliteCountInfo.kt$SatelliteCountInfo</ID>
     <ID>ComposableParamOrder:TracerouteButton.kt$TracerouteButton</ID>
+    <ID>LongMethod:NodeDetailsSection.kt$@Composable private fun MainNodeDetails(node: Node)</ID>
     <ID>ModifierMissing:NodeStatusIcons.kt$NodeStatusIcons</ID>
     <ID>MultipleEmitters:NodeDetailsSection.kt$MainNodeDetails</ID>
     <ID>MultipleEmitters:RemoteDeviceActions.kt$RemoteDeviceActions</ID>

@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
@@ -74,8 +75,12 @@ fun DeviceActions(
             onClick = { onAction(NodeDetailAction.ShareContact) },
         )
         if (!isLocal) {
+            InsetDivider()
             RemoteDeviceActions(node = node, lastTracerouteTime = lastTracerouteTime, onAction = onAction)
         }
+
+        InsetDivider()
+
         SwitchListItem(
             text = stringResource(R.string.favorite),
             leadingIcon = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
@@ -83,6 +88,9 @@ fun DeviceActions(
             checked = node.isFavorite,
             onClick = { displayFavoriteDialog = true },
         )
+
+        InsetDivider()
+
         SwitchListItem(
             text = stringResource(R.string.ignore),
             leadingIcon =
@@ -90,6 +98,9 @@ fun DeviceActions(
             checked = node.isIgnored,
             onClick = { displayIgnoreDialog = true },
         )
+
+        InsetDivider()
+
         ListItem(
             text = stringResource(id = R.string.remove),
             leadingIcon = Icons.Rounded.Delete,

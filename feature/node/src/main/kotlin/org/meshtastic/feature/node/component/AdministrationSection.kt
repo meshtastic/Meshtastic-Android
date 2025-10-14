@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.ForkLeft
 import androidx.compose.material.icons.filled.Icecream
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -35,6 +34,7 @@ import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
@@ -61,6 +61,9 @@ fun AdministrationSection(
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
+
+        InsetDivider()
+
         ListItem(
             text = stringResource(id = R.string.remote_admin),
             leadingIcon = Icons.Default.Settings,
@@ -95,6 +98,8 @@ fun AdministrationSection(
                 val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
                 val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
+                InsetDivider()
+
                 ListItem(
                     text = stringResource(R.string.installed_firmware_version),
                     leadingIcon = Icons.Default.Memory,
@@ -103,7 +108,9 @@ fun AdministrationSection(
                     leadingIconTint = statusColor,
                     trailingIcon = null,
                 )
-                HorizontalDivider()
+
+                InsetDivider()
+
                 ListItem(
                     text = stringResource(R.string.latest_stable_firmware),
                     leadingIcon = Icons.Default.Memory,
@@ -113,6 +120,9 @@ fun AdministrationSection(
                     trailingIcon = null,
                     onClick = { onFirmwareSelect(latestStable) },
                 )
+
+                InsetDivider()
+
                 ListItem(
                     text = stringResource(R.string.latest_alpha_firmware),
                     leadingIcon = Icons.Default.Memory,
