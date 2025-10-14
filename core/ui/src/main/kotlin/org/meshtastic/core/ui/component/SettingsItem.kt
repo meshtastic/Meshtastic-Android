@@ -64,15 +64,14 @@ fun SettingsItem(
         enabled = enabled,
         leadingIcon = leadingIcon,
         leadingIconTint = leadingIconTint,
-        trailingContent = { trailingIcon.Icon(trailingIconTint) },
+        trailingContent = trailingIcon.icon(trailingIconTint),
         onClick = onClick,
     )
 }
 
 /**
  * The foundational settings item. It supports a [leadingIcon] (optional), headline [text] and [supportingText]
- * (optional), and a [trailingContent] composable (optional). The majority of settings items will leverage this, and if
- * they can't, they should build on [Content].
+ * (optional), and a [trailingContent] composable (optional).
  */
 @Composable
 fun BasicSettingsItem(
@@ -87,17 +86,24 @@ fun BasicSettingsItem(
     onClick: (() -> Unit)? = null,
 ) {
     val content: @Composable ColumnScope.() -> Unit = {
-        Content(
-            leading = { leadingIcon.Icon(leadingIconTint) },
-            headline = { Text(text = text, color = textColor) },
-            supporting = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
-            trailing = trailingContent,
+        ListItem(
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            headlineContent = { Text(text = text, color = textColor) },
+            supportingContent = supportingText?.let { { Text(text = it, color = supportingTextColor) } },
+            leadingContent = leadingIcon.icon(leadingIconTint),
+            trailingContent = trailingContent,
         )
     }
 
     // Ensures that click ripples are disabled for non-clickable list items
     if (onClick != null) {
-        ClickableWrapper(enabled = enabled, onClick = onClick, content = content)
+        Card(
+            onClick = onClick,
+            enabled = enabled,
+            colors =
+            CardDefaults.cardColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent),
+            content = content,
+        )
     } else {
         Column(content = content)
     }
@@ -125,45 +131,9 @@ fun SettingsItemSwitch(
     )
 }
 
-/**
- * A clickable Card wrapper used for all clickable settings items. This has a dedicated implementation so that it can be
- * used by multiple components. This allows its underlying implementation to be changed in a single place, while being
- * reflected in all components that use it..
- */
 @Composable
-private fun ClickableWrapper(enabled: Boolean, onClick: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    Card(
-        onClick = onClick,
-        enabled = enabled,
-        colors =
-        CardDefaults.cardColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent),
-        content = content,
-    )
-}
-
-/**
- * The row content to display for a settings item. This is a useful building block for new items that may not align with
- * [BasicSettingsItem]
- */
-@Composable
-private fun Content(
-    leading: @Composable () -> Unit,
-    headline: @Composable () -> Unit,
-    supporting: @Composable (() -> Unit)? = null,
-    trailing: @Composable (() -> Unit)? = null,
-) {
-    ListItem(
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = headline,
-        supportingContent = supporting,
-        leadingContent = leading,
-        trailingContent = trailing,
-    )
-}
-
-@Composable
-private fun ImageVector?.Icon(tint: Color = LocalContentColor.current) =
-    this?.let { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint) }
+private fun ImageVector?.icon(tint: Color = LocalContentColor.current): @Composable (() -> Unit)? =
+    this?.let { { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint) } }
 
 @Preview(showBackground = true)
 @Composable
