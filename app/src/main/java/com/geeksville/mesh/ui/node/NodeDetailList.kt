@@ -120,6 +120,7 @@ fun NodeDetailList(
         }
 
         NodeDetailsSection(node)
+
         NotesSection(node = node, onSaveNotes = onSaveNotes)
 
         DeviceActions(

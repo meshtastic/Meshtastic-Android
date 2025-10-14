@@ -84,24 +84,28 @@ private fun MainNodeDetails(node: Node) {
         text = stringResource(R.string.long_name),
         leadingIcon = Icons.TwoTone.Person,
         supportingText = node.user.longName.ifEmpty { "???" },
+        copyable = true,
         trailingIcon = null,
     )
     ListItem(
         text = stringResource(R.string.short_name),
         leadingIcon = Icons.Outlined.Person,
         supportingText = node.user.shortName.ifEmpty { "???" },
+        copyable = true,
         trailingIcon = null,
     )
     ListItem(
         text = stringResource(R.string.node_number),
         leadingIcon = Icons.Default.Numbers,
         supportingText = node.num.toUInt().toString(),
+        copyable = true,
         trailingIcon = null,
     )
     ListItem(
         text = stringResource(R.string.user_id),
         leadingIcon = Icons.Default.Person,
         supportingText = node.user.id,
+        copyable = true,
         trailingIcon = null,
     )
     ListItem(

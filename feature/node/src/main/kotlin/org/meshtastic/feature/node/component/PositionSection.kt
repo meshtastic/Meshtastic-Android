@@ -64,6 +64,7 @@ fun PositionSection(
                 text = stringResource(R.string.node_sort_distance),
                 leadingIcon = Icons.Default.SocialDistance,
                 supportingText = distance,
+                copyable = true,
                 trailingIcon = null,
             )
         }

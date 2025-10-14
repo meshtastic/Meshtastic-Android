@@ -84,6 +84,7 @@ fun AdministrationSection(
                     text = stringResource(R.string.firmware_edition),
                     leadingIcon = icon,
                     supportingText = it.name,
+                    copyable = true,
                     trailingIcon = null,
                 )
             }
@@ -98,6 +99,7 @@ fun AdministrationSection(
                     text = stringResource(R.string.installed_firmware_version),
                     leadingIcon = Icons.Default.Memory,
                     supportingText = firmwareVersion.substringBeforeLast("."),
+                    copyable = true,
                     leadingIconTint = statusColor,
                     trailingIcon = null,
                 )
@@ -106,6 +108,7 @@ fun AdministrationSection(
                     text = stringResource(R.string.latest_stable_firmware),
                     leadingIcon = Icons.Default.Memory,
                     supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
+                    copyable = true,
                     leadingIconTint = MaterialTheme.colorScheme.StatusGreen,
                     trailingIcon = null,
                     onClick = { onFirmwareSelect(latestStable) },
@@ -114,6 +117,7 @@ fun AdministrationSection(
                     text = stringResource(R.string.latest_alpha_firmware),
                     leadingIcon = Icons.Default.Memory,
                     supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
+                    copyable = true,
                     leadingIconTint = MaterialTheme.colorScheme.StatusYellow,
                     trailingIcon = null,
                     onClick = { onFirmwareSelect(latestAlpha) },

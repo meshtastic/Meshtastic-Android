@@ -75,6 +75,7 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
             text = stringResource(R.string.hardware),
             leadingIcon = Icons.Default.Router,
             supportingText = hwModelName,
+            copyable = true,
             trailingIcon = null,
         )
         ListItem(
@@ -90,7 +91,6 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
             } else {
                 ImageVector.vectorResource(org.meshtastic.feature.node.R.drawable.unverified)
             },
-            supportingText = null,
             leadingIconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
             trailingIcon = null,
         )
