@@ -70,7 +70,7 @@ fun DeviceActions(
         SettingsItem(
             text = stringResource(id = R.string.share_contact),
             leadingIcon = Icons.Rounded.QrCode2,
-            trailingContent = {},
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.ShareContact) },
         )
         if (!isLocal) {
@@ -93,7 +93,7 @@ fun DeviceActions(
         SettingsItem(
             text = stringResource(id = R.string.remove),
             leadingIcon = Icons.Rounded.Delete,
-            trailingContent = {},
+            trailingIcon = null,
             onClick = { displayRemoveDialog = true },
         )
     }

@@ -34,14 +34,14 @@ internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction
         SettingsItem(
             text = stringResource(id = R.string.direct_message),
             leadingIcon = Icons.AutoMirrored.TwoTone.Message,
-            trailingContent = {},
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
         )
     }
     SettingsItem(
         text = stringResource(id = R.string.exchange_userinfo),
         leadingIcon = Icons.Default.Person,
-        trailingContent = {},
+        trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
     )
     TracerouteButton(

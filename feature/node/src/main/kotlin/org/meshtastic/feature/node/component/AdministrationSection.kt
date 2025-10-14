@@ -36,7 +36,6 @@ import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SettingsItem
-import org.meshtastic.core.ui.component.SettingsItemDetail
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
@@ -59,7 +58,7 @@ fun AdministrationSection(
         SettingsItem(
             text = stringResource(id = R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
-            trailingContent = {},
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
         SettingsItem(
@@ -81,10 +80,11 @@ fun AdministrationSection(
                         else -> Icons.Default.ForkLeft
                     }
 
-                SettingsItemDetail(
+                SettingsItem(
                     text = stringResource(R.string.firmware_edition),
-                    icon = icon,
+                    leadingIcon = icon,
                     supportingText = it.name,
+                    trailingIcon = null,
                 )
             }
             firmwareVersion?.let { firmwareVersion ->
@@ -94,25 +94,28 @@ fun AdministrationSection(
                 val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
                 val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
-                SettingsItemDetail(
+                SettingsItem(
                     text = stringResource(R.string.installed_firmware_version),
-                    icon = Icons.Default.Memory,
+                    leadingIcon = Icons.Default.Memory,
                     supportingText = firmwareVersion.substringBeforeLast("."),
-                    iconTint = statusColor,
+                    leadingIconTint = statusColor,
+                    trailingIcon = null,
                 )
                 HorizontalDivider()
-                SettingsItemDetail(
+                SettingsItem(
                     text = stringResource(R.string.latest_stable_firmware),
-                    icon = Icons.Default.Memory,
+                    leadingIcon = Icons.Default.Memory,
                     supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
-                    iconTint = MaterialTheme.colorScheme.StatusGreen,
+                    leadingIconTint = MaterialTheme.colorScheme.StatusGreen,
+                    trailingIcon = null,
                     onClick = { onFirmwareSelect(latestStable) },
                 )
-                SettingsItemDetail(
+                SettingsItem(
                     text = stringResource(R.string.latest_alpha_firmware),
-                    icon = Icons.Default.Memory,
+                    leadingIcon = Icons.Default.Memory,
                     supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
-                    iconTint = MaterialTheme.colorScheme.StatusYellow,
+                    leadingIconTint = MaterialTheme.colorScheme.StatusYellow,
+                    trailingIcon = null,
                     onClick = { onFirmwareSelect(latestAlpha) },
                 )
             }
