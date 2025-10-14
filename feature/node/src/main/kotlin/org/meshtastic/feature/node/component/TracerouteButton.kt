@@ -35,7 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
+import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.theme.AppTheme
 
 private const val COOL_DOWN_TIME_MS = 30000L
@@ -70,7 +70,7 @@ private fun TracerouteButton(text: String, progress: Float, onClick: () -> Unit)
 
     val stroke = Stroke(width = with(LocalDensity.current) { 2.dp.toPx() }, cap = StrokeCap.Round)
 
-    SettingsItem(
+    BasicListItem(
         text = text,
         enabled = !isCoolingDown,
         leadingIcon = Icons.Default.Route,

@@ -35,9 +35,6 @@
     <ID>ModifierMissing:LoraSignalIndicator.kt$SnrAndRssi</ID>
     <ID>ModifierMissing:PreferenceDivider.kt$PreferenceDivider</ID>
     <ID>ModifierMissing:SecurityIcon.kt$SecurityIcon</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItem</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItemDetail</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItemSwitch</ID>
     <ID>ModifierMissing:SharedContactDialog.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:SimpleAlertDialog.kt$SimpleAlertDialog</ID>
     <ID>ModifierMissing:SlidingSelector.kt$OptionLabel</ID>

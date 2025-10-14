@@ -25,7 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
@@ -57,7 +57,7 @@ fun MetricsSection(
     if (nonPositionLogs.isNotEmpty()) {
         TitledCard(title = stringResource(id = R.string.logs), modifier = modifier) {
             nonPositionLogs.forEach { type ->
-                SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
+                ListItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
                     onAction(NodeDetailAction.Navigate(type.route))
                 }
             }

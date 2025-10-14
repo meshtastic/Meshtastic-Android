@@ -17,26 +17,19 @@
 
 package org.meshtastic.feature.node.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.SocialDistance
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
-import org.meshtastic.core.ui.component.SettingsItemDetail
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
@@ -61,52 +54,39 @@ fun PositionSection(
         // Current position coordinates (linked)
         if (hasValidPosition) {
             InlineMap(node = node, Modifier.fillMaxWidth().height(200.dp))
-            SettingsItemDetail(
-                text = stringResource(R.string.last_position_update),
-                icon = Icons.Default.LocationOn,
-                supportingContent = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(formatAgo(node.position.time), style = MaterialTheme.typography.titleLarge)
-                        LinkedCoordinates(
-                            latitude = node.latitude,
-                            longitude = node.longitude,
-                            nodeName = node.user.longName,
-                        )
-                    }
-                },
-            )
+
+            LinkedCoordinatesItem(node)
         }
 
         // Distance (if available)
         if (distance != null && distance.isNotEmpty()) {
-            SettingsItemDetail(
+            ListItem(
                 text = stringResource(R.string.node_sort_distance),
-                icon = Icons.Default.SocialDistance,
+                leadingIcon = Icons.Default.SocialDistance,
                 supportingText = distance,
+                copyable = true,
+                trailingIcon = null,
             )
         }
 
         // Exchange position action
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.exchange_position),
             leadingIcon = Icons.Default.LocationOn,
-            trailingContent = {},
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
         )
 
         // Node Map log
         if (availableLogs.contains(LogsType.NODE_MAP)) {
-            SettingsItem(text = stringResource(LogsType.NODE_MAP.titleRes), leadingIcon = LogsType.NODE_MAP.icon) {
+            ListItem(text = stringResource(LogsType.NODE_MAP.titleRes), leadingIcon = LogsType.NODE_MAP.icon) {
                 onAction(NodeDetailAction.Navigate(LogsType.NODE_MAP.route))
             }
         }
 
         // Positions Log
         if (availableLogs.contains(LogsType.POSITIONS)) {
-            SettingsItem(text = stringResource(LogsType.POSITIONS.titleRes), leadingIcon = LogsType.POSITIONS.icon) {
+            ListItem(text = stringResource(LogsType.POSITIONS.titleRes), leadingIcon = LogsType.POSITIONS.icon) {
                 onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.route))
             }
         }

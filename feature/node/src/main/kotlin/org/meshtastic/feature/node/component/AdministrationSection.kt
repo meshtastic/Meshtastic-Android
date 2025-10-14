@@ -35,8 +35,7 @@ import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
-import org.meshtastic.core.ui.component.SettingsItemDetail
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
@@ -56,13 +55,13 @@ fun AdministrationSection(
     modifier: Modifier = Modifier,
 ) {
     TitledCard(stringResource(id = R.string.administration), modifier = modifier) {
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
-            trailingContent = {},
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.remote_admin),
             leadingIcon = Icons.Default.Settings,
             enabled = metricsState.isLocal || node.metadata != null,
@@ -81,10 +80,12 @@ fun AdministrationSection(
                         else -> Icons.Default.ForkLeft
                     }
 
-                SettingsItemDetail(
+                ListItem(
                     text = stringResource(R.string.firmware_edition),
-                    icon = icon,
+                    leadingIcon = icon,
                     supportingText = it.name,
+                    copyable = true,
+                    trailingIcon = null,
                 )
             }
             firmwareVersion?.let { firmwareVersion ->
@@ -94,25 +95,31 @@ fun AdministrationSection(
                 val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
                 val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
-                SettingsItemDetail(
+                ListItem(
                     text = stringResource(R.string.installed_firmware_version),
-                    icon = Icons.Default.Memory,
+                    leadingIcon = Icons.Default.Memory,
                     supportingText = firmwareVersion.substringBeforeLast("."),
-                    iconTint = statusColor,
+                    copyable = true,
+                    leadingIconTint = statusColor,
+                    trailingIcon = null,
                 )
                 HorizontalDivider()
-                SettingsItemDetail(
+                ListItem(
                     text = stringResource(R.string.latest_stable_firmware),
-                    icon = Icons.Default.Memory,
+                    leadingIcon = Icons.Default.Memory,
                     supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
-                    iconTint = MaterialTheme.colorScheme.StatusGreen,
+                    copyable = true,
+                    leadingIconTint = MaterialTheme.colorScheme.StatusGreen,
+                    trailingIcon = null,
                     onClick = { onFirmwareSelect(latestStable) },
                 )
-                SettingsItemDetail(
+                ListItem(
                     text = stringResource(R.string.latest_alpha_firmware),
-                    icon = Icons.Default.Memory,
+                    leadingIcon = Icons.Default.Memory,
                     supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
-                    iconTint = MaterialTheme.colorScheme.StatusYellow,
+                    copyable = true,
+                    leadingIconTint = MaterialTheme.colorScheme.StatusYellow,
+                    trailingIcon = null,
                     onClick = { onFirmwareSelect(latestAlpha) },
                 )
             }
