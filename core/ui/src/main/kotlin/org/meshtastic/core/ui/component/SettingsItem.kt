@@ -41,7 +41,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.meshtastic.core.ui.theme.AppTheme
-import timber.log.Timber
 
 /**
  * A settings item with an optional [leadingIcon], headline [text], optional [supportingText], and optional
@@ -79,7 +78,6 @@ fun SettingsItem(
             {
                 coroutineScope.launch {
                     clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", supportingText)))
-                    Timber.d("Copied to clipboard")
                 }
             }
         } else {

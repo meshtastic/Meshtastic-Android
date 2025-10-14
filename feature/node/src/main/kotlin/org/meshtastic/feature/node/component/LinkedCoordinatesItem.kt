@@ -73,10 +73,7 @@ fun LinkedCoordinatesItem(node: Node) {
             }
         },
         onLongClick = {
-            coroutineScope.launch {
-                clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", coordinates)))
-                Timber.d("Copied to clipboard")
-            }
+            coroutineScope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", coordinates))) }
         },
     )
 }
