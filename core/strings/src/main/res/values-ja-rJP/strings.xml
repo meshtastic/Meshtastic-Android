@@ -327,6 +327,7 @@
     <string name="ch_util_definition">現在のチャンネルの使用率。正常な送信（TX）、正常な受信（RX）、および不正な受信 (ノイズ)を含みます。</string>
     <string name="air_util_definition">過去1時間以内に送信に使用された通信時間の割合。</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">共有キー</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">公開キー暗号化</string>
