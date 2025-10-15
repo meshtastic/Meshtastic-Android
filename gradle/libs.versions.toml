@@ -193,7 +193,7 @@ firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.1" }
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.21.0" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.1.0" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
+dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
 room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
