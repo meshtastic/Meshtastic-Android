@@ -327,6 +327,7 @@
     <string name="ch_util_definition">Utilização do canal atual, incluindo TX bem formado, RX e RX mal formado (ruído).</string>
     <string name="air_util_definition">Percentagem do tempo de transmissão utilizado na última hora.</string>
     <string name="iaq">Qualidade do Ar Interior</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Chave partilhada</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Criptografia de chave pública</string>
