@@ -326,6 +326,7 @@
     <string name="ch_util_definition">현재 채널 사용, 올바르게 형성된 TX, RX, 잘못 형성된 RX(일명 노이즈)를 포함.</string>
     <string name="air_util_definition">지난 1시간 동안 전송에 사용된 통신 시간의 백분율.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">공유 키</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">공개 키 암호화</string>
