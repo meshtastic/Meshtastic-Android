@@ -32,15 +32,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.component.AdministrationSection
@@ -116,10 +113,11 @@ fun NodeDetailList(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (metricsState.deviceHardware != null) {
-            TitledCard(title = stringResource(R.string.device)) { DeviceDetailsSection(metricsState) }
+            DeviceDetailsSection(metricsState)
         }
 
         NodeDetailsSection(node)
+
         NotesSection(node = node, onSaveNotes = onSaveNotes)
 
         DeviceActions(

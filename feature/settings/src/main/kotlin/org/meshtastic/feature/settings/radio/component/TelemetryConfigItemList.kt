@@ -25,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -40,7 +39,7 @@ import org.meshtastic.proto.moduleConfig
 private const val MIN_FW_FOR_TELEMETRY_TOGGLE = "2.7.12"
 
 @Composable
-fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val telemetryConfig = state.moduleConfig.telemetry
     val formState = rememberConfigState(initialValue = telemetryConfig)
@@ -49,7 +48,7 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.telemetry),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

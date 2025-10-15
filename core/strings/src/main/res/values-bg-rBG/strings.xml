@@ -159,7 +159,7 @@
     <string name="analytics_okay">Разрешаване на анализи и докладване за сривове.</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
-    <string name="discard_changes">Отхвърляне на промените</string>
+    <string name="discard_changes">Discard</string>
     <string name="save_changes">Запис</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="permission_missing">Meshtastic се нуждае от активирани разрешения за местоположение, за да намира нови устройства чрез Bluetooth. Можете да ги деактивирате, когато не се използват.</string>
@@ -482,7 +482,7 @@
     <string name="time_zone">Часова зона</string>
     <string name="led_heartbeat">LED Heartbeat</string>
     <string name="display_config">Дисплей</string>
-    <string name="screen_on_for">Screen on for</string>
+    <string name="screen_on_for"></string>
     <string name="carousel_interval">Carousel interval</string>
     <string name="compass_north_top">Север на компаса отгоре</string>
     <string name="flip_screen">Обръщане на екрана</string>
@@ -690,7 +690,7 @@
     <string name="import_known_shared_contact_text">Предупреждение: Този контакт е известен, импортирането ще презапише предишната информация за контакта.</string>
     <string name="public_key_changed">Публичният ключ е променен</string>
     <string name="import_label">Импортиране</string>
-    <string name="request_metadata">Request Metadata</string>
+    <string name="request_metadata">Заявка за метаданни</string>
     <string name="actions">Действия</string>
     <string name="firmware">Фърмуер</string>
     <string name="use_12h_format">Използване на 12ч формат</string>

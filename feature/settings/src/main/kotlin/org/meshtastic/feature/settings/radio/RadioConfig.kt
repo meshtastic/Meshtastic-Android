@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -81,9 +81,7 @@ fun RadioConfigItemList(
                 ManagedMessage()
             }
             ConfigRoute.radioConfigRoutes.forEach {
-                SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
-                    onRouteClick(it)
-                }
+                ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
             }
         }
 
@@ -92,9 +90,7 @@ fun RadioConfigItemList(
                 ManagedMessage()
             }
             ConfigRoute.deviceConfigRoutes(state.metadata).forEach {
-                SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
-                    onRouteClick(it)
-                }
+                ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
             }
         }
 
@@ -104,9 +100,7 @@ fun RadioConfigItemList(
             }
 
             modules.forEach {
-                SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
-                    onRouteClick(it)
-                }
+                ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
             }
         }
     }
@@ -117,13 +111,13 @@ fun RadioConfigItemList(
                 ManagedMessage()
             }
 
-            SettingsItem(
+            ListItem(
                 text = stringResource(R.string.import_configuration),
                 leadingIcon = Icons.Default.Download,
                 enabled = enabled,
                 onClick = onImport,
             )
-            SettingsItem(
+            ListItem(
                 text = stringResource(R.string.export_configuration),
                 leadingIcon = Icons.Default.Upload,
                 enabled = enabled,
@@ -143,11 +137,11 @@ fun RadioConfigItemList(
                 )
             }
 
-            SettingsItem(
+            ListItem(
                 enabled = enabled,
                 text = stringResource(route.title),
                 leadingIcon = route.icon,
-                trailingContent = {},
+                trailingIcon = null,
             ) {
                 showDialog = true
             }
@@ -159,14 +153,14 @@ fun RadioConfigItemList(
             ManagedMessage()
         }
 
-        SettingsItem(
+        ListItem(
             text = stringResource(R.string.clean_node_database_title),
             leadingIcon = Icons.Rounded.CleaningServices,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
         )
 
-        SettingsItem(
+        ListItem(
             text = stringResource(R.string.debug_panel),
             leadingIcon = Icons.Rounded.BugReport,
             enabled = enabled,

@@ -63,6 +63,6 @@ private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
     composable<SettingsRoutes.LoRa> { backStackEntry ->
         val parentEntry =
             remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
-        LoRaConfigScreen(navController = navController, viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry))
+        LoRaConfigScreen(viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry), navController::popBackStack)
     }
 }

@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -36,7 +35,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
 
 @Composable
-fun NeighborInfoConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val neighborInfoConfig = state.moduleConfig.neighborInfo
     val formState = rememberConfigState(initialValue = neighborInfoConfig)
@@ -44,7 +43,7 @@ fun NeighborInfoConfigScreen(navController: NavController, viewModel: RadioConfi
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.neighbor_info),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

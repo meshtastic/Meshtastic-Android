@@ -65,8 +65,8 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.SettingsItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
@@ -197,7 +197,7 @@ fun ConnectionsScreen(
 
                             if (regionUnset && selectedDevice != "m") {
                                 TitledCard(title = null) {
-                                    SettingsItem(
+                                    ListItem(
                                         leadingIcon = Icons.Rounded.Language,
                                         text = stringResource(id = R.string.set_your_region),
                                     ) {

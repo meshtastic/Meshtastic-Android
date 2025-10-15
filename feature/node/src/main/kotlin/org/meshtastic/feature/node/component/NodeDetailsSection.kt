@@ -45,7 +45,8 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItemDetail
+import org.meshtastic.core.ui.component.InsetDivider
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
@@ -80,48 +81,79 @@ fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
 
 @Composable
 private fun MainNodeDetails(node: Node) {
-    SettingsItemDetail(
+    ListItem(
         text = stringResource(R.string.long_name),
-        icon = Icons.TwoTone.Person,
+        leadingIcon = Icons.TwoTone.Person,
         supportingText = node.user.longName.ifEmpty { "???" },
+        copyable = true,
+        trailingIcon = null,
     )
-    SettingsItemDetail(
+
+    InsetDivider()
+
+    ListItem(
         text = stringResource(R.string.short_name),
-        icon = Icons.Outlined.Person,
+        leadingIcon = Icons.Outlined.Person,
         supportingText = node.user.shortName.ifEmpty { "???" },
+        copyable = true,
+        trailingIcon = null,
     )
-    SettingsItemDetail(
+
+    InsetDivider()
+
+    ListItem(
         text = stringResource(R.string.node_number),
-        icon = Icons.Default.Numbers,
+        leadingIcon = Icons.Default.Numbers,
         supportingText = node.num.toUInt().toString(),
+        copyable = true,
+        trailingIcon = null,
     )
-    SettingsItemDetail(
+
+    InsetDivider()
+
+    ListItem(
         text = stringResource(R.string.user_id),
-        icon = Icons.Default.Person,
+        leadingIcon = Icons.Default.Person,
         supportingText = node.user.id,
+        copyable = true,
+        trailingIcon = null,
     )
-    SettingsItemDetail(
+
+    InsetDivider()
+
+    ListItem(
         text = stringResource(R.string.role),
-        icon = Icons.Default.Work,
+        leadingIcon = Icons.Default.Work,
         supportingText = node.user.role.name,
+        trailingIcon = null,
     )
+
     if (node.isEffectivelyUnmessageable) {
-        SettingsItemDetail(
+        InsetDivider()
+
+        ListItem(
             text = stringResource(R.string.unmonitored_or_infrastructure),
-            icon = Icons.Outlined.NoCell,
-            supportingText = null,
+            leadingIcon = Icons.Outlined.NoCell,
+            trailingIcon = null,
         )
     }
     if (node.deviceMetrics.uptimeSeconds > 0) {
-        SettingsItemDetail(
+        InsetDivider()
+
+        ListItem(
             text = stringResource(R.string.uptime),
-            icon = Icons.Default.CheckCircle,
+            leadingIcon = Icons.Default.CheckCircle,
             supportingText = formatUptime(node.deviceMetrics.uptimeSeconds),
+            trailingIcon = null,
         )
     }
-    SettingsItemDetail(
+
+    InsetDivider()
+
+    ListItem(
         text = stringResource(R.string.node_sort_last_heard),
-        icon = Icons.Default.History,
+        leadingIcon = Icons.Default.History,
         supportingText = formatAgo(node.lastHeard),
+        trailingIcon = null,
     )
 }

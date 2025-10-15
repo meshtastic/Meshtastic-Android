@@ -24,9 +24,7 @@ import com.geeksville.mesh.model.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -37,6 +35,7 @@ import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.getShortDate
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.channelSet
 import javax.inject.Inject
 import kotlin.collections.map
@@ -55,12 +54,7 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
-    val channels =
-        radioConfigRepository.channelSetFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            channelSet {},
-        )
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = channelSet {})
 
     val contactList =
         combine(
@@ -117,11 +111,7 @@ constructor(
                 )
             }
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
+            .stateInWhileSubscribed(initialValue = emptyList())
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 

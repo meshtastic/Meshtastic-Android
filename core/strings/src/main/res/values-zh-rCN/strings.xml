@@ -159,7 +159,7 @@
     <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
-    <string name="discard_changes">Discard changes</string>
+    <string name="discard_changes">Discard</string>
     <string name="save_changes">保存</string>
     <string name="new_channel_rcvd">收到新的频道 URL</string>
     <string name="permission_missing">Meshtastic needs location permissions enabled to find new devices via Bluetooth. You can disable when not in use.</string>
@@ -886,7 +886,7 @@
     <string name="one_day">24 Hours</string>
     <string name="two_days">48 Hours</string>
     <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
-    <string name="dbm_value">%1$d dBm</string>
+    <string name="dbm_value"></string>
     <string name="error_no_app_to_handle_link">No application available to handle link.</string>
     <string name="system_settings">System Settings</string>
     <string name="no_local_stats">No Stats Available</string>

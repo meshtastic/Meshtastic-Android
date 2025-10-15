@@ -4,13 +4,14 @@
   <CurrentIssues>
     <ID>ComposableParamOrder:ElevationInfo.kt$ElevationInfo</ID>
     <ID>ComposableParamOrder:LastHeardInfo.kt$LastHeardInfo</ID>
-    <ID>ComposableParamOrder:LinkedCoordinates.kt$LinkedCoordinates</ID>
     <ID>ComposableParamOrder:NodeFilterTextField.kt$NodeFilterTextField</ID>
     <ID>ComposableParamOrder:NodeItem.kt$NodeItem</ID>
-    <ID>ComposableParamOrder:NodeKeyStatusIcon.kt$NodeKeyStatusIcon</ID>
     <ID>ComposableParamOrder:SatelliteCountInfo.kt$SatelliteCountInfo</ID>
     <ID>ComposableParamOrder:TracerouteButton.kt$TracerouteButton</ID>
+    <ID>LongMethod:NodeDetailsSection.kt$@Composable private fun MainNodeDetails(node: Node)</ID>
     <ID>ModifierMissing:NodeStatusIcons.kt$NodeStatusIcons</ID>
+    <ID>MultipleEmitters:NodeDetailsSection.kt$MainNodeDetails</ID>
+    <ID>MultipleEmitters:RemoteDeviceActions.kt$RemoteDeviceActions</ID>
     <ID>ParameterNaming:NodeFilterTextField.kt$onToggleShowIgnored</ID>
     <ID>PreviewPublic:NodeItem.kt$NodeInfoPreview</ID>
     <ID>PreviewPublic:NodeItem.kt$NodeInfoSimplePreview</ID>

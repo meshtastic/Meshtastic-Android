@@ -87,6 +87,7 @@ dependencies {
     kover(projects.core.network)
     kover(projects.core.prefs)
     kover(projects.feature.intro)
+    kover(projects.feature.messaging)
     kover(projects.feature.map)
     kover(projects.feature.node)
     kover(projects.feature.settings)

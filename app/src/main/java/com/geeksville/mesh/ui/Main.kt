@@ -22,9 +22,14 @@ package com.geeksville.mesh.ui
 import android.Manifest
 import android.os.Build
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,7 +40,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Wifi
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
@@ -52,6 +61,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -83,11 +93,9 @@ import com.geeksville.mesh.navigation.mapGraph
 import com.geeksville.mesh.navigation.nodesGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.connections.DeviceType
-import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
+import com.geeksville.mesh.ui.connections.components.ConnectionsNavIcon
 import com.geeksville.mesh.ui.metrics.annotateTraceroute
-import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -109,6 +117,8 @@ import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
+import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.feature.settings.navigation.settingsGraph
@@ -137,6 +147,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -199,6 +210,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                 }
                 uIViewModel.clearClientNotification(notification)
             },
+            onDismiss = { uIViewModel.clearClientNotification(notification) },
         )
     }
 
@@ -279,8 +291,9 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                             },
                             state = rememberTooltipState(),
                         ) {
-                            val iconModifier =
-                                if (isConnectionsRoute) {
+                            if (isConnectionsRoute) {
+                                Box(
+                                    modifier =
                                     Modifier.drawWithCache {
                                         onDrawWithContent {
                                             drawContent()
@@ -307,12 +320,38 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                                                 )
                                             }
                                         }
-                                    }
-                                } else {
-                                    Modifier
+                                    },
+                                ) {
+                                    ConnectionsNavIcon(
+                                        connectionState = connectionState,
+                                        deviceType = DeviceType.fromAddress(selectedDevice),
+                                    )
                                 }
-                            Box(modifier = iconModifier) {
-                                TopLevelNavIcon(destination, connectionState, DeviceType.fromAddress(selectedDevice))
+                            } else {
+                                BadgedBox(
+                                    badge = {
+                                        if (destination == TopLevelDestination.Conversations) {
+                                            // Keep track of the last non-zero count for display during exit animation
+                                            var lastNonZeroCount by remember { mutableIntStateOf(unreadMessageCount) }
+                                            if (unreadMessageCount > 0) {
+                                                lastNonZeroCount = unreadMessageCount
+                                            }
+                                            AnimatedVisibility(
+                                                visible = unreadMessageCount > 0,
+                                                enter = scaleIn() + fadeIn(),
+                                                exit = scaleOut() + fadeOut(),
+                                            ) {
+                                                Badge { Text(lastNonZeroCount.toString()) }
+                                            }
+                                        }
+                                    },
+                                ) {
+                                    Icon(
+                                        imageVector = destination.icon,
+                                        contentDescription = stringResource(id = destination.label),
+                                        tint = LocalContentColor.current,
+                                    )
+                                }
                             }
                         }
                     },

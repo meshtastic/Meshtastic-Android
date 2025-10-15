@@ -8,11 +8,12 @@
     <ID>ComposableParamOrder:MainAppBar.kt$MainAppBar</ID>
     <ID>ComposableParamOrder:MaterialBatteryInfo.kt$MaterialBatteryInfo</ID>
     <ID>ComposableParamOrder:NodeChip.kt$NodeChip</ID>
+    <ID>ComposableParamOrder:NodeKeyStatusIcon.kt$NodeKeyStatusIcon</ID>
     <ID>ComposableParamOrder:SignalInfo.kt$SignalInfo</ID>
     <ID>ComposableParamOrder:SwitchPreference.kt$SwitchPreference</ID>
     <ID>ContentSlotReused:AdaptiveTwoPane.kt$second</ID>
+    <ID>LambdaParameterEventTrailing:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>LambdaParameterEventTrailing:MainAppBar.kt$onClickChip</ID>
-    <ID>LongMethod:EditTextPreference.kt$@Composable fun EditTextPreference( title: String, value: String, enabled: Boolean, isError: Boolean, keyboardOptions: KeyboardOptions, keyboardActions: KeyboardActions, onValueChanged: (String) -&gt; Unit, modifier: Modifier = Modifier, summary: String? = null, maxSize: Int = 0, // max_size - 1 (in bytes) onFocusChanged: (FocusState) -&gt; Unit = {}, trailingIcon: (@Composable () -&gt; Unit)? = null, visualTransformation: VisualTransformation = VisualTransformation.None, )</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$0xff</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$16</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$24</ID>
@@ -22,6 +23,9 @@
     <ID>MagicNumber:EditListPreference.kt$67890</ID>
     <ID>MagicNumber:LazyColumnDragAndDropDemo.kt$50</ID>
     <ID>ModifierMissing:AdaptiveTwoPane.kt$AdaptiveTwoPane</ID>
+    <ID>ModifierMissing:ChannelItem.kt$ChannelItem</ID>
+    <ID>ModifierMissing:ChannelSelection.kt$ChannelSelection</ID>
+    <ID>ModifierMissing:ContactSharing.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:EmojiPicker.kt$EmojiPicker</ID>
     <ID>ModifierMissing:EmojiPicker.kt$EmojiPickerDialog</ID>
     <ID>ModifierMissing:IndoorAirQuality.kt$IndoorAirQuality</ID>
@@ -31,9 +35,7 @@
     <ID>ModifierMissing:LoraSignalIndicator.kt$SnrAndRssi</ID>
     <ID>ModifierMissing:PreferenceDivider.kt$PreferenceDivider</ID>
     <ID>ModifierMissing:SecurityIcon.kt$SecurityIcon</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItem</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItemDetail</ID>
-    <ID>ModifierMissing:SettingsItem.kt$SettingsItemSwitch</ID>
+    <ID>ModifierMissing:SharedContactDialog.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:SimpleAlertDialog.kt$SimpleAlertDialog</ID>
     <ID>ModifierMissing:SlidingSelector.kt$OptionLabel</ID>
     <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt$modifier = modifier.fillMaxWidth().padding(all = 16.dp)</ID>
@@ -45,6 +47,8 @@
     <ID>ModifierReused:TextDividerPreference.kt$Row(modifier = modifier.fillMaxWidth().padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)) } }</ID>
     <ID>MultipleEmitters:PreferenceCategory.kt$PreferenceCategory</ID>
     <ID>ParameterNaming:BitwisePreference.kt$onItemSelected</ID>
+    <ID>ParameterNaming:ChannelSelection.kt$onSelected</ID>
+    <ID>ParameterNaming:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>ParameterNaming:DropDownPreference.kt$onItemSelected</ID>
     <ID>ParameterNaming:EditIPv4Preference.kt$onValueChanged</ID>
     <ID>ParameterNaming:EditListPreference.kt$onValuesChanged</ID>
@@ -60,6 +64,5 @@
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoPreview</ID>
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoSelfPreview</ID>
     <ID>PreviewPublic:SignalInfo.kt$SignalInfoSimplePreview</ID>
-    <ID>UnusedParameter:DropDownPreference.kt$modifier: Modifier = Modifier</ID>
   </CurrentIssues>
 </SmellBaseline>

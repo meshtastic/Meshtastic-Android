@@ -159,7 +159,7 @@
     <string name="analytics_okay">Salli analytiikka ja virheraportit.</string>
     <string name="accept">Hyväksy</string>
     <string name="cancel">Peruuta</string>
-    <string name="discard_changes">Hylkää muutokset</string>
+    <string name="discard_changes">Hylkää</string>
     <string name="save_changes">Tallenna</string>
     <string name="new_channel_rcvd">Uusi kanavan URL-osoite vastaanotettu</string>
     <string name="permission_missing">Meshtastic tarvitsee sijaintioikeudet, jotta se voi löytää uusia laitteita Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>

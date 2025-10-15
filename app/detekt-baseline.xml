@@ -8,6 +8,7 @@
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
     <ID>ComposableParamOrder:Channel.kt$ChannelScreen</ID>
     <ID>ComposableParamOrder:Channel.kt$EditChannelUrl</ID>
+    <ID>ComposableParamOrder:ConnectionsNavIcon.kt$ConnectionsNavIcon</ID>
     <ID>ComposableParamOrder:DeviceMetrics.kt$DeviceMetricsChart</ID>
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:EnvironmentCharts.kt$ChartContent</ID>
@@ -15,19 +16,10 @@
     <ID>ComposableParamOrder:EnvironmentCharts.kt$MetricPlottingCanvas</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt$HostMetricsItem</ID>
     <ID>ComposableParamOrder:HostMetricsLog.kt$LogLine</ID>
-    <ID>ComposableParamOrder:Message.kt$MessageScreen</ID>
-    <ID>ComposableParamOrder:Message.kt$QuickChatRow</ID>
-    <ID>ComposableParamOrder:MessageActions.kt$MessageActions</ID>
-    <ID>ComposableParamOrder:MessageActions.kt$MessageStatusButton</ID>
-    <ID>ComposableParamOrder:MessageItem.kt$MessageItem</ID>
-    <ID>ComposableParamOrder:MessageList.kt$DeliveryInfo</ID>
-    <ID>ComposableParamOrder:MessageList.kt$MessageList</ID>
     <ID>ComposableParamOrder:PaxMetrics.kt$PaxMetricsChart</ID>
     <ID>ComposableParamOrder:PowerMetrics.kt$PowerMetricsChart</ID>
-    <ID>ComposableParamOrder:QuickChat.kt$OutlinedTextFieldWithCounter</ID>
     <ID>ComposableParamOrder:Share.kt$ShareScreen</ID>
     <ID>ComposableParamOrder:SignalMetrics.kt$SignalMetricsChart</ID>
-    <ID>ComposableParamOrder:TopLevelNavIcon.kt$ConnectionsNavIcon</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
@@ -54,18 +46,11 @@
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
-    <ID>LambdaParameterEventTrailing:ContactSharing.kt$onSharedContactRequested</ID>
-    <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
-    <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
-    <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
-    <ID>LambdaParameterEventTrailing:QuickChat.kt$onNavigateUp</ID>
     <ID>LambdaParameterEventTrailing:TracerouteLog.kt$onNavigateUp</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
-    <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
     <ID>LongMethod:EnvironmentMetrics.kt$@Composable fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -&gt; Unit)</ID>
     <ID>LongMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>LongParameterList:MessageViewModel.kt$MessageViewModel$( private val nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, quickChatActionRepository: QuickChatActionRepository, private val serviceRepository: ServiceRepository, private val packetRepository: PacketRepository, private val uiPrefs: UiPrefs, private val meshServiceNotifications: MeshServiceNotifications, )</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1000</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$500</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$512</ID>
@@ -112,7 +97,6 @@
     <ID>ModifierMissing:CommonCharts.kt$ChartHeader</ID>
     <ID>ModifierMissing:CommonCharts.kt$Legend</ID>
     <ID>ModifierMissing:CommonCharts.kt$TimeLabels</ID>
-    <ID>ModifierMissing:ContactSharing.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:Contacts.kt$ContactListView</ID>
     <ID>ModifierMissing:Contacts.kt$ContactsScreen</ID>
     <ID>ModifierMissing:Contacts.kt$SelectionToolbar</ID>
@@ -121,9 +105,6 @@
     <ID>ModifierMissing:EnvironmentMetrics.kt$EnvironmentMetricsScreen</ID>
     <ID>ModifierMissing:HostMetricsLog.kt$HostMetricsLogScreen</ID>
     <ID>ModifierMissing:Main.kt$MainScreen</ID>
-    <ID>ModifierMissing:MessageActions.kt$MessageStatusButton</ID>
-    <ID>ModifierMissing:MessageActions.kt$ReactionButton</ID>
-    <ID>ModifierMissing:MessageActions.kt$ReplyButton</ID>
     <ID>ModifierMissing:NetworkDevices.kt$NetworkDevices</ID>
     <ID>ModifierMissing:NodeListScreen.kt$NodeListScreen</ID>
     <ID>ModifierMissing:PaxMetrics.kt$PaxMetricsItem</ID>
@@ -131,11 +112,8 @@
     <ID>ModifierMissing:PositionLog.kt$PositionItem</ID>
     <ID>ModifierMissing:PositionLog.kt$PositionLogScreen</ID>
     <ID>ModifierMissing:PowerMetrics.kt$PowerMetricsScreen</ID>
-    <ID>ModifierMissing:Reaction.kt$ReactionDialog</ID>
     <ID>ModifierMissing:Share.kt$ShareScreen</ID>
-    <ID>ModifierMissing:SharedContactDialog.kt$SharedContactDialog</ID>
     <ID>ModifierMissing:SignalMetrics.kt$SignalMetricsScreen</ID>
-    <ID>ModifierMissing:TopLevelNavIcon.kt$TopLevelNavIcon</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:DeviceMetrics.kt$modifier.width(dp)</ID>
@@ -145,7 +123,6 @@
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:PowerMetrics.kt$modifier.width(dp)</ID>
-    <ID>ModifierNotUsedAtRoot:QuickChat.kt$modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier = modifier.weight(weight = Y_AXIS_WEIGHT)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier = modifier.width(dp)</ID>
     <ID>ModifierNotUsedAtRoot:SignalMetrics.kt$modifier.width(dp)</ID>
@@ -179,7 +156,6 @@
     <ID>MultipleEmitters:PowerMetrics.kt$PowerMetricsChart</ID>
     <ID>MultipleEmitters:SignalMetrics.kt$SignalMetricsChart</ID>
     <ID>MutableStateAutoboxing:Contacts.kt$mutableStateOf(2)</ID>
-    <ID>MutableStateParam:MessageList.kt$selectedIds</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>NewLineAtEndOfFile:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
@@ -208,15 +184,11 @@
     <ID>NoEmptyClassBody:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>NoSemicolons:DateUtils.kt$DateUtils$;</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
-    <ID>ParameterNaming:ContactSharing.kt$onSharedContactRequested</ID>
     <ID>ParameterNaming:Contacts.kt$onDeleteSelected</ID>
     <ID>ParameterNaming:Contacts.kt$onMuteSelected</ID>
-    <ID>ParameterNaming:MessageList.kt$onUnreadChanged</ID>
     <ID>ParameterNaming:UsbDevices.kt$onDeviceSelected</ID>
     <ID>PreviewPublic:Channel.kt$ModemPresetInfoPreview</ID>
     <ID>PreviewPublic:EmptyStateContent.kt$EmptyStateContentPreview</ID>
-    <ID>PreviewPublic:Reaction.kt$ReactionItemPreview</ID>
-    <ID>PreviewPublic:Reaction.kt$ReactionRowPreview</ID>
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
     <ID>SwallowedException:BluetoothInterface.kt$BluetoothInterface$ex: CancellationException</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
@@ -247,13 +219,11 @@
     <ID>TooManyFunctions:BluetoothInterface.kt$BluetoothInterface : IRadioInterface</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService : Service</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided&gt; : Stub</ID>
-    <ID>TooManyFunctions:MessageViewModel.kt$MessageViewModel : ViewModel</ID>
     <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService</ID>
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : Closeable</ID>
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModel</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
     <ID>ViewModelForwarding:Main.kt$VersionChecks(uIViewModel)</ID>
-    <ID>Wrapping:Message.kt${ event -&gt; when (event) { is MessageScreenEvent.SendMessage -&gt; { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -&gt; viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -&gt; { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -&gt; viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.NodeDetails -&gt; navigateToNodeDetails(event.node.num) is MessageScreenEvent.SetTitle -&gt; viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -&gt; navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -&gt; navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -&gt; onNavigateBack() is MessageScreenEvent.CopyToClipboard -&gt; { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -40,7 +40,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import org.meshtastic.core.strings.R
@@ -61,7 +60,7 @@ private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
     SimpleAlertDialog(title = R.string.error, text = R.string.wifi_qr_code_error, onDismiss = onDismiss)
 
 @Composable
-fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val networkConfig = state.radioConfig.network
     val formState = rememberConfigState(initialValue = networkConfig)
@@ -101,7 +100,7 @@ fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigView
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.network),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

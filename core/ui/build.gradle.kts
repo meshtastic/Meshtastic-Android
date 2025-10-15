@@ -24,12 +24,15 @@ plugins {
 android { namespace = "org.meshtastic.core.ui" }
 
 dependencies {
+    implementation(projects.core.data)
     implementation(projects.core.database)
     implementation(projects.core.model)
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
+    implementation(projects.core.service)
     implementation(projects.core.strings)
 
+    implementation(libs.accompanist.permissions)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.material3)
@@ -38,4 +41,12 @@ dependencies {
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.guava)
+    implementation(libs.zxing.core)
+    implementation(libs.zxing.android.embedded)
+    implementation(libs.timber)
+
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.runner)
 }

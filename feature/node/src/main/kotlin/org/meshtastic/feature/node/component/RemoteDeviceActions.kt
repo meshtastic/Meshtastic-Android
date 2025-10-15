@@ -24,26 +24,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.SettingsItem
+import org.meshtastic.core.ui.component.InsetDivider
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 @Composable
 internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction: (NodeDetailAction) -> Unit) {
     if (!node.isEffectivelyUnmessageable) {
-        SettingsItem(
+        ListItem(
             text = stringResource(id = R.string.direct_message),
             leadingIcon = Icons.AutoMirrored.TwoTone.Message,
-            trailingContent = {},
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
         )
+
+        InsetDivider()
     }
-    SettingsItem(
+
+    ListItem(
         text = stringResource(id = R.string.exchange_userinfo),
         leadingIcon = Icons.Default.Person,
-        trailingContent = {},
+        trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
     )
+
+    InsetDivider()
+
     TracerouteButton(
         lastTracerouteTime = lastTracerouteTime,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },

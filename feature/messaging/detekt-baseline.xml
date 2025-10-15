@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComposableParamOrder:Message.kt$MessageScreen</ID>
+    <ID>ComposableParamOrder:Message.kt$QuickChatRow</ID>
+    <ID>ComposableParamOrder:MessageActions.kt$MessageActions</ID>
+    <ID>ComposableParamOrder:MessageActions.kt$MessageStatusButton</ID>
+    <ID>ComposableParamOrder:MessageItem.kt$MessageItem</ID>
+    <ID>ComposableParamOrder:MessageList.kt$DeliveryInfo</ID>
+    <ID>ComposableParamOrder:MessageList.kt$MessageList</ID>
+    <ID>ComposableParamOrder:QuickChat.kt$OutlinedTextFieldWithCounter</ID>
+    <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
+    <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
+    <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
+    <ID>LambdaParameterEventTrailing:QuickChat.kt$onNavigateUp</ID>
+    <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
+    <ID>LongParameterList:MessageViewModel.kt$MessageViewModel$( private val nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, quickChatActionRepository: QuickChatActionRepository, private val serviceRepository: ServiceRepository, private val packetRepository: PacketRepository, private val uiPrefs: UiPrefs, private val meshServiceNotifications: MeshServiceNotifications, )</ID>
+    <ID>ModifierMissing:Message.kt$MessageScreen</ID>
+    <ID>ModifierNotUsedAtRoot:QuickChat.kt$modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
+    <ID>MutableStateParam:MessageList.kt$selectedIds</ID>
+    <ID>ParameterNaming:MessageList.kt$onUnreadChanged</ID>
+    <ID>TooManyFunctions:MessageViewModel.kt$MessageViewModel : ViewModel</ID>
+    <ID>Wrapping:Message.kt${ event -&gt; when (event) { is MessageScreenEvent.SendMessage -&gt; { viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId) if (event.replyingToPacketId != null) replyingToPacketId = null messageInputState.clearText() } is MessageScreenEvent.SendReaction -&gt; viewModel.sendReaction(event.emoji, event.messageId, contactKey) is MessageScreenEvent.DeleteMessages -&gt; { viewModel.deleteMessages(event.ids) selectedMessageIds.value = emptySet() showDeleteDialog = false } is MessageScreenEvent.ClearUnreadCount -&gt; viewModel.clearUnreadCount(contactKey, event.lastReadMessageId) is MessageScreenEvent.NodeDetails -&gt; navigateToNodeDetails(event.node.num) is MessageScreenEvent.SetTitle -&gt; viewModel.setTitle(event.title) is MessageScreenEvent.NavigateToMessages -&gt; navigateToMessages(event.contactKey) is MessageScreenEvent.NavigateToNodeDetails -&gt; navigateToNodeDetails(event.nodeNum) MessageScreenEvent.NavigateBack -&gt; onNavigateBack() is MessageScreenEvent.CopyToClipboard -&gt; { clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text)) selectedMessageIds.value = emptySet() } } }</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.FormatPaint
@@ -52,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -63,11 +65,10 @@ import kotlinx.coroutines.delay
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
-import org.meshtastic.core.ui.component.SettingsItem
-import org.meshtastic.core.ui.component.SettingsItemDetail
-import org.meshtastic.core.ui.component.SettingsItemSwitch
+import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
@@ -230,11 +231,12 @@ fun SettingsScreen(
             )
 
             val context = LocalContext.current
+            val resources = LocalResources.current
 
             TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
                 if (state.analyticsAvailable) {
                     val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
-                    SettingsItemSwitch(
+                    SwitchListItem(
                         text = stringResource(R.string.analytics_okay),
                         checked = allowed,
                         leadingIcon = Icons.Default.BugReport,
@@ -255,7 +257,7 @@ fun SettingsScreen(
                             } else {
                                 Toast.makeText(
                                     context,
-                                    context.getString(R.string.location_disabled),
+                                    resources.getString(R.string.location_disabled),
                                     Toast.LENGTH_LONG,
                                 )
                                     .show()
@@ -269,14 +271,13 @@ fun SettingsScreen(
                     }
                 }
 
-                SettingsItemSwitch(
+                SwitchListItem(
                     text = stringResource(R.string.provide_location_to_mesh),
                     leadingIcon = Icons.Rounded.LocationOn,
                     enabled = !isGpsDisabled,
                     checked = provideLocation,
-                ) {
-                    settingsViewModel.setProvideLocation(!provideLocation)
-                }
+                    onClick = { settingsViewModel.setProvideLocation(!provideLocation) },
+                )
 
                 val settingsLauncher =
                     rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
@@ -284,15 +285,10 @@ fun SettingsScreen(
                 // On Android 12 and below, system app settings for language are not available. Use the in-app language
                 // picker for these devices.
                 val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
-                    trailingContent =
-                    if (useInAppLangPicker) {
-                        null
-                    } else {
-                        {}
-                    },
+                    trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 ) {
                     if (useInAppLangPicker) {
                         showLanguagePickerDialog = true
@@ -307,10 +303,10 @@ fun SettingsScreen(
                     }
                 }
 
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.theme),
                     leadingIcon = Icons.Rounded.FormatPaint,
-                    trailingContent = {},
+                    trailingIcon = null,
                 ) {
                     showThemePickerDialog = true
                 }
@@ -322,10 +318,10 @@ fun SettingsScreen(
                             it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.save_rangetest),
                     leadingIcon = Icons.Rounded.Output,
-                    trailingContent = {},
+                    trailingIcon = null,
                 ) {
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -342,10 +338,10 @@ fun SettingsScreen(
                             it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.export_data_csv),
                     leadingIcon = Icons.Rounded.Output,
-                    trailingContent = {},
+                    trailingIcon = null,
                 ) {
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -356,18 +352,18 @@ fun SettingsScreen(
                     exportDataLauncher.launch(intent)
                 }
 
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.intro_show),
                     leadingIcon = Icons.Rounded.WavingHand,
-                    trailingContent = {},
+                    trailingIcon = null,
                 ) {
                     settingsViewModel.showAppIntro()
                 }
 
-                SettingsItem(
+                ListItem(
                     text = stringResource(R.string.system_settings),
                     leadingIcon = Icons.Rounded.AppSettingsAlt,
-                    trailingContent = null,
+                    trailingIcon = null,
                 ) {
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.fromParts("package", context.packageName, null)
@@ -397,6 +393,7 @@ private fun AppVersionButton(
     onUnlockExcludedModules: () -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     var clickCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(clickCount) {
@@ -406,23 +403,25 @@ private fun AppVersionButton(
         }
     }
 
-    SettingsItemDetail(
+    ListItem(
         text = stringResource(R.string.app_version),
-        icon = Icons.Rounded.Memory,
+        leadingIcon = Icons.Rounded.Memory,
         supportingText = appVersionName,
+        trailingIcon = null,
     ) {
         clickCount = clickCount.inc().coerceIn(0, UNLOCK_CLICK_COUNT)
 
         when {
             clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
                 clickCount = 0
-                Toast.makeText(context, context.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, resources.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG)
+                    .show()
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
                 onUnlockExcludedModules()
-                Toast.makeText(context, context.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, resources.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -448,13 +447,13 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
 
 @Composable
 private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    val context = LocalContext.current
+    val resources = LocalResources.current
     val themeMap = remember {
         mapOf(
-            context.getString(R.string.dynamic) to MODE_DYNAMIC,
-            context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-            context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-            context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            resources.getString(R.string.dynamic) to MODE_DYNAMIC,
+            resources.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            resources.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            resources.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
         )
             .mapValues { (_, value) -> { onClickTheme(value) } }
     }

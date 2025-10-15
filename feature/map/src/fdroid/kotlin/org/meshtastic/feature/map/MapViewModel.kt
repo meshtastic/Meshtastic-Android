@@ -17,10 +17,7 @@
 
 package org.meshtastic.feature.map
 
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -28,6 +25,7 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import javax.inject.Inject
 
@@ -50,11 +48,7 @@ constructor(
         }
 
     val localConfig =
-        radioConfigRepository.localConfigFlow.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000L),
-            LocalConfig.getDefaultInstance(),
-        )
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
 
     val config
         get() = localConfig.value

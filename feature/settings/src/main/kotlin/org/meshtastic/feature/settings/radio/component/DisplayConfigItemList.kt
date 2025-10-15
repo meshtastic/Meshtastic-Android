@@ -25,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -38,14 +37,14 @@ import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 
 @Composable
-fun DisplayConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val displayConfig = state.radioConfig.display
     val formState = rememberConfigState(initialValue = displayConfig)
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.display),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,

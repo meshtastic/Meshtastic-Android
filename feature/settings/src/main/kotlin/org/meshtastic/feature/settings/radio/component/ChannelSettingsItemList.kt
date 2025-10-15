@@ -22,13 +22,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,13 +38,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Close
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,19 +53,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.component.ChannelItem
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.SecurityIcon
@@ -82,34 +74,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.channelSettings
-
-@Composable
-private fun ChannelItem(
-    index: Int,
-    title: String,
-    enabled: Boolean,
-    onClick: () -> Unit = {},
-    content: @Composable RowScope.() -> Unit,
-) {
-    val fontColor = if (index == 0) MaterialTheme.colorScheme.primary else Color.Unspecified
-    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).clickable(enabled = enabled) { onClick() }) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp),
-        ) {
-            AssistChip(onClick = onClick, label = { Text(text = "$index", color = fontColor) })
-            Text(
-                text = title,
-                modifier = Modifier.weight(1f),
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                style = MaterialTheme.typography.bodyLarge,
-                color = fontColor,
-            )
-            content()
-        }
-    }
-}
 
 @Composable
 private fun ChannelCard(
@@ -155,21 +119,7 @@ private fun ChannelCard(
 }
 
 @Composable
-fun ChannelSelection(
-    index: Int,
-    title: String,
-    enabled: Boolean,
-    isSelected: Boolean,
-    onSelected: (Boolean) -> Unit,
-    channel: Channel,
-) = ChannelItem(index = index, title = title, enabled = enabled) {
-    SecurityIcon(channel)
-    Spacer(modifier = Modifier.width(10.dp))
-    Checkbox(enabled = enabled, checked = isSelected, onCheckedChange = onSelected)
-}
-
-@Composable
-fun ChannelConfigScreen(navController: NavController, viewModel: RadioConfigViewModel) {
+fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     if (state.responseState.isWaiting()) {
@@ -178,7 +128,7 @@ fun ChannelConfigScreen(navController: NavController, viewModel: RadioConfigView
 
     ChannelSettingsItemList(
         title = stringResource(id = R.string.channels),
-        onBack = { navController.popBackStack() },
+        onBack = onBack,
         settingsList = state.channelList,
         loraConfig = state.radioConfig.lora,
         maxChannels = viewModel.maxChannels,
