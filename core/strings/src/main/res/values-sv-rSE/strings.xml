@@ -327,6 +327,7 @@
     <string name="ch_util_definition">Utnyttjande av den nuvarande kanalen, inklusive välformad TX, RX och felformaterad RX (sk. brus).</string>
     <string name="air_util_definition">Procent av luftrumstid använd för sändningar inom den senaste timmen.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Delad nyckel</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Kryptering med Publik nyckel</string>

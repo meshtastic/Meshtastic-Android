@@ -326,6 +326,7 @@
     <string name="ch_util_definition">目前頻道的使用情況，包括格式正確的傳輸（TX）、接收（RX）和格式錯誤的接收（也稱為雜訊）。</string>
     <string name="air_util_definition">過去一小時内傳輸所使用的通話時間（airtime）百分比。</string>
     <string name="iaq">室内空氣品質指標(IAQ)</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">共用金鑰</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">加密公鑰</string>

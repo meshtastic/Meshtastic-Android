@@ -328,6 +328,7 @@
     <string name="ch_util_definition">Искоришћење за тренутни канал, укључујући добро формиран TX, RX и неисправан RX (такође познат као шум).</string>
     <string name="air_util_definition">Проценат искоришћења ефирског времена за пренос у последњем сату.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Дељени кључ</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Шифровање јавним кључем</string>

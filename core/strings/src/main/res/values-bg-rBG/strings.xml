@@ -327,6 +327,7 @@
     <string name="ch_util_definition">Използване на текущия канал, включително добре формулиан TX, RX и деформиран RX (така наречен шум).</string>
     <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Споделен ключ</string>
     <string name="encryption_psk_text">Могат да се изпращат/получават само съобщения в каналите. Директните съобщения изискват функцията Инфраструктура с публичен ключ във фърмуер 2.5+.</string>
     <string name="encryption_pkc">Криптиране с публичния ключ</string>

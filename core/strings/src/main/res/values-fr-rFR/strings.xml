@@ -327,6 +327,7 @@
     <string name="ch_util_definition">Utilisation pour le canal actuel, y compris TX bien formé, RX et RX mal formé (AKA bruit).</string>
     <string name="air_util_definition">Pourcentage de temps d\'antenne pour la transmission utilisée au cours de la dernière heure.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Clé partagée</string>
     <string name="encryption_psk_text">Seuls les messages vers les canaux peuvent être senvoyés/reçus. Les messages directs nécessitent la fonctionnalité d\'infrastructure de clé publique disponible dans le firmware 2.5+.</string>
     <string name="encryption_pkc">Chiffrement de clé publique</string>

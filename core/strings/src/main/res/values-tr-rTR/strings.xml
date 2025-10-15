@@ -327,6 +327,7 @@
     <string name="ch_util_definition">İyi biçimlendirilmiş TX ve RX ile hatalı biçimlendirilmiş RX (gürültü) dahil olmak üzere mevcut kanal için kullanım.</string>
     <string name="air_util_definition">Son bir saat içinde kullanılan iletim için yayın süresi yüzdesi.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Paylaşılan Anahtar</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Genel Anahtar Şifrelemesi</string>

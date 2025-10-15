@@ -328,6 +328,7 @@
     <string name="ch_util_definition">当前信道的利用情况，包括格式正确的发送(TX）、接收（RX）以及无法解码的接收(即噪声）。</string>
     <string name="air_util_definition">过去一小时内用于传输的空中占用时间百分比。</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">共享密钥</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">公钥加密</string>

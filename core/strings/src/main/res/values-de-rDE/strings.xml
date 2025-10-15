@@ -327,6 +327,7 @@
     <string name="ch_util_definition">Auslastung für den aktuellen Kanal, einschließlich fehlerfreier TX, RX und fehlerhaftem RX (Rauschen).</string>
     <string name="air_util_definition">Prozentuale Sendezeit für die Übertragung innerhalb der letzten Stunde.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Geteilter Schlüssel</string>
     <string name="encryption_psk_text">Es können nur Kanalnachrichten gesendet/empfangen werden. Direktnachrichten erfordern die Verschlüsselung mit öffentlichem Knotenschlüssel seit Firmware 2.5+.</string>
     <string name="encryption_pkc">Verschlüsselung mit öffentlichen Schlüssel</string>
