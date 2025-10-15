@@ -327,6 +327,7 @@
     <string name="ch_util_definition">A jelenlegi csatorna kihasználtsága, beleértve a megfelelő TX/RX és a hibás RX (zaj) csomagokat.</string>
     <string name="air_util_definition">Az elmúlt órában az adásra használt adásidő százaléka.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Megosztott kulcs</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Publikus Kulcs Titkosítás</string>
