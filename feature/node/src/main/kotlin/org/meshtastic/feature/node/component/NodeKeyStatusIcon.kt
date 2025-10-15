@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -68,6 +67,57 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+
+/**
+ * function to display information about the current node's encryption key.
+ *
+ * @property hasPKC boolean if the node has public key encryption
+ * @property mismatchKey boolean if the public key does not match the recorded key.
+ * @property publicKey boolean if the node has a shared public key.
+ */
+@Composable
+fun NodeKeyStatusIcon(
+    modifier: Modifier = Modifier,
+    hasPKC: Boolean,
+    mismatchKey: Boolean,
+    publicKey: ByteString? = null,
+) {
+    var showEncryptionDialog by remember { mutableStateOf(false) }
+    if (showEncryptionDialog) {
+        val (title, text) =
+            when {
+                mismatchKey -> R.string.encryption_error to R.string.encryption_error_text
+                hasPKC -> R.string.encryption_pkc to R.string.encryption_pkc_text
+                else -> R.string.encryption_psk to R.string.encryption_psk_text
+            }
+        KeyStatusDialog(title, text, publicKey) { showEncryptionDialog = false }
+    }
+
+    val (icon, tint) =
+        when {
+            mismatchKey -> Icons.Default.KeyOff to colorScheme.StatusRed
+            hasPKC -> Icons.Default.Lock to colorScheme.StatusGreen
+            else ->
+                ImageVector.vectorResource(org.meshtastic.core.ui.R.drawable.ic_lock_open_right_24) to
+                    colorScheme.StatusYellow
+        }
+
+    IconButton(onClick = { showEncryptionDialog = true }, modifier = modifier) {
+        Icon(
+            imageVector = icon,
+            contentDescription =
+            stringResource(
+                id =
+                when {
+                    mismatchKey -> R.string.encryption_error
+                    hasPKC -> R.string.encryption_pkc
+                    else -> R.string.encryption_psk
+                },
+            ),
+            tint = tint,
+        )
+    }
+}
 
 /**
  * Represents the various visual states of the node key as an enum. Each enum constant encapsulates the icon, color,
@@ -119,12 +169,7 @@ enum class NodeKeySecurityState(
 private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: ByteString?, onDismiss: () -> Unit = {}) {
     var showAll by rememberSaveable { mutableStateOf(false) }
     AlertDialog(
-        modifier =
-        if (showAll) {
-            Modifier.fillMaxSize()
-        } else {
-            Modifier
-        },
+        modifier = Modifier,
         onDismissRequest = onDismiss,
         title = {
             if (showAll) {
@@ -174,50 +219,6 @@ private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: By
             }
         },
     )
-}
-
-@Composable
-fun NodeKeyStatusIcon(
-    modifier: Modifier = Modifier,
-    hasPKC: Boolean,
-    mismatchKey: Boolean,
-    publicKey: ByteString? = null,
-) {
-    var showEncryptionDialog by remember { mutableStateOf(false) }
-    if (showEncryptionDialog) {
-        val (title, text) =
-            when {
-                mismatchKey -> R.string.encryption_error to R.string.encryption_error_text
-                hasPKC -> R.string.encryption_pkc to R.string.encryption_pkc_text
-                else -> R.string.encryption_psk to R.string.encryption_psk_text
-            }
-        KeyStatusDialog(title, text, publicKey) { showEncryptionDialog = false }
-    }
-
-    val (icon, tint) =
-        when {
-            mismatchKey -> Icons.Default.KeyOff to colorScheme.StatusRed
-            hasPKC -> Icons.Default.Lock to colorScheme.StatusGreen
-            else ->
-                ImageVector.vectorResource(org.meshtastic.core.ui.R.drawable.ic_lock_open_right_24) to
-                    colorScheme.StatusYellow
-        }
-
-    IconButton(onClick = { showEncryptionDialog = true }, modifier = modifier) {
-        Icon(
-            imageVector = icon,
-            contentDescription =
-            stringResource(
-                id =
-                when {
-                    mismatchKey -> R.string.encryption_error
-                    hasPKC -> R.string.encryption_pkc
-                    else -> R.string.encryption_psk
-                },
-            ),
-            tint = tint,
-        )
-    }
 }
 
 /**
