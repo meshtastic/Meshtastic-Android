@@ -21,18 +21,13 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import org.meshtastic.core.di.annotation.DefaultDispatcher
-import org.meshtastic.core.di.annotation.IoDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    @Provides @DefaultDispatcher
-    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
-
-    @Provides @IoDispatcher
-    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+    @Provides
+    fun provideCoroutineDispatchers(): CoroutineDispatchers =
+        CoroutineDispatchers(io = Dispatchers.IO, main = Dispatchers.Main, default = Dispatchers.Default)
 }
