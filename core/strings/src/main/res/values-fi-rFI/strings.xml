@@ -890,7 +890,7 @@
     <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Ei sovellusta linkin avaamiseen.</string>
-    <string name="system_settings">Järjestelmäasetukset</string>
+    <string name="system_settings">Järjestelmäaset</string>
     <string name="no_local_stats">Tilastoja ei ole saatavilla</string>
     <string name="analytics_notice">Analytiikkatietoja kerätään auttamaan meitä parantamaan Android-sovellusta (kiitos siitä). Saamme anonymisoitua tietoa käyttäjien toiminnasta, kuten kaatumisraportteja ja tietoa sovelluksessa käytetyistä näkymistä jne.</string>
     <string name="analytics_platforms">"Analytiikka-alustat: "</string>
