@@ -54,6 +54,8 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.channel
+import org.meshtastic.proto.channelSet
 
 @Suppress("LongMethod")
 @Composable
@@ -102,26 +104,25 @@ fun ContactItem(
                 colors = colors,
             )
             Column(modifier = Modifier.weight(1f)) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(text = longName, modifier = Modifier.weight(1f))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         // Show unlock icon for broadcast with default PSK
                         val isBroadcast =
                             contact.contactKey.getOrNull(1) == '^' ||
-                                contact.contactKey.endsWith("^all") ||
-                                contact.contactKey.endsWith("^broadcast")
+                                    contact.contactKey.endsWith("^all") ||
+                                    contact.contactKey.endsWith("^broadcast")
                         if (isBroadcast && channels != null) {
                             val channelIndex = contact.contactKey[0].digitToIntOrNull()
                             channelIndex?.let { index -> SecurityIcon(channels, index) }
-                            Spacer(modifier = Modifier.width(8.dp))
                         }
-                        Text(
-                            text = lastMessageTime.orEmpty(),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                            modifier = Modifier.width(80.dp),
-                        )
-                    }
+
+                    Text(text = longName)
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = lastMessageTime.orEmpty(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        modifier = Modifier.width(80.dp),
+                    )
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
