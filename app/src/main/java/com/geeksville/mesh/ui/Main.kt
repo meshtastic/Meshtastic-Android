@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
@@ -372,8 +373,8 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             }
         },
     ) {
-        Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { _ ->
-            Column(modifier = Modifier.fillMaxSize()) {
+        Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { paddingValues ->
+            Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
                 NavHost(
                     navController = navController,
                     startDestination = NodesRoutes.NodesGraph,
