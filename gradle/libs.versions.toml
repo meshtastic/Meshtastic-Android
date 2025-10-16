@@ -33,7 +33,7 @@ detekt = "1.23.8"
 devtools-ksp = "2.2.20-2.0.3"
 markdownRenderer = "0.37.0"
 osmdroid-android = "6.1.20"
-protobuf = "4.32.1"
+protobuf = "4.33.0"
 
 
 [libraries]
