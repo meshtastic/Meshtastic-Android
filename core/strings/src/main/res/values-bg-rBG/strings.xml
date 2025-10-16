@@ -98,7 +98,7 @@
     <string name="config_device_transmitOverLora_summary">Whether in addition to sending it to MQTT and the PhoneAPI, our NeighborInfo should be transmitted over LoRa. Not available on a channel with default key and name.</string>
     <string name="config_display_screen_on_secs_summary">Колко дълго екранът остава включен след натискане на потребителския бутон или получаване на съобщения.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Автоматично превключва към следващата страница на екрана като въртележка, въз основа на зададения интервал.</string>
-    <string name="config_display_compass_north_top_summary">The compass heading on the screen outside of the circle will always point north.</string>
+    <string name="config_display_compass_north_top_summary">Компасът на екрана извън кръга винаги ще сочи на север.</string>
     <string name="config_display_flip_screen_summary">Обръщане на екрана вертикално.</string>
     <string name="config_display_units_summary">Мерни единици, показвани на екрана на устройството.</string>
     <string name="config_display_oled_summary">Override automatic OLED screen detection.</string>
@@ -121,8 +121,8 @@
     <string name="config_network_wifi_enabled_summary">Активирането на WiFi ще дезактивира Bluetooth връзката с приложението.</string>
     <string name="config_network_eth_enabled_summary">Активирането на Ethernet ще дезактивира Bluetooth връзката с приложението. TCP връзки с възли не са налични на устройства на Apple.</string>
     <string name="config_network_udp_enabled_summary">Enable broadcasting packets via UDP over the local network.</string>
-    <string name="config_position_broadcast_secs_summary">The maximum interval that can elapse without a node broadcasting a position.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
+    <string name="config_position_broadcast_secs_summary">Максималният интервал, който може да изтече, без възела да излъчи позиция.</string>
+    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Най-бързо ще бъдат изпратени актуализации на позицията, ако е спазено минималното разстояние.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">The minimum distance change in meters to be considered for a smart position broadcast.</string>
     <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
@@ -136,7 +136,7 @@
     <!-- Position Config -->
     <string name="position_packet">Position Packet</string>
     <string name="broadcast_interval">Интервал на излъчване</string>
-    <string name="smart_position">Smart Position</string>
+    <string name="smart_position">Интелигентна позиция</string>
     <string name="minimum_interval">Минимален интервал</string>
     <string name="minimum_distance">Минимално разстояние</string>
     <string name="device_gps">Device GPS</string>
@@ -491,7 +491,7 @@
     <string name="oled_type">Тип на OLED</string>
     <string name="display_mode">Режим на дисплея</string>
     <string name="always_point_north">Always point north</string>
-    <string name="bold_heading">Bold Heading</string>
+    <string name="bold_heading">Удебелен заглавен шрифт</string>
     <string name="wake_on_tap_or_motion">Събуждане при докосване или движение</string>
     <string name="compass_orientation">Ориентация на компаса</string>
     <string name="external_notification_config">Конфигуриране на външни известия</string>
@@ -591,8 +591,8 @@
     <string name="adc_multiplier_override">ADC multiplier override</string>
     <string name="adc_multiplier_override_ratio">ADC multiplier override ratio</string>
     <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration (seconds)</string>
-    <string name="super_deep_sleep_duration_seconds">Super deep sleep duration (seconds)</string>
-    <string name="light_sleep_duration_seconds">Light sleep duration (seconds)</string>
+    <string name="super_deep_sleep_duration_seconds">Продължителност на супер дълбокия сън (секунди)</string>
+    <string name="light_sleep_duration_seconds">Продължителност на лекия сън (секунди)</string>
     <string name="minimum_wake_time_seconds">Минимално време за събуждане (секунди)</string>
     <string name="battery_ina_2xx_i2c_address">I2C адрес на батерията INA_2XX</string>
     <string name="range_test_config">Конфигуриране на Тест на обхвата</string>
