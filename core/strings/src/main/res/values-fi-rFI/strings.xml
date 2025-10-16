@@ -327,7 +327,7 @@
     <string name="ch_util_definition">Nykyisen kanavan lähetyksen (TX) ja vastaanoton (RX) käyttöaste ja virheelliset lähetykset, eli häiriöt.</string>
     <string name="air_util_definition">Viimeisen tunnin aikana käytetyn lähetyksen prosenttiosuus.</string>
     <string name="iaq">IAQ</string>
-    <string name="show_all_key_title">Encryption Key Meanings</string>
+    <string name="show_all_key_title">Salausavainten merkitykset</string>
     <string name="encryption_psk">Jaettu avain</string>
     <string name="encryption_psk_text">Voit lähettää ja vastaanottaa vain kanavaviestejä. Yksityisviestit toimivat vasta, kun käytössä on ohjelmistoversio 2.5+ tai uudempi, jossa on tuki salausavaimille.</string>
     <string name="encryption_pkc">Julkisen avaimen salaus</string>
