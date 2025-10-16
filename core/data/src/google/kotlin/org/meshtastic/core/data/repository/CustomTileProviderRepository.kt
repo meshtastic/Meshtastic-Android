@@ -17,7 +17,6 @@
 
 package org.meshtastic.core.data.repository
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +24,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.meshtastic.core.data.model.CustomTileProviderConfig
-import org.meshtastic.core.di.annotation.IoDispatcher
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.map.MapTileProviderPrefs
 import timber.log.Timber
 import javax.inject.Inject
@@ -49,7 +48,7 @@ class CustomTileProviderRepositoryImpl
 @Inject
 constructor(
     private val json: Json,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val dispatchers: CoroutineDispatchers,
     private val mapTileProviderPrefs: MapTileProviderPrefs,
 ) : CustomTileProviderRepository {
 
@@ -98,7 +97,7 @@ constructor(
     }
 
     private suspend fun saveDataToPrefs(providers: List<CustomTileProviderConfig>) {
-        withContext(ioDispatcher) {
+        withContext(dispatchers.io) {
             try {
                 val jsonString = json.encodeToString(providers)
                 mapTileProviderPrefs.customTileProviders = jsonString
