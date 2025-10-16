@@ -327,7 +327,7 @@
     <string name="ch_util_definition">Praeguse kanali kasutamine, sealhulgas korrektne TX, RX ja vigane RX (ehk müra).</string>
     <string name="air_util_definition">Viimase tunni jooksul kasutatud eetriaja protsent.</string>
     <string name="iaq">IAQ</string>
-    <string name="show_all_key_title">Encryption Key Meanings</string>
+    <string name="show_all_key_title">Krüpteerimisvõtmete nimed</string>
     <string name="encryption_psk">Jagatud võti</string>
     <string name="encryption_psk_text">Saata/vastuvõtta saab ainult kanali-sõnumeid. Otsesõnumid nõuavad avaliku võtme infrastruktuuri funktsiooni püsivara versioonist 2.5 alates.</string>
     <string name="encryption_pkc">Avaliku võtme krüpteerimine</string>
