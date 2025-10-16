@@ -71,7 +71,7 @@ internal class BluetoothWorkQueue {
             val newWork = workQueue.removeAt(0)
             currentWork = newWork
 
-            if (newWork.timeoutMillis > 0) {
+            if (newWork.timeoutMillis != 0L) {
                 activeTimeout =
                     serviceScope.launch {
                         delay(newWork.timeoutMillis)
