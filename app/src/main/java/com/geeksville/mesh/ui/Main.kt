@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
@@ -73,6 +74,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -371,8 +373,8 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             }
         },
     ) {
-        Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { _ ->
-            Column(modifier = Modifier.fillMaxSize()) {
+        Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { paddingValues ->
+            Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
                 NavHost(
                     navController = navController,
                     startDestination = NodesRoutes.NodesGraph,
@@ -396,6 +398,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     val myFirmwareVersion = myNodeInfo?.firmwareVersion
 
@@ -427,8 +430,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE && BuildConfig.DEBUG.not()
                 if (isOld) {
                     viewModel.showAlert(
-                        context.getString(R.string.app_too_old),
-                        context.getString(R.string.must_update),
+                        resources.getString(R.string.app_too_old),
+                        resources.getString(R.string.must_update),
                         dismissable = false,
                         onConfirm = {
                             val service = viewModel.meshService ?: return@showAlert
@@ -439,8 +442,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                     myFirmwareVersion?.let {
                         val curVer = DeviceVersion(it)
                         if (curVer < MeshService.absoluteMinDeviceVersion) {
-                            val title = context.getString(R.string.firmware_too_old)
-                            val message = context.getString(R.string.firmware_old)
+                            val title = resources.getString(R.string.firmware_too_old)
+                            val message = resources.getString(R.string.firmware_old)
                             viewModel.showAlert(
                                 title = title,
                                 html = message,
@@ -451,9 +454,9 @@ private fun VersionChecks(viewModel: UIViewModel) {
                                 },
                             )
                         } else if (curVer < MeshService.minDeviceVersion) {
-                            val title = context.getString(R.string.should_update_firmware)
+                            val title = resources.getString(R.string.should_update_firmware)
                             val message =
-                                context.getString(R.string.should_update, latestStableFirmwareRelease.asString)
+                                resources.getString(R.string.should_update, latestStableFirmwareRelease.asString)
                             viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
                         }
                     }
