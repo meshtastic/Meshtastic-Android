@@ -80,7 +80,9 @@ internal class BluetoothWorkQueue {
                     }
             }
             isSettingMtu = false // Most work is not doing MTU stuff, the work that is will re set this flag
-            newWork.startWork()
+            if (!newWork.startWork()) {
+                completeWork(STATUS_TIMEOUT, Unit)
+            }
         }
     }
 

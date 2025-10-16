@@ -161,7 +161,7 @@ class SafeBluetooth(
             // (the race condition does not affect that case). If that connection times out
             // you will get a callback with status=133. Then call BluetoothGatt#connect()
             // to initiate a background connection.
-            lowLevelConnect(autoConnect) != null
+            lowLevelConnect(false) != null
         }
     }
 
