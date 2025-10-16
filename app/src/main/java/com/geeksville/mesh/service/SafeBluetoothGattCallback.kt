@@ -126,10 +126,8 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
     ) {
         // Store value in characteristic for compatibility with existing code
         // Note: This is safe because we clone the value before using it
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            @Suppress("DEPRECATION")
-            characteristic.value = value
-        }
+        @Suppress("DEPRECATION")
+        characteristic.value = value
         workQueue.completeWork(status, characteristic)
     }
 
@@ -181,10 +179,8 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
         value: ByteArray,
     ) {
         // Store value in characteristic for compatibility with existing code
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            @Suppress("DEPRECATION")
-            characteristic.value = value
-        }
+        @Suppress("DEPRECATION")
+        characteristic.value = value
         onCharacteristicChanged(gatt, characteristic)
     }
 
