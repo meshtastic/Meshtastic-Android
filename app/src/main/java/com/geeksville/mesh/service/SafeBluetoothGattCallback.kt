@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,13 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
 
     private val workQueue = safeBluetooth.workQueue
 
+    companion object {
+        private const val RECONNECT_WORKAROUND_STATUS_CODE = 133
+        private const val LOST_CONNECTION_STATUS_CODE = 147
+        private const val MYSTERY_STATUS_CODE = 257
+    }
+
+    @Suppress("CyclomaticComplexMethod")
     override fun onConnectionStateChange(g: BluetoothGatt, status: Int, newState: Int) = exceptionReporter {
         Timber.i("new bluetooth connection state $newState, status $status")
 
@@ -77,7 +84,7 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
                         } else {
                             safeBluetooth.lostConnection("lost connection")
                         }
-                    } else if (status == 133) {
+                    } else if (status == RECONNECT_WORKAROUND_STATUS_CODE) {
                         // We were not previously connected and we just failed with our non-auto connection
                         // attempt.  Therefore we now need
                         // to do an autoconnection attempt.  When that attempt succeeds/fails the normal
@@ -93,12 +100,12 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
                             safeBluetooth.closeGatt() // Close the old non-auto connection
                             safeBluetooth.lowLevelConnect(true)
                         }
-                    } else if (status == 147) {
+                    } else if (status == LOST_CONNECTION_STATUS_CODE) {
                         Timber.i("got 147, calling lostConnection()")
                         safeBluetooth.lostConnection("code 147")
                     }
 
-                    if (status == 257) { // mystery error code when phone is hung
+                    if (status == MYSTERY_STATUS_CODE) { // mystery error code when phone is hung
                         // throw Exception("Mystery bluetooth failure - debug me")
                         safeBluetooth.restartBle()
                     }

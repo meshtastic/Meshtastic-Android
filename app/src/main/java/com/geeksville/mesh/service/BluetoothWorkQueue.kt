@@ -142,6 +142,7 @@ internal class BluetoothWorkQueue {
         synchronized(workQueue) {
             Timber.w("Failing ${workQueue.size} works, because ${ex.message}")
             workQueue.forEach {
+                @Suppress("TooGenericExceptionCaught")
                 try {
                     it.completion.resumeWithException(ex)
                 } catch (e: Exception) {

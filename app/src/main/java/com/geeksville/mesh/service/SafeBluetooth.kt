@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import android.bluetooth.BluetoothProfile
 import android.bluetooth.BluetoothStatusCodes
 import android.content.Context
 import android.os.Build
-import android.os.DeadObjectException
 import android.os.Handler
 import android.os.Looper
 import com.geeksville.mesh.concurrent.CallbackContinuation
@@ -336,32 +335,19 @@ class SafeBluetooth(
     @Volatile internal var isClosing = false
 
     /** Close just the GATT device but keep our pending callbacks active */
+    @Suppress("TooGenericExceptionCaught")
     fun closeGatt() {
-        gatt?.let { g ->
-            Timber.i("Closing our GATT connection")
-            isClosing = true
-            try {
-                g.disconnect()
-
-                // Wait for our callback to run and handle hte disconnect
-                var msecsLeft = 1000
-                while (gatt != null && msecsLeft >= 0) {
-                    Thread.sleep(100)
-                    msecsLeft -= 100
-                }
-
-                gatt?.let { g2 ->
-                    Timber.w("Android onConnectionStateChange did not run, manually closing")
-                    gatt = null // clear gat before calling close, bcause close might throw dead object exception
-                    g2.close()
-                }
-            } catch (e: NullPointerException) {
-                Timber.w(e, "Ignoring NPE in close - probably buggy Samsung BLE")
-            } catch (e: DeadObjectException) {
-                Timber.w(e, "Ignoring dead object exception, probably bluetooth was just disabled")
-            } finally {
-                isClosing = false
-            }
+        val g = gatt ?: return
+        Timber.i("Closing our GATT connection")
+        isClosing = true
+        try {
+            g.disconnect()
+            g.close()
+        } catch (e: Exception) {
+            Timber.w(e, "Ignoring exception in close, probably bluetooth was just disabled")
+        } finally {
+            gatt = null
+            isClosing = false
         }
     }
 
