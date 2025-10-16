@@ -20,10 +20,10 @@ package com.geeksville.mesh.repository.network
 import android.net.ConnectivityManager
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
-import com.geeksville.mesh.CoroutineDispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
+import org.meshtastic.core.di.CoroutineDispatchers
 import javax.inject.Inject
 import javax.inject.Singleton
 

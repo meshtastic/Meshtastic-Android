@@ -29,7 +29,6 @@ import android.os.RemoteException
 import androidx.core.app.ServiceCompat
 import androidx.core.location.LocationCompat
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.repository.network.MQTTRepository
@@ -66,6 +65,7 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.MeshUser

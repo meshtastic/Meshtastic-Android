@@ -27,7 +27,6 @@ import android.bluetooth.le.ScanSettings
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.util.registerReceiverCompat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +36,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.meshtastic.core.common.hasBluetoothPermission
+import org.meshtastic.core.di.CoroutineDispatchers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton

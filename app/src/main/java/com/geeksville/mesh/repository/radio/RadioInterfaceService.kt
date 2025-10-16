@@ -22,7 +22,6 @@ import android.provider.Settings
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.concurrent.handledLaunch
@@ -45,6 +44,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState

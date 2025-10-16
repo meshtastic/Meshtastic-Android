@@ -15,15 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.di
 
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
 
-/**
- * Wrapper around `Dispatchers` to allow for easier testing when using dispatchers
- * in injected classes.
- */
+/** Wrapper around `Dispatchers` to allow for easier testing when using dispatchers in injected classes. */
 class CoroutineDispatchers @Inject constructor() {
     val main = Dispatchers.Main
     val mainImmediate = Dispatchers.Main.immediate
