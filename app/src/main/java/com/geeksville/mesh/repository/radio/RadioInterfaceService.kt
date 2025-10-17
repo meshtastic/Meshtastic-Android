@@ -87,6 +87,13 @@ constructor(
     private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr)
     val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
 
+    private val _isRssiPollingEnabled = MutableStateFlow(false)
+    val isRssiPollingEnabled: StateFlow<Boolean> = _isRssiPollingEnabled.asStateFlow()
+
+    fun setRssiPolling(enabled: Boolean) {
+        _isRssiPollingEnabled.value = enabled
+    }
+
     private val logSends = false
     private val logReceives = false
     private lateinit var sentPacketsLog: BinaryLogFile

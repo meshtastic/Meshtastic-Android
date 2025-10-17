@@ -158,14 +158,18 @@ constructor(
             @Suppress("LoopWithTooManyJumpStatements", "MagicNumber")
             val pollingJob =
                 service.serviceScope.handledLaunch {
-                    while (true) {
-                        try {
-                            delay(2500) // Poll every 5 seconds
-                            safe?.asyncReadRemoteRssi { res -> res.getOrNull()?.let { trySend(it) } }
-                        } catch (ex: CancellationException) {
-                            break // Stop polling on cancellation
-                        } catch (ex: Exception) {
-                            Timber.d("RSSI polling error: ${ex.message}")
+                    service.isRssiPollingEnabled.collect { isEnabled ->
+                        if (isEnabled) {
+                            while (true) {
+                                try {
+                                    delay(10000) // Poll every 10 seconds
+                                    safe?.asyncReadRemoteRssi { res -> res.getOrNull()?.let { trySend(it) } }
+                                } catch (ex: CancellationException) {
+                                    break // Stop polling on cancellation
+                                } catch (ex: Exception) {
+                                    Timber.d("RSSI polling error: ${ex.message}")
+                                }
+                            }
                         }
                     }
                 }
