@@ -17,12 +17,14 @@
 
 package com.geeksville.mesh.service
 
+import android.Manifest
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothProfile
 import android.os.Build
+import androidx.annotation.RequiresPermission
 import com.geeksville.mesh.logAssert
 import com.geeksville.mesh.util.exceptionReporter
 import timber.log.Timber
@@ -43,20 +45,20 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
         private const val MYSTERY_STATUS_CODE = 257
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     @Suppress("CyclomaticComplexMethod")
     override fun onConnectionStateChange(g: BluetoothGatt, status: Int, newState: Int) = exceptionReporter {
         Timber.i("new bluetooth connection state $newState, status $status")
 
         when (newState) {
             BluetoothProfile.STATE_CONNECTED -> {
-                safeBluetooth.state =
-                    newState // we only care about connected/disconnected - not the transitional states
-
                 // If autoconnect is on and this connect attempt failed, hopefully some future attempt will
                 // succeed
-                if (status != BluetoothGatt.GATT_SUCCESS && safeBluetooth.autoReconnect) {
-                    Timber.e("Connect attempt failed $status, not calling connect completion handler...")
+                if (status != BluetoothGatt.GATT_SUCCESS) {
+                    Timber.e("Connect attempt failed with status $status")
+                    safeBluetooth.lostConnection("connection failed with status $status")
                 } else {
+                    safeBluetooth.state = newState
                     workQueue.completeWork(status, Unit)
                 }
             }
@@ -111,6 +113,10 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
                     }
                 }
             }
+            else -> {
+                // Anything that is not a successful connection should be treated as a failure.
+                safeBluetooth.lostConnection("unexpected connection state: $newState")
+            }
         }
     }
 
@@ -142,6 +148,7 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
         workQueue.completeWork(status, Unit)
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun onCharacteristicWrite(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
         val reliable = safeBluetooth.currentReliableWrite
         if (reliable != null) {
