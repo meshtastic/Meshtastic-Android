@@ -48,7 +48,9 @@ class UiPreferencesDataSource @Inject constructor(private val dataStore: DataSto
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    val appIntroCompleted: StateFlow<Boolean> = dataStore.prefStateFlow(key = APP_INTRO_COMPLETED, default = false)
+    // Start this flow eagerly, so app intro doesn't flash (when disabled) on cold app start.
+    val appIntroCompleted: StateFlow<Boolean> =
+        dataStore.prefStateFlow(key = APP_INTRO_COMPLETED, default = false, started = SharingStarted.Eagerly)
 
     // Default value for AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     val theme: StateFlow<Int> = dataStore.prefStateFlow(key = THEME, default = -1)
@@ -87,8 +89,11 @@ class UiPreferencesDataSource @Inject constructor(private val dataStore: DataSto
         dataStore.setPref(key = SHOW_IGNORED, value = value)
     }
 
-    private fun <T : Any> DataStore<Preferences>.prefStateFlow(key: Preferences.Key<T>, default: T): StateFlow<T> =
-        data.map { it[key] ?: default }.stateIn(scope = scope, started = SharingStarted.Lazily, initialValue = default)
+    private fun <T : Any> DataStore<Preferences>.prefStateFlow(
+        key: Preferences.Key<T>,
+        default: T,
+        started: SharingStarted = SharingStarted.Lazily,
+    ): StateFlow<T> = data.map { it[key] ?: default }.stateIn(scope = scope, started = started, initialValue = default)
 
     private fun <T : Any> DataStore<Preferences>.setPref(key: Preferences.Key<T>, value: T) {
         scope.launch { edit { it[key] = value } }
