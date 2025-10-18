@@ -25,7 +25,6 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
-import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.model.NodeClusterItem
 
@@ -50,7 +49,7 @@ fun NodeClusterMarkers(
                             fillColor = Color(clusterItem.node.colors.second).copy(alpha = 0.2f),
                             strokeColor = Color(clusterItem.node.colors.second),
                             strokeWidth = 2f,
-                            zIndex = 1f, // Ensure circles are drawn above markers
+                            zIndex = 0f,
                         )
                     }
                 }
@@ -64,7 +63,7 @@ fun NodeClusterMarkers(
             navigateToNodeDetails(item.node.num)
             false
         },
-        clusterItemContent = { clusterItem -> NodeChip(node = clusterItem.node) },
+        clusterItemContent = { clusterItem -> PulsingNodeChip(node = clusterItem.node) },
         onClusterManager = { clusterManager ->
             (clusterManager.renderer as DefaultClusterRenderer).minClusterSize = 10
         },
