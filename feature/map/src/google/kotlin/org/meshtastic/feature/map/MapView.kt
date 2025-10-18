@@ -402,7 +402,7 @@ fun MapView(
                                     DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
                                 }
                                 val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
-                                val color = Color(focusedNode!!.colors.second).copy(alpha = alpha)
+                                val color = Color(focusedNode.colors.second).copy(alpha = alpha)
                                 if (index == sortedPositions.lastIndex) {
                                     MarkerComposable(state = markerState, zIndex = 1f) { NodeChip(node = focusedNode) }
                                 } else {
@@ -428,7 +428,7 @@ fun MapView(
                                 }
                             }
 
-                            if (sortedPositions.size > 1 && focusedNode != null) {
+                            if (sortedPositions.size > 1) {
                                 val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
                                 segments.forEachIndexed { index, segmentPoints ->
                                     val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
