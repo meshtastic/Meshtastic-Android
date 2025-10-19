@@ -893,4 +893,5 @@
     <string name="analytics_notice">Analytics are collected to help us improve the Android app (thank you), we will receive anonymized information about user behavior. This includes crash reports, screens used in the app, etc.</string>
     <string name="analytics_platforms">"Analytics platforms: "</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
+    <string name="unset">Unset - 0</string>
 </resources>
