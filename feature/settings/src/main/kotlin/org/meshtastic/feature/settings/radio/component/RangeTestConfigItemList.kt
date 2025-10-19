@@ -22,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,6 +41,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val rangeTestConfig = state.moduleConfig.rangeTest
     val formState = rememberConfigState(initialValue = rangeTestConfig)
+    val context = LocalContext.current
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.range_test),
@@ -68,7 +70,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                     title = stringResource(R.string.sender_message_interval_seconds),
                     selectedItem = formState.value.sender.toLong(),
                     enabled = state.connected,
-                    items = rangeItems.map { it.value to it.toDisplayString() },
+                    items = rangeItems.map { it.value to it.toDisplayString(context = context) },
                     onItemSelected = { formState.value = formState.value.copy { sender = it.toInt() } },
                 )
                 HorizontalDivider()

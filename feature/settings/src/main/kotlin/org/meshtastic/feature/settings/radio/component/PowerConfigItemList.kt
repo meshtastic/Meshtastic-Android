@@ -23,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -44,6 +45,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
     val powerConfig = state.radioConfig.power
     val formState = rememberConfigState(initialValue = powerConfig)
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.power),
@@ -73,7 +75,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     title = stringResource(R.string.shutdown_on_power_loss),
                     selectedItem = formState.value.onBatteryShutdownAfterSecs.toLong(),
                     enabled = state.connected,
-                    items = items.map { it.value to it.toDisplayString() },
+                    items = items.map { it.value to it.toDisplayString(context = context) },
                     onItemSelected = {
                         formState.value = formState.value.copy { onBatteryShutdownAfterSecs = it.toInt() }
                     },
@@ -104,7 +106,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     title = stringResource(R.string.wait_for_bluetooth_duration_seconds),
                     selectedItem = formState.value.waitBluetoothSecs.toLong(),
                     enabled = state.connected,
-                    items = waitBluetoothItems.map { it.value to it.toDisplayString() },
+                    items = waitBluetoothItems.map { it.value to it.toDisplayString(context = context) },
                     onItemSelected = { formState.value = formState.value.copy { waitBluetoothSecs = it.toInt() } },
                 )
                 HorizontalDivider()
@@ -114,7 +116,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     selectedItem = formState.value.sdsSecs.toLong(),
                     onItemSelected = { formState.value = formState.value.copy { sdsSecs = it.toInt() } },
                     enabled = state.connected,
-                    items = sdsSecsItems.map { it.value to it.toDisplayString() },
+                    items = sdsSecsItems.map { it.value to it.toDisplayString(context = context) },
                 )
                 HorizontalDivider()
                 val minWakeItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
@@ -122,7 +124,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     title = stringResource(R.string.minimum_wake_time_seconds),
                     selectedItem = formState.value.minWakeSecs.toLong(),
                     enabled = state.connected,
-                    items = minWakeItems.map { it.value to it.toDisplayString() },
+                    items = minWakeItems.map { it.value to it.toDisplayString(context = context) },
                     onItemSelected = { formState.value = formState.value.copy { minWakeSecs = it.toInt() } },
                 )
                 HorizontalDivider()

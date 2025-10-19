@@ -938,4 +938,5 @@
     <string name="datadog_link" translatable="false">Datadog  https://www.datadoghq.com/</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
+    <string name="unset">Unset - 0</string>
 </resources>

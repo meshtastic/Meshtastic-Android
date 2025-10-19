@@ -22,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,6 +42,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val displayConfig = state.radioConfig.display
     val formState = rememberConfigState(initialValue = displayConfig)
+    val context = LocalContext.current
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.display),
@@ -104,7 +106,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                     title = stringResource(R.string.screen_on_for),
                     summary = stringResource(id = R.string.config_display_screen_on_secs_summary),
                     enabled = state.connected,
-                    items = screenOnIntervals.map { it to it.toDisplayString() },
+                    items = screenOnIntervals.map { it to it.toDisplayString(context = context) },
                     selectedItem =
                     screenOnIntervals.find { it.value == formState.value.screenOnSecs.toLong() }
                         ?: screenOnIntervals.first(),
@@ -115,7 +117,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                     title = stringResource(R.string.carousel_interval),
                     summary = stringResource(id = R.string.config_display_auto_screen_carousel_secs_summary),
                     enabled = state.connected,
-                    items = carouselIntervals.map { it to it.toDisplayString() },
+                    items = carouselIntervals.map { it to it.toDisplayString(context = context) },
                     selectedItem =
                     carouselIntervals.find { it.value == formState.value.autoScreenCarouselSecs.toLong() }
                         ?: carouselIntervals.first(),
