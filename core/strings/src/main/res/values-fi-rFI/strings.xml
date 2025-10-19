@@ -895,4 +895,5 @@
     <string name="analytics_notice">Analytiikkatietoja kerätään auttamaan meitä parantamaan Android-sovellusta (kiitos siitä). Saamme anonymisoitua tietoa käyttäjien toiminnasta, kuten kaatumisraportteja ja tietoa sovelluksessa käytetyistä näkymistä jne.</string>
     <string name="analytics_platforms">"Analytiikka-alustat: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
+    <string name="unset">Unset - 0</string>
 </resources>
