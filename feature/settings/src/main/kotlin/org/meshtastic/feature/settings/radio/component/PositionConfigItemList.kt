@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.core.location.LocationCompat
@@ -118,7 +119,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         }
     }
     val focusManager = LocalFocusManager.current
-
+    val context = LocalContext.current
     RadioConfigScreenList(
         title = stringResource(id = R.string.position),
         onBack = onBack,
@@ -143,12 +144,12 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
     ) {
         item {
             TitledCard(title = stringResource(R.string.position_packet)) {
-                val items = remember { IntervalConfiguration.BROADCAST_MEDIUM.allowedIntervals }
+                val items = remember { IntervalConfiguration.POSITION_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(R.string.broadcast_interval),
                     summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
                     enabled = state.connected,
-                    items = items.map { it to it.toDisplayString() },
+                    items = items.map { it to it.toDisplayString(context = context) },
                     selectedItem =
                     FixedUpdateIntervals.fromValue(formState.value.positionBroadcastSecs.toLong()) ?: items.first(),
                     onItemSelected = {
@@ -171,7 +172,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         summary =
                         stringResource(id = R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
                         enabled = state.connected,
-                        items = smartItems.map { it to it.toDisplayString() },
+                        items = smartItems.map { it to it.toDisplayString(context = context) },
                         selectedItem =
                         FixedUpdateIntervals.fromValue(formState.value.broadcastSmartMinimumIntervalSecs.toLong())
                             ?: smartItems.first(),
@@ -262,7 +263,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         title = stringResource(R.string.update_interval),
                         summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
                         enabled = state.connected,
-                        items = items.map { it to it.toDisplayString() },
+                        items = items.map { it to it.toDisplayString(context = context) },
                         selectedItem =
                         FixedUpdateIntervals.fromValue(formState.value.gpsUpdateInterval.toLong()) ?: items.first(),
                         onItemSelected = {

@@ -24,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -49,6 +50,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
     val detectionSensorConfig = state.moduleConfig.detectionSensor
     val formState = rememberConfigState(initialValue = detectionSensorConfig)
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.detection_sensor),
@@ -79,7 +81,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
                     title = stringResource(R.string.minimum_broadcast_seconds),
                     selectedItem = formState.value.minimumBroadcastSecs.toLong(),
                     enabled = state.connected,
-                    items = minimumBroadcastIntervals.map { it.value to it.toDisplayString() },
+                    items = minimumBroadcastIntervals.map { it.value to it.toDisplayString(context = context) },
                     onItemSelected = { formState.value = formState.value.copy { minimumBroadcastSecs = it.toInt() } },
                 )
 
@@ -88,7 +90,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
                     title = stringResource(R.string.state_broadcast_seconds),
                     selectedItem = formState.value.stateBroadcastSecs.toLong(),
                     enabled = state.connected,
-                    items = stateBroadcastIntervals.map { it.value to it.toDisplayString() },
+                    items = stateBroadcastIntervals.map { it.value to it.toDisplayString(context = context) },
                     onItemSelected = { formState.value = formState.value.copy { stateBroadcastSecs = it.toInt() } },
                 )
                 HorizontalDivider()

@@ -23,6 +23,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -44,6 +45,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), on
     val paxcounterConfig = state.moduleConfig.paxcounter
     val formState = rememberConfigState(initialValue = paxcounterConfig)
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.paxcounter),
@@ -72,7 +74,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), on
                     title = stringResource(R.string.update_interval_seconds),
                     selectedItem = formState.value.paxcounterUpdateInterval.toLong(),
                     enabled = state.connected,
-                    items = items.map { it.value to it.toDisplayString() },
+                    items = items.map { it.value to it.toDisplayString(context = context) },
                     onItemSelected = {
                         formState.value = formState.value.copy { paxcounterUpdateInterval = it.toInt() }
                     },

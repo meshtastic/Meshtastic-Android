@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -108,6 +109,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         }
     }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
     RadioConfigScreenList(
         title = stringResource(id = R.string.device),
         onBack = onBack,
@@ -145,7 +147,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     title = stringResource(R.string.nodeinfo_broadcast_interval),
                     selectedItem = formState.value.nodeInfoBroadcastSecs.toLong(),
                     enabled = state.connected,
-                    items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
+                    items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString(context = context) },
                     onItemSelected = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it.toInt() } },
                 )
             }

@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -53,6 +54,7 @@ fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewM
     val formState = rememberConfigState(initialValue = extNotificationConfig)
     var ringtoneInput by rememberSaveable(ringtone) { mutableStateOf(ringtone) }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     RadioConfigScreenList(
         title = stringResource(id = R.string.external_notification),
@@ -189,7 +191,7 @@ fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewM
                 val outputItems = remember { IntervalConfiguration.OUTPUT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(R.string.output_duration_milliseconds),
-                    items = outputItems.map { it.value to it.toDisplayString() },
+                    items = outputItems.map { it.value to it.toDisplayString(context = context) },
                     selectedItem = formState.value.outputMs,
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy { outputMs = it.toInt() } },
@@ -198,7 +200,7 @@ fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewM
                 val nagItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(R.string.nag_timeout_seconds),
-                    items = nagItems.map { it.value to it.toDisplayString() },
+                    items = nagItems.map { it.value to it.toDisplayString(context = context) },
                     selectedItem = formState.value.nagTimeout,
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy { nagTimeout = it.toInt() } },
