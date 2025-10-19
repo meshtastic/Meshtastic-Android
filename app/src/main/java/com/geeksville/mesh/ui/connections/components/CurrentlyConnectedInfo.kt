@@ -54,7 +54,6 @@ fun CurrentlyConnectedInfo(
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
-    bluetoothRssi: Int? = null,
 ) {
     Column(modifier = modifier) {
         Row(
@@ -63,9 +62,6 @@ fun CurrentlyConnectedInfo(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             MaterialBatteryInfo(level = node.batteryLevel, voltage = node.voltage)
-            if (bluetoothRssi != null) {
-                MaterialBluetoothSignalInfo(rssi = bluetoothRssi)
-            }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(
@@ -122,7 +118,6 @@ private fun CurrentlyConnectedInfoPreview() {
                     .setRelativeHumidity(60f)
                     .build(),
             ),
-            bluetoothRssi = -75, // Example RSSI for signal preview
             onNavigateToNodeDetails = {},
             onClickDisconnect = {},
         )
