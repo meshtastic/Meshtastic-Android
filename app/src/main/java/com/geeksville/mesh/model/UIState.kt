@@ -492,9 +492,19 @@ class UIViewModel @Inject constructor(
 //                        "\"environment metrics temperature\"," +
 //                        "\"environment metrics barometric pressure\"," +
 //                        "\"environment metrics gas resistance\"")
+                        // === NEW FIELDS FOR PERSONNEL TRACKING ===
+//                        "\"sender battery level (%)\"," +        // ← NEW
+//                        "\"sender voltage (V)\"," +              // ← NEW
+//                        "\"sender device temperature (C)\"," +   // ← NEW
+//                        "\"position gps timestamp\"," +          // ← NEW: когда сделан GPS-фикс
+//                        "\"position gps accuracy (m)\"," +       // ← NEW: точность
+//                        "\"position location source\"," +        // ← NEW
+//                        "\"position fix quality\"," +            // ← NEW
+//                        "\"seconds since last update\"")         // ← NEW: насколько "свежие" данные
 
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
+//                val currentTimeMs = System.currentTimeMillis()
                 val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
                 meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
                     // If we get a NodeInfo packet, use it to update our position data (if valid)
@@ -589,6 +599,26 @@ class UIViewModel @Inject constructor(
 //                            val EnvironmentMetricsBarometricPressure = meshService!!.nodes[myNodeNum]?.environmentMetrics?.barometricPressure
 //                            val EnvironmentMetricsGasResistance = meshService!!.nodes[myNodeNum]?.environmentMetrics?.gasResistance
 
+                            // Получаем данные ОТПРАВИТЕЛЯ (а не от нашего узла!)
+//                            val fromNode = meshService?.nodes?.get(proto.from)
+//                            val deviceMetrics = fromNode?.deviceMetrics
+//                            val envMetrics = fromNode?.environmentMetrics
+//
+//                            val senderBatteryLevel = deviceMetrics?.batteryLevel ?: ""
+//                            val senderVoltage = deviceMetrics?.voltage?.let { "%.2f".format(it) } ?: ""
+//                            val senderDeviceTemp = envMetrics?.temperature?.let { "%.1f".format(it) } ?: ""
+//
+//                            // Position metadata from sender's position (not rx position)
+//                            val posGpsTimestamp = senderPosition?.timestamp ?: ""
+//                            val posGpsAccuracy = senderPosition?.gpsAccuracy ?: ""
+//                            val posLocationSource = senderPosition?.locationSource?.name ?: ""
+//                            val posFixQuality = senderPosition?.fixQuality ?: ""
+//
+//                            // Time since last update (in seconds)
+//                            val secondsSinceLastUpdate = if (packet.received_date > 0) {
+//                                ((currentTimeMs - packet.received_date) / 1000).toString()
+//                            } else ""
+
                             // Calculate the distance if both positions are valid
 
                             val dist = if (senderPos == null || rxPos == null) {
@@ -679,6 +709,20 @@ class UIViewModel @Inject constructor(
 //                                    "\"$EnvironmentMetricsTemperature\"," +
 //                                    "\"$EnvironmentMetricsBarometricPressure\"," +
 //                                    "\"$EnvironmentMetricsGasResistance\"")
+                                    // === ИСПРАВЛЕНО: используем envMetrics от ОТПРАВИТЕЛЯ ===
+//                                    "\"${envMetrics?.relativeHumidity ?: ""}\"," +
+//                                    "\"${envMetrics?.temperature?.let { "%.1f".format(it) } ?: ""}\"," +
+//                                    "\"${envMetrics?.barometricPressure?.let { "%.1f".format(it) } ?: ""}\"," +
+//                                    "\"${envMetrics?.gasResistance?.let { "%.0f".format(it) } ?: ""}\"")
+                                    // === NEW VALUES ===
+//                                    "\"$senderBatteryLevel\"," +
+//                                    "\"$senderVoltage\"," +
+//                                    "\"$senderDeviceTemp\"," +
+//                                    "\"$posGpsTimestamp\"," +
+//                                    "\"$posGpsAccuracy\"," +
+//                                    "\"$posLocationSource\"," +
+//                                    "\"$posFixQuality\"," +
+//                                    "\"$secondsSinceLastUpdate\"")
                         }
                     }
                 }
