@@ -487,11 +487,11 @@ class UIViewModel @Inject constructor(
                         "\"LoRa override duty cycle\"," +
                         "\"LoRa override frequency\"," +
                         "\"LoRa spread factor\"," +
-                        "\"LoRa sx126XRx boosted gain\"," +
-                        "\"environment metrics relative humidity\"," +
-                        "\"environment metrics temperature\"," +
-                        "\"environment metrics barometric pressure\"," +
-                        "\"environment metrics gas resistance\"")
+                        "\"LoRa sx126XRx boosted gain\"")
+//                        "\"environment metrics relative humidity\"," +
+//                        "\"environment metrics temperature\"," +
+//                        "\"environment metrics barometric pressure\"," +
+//                        "\"environment metrics gas resistance\"")
 
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
@@ -584,10 +584,10 @@ class UIViewModel @Inject constructor(
                             val LoRaSpreadFactor = localConfig.value.lora.spreadFactor
                             val LoRaSX126XRxBosstedGain = localConfig.value.lora.sx126XRxBoostedGain
 
-                            val EnvironmentMetricsRelativeHumidity = meshService!!.nodes[myNodeNum]?.environmentMetrics?.relativeHumidity
-                            val EnvironmentMetricsTemperature = meshService!!.nodes[myNodeNum]?.environmentMetrics?.temperature
-                            val EnvironmentMetricsBarometricPressure = meshService!!.nodes[myNodeNum]?.environmentMetrics?.barometricPressure
-                            val EnvironmentMetricsGasResistance = meshService!!.nodes[myNodeNum]?.environmentMetrics?.gasResistance
+//                            val EnvironmentMetricsRelativeHumidity = meshService!!.nodes[myNodeNum]?.environmentMetrics?.relativeHumidity
+//                            val EnvironmentMetricsTemperature = meshService!!.nodes[myNodeNum]?.environmentMetrics?.temperature
+//                            val EnvironmentMetricsBarometricPressure = meshService!!.nodes[myNodeNum]?.environmentMetrics?.barometricPressure
+//                            val EnvironmentMetricsGasResistance = meshService!!.nodes[myNodeNum]?.environmentMetrics?.gasResistance
 
                             // Calculate the distance if both positions are valid
 
@@ -613,7 +613,11 @@ class UIViewModel @Inject constructor(
                                 else -> ""
                             }
 
-                            val airtime = (rxTime - rxSenderTime)
+                            val airtime = if (rxTime == 0 || rxSenderTime == 0) {
+                                0
+                            } else {
+                                rxSenderTime - rxTime
+                            }
 
                             //  datetime,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
                             writer.appendLine("$rxDateTime," +
@@ -670,11 +674,11 @@ class UIViewModel @Inject constructor(
                                     "\"$LoRaOverrideDutyCycle\"," +
                                     "\"$LoRaOverrideFrequency\"," +
                                     "\"$LoRaSpreadFactor\"," +
-                                    "\"$LoRaSX126XRxBosstedGain\"," +
-                                    "\"$EnvironmentMetricsRelativeHumidity\"," +
-                                    "\"$EnvironmentMetricsTemperature\"," +
-                                    "\"$EnvironmentMetricsBarometricPressure\"," +
-                                    "\"$EnvironmentMetricsGasResistance\"")
+                                    "\"$LoRaSX126XRxBosstedGain\"")
+//                                    "\"$EnvironmentMetricsRelativeHumidity\"," +
+//                                    "\"$EnvironmentMetricsTemperature\"," +
+//                                    "\"$EnvironmentMetricsBarometricPressure\"," +
+//                                    "\"$EnvironmentMetricsGasResistance\"")
                         }
                     }
                 }
