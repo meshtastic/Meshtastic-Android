@@ -35,13 +35,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.stateIn
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.model.util.anonymize
 import timber.log.Timber
@@ -144,50 +138,6 @@ constructor(
     @Volatile private var reconnectAttempts = 0
 
     private lateinit var fromNum: BluetoothGattCharacteristic
-
-    /**
-     * RSSI flow, which polls the remote device for RSSI only when there are active subscribers. The polling stops
-     * automatically when the last collector stops.
-     */
-    val rssiFlow: StateFlow<Int?> =
-        callbackFlow {
-            // Initial read for faster UI update
-            safe?.asyncReadRemoteRssi { first -> first.getOrNull()?.let { trySend(it) } }
-
-            // Launch the polling loop on the service scope
-            @Suppress("LoopWithTooManyJumpStatements", "MagicNumber")
-            val pollingJob =
-                service.serviceScope.handledLaunch {
-                    service.isRssiPollingEnabled.collect { isEnabled ->
-                        if (isEnabled) {
-                            while (true) {
-                                try {
-                                    delay(10000) // Poll every 10 seconds
-                                    safe?.asyncReadRemoteRssi { res -> res.getOrNull()?.let { trySend(it) } }
-                                } catch (ex: CancellationException) {
-                                    break // Stop polling on cancellation
-                                } catch (ex: Exception) {
-                                    Timber.d("RSSI polling error: ${ex.message}")
-                                }
-                            }
-                        }
-                    }
-                }
-
-            // This block executes when the last collector stops.
-            awaitClose {
-                pollingJob.cancel()
-                // Clear the value when the flow is closed (no active subscribers).
-                trySend(null)
-            }
-        }
-            .distinctUntilChanged()
-            .stateIn(
-                scope = service.serviceScope,
-                // Keep the polling running for 5 seconds after the last collector disappears
-                started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
-                initialValue = null,
-            )
 
     /**
      * If we think we are connected, but we don't hear anything from the device, we might be in a zombie state. This
