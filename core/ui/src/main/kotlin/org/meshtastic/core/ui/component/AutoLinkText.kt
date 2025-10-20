@@ -49,33 +49,103 @@ fun AutoLinkText(
     linkStyles: TextLinkStyles = DefaultTextLinkStyles,
     color: Color = Color.Unspecified,
 ) {
-    val spannable = remember(text) { linkify(text) }
-    Text(text = spannable.toAnnotatedString(linkStyles), modifier = modifier, style = style.copy(color = color))
+    val annotatedString = remember(text, linkStyles) {
+        processMarkdownAndLinks(text, linkStyles)
+    }
+    Text(text = annotatedString, modifier = modifier, style = style.copy(color = color))
 }
+
+/**
+ * Processes markdown-style links [text](url) and then auto-linkifies remaining URLs
+ */
+private fun processMarkdownAndLinks(text: String, linkStyles: TextLinkStyles): AnnotatedString {
+    // First, extract markdown links and create a spannable without them
+    val markdownLinks = mutableListOf<MarkdownLink>()
+    val markdownPattern = "\\[([^\\]]+)\\]\\(([^)]+)\\)".toRegex()
+    var processedText = text
+    var offsetAdjustment = 0
+
+    markdownPattern.findAll(text).forEach { match ->
+        val displayText = match.groupValues[1]
+        val url = match.groupValues[2]
+        val originalStart = match.range.first - offsetAdjustment
+        markdownLinks.add(
+            MarkdownLink(
+                start = originalStart,
+                end = originalStart + displayText.length,
+                displayText = displayText,
+                url = url
+            )
+        )
+        // Replace [text](url) with just text for linkify processing
+        processedText = processedText.replaceFirst(match.value, displayText)
+        // Adjust offset for next replacements
+        offsetAdjustment += match.value.length - displayText.length
+    }
+
+    // Linkify the processed text for auto-detection
+    val spannable = linkify(processedText)
+
+    // Convert to AnnotatedString with both markdown and auto-detected links
+    return spannable.toAnnotatedStringWithMarkdown(linkStyles, markdownLinks)
+}
+
+private data class MarkdownLink(
+    val start: Int,
+    val end: Int,
+    val displayText: String,
+    val url: String
+)
 
 private fun linkify(text: String) = Factory.getInstance().newSpannable(text).also {
     LinkifyCompat.addLinks(it, Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS)
 }
 
-private fun Spannable.toAnnotatedString(linkStyles: TextLinkStyles): AnnotatedString = buildAnnotatedString {
-    val spannable = this@toAnnotatedString
+private fun Spannable.toAnnotatedStringWithMarkdown(
+    linkStyles: TextLinkStyles,
+    markdownLinks: List<MarkdownLink>
+): AnnotatedString = buildAnnotatedString {
+    val spannable = this@toAnnotatedStringWithMarkdown
     var lastEnd = 0
-    spannable.getSpans(0, spannable.length, Any::class.java).forEach { span ->
+
+    // Collect all link positions (both markdown and auto-detected)
+    val allLinks = mutableListOf<LinkInfo>()
+
+    // Add markdown links
+    markdownLinks.forEach { mdLink ->
+        allLinks.add(LinkInfo(mdLink.start, mdLink.end, mdLink.url, isMarkdown = true))
+    }
+
+    // Add auto-detected links (URLSpans)
+    spannable.getSpans(0, spannable.length, URLSpan::class.java).forEach { span ->
         val start = spannable.getSpanStart(span)
         val end = spannable.getSpanEnd(span)
-        append(spannable.subSequence(lastEnd, start))
-        when (span) {
-            is URLSpan ->
-                withLink(LinkAnnotation.Url(url = span.url, styles = linkStyles)) {
-                    append(spannable.subSequence(start, end))
-                }
-
-            else -> append(spannable.subSequence(start, end))
+        // Only add if it doesn't overlap with markdown links
+        if (allLinks.none { it.start <= start && start < it.end }) {
+            allLinks.add(LinkInfo(start, end, span.url, isMarkdown = false))
         }
-        lastEnd = end
+    }
+
+    // Sort by position
+    allLinks.sortBy { it.start }
+
+    // Build the annotated string
+    allLinks.forEach { link ->
+        append(spannable.subSequence(lastEnd, link.start))
+        withLink(LinkAnnotation.Url(url = link.url, styles = linkStyles)) {
+            append(spannable.subSequence(link.start, link.end))
+        }
+        lastEnd = link.end
     }
     append(spannable.subSequence(lastEnd, spannable.length))
 }
+
+private data class LinkInfo(
+    val start: Int,
+    val end: Int,
+    val url: String,
+    val isMarkdown: Boolean
+)
 
 @Preview(showBackground = true)
 @Composable

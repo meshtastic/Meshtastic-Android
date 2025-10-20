@@ -97,7 +97,9 @@ constructor(
                     shortName = if (toBroadcast) "${data.channel}" else shortName,
                     longName = longName,
                     lastMessageTime = getShortDate(data.time),
-                    lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
+                    lastMessageText = stripMarkdownLinks(
+                        if (fromLocal) data.text else "$shortName: ${data.text}"
+                    ),
                     unreadCount = packetRepository.getUnreadCount(contactKey),
                     messageCount = packetRepository.getMessageCount(contactKey),
                     isMuted = settings[contactKey]?.isMuted == true,
@@ -122,4 +124,12 @@ constructor(
         viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
 
     private fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+
+    /**
+     * Strips markdown link syntax [text](url) from a string, keeping only the display text.
+     * This is used for message previews to show clean text instead of raw markdown.
+     */
+    private fun stripMarkdownLinks(text: String?): String? {
+        return text?.replace("\\[([^\\]]+)\\]\\([^)]+\\)".toRegex(), "$1")
+    }
 }

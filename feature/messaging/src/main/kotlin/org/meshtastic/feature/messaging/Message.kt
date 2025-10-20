@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.SpeakerNotes
@@ -299,6 +300,8 @@ fun MessageScreen(
                 QuickChatRow(
                     enabled = connectionState.isConnected(),
                     actions = quickChatActions,
+                    userLatitude = ourNode?.takeIf { it.validPosition != null }?.latitude,
+                    userLongitude = ourNode?.takeIf { it.validPosition != null }?.longitude,
                     onClick = { action ->
                         handleQuickChatAction(
                             action = action,
@@ -683,6 +686,8 @@ private fun OverFlowMenu(
  *
  * @param enabled Whether the buttons should be enabled.
  * @param actions The list of [QuickChatAction]s to display.
+ * @param userLatitude The current user's latitude for location sharing, or null if unavailable.
+ * @param userLongitude The current user's longitude for location sharing, or null if unavailable.
  * @param onClick Callback when a quick chat button is clicked.
  */
 @Composable
@@ -690,6 +695,8 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
+    userLatitude: Double? = null,
+    userLongitude: Double? = null,
     onClick: (QuickChatAction) -> Unit,
 ) {
     val alertActionMessage = stringResource(R.string.alert_bell_text)
@@ -704,10 +711,33 @@ private fun QuickChatRow(
             )
         }
 
-    val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
+    val locationAction =
+        remember(userLatitude, userLongitude) {
+            if (userLatitude != null && userLongitude != null) {
+                // Display coordinates with 4 decimal places (~11 meter precision)
+                val displayLat = "%.4f".format(userLatitude)
+                val displayLon = "%.4f".format(userLongitude)
+                // URL coordinates with 7 decimal places (~1.1 cm precision)
+                val urlLat = "%.7f".format(userLatitude)
+                val urlLon = "%.7f".format(userLongitude)
+                // Markdown format: [display text](url)
+                QuickChatAction(
+                    name = "📍",
+                    message = "[$displayLat,$displayLon](https://maps.google.com/?q=$urlLat,$urlLon)",
+                    mode = QuickChatAction.Mode.Append,
+                    position = -2, // Special position for location action
+                )
+            } else {
+                null
+            }
+        }
+
+    val allActions = remember(alertAction, locationAction, actions) {
+        listOfNotNull(alertAction, locationAction) + actions
+    }
 
     LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(allActions, key = { it.uuid }) { action ->
+        items(allActions, key = { it.position }) { action ->
             Button(onClick = { onClick(action) }, enabled = enabled) { Text(text = action.name) }
         }
     }

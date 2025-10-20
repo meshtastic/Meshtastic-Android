@@ -48,7 +48,7 @@ if (configPropertiesFile.exists()) {
 }
 
 android {
-    namespace = configProperties.getProperty("APPLICATION_ID")
+    namespace = "com.geeksville.mesh"  // Keep original namespace for BuildConfig/R
     compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
 
     signingConfigs {
