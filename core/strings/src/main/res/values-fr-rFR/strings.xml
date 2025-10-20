@@ -892,4 +892,5 @@
     <string name="analytics_notice">Les statistiques sont collectées pour nous aider à améliorer l\'application Android (merci), nous recevrons des informations anonymes sur le comportement de l\'utilisateur. Cela inclut les rapports de plantage, les écrans utilisés dans l\'application, etc.</string>
     <string name="analytics_platforms">"Plateformes d'analyse : "</string>
     <string name="for_more_information_see_our_privacy_policy">Pour plus d\'informations, consultez notre politique de confidentialité.</string>
+    <string name="unset">Unset - 0</string>
 </resources>

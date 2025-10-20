@@ -895,4 +895,5 @@
     <string name="analytics_notice">Анализите се събират, за да ни помогнат да подобрим приложението за Android (благодарим ви). Ще получаваме анонимизирана информация за поведението на потребителите. Това включва отчети за сривове, екрани, използвани в приложението и др.</string>
     <string name="analytics_platforms">"Analytics platforms: "</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
+    <string name="unset">Unset - 0</string>
 </resources>
