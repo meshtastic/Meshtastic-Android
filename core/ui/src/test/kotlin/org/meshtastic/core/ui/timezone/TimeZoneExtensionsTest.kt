@@ -36,17 +36,17 @@ class TimeZoneExtensionsTest {
                 "US/Eastern" to "EST5EDT,M3.2.0,M11.1.0",
                 "America/Sao_Paulo" to "BRT3",
                 "UTC" to "UTC0",
-                // "Europe/London" to "GMT0BST,M3.5.0/1,M10.5.0",
-                // "Europe/Lisbon" to "WET0WEST,M3.5.0/1,M10.5.0",
-                // "Europe/Budapest" to "CET-1CEST,M3.5.0,M10.5.0/3",
-                // "Europe/Kiev" to "EET-2EEST,M3.5.0/3,M10.5.0/4",
+                "Europe/London" to "GMT0BST,M3.5.0/1,M10.4.0",
+                "Europe/Lisbon" to "WET0WEST,M3.5.0/1,M10.4.0",
+                "Europe/Budapest" to "CET-1CEST,M3.5.0,M10.4.0/3",
+                "Europe/Kiev" to "EET-2EEST,M3.5.0/3,M10.4.0/4",
                 "Asia/Kolkata" to "IST-5:30",
                 "Asia/Hong_Kong" to "HKT-8",
                 "Asia/Tokyo" to "JST-9",
                 "Australia/Perth" to "AWST-8",
                 "Australia/Adelaide" to "ACST-9:30ACDT,M10.1.0,M4.1.0/3",
                 "Australia/Sydney" to "AEST-10AEDT,M10.1.0,M4.1.0/3",
-                // "Pacific/Auckland" to "NZST-12NZDT,M9.5.0,M4.1.0/3"
+                "Pacific/Auckland" to "NZST-12NZDT,M9.4.0,M4.1.0/3",
             )
 
         zoneMap.forEach { (tz, expected) -> assertEquals(expected, ZoneId.of(tz).toPosixString()) }
