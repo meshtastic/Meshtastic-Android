@@ -11,7 +11,7 @@ datastore = "1.1.7"
 lifecycle = "2.9.4"
 navigation = "2.9.5"
 navigation3 = "1.0.0-alpha11"
-room = "2.8.2"
+room = "2.8.3"
 
 # Kotlin
 kotlin = "2.2.20"
