@@ -17,6 +17,10 @@
 
 package org.meshtastic.feature.settings.radio.component
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,6 +46,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -207,7 +212,20 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         }
         item {
             TitledCard(title = stringResource(R.string.time_zone)) {
-                val appTxPosixString = remember { ZoneId.systemDefault().toPosixString() }
+                val context = LocalContext.current
+                val appTzPosixString by
+                    produceState(initialValue = ZoneId.systemDefault().toPosixString()) {
+                        val receiver =
+                            object : BroadcastReceiver() {
+                                override fun onReceive(context: Context, intent: Intent) {
+                                    if (intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
+                                        value = ZoneId.systemDefault().toPosixString()
+                                    }
+                                }
+                            }
+                        context.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIMEZONE_CHANGED))
+                        awaitDispose { context.unregisterReceiver(receiver) }
+                    }
 
                 EditTextPreference(
                     title = "",
@@ -233,7 +251,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     modifier = Modifier.height(MediumContainerHeight).fillMaxWidth(),
                     enabled = state.connected,
                     shape = RectangleShape,
-                    onClick = { formState.value = formState.value.copy { tzdef = appTxPosixString } },
+                    onClick = { formState.value = formState.value.copy { tzdef = appTzPosixString } },
                 ) {
                     Icon(imageVector = Icons.Rounded.PhoneAndroid, contentDescription = null)
 

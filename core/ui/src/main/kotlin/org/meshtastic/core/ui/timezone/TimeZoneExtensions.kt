@@ -74,7 +74,7 @@ fun ZoneId.toPosixString(): String {
 fun ZonedDateTime.timeZoneShortName(): String {
     val formatter = DateTimeFormatter.ofPattern("zzz", Locale.ENGLISH)
     val shortName = format(formatter)
-    return if(shortName.startsWith("GMT")) "GMT" else shortName
+    return if (shortName.startsWith("GMT")) "GMT" else shortName
 }
 
 /**
