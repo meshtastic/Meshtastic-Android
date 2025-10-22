@@ -17,13 +17,14 @@
     <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:DeviceConfigItemList.kt$@Composable fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
+    <ID>LongMethod:DeviceConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:ExternalNotificationConfigItemList.kt$@Composable fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
+    <ID>LongMethod:RadioConfigScreenList.kt$@Composable fun &lt;T : MessageLite&gt; RadioConfigScreenList( title: String, onBack: () -&gt; Unit, responseState: ResponseState&lt;Any&gt;, onDismissPacketResponse: () -&gt; Unit, configState: ConfigState&lt;T&gt;, enabled: Boolean, onSave: (T) -&gt; Unit, content: LazyListScope.() -&gt; Unit, )</ID>
     <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>LongMethod:SecurityConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:SerialConfigItemList.kt$@Composable fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
@@ -35,6 +36,7 @@
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
     <ID>ModifierMissing:CleanNodeDatabaseScreen.kt$CleanNodeDatabaseScreen</ID>
+    <ID>ModifierMissing:DeviceConfigItemList.kt$DeviceConfigScreen</ID>
     <ID>ModifierMissing:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ModifierMissing:NetworkConfigItemList.kt$NetworkConfigScreen</ID>
     <ID>ModifierMissing:PositionConfigItemList.kt$PositionConfigScreen</ID>

@@ -61,6 +61,7 @@ fun ZoneId.toPosixString(): String {
         append(dstDate.timeZoneShortName())
 
         // Don't append the DST offset if it is only 1 hour off.
+        @Suppress("MagicNumber")
         if (abs(stdDate.offset.totalSeconds - dstDate.offset.totalSeconds) != 3600) {
             append(dstDate.formattedOffsetString())
         }
@@ -110,6 +111,7 @@ fun ZonedDateTime.formattedOffsetString(): String {
  * if it is 2:00:00, since that is the default. Otherwise, append time with non-zero values.
  */
 fun LocalDateTime.formattedDateString(): String {
+    @Suppress("MagicNumber")
     val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 7)
 
     return buildString {
