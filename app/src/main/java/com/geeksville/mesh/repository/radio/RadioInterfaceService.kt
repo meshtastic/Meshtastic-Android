@@ -303,7 +303,7 @@ constructor(
      * @return true if the device changed, false if no change
      */
     private fun setBondedDeviceAddress(address: String?): Boolean =
-        if (getBondedDeviceAddress() == address && isStarted) {
+        if (getBondedDeviceAddress() == address && isStarted && _connectionState.value == ConnectionState.CONNECTED) {
             Timber.w("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
             false
         } else {
