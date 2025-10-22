@@ -40,6 +40,7 @@ class ZoneIdExtensionsTest {
                 "Europe/Lisbon" to "WET0WEST,M3.5.0/1,M10.4.0",
                 "Europe/Budapest" to "CET-1CEST,M3.5.0,M10.4.0/3",
                 "Europe/Kiev" to "EET-2EEST,M3.5.0/3,M10.4.0/4",
+                "Africa/Cairo" to "EET-2EEST,M4.4.5/0,M10.5.5/0",
                 "Asia/Kolkata" to "IST-5:30",
                 "Asia/Hong_Kong" to "HKT-8",
                 "Asia/Tokyo" to "JST-9",

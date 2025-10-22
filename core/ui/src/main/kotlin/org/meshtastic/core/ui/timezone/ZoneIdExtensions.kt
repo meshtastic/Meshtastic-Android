@@ -25,6 +25,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
 import java.time.temporal.WeekFields
 import java.util.Locale
 import kotlin.math.abs
@@ -109,15 +110,15 @@ private fun ZonedDateTime.formattedOffsetString(): String {
 }
 
 /**
- * Returns a date string with the format ",M<MONTH>.<WEEK_OF_MONTH>.<WEEKDAY>/<HOUR>:<MINUTE>:<SECOND>". Time is omitted
- * if it is 2:00:00, since that is the default. Otherwise, append time with non-zero values.
+ * Returns a date string with the format ",M<MONTH>.<WEEK_OF_MONTH>.<DAY_OF_WEEK>/<HOUR>:<MINUTE>:<SECOND>". Time is
+ * omitted if it is 2:00:00, since that is the default. Otherwise, append time with non-zero values.
  */
 private fun LocalDateTime.formattedDateString(): String {
     @Suppress("MagicNumber")
-    val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 7)
-
     return buildString {
-        append(",M$monthValue.${get(weekFields.weekOfMonth())}.${get(weekFields.dayOfWeek()) - 1}")
+        val weekOfMonth = get(ChronoField.ALIGNED_WEEK_OF_MONTH)
+        val dayOfWeek = get(WeekFields.of(DayOfWeek.SUNDAY, 7).dayOfWeek()) - 1
+        append(",M$monthValue.$weekOfMonth.$dayOfWeek")
 
         when {
             // 2:00:00 is the default, so only append it if there are minutes or seconds.
