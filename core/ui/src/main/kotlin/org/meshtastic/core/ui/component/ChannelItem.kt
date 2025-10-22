@@ -31,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun ChannelItem(
@@ -59,4 +61,10 @@ fun ChannelItem(
             content()
         }
     }
+}
+
+@Preview
+@Composable
+private fun ChannelItemPreview() {
+    AppTheme { ChannelItem(index = 0, title = "Medium Fast", enabled = true) {} }
 }
