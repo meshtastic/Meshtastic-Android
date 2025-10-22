@@ -95,6 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Při trojím stisku tlačítka odeslat polohu na primární kanál.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Nastavuje blikání LED diody na zařízení. U většiny zařízení lze ovládat jednu ze čtyř LED diod, avšak LED diody nabíječky a GPS nelze ovládat.</string>
     <string name="config_device_tzdef_summary">Časové pásmo pro zobrazování dat na displeji a v záznamech (logu).</string>
+    <string name="config_device_use_phone_tz">Use phone time zone</string>
     <string name="config_device_transmitOverLora_summary">Umožní odesílat informace o sousedních uzlech (NeighborInfo) nejen do MQTT a PhoneAPI, ale také přes LoRa. Nedostupné na kanálech s výchozím klíčem a názvem.</string>
     <string name="config_display_screen_on_secs_summary">Doba, po kterou zůstane displej aktivní po stisku tlačítka nebo po přijetí zprávy.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Automaticky přepíná stránky na displeji v daném intervalu.</string>
