@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.kover)
 }
 
 android { namespace = "org.meshtastic.core.ui" }
@@ -49,4 +50,6 @@ dependencies {
 
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.runner)
+
+    testImplementation(libs.junit)
 }

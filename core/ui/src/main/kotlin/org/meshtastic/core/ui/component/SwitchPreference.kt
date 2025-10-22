@@ -82,7 +82,7 @@ fun SwitchPreference(
         },
         supportingContent = {
             if (summary.isNotEmpty()) {
-                Text(text = summary, modifier = Modifier.padding(bottom = 16.dp))
+                Text(text = summary)
             }
         },
         headlineContent = { Text(text = title) },

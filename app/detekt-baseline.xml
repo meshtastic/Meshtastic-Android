@@ -28,7 +28,6 @@
     <ID>FinalNewline:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
     <ID>FinalNewline:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
     <ID>FinalNewline:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
-    <ID>FinalNewline:CoroutineDispatchers.kt$com.geeksville.mesh.CoroutineDispatchers.kt</ID>
     <ID>FinalNewline:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>FinalNewline:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>FinalNewline:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
@@ -74,10 +73,8 @@
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$9114</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$10</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$100</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$1000</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$2500</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$2500</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
     <ID>MagicNumber:ServiceClient.kt$ServiceClient$500</ID>
@@ -161,7 +158,6 @@
     <ID>NewLineAtEndOfFile:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
-    <ID>NewLineAtEndOfFile:CoroutineDispatchers.kt$com.geeksville.mesh.CoroutineDispatchers.kt</ID>
     <ID>NewLineAtEndOfFile:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>NewLineAtEndOfFile:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>NewLineAtEndOfFile:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
@@ -195,8 +191,6 @@
     <ID>SwallowedException:MeshService.kt$MeshService$ex: BLEException</ID>
     <ID>SwallowedException:MeshService.kt$MeshService$ex: CancellationException</ID>
     <ID>SwallowedException:NsdManager.kt$ex: IllegalArgumentException</ID>
-    <ID>SwallowedException:SafeBluetooth.kt$SafeBluetooth$ex: DeadObjectException</ID>
-    <ID>SwallowedException:SafeBluetooth.kt$SafeBluetooth$ex: NullPointerException</ID>
     <ID>SwallowedException:ServiceClient.kt$ServiceClient$ex: IllegalArgumentException</ID>
     <ID>SwallowedException:TCPInterface.kt$TCPInterface$ex: SocketTimeoutException</ID>
     <ID>TooGenericExceptionCaught:BTScanModel.kt$BTScanModel$ex: Throwable</ID>
@@ -206,8 +200,6 @@
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService.&lt;no name provided&gt;$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshServiceStarter.kt$ServiceStarter$ex: Exception</ID>
-    <ID>TooGenericExceptionCaught:SafeBluetooth.kt$SafeBluetooth$ex: Exception</ID>
-    <ID>TooGenericExceptionCaught:SafeBluetooth.kt$SafeBluetooth$ex: NullPointerException</ID>
     <ID>TooGenericExceptionCaught:SyncContinuation.kt$Continuation$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
     <ID>TooGenericExceptionThrown:MeshService.kt$MeshService$throw Exception("Can't set user without a NodeInfo")</ID>
