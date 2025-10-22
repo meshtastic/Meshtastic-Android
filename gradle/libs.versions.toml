@@ -6,7 +6,7 @@ accompanist = "0.37.3"
 
 # androidx
 androidxComposeMaterial3Adaptive = "1.2.0"
-androidxTracing = "1.9.3"
+androidxTracing = "1.9.4"
 datastore = "1.1.7"
 lifecycle = "2.9.4"
 navigation = "2.9.5"
@@ -62,11 +62,11 @@ androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", vers
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
-androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.10.5" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
 
 # Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.10.00" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.10.01" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
