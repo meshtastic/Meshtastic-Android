@@ -95,6 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Send a position on the primary channel when the user button is triple clicked.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Upravlja utripajočo LED na napravi. Pri večini naprav bo to krmililo eno od največ 4 LED diod, LED napajanja in GPS ni mogoče nadzorovati.</string>
     <string name="config_device_tzdef_summary">Time zone for dates on the device screen and log.</string>
+    <string name="config_device_use_phone_tz">Use phone time zone</string>
     <string name="config_device_transmitOverLora_summary">Izbira ali je treba naš NeighborInfo poleg pošiljanja v MQTT in PhoneAPI posredovati tudi prek LoRa. Ni na voljo na kanalu s privzetim ključem in imenom.</string>
     <string name="config_display_screen_on_secs_summary">How long the screen remains on after the user button is pressed or messages are received.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Automatically toggles to the next page on the screen like a carousel, based the specified interval.</string>

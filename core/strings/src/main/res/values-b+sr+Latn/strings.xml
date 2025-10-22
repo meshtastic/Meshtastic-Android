@@ -95,6 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Пошаљи позицију на примарном каналу када се корисничко дугме три пута кликне.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Kontroliše trepćući LED na uređaju. Kod većine uređaja ovo će kontrolisati jedan od do četiri LED-a, punjač i GPS LED-ovi nisu kontrolisani.</string>
     <string name="config_device_tzdef_summary">Временска зона за датуме на екрану уређаја и у евиденцији.</string>
+    <string name="config_device_use_phone_tz">Use phone time zone</string>
     <string name="config_device_transmitOverLora_summary">Da li bi osim slanja na MQTT i PhoneAPI, naš NeighborInfo trebalo da se prenosi preko LoRa. Nije dostupno na kanalu sa podrazumevanim ključem i imenom.</string>
     <string name="config_display_screen_on_secs_summary">Колико дуго екран остаје укључен након притиска корисничког дугмета или пријема порука.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Аутоматски се пребацује на следећу страницу на екрану као карусел, на основу наведеног интервала.</string>

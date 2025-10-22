@@ -95,6 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">当用户按钮被点击三次时，在主通道上发送定位。</string>
     <string name="config_device_ledHeartbeatEnabled_summary">控制设备上的指示灯闪烁。对于大多数设备，这将控制最多 4 个指示灯，充电器和 GPS 指示灯无法控制。</string>
     <string name="config_device_tzdef_summary">Time zone for dates on the device screen and log.</string>
+    <string name="config_device_use_phone_tz">Use phone time zone</string>
     <string name="config_device_transmitOverLora_summary">是否除了发送到 MQTT 和 PhoneAPI 外，还应通过 LoRa 传输我们的邻居信息（NeighborInfo）。在具有默认密钥和名称的通道上不可用。</string>
     <string name="config_display_screen_on_secs_summary">按下用户按钮或收到消息后屏幕保持亮屏的时间。</string>
     <string name="config_display_auto_screen_carousel_secs_summary">根据指定的时间间隔，像旋转木马一样自动切换到屏幕上的下一页。</string>

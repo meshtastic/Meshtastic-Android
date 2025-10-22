@@ -95,6 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Отправлять позицию на основной канал по тройному нажатию кнопки.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Управляет мигающим светодиодом на устройстве. Для большинства устройств это будет управлять одним из до 4 светодиодов, зарядное устройство и GPS светодиоды не управляются.</string>
     <string name="config_device_tzdef_summary">Часовой пояс дат на экране и журнале устройства.</string>
+    <string name="config_device_use_phone_tz">Use phone time zone</string>
     <string name="config_device_transmitOverLora_summary">В дополнение к отправке на MQTT и PhoneAPI, наши NeighborInfo должны быть переданы через LoRa. Недоступно на канале с ключом и именем по умолчанию.</string>
     <string name="config_display_screen_on_secs_summary">Как долго экран остается включенным после нажатия пользовательской кнопки или получения сообщений.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Автоматически переключает на следующую страницу на экране как карусель, основываясь на заданном интервале.</string>
