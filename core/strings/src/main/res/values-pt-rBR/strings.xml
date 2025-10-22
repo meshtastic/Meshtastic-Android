@@ -95,6 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Send a position on the primary channel when the user button is triple clicked.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Controla o LED piscando no dispositivo. Para a maioria dos dispositivos, isto controlará um dos até 4 LEDs, os LEDs do carregador e GPS não são controláveis.</string>
     <string name="config_device_tzdef_summary">Time zone for dates on the device screen and log.</string>
+    <string name="config_device_use_phone_tz">Use phone time zone</string>
     <string name="config_device_transmitOverLora_summary">Se além de enviá-lo para MQTT e PhoneAPI, nosso NeighborInfo deve ser transmitido por LoRa. Não disponível em um canal com chave e nome padrão.</string>
     <string name="config_display_screen_on_secs_summary">How long the screen remains on after the user button is pressed or messages are received.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Automatically toggles to the next page on the screen like a carousel, based the specified interval.</string>
