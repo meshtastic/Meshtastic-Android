@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.feature.settings.radio.component
+package org.meshtastic.feature.settings.radio.channel.component
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable

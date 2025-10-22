@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.feature.settings.radio.component
+package org.meshtastic.feature.settings.radio.channel
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -71,6 +71,12 @@ import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.channel.component.ChannelIcons
+import org.meshtastic.feature.settings.radio.channel.component.ChannelLegend
+import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDialog
+import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
+import org.meshtastic.feature.settings.radio.channel.component.SECONDARY_CHANNEL_EPOCH
+import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.channelSettings

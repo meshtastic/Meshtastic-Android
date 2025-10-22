@@ -32,11 +32,11 @@ import org.meshtastic.feature.settings.SettingsScreen
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseScreen
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.channel.ChannelConfigScreen
 import org.meshtastic.feature.settings.radio.component.AmbientLightingConfigScreen
 import org.meshtastic.feature.settings.radio.component.AudioConfigScreen
 import org.meshtastic.feature.settings.radio.component.BluetoothConfigScreen
 import org.meshtastic.feature.settings.radio.component.CannedMessageConfigScreen
-import org.meshtastic.feature.settings.radio.component.ChannelConfigScreen
 import org.meshtastic.feature.settings.radio.component.DetectionSensorConfigScreen
 import org.meshtastic.feature.settings.radio.component.DeviceConfigScreen
 import org.meshtastic.feature.settings.radio.component.DisplayConfigScreen
