@@ -22,14 +22,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -59,13 +56,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
+import org.meshtastic.feature.settings.radio.channel.component.ChannelConfigHeader
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegend
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDialog
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
@@ -174,7 +171,7 @@ private fun ChannelSettingsItemList(
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             Column {
-                ChannelsConfigHeader(
+                ChannelConfigHeader(
                     frequency =
                     if (loraConfig.overrideFrequency != 0f) {
                         loraConfig.overrideFrequency
@@ -254,21 +251,6 @@ private fun ChannelSettingsItemList(
                     animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
                 ),
             ) {}
-        }
-    }
-}
-
-@Composable
-private fun ChannelsConfigHeader(frequency: Float, slot: Int) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        PreferenceCategory(text = stringResource(R.string.channels))
-        Column {
-            Text(text = "${stringResource(R.string.freq)}: ${frequency}MHz", fontSize = 11.sp)
-            Text(text = "${stringResource(R.string.slot)}: $slot", fontSize = 11.sp)
         }
     }
 }
