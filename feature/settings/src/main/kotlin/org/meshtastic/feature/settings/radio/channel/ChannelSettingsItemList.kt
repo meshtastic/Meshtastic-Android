@@ -31,16 +31,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Add
-import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,15 +59,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.R
-import org.meshtastic.core.ui.component.ChannelItem
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.component.PreferenceFooter
-import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.feature.settings.radio.channel.component.ChannelIcons
+import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegend
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDialog
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
@@ -80,49 +74,6 @@ import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.channelSettings
-
-@Composable
-private fun ChannelCard(
-    index: Int,
-    title: String,
-    enabled: Boolean,
-    channelSettings: ChannelSettings,
-    loraConfig: LoRaConfig,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
-    sharesLocation: Boolean,
-) = ChannelItem(index = index, title = title, enabled = enabled, onClick = onEditClick) {
-    if (sharesLocation) {
-        Icon(
-            imageVector = ChannelIcons.LOCATION.icon,
-            contentDescription = stringResource(ChannelIcons.LOCATION.descriptionResId),
-            modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
-        )
-    }
-    if (channelSettings.uplinkEnabled) {
-        Icon(
-            imageVector = ChannelIcons.UPLINK.icon,
-            contentDescription = stringResource(ChannelIcons.UPLINK.descriptionResId),
-            modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
-        )
-    }
-    if (channelSettings.downlinkEnabled) {
-        Icon(
-            imageVector = ChannelIcons.DOWNLINK.icon,
-            contentDescription = stringResource(ChannelIcons.DOWNLINK.descriptionResId),
-            modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
-        )
-    }
-    SecurityIcon(channelSettings, loraConfig)
-    Spacer(modifier = Modifier.width(10.dp))
-    IconButton(onClick = { onDeleteClick() }) {
-        Icon(
-            imageVector = Icons.TwoTone.Close,
-            contentDescription = stringResource(R.string.delete),
-            modifier = Modifier.wrapContentSize(),
-        )
-    }
-}
 
 @Composable
 fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
