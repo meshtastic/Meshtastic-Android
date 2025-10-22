@@ -69,8 +69,8 @@ fun ZoneId.toPosixString(): String {
             append(dstDate.formattedOffsetString())
         }
 
-        append(dstTransition.dateTimeBefore.formattedDateString())
-        append(stdTransition.dateTimeBefore.formattedDateString())
+        append(dstTransition.dateTimeBefore.transitionRuleString())
+        append(stdTransition.dateTimeBefore.transitionRuleString())
     }
 }
 
@@ -90,62 +90,43 @@ private fun ZonedDateTime.formattedOffsetString(): String {
     val offsetSeconds = -offset.totalSeconds
 
     val hours = offsetSeconds / 3600
-    val minutes = abs(offsetSeconds % 3600) / 60
-    val seconds = abs(offsetSeconds % 60)
-
-    val format: (Int) -> String = { String.format(Locale.ENGLISH, ":%02d", it) }
+    val remainingSeconds = abs(offsetSeconds) % 3600
+    val minutes = remainingSeconds / 60
+    val seconds = remainingSeconds % 60
 
     return buildString {
         append(hours)
-
-        if (minutes != 0 || seconds != 0) {
-            // This covers for both "30m:30s" and "00m:30s"
-            append(format(minutes))
-            // This prevents "30m:00s"
-            if (seconds != 0) {
-                append(format(seconds))
-            }
-        }
+        appendMinSec(minutes = minutes, seconds = seconds) { ":%02d".format(Locale.ENGLISH, it) }
     }
 }
 
 /**
- * Returns a date string with the format ",M<MONTH>.<WEEK_OF_MONTH>.<DAY_OF_WEEK>/<HOUR>:<MINUTE>:<SECOND>". Time is
- * omitted if it is 2:00:00, since that is the default. Otherwise, append time with non-zero values.
+ * Returns a transition rule string with the format
+ * ",M<MONTH>.<WEEK_OF_MONTH>.<DAY_OF_WEEK>/<HOURS>:<MINUTES>:<SECONDS>". Time is omitted if it is 2:00:00, since that
+ * is the spec default. Otherwise, append time with non-zero values.
  */
-private fun LocalDateTime.formattedDateString(): String {
-    @Suppress("MagicNumber")
-    return buildString {
-        val weekOfMonth = get(ChronoField.ALIGNED_WEEK_OF_MONTH)
-        val dayOfWeek = get(WeekFields.of(DayOfWeek.SUNDAY, 7).dayOfWeek()) - 1
-        append(",M$monthValue.$weekOfMonth.$dayOfWeek")
+@Suppress("MagicNumber")
+private fun LocalDateTime.transitionRuleString() = buildString {
+    val weekOfMonth = get(ChronoField.ALIGNED_WEEK_OF_MONTH)
+    val dayOfWeek = get(WeekFields.of(DayOfWeek.SUNDAY, 7).dayOfWeek()) - 1
+    append(",M$monthValue.$weekOfMonth.$dayOfWeek")
 
-        when {
-            // 2:00:00 is the default, so only append it if there are minutes or seconds.
-            hour == 2 -> {
-                if (minute != 0 || second != 0) {
-                    append("/$hour")
-                    // This covers for both "30m:30s" and "00m:30s"
-                    append(":$minute")
-                    // This prevents "30m:00s"
-                    if (second != 0) {
-                        append(":$second")
-                    }
-                }
-            }
-
-            else -> {
-                append("/$hour")
-                if (minute != 0 || second != 0) {
-                    // This covers for both "30m:30s" and "00m:30s"
-                    append(":$minute")
-                    // This prevents "30m:00s"
-                    if (second != 0) {
-                        append(":$second")
-                    }
-                }
-            }
+    when {
+        // No-op for spec default
+        hour == 2 && minute == 0 && second == 0 -> Unit
+        else -> {
+            append("/$hour")
+            appendMinSec(minutes = minute, seconds = second) { ":$it" }
         }
+    }
+}
+
+private inline fun StringBuilder.appendMinSec(minutes: Int, seconds: Int, format: (Int) -> String) {
+    if (minutes != 0 || seconds != 0) {
+        // This covers both "30m:30s" and "00m:30s"
+        append(format(minutes))
+        // This prevents "30m:00s"
+        if (seconds != 0) append(format(seconds))
     }
 }
 
