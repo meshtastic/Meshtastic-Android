@@ -112,7 +112,7 @@
     <string name="label_very_long_slow">Väga pikk ulatus- aeglane</string>
     <string name="label_long_fast">Pikk ulatus - kiire</string>
     <string name="label_long_moderate">Pikk ulatus - mõõdukas</string>
-    <string name="label_long_slow">Pikk ulatus - aeglame</string>
+    <string name="label_long_slow">Pikk ulatus - aeglane</string>
     <string name="label_medium_fast">Keskmine ulatus - kiire</string>
     <string name="label_medium_slow">Keskmine ulatus - aeglane</string>
     <string name="label_short_turbo">Lühike ulatus - turbo</string>
@@ -590,10 +590,10 @@
     <string name="shutdown_on_battery_delay_seconds">Aku viivitus väljalükkamisel (sekundit)</string>
     <string name="adc_multiplier_override">ADC kordaja tühistamine</string>
     <string name="adc_multiplier_override_ratio">Asenda ADC kordistaja suhe</string>
-    <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration</string>
-    <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
-    <string name="light_sleep_duration_seconds">Light sleep duration</string>
-    <string name="minimum_wake_time_seconds">Minimum wake time</string>
+    <string name="wait_for_bluetooth_duration_seconds">Oota Bluetoothi ​​kestust</string>
+    <string name="super_deep_sleep_duration_seconds">Super sügava une kestus</string>
+    <string name="light_sleep_duration_seconds">Kerge une kestus</string>
+    <string name="minimum_wake_time_seconds">Minimaalne ärkveloleku aeg</string>
     <string name="battery_ina_2xx_i2c_address">Aku INA_2XX I2C aadress</string>
     <string name="range_test_config">Ulatustesti sätted</string>
     <string name="range_test_enabled">Ulatustest lubatud</string>
@@ -627,16 +627,16 @@
     <string name="history_return_window">Ajalookirjete aken</string>
     <string name="server">Server</string>
     <string name="telemetry_config">Telemeetria sätted</string>
-    <string name="device_metrics_update_interval_seconds">Device metrics update interval</string>
-    <string name="environment_metrics_update_interval_seconds">Environment metrics update interval</string>
+    <string name="device_metrics_update_interval_seconds">Seadme mõõdikute värskendamise intervall</string>
+    <string name="environment_metrics_update_interval_seconds">Keskkonnamõõdikute värskendamise intervall</string>
     <string name="environment_metrics_module_enabled">Keskkonnamõõdikute lubamine</string>
     <string name="environment_metrics_on_screen_enabled">Keskkonnamõõdikute ekraanil kuvamine lubatud</string>
     <string name="environment_metrics_use_fahrenheit">Keskkonnamõõdikud kasutavad Fahrenheiti</string>
     <string name="air_quality_metrics_module_enabled">Õhukvaliteedi moodul on lubatud</string>
-    <string name="air_quality_metrics_update_interval_seconds">Air quality metrics update interval</string>
+    <string name="air_quality_metrics_update_interval_seconds">Õhupuhtusmõõdikute värskendamise intervall</string>
     <string name="air_quality_icon">Õhukvaliteedi ikoon</string>
     <string name="power_metrics_module_enabled">Toitemõõdiku moodul on lubatud</string>
-    <string name="power_metrics_update_interval_seconds">Power metrics update interval</string>
+    <string name="power_metrics_update_interval_seconds">Toitemõõdikute värskendamise intervall</string>
     <string name="power_metrics_on_screen_enabled">Toitemõõdiku ekraanil kuvamine lubatud</string>
     <string name="user_config">Kasutaja sätted</string>
     <string name="node_id">Sõlme ID</string>
@@ -895,5 +895,5 @@
     <string name="analytics_notice">Analüüsiandmeid kogutakse Androidi rakenduse täiustamiseks (tänan). Me saame anonüümset teavet kasutajate käitumise kohta. See hõlmab krahhiaruandeid, rakenduse ekraanipilte jms.</string>
     <string name="analytics_platforms">"Analüütika platvormid: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
-    <string name="unset">Unset - 0</string>
+    <string name="unset">Tühistatud - 0</string>
 </resources>
