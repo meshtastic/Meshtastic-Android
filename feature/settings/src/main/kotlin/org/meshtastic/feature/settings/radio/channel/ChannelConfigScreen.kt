@@ -80,7 +80,7 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
     }
 
-    ChannelSettingsItemList(
+    ChannelConfigScreen(
         title = stringResource(id = R.string.channels),
         onBack = onBack,
         settingsList = state.channelList,
@@ -94,7 +94,7 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-private fun ChannelSettingsItemList(
+private fun ChannelConfigScreen(
     title: String,
     onBack: () -> Unit,
     settingsList: List<ChannelSettings>,
@@ -284,8 +284,8 @@ private fun determineLocationSharingChannel(firmwareVersion: DeviceVersion, sett
 
 @Preview(showBackground = true)
 @Composable
-private fun ChannelSettingsPreview() {
-    ChannelSettingsItemList(
+private fun ChannelConfigScreenPreview() {
+    ChannelConfigScreen(
         title = "Channels",
         onBack = {},
         settingsList =
