@@ -2,7 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ComposableParamOrder:ChannelSettingsItemList.kt$ChannelSettingsItemList</ID>
+    <ID>ComposableParamOrder:ChannelConfigScreen.kt$ChannelConfigScreen</ID>
     <ID>ComposableParamOrder:Debug.kt$DecodedPayloadBlock</ID>
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchState</ID>
     <ID>ComposableParamOrder:DebugSearch.kt$DebugSearchStateviewModelDefaults</ID>
@@ -49,7 +49,7 @@
     <ID>MultipleEmitters:CleanNodeDatabaseScreen.kt$NodesDeletionPreview</ID>
     <ID>MultipleEmitters:RadioConfig.kt$RadioConfigItemList</ID>
     <ID>NestedBlockDepth:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>ParameterNaming:ChannelSettingsItemList.kt$onPositiveClicked</ID>
+    <ID>ParameterNaming:ChannelConfigScreen.kt$onPositiveClicked</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onCheckedChanged</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt$onDaysChanged</ID>
     <ID>ParameterNaming:MapReportingPreference.kt$onMapReportingEnabledChanged</ID>
@@ -61,8 +61,8 @@
     <ID>TooGenericExceptionCaught:LanguageUtils.kt$LanguageUtils$e: Exception</ID>
     <ID>TooGenericExceptionCaught:RadioConfigViewModel.kt$RadioConfigViewModel$ex: Exception</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
-    <ID>UnusedParameter:ChannelSettingsItemList.kt$onBack: () -&gt; Unit</ID>
-    <ID>UnusedParameter:ChannelSettingsItemList.kt$title: String</ID>
+    <ID>UnusedParameter:ChannelConfigScreen.kt$onBack: () -&gt; Unit</ID>
+    <ID>UnusedParameter:ChannelConfigScreen.kt$title: String</ID>
     <ID>ViewModelInjection:DebugSearch.kt$viewModel</ID>
   </CurrentIssues>
 </SmellBaseline>
