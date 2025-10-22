@@ -299,6 +299,8 @@ fun MessageScreen(
                 QuickChatRow(
                     enabled = connectionState.isConnected(),
                     actions = quickChatActions,
+                    userLatitude = ourNode?.takeIf { it.validPosition != null }?.latitude,
+                    userLongitude = ourNode?.takeIf { it.validPosition != null }?.longitude,
                     onClick = { action ->
                         handleQuickChatAction(
                             action = action,
@@ -690,6 +692,8 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
+    userLatitude: Double? = null,
+    userLongitude: Double? = null,
     onClick: (QuickChatAction) -> Unit,
 ) {
     val alertActionMessage = stringResource(R.string.alert_bell_text)
@@ -704,10 +708,29 @@ private fun QuickChatRow(
             )
         }
 
-    val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
+    val locationAction =
+        remember(userLatitude, userLongitude) {
+            if (userLatitude != null && userLongitude != null) {
+                // Format coordinates with 7 decimal places for GPS precision
+                val urlLat = "%.7f".format(userLatitude)
+                val urlLon = "%.7f".format(userLongitude)
+                QuickChatAction(
+                    name = "📍",
+                    message = "https://maps.google.com/?q=$urlLat,$urlLon",
+                    mode = QuickChatAction.Mode.Append,
+                    position = -2,
+                )
+            } else {
+                null
+            }
+        }
+
+    val allActions = remember(alertAction, locationAction, actions) {
+        listOfNotNull(alertAction, locationAction) + actions
+    }
 
     LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(allActions, key = { it.uuid }) { action ->
+        items(allActions, key = { it.position }) { action ->
             Button(onClick = { onClick(action) }, enabled = enabled) { Text(text = action.name) }
         }
     }
