@@ -21,10 +21,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.ZoneId
 
-class TimeZoneExtensionsTest {
+class ZoneIdExtensionsTest {
 
     @Test
-    fun testTimeZoneAbbreviations() {
+    fun `test POSIX string generation`() {
         val zoneMap =
             mapOf(
                 "US/Hawaii" to "HST10",

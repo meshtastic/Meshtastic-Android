@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("Wrapping", "UnusedImports", "SpacingAroundColon")
+
 package org.meshtastic.core.ui.timezone
 
 import java.time.DayOfWeek
@@ -37,7 +39,7 @@ fun ZoneId.toPosixString(): String {
 
     // No upcoming transition means this time zone does not support DST.
     if (upcomingTransition == null) {
-        with(now.asZonedDateTime(this)) {
+        with(now.asZonedDateTime()) {
             return "${timeZoneShortName()}${formattedOffsetString()}"
         }
     }
@@ -52,8 +54,8 @@ fun ZoneId.toPosixString(): String {
             upcomingTransition to followingTransition
         }
 
-    val stdDate = stdTransition.instant.asZonedDateTime(this)
-    val dstDate = dstTransition.instant.asZonedDateTime(this)
+    val stdDate = stdTransition.instant.asZonedDateTime()
+    val dstDate = dstTransition.instant.asZonedDateTime()
 
     return buildString {
         append(stdDate.timeZoneShortName())
@@ -71,8 +73,8 @@ fun ZoneId.toPosixString(): String {
     }
 }
 
-/** Returns the time zone short name with the format "EST" or "EDT". */
-fun ZonedDateTime.timeZoneShortName(): String {
+/** Returns the time zone short. e.g. "EST" or "EDT". */
+private fun ZonedDateTime.timeZoneShortName(): String {
     val formatter = DateTimeFormatter.ofPattern("zzz", Locale.ENGLISH)
     val shortName = format(formatter)
     return if (shortName.startsWith("GMT")) "GMT" else shortName
@@ -83,7 +85,7 @@ fun ZonedDateTime.timeZoneShortName(): String {
  * if they are non-zero.
  */
 @Suppress("MagicNumber")
-fun ZonedDateTime.formattedOffsetString(): String {
+private fun ZonedDateTime.formattedOffsetString(): String {
     val offsetSeconds = -offset.totalSeconds
 
     val hours = offsetSeconds / 3600
@@ -110,7 +112,7 @@ fun ZonedDateTime.formattedOffsetString(): String {
  * Returns a date string with the format ",M<MONTH>.<WEEK_OF_MONTH>.<WEEKDAY>/<HOUR>:<MINUTE>:<SECOND>". Time is omitted
  * if it is 2:00:00, since that is the default. Otherwise, append time with non-zero values.
  */
-fun LocalDateTime.formattedDateString(): String {
+private fun LocalDateTime.formattedDateString(): String {
     @Suppress("MagicNumber")
     val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 7)
 
@@ -146,4 +148,5 @@ fun LocalDateTime.formattedDateString(): String {
     }
 }
 
-private fun Instant.asZonedDateTime(zoneId: ZoneId) = ZonedDateTime.ofInstant(this, zoneId)
+context(zoneId: ZoneId)
+private fun Instant.asZonedDateTime() = ZonedDateTime.ofInstant(this, zoneId)
