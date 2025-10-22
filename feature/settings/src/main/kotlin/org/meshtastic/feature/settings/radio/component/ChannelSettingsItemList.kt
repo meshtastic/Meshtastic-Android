@@ -267,13 +267,13 @@ private fun ChannelSettingsItemList(
                     item {
                         PreferenceFooter(
                             enabled = enabled && isEditing,
-                            negativeText = R.string.cancel,
+                            negativeText = stringResource(R.string.cancel),
                             onNegativeClicked = {
                                 focusManager.clearFocus()
                                 settingsListInput.clear()
                                 settingsListInput.addAll(settingsList)
                             },
-                            positiveText = R.string.send,
+                            positiveText = stringResource(R.string.send),
                             onPositiveClicked = {
                                 focusManager.clearFocus()
                                 onPositiveClicked(settingsListInput)
