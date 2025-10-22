@@ -72,8 +72,9 @@ fun ZoneId.toPosixString(): String {
 
 /** Returns the time zone short name with the format "EST" or "EDT". */
 fun ZonedDateTime.timeZoneShortName(): String {
-    val formatter = DateTimeFormatter.ofPattern("z", Locale.ENGLISH)
-    return format(formatter)
+    val formatter = DateTimeFormatter.ofPattern("zzz", Locale.ENGLISH)
+    val shortName = format(formatter)
+    return if(shortName.startsWith("GMT")) "GMT" else shortName
 }
 
 /**
