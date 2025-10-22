@@ -95,6 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Send a position on the primary channel when the user button is triple clicked.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">控制裝置上閃爍的 LED。對大多數裝置而言，這將控制最多 4 個 LED 中的一個，充電器和 GPS LED 則無法控制。</string>
     <string name="config_device_tzdef_summary">Time zone for dates on the device screen and log.</string>
+    <string name="config_device_use_phone_tz">Use phone time zone</string>
     <string name="config_device_transmitOverLora_summary">除了發送至 MQTT 和 PhoneAPI 之外，我們的 NeighborInfo 是否也透過 LoRa 發送？此功能無法在使用預設密鑰和名稱的頻道使用。</string>
     <string name="config_display_screen_on_secs_summary">How long the screen remains on after the user button is pressed or messages are received.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Automatically toggles to the next page on the screen like a carousel, based the specified interval.</string>
