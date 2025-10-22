@@ -105,7 +105,7 @@ fun <T> DropDownPreference(
                 enabled = enabled,
                 supportingText =
                 if (summary != null) {
-                    { Text(text = summary, modifier = Modifier.padding(bottom = 8.dp)) }
+                    { Text(text = summary) }
                 } else {
                     null
                 },

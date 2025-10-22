@@ -20,13 +20,23 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults.MediumContainerHeight
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -47,19 +58,23 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.timezone.toPosixString
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
+import java.time.ZoneId
 
 private val DeviceConfig.Role.description: Int
     get() =
@@ -91,6 +106,7 @@ private val DeviceConfig.RebroadcastMode.description: Int
             else -> R.string.unrecognized
         }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
@@ -131,6 +147,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     onItemSelected = { selectedRole = it },
                     summary = stringResource(id = formState.value.role.description),
                 )
+
                 HorizontalDivider()
 
                 DropDownPreference(
@@ -140,6 +157,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     onItemSelected = { formState.value = formState.value.copy { rebroadcastMode = it } },
                     summary = stringResource(id = formState.value.rebroadcastMode.description),
                 )
+
                 HorizontalDivider()
 
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
@@ -152,6 +170,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 )
             }
         }
+
         item {
             TitledCard(title = stringResource(R.string.hardware)) {
                 SwitchPreference(
@@ -162,7 +181,8 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     onCheckedChange = { formState.value = formState.value.copy { doubleTapAsButtonPress = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
-                HorizontalDivider()
+
+                InsetDivider()
 
                 SwitchPreference(
                     title = stringResource(R.string.triple_click_adhoc_ping),
@@ -172,7 +192,9 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     onCheckedChange = { formState.value = formState.value.copy { disableTripleClick = !it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
-                HorizontalDivider()
+
+                InsetDivider()
+
                 SwitchPreference(
                     title = stringResource(R.string.led_heartbeat),
                     summary = stringResource(id = R.string.config_device_ledHeartbeatEnabled_summary),
@@ -181,13 +203,14 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     onCheckedChange = { formState.value = formState.value.copy { ledHeartbeatDisabled = !it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
-                HorizontalDivider()
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.debug)) {
+            TitledCard(title = stringResource(R.string.time_zone)) {
+                val appTxPosixString = remember { ZoneId.systemDefault().toPosixString() }
+
                 EditTextPreference(
-                    title = stringResource(R.string.time_zone),
+                    title = "",
                     value = formState.value.tzdef,
                     summary = stringResource(id = R.string.config_device_tzdef_summary),
                     maxSize = 64, // tzdef max_size:65
@@ -197,7 +220,27 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { tzdef = it } },
+                    trailingIcon = {
+                        IconButton(onClick = { formState.value = formState.value.copy { tzdef = "" } }) {
+                            Icon(imageVector = Icons.Rounded.Clear, contentDescription = null)
+                        }
+                    },
                 )
+
+                HorizontalDivider()
+
+                TextButton(
+                    modifier = Modifier.height(MediumContainerHeight).fillMaxWidth(),
+                    enabled = state.connected,
+                    shape = RectangleShape,
+                    onClick = { formState.value = formState.value.copy { tzdef = appTxPosixString } },
+                ) {
+                    Icon(imageVector = Icons.Rounded.PhoneAndroid, contentDescription = null)
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(text = stringResource(R.string.config_device_use_app_tz))
+                }
             }
         }
 
