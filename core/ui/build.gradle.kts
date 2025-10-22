@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.kover)
 }
 
 android { namespace = "org.meshtastic.core.ui" }
