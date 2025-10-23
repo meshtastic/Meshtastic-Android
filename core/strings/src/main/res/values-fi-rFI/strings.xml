@@ -95,7 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Lähetä sijainti ensisijaisella kanavalla, kun käyttäjäpainiketta painetaan kolme kertaa.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Hallitsee laitteen vilkkuvaa LED-valoa. Useimmissa laitteissa tällä voidaan ohjata yhtä neljästä LED-valosta, mutta latauksen tai GPS:n valoja ei voi hallita.</string>
     <string name="config_device_tzdef_summary">Aikavyöhyke laitteen näytöllä ja lokissa käytettäville päivämäärille.</string>
-    <string name="config_device_use_phone_tz">Use phone time zone</string>
+    <string name="config_device_use_phone_tz">Käytä puhelimen aikavyöhykettä</string>
     <string name="config_device_transmitOverLora_summary">Lähetetäänkö naapuritiedot LoRa:n kautta sen lisäksi, että ne lähetetään MQTT-protokollalla ja PhoneAPI sovellusrajapinnassa? Tämä ei ole tuettu kanavalla, joka käyttää oletussalausavainta ja nimeä.</string>
     <string name="config_display_screen_on_secs_summary">Kuinka kauan näyttö pysyy päällä sen jälkeen, kun käyttäjäpainiketta on painettu tai viestejä on vastaanotettu.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Vaihtaa automaattisesti seuraavalle näytön sivulle kuin karuselli, määritetyn aikavälin perusteella.</string>
