@@ -137,7 +137,7 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.4.7'
           bundler-cache: true
 
       - name: Build and Deploy Google Play to Internal Track with Fastlane
@@ -203,7 +203,7 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.4.7'
           bundler-cache: true
 
       - name: Build F-Droid with Fastlane
