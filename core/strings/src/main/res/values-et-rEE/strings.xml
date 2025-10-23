@@ -95,7 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Saada asukoht põhikanalil, kui klõpsatakse kasutaja nuppu kolm korda.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Juhib seadme vilkuvaid LED. Enamiku seadmete puhul juhib see ühe kuni 4 LED, laadija ja GPS LED ei ole juhitavad.</string>
     <string name="config_device_tzdef_summary">Seadme ekraanil ja logis kuvatavate kuupäevade ajavöönd.</string>
-    <string name="config_device_use_phone_tz">Use phone time zone</string>
+    <string name="config_device_use_phone_tz">Kasuta telefoni ajavööndit</string>
     <string name="config_device_transmitOverLora_summary">Lisaks MQTT-le ja PhoneAPI-le saatmisele peaks meie NeighborInfo edastama ka LoRa kaudu. Ei tööta vaikimisi võtme ja - nimega kanalil.</string>
     <string name="config_display_screen_on_secs_summary">Kui kaua ekraan pärast nupu vajutamist või sõnumite vastuvõtmist sisse lülitatuks jääb.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Läheb automaatselt ekraani järgmisele lehele nagu karussell, vastavalt määratud intervallile.</string>
