@@ -70,7 +70,13 @@ enum class FixedUpdateIntervals(val value: Long) {
          *
          * @return The corresponding [FixedUpdateIntervals] or null if no match is found.
          */
-        fun fromValue(value: Long): FixedUpdateIntervals? = entries.find { it.value == value }
+        fun fromValue(value: Long): FixedUpdateIntervals? {
+            // Handle the case where both ONE_MINUTE and SIXTY_SECONDS have the same value (60 seconds)
+            if (value == 60L) {
+                return SIXTY_SECONDS
+            }
+            return entries.find { it.value == value }
+        }
     }
 }
 
