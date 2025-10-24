@@ -71,6 +71,7 @@ import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.ConfigProtos.Config.SecurityConfig
+import org.meshtastic.proto.ConnStatusProtos
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.ModuleConfigProtos
 import org.meshtastic.proto.Portnums
@@ -93,6 +94,7 @@ data class RadioConfigState(
     val moduleConfig: ModuleConfigProtos.ModuleConfig = moduleConfig {},
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
+    val deviceConnectionStatus: ConnStatusProtos.DeviceConnectionStatus? = null,
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = false,
@@ -329,6 +331,12 @@ constructor(
         "Request getCannedMessages error",
     )
 
+    private fun getDeviceConnectionStatus(destNum: Int) = request(
+        destNum,
+        { service, packetId, dest -> service.getDeviceConnectionStatus(packetId, dest) },
+        "Request getDeviceConnectionStatus error",
+    )
+
     private fun requestShutdown(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.requestShutdown(packetId, dest) },
@@ -542,6 +550,9 @@ constructor(
                 if (route == ConfigRoute.LORA) {
                     getChannel(destNum, 0)
                 }
+                if (route == ConfigRoute.NETWORK) {
+                    getDeviceConnectionStatus(destNum)
+                }
                 getConfig(destNum, route.type)
             }
 
@@ -693,6 +704,13 @@ constructor(
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_RINGTONE_RESPONSE -> {
                     _radioConfigState.update { it.copy(ringtone = parsed.getRingtoneResponse) }
+                    incrementCompleted()
+                }
+
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_DEVICE_CONNECTION_STATUS_RESPONSE -> {
+                    _radioConfigState.update {
+                        it.copy(deviceConnectionStatus = parsed.getDeviceConnectionStatusResponse)
+                    }
                     incrementCompleted()
                 }
 

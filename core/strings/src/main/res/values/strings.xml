@@ -207,6 +207,9 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Connected</string>
     <string name="connected_to">Connected to radio (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Not connected</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="app_too_old">Application update required</string>

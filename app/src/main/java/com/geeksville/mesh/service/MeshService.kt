@@ -2296,5 +2296,13 @@ class MeshService : Service() {
             override fun requestNodedbReset(requestId: Int, destNum: Int) = toRemoteExceptions {
                 packetHandler.sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { nodedbReset = 1 })
             }
+
+            override fun getDeviceConnectionStatus(requestId: Int, destNum: Int) = toRemoteExceptions {
+                packetHandler.sendToRadio(
+                    newMeshPacketTo(destNum).buildAdminPacket(id = requestId, wantResponse = true) {
+                        getDeviceConnectionStatusRequest = true
+                    },
+                )
+            }
         }
 }
