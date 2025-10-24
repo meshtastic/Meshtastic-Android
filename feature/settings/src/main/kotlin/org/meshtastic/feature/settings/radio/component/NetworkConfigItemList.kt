@@ -110,6 +110,41 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
             viewModel.setConfig(config)
         },
     ) {
+        // Display device connection status
+        state.deviceConnectionStatus?.let { connectionStatus ->
+            if (
+                connectionStatus.wifi?.status?.isConnected == true ||
+                connectionStatus.ethernet?.status?.isConnected == true
+            ) {
+                item {
+                    TitledCard(title = stringResource(R.string.connection_status)) {
+                        connectionStatus.wifi?.let { wifiStatus ->
+                            if (wifiStatus.status.isConnected) {
+                                Text(
+                                    text =
+                                    stringResource(R.string.wifi_ip) +
+                                        " " +
+                                        formatIpAddress(wifiStatus.status.ipAddress),
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+                                )
+                            }
+                        }
+                        connectionStatus.ethernet?.let { ethernetStatus ->
+                            if (ethernetStatus.status.isConnected) {
+                                Text(
+                                    text =
+                                    stringResource(R.string.ethernet_ip) +
+                                        " " +
+                                        formatIpAddress(ethernetStatus.status.ipAddress),
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+                                )
+                            }
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
         if (state.metadata?.hasWifi == true) {
             item {
                 TitledCard(title = stringResource(R.string.wifi_config)) {
@@ -274,3 +309,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
 private fun extractWifiCredentials(qrCode: String) =
     Regex("""WIFI:S:(.*?);.*?P:(.*?);""").find(qrCode)?.destructured?.let { (ssid, password) -> ssid to password }
         ?: (null to null)
+
+@Suppress("detekt:MagicNumber")
+private fun formatIpAddress(ipAddress: Int): String = "${(ipAddress) and 0xFF}." +
+    "${(ipAddress shr 8) and 0xFF}." +
+    "${(ipAddress shr 16) and 0xFF}." +
+    "${(ipAddress shr 24) and 0xFF}"
