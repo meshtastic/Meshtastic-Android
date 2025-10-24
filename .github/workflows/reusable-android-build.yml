@@ -82,14 +82,14 @@ jobs:
 
       - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fdroidDebug
           path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
           retention-days: 14
       - name: Upload Google debug artifact
         if: ${{ inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: googleDebug
           path: app/build/outputs/apk/google/debug/app-google-debug.apk
@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload reports
         if: ${{ inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: upload-reports
           path: |
