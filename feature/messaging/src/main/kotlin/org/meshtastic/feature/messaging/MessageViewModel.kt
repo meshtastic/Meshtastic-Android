@@ -55,7 +55,7 @@ class MessageViewModel
 constructor(
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
-    quickChatActionRepository: QuickChatActionRepository,
+    private val quickChatActionRepository: QuickChatActionRepository,
     private val serviceRepository: ServiceRepository,
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
@@ -76,6 +76,26 @@ constructor(
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
     val quickChatActions = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val actions = quickChatActionRepository.getAllActions()
+            var isEmpty = true
+            actions.collect { list ->
+                if (isEmpty && list.isEmpty()) {
+                    quickChatActionRepository.upsert(
+                        org.meshtastic.core.database.entity.QuickChatAction(
+                            name = "📍",
+                            message = "https://maps.google.com/?q=%GPS",
+                            mode = org.meshtastic.core.database.entity.QuickChatAction.Mode.Append,
+                            position = 0,
+                        )
+                    )
+                }
+                isEmpty = false
+            }
+        }
+    }
 
     private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val messagesForContactKey: StateFlow<List<Message>> =

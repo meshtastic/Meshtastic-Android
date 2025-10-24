@@ -437,7 +437,6 @@ private fun handleQuickChatAction(
     userLongitude: Double?,
     onSendMessage: (String) -> Unit,
 ) {
-    // Replace %GPS with actual coordinates if available
     val processedMessage = if (userLatitude != null && userLongitude != null) {
         val gpsString = "%.7f,%.7f".format(userLatitude, userLongitude)
         action.message.replace("%GPS", gpsString, ignoreCase = true)
