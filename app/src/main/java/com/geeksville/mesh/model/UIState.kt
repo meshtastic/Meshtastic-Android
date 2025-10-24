@@ -50,6 +50,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import com.geeksville.mesh.Position
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
 /// that user. If the original name is only one word, strip vowels from the original name and if the result is
@@ -440,6 +441,8 @@ class UIViewModel @Inject constructor(
                         "\"sender long\"," +
                         "\"distance\"," +
                         "\"hop limit\"," +
+                        "\"portnum\"," +
+                        "\"decoded payload\"," +
                         "\"payload\"," +
                         "\"airtime\"," +
                         "\"rx pos lat\"," +
@@ -632,14 +635,25 @@ class UIViewModel @Inject constructor(
 
                             val hopLimit = proto.hopLimit
 
+                            val portnum = proto.decoded.portnum
+
+                            val decoded_payload = proto.decoded.payload
+
                             val payload = when {
-                                proto.decoded.portnumValue !in setOf(
+                                proto.decoded.portnumValue in setOf(
                                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
                                     Portnums.PortNum.RANGE_TEST_APP_VALUE,
-                                ) -> "<${proto.decoded.portnum}>"
-                                proto.hasDecoded() -> proto.decoded.payload.toStringUtf8()
+                                ) -> proto.decoded.payload.toStringUtf8()
                                     .replace("\"", "\"\"")
-                                proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
+                                (proto.decoded.portnumValue == Portnums.PortNum.POSITION_APP_VALUE)
+                                 -> MeshProtos.Position.parseFrom(proto.decoded.payload).toString()
+                                    .replace("\"", "\"\"")
+                                (proto.decoded.portnumValue == Portnums.PortNum.TELEMETRY_APP_VALUE)
+                                 -> TelemetryProtos.Telemetry.parseFrom(proto.decoded.payload).toString()
+                                    .replace("\"", "\"\"")
+                                (proto.decoded.portnumValue == Portnums.PortNum.NODEINFO_APP_VALUE)
+                                 -> MeshProtos.User.parseFrom(proto.decoded.payload).toString()
+                                    .replace("\"", "\"\"")
                                 else -> ""
                             }
 
@@ -657,6 +671,8 @@ class UIViewModel @Inject constructor(
                                     "\"$senderLong\"," +
                                     "\"$dist\"," +
                                     "\"$hopLimit\"," +
+                                    "\"$portnum\"," +
+                                    "\"$decoded_payload\"," +
                                     "\"$payload\"," +
                                     "\"$airtime\"," +
                                     "\"$rxPosLat\"," +
