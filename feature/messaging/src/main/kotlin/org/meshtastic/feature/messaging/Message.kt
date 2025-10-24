@@ -722,23 +722,7 @@ private fun QuickChatRow(
             )
         }
 
-    val locationAction =
-        remember(userLatitude, userLongitude) {
-            if (userLatitude != null && userLongitude != null) {
-                QuickChatAction(
-                    name = "📍",
-                    message = "https://maps.google.com/?q=%GPS",
-                    mode = QuickChatAction.Mode.Append,
-                    position = -2,
-                )
-            } else {
-                null
-            }
-        }
-
-    val allActions = remember(alertAction, locationAction, actions) {
-        listOfNotNull(alertAction, locationAction) + actions
-    }
+    val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
 
     LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         items(allActions, key = { it.position }) { action ->
