@@ -57,7 +57,6 @@ enum class FixedUpdateIntervals(val value: Long) {
     FORTY_EIGHT_HOURS(TimeUnit.HOURS.toSeconds(48)),
     SEVENTY_TWO_HOURS(TimeUnit.HOURS.toSeconds(72)),
     ALWAYS_ON(Int.MAX_VALUE.toLong()),
-    SIXTY_SECONDS(TimeUnit.MINUTES.toSeconds(1)),
     EIGHTY_SECONDS(TimeUnit.SECONDS.toSeconds(80)),
     NINETY_SECONDS(TimeUnit.SECONDS.toSeconds(90)),
     EIGHT_SECONDS(TimeUnit.SECONDS.toSeconds(8)),
@@ -70,13 +69,7 @@ enum class FixedUpdateIntervals(val value: Long) {
          *
          * @return The corresponding [FixedUpdateIntervals] or null if no match is found.
          */
-        fun fromValue(value: Long): FixedUpdateIntervals? {
-            // Handle the case where both ONE_MINUTE and SIXTY_SECONDS have the same value (60 seconds)
-            if (value == 60L) {
-                return SIXTY_SECONDS
-            }
-            return entries.find { it.value == value }
-        }
+        fun fromValue(value: Long): FixedUpdateIntervals? = entries.find { it.value == value }
     }
 }
 
@@ -266,7 +259,7 @@ enum class IntervalConfiguration {
             POSITION_BROADCAST ->
                 listOf(
                     FixedUpdateIntervals.UNSET,
-                    FixedUpdateIntervals.SIXTY_SECONDS,
+                    FixedUpdateIntervals.ONE_MINUTE,
                     FixedUpdateIntervals.NINETY_SECONDS,
                     FixedUpdateIntervals.FIVE_MINUTES,
                     FixedUpdateIntervals.FIFTEEN_MINUTES,
@@ -289,7 +282,7 @@ enum class IntervalConfiguration {
                     FixedUpdateIntervals.EIGHT_SECONDS,
                     FixedUpdateIntervals.TWENTY_SECONDS,
                     FixedUpdateIntervals.FORTY_SECONDS,
-                    FixedUpdateIntervals.SIXTY_SECONDS,
+                    FixedUpdateIntervals.ONE_MINUTE,
                     FixedUpdateIntervals.EIGHTY_SECONDS,
                     FixedUpdateIntervals.TWO_MINUTES,
                     FixedUpdateIntervals.FIVE_MINUTES,
