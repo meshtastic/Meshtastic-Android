@@ -73,7 +73,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Upload Test Results
         if: ${{ inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: android-test-reports-api-${{ matrix.api-level }}
           path: app/build/outputs/androidTest-results/
