@@ -19,7 +19,7 @@
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">rensa filtrering av noder</string>
-    <string name="node_filter_title">Filter by</string>
+    <string name="node_filter_title">Filtrera på</string>
     <string name="node_filter_include_unknown">Inkludera okända</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
@@ -241,7 +241,7 @@
     <string name="delete_for_me">Radera för mig</string>
     <string name="select_all">Välj alla</string>
     <string name="close_selection">Close selection</string>
-    <string name="delete_selection">Delete selected</string>
+    <string name="delete_selection"></string>
     <string name="map_style_selection">Stilval</string>
     <string name="map_download_region">Ladda ner region</string>
     <string name="name">Namn</string>
