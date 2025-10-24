@@ -33,6 +33,27 @@ class QuickChatViewModel @Inject constructor(private val quickChatActionReposito
     val quickChatActions
         get() = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
+    init {
+        // Initialize default location action if database is empty
+        viewModelScope.launch(Dispatchers.IO) {
+            val actions = quickChatActionRepository.getAllActions()
+            var isEmpty = true
+            actions.collect { list ->
+                if (isEmpty && list.isEmpty()) {
+                    quickChatActionRepository.upsert(
+                        QuickChatAction(
+                            name = "📍",
+                            message = "https://maps.google.com/?q=%GPS",
+                            mode = QuickChatAction.Mode.Append,
+                            position = 0,
+                        )
+                    )
+                }
+                isEmpty = false
+            }
+        }
+    }
+
     fun updateActionPositions(actions: List<QuickChatAction>) {
         viewModelScope.launch(Dispatchers.IO) {
             for (position in actions.indices) {
