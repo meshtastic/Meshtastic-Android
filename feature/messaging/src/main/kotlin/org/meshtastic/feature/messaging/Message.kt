@@ -299,10 +299,14 @@ fun MessageScreen(
                 QuickChatRow(
                     enabled = connectionState.isConnected(),
                     actions = quickChatActions,
+                    userLatitude = ourNode?.takeIf { it.validPosition != null }?.latitude,
+                    userLongitude = ourNode?.takeIf { it.validPosition != null }?.longitude,
                     onClick = { action ->
                         handleQuickChatAction(
                             action = action,
                             messageInputState = messageInputState,
+                            userLatitude = ourNode?.takeIf { it.validPosition != null }?.latitude,
+                            userLongitude = ourNode?.takeIf { it.validPosition != null }?.longitude,
                             onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
                         )
                     },
@@ -422,25 +426,36 @@ private fun String.ellipsize(maxLength: Int): String = if (length > maxLength) "
  *
  * @param action The [QuickChatAction] to handle.
  * @param messageInputState The [TextFieldState] of the message input field.
+ * @param userLatitude Current user latitude, if available.
+ * @param userLongitude Current user longitude, if available.
  * @param onSendMessage Lambda to call when a message needs to be sent.
  */
 private fun handleQuickChatAction(
     action: QuickChatAction,
     messageInputState: TextFieldState,
+    userLatitude: Double?,
+    userLongitude: Double?,
     onSendMessage: (String) -> Unit,
 ) {
+    val processedMessage = if (userLatitude != null && userLongitude != null) {
+        val gpsString = "%.7f,%.7f".format(userLatitude, userLongitude)
+        action.message.replace("%GPS", gpsString, ignoreCase = true)
+    } else {
+        action.message
+    }
+
     when (action.mode) {
         QuickChatAction.Mode.Append -> {
             val originalText = messageInputState.text.toString()
             // Avoid appending if the exact message is already present (simple check)
-            if (!originalText.contains(action.message)) {
+            if (!originalText.contains(processedMessage)) {
                 val newText =
                     buildString {
                         append(originalText)
                         if (originalText.isNotEmpty() && !originalText.endsWith(' ')) {
                             append(' ')
                         }
-                        append(action.message)
+                        append(processedMessage)
                     }
                         .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
                 messageInputState.setTextAndPlaceCursorAtEnd(newText)
@@ -449,7 +464,7 @@ private fun handleQuickChatAction(
 
         QuickChatAction.Mode.Instant -> {
             // Byte limit for 'Send' mode messages is handled by the backend/transport layer.
-            onSendMessage(action.message)
+            onSendMessage(processedMessage)
         }
     }
 }
@@ -690,6 +705,8 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
+    userLatitude: Double? = null,
+    userLongitude: Double? = null,
     onClick: (QuickChatAction) -> Unit,
 ) {
     val alertActionMessage = stringResource(R.string.alert_bell_text)
@@ -707,7 +724,7 @@ private fun QuickChatRow(
     val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
 
     LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(allActions, key = { it.uuid }) { action ->
+        items(allActions, key = { it.position }) { action ->
             Button(onClick = { onClick(action) }, enabled = enabled) { Text(text = action.name) }
         }
     }

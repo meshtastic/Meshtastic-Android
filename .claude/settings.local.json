@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir)",
+      "Bash(git clone https://github.com/meshtastic/Meshtastic-Android.git .)",
+      "Bash(git submodule update --init --recursive)",
+      "Bash(where sdkmanager)",
+      "Bash(echo $ANDROID_HOME)",
+      "Bash(./gradlew --version)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(where java)",
+      "Bash(\"C:\\Program Files\\Android\\Android Studio\\jbr\\bin\\java.exe\" -version)",
+      "Bash($env:JAVA_HOME=\"C:\\Program Files\\Android\\Android Studio\\jbr\")",
+      "Bash(export JAVA_HOME=\"C:/Program Files/Android/Android Studio/jbr\")",
+      "Read(//c/Users/**)",
+      "Bash(./gradlew :feature:messaging:assembleDebug)",
+      "Bash(./gradlew assembleFdroidDebug)",
+      "Bash(./gradlew assembleGoogleDebug)",
+      "Bash(./gradlew clean)",
+      "Bash(./gradlew :app:assembleFdroidDebug)",
+      "Bash(./gradlew clean assembleFdroidDebug)",
+      "Bash(./gradlew :app:assembleFdroidDebug --rerun-tasks)",
+      "Bash(./gradlew :app:assembleGoogleDebug)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
