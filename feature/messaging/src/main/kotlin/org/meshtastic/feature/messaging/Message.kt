@@ -299,8 +299,6 @@ fun MessageScreen(
                 QuickChatRow(
                     enabled = connectionState.isConnected(),
                     actions = quickChatActions,
-                    userLatitude = ourNode?.takeIf { it.validPosition != null }?.latitude,
-                    userLongitude = ourNode?.takeIf { it.validPosition != null }?.longitude,
                     onClick = { action ->
                         handleQuickChatAction(
                             action = action,
@@ -706,8 +704,6 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
-    userLatitude: Double? = null,
-    userLongitude: Double? = null,
     onClick: (QuickChatAction) -> Unit,
 ) {
     val alertActionMessage = stringResource(R.string.alert_bell_text)
