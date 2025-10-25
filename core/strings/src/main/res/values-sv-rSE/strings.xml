@@ -163,7 +163,7 @@
     <string name="discard_changes">Släng</string>
     <string name="save_changes">Spara</string>
     <string name="new_channel_rcvd">Ny kanal-länk mottagen</string>
-    <string name="permission_missing">Meshtastic behöver platsbehörigheter aktiverade för att hitta nya enheter via Bluetooth. Du kan inaktivera när den inte används.</string>
+    <string name="permission_missing">Meshtastic behöver platsbehörigheter aktiverade på telefonen för att hitta nya enheter via Bluetooth. Du kan inaktivera när den inte används.</string>
     <string name="report_bug">Rapportera bugg</string>
     <string name="report_a_bug">Rapportera bugg</string>
     <string name="report_bug_text">Är du säker på att du vill rapportera en bugg? Efter rapportering, vänligen posta i https://github.com/orgs/meshtastic/discussions så att vi kan matcha rapporten med buggen du hittat.</string>
