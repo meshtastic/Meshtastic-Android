@@ -437,12 +437,13 @@ private fun handleQuickChatAction(
     userLongitude: Double?,
     onSendMessage: (String) -> Unit,
 ) {
-    val processedMessage = if (userLatitude != null && userLongitude != null) {
-        val gpsString = "%.7f,%.7f".format(userLatitude, userLongitude)
-        action.message.replace("%GPS", gpsString, ignoreCase = true)
-    } else {
-        action.message
-    }
+    val processedMessage =
+        if (userLatitude != null && userLongitude != null) {
+            val gpsString = "%.7f,%.7f".format(userLatitude, userLongitude)
+            action.message.replace("%GPS", gpsString, ignoreCase = true)
+        } else {
+            action.message
+        }
 
     when (action.mode) {
         QuickChatAction.Mode.Append -> {

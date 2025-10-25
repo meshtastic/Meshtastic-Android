@@ -89,7 +89,7 @@ constructor(
                             message = "https://maps.google.com/?q=%GPS",
                             mode = org.meshtastic.core.database.entity.QuickChatAction.Mode.Append,
                             position = 0,
-                        )
+                        ),
                     )
                 }
                 isEmpty = false
