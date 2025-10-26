@@ -41,3 +41,6 @@ keystore.properties
 
 /build-logic/convention/build/*
 /build-logic/build/
+
+# Claude Code
+.claude/
