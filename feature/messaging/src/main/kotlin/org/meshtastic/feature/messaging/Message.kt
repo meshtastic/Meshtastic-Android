@@ -106,6 +106,7 @@ import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.MeshProtos
 import java.nio.charset.StandardCharsets
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
@@ -303,8 +304,7 @@ fun MessageScreen(
                         handleQuickChatAction(
                             action = action,
                             messageInputState = messageInputState,
-                            userLatitude = ourNode?.takeIf { it.validPosition != null }?.latitude,
-                            userLongitude = ourNode?.takeIf { it.validPosition != null }?.longitude,
+                            userPosition = ourNode?.validPosition,
                             onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
                         )
                     },
@@ -424,21 +424,24 @@ private fun String.ellipsize(maxLength: Int): String = if (length > maxLength) "
  *
  * @param action The [QuickChatAction] to handle.
  * @param messageInputState The [TextFieldState] of the message input field.
- * @param userLatitude Current user latitude, if available.
- * @param userLongitude Current user longitude, if available.
+ * @param userPosition Current user position (lat/lng), if available.
  * @param onSendMessage Lambda to call when a message needs to be sent.
  */
 private fun handleQuickChatAction(
     action: QuickChatAction,
     messageInputState: TextFieldState,
-    userLatitude: Double?,
-    userLongitude: Double?,
+    userPosition: MeshProtos.Position?,
     onSendMessage: (String) -> Unit,
 ) {
     val processedMessage =
-        if (userLatitude != null && userLongitude != null) {
-            val gpsString = "%.7f,%.7f".format(userLatitude, userLongitude)
-            action.message.replace("%GPS", gpsString, ignoreCase = true)
+        if (action.message.contains("%LAT", ignoreCase = true) || action.message.contains("%LON", ignoreCase = true)) {
+            userPosition?.let {
+                val latitude = "%.7f".format(it.latitudeI * 1e-7)
+                val longitude = "%.7f".format(it.longitudeI * 1e-7)
+                action.message
+                    .replace("%LAT", latitude, ignoreCase = true)
+                    .replace("%LON", longitude, ignoreCase = true)
+            } ?: action.message
         } else {
             action.message
         }

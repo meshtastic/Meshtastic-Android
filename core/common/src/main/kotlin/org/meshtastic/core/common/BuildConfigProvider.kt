@@ -25,4 +25,5 @@ interface BuildConfigProvider {
     val versionName: String
     val absoluteMinFwVersion: String
     val minFwVersion: String
+    val defaultMapUrl: String
 }
