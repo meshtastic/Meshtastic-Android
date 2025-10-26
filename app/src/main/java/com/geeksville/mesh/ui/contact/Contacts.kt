@@ -62,6 +62,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.Contact
+import org.meshtastic.core.database.entity.ContactSettings
+import org.meshtastic.core.model.util.formatMuteRemainingTime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.proto.AppOnlyProtos
@@ -201,8 +203,13 @@ fun ContactsScreen(
         },
     )
 
+    // Get contact settings for the dialog
+    val contactSettings by viewModel.getContactSettings().collectAsStateWithLifecycle(initialValue = emptyMap())
+
     MuteNotificationsDialog(
         showDialog = showMuteDialog,
+        selectedContactKeys = selectedContactKeys.toList(),
+        contactSettings = contactSettings,
         onDismiss = { showMuteDialog = false },
         onConfirm = { muteUntil ->
             showMuteDialog = false
@@ -216,6 +223,8 @@ fun ContactsScreen(
 @Composable
 fun MuteNotificationsDialog(
     showDialog: Boolean,
+    selectedContactKeys: List<String>,
+    contactSettings: Map<String, ContactSettings>,
     onDismiss: () -> Unit,
     onConfirm: (Long) -> Unit, // Lambda to handle the confirmed mute duration
 ) {
@@ -238,6 +247,32 @@ fun MuteNotificationsDialog(
             title = { Text(text = stringResource(R.string.mute_notifications)) },
             text = {
                 Column {
+                    // Show current mute status
+                    selectedContactKeys.forEach { contactKey ->
+                        contactSettings[contactKey]?.let { settings ->
+                            val now = System.currentTimeMillis()
+                            val statusText =
+                                when {
+                                    settings.muteUntil > 0 && settings.muteUntil != Long.MAX_VALUE -> {
+                                        val remaining = settings.muteUntil - now
+                                        if (remaining > 0) {
+                                            stringResource(R.string.mute_status_muted_for) +
+                                                " " +
+                                                formatMuteRemainingTime(remaining)
+                                        } else {
+                                            stringResource(R.string.mute_status_unmuted)
+                                        }
+                                    }
+                                    settings.muteUntil == Long.MAX_VALUE -> stringResource(R.string.mute_status_always)
+                                    else -> stringResource(R.string.mute_status_unmuted)
+                                }
+                            Text(
+                                text = stringResource(R.string.currently) + " " + statusText,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                            )
+                        }
+                    }
+
                     muteOptions.forEachIndexed { index, (stringRes, _) ->
                         val isSelected = index == selectedOptionIndex
                         val text = stringResource(stringRes)

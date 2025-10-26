@@ -230,8 +230,18 @@ interface PacketDao {
     suspend fun setMuteUntil(contacts: List<String>, until: Long) {
         val contactList =
             contacts.map { contact ->
-                getContactSettings(contact)?.copy(muteUntil = until)
-                    ?: ContactSettings(contact_key = contact, muteUntil = until)
+                // Always mute
+                val absoluteMuteUntil =
+                    if (until == Long.MAX_VALUE) {
+                        Long.MAX_VALUE
+                    } else if (until == 0L) { // unmute
+                        0L
+                    } else {
+                        System.currentTimeMillis() + until
+                    }
+
+                getContactSettings(contact)?.copy(muteUntil = absoluteMuteUntil)
+                    ?: ContactSettings(contact_key = contact, muteUntil = absoluteMuteUntil)
             }
         upsertContactSettings(contactList)
     }

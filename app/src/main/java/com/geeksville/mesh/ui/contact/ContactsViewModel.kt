@@ -121,5 +121,7 @@ constructor(
     fun setMuteUntil(contacts: List<String>, until: Long) =
         viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
 
+    fun getContactSettings() = packetRepository.getContactSettings()
+
     private fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 }
