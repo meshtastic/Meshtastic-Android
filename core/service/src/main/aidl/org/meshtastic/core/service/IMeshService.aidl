@@ -170,4 +170,7 @@ interface IMeshService {
 
     /// Send request for node UserInfo
     void requestUserInfo(in int destNum);
+
+    /// Send request for node Neighbours
+    void requestNeighbourInfo(in int destNum);
 }

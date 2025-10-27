@@ -54,6 +54,7 @@ constructor(
             is NodeMenuAction.Ignore -> ignoreNode(action.node)
             is NodeMenuAction.Favorite -> favoriteNode(action.node)
             is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
+            is NodeMenuAction.RequestNeighbourInfo -> requestNeighbourInfo(action.node.num)
             is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
             is NodeMenuAction.TraceRoute -> {
                 requestTraceroute(action.node.num)
@@ -107,6 +108,15 @@ constructor(
             serviceRepository.meshService?.requestUserInfo(destNum)
         } catch (ex: RemoteException) {
             Timber.e("Request NodeInfo error: ${ex.message}")
+        }
+    }
+
+    private fun requestNeighbourInfo(destNum: Int) {
+        Timber.i("Requesting NeighbourInfo for '$destNum'")
+        try {
+            serviceRepository.meshService?.requestNeighbourInfo(destNum)
+        } catch (ex: RemoteException) {
+            Timber.e("Request NeighbourInfo error: ${ex.message}")
         }
     }
 

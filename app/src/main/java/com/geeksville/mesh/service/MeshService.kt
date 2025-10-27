@@ -2203,6 +2203,18 @@ class MeshService : Service() {
                 }
             }
 
+            override fun requestNeighbourInfo(destNum: Int) = toRemoteExceptions {
+                if (destNum != myNodeNum) {
+                    packetHandler.sendToRadio(
+                        newMeshPacketTo(destNum).buildMeshPacket(channel = nodeDBbyNodeNum[destNum]?.channel ?: 0) {
+                            portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE // fixme - hardcode for now. 
+                            wantResponse = true
+                            payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
+                        },
+                    )
+                }
+            }
+
             override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
                 if (destNum != myNodeNum) {
                     // Determine the best position to send based on user preferences and available
