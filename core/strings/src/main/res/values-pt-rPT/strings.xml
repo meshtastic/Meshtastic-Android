@@ -16,16 +16,16 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="fallback_node_name">Meshtastic</string>
+    <string name="fallback_node_name">Nome do nó de alternativo</string>
     <string name="node_filter_placeholder">Filtrar</string>
     <string name="desc_node_filter_clear">limpar filtro de nodes</string>
     <string name="node_filter_title">Filtrar por</string>
     <string name="node_filter_include_unknown">Incluir desconhecidos</string>
     <string name="node_filter_only_online">Ocultar nós offline</string>
-    <string name="node_filter_only_direct">Only show direct nodes</string>
-    <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
+    <string name="node_filter_only_direct">Mostrar apenas nós diretos</string>
+    <string name="node_filter_ignored">Está a visualizar nós ignorados,\nPrima para regressar à lista de nós.</string>
     <string name="node_filter_show_details">Mostrar detalhes</string>
-    <string name="node_sort_title">Sort by</string>
+    <string name="node_sort_title">Ordenar por</string>
     <string name="node_sort_button">Opções de ordenação de nodes</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canal</string>
@@ -35,7 +35,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favorito</string>
-    <string name="node_filter_show_ignored">Ignored Nodes</string>
+    <string name="node_filter_show_ignored">Nós ignorados</string>
     <string name="unrecognized">Desconhecido</string>
     <string name="message_status_enroute">A aguardar confirmação</string>
     <string name="message_status_queued">Na fila de envio</string>
@@ -55,25 +55,25 @@
     <string name="routing_error_pki_unknown_pubkey">Chave pública desconhecida</string>
     <string name="routing_error_admin_bad_session_key">Chave de sessão inválida</string>
     <string name="routing_error_admin_public_key_unauthorized">Public Key não autorizada</string>
-    <string name="role_client">Client</string>
+    <string name="role_client">Cliente</string>
     <string name="role_client_desc">Ligado por app, ou dispositivo autónomo de mensagens.</string>
-    <string name="role_client_mute">Client Mute</string>
+    <string name="role_client_mute">Cliente silenciado</string>
     <string name="role_client_mute_desc">Dispositivo que não encaminha mensagens de outros dispositivos.</string>
-    <string name="role_router">Router</string>
+    <string name="role_router">Roteador</string>
     <string name="role_router_desc">Node de infraestrutura que retransmite mensagens para estender a cobertura da rede (Router). Visível na lista de nodes.</string>
-    <string name="role_router_client">Router Client</string>
+    <string name="role_router_client">Cliente Roteador</string>
     <string name="role_router_client_desc">Combinação de ROUTER e CLIENT. Não indicado para dispositivos móveis.</string>
-    <string name="role_repeater">Repeater</string>
+    <string name="role_repeater">Repetidor</string>
     <string name="role_repeater_desc">Node de infraestrutura para estender a cobertura da rede retransmitindo mensagens com overhead mínimo. Não visível na lista de nodes.</string>
-    <string name="role_tracker">Tracker</string>
+    <string name="role_tracker">Monitor</string>
     <string name="role_tracker_desc">Transmite dados de posições GPS como prioridade.</string>
     <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">Transmite dados de telemetria como prioridade.</string>
-    <string name="role_tak">TAK</string>
+    <string name="role_tak">TAK — ‘Kit’ de Consciencialização da Equipa</string>
     <string name="role_tak_desc">Otimizado para comunicação do sistema ATAK, reduz as transmissões de rotina.</string>
-    <string name="role_client_hidden">Client Hidden</string>
+    <string name="role_client_hidden">Cliente oculto</string>
     <string name="role_client_hidden_desc">Dispositivo que só transmite quando necessário para economizar energia ou anonimidade.</string>
-    <string name="role_lost_and_found">Lost and Found</string>
+    <string name="role_lost_and_found">Perdidos e Achados</string>
     <string name="role_lost_and_found_desc">Transmite regularmente a localização como uma mensagem para o canal default, para auxiliar na recuperação do dispositivo.</string>
     <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Permite transmissões automáticas do TAK PLI e reduz as transmissões de rotina.</string>
@@ -108,7 +108,7 @@
     <string name="config_display_wake_on_tap_or_motion_summary">Requires that there be an accelerometer on your device.</string>
     <string name="config_lora_region_summary">The region where you will be using your radios.</string>
     <string name="config_lora_modem_preset_summary">Available modem presets, default is Long Fast.</string>
-    <string name="config_lora_hop_limit_summary">Sets the maximum number of hops, default is 3. Increasing hops also increases congestion and should be used carefully. 0 hop broadcast messages will not get ACKs.</string>
+    <string name="config_lora_hop_limit_summary">Define o número máximo de saltos; o valor predefinido é 3. Aumentar o número de saltos também aumenta a congestão e deve ser usado com precaução. Mensagens de broadcast com 0 saltos não receberão ACKs.</string>
     <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
     <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="label_long_fast">Long Range - Fast</string>
