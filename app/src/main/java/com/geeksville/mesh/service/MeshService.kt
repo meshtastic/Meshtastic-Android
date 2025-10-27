@@ -156,6 +156,7 @@ class MeshService : Service() {
     @Inject lateinit var analytics: PlatformAnalytics
 
     private val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
+    private val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
 
     companion object {
 
@@ -837,6 +838,24 @@ class MeshService : Service() {
                                 }
                             serviceRepository.setTracerouteResponse(response)
                         }
+                    }
+
+                    Portnums.PortNum.NEIGHBORINFO_APP_VALUE -> {
+                        val requestId = packet.decoded.requestId
+                        Timber.d("Processing NEIGHBORINFO_APP packet with requestId: $requestId")
+                        val start = neighborInfoStartTimes.remove(requestId)
+                        Timber.d("Found start time for requestId $requestId: $start")
+                        val response = if (start != null) {
+                            val elapsedMs = System.currentTimeMillis() - start
+                            val seconds = elapsedMs / 1000.0
+                            Timber.i("Neighbor info $requestId complete in $seconds s")
+                            val neighborData = String(data.payload.toByteArray())
+                            "$neighborData\n\nDuration: ${"%.1f".format(seconds)} s"
+                        } else {
+                            Timber.w("No start time found for neighbor info requestId: $requestId")
+                            String(data.payload.toByteArray())
+                        }
+                        serviceRepository.setNeighborInfoResponse(response)
                     }
 
                     else -> Timber.d("No custom processing needed for ${data.portnumValue}")
@@ -2203,13 +2222,17 @@ class MeshService : Service() {
                 }
             }
 
-            override fun requestNeighbourInfo(destNum: Int) = toRemoteExceptions {
+            override fun requestNeighbourInfo(requestId: Int, destNum: Int) = toRemoteExceptions {
                 if (destNum != myNodeNum) {
+                    neighborInfoStartTimes[requestId] = System.currentTimeMillis()
                     packetHandler.sendToRadio(
-                        newMeshPacketTo(destNum).buildMeshPacket(channel = nodeDBbyNodeNum[destNum]?.channel ?: 0) {
-                            portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE // fixme - hardcode for now. 
+                        newMeshPacketTo(destNum).buildMeshPacket(
+                            wantAck = true,
+                            id = requestId,
+                            channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                        ) {
+                            portnumValue = Portnums.PortNum.NEIGHBORINFO_APP_VALUE
                             wantResponse = true
-                            payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
                         },
                     )
                 }

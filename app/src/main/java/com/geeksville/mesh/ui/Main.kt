@@ -32,7 +32,10 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
@@ -46,6 +49,8 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
@@ -76,6 +81,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
@@ -227,6 +234,132 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             },
             dismissText = stringResource(id = R.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
+        )
+    }
+
+    val neighborInfoResponse by uIViewModel.neighborInfoResponse.observeAsState()
+    neighborInfoResponse?.let { response ->
+        SimpleAlertDialog(
+            title = R.string.neighbor_info,
+            text = {
+                // Render the neighbor info response plainly
+                // Render the neighbor info response as a hex dump, interpreting any binary data as hex bytes.
+                // If the data appears to be binary, try to render its hex representation.
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    val isBinary = response.any { it.code < 32 && it != '\n' && it != '\r' && it != '\t' }
+                    if (isBinary) {
+                        // Render as hex string (show hex dump)
+                        val hexString = response.toByteArray()
+                            .joinToString(" ") { "%02X".format(it) }
+                        Text(
+                            text = "Binary data (hex view):",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = hexString,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                                .fillMaxWidth()
+                        )
+                    } else {
+                        Text(
+                            text = response,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                                .fillMaxWidth()
+                        )
+                    }
+
+                    // The previous method tries to "find hex bytes" in the formatted response string,
+                    // but since in 'isBinary' case we're showing our *own* hexString, let's directly use the bytes we made above for that.
+                    // Use the *actual* binary: derive the nodeId from the first 4 bytes of the response, not the hex string.
+
+                    val rawBytes = response.toByteArray()
+                    // For every 4-byte chunk, interpret as nodeId and output it.
+                    // Interpret the byte array using the NeighborInfo protobuf layout.
+                    // Expected: node_id (4 bytes), last_sent_by_id (4 bytes), node_broadcast_interval_secs (4 bytes), repeated Neighbor (8 bytes each: 4 for id, 4 for snr float)
+                    if (rawBytes.size >= 12) {
+                        val nodeId =
+                            (rawBytes[0].toUByte().toLong() or
+                                (rawBytes[1].toUByte().toLong() shl 8) or
+                                (rawBytes[2].toUByte().toLong() shl 16) or
+                                (rawBytes[3].toUByte().toLong() shl 24))
+                        val lastSentById =
+                            (rawBytes[4].toUByte().toLong() or
+                                (rawBytes[5].toUByte().toLong() shl 8) or
+                                (rawBytes[6].toUByte().toLong() shl 16) or
+                                (rawBytes[7].toUByte().toLong() shl 24))
+                        val nodeBroadcastIntervalSecs =
+                            (rawBytes[8].toUByte().toLong() or
+                                (rawBytes[9].toUByte().toLong() shl 8) or
+                                (rawBytes[10].toUByte().toLong() shl 16) or
+                                (rawBytes[11].toUByte().toLong() shl 24))
+                        Text(
+                            text = "node_id: 0x${nodeId.toString(16)} = $nodeId",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        Text(
+                            text = "last_sent_by_id: 0x${lastSentById.toString(16)} = $lastSentById",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                        Text(
+                            text = "node_broadcast_interval_secs: $nodeBroadcastIntervalSecs",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                        // Neighbors: Each is 8 bytes (4 for node_id, 4 for snr)
+                        val neighborCount = (rawBytes.size - 12) / 8
+                        if (neighborCount > 0) {
+                            Text(
+                                text = "Neighbors:",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                        for (n in 0 until neighborCount) {
+                            val base = 12 + n * 8
+                            val neighborId =
+                                (rawBytes[base].toUByte().toLong() or
+                                    (rawBytes[base + 1].toUByte().toLong() shl 8) or
+                                    (rawBytes[base + 2].toUByte().toLong() shl 16) or
+                                    (rawBytes[base + 3].toUByte().toLong() shl 24))
+                            // Next 4 bytes as Float (snr)
+                            val snrBits = 
+                                (rawBytes[base + 4].toInt() and 0xFF) or
+                                ((rawBytes[base + 5].toInt() and 0xFF) shl 8) or
+                                ((rawBytes[base + 6].toInt() and 0xFF) shl 16) or
+                                ((rawBytes[base + 7].toInt() and 0xFF) shl 24)
+                            val snr = Float.fromBits(snrBits)
+                            Text(
+                                text = "  - node_id: 0x${neighborId.toString(16)} = $neighborId, snr: $snr",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                        if ((rawBytes.size - 12) % 8 != 0) {
+                            Text(
+                                text = "Warning: Remaining ${(rawBytes.size-12)%8} bytes could not be parsed as Neighbor.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "Not enough data for NeighborInfo protobuf header (need 12 bytes, got ${rawBytes.size})",
+                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                }
+            },
+            dismissText = stringResource(id = R.string.okay),
+            onDismiss = { uIViewModel.clearNeighborInfoResponse() },
         )
     }
     val navSuiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())

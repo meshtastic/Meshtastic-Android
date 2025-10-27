@@ -126,6 +126,9 @@ interface IMeshService {
     /// Send traceroute packet with wantResponse to nodeNum
     void requestTraceroute(in int requestId, in int destNum);
 
+    /// Send neighbor info packet with wantResponse to nodeNum
+    void requestNeighbourInfo(in int requestId, in int destNum);
+
     /// Send Shutdown admin packet to nodeNum
     void requestShutdown(in int requestId, in int destNum);
 
@@ -170,7 +173,4 @@ interface IMeshService {
 
     /// Send request for node UserInfo
     void requestUserInfo(in int destNum);
-
-    /// Send request for node Neighbours
-    void requestNeighbourInfo(in int destNum);
 }

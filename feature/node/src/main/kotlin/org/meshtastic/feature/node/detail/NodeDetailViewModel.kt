@@ -114,7 +114,8 @@ constructor(
     private fun requestNeighbourInfo(destNum: Int) {
         Timber.i("Requesting NeighbourInfo for '$destNum'")
         try {
-            serviceRepository.meshService?.requestNeighbourInfo(destNum)
+            val packetId = serviceRepository.meshService?.packetId ?: return
+            serviceRepository.meshService?.requestNeighbourInfo(packetId, destNum)
         } catch (ex: RemoteException) {
             Timber.e("Request NeighbourInfo error: ${ex.message}")
         }
