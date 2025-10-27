@@ -109,7 +109,7 @@
     <string name="config_lora_region_summary">The region where you will be using your radios.</string>
     <string name="config_lora_modem_preset_summary">Available modem presets, default is Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Define o número máximo de saltos; o valor predefinido é 3. Aumentar o número de saltos também aumenta a congestão e deve ser usado com precaução. Mensagens de broadcast com 0 saltos não receberão ACKs.</string>
-    <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
+    <string name="config_lora_frequency_slot_summary">A frequência de operação do seu nó é calculada com base na região, na predefinição do modem e neste campo. Quando o valor é 0, o slot é calculado automaticamente com base no nome do canal primário e será diferente do slot público predefinido. Volte para o slot público predefinido se forem configurados canais primário privado e secundário público.</string>
     <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="label_long_fast">Long Range - Fast</string>
     <string name="label_long_moderate">Long Range - Moderate</string>
@@ -119,10 +119,10 @@
     <string name="label_short_turbo">Short Range - Turbo</string>
     <string name="label_short_fast">Short Range - Fast</string>
     <string name="label_short_slow">Short Range - Slow</string>
-    <string name="config_network_wifi_enabled_summary">Enabling WiFi will disable the bluetooth connection to the app.</string>
-    <string name="config_network_eth_enabled_summary">Enabling Ethernet will disable the bluetooth connection to the app. TCP node connections are not available on Apple devices.</string>
-    <string name="config_network_udp_enabled_summary">Enable broadcasting packets via UDP over the local network.</string>
-    <string name="config_position_broadcast_secs_summary">The maximum interval that can elapse without a node broadcasting a position.</string>
+    <string name="config_network_wifi_enabled_summary">Ativar o WiFi irá desativar a ligação Bluetooth à aplicação.</string>
+    <string name="config_network_eth_enabled_summary">Ativar a Ethernet irá desativar a ligação Bluetooth à aplicação. As ligações TCP do nó não estão disponíveis em dispositivos Apple.</string>
+    <string name="config_network_udp_enabled_summary">Ativar a transmissão de pacotes via UDP através da rede local.</string>
+    <string name="config_position_broadcast_secs_summary">O intervalo máximo que pode decorrer sem que um nó transmita a sua posição.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">The minimum distance change in meters to be considered for a smart position broadcast.</string>
     <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
