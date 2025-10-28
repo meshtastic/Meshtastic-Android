@@ -125,13 +125,13 @@
     <string name="config_position_broadcast_secs_summary">Längsta tid som kan förflyta utan att en nod sänder en position.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">The minimum distance change in meters to be considered for a smart position broadcast.</string>
-    <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
+    <string name="config_position_gps_update_interval_summary">Hur ofta ska vi försöka få en GPS-position (&lt;10sec håller GPS aktiv).</string>
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
     <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
     <string name="config_security_private_key">Används för att skapa en delad nyckel med en fjärrnod.</string>
-    <string name="config_security_admin_key">The public key authorized to send admin messages to this node.</string>
-    <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
+    <string name="config_security_admin_key">Den publika nyckeln som ger rätt att skicka administratörsmeddelanden till den här noden.</string>
+    <string name="config_security_is_managed">Enheten hanteras av en mesh-administratör. Användaren kan inte ändra enhetsinställningarna.</string>
     <string name="config_security_serial_enabled">Seriell kommunikation över Stream API.</string>
     <string name="config_security_debug_log_api_enabled">Skriv felsökningsloggar över seriell kommunikation samt visa och exportera positions-rensade loggar över Bluetooth.</string>
     <!-- Position Config -->
@@ -328,7 +328,7 @@
     <string name="ch_util_definition">Utnyttjande av den nuvarande kanalen, inklusive välformad TX, RX och felformaterad RX (sk. brus).</string>
     <string name="air_util_definition">Procent av luftrumstid använd för sändningar inom den senaste timmen.</string>
     <string name="iaq">IAQ</string>
-    <string name="show_all_key_title">Encryption Key Meanings</string>
+    <string name="show_all_key_title">Krypteringsnycklars betydelser</string>
     <string name="encryption_psk">Delad nyckel</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Kryptering med Publik nyckel</string>
@@ -389,7 +389,7 @@
     <string name="are_you_sure">Är du säker?</string>
     <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
     <string name="i_know_what_i_m_doing">Jag vet vad jag håller på med.</string>
-    <string name="low_battery_message">Node %1$s has a low battery (%2$d%%)</string>
+    <string name="low_battery_message">Noden %1$s har ett lågt batteri (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Avisering vid låg batterinivå</string>
     <string name="low_battery_title">Lågt batteri: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Meddelanden om lågt batteri (favoritnoder)</string>
@@ -397,7 +397,7 @@
     <string name="udp_enabled">Aktiverad</string>
     <string name="udp_broadcast">UDP-sändning</string>
     <string name="udp_config">UDP-konfiguration</string>
-    <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Senast hörd: %2$s<br>Senaste position: %3$s<br>Batteri: %4$s]]></string>
     <string name="toggle_my_position">Växla min position</string>
     <string name="orient_north">Orientera mot norr</string>
     <string name="user">Användare</string>
@@ -496,8 +496,8 @@
     <string name="wake_on_tap_or_motion">Vakna vid tryck eller rörelse</string>
     <string name="compass_orientation">Kompassriktning</string>
     <string name="external_notification_config">External Notification Config</string>
-    <string name="external_notification_enabled">External notification enabled</string>
-    <string name="notifications_on_message_receipt">Notifications on message receipt</string>
+    <string name="external_notification_enabled">Externa aviseringar aktiverad</string>
+    <string name="notifications_on_message_receipt">Avisera meddelandekvitto</string>
     <string name="alert_message_led">Alert message LED</string>
     <string name="alert_message_buzzer">Meddelande-summer</string>
     <string name="alert_message_vibra">Alert message vibra</string>
@@ -508,10 +508,10 @@
     <string name="output_led_gpio">Utmatning LED (GPIO)</string>
     <string name="output_led_active_high">Output LED active high</string>
     <string name="output_buzzer_gpio">Utmatning summer (GPIO)</string>
-    <string name="use_pwm_buzzer">Use PWM buzzer</string>
+    <string name="use_pwm_buzzer">Använd PWM-summern</string>
     <string name="output_vibra_gpio">Output vibra (GPIO)</string>
     <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
-    <string name="nag_timeout_seconds">Nag timeout (seconds)</string>
+    <string name="nag_timeout_seconds">Sluta tjata efter (sekunder)</string>
     <string name="ringtone">Ringsignal</string>
     <string name="use_i2s_as_buzzer">Use I2S as buzzer</string>
     <string name="lora_config">LoRa</string>
@@ -531,7 +531,7 @@
     <string name="override_duty_cycle">Ersätt gräns för driftsperiod</string>
     <string name="ignore_incoming">Ignorera inkommande</string>
     <string name="sx126x_rx_boosted_gain">RX Boosted Gain</string>
-    <string name="override_frequency_mhz">Frequency Override</string>
+    <string name="override_frequency_mhz">Åsidosätt </string>
     <string name="pa_fan_disabled">PA fan disabled</string>
     <string name="ignore_mqtt">Ignorera MQTT</string>
     <string name="ok_to_mqtt">Ok to MQTT</string>
@@ -730,7 +730,7 @@
     <string name="regenerate_private_key">Förnya nyckel</string>
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
     <string name="export_keys">Exportera nycklar</string>
-    <string name="export_keys_confirmation">Exports public and private keys to a file. Please store somewhere securely.</string>
+    <string name="export_keys_confirmation">Exporterar publika och privata nycklar till en fil. Förvara någonstans säkert.</string>
     <string name="modules_unlocked">Modulerna är upplåsta</string>
     <string name="modules_already_unlocked">Modulerna är redan upplåsta</string>
     <string name="remote">Remote</string>
