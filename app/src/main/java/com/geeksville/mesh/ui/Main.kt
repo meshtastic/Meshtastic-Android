@@ -242,119 +242,78 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         SimpleAlertDialog(
             title = R.string.neighbor_info,
             text = {
-                // Render the neighbor info response plainly
-                // Render the neighbor info response as a hex dump, interpreting any binary data as hex bytes.
-                // If the data appears to be binary, try to render its hex representation.
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    val isBinary = response.any { it.code < 32 && it != '\n' && it != '\r' && it != '\t' }
-                    if (isBinary) {
-                        // Render as hex string (show hex dump)
-                        val hexString = response.toByteArray()
-                            .joinToString(" ") { "%02X".format(it) }
-                        Text(
-                            text = "Binary data (hex view):",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        Text(
-                            text = hexString,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
-                            modifier = Modifier
-                                .padding(bottom = 8.dp)
-                                .fillMaxWidth()
-                        )
-                    } else {
-                        Text(
-                            text = response,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier
-                                .padding(bottom = 8.dp)
-                                .fillMaxWidth()
-                        )
+                    fun tryParseNeighborInfo(input: String): MeshProtos.NeighborInfo? {
+                        // First, try parsing directly from raw bytes of the string
+                        runCatching { MeshProtos.NeighborInfo.parseFrom(input.toByteArray()) }.getOrNull()?.let { return it }
+                        // Next, try to decode a hex dump embedded as text (e.g., "AA BB CC ...")
+                        val hexPairs = Regex("""\b[0-9A-Fa-f]{2}\b""").findAll(input).map { it.value }.toList()
+                        if (hexPairs.size >= 4) {
+                            val bytes = hexPairs.map { it.toInt(16).toByte() }.toByteArray()
+                            runCatching { MeshProtos.NeighborInfo.parseFrom(bytes) }.getOrNull()?.let { return it }
+                        }
+                        return null
                     }
 
-                    // The previous method tries to "find hex bytes" in the formatted response string,
-                    // but since in 'isBinary' case we're showing our *own* hexString, let's directly use the bytes we made above for that.
-                    // Use the *actual* binary: derive the nodeId from the first 4 bytes of the response, not the hex string.
-
-                    val rawBytes = response.toByteArray()
-                    // For every 4-byte chunk, interpret as nodeId and output it.
-                    // Interpret the byte array using the NeighborInfo protobuf layout.
-                    // Expected: node_id (4 bytes), last_sent_by_id (4 bytes), node_broadcast_interval_secs (4 bytes), repeated Neighbor (8 bytes each: 4 for id, 4 for snr float)
-                    if (rawBytes.size >= 12) {
-                        val nodeId =
-                            (rawBytes[0].toUByte().toLong() or
-                                (rawBytes[1].toUByte().toLong() shl 8) or
-                                (rawBytes[2].toUByte().toLong() shl 16) or
-                                (rawBytes[3].toUByte().toLong() shl 24))
-                        val lastSentById =
-                            (rawBytes[4].toUByte().toLong() or
-                                (rawBytes[5].toUByte().toLong() shl 8) or
-                                (rawBytes[6].toUByte().toLong() shl 16) or
-                                (rawBytes[7].toUByte().toLong() shl 24))
-                        val nodeBroadcastIntervalSecs =
-                            (rawBytes[8].toUByte().toLong() or
-                                (rawBytes[9].toUByte().toLong() shl 8) or
-                                (rawBytes[10].toUByte().toLong() shl 16) or
-                                (rawBytes[11].toUByte().toLong() shl 24))
+                    val parsed = tryParseNeighborInfo(response)
+                    if (parsed != null) {
+                        fun fmtNode(nodeNum: Int): String = "!%08x".format(nodeNum)
+                        Text(text = "NeighborInfo:", style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            text = "node_id: 0x${nodeId.toString(16)} = $nodeId",
+                            text = "node_id: ${fmtNode(parsed.nodeId)}",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                         Text(
-                            text = "last_sent_by_id: 0x${lastSentById.toString(16)} = $lastSentById",
+                            text = "last_sent_by_id: ${fmtNode(parsed.lastSentById)}",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 2.dp)
                         )
                         Text(
-                            text = "node_broadcast_interval_secs: $nodeBroadcastIntervalSecs",
+                            text = "node_broadcast_interval_secs: ${parsed.nodeBroadcastIntervalSecs}",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 2.dp)
                         )
-                        // Neighbors: Each is 8 bytes (4 for node_id, 4 for snr)
-                        val neighborCount = (rawBytes.size - 12) / 8
-                        if (neighborCount > 0) {
+                        if (parsed.neighborsCount > 0) {
                             Text(
-                                text = "Neighbors:",
+                                text = "neighbors:",
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
-                        }
-                        for (n in 0 until neighborCount) {
-                            val base = 12 + n * 8
-                            val neighborId =
-                                (rawBytes[base].toUByte().toLong() or
-                                    (rawBytes[base + 1].toUByte().toLong() shl 8) or
-                                    (rawBytes[base + 2].toUByte().toLong() shl 16) or
-                                    (rawBytes[base + 3].toUByte().toLong() shl 24))
-                            // Next 4 bytes as Float (snr)
-                            val snrBits = 
-                                (rawBytes[base + 4].toInt() and 0xFF) or
-                                ((rawBytes[base + 5].toInt() and 0xFF) shl 8) or
-                                ((rawBytes[base + 6].toInt() and 0xFF) shl 16) or
-                                ((rawBytes[base + 7].toInt() and 0xFF) shl 24)
-                            val snr = Float.fromBits(snrBits)
-                            Text(
-                                text = "  - node_id: 0x${neighborId.toString(16)} = $neighborId, snr: $snr",
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                        }
-                        if ((rawBytes.size - 12) % 8 != 0) {
-                            Text(
-                                text = "Warning: Remaining ${(rawBytes.size-12)%8} bytes could not be parsed as Neighbor.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                            parsed.neighborsList.forEach { n ->
+                                Text(
+                                    text = "  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
                         }
                     } else {
-                        Text(
-                            text = "Not enough data for NeighborInfo protobuf header (need 12 bytes, got ${rawBytes.size})",
-                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error),
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                        val rawBytes = response.toByteArray()
+                        val isBinary = response.any { it.code < 32 && it != '\n' && it != '\r' && it != '\t' }
+                        if (isBinary) {
+                            val hexString = rawBytes.joinToString(" ") { "%02X".format(it) }
+                            Text(
+                                text = "Binary data (hex view):",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            Text(
+                                text = hexString,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                                    .fillMaxWidth()
+                            )
+                        } else {
+                            Text(
+                                text = response,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
                     }
                 }
             },

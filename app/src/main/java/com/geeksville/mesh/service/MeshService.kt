@@ -845,15 +845,40 @@ class MeshService : Service() {
                         Timber.d("Processing NEIGHBORINFO_APP packet with requestId: $requestId")
                         val start = neighborInfoStartTimes.remove(requestId)
                         Timber.d("Found start time for requestId $requestId: $start")
+
+                        val info = runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
+                        val formatted = if (info != null) {
+                            val fmtNode: (Int) -> String = { nodeNum ->
+                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                val nodeId = "!%08x".format(nodeNum)
+                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                            }
+                            buildString {
+                                appendLine("NeighborInfo:")
+                                appendLine("node_id: ${fmtNode(info.nodeId)}")
+                                appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
+                                appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+                                if (info.neighborsCount > 0) {
+                                    appendLine("neighbors:")
+                                    info.neighborsList.forEach { n ->
+                                        appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                                    }
+                                }
+                            }
+                        } else {
+                            // Fallback to raw string if parsing fails
+                            String(data.payload.toByteArray())
+                        }
+
                         val response = if (start != null) {
                             val elapsedMs = System.currentTimeMillis() - start
                             val seconds = elapsedMs / 1000.0
                             Timber.i("Neighbor info $requestId complete in $seconds s")
-                            val neighborData = String(data.payload.toByteArray())
-                            "$neighborData\n\nDuration: ${"%.1f".format(seconds)} s"
+                            "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
                         } else {
                             Timber.w("No start time found for neighbor info requestId: $requestId")
-                            String(data.payload.toByteArray())
+                            formatted
                         }
                         serviceRepository.setNeighborInfoResponse(response)
                     }
