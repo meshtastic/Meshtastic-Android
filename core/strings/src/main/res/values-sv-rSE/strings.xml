@@ -240,7 +240,7 @@
     <string name="delete_for_everyone">Radera för alla</string>
     <string name="delete_for_me">Radera för mig</string>
     <string name="select_all">Välj alla</string>
-    <string name="close_selection">Close selection</string>
+    <string name="close_selection">Stäng markerade</string>
     <string name="delete_selection">Radera markerade</string>
     <string name="map_style_selection">Stilval</string>
     <string name="map_download_region">Ladda ner region</string>
