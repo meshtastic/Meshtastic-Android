@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
@@ -389,6 +390,17 @@ constructor(
                         PortNum.PAXCOUNTER_APP_VALUE -> PaxcountProtos.Paxcount.parseFrom(payload).toString()
                         PortNum.STORE_FORWARD_APP_VALUE ->
                             StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
+                        PortNum.TRACEROUTE_APP_VALUE -> {
+                            val getUsername: (Int) -> String = { nodeNum ->
+                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                val nodeId = "!%08x".format(nodeNum)
+                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                            }
+                            packet.getTracerouteResponse(getUsername)
+                                ?: runCatching { MeshProtos.RouteDiscovery.parseFrom(payload).toString() }.getOrNull()
+                                ?: payload.joinToString(" ") { HEX_FORMAT.format(it) }
+                        }
                         else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
                     }
                 } catch (e: InvalidProtocolBufferException) {
