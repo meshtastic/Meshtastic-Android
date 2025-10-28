@@ -595,7 +595,7 @@
     <string name="shutdown_on_battery_delay_seconds">Задержка выключения в режиме батареи (в секундах)</string>
     <string name="adc_multiplier_override">Коэффициент переопределения ADC</string>
     <string name="adc_multiplier_override_ratio">Коэффициент переопределения ADC</string>
-    <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration</string>
+    <string name="wait_for_bluetooth_duration_seconds">Длительность ожидания Bluetooth</string>
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
     <string name="light_sleep_duration_seconds">Light sleep duration</string>
     <string name="minimum_wake_time_seconds">Minimum wake time</string>
