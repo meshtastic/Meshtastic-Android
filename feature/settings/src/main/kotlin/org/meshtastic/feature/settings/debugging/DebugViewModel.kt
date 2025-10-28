@@ -34,8 +34,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
@@ -367,6 +367,7 @@ constructor(
      * @return A human-readable string representation of the decoded payload, or an error message if decoding fails, or
      *   null if the log does not contain a decodable packet.
      */
+    @Suppress("detekt:CyclomaticComplexMethod") // large switch that detekt doesn't parse well.
     private fun decodePayloadFromMeshLog(log: MeshLog): String? {
         var result: String? = null
         val packet = log.meshPacket
@@ -390,38 +391,8 @@ constructor(
                         PortNum.PAXCOUNTER_APP_VALUE -> PaxcountProtos.Paxcount.parseFrom(payload).toString()
                         PortNum.STORE_FORWARD_APP_VALUE ->
                             StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
-                        PortNum.NEIGHBORINFO_APP_VALUE -> {
-                            val info = MeshProtos.NeighborInfo.parseFrom(payload)
-                            val formatNode: (Int) -> String = { nodeNum ->
-                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
-                                val nodeId = "!%08x".format(nodeNum)
-                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
-                            }
-                            buildString {
-                                appendLine("NeighborInfo:")
-                                appendLine("node_id: ${formatNode(info.nodeId)}")
-                                appendLine("last_sent_by_id: ${formatNode(info.lastSentById)}")
-                                appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
-                                if (info.neighborsCount > 0) {
-                                    appendLine("neighbors:")
-                                    info.neighborsList.forEach { n ->
-                                        appendLine("  - node_id: ${formatNode(n.nodeId)} snr: ${n.snr}")
-                                    }
-                                }
-                            }
-                        }
-                        PortNum.TRACEROUTE_APP_VALUE -> {
-                            val getUsername: (Int) -> String = { nodeNum ->
-                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
-                                val nodeId = "!%08x".format(nodeNum)
-                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
-                            }
-                            packet.getTracerouteResponse(getUsername)
-                                ?: runCatching { MeshProtos.RouteDiscovery.parseFrom(payload).toString() }.getOrNull()
-                                ?: payload.joinToString(" ") { HEX_FORMAT.format(it) }
-                        }
+                        PortNum.NEIGHBORINFO_APP_VALUE -> decodeNeighborInfo(payload)
+                        PortNum.TRACEROUTE_APP_VALUE -> decodeTraceroute(packet, payload)
                         else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
                     }
                 } catch (e: InvalidProtocolBufferException) {
@@ -429,5 +400,35 @@ constructor(
                 }
         }
         return result
+    }
+
+    private fun formatNodeWithShortName(nodeNum: Int): String {
+        val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+        val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+        val nodeId = "!%08x".format(nodeNum)
+        return if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+    }
+
+    private fun decodeNeighborInfo(payload: ByteArray): String {
+        val info = MeshProtos.NeighborInfo.parseFrom(payload)
+        return buildString {
+            appendLine("NeighborInfo:")
+            appendLine("node_id: ${formatNodeWithShortName(info.nodeId)}")
+            appendLine("last_sent_by_id: ${formatNodeWithShortName(info.lastSentById)}")
+            appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+            if (info.neighborsCount > 0) {
+                appendLine("neighbors:")
+                info.neighborsList.forEach { n ->
+                    appendLine("  - node_id: ${formatNodeWithShortName(n.nodeId)} snr: ${n.snr}")
+                }
+            }
+        }
+    }
+
+    private fun decodeTraceroute(packet: MeshProtos.MeshPacket, payload: ByteArray): String {
+        val getUsername: (Int) -> String = { nodeNum -> formatNodeWithShortName(nodeNum) }
+        return packet.getTracerouteResponse(getUsername)
+            ?: runCatching { MeshProtos.RouteDiscovery.parseFrom(payload).toString() }.getOrNull()
+            ?: payload.joinToString(" ") { HEX_FORMAT.format(it) }
     }
 }
