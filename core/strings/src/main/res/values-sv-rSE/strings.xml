@@ -479,7 +479,7 @@
     <string name="buzzer_gpio">GPIO för summer</string>
     <string name="rebroadcast_mode">Återutsändningsläge</string>
     <string name="nodeinfo_broadcast_interval">Sändningsintervall för nod-info</string>
-    <string name="double_tap_as_button_press">Double Tap as Button</string>
+    <string name="double_tap_as_button_press">Dubbeltryck som knapptryck</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
     <string name="time_zone">Tidszon</string>
     <string name="led_heartbeat">LED Heartbeat</string>
