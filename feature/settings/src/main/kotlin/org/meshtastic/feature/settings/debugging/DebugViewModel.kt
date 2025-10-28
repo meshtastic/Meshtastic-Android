@@ -390,6 +390,27 @@ constructor(
                         PortNum.PAXCOUNTER_APP_VALUE -> PaxcountProtos.Paxcount.parseFrom(payload).toString()
                         PortNum.STORE_FORWARD_APP_VALUE ->
                             StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
+                        PortNum.NEIGHBORINFO_APP_VALUE -> {
+                            val info = MeshProtos.NeighborInfo.parseFrom(payload)
+                            val formatNode: (Int) -> String = { nodeNum ->
+                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                val nodeId = "!%08x".format(nodeNum)
+                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                            }
+                            buildString {
+                                appendLine("NeighborInfo:")
+                                appendLine("node_id: ${formatNode(info.nodeId)}")
+                                appendLine("last_sent_by_id: ${formatNode(info.lastSentById)}")
+                                appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+                                if (info.neighborsCount > 0) {
+                                    appendLine("neighbors:")
+                                    info.neighborsList.forEach { n ->
+                                        appendLine("  - node_id: ${formatNode(n.nodeId)} snr: ${n.snr}")
+                                    }
+                                }
+                            }
+                        }
                         PortNum.TRACEROUTE_APP_VALUE -> {
                             val getUsername: (Int) -> String = { nodeNum ->
                                 val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
