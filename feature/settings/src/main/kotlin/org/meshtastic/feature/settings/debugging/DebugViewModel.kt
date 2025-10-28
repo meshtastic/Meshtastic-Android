@@ -413,13 +413,13 @@ constructor(
         val info = MeshProtos.NeighborInfo.parseFrom(payload)
         return buildString {
             appendLine("NeighborInfo:")
-            appendLine("node_id: ${formatNodeWithShortName(info.nodeId)}")
-            appendLine("last_sent_by_id: ${formatNodeWithShortName(info.lastSentById)}")
-            appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+            appendLine("  node_id: ${formatNodeWithShortName(info.nodeId)}")
+            appendLine("  last_sent_by_id: ${formatNodeWithShortName(info.lastSentById)}")
+            appendLine("  node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
             if (info.neighborsCount > 0) {
-                appendLine("neighbors:")
+                appendLine("  neighbors:")
                 info.neighborsList.forEach { n ->
-                    appendLine("  - node_id: ${formatNodeWithShortName(n.nodeId)} snr: ${n.snr}")
+                    appendLine("    - node_id: ${formatNodeWithShortName(n.nodeId)} snr: ${n.snr}")
                 }
             }
         }
