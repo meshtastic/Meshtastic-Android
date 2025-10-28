@@ -328,7 +328,7 @@ fun SettingsScreen(
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "application/csv"
-                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_{$nodeName}_{$timestamp}.csv")
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_${nodeName}_${timestamp}.csv")
                         }
                     exportRangeTestLauncher.launch(intent)
                 }
@@ -348,7 +348,7 @@ fun SettingsScreen(
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "application/csv"
-                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_{$nodeName}_{$timestamp}.csv")
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_${nodeName}_${timestamp}.csv")
                         }
                     exportDataLauncher.launch(intent)
                 }
