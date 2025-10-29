@@ -202,7 +202,7 @@
     <string name="debug_search_prev">Föregående träff</string>
     <string name="debug_search_clear">Rensa sökning</string>
     <string name="debug_filter_add">Lägg till filter</string>
-    <string name="debug_filter_included">Filter included</string>
+    <string name="debug_filter_included">Filtrera inkluderade</string>
     <string name="debug_filter_clear">Rensa alla filter</string>
     <string name="debug_clear">Töm loggar</string>
     <string name="match_any">Matcha någon &lt;unk&gt; alla</string>
@@ -332,7 +332,7 @@
     <string name="encryption_psk">Delad nyckel</string>
     <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="encryption_pkc">Kryptering med Publik nyckel</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
+    <string name="encryption_pkc_text">Direktmeddelanden använder den nya publika nyckelinfrastrukturen (PKI) för kryptering.</string>
     <string name="encryption_error">Publik nyckel matchar inte</string>
     <string name="encryption_error_text">Den publika nyckel matchar inte den insamlade. Du kan ta bort noden ur nod listan för att förhandla nycklar på nytt, men det här kan påvisa ett säkerhetsproblem. Kontakta nodens ägare igenom en annan betrodd kanal för att avgöra om nyckeländringen berodde på en fabriksåterställning eller annan avsiktlig åtgärd.</string>
     <string name="exchange_userinfo">Utbyt användarinformation</string>
@@ -534,7 +534,7 @@
     <string name="override_frequency_mhz">Åsidosätt </string>
     <string name="pa_fan_disabled">PA fan disabled</string>
     <string name="ignore_mqtt">Ignorera MQTT</string>
-    <string name="ok_to_mqtt">Ok to MQTT</string>
+    <string name="ok_to_mqtt">Ok till MQTT</string>
     <string name="mqtt_config">MQTT-konfiguration</string>
     <string name="mqtt_enabled">MQTT är aktiverat</string>
     <string name="address">Adress</string>
