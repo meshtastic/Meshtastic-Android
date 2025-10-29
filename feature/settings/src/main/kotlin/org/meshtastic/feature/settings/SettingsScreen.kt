@@ -311,6 +311,7 @@ fun SettingsScreen(
                     showThemePickerDialog = true
                 }
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                val nodeName = ourNode?.user?.shortName ?: ""
 
                 val exportRangeTestLauncher =
                     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -327,7 +328,7 @@ fun SettingsScreen(
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "application/csv"
-                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_$timestamp.csv")
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_${nodeName}_$timestamp.csv")
                         }
                     exportRangeTestLauncher.launch(intent)
                 }
@@ -347,7 +348,7 @@ fun SettingsScreen(
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "application/csv"
-                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_$timestamp.csv")
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_${nodeName}_$timestamp.csv")
                         }
                     exportDataLauncher.launch(intent)
                 }
