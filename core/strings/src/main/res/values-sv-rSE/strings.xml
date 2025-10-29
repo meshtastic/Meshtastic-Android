@@ -207,7 +207,7 @@
     <string name="debug_clear">Töm loggar</string>
     <string name="match_any">Matcha någon &lt;unk&gt; alla</string>
     <string name="match_all">Matcha alla &lt;unk&gt; någon</string>
-    <string name="debug_clear_logs_confirm">This will remove all log packets and database entries from your device - It is a full reset, and is permanent.</string>
+    <string name="debug_clear_logs_confirm">Detta kommer att ta bort alla loggpaket och databasposter från din enhet - Det är en fullständig återställning och är permanent.</string>
     <string name="clear">Rensa</string>
     <string name="message_delivery_status">Meddelandets leveransstatus</string>
     <string name="meshtastic_messages_notifications">Meddelandeaviseringar</string>
@@ -268,7 +268,7 @@
     <string name="bluetooth_disabled">Bluetooth är inaktiverat. Aktivera den i inställningarna för enheten.</string>
     <string name="open_settings">Öppna inställningar</string>
     <string name="firmware_version">Fast programversion: %1$s</string>
-    <string name="permission_missing_31">Meshtastic needs \"Nearby devices\" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
+    <string name="permission_missing_31">Meshtastic behöver \"Närliggande enheter\"-behörigheter aktiverade för att hitta och ansluta till enheter via Bluetooth. Du kan inaktivera när den inte används.</string>
     <string name="direct_message">Direktmeddelande</string>
     <string name="nodedb_reset">Nollställ NodeDB</string>
     <string name="delivery_confirmed">Sändning bekräftad</string>
@@ -510,7 +510,7 @@
     <string name="output_buzzer_gpio">Utmatning summer (GPIO)</string>
     <string name="use_pwm_buzzer">Använd PWM-summern</string>
     <string name="output_vibra_gpio">Output vibra (GPIO)</string>
-    <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
+    <string name="output_duration_milliseconds">Utmatningstid (millisekunder)</string>
     <string name="nag_timeout_seconds">Sluta tjata efter (sekunder)</string>
     <string name="ringtone">Ringsignal</string>
     <string name="use_i2s_as_buzzer">Använd I2S som summer</string>
@@ -530,7 +530,7 @@
     <string name="frequency_slot">Frekvens-slot</string>
     <string name="override_duty_cycle">Ersätt gräns för driftsperiod</string>
     <string name="ignore_incoming">Ignorera inkommande</string>
-    <string name="sx126x_rx_boosted_gain">RX Boosted Gain</string>
+    <string name="sx126x_rx_boosted_gain">RX förstärkt gain</string>
     <string name="override_frequency_mhz">Åsidosätt </string>
     <string name="pa_fan_disabled">PA fan disabled</string>
     <string name="ignore_mqtt">Ignorera MQTT</string>
@@ -547,8 +547,8 @@
     <string name="proxy_to_client_enabled">Proxy to client enabled</string>
     <string name="map_reporting">Map reporting</string>
     <string name="map_reporting_interval_seconds">Map reporting interval (seconds)</string>
-    <string name="neighbor_info_config">Neighbor Info Config</string>
-    <string name="neighbor_info_enabled">Neighbor Info enabled</string>
+    <string name="neighbor_info_config">Konfiguration av grannskapsinformation</string>
+    <string name="neighbor_info_enabled">Grannskapsinformation aktiverat</string>
     <string name="update_interval_seconds">Uppdateringsintervall (sekunder)</string>
     <string name="transmit_over_lora">Skicka över LoRa</string>
     <string name="network_config">Nätverk</string>
@@ -565,8 +565,8 @@
     <string name="ip">Ip-adress</string>
     <string name="gateway">Gateway</string>
     <string name="subnet">Subnät</string>
-    <string name="paxcounter_config">Paxcounter Config</string>
-    <string name="paxcounter_enabled">Paxcounter enabled</string>
+    <string name="paxcounter_config">Konfiguration av PAX-räknare</string>
+    <string name="paxcounter_enabled">PAX-räknare aktiverad</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI threshold (defaults to -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI threshold (defaults to -80)</string>
     <string name="position_config">Plats</string>
@@ -766,7 +766,7 @@
     <string name="security_icon_insecure_no_precise">Osäker kanal. Inte exakt.</string>
     <string name="security_icon_help_yellow_open_lock">A yellow open lock means the channel is not securely encrypted, is not used for precise location data, and uses either no key at all or a 1 byte known key.</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
-    <string name="security_icon_insecure_precise_only">Insecure Channel, Precise Location</string>
+    <string name="security_icon_insecure_precise_only">Osäker kanal. Exakt plats.</string>
     <string name="security_icon_help_red_open_lock">A red open lock means the channel is not securely encrypted, is used for precise location data, and uses either no key at all or a 1 byte known key.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
@@ -784,9 +784,9 @@
     <string name="clear_selection">Avmarkera</string>
     <string name="message_input_label">Meddelande</string>
     <string name="type_a_message">Skriv ett meddelande</string>
-    <string name="pax_metrics_log">PAX Metrics Log</string>
+    <string name="pax_metrics_log">Logg över PAX-värden</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
+    <string name="no_pax_metrics_logs">Det finns inga PAX-loggar.</string>
     <string name="wifi_devices">WiFi-enheter</string>
     <string name="ble_devices">BLE-enheter</string>
     <string name="bluetooth_paired_devices">Parkopplade enheter</string>
@@ -804,7 +804,7 @@
     <string name="discovered_network_devices">Upptäckta nätverksenheter</string>
     <string name="get_started">Kom igång</string>
     <string name="intro_welcome">Välkommen till</string>
-    <string name="stay_connected_anywhere">Stay Connected Anywhere</string>
+    <string name="stay_connected_anywhere">Håll dig uppkopplad var som helst</string>
     <string name="communicate_off_the_grid">Kommunicera med din släkt och dina vänner utan online- och mobiltjänster.</string>
     <string name="create_your_own_networks">Skapa egna nätverk</string>
     <string name="easily_set_up_private_mesh_networks">Konfigurera enkelt privata nätverk för säker och tillförlitlig kommunikation i avlägsna områden.</string>
@@ -822,7 +822,7 @@
     <string name="phone_location">Telefonens plats</string>
     <string name="phone_location_description">Meshtastic uses your phone\'s location to enable a number of features. You can update your location permissions at any time from settings.</string>
     <string name="share_location">Dela plats</string>
-    <string name="share_location_description">Use your phone GPS to send locations to your node to instead of using a hardware GPS on your node.</string>
+    <string name="share_location_description">Använd din telefons GPS för position istället för GPS:en på din nod.</string>
     <string name="distance_measurements">Avståndsmätning</string>
     <string name="distance_measurements_description">Visa avståndet mellan din telefon och andra Meshtastic noder med kända positioner.</string>
     <string name="distance_filters">Filtrera på avstånd</string>
@@ -838,7 +838,7 @@
         permission. Please enable this in the notification settings.
     </string>
     <string name="configure_critical_alerts">Konfigurera kritiska varningar</string>
-    <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
+    <string name="notification_permissions_description">Meshtastic använder aviseringar för att hålla dig uppdaterad om nya meddelanden och andra viktiga händelser. Du kan uppdatera dina aviseringsbehörigheter när som helst från inställningar.</string>
     <string name="next">Nästa</string>
     <string name="grant_permissions">Ge behörigheter</string>
     <string name="nodes_queued_for_deletion">%d noder köade för radering:</string>
@@ -859,13 +859,13 @@
     <string name="add_layer">Lägg till lager</string>
     <string name="nodes_at_this_location">Noder på denna plats</string>
     <string name="selected_map_type">Vald karttyp</string>
-    <string name="manage_custom_tile_sources">Manage Custom Tile Sources</string>
-    <string name="add_custom_tile_source">Add Custom Tile Source</string>
-    <string name="no_custom_tile_sources_found">No Custom Tile Sources</string>
-    <string name="edit_custom_tile_source">Edit Custom Tile Source</string>
-    <string name="delete_custom_tile_source">Delete Custom Tile Source</string>
+    <string name="manage_custom_tile_sources">Hantera kartkällor</string>
+    <string name="add_custom_tile_source">Lägg till kartkälla</string>
+    <string name="no_custom_tile_sources_found">Inga kartkällor</string>
+    <string name="edit_custom_tile_source">Redigera kartkälla</string>
+    <string name="delete_custom_tile_source">Ta bort kartkälla</string>
     <string name="name_cannot_be_empty">Namn kan inte vara tomt.</string>
-    <string name="provider_name_exists">Provider name exists.</string>
+    <string name="provider_name_exists">Leverantörens namn finns redan.</string>
     <string name="url_cannot_be_empty">URL kan inte vara odefinierad.</string>
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL-mall</string>
