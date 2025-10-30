@@ -180,6 +180,9 @@
     <string name="ip_port">Θύρα:</string>
     <string name="connected">Connected</string>
     <string name="connected_to">Συνδεδεμένο στο radio (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Αποσυνδεδεμένο</string>
     <string name="connected_sleeping">Συνδεδεμένο στο radio, αλλά βρίσκεται σε ύπνωση</string>
     <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8 ώρες</string>
     <string name="mute_1_week">1 εβδομάδα</string>
     <string name="mute_always">Πάντα</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Αντικατάσταση</string>
     <string name="wifi_qr_code_scan">Σάρωση QR κωδικού WiFi</string>
     <string name="wifi_qr_code_error">Μη έγκυρη μορφή QR διαπιστευτηρίων WiFi</string>
