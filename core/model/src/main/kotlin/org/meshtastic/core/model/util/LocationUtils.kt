@@ -55,8 +55,7 @@ fun latLongToMeter(latitudeA: Double, longitudeA: Double, latitudeB: Double, lon
 
 // Same as above, but takes Mesh Position proto.
 @Suppress("MagicNumber")
-fun positionToMeter(a: Position, b: Position): Double =
-    latLongToMeter(a.latitude * 1e-7, a.longitude * 1e-7, b.latitude * 1e-7, b.longitude * 1e-7)
+fun positionToMeter(a: Position, b: Position): Double = latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
 
 /**
  * Computes the bearing in degrees between two points on Earth.
