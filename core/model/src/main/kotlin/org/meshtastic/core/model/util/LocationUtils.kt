@@ -55,7 +55,7 @@ fun latLongToMeter(latitudeA: Double, longitudeA: Double, latitudeB: Double, lon
 
 // Same as above, but takes Mesh Position proto.
 @Suppress("MagicNumber")
-fun positionToMeter(a: Position, b: Position): Double = // only used in the export ...
+fun positionToMeter(a: Position, b: Position): Double =
     latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
 
 /**
