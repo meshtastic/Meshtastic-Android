@@ -256,9 +256,12 @@ fun MuteNotificationsDialog(
                                     settings.muteUntil > 0 && settings.muteUntil != Long.MAX_VALUE -> {
                                         val remaining = settings.muteUntil - now
                                         if (remaining > 0) {
-                                            stringResource(R.string.mute_status_muted_for) +
-                                                " " +
-                                                formatMuteRemainingTime(remaining)
+                                            val (days, hours) = formatMuteRemainingTime(remaining)
+                                            if (days >= 1) {
+                                                stringResource(R.string.mute_status_muted_for_days, days, hours)
+                                            } else {
+                                                stringResource(R.string.mute_status_muted_for_hours, hours)
+                                            }
                                         } else {
                                             stringResource(R.string.mute_status_unmuted)
                                         }

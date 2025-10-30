@@ -66,24 +66,19 @@ private fun formatUptime(seconds: Long): String {
 
 fun onlineTimeThreshold(): Int {
     val currentSeconds = System.currentTimeMillis() / TimeUnit.SECONDS.toMillis(1)
-    return (currentSeconds - ONLINE_WINDOW_HOURS * TimeUnit.HOURS.toSeconds(ONLINE_WINDOW_HOURS.toLong())).toInt()
+    return (currentSeconds - TimeUnit.HOURS.toSeconds(ONLINE_WINDOW_HOURS.toLong())).toInt()
 }
 
 /**
- * Formats remaining mute time in a human-readable format
+ * Calculates the remaining mute time in days and hours.
  *
  * @param remainingMillis The remaining time in milliseconds
- * @return Formatted string as "2d, 3.5h" or "Not muted" if time has expired
+ * @return Pair of (days, hours), where days is Int and hours is Double
  */
-fun formatMuteRemainingTime(remainingMillis: Long): String {
-    if (remainingMillis <= 0) return "Not muted"
+fun formatMuteRemainingTime(remainingMillis: Long): Pair<Int, Double> {
+    if (remainingMillis <= 0) return Pair(0, 0.0)
     val totalHours = remainingMillis.toDouble() / TimeUnit.HOURS.toMillis(1)
     val days = (totalHours / TimeUnit.DAYS.toHours(1)).toInt()
     val hours = totalHours % TimeUnit.DAYS.toHours(1)
-    return buildString {
-        if (days > 0) {
-            append("%dd ".format(days))
-        }
-        append("%.1fh".format(hours))
-    }
+    return Pair(days, hours)
 }

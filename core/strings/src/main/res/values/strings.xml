@@ -340,9 +340,8 @@
     <string name="currently">Currently:</string>
     <string name="mute_status_always">Always muted</string>
     <string name="mute_status_unmuted">Not muted</string>
-    <string name="mute_status_muted_for">Muted for approximately</string>
-    <string name="mute_status_days">\ %1$d days</string>
-    <string name="mute_status_hours">, %.1f hours</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Replace</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
