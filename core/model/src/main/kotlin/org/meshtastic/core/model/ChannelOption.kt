@@ -303,7 +303,6 @@ enum class RegionInfo(
     companion object {
         fun fromRegionCode(regionCode: RegionCode): RegionInfo? = entries.find { it.regionCode == regionCode }
     }
-
 }
 
 enum class ChannelOption(val modemPreset: ModemPreset, @StringRes val labelRes: Int, val bandwidth: Float) {
