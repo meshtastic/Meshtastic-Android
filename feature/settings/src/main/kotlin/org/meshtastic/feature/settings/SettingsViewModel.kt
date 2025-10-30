@@ -142,8 +142,10 @@ constructor(
             // Capture the current node value while we're still on main thread
             val nodes = nodeRepository.nodeDBbyNum.value
 
+            // Converts a MeshProtos.Position (nullable) to a Position, but only if it's valid, otherwise returns null.
+            // The returned Position is guaranteed to be non-null and valid, or null if the input was null or invalid.
             val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
-                meshPosition?.let { Position(it) }.takeIf { it?.isValid() == true }
+                meshPosition?.let { Position(it) }?.takeIf { it.isValid() }
             }
 
             writeToUri(uri) { writer ->
@@ -151,7 +153,7 @@ constructor(
 
                 @Suppress("MaxLineLength")
                 writer.appendLine(
-                    "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"",
+                    "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance(m)\",\"hop limit\",\"payload\"",
                 )
 
                 // Packets are ordered by time, we keep most recent position of
