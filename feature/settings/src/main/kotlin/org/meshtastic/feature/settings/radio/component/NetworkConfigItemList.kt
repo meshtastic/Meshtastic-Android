@@ -47,6 +47,7 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditIPv4Preference
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -110,6 +111,36 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
             viewModel.setConfig(config)
         },
     ) {
+        // Display device connection status
+        state.deviceConnectionStatus?.let { connectionStatus ->
+            if (
+                connectionStatus.wifi?.status?.isConnected == true ||
+                connectionStatus.ethernet?.status?.isConnected == true
+            ) {
+                item {
+                    TitledCard(title = stringResource(R.string.connection_status)) {
+                        connectionStatus.wifi?.let { wifiStatus ->
+                            if (wifiStatus.status.isConnected) {
+                                ListItem(
+                                    text = stringResource(R.string.wifi_ip),
+                                    supportingText = formatIpAddress(wifiStatus.status.ipAddress),
+                                    trailingIcon = null,
+                                )
+                            }
+                        }
+                        connectionStatus.ethernet?.let { ethernetStatus ->
+                            if (ethernetStatus.status.isConnected) {
+                                ListItem(
+                                    text = stringResource(R.string.ethernet_ip),
+                                    supportingText = formatIpAddress(ethernetStatus.status.ipAddress),
+                                    trailingIcon = null,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if (state.metadata?.hasWifi == true) {
             item {
                 TitledCard(title = stringResource(R.string.wifi_config)) {
@@ -274,3 +305,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
 private fun extractWifiCredentials(qrCode: String) =
     Regex("""WIFI:S:(.*?);.*?P:(.*?);""").find(qrCode)?.destructured?.let { (ssid, password) -> ssid to password }
         ?: (null to null)
+
+@Suppress("detekt:MagicNumber")
+private fun formatIpAddress(ipAddress: Int): String = "${(ipAddress) and 0xFF}." +
+    "${(ipAddress shr 8) and 0xFF}." +
+    "${(ipAddress shr 16) and 0xFF}." +
+    "${(ipAddress shr 24) and 0xFF}"
