@@ -630,6 +630,7 @@ class MeshService : Service() {
             snr = packet.rxSnr,
             rssi = packet.rxRssi,
             replyId = data.replyId,
+            relayNode = packet.relayNode,
         )
     }
 
@@ -788,7 +789,7 @@ class MeshService : Service() {
                             serviceRepository.setErrorMessage(getString(R.string.error_duty_cycle))
                         }
 
-                        handleAckNak(data.requestId, fromId, u.errorReasonValue)
+                        handleAckNak(data.requestId, fromId, u.errorReasonValue, dataPacket.relayNode)
                         packetHandler.removeResponse(data.requestId, complete = true)
                     }
 
@@ -817,11 +818,13 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.DETECTION_SENSOR_APP_VALUE -> {
+                        Timber.d("Received DETECTION_SENSOR_APP from $fromId")
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
                         rememberDataPacket(u)
                     }
 
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
+                        Timber.d("Received TRACEROUTE_APP from $fromId")
                         val full = packet.getFullTracerouteResponse(::getUserName)
                         if (full != null) {
                             val requestId = packet.decoded.requestId
@@ -1101,7 +1104,7 @@ class MeshService : Service() {
     }
 
     /** Handle an ack/nak packet by updating sent message status */
-    private fun handleAckNak(requestId: Int, fromId: String, routingError: Int) {
+    private fun handleAckNak(requestId: Int, fromId: String, routingError: Int, relayNode: Int? = null) {
         serviceScope.handledLaunch {
             val isAck = routingError == MeshProtos.Routing.Error.NONE_VALUE
             val p = packetRepository.get().getPacketById(requestId)
@@ -1115,6 +1118,7 @@ class MeshService : Service() {
             if (p != null && p.data.status != MessageStatus.RECEIVED) {
                 p.data.status = m
                 p.routingError = routingError
+                p.data.relayNode = relayNode
                 packetRepository.get().update(p)
             }
             serviceBroadcasts.broadcastMessageStatus(requestId, m)
