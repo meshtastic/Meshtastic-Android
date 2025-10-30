@@ -517,7 +517,7 @@
     <string name="output_led_active_high">Output LED active high</string>
     <string name="output_buzzer_gpio">Utmatning summer (GPIO)</string>
     <string name="use_pwm_buzzer">Använd PWM-summern</string>
-    <string name="output_vibra_gpio">Output vibra (GPIO)</string>
+    <string name="output_vibra_gpio">Utmatning vibra (GPIO)</string>
     <string name="output_duration_milliseconds">Utmatningstid (millisekunder)</string>
     <string name="nag_timeout_seconds">Sluta tjata efter (sekunder)</string>
     <string name="ringtone">Ringsignal</string>
