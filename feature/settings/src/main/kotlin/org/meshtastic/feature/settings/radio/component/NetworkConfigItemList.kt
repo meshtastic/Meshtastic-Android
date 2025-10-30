@@ -47,6 +47,7 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditIPv4Preference
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -120,27 +121,20 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                     TitledCard(title = stringResource(R.string.connection_status)) {
                         connectionStatus.wifi?.let { wifiStatus ->
                             if (wifiStatus.status.isConnected) {
-                                Text(
-                                    text =
-                                    stringResource(R.string.wifi_ip) +
-                                        " " +
-                                        formatIpAddress(wifiStatus.status.ipAddress),
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+                                ListItem(
+                                    text = stringResource(R.string.wifi_ip),
+                                    supportingText = formatIpAddress(wifiStatus.status.ipAddress),
                                 )
                             }
                         }
                         connectionStatus.ethernet?.let { ethernetStatus ->
                             if (ethernetStatus.status.isConnected) {
-                                Text(
-                                    text =
-                                    stringResource(R.string.ethernet_ip) +
-                                        " " +
-                                        formatIpAddress(ethernetStatus.status.ipAddress),
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
+                                ListItem(
+                                    text = stringResource(R.string.ethernet_ip),
+                                    supportingText = formatIpAddress(ethernetStatus.status.ipAddress),
                                 )
                             }
                         }
-                        HorizontalDivider()
                     }
                 }
             }
