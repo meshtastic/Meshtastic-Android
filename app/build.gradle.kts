@@ -158,10 +158,9 @@ android {
             } else {
                 signingConfig = signingConfigs.getByName("debug")
             }
-            productFlavors.getByName("fdroid") {
-                isMinifyEnabled = false
-                isShrinkResources = false
-            }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
         }
     }
     bundle { language { enableSplit = false } }
