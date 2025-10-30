@@ -181,6 +181,9 @@
     <string name="connected">Connected</string>
     <string name="connected_to">Meshtasticデバイスに接続しました
 (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">接続されていません</string>
     <string name="connected_sleeping">接続しましたが、Meshtasticデバイスはスリープ状態です。</string>
     <string name="app_too_old">アプリを更新して下さい。</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8時間</string>
     <string name="mute_1_week">1週間</string>
     <string name="mute_always">常時</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">置き換え</string>
     <string name="wifi_qr_code_scan">WiFiのQRコードをスキャン</string>
     <string name="wifi_qr_code_error">WiFi認証のQRコードの形式が無効です</string>
