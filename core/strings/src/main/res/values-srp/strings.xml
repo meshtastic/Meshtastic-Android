@@ -180,6 +180,9 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Блутут повезан</string>
     <string name="connected_to">Повезан на радио уређај (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Није повезан</string>
     <string name="connected_sleeping">Повезан на радио уређај, али уређај је у стању спавања</string>
     <string name="app_too_old">Неопходно је ажурирање апликације</string>
@@ -311,6 +314,11 @@
     <string name="mute_8_hours">8 сати</string>
     <string name="mute_1_week">1 седмица</string>
     <string name="mute_always">Увек</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Замени</string>
     <string name="wifi_qr_code_scan">Скенирај ВајФај QR код</string>
     <string name="wifi_qr_code_error">Неважећи формат QR кода за ВајФАј податке</string>

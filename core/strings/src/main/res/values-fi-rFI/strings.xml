@@ -180,6 +180,9 @@
     <string name="ip_port">Portti:</string>
     <string name="connected">Yhdistetty</string>
     <string name="connected_to">Yhdistetty radioon (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Ei yhdistetty</string>
     <string name="connected_sleeping">Yhdistetty radioon, mutta se on lepotilassa</string>
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8 tuntia</string>
     <string name="mute_1_week">1 viikko</string>
     <string name="mute_always">Aina</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Korvaa</string>
     <string name="wifi_qr_code_scan">Skannaa WiFi QR-koodi</string>
     <string name="wifi_qr_code_error">WiFi-verkon käyttöoikeustiedoissa on virheellinen QR-koodin muoto</string>

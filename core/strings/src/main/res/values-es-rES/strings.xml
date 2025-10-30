@@ -180,6 +180,9 @@
     <string name="ip_port">Puerto:</string>
     <string name="connected">Conectado</string>
     <string name="connected_to">Conectado a la radio (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">No está conectado</string>
     <string name="connected_sleeping">Conectado a la radio, pero está en reposo</string>
     <string name="app_too_old">Es necesario actualizar la aplicación</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8 horas</string>
     <string name="mute_1_week">1 semana</string>
     <string name="mute_always">Siempre</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Reemplazar</string>
     <string name="wifi_qr_code_scan">Escanear código QR WiFi</string>
     <string name="wifi_qr_code_error">Formato de código QR de credencial wifi inválido</string>

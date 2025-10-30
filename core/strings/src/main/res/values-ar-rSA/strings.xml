@@ -180,6 +180,9 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Connected</string>
     <string name="connected_to">متصل بالراديو (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">غير متصل</string>
     <string name="connected_sleeping">تم الاتصال بالراديو، إلا أن الجهاز في وضعية السكون</string>
     <string name="app_too_old">مطلوب تحديث التطبيق</string>
@@ -314,6 +317,11 @@
     <string name="mute_8_hours">8 ساعات</string>
     <string name="mute_1_week">أسبوع 1</string>
     <string name="mute_always">دائما</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">استبدال</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>

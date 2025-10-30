@@ -180,6 +180,9 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Connected</string>
     <string name="connected_to">E lidhur me radio (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Nuk është lidhur</string>
     <string name="connected_sleeping">E lidhur me radio, por është në gjumë</string>
     <string name="app_too_old">Përditësimi i aplikacionit kërkohet</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8 orë</string>
     <string name="mute_1_week">1 javë</string>
     <string name="mute_always">Gjithmonë</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Zëvendëso</string>
     <string name="wifi_qr_code_scan">Skano QR kodi WiFi</string>
     <string name="wifi_qr_code_error">Formati i gabuar i kodit QR të kredencialeve WiFi</string>
