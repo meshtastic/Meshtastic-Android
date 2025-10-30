@@ -42,7 +42,6 @@ import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.MeshProtos
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.collections.map
 
 @Singleton
 @Suppress("TooManyFunctions")
@@ -94,8 +93,20 @@ constructor(
     fun getUser(userId: String): MeshProtos.User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
         ?: MeshProtos.User.newBuilder()
             .setId(userId)
-            .setLongName("Meshtastic ${userId.takeLast(n = 4)}")
-            .setShortName(userId.takeLast(n = 4))
+            .setLongName(
+                if (userId == "^local") {
+                    "Local"
+                } else {
+                    "Meshtastic ${userId.takeLast(n = 4)}"
+                },
+            )
+            .setShortName(
+                if (userId == "^local") {
+                    "Local"
+                } else {
+                    userId.takeLast(n = 4)
+                },
+            )
             .setHwModel(MeshProtos.HardwareModel.UNSET)
             .build()
 
