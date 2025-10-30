@@ -29,6 +29,7 @@ import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.Portnums.PortNum
 import javax.inject.Inject
 
@@ -103,4 +104,7 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: Lazy<Packe
     suspend fun insertReaction(reaction: ReactionEntity) = withContext(Dispatchers.IO) { packetDao.insert(reaction) }
 
     suspend fun clearPacketDB() = withContext(Dispatchers.IO) { packetDao.deleteAll() }
+
+    suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>) =
+        packetDao.migrateChannelsByPSK(oldSettings, newSettings)
 }
