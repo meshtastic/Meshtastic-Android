@@ -124,6 +124,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                                 ListItem(
                                     text = stringResource(R.string.wifi_ip),
                                     supportingText = formatIpAddress(wifiStatus.status.ipAddress),
+                                    trailingIcon = null,
                                 )
                             }
                         }
@@ -132,6 +133,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                                 ListItem(
                                     text = stringResource(R.string.ethernet_ip),
                                     supportingText = formatIpAddress(ethernetStatus.status.ipAddress),
+                                    trailingIcon = null,
                                 )
                             }
                         }
