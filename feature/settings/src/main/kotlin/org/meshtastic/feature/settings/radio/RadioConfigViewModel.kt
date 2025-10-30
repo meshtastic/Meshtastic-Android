@@ -49,6 +49,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
@@ -108,6 +109,7 @@ constructor(
     savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
+    private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val locationRepository: LocationRepository,
@@ -247,7 +249,12 @@ constructor(
         val destNum = destNode.value?.num ?: return
         getChannelList(new, old).forEach { setRemoteChannel(destNum, it) }
 
-        if (destNum == myNodeNum) viewModelScope.launch { radioConfigRepository.replaceAllSettings(new) }
+        if (destNum == myNodeNum) {
+            viewModelScope.launch {
+                packetRepository.migrateChannelsByPSK(old, new)
+                radioConfigRepository.replaceAllSettings(new)
+            }
+        }
         _radioConfigState.update { it.copy(channelList = new) }
     }
 
