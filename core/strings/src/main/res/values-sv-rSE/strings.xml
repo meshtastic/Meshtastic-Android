@@ -905,4 +905,5 @@
     <string name="analytics_platforms">"Analysplattformar: "</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
+    <string name="relayed_by">Relayed by: %s</string>
 </resources>
