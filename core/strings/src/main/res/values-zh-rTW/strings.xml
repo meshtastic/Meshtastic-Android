@@ -180,6 +180,9 @@
     <string name="ip_port">Ip_ 埠：</string>
     <string name="connected">已連線</string>
     <string name="connected_to">已連接至設備 (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">未連線</string>
     <string name="connected_sleeping">已連接至無線電，但它正在休眠中</string>
     <string name="app_too_old">需要應用程式更新</string>
@@ -309,6 +312,11 @@
     <string name="mute_8_hours">8小時</string>
     <string name="mute_1_week">1週</string>
     <string name="mute_always">總是</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">替換</string>
     <string name="wifi_qr_code_scan">掃描WiFi QR code</string>
     <string name="wifi_qr_code_error">錯誤的 WiFi 驗證QR code格式</string>
