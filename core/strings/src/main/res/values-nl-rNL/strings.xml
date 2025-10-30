@@ -180,6 +180,9 @@
     <string name="ip_port">Poort:</string>
     <string name="connected">Verbonden</string>
     <string name="connected_to">Verbonden met radio (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Niet verbonden</string>
     <string name="connected_sleeping">Verbonden met radio in slaapstand</string>
     <string name="app_too_old">Applicatie bijwerken vereist</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8 uur</string>
     <string name="mute_1_week">1 week</string>
     <string name="mute_always">Altijd</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Vervang</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR-code</string>
     <string name="wifi_qr_code_error">Ongeldige WiFi Credential QR-code formaat</string>

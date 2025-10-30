@@ -180,6 +180,9 @@
     <string name="ip_port">포트:</string>
     <string name="connected">연결됨</string>
     <string name="connected_to">(%s)에 연결됨</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">연결되지 않음</string>
     <string name="connected_sleeping">연결되었지만, 해당 장치는 절전모드입니다.</string>
     <string name="app_too_old">앱 업데이트가 필요합니다.</string>
@@ -309,6 +312,11 @@
     <string name="mute_8_hours">8 시간</string>
     <string name="mute_1_week">1 주</string>
     <string name="mute_always">항상</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">바꾸기</string>
     <string name="wifi_qr_code_scan">WiFi QR코드 스캔</string>
     <string name="wifi_qr_code_error">WiFi QR코드 형식이 잘못됨</string>

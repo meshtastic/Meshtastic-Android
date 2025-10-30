@@ -180,6 +180,9 @@
     <string name="ip_port">Порт:</string>
     <string name="connected">Connected</string>
     <string name="connected_to">Підключено до радіомодуля (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Не підключено</string>
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
@@ -312,6 +315,11 @@
     <string name="mute_8_hours">8 годин</string>
     <string name="mute_1_week">1 тиждень</string>
     <string name="mute_always">Завжди</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Замінити</string>
     <string name="wifi_qr_code_scan">Сканувати QR-код Wi-Fi</string>
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>

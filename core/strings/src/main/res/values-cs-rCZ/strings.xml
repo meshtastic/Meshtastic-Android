@@ -180,6 +180,9 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Připojeno</string>
     <string name="connected_to">Připojeno k vysílači (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Nepřipojeno</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači</string>
     <string name="app_too_old">Aplikace je příliš stará</string>
@@ -312,6 +315,11 @@
     <string name="mute_8_hours">8 hodin</string>
     <string name="mute_1_week">1 týden</string>
     <string name="mute_always">Vždy</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Nahradit</string>
     <string name="wifi_qr_code_scan">Skenovat WiFi QR kód</string>
     <string name="wifi_qr_code_error">Neplatný formát QR kódu WiFi</string>

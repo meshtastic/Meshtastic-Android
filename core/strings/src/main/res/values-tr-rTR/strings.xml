@@ -180,6 +180,9 @@
     <string name="ip_port">Bağlantı noktası:</string>
     <string name="connected">Bağlandı</string>
     <string name="connected_to">(%s) telsizine bağlandı </string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Bağlı değil</string>
     <string name="connected_sleeping">Cihaza bağlandı, ancak uyku durumunda</string>
     <string name="app_too_old">Uygulama güncellemesi gerekli</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8 saat</string>
     <string name="mute_1_week">1 hafta</string>
     <string name="mute_always">Her zaman</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Değiştir</string>
     <string name="wifi_qr_code_scan">Wi-Fi QR Kodu Tara</string>
     <string name="wifi_qr_code_error">Geçersiz Wi-Fi Kimlik Bilgisi QR kodu formatı</string>

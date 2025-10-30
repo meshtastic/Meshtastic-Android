@@ -180,6 +180,9 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Połączony</string>
     <string name="connected_to">Połączono z urządzeniem (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Nie połączono</string>
     <string name="connected_sleeping">Połączono z urządzeniem, ale jest ono w stanie uśpienia</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
@@ -312,6 +315,11 @@
     <string name="mute_8_hours">8 godzin</string>
     <string name="mute_1_week">1 tydzień</string>
     <string name="mute_always">Na zawsze</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Zastąp</string>
     <string name="wifi_qr_code_scan">Skanuj kod QR Wi-Fi</string>
     <string name="wifi_qr_code_error">Nieprawidłowy format kodu QR</string>

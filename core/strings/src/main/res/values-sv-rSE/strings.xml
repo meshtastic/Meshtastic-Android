@@ -180,6 +180,9 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Ansluten</string>
     <string name="connected_to">Ansluten till radioenhet (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Ej ansluten</string>
     <string name="connected_sleeping">Ansluten till radioenhet, men den är i sovläge</string>
     <string name="app_too_old">Applikationen måste uppgraderas</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8 timmar</string>
     <string name="mute_1_week">1 vecka</string>
     <string name="mute_always">Alltid</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Ersätt</string>
     <string name="wifi_qr_code_scan">Skanna WiFi QR-kod</string>
     <string name="wifi_qr_code_error">Felaktigt QR-kodformat eller inloggningsinformation</string>
