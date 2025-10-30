@@ -35,8 +35,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
-import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.DataPacket.CREATOR.RELAY_NODE_SUFFIX_MASK
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
@@ -266,21 +265,6 @@ constructor(
         }
         .toImmutableList()
 
-    private fun getRelayNodeId(relayNodeId: Int?): Node? {
-        if (relayNodeId == null || relayNodeId == 0) return null
-
-        val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
-        val candidateRelayNodes =
-            nodeRepository.nodeDBbyNum.value.values.filter { (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix }
-        val closestRelayNode =
-            if (candidateRelayNodes.size == 1) {
-                candidateRelayNodes.first()
-            } else {
-                candidateRelayNodes.minByOrNull { it.hopsAway }
-            }
-        return closestRelayNode
-    }
-
     /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
     private fun annotateMeshLogMessage(meshLog: MeshLog): String = when (meshLog.message_type) {
         "Packet" -> meshLog.meshPacket?.let { packet -> annotatePacketLog(packet) } ?: meshLog.raw_message
@@ -312,7 +296,7 @@ constructor(
         val placeholder = "___RELAY_NODE___"
 
         if (relayNode != 0) {
-            getRelayNodeId(relayNode)?.let { node ->
+            Packet.getRelayNode(relayNode, nodeRepository.nodeDBbyNum.value.values.toList())?.let { node ->
                 val relayId = node.user.id
                 val relayName = node.user.longName
                 val regex = Regex("""\brelay_node: ${relayNode.toUInt()}\b""")
@@ -323,8 +307,7 @@ constructor(
             }
         }
 
-        val otherNodeIds = intArrayOf(packet.from, packet.to)
-        result = annotateRawMessage(result, *otherNodeIds)
+        result = annotateRawMessage(result, packet.from, packet.to)
 
         if (relayNodeAnnotation != null) {
             result = result.replace(placeholder, relayNodeAnnotation)

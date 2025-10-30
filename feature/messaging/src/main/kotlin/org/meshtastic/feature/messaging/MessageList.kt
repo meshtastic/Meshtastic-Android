@@ -52,11 +52,10 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import org.meshtastic.core.database.entity.Packet.Companion.RELAY_NODE_SUFFIX_MASK
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.DataPacket.CREATOR.RELAY_NODE_SUFFIX_MASK
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.messaging.component.MessageItem
@@ -144,18 +143,7 @@ internal fun MessageList(
         val relayNodeName by
             remember(msg.relayNode, nodes) {
                 derivedStateOf {
-                    msg.relayNode?.let { relayNodeId ->
-                        val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
-                        val candidateRelayNodes =
-                            nodes.filter { (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix }
-                        val closestRelayNode =
-                            if (candidateRelayNodes.size == 1) {
-                                candidateRelayNodes.first()
-                            } else {
-                                candidateRelayNodes.minByOrNull { it.hopsAway }
-                            }
-                        closestRelayNode?.user?.longName
-                    }
+                    msg.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
                 }
             }
         DeliveryInfo(

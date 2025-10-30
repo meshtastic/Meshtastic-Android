@@ -244,7 +244,5 @@ data class DataPacket(
         override fun createFromParcel(parcel: Parcel): DataPacket = DataPacket(parcel)
 
         override fun newArray(size: Int): Array<DataPacket?> = arrayOfNulls(size)
-
-        const val RELAY_NODE_SUFFIX_MASK = 0xFF
     }
 }
