@@ -180,6 +180,9 @@
     <string name="ip_port">Порт:</string>
     <string name="connected">Свързано</string>
     <string name="connected_to">Свързан с радио (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Няма връзка</string>
     <string name="connected_sleeping">Свързан е с радио, но рядиото е в режим на заспиване</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
@@ -310,6 +313,11 @@
     <string name="mute_8_hours">8 часа</string>
     <string name="mute_1_week">1 седмица</string>
     <string name="mute_always">Винаги</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Замяна</string>
     <string name="wifi_qr_code_scan">Сканиране на QR код за WiFi</string>
     <string name="wifi_qr_code_error">Невалиден формат на QR кода на идентификационните данни за WiFi</string>
