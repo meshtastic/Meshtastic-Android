@@ -180,6 +180,9 @@
     <string name="ip_port">端口：</string>
     <string name="connected">已连接</string>
     <string name="connected_to">已连接至设备 (%s)</string>
+    <string name="connection_status">Current connections:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">尚未联机</string>
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
     <string name="app_too_old">需要更新应用程序</string>
@@ -311,6 +314,11 @@
     <string name="mute_8_hours">8 小时</string>
     <string name="mute_1_week">1周</string>
     <string name="mute_always">始终</string>
+    <string name="currently">Currently:</string>
+    <string name="mute_status_always">Always muted</string>
+    <string name="mute_status_unmuted">Not muted</string>
+    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">替换</string>
     <string name="wifi_qr_code_scan">扫描 WiFi 二维码</string>
     <string name="wifi_qr_code_error">WiFi凭据二维码格式无效</string>
