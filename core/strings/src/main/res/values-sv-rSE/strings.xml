@@ -215,7 +215,7 @@
     <string name="message_delivery_status">Meddelandets leveransstatus</string>
     <string name="meshtastic_messages_notifications">Direktmeddelandeaviseringar</string>
     <string name="meshtastic_broadcast_notifications">Meddelandeaviseringar</string>
-    <string name="meshtastic_alerts_notifications">Varningsmeddelanden</string>
+    <string name="meshtastic_alerts_notifications">Larmmeddelanden</string>
     <string name="firmware_too_old">Uppdatering av fast programvara krävs.</string>
     <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
     <string name="okay">Okej</string>
@@ -382,7 +382,7 @@
     <string name="unknown_age">Okänd ålder</string>
     <string name="copy">Kopiera</string>
     <string name="alert_bell_text">Varningsklocka!</string>
-    <string name="critical_alert">Kritisk varning!</string>
+    <string name="critical_alert">Kritiskt larm!</string>
     <string name="favorite">Favorit</string>
     <string name="add_favorite">Lägg till i favoriter</string>
     <string name="remove_favorite">Ta bort från Favoriter</string>
@@ -476,7 +476,7 @@
     <string name="detection_sensor_enabled">Detektionssensor aktiverad</string>
     <string name="minimum_broadcast_seconds">Minsta sändningsintervall (sekunder)</string>
     <string name="state_broadcast_seconds">Statussändningsintervall (sekunder)</string>
-    <string name="send_bell_with_alert_message">Skicka ljudavisering med varningsmeddelande</string>
+    <string name="send_bell_with_alert_message">Skicka ljudavisering med larmmeddelande</string>
     <string name="friendly_name">Visningsnamn</string>
     <string name="gpio_pin_to_monitor">GPIO-pin att övervaka</string>
     <string name="detection_trigger_type">Detection trigger type</string>
@@ -506,18 +506,18 @@
     <string name="external_notification_config">Inställningar för extern avisering</string>
     <string name="external_notification_enabled">Externa aviseringar aktiverad</string>
     <string name="notifications_on_message_receipt">Avisera meddelandekvitto</string>
-    <string name="alert_message_led">Alert message LED</string>
-    <string name="alert_message_buzzer">Meddelande-summer</string>
-    <string name="alert_message_vibra">Alert message vibra</string>
-    <string name="notifications_on_alert_bell_receipt">Notifications on alert/bell receipt</string>
-    <string name="alert_bell_led">Alert bell LED</string>
-    <string name="alert_bell_buzzer">Alert bell buzzer</string>
-    <string name="alert_bell_vibra">Alert bell vibra</string>
+    <string name="alert_message_led">Larmmeddelande LED</string>
+    <string name="alert_message_buzzer">Larmmeddelande-summer</string>
+    <string name="alert_message_vibra">Larmmeddelande vibration</string>
+    <string name="notifications_on_alert_bell_receipt">Avisera mottaget varnings- och larmmeddelande</string>
+    <string name="alert_bell_led">Larmavisering med LED</string>
+    <string name="alert_bell_buzzer">Larmavisering med summer</string>
+    <string name="alert_bell_vibra">Larmavisering med vibration</string>
     <string name="output_led_gpio">Utmatning LED (GPIO)</string>
     <string name="output_led_active_high">Output LED active high</string>
     <string name="output_buzzer_gpio">Utmatning summer (GPIO)</string>
     <string name="use_pwm_buzzer">Använd PWM-summern</string>
-    <string name="output_vibra_gpio">Utmatning vibra (GPIO)</string>
+    <string name="output_vibra_gpio">Utmatning vibration (GPIO)</string>
     <string name="output_duration_milliseconds">Utmatningstid (millisekunder)</string>
     <string name="nag_timeout_seconds">Sluta tjata efter (sekunder)</string>
     <string name="ringtone">Ringsignal</string>
@@ -603,7 +603,7 @@
     <string name="super_deep_sleep_duration_seconds">Tid för djup strömsparläge</string>
     <string name="light_sleep_duration_seconds">Tid för lätt strömsparläge</string>
     <string name="minimum_wake_time_seconds">Minimum wake time</string>
-    <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
+    <string name="battery_ina_2xx_i2c_address">Batteriets INA_2XX I2C-adress</string>
     <string name="range_test_config">Räckvidstest konfiguration</string>
     <string name="range_test_enabled">Räckvidstest aktiverat</string>
     <string name="sender_message_interval_seconds">Avsändarens meddelandeintervall (sekunder)</string>
@@ -840,12 +840,12 @@
     <string name="configure_location_permissions">Konfigurera platsbehörigheter</string>
     <string name="skip">Hoppa över</string>
     <string name="settings">inställningar</string>
-    <string name="critical_alerts">Kritiska varningar</string>
+    <string name="critical_alerts">Kritiska larm</string>
     <string name="critical_alerts_dnd_request_text">För att försäkra dig om att du får kritiska larm, till exempel
         SOS-meddelanden, även när din enhet är i läget \"Stör ej\", måste du ge särskild
         -behörighet. Vänligen aktivera detta i aviseringsinställningarna.
     </string>
-    <string name="configure_critical_alerts">Konfigurera kritiska varningar</string>
+    <string name="configure_critical_alerts">Konfigurera kritiska larm</string>
     <string name="notification_permissions_description">Meshtastic använder aviseringar för att hålla dig uppdaterad om nya meddelanden och andra viktiga händelser. Du kan uppdatera dina aviseringsbehörigheter när som helst från inställningar.</string>
     <string name="next">Nästa</string>
     <string name="grant_permissions">Ge behörigheter</string>
