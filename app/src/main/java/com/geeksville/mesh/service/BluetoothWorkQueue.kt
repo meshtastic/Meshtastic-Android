@@ -63,83 +63,124 @@ internal class BluetoothWorkQueue {
 
     var isSettingMtu: Boolean = false
 
-    // / If we have work we can do, start doing it.
+    /**
+     * Starts a new work item from the queue if one is available and no work is currently in progress. This method is
+     * synchronized to prevent concurrent execution and ensure thread safety when managing [currentWork] and
+     * [workQueue].
+     */
     private fun startNewWork() {
-        logAssert(currentWork == null)
+        synchronized(this) {
+            // Synchronize on the instance to ensure exclusive access
+            logAssert(currentWork == null) // This assert should now hold true due to synchronization
 
-        if (workQueue.isNotEmpty()) {
-            val newWork = workQueue.removeAt(0)
-            currentWork = newWork
+            if (workQueue.isNotEmpty()) {
+                val newWork = workQueue.removeAt(0)
+                currentWork = newWork
 
-            if (newWork.timeoutMillis != 0L) {
-                activeTimeout =
-                    serviceScope.launch {
-                        delay(newWork.timeoutMillis)
-                        Timber.e("Failsafe BLE timer for ${newWork.tag} expired!")
-                        completeWork(STATUS_TIMEOUT, Unit) // Throw an exception in that work
-                    }
-            }
-            isSettingMtu = false // Most work is not doing MTU stuff, the work that is will re set this flag
-            if (!newWork.startWork()) {
-                completeWork(STATUS_TIMEOUT, Unit)
+                if (newWork.timeoutMillis != 0L) {
+                    activeTimeout =
+                        serviceScope.launch {
+                            delay(newWork.timeoutMillis)
+                            Timber.e("Failsafe BLE timer for ${newWork.tag} expired!")
+                            // Call completeWork, which is also synchronized, to handle timeout
+                            completeWork(STATUS_TIMEOUT, Unit)
+                        }
+                }
+                isSettingMtu = false // Most work is not doing MTU stuff, the work that is will reset this flag
+                if (!newWork.startWork()) {
+                    completeWork(STATUS_TIMEOUT, Unit)
+                }
             }
         }
     }
 
+    /**
+     * Enqueues a new Bluetooth work item. If no work is currently in progress, it immediately attempts to start the new
+     * work. This method is synchronized to ensure thread safety.
+     *
+     * @param tag A string tag for the work item, useful for logging and debugging.
+     * @param cont The continuation to resume when the work is complete.
+     * @param timeout The timeout duration in milliseconds for this work item.
+     * @param initFn A function that starts the actual Bluetooth operation.
+     */
     fun <T> queueWork(tag: String, cont: Continuation<T>, timeout: Long, initFn: () -> Boolean) {
         val workItem = BluetoothWorkItem(tag, cont, timeout, initFn)
 
-        synchronized(workQueue) {
+        synchronized(this) {
+            // Synchronize on the instance to ensure exclusive access
             Timber.d("Enqueuing work: ${workItem.tag}")
             workQueue.add(workItem)
 
-            // if we don't have any outstanding operations, run first item in queue
-            if (currentWork == null) startNewWork()
+            // If no work is currently in progress, start the first item in the queue.
+            // startNewWork is also synchronized, but calling it from within another synchronized
+            // block on the same object is safe (re-entrant lock).
+            if (currentWork == null) {
+                startNewWork()
+            }
         }
     }
 
-    /** Stop any current work */
+    /**
+     * Stops any currently active work item, canceling its timeout and clearing [currentWork]. This method is
+     * synchronized to ensure thread safety.
+     */
     private fun stopCurrentWork() {
-        activeTimeout?.cancel()
-        activeTimeout = null
-        currentWork = null
+        synchronized(this) {
+            // Synchronize on the instance
+            activeTimeout?.cancel()
+            activeTimeout = null
+            currentWork = null
+        }
     }
 
-    /** Called from our big GATT callback, completes the current job and then schedules a new one */
+    /**
+     * Called to complete the current work item with a given status and result. After completion, it attempts to start
+     * the next work item in the queue. This method is synchronized to prevent race conditions during completion and
+     * subsequent work initiation.
+     *
+     * @param status The Bluetooth GATT status code for the completed operation.
+     * @param res The result of the completed operation.
+     */
     fun <T : Any> completeWork(status: Int, res: T) {
         exceptionReporter {
-            // We might unexpectedly fail inside here, but we don't want to pass that exception back up to the bluetooth
-            // GATT layer
-
-            val work =
-                synchronized(workQueue) {
+            // Synchronize on the instance to ensure exclusive access to currentWork and workQueue
+            synchronized(this) {
+                val work =
                     currentWork.also {
                         if (it != null) {
-                            stopCurrentWork()
-                            startNewWork()
+                            stopCurrentWork() // Sets currentWork to null
+                            startNewWork() // Attempts to start new work from the queue
                         }
                     }
+
+                if (work == null) {
+                    Timber.w(
+                        "Work completed, but it was already killed (possibly by timeout). status=$status, res=$res",
+                    )
+                    return@exceptionReporter
                 }
 
-            if (work == null) {
-                Timber.w("Work completed, but it was already killed (possibly by timeout). status=$status, res=$res")
-                return@exceptionReporter
-            }
-
-            if (status != BluetoothGatt.GATT_SUCCESS) {
-                work.completion.resumeWithException(
-                    SafeBluetooth.BLEStatusException(status, "Bluetooth status=$status while doing ${work.tag}"),
-                )
-            } else {
-                @Suppress("UNCHECKED_CAST")
-                work.completion.resume(Result.success(res) as Result<Nothing>)
+                if (status != BluetoothGatt.GATT_SUCCESS) {
+                    work.completion.resumeWithException(
+                        SafeBluetooth.BLEStatusException(status, "Bluetooth status=$status while doing ${work.tag}"),
+                    )
+                } else {
+                    @Suppress("UNCHECKED_CAST")
+                    work.completion.resume(Result.success(res) as Result<Nothing>)
+                }
             }
         }
     }
 
-    /** Something went wrong, abort all queued */
+    /**
+     * Fails all currently queued and active work items with the given exception. This method clears the work queue and
+     * stops any current work. It is synchronized to ensure thread safety.
+     *
+     * @param ex The exception to use when failing work items.
+     */
     fun failAllWork(ex: Exception) {
-        synchronized(workQueue) {
+        synchronized(this) {
+            // Synchronize on the instance to ensure exclusive access
             Timber.w("Failing ${workQueue.size} works, because ${ex.message}")
             workQueue.forEach {
                 @Suppress("TooGenericExceptionCaught")
@@ -150,7 +191,7 @@ internal class BluetoothWorkQueue {
                 }
             }
             workQueue.clear()
-            stopCurrentWork()
+            stopCurrentWork() // This is also synchronized
         }
     }
 }

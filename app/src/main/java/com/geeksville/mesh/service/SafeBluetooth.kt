@@ -174,8 +174,10 @@ class SafeBluetooth(
      * So you should expect your callback might be called multiple times, each time to reestablish a new connection.
      */
     fun asyncConnect(autoConnect: Boolean = false, cb: (Result<Unit>) -> Unit, lostConnectCb: () -> Unit) {
-        // logAssert(workQueue.isEmpty())
-        if (workQueue.currentWork != null) throw AssertionError("currentWork was not null: ${workQueue.currentWork}")
+        if (workQueue.currentWork?.isConnect() == true) {
+            Timber.d("Ignoring connect request because a connect or reconnect is already in progress.")
+            return
+        }
 
         lostConnectCallback = lostConnectCb
         connectionCallback = if (autoConnect) cb else null
@@ -207,7 +209,6 @@ class SafeBluetooth(
         val cb = connectionCallback
         if (cb != null) {
             Timber.d("queuing a reconnection callback")
-            assert(workQueue.currentWork == null)
 
             if (
                 !currentConnectIsAuto
