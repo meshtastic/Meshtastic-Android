@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.repository.bluetooth
 
+import android.Manifest
 import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -24,16 +25,17 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
+import android.os.ParcelUuid
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.util.registerReceiverCompat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import org.meshtastic.core.common.hasBluetoothPermission
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -86,24 +88,16 @@ constructor(
     private fun getBluetoothLeScanner(): BluetoothLeScanner? =
         bluetoothAdapterLazy.get()?.takeIf { application.hasBluetoothPermission() }?.bluetoothLeScanner
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_SCAN)
     fun scan(): Flow<ScanResult> {
-        val filter =
-            ScanFilter.Builder()
-                // Samsung doesn't seem to filter properly by service so this can't work
-                // see
-                // https://stackoverflow.com/questions/57981986/altbeacon-android-beacon-library-not-working-after-device-has-screen-off-for-a-s/57995960#57995960
-                // and https://stackoverflow.com/a/45590493
-                // .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
-                .build()
+        val filter = ScanFilter.Builder().setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID)).build()
 
         val settings = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
 
-        return getBluetoothLeScanner()?.scan(listOf(filter), settings)?.filter {
-            it.device.name?.matches(Regex(BLE_NAME_PATTERN)) == true
-        } ?: emptyFlow()
+        return getBluetoothLeScanner()?.scan(listOf(filter), settings) ?: emptyFlow()
     }
 
-    @RequiresPermission("android.permission.BLUETOOTH_CONNECT")
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun createBond(device: BluetoothDevice): Flow<Int> = device.createBond(application)
 
     internal suspend fun updateBluetoothState() {
@@ -120,16 +114,12 @@ constructor(
                     if (!enabled) {
                         emptyList()
                     } else {
-                        bondedDevices.filter { it.name?.matches(Regex(BLE_NAME_PATTERN)) == true }
+                        bondedDevices.toList()
                     },
                 )
             } ?: BluetoothState()
 
         _state.emit(newState)
         Timber.d("Detected our bluetooth access=$newState")
-    }
-
-    companion object {
-        const val BLE_NAME_PATTERN = "^.*_([0-9a-fA-F]{4})$"
     }
 }
