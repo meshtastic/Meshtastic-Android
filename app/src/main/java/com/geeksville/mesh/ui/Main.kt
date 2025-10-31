@@ -221,7 +221,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         SimpleAlertDialog(
             title = R.string.traceroute,
             text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Box(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(text = annotateTraceroute(response))
                 }
             },
