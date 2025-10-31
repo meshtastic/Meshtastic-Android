@@ -213,7 +213,7 @@
     <string name="debug_clear_logs_confirm">Detta kommer att ta bort alla loggpaket och databasposter från din enhet - Det är en fullständig återställning och är permanent.</string>
     <string name="clear">Rensa</string>
     <string name="message_delivery_status">Meddelandets leveransstatus</string>
-    <string name="meshtastic_messages_notifications">Meddelandeaviseringar</string>
+    <string name="meshtastic_messages_notifications">Direktmeddelandeaviseringar</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
     <string name="meshtastic_alerts_notifications">Varningsmeddelanden</string>
     <string name="firmware_too_old">Uppdatering av firmware krävs.</string>
@@ -313,7 +313,7 @@
     <string name="mute_8_hours">8 timmar</string>
     <string name="mute_1_week">1 vecka</string>
     <string name="mute_always">Alltid</string>
-    <string name="currently">Currently:</string>
+    <string name="currently">Nuvarande:</string>
     <string name="mute_status_always">Alltid tystad</string>
     <string name="mute_status_unmuted">Inte tystad</string>
     <string name="mute_status_muted_for_days">Tystad i %1d dagar och %.1f timmar</string>
@@ -395,7 +395,7 @@
     <string name="current">Ström</string>
     <string name="voltage">Spänning</string>
     <string name="are_you_sure">Är du säker?</string>
-    <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
+    <string name="router_role_confirmation_text"><![CDATA[Jag har läst <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> och blogginlägget om <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
     <string name="i_know_what_i_m_doing">Jag vet vad jag håller på med.</string>
     <string name="low_battery_message">Noden %1$s har ett lågt batteri (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Avisering vid låg batterinivå</string>
