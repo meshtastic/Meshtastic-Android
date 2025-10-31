@@ -140,7 +140,6 @@ class SafeBluetooth(
         currentConnectIsAuto = autoNow
         logAssert(gatt == null)
 
-        // MinSdk is 26, so we always use TRANSPORT_LE
         val g = device.connectGatt(context, autoNow, gattCallback, BluetoothDevice.TRANSPORT_LE)
 
         gatt = g
@@ -160,7 +159,8 @@ class SafeBluetooth(
             // (the race condition does not affect that case). If that connection times out
             // you will get a callback with status=133. Then call BluetoothGatt#connect()
             // to initiate a background connection.
-            lowLevelConnect(false) != null
+            val g = lowLevelConnect(false)
+            g != null
         }
     }
 

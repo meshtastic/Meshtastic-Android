@@ -77,11 +77,7 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
                     if (oldstate == BluetoothProfile.STATE_CONNECTED) {
                         Timber.i("Lost connection - aborting current work: ${workQueue.currentWork}")
 
-                        // If autoReconnect is true and we are in a state where reconnecting makes sense
-                        if (
-                            safeBluetooth.autoReconnect &&
-                            (workQueue.currentWork == null || workQueue.currentWork?.isConnect() == true)
-                        ) {
+                        if (shouldAttemptReconnect(status)) {
                             safeBluetooth.dropAndReconnect()
                         } else {
                             safeBluetooth.lostConnection("lost connection")
@@ -118,6 +114,24 @@ internal class SafeBluetoothGattCallback(private val safeBluetooth: SafeBluetoot
                 safeBluetooth.lostConnection("unexpected connection state: $newState")
             }
         }
+    }
+
+    /**
+     * Determines if a reconnection should be attempted based on the current state and disconnection status.
+     *
+     * @param status The status code of the disconnection event.
+     * @return `true` if a reconnect should be attempted, `false` otherwise.
+     */
+    private fun shouldAttemptReconnect(status: Int): Boolean {
+        if (!safeBluetooth.autoReconnect) {
+            return false
+        }
+
+        val isConnectInProgress = workQueue.currentWork?.isConnect() == true
+        val isIdle = workQueue.currentWork == null
+        val isReconnectWorkaround = status == RECONNECT_WORKAROUND_STATUS_CODE
+
+        return isIdle || isConnectInProgress || isReconnectWorkaround
     }
 
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
