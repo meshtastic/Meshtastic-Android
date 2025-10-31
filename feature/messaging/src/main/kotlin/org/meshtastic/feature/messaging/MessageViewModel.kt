@@ -55,11 +55,12 @@ class MessageViewModel
 constructor(
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
-    quickChatActionRepository: QuickChatActionRepository,
+    private val quickChatActionRepository: QuickChatActionRepository,
     private val serviceRepository: ServiceRepository,
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
+    buildConfigProvider: org.meshtastic.core.common.BuildConfigProvider,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
@@ -76,6 +77,39 @@ constructor(
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
     val quickChatActions = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val actions = quickChatActionRepository.getAllActions()
+            var isEmpty = true
+            actions.collect { list ->
+                if (isEmpty) {
+                    // Find existing location pin action (position 0)
+                    val existingLocationPin = list.find { it.position == 0 && it.name == "📍" }
+
+                    if (existingLocationPin == null && list.isEmpty()) {
+                        // No actions exist, create default location pin
+                        quickChatActionRepository.upsert(
+                            org.meshtastic.core.database.entity.QuickChatAction(
+                                name = "📍",
+                                message = buildConfigProvider.defaultMapUrl,
+                                mode = org.meshtastic.core.database.entity.QuickChatAction.Mode.Append,
+                                position = 0,
+                            ),
+                        )
+                    } else if (
+                        existingLocationPin != null && existingLocationPin.message != buildConfigProvider.defaultMapUrl
+                    ) {
+                        // Update existing location pin with correct URL for current build variant
+                        quickChatActionRepository.upsert(
+                            existingLocationPin.copy(message = buildConfigProvider.defaultMapUrl),
+                        )
+                    }
+                }
+                isEmpty = false
+            }
+        }
+    }
 
     private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val messagesForContactKey: StateFlow<List<Message>> =

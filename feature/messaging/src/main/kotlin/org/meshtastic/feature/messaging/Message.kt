@@ -106,6 +106,7 @@ import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.MeshProtos
 import java.nio.charset.StandardCharsets
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
@@ -303,6 +304,7 @@ fun MessageScreen(
                         handleQuickChatAction(
                             action = action,
                             messageInputState = messageInputState,
+                            userPosition = ourNode?.validPosition,
                             onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
                         )
                     },
@@ -422,25 +424,40 @@ private fun String.ellipsize(maxLength: Int): String = if (length > maxLength) "
  *
  * @param action The [QuickChatAction] to handle.
  * @param messageInputState The [TextFieldState] of the message input field.
+ * @param userPosition Current user position (lat/lng), if available.
  * @param onSendMessage Lambda to call when a message needs to be sent.
  */
 private fun handleQuickChatAction(
     action: QuickChatAction,
     messageInputState: TextFieldState,
+    userPosition: MeshProtos.Position?,
     onSendMessage: (String) -> Unit,
 ) {
+    val processedMessage =
+        if (action.message.contains("%LAT", ignoreCase = true) || action.message.contains("%LON", ignoreCase = true)) {
+            userPosition?.let {
+                val latitude = "%.7f".format(it.latitudeI * 1e-7)
+                val longitude = "%.7f".format(it.longitudeI * 1e-7)
+                action.message
+                    .replace("%LAT", latitude, ignoreCase = true)
+                    .replace("%LON", longitude, ignoreCase = true)
+            } ?: action.message
+        } else {
+            action.message
+        }
+
     when (action.mode) {
         QuickChatAction.Mode.Append -> {
             val originalText = messageInputState.text.toString()
             // Avoid appending if the exact message is already present (simple check)
-            if (!originalText.contains(action.message)) {
+            if (!originalText.contains(processedMessage)) {
                 val newText =
                     buildString {
                         append(originalText)
                         if (originalText.isNotEmpty() && !originalText.endsWith(' ')) {
                             append(' ')
                         }
-                        append(action.message)
+                        append(processedMessage)
                     }
                         .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
                 messageInputState.setTextAndPlaceCursorAtEnd(newText)
@@ -449,7 +466,7 @@ private fun handleQuickChatAction(
 
         QuickChatAction.Mode.Instant -> {
             // Byte limit for 'Send' mode messages is handled by the backend/transport layer.
-            onSendMessage(action.message)
+            onSendMessage(processedMessage)
         }
     }
 }
@@ -707,7 +724,7 @@ private fun QuickChatRow(
     val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
 
     LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(allActions, key = { it.uuid }) { action ->
+        items(allActions, key = { it.position }) { action ->
             Button(onClick = { onClick(action) }, enabled = enabled) { Text(text = action.name) }
         }
     }

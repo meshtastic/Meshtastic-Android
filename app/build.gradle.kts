@@ -147,8 +147,18 @@ android {
             }
         }
 
-        named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
-        named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
+        named("google") {
+            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google"
+            buildConfigField("String", "DEFAULT_MAP_URL", "\"https://maps.google.com/?q=%LAT,%LON\"")
+        }
+        named("fdroid") {
+            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid"
+            buildConfigField(
+                "String",
+                "DEFAULT_MAP_URL",
+                "\"https://www.openstreetmap.org/?mlat=%LAT&mlon=%LON#map=13/%LAT/%LON\"",
+            )
+        }
     }
 
     buildTypes {
