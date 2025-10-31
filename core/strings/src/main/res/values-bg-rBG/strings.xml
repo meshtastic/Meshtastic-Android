@@ -95,7 +95,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Изпраща позиция в основния канал, когато потребителският бутон бъде щракнат три пъти.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Controls the blinking LED on the device. For most devices this will control one of the up to 4 LEDs, the charger and GPS LEDs are not controllable.</string>
     <string name="config_device_tzdef_summary">Часова зона за дати на екрана на устройството и в дневника.</string>
-    <string name="config_device_use_phone_tz">Use phone time zone</string>
+    <string name="config_device_use_phone_tz">Използване на часовата зона на телефона</string>
     <string name="config_device_transmitOverLora_summary">Whether in addition to sending it to MQTT and the PhoneAPI, our NeighborInfo should be transmitted over LoRa. Not available on a channel with default key and name.</string>
     <string name="config_display_screen_on_secs_summary">Колко дълго екранът остава включен след натискане на потребителския бутон или получаване на съобщения.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Автоматично превключва към следващата страница на екрана като въртележка, въз основа на зададения интервал.</string>
@@ -108,7 +108,7 @@
     <string name="config_display_wake_on_tap_or_motion_summary">Изисква се да има акселерометър на вашето устройство.</string>
     <string name="config_lora_region_summary">Регионът, където ще използвате радиостанциите си.</string>
     <string name="config_lora_modem_preset_summary">Налични предварително зададени настройки на модема, по подразбиране е Дълъг Бърз.</string>
-    <string name="config_lora_hop_limit_summary">Sets the maximum number of hops, default is 3. Increasing hops also increases congestion and should be used carefully. 0 hop broadcast messages will not get ACKs.</string>
+    <string name="config_lora_hop_limit_summary">Задава максималния брой отскоци, по подразбиране е 3. Увеличаването на броя отскоци също увеличава претоварването и трябва да се използва внимателно. Съобщенията с 0 отскока няма да получат ACK.</string>
     <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
     <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="label_long_fast">Long Range - Fast</string>
@@ -132,7 +132,7 @@
     <string name="config_security_private_key">Използва се за създаване на споделен ключ с отдалечено устройство.</string>
     <string name="config_security_admin_key">Публичният ключ, оторизиран за изпращане на администраторски съобщения до този възел.</string>
     <string name="config_security_is_managed">Устройството се управлява от mesh администратор, потребителят няма достъп до никоя от настройките на устройството.</string>
-    <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
+    <string name="config_security_serial_enabled">Серийна конзола през Stream API.</string>
     <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
     <!-- Position Config -->
     <string name="position_packet">Position Packet</string>
@@ -160,7 +160,7 @@
     <string name="analytics_okay">Разрешаване на анализи и докладване за сривове.</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
-    <string name="discard_changes">Discard</string>
+    <string name="discard_changes">Отхвърляне</string>
     <string name="save_changes">Запис</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="permission_missing">Meshtastic се нуждае от активирани разрешения за местоположение, за да намира нови устройства чрез Bluetooth. Можете да ги деактивирате, когато не се използват.</string>
@@ -180,7 +180,7 @@
     <string name="ip_port">Порт:</string>
     <string name="connected">Свързано</string>
     <string name="connected_to">Свързан с радио (%s)</string>
-    <string name="connection_status">Current connections:</string>
+    <string name="connection_status">Текущи връзки:</string>
     <string name="wifi_ip">Wifi IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Няма връзка</string>
@@ -350,7 +350,7 @@
     <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
-    <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
+    <string name="iaq_definition">(Качество на въздуха в помещенията) относителна скала за IAQ, стойностите са измерени с Bosch BME680. Диапазон на стойностите 0–500.</string>
     <string name="device_metrics_log">Журнал на показателите на устройството</string>
     <string name="node_map">Карта на възела</string>
     <string name="position_log">Журнал на позициите</string>
@@ -905,4 +905,5 @@
     <string name="analytics_platforms">"Analytics platforms: "</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <string name="unset">Unset - 0</string>
+    <string name="relayed_by">Relayed by: %s</string>
 </resources>

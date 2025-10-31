@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
@@ -181,6 +182,7 @@ class LogFilterManager {
                             log.formattedReceivedDate.contains(filterText, ignoreCase = true) ||
                             (log.decodedPayload?.contains(filterText, ignoreCase = true) == true)
                     }
+
                 FilterMode.AND ->
                     filterTexts.all { filterText ->
                         log.logMessage.contains(filterText, ignoreCase = true) ||
@@ -281,14 +283,40 @@ constructor(
         val decoded = if (hasDecoded) builder.decoded else null
         if (hasDecoded) builder.clearDecoded()
         val baseText = builder.build().toString().trimEnd()
-        val result =
+        var result =
             if (hasDecoded && decoded != null) {
                 val decodedText = decoded.toString().trimEnd().prependIndent("  ")
                 "$baseText\ndecoded {\n$decodedText\n}"
             } else {
                 baseText
             }
-        return annotateRawMessage(result, packet.from, packet.to)
+
+        val relayNode = packet.relayNode
+        var relayNodeAnnotation: String? = null
+        val placeholder = "___RELAY_NODE___"
+
+        if (relayNode != 0) {
+            Packet.getRelayNode(relayNode, nodeRepository.nodeDBbyNum.value.values.toList())?.let { node ->
+                val relayId = node.user.id
+                val relayName = node.user.longName
+                val regex = Regex("""\brelay_node: ${relayNode.toUInt()}\b""")
+                if (regex.containsMatchIn(result)) {
+                    relayNodeAnnotation = "relay_node: $relayName ($relayId)"
+                    result = regex.replace(result, placeholder)
+                }
+            }
+        }
+
+        result = annotateRawMessage(result, packet.from, packet.to)
+
+        if (relayNodeAnnotation != null) {
+            result = result.replace(placeholder, relayNodeAnnotation)
+        } else {
+            // Not annotated with name, so use hex.
+            result = annotateRawMessage(result, relayNode)
+        }
+
+        return result
     }
 
     /** Annotate the raw message string with the node IDs provided, in hex, if they are present. */

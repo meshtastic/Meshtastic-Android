@@ -64,6 +64,7 @@ data class Message(
     val replyId: Int?,
     val originalMessage: Message? = null,
     val viaMqtt: Boolean = false,
+    val relayNode: Int? = null,
 ) {
     fun getStatusStringRes(): Pair<Int, Int> {
         val title = if (routingError > 0) R.string.error else R.string.message_delivery_status

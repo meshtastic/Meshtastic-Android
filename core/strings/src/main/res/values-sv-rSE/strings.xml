@@ -123,12 +123,12 @@
     <string name="config_network_eth_enabled_summary">Aktivering av Ethernet kommer att inaktivera Bluetooth-anslutningen till appen. TCP-nodanslutningar är inte tillgängliga på Apple-enheter.</string>
     <string name="config_network_udp_enabled_summary">Aktivera UDP-sändning över det lokala nätverket.</string>
     <string name="config_position_broadcast_secs_summary">Längsta tid som kan förflyta utan att en nod sänder en position.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
+    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Hur ofta position ska skickas om minsta angivna förflyttning skett.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Minsta förändring av position för att smart position ska sända (meter).</string>
     <string name="config_position_gps_update_interval_summary">Hur ofta ska vi försöka få en GPS-position (&lt;10sec håller GPS aktiv).</string>
-    <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
-    <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
-    <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
+    <string name="config_position_flags_summary">Valfria fält att inkludera vid sammansättning av positionsmeddelanden. Ju fler fält som väljs, desto större kommer meddelandet att bli. Längre meddelanden leder till högre sändningsutnyttnande och en högre risk för paketförlust.</string>
+    <string name="config_power_is_power_saving_summary">Kommer att pausa allt så mycket som möjligt. För tracker- och sensor-rollen kommer detta också att omfatta lora radio. Använd inte den här inställningen om du vill använda enheten med telefonapparna eller använder en enhet utan en hårdvaruknapp.</string>
+    <string name="config_security_public_key">Genereras från din publika nyckel och skickas ut till andra noder på nätet för att tillåta dem att beräkna en delad hemlig nyckel.</string>
     <string name="config_security_private_key">Används för att skapa en delad nyckel med en fjärrnod.</string>
     <string name="config_security_admin_key">Den publika nyckeln som ger rätt att skicka administratörsmeddelanden till den här noden.</string>
     <string name="config_security_is_managed">Enheten hanteras av en mesh-administratör. Användaren kan inte ändra enhetsinställningarna.</string>
@@ -180,7 +180,7 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Ansluten</string>
     <string name="connected_to">Ansluten till radioenhet (%s)</string>
-    <string name="connection_status">Current connections:</string>
+    <string name="connection_status">Aktuella anslutningar:</string>
     <string name="wifi_ip">Wifi IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Ej ansluten</string>
@@ -213,10 +213,10 @@
     <string name="debug_clear_logs_confirm">Detta kommer att ta bort alla loggpaket och databasposter från din enhet - Det är en fullständig återställning och är permanent.</string>
     <string name="clear">Rensa</string>
     <string name="message_delivery_status">Meddelandets leveransstatus</string>
-    <string name="meshtastic_messages_notifications">Meddelandeaviseringar</string>
-    <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
-    <string name="meshtastic_alerts_notifications">Varningsmeddelanden</string>
-    <string name="firmware_too_old">Uppdatering av firmware krävs.</string>
+    <string name="meshtastic_messages_notifications">Direktmeddelandeaviseringar</string>
+    <string name="meshtastic_broadcast_notifications">Meddelandeaviseringar</string>
+    <string name="meshtastic_alerts_notifications">Larmmeddelanden</string>
+    <string name="firmware_too_old">Uppdatering av fast programvara krävs.</string>
     <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
     <string name="okay">Okej</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
@@ -313,11 +313,11 @@
     <string name="mute_8_hours">8 timmar</string>
     <string name="mute_1_week">1 vecka</string>
     <string name="mute_always">Alltid</string>
-    <string name="currently">Currently:</string>
-    <string name="mute_status_always">Always muted</string>
-    <string name="mute_status_unmuted">Not muted</string>
-    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
-    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
+    <string name="currently">Nuvarande:</string>
+    <string name="mute_status_always">Alltid tystad</string>
+    <string name="mute_status_unmuted">Inte tystad</string>
+    <string name="mute_status_muted_for_days">Tystad i %1d dagar och %.1f timmar</string>
+    <string name="mute_status_muted_for_hours">Tystad i %.1f timmar</string>
     <string name="replace">Ersätt</string>
     <string name="wifi_qr_code_scan">Skanna WiFi QR-kod</string>
     <string name="wifi_qr_code_error">Felaktigt QR-kodformat eller inloggningsinformation</string>
@@ -338,7 +338,7 @@
     <string name="iaq">IAQ</string>
     <string name="show_all_key_title">Krypteringsnycklars betydelser</string>
     <string name="encryption_psk">Delad nyckel</string>
-    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
+    <string name="encryption_psk_text">Endast kanalmeddelanden kan skickas/tas emot. Direkta meddelanden kräver funktionen Public Key Infrastructure i 2.5+ fast programvara.</string>
     <string name="encryption_pkc">Kryptering med Publik nyckel</string>
     <string name="encryption_pkc_text">Direktmeddelanden använder den nya publika nyckelinfrastrukturen (PKI) för kryptering.</string>
     <string name="encryption_error">Publik nyckel matchar inte</string>
@@ -382,7 +382,7 @@
     <string name="unknown_age">Okänd ålder</string>
     <string name="copy">Kopiera</string>
     <string name="alert_bell_text">Varningsklocka!</string>
-    <string name="critical_alert">Kritisk varning!</string>
+    <string name="critical_alert">Kritiskt larm!</string>
     <string name="favorite">Favorit</string>
     <string name="add_favorite">Lägg till i favoriter</string>
     <string name="remove_favorite">Ta bort från Favoriter</string>
@@ -395,7 +395,7 @@
     <string name="current">Ström</string>
     <string name="voltage">Spänning</string>
     <string name="are_you_sure">Är du säker?</string>
-    <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
+    <string name="router_role_confirmation_text"><![CDATA[Jag har läst <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> och blogginlägget om <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
     <string name="i_know_what_i_m_doing">Jag vet vad jag håller på med.</string>
     <string name="low_battery_message">Noden %1$s har ett lågt batteri (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Avisering vid låg batterinivå</string>
@@ -474,13 +474,13 @@
     <string name="messages">Meddelanden</string>
     <string name="detection_sensor_config">Inställningar för detekteringssensor</string>
     <string name="detection_sensor_enabled">Detektionssensor aktiverad</string>
-    <string name="minimum_broadcast_seconds">Minimum broadcast (seconds)</string>
+    <string name="minimum_broadcast_seconds">Minsta sändningsintervall (sekunder)</string>
     <string name="state_broadcast_seconds">Statussändningsintervall (sekunder)</string>
-    <string name="send_bell_with_alert_message">Skicka ljudavisering med varningsmeddelande</string>
+    <string name="send_bell_with_alert_message">Skicka ljudavisering med larmmeddelande</string>
     <string name="friendly_name">Visningsnamn</string>
     <string name="gpio_pin_to_monitor">GPIO-pin att övervaka</string>
     <string name="detection_trigger_type">Detection trigger type</string>
-    <string name="use_input_pullup_mode">Use INPUT_PULLUP mode</string>
+    <string name="use_input_pullup_mode">Använd INPUT_PULLUP-läge</string>
     <string name="device_config">Enhet</string>
     <string name="role">Enhetens roll</string>
     <string name="button_gpio">GPIO för knapp</string>
@@ -494,7 +494,7 @@
     <string name="display_config">Display</string>
     <string name="screen_on_for">Håll skärmen tänd</string>
     <string name="carousel_interval">Carousel interval</string>
-    <string name="compass_north_top">Compass north top</string>
+    <string name="compass_north_top">Kompassens norrläge uppåt</string>
     <string name="flip_screen">Vänd skärmen</string>
     <string name="display_units">Visa enheter</string>
     <string name="oled_type">OLED-typ</string>
@@ -506,18 +506,18 @@
     <string name="external_notification_config">Inställningar för extern avisering</string>
     <string name="external_notification_enabled">Externa aviseringar aktiverad</string>
     <string name="notifications_on_message_receipt">Avisera meddelandekvitto</string>
-    <string name="alert_message_led">Alert message LED</string>
-    <string name="alert_message_buzzer">Meddelande-summer</string>
-    <string name="alert_message_vibra">Alert message vibra</string>
-    <string name="notifications_on_alert_bell_receipt">Notifications on alert/bell receipt</string>
-    <string name="alert_bell_led">Alert bell LED</string>
-    <string name="alert_bell_buzzer">Alert bell buzzer</string>
-    <string name="alert_bell_vibra">Alert bell vibra</string>
+    <string name="alert_message_led">Larmmeddelande LED</string>
+    <string name="alert_message_buzzer">Larmmeddelande-summer</string>
+    <string name="alert_message_vibra">Larmmeddelande vibration</string>
+    <string name="notifications_on_alert_bell_receipt">Avisera mottaget varnings- och larmmeddelande</string>
+    <string name="alert_bell_led">Larmavisering med LED</string>
+    <string name="alert_bell_buzzer">Larmavisering med summer</string>
+    <string name="alert_bell_vibra">Larmavisering med vibration</string>
     <string name="output_led_gpio">Utmatning LED (GPIO)</string>
     <string name="output_led_active_high">Output LED active high</string>
     <string name="output_buzzer_gpio">Utmatning summer (GPIO)</string>
     <string name="use_pwm_buzzer">Använd PWM-summern</string>
-    <string name="output_vibra_gpio">Output vibra (GPIO)</string>
+    <string name="output_vibra_gpio">Utmatning vibration (GPIO)</string>
     <string name="output_duration_milliseconds">Utmatningstid (millisekunder)</string>
     <string name="nag_timeout_seconds">Sluta tjata efter (sekunder)</string>
     <string name="ringtone">Ringsignal</string>
@@ -603,10 +603,10 @@
     <string name="super_deep_sleep_duration_seconds">Tid för djup strömsparläge</string>
     <string name="light_sleep_duration_seconds">Tid för lätt strömsparläge</string>
     <string name="minimum_wake_time_seconds">Minimum wake time</string>
-    <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
+    <string name="battery_ina_2xx_i2c_address">Batteriets INA_2XX I2C-adress</string>
     <string name="range_test_config">Räckvidstest konfiguration</string>
     <string name="range_test_enabled">Räckvidstest aktiverat</string>
-    <string name="sender_message_interval_seconds">Sender message interval (seconds)</string>
+    <string name="sender_message_interval_seconds">Avsändarens meddelandeintervall (sekunder)</string>
     <string name="save_csv_in_storage_esp32_only">Spara .CSV i enheten (endast ESP32)</string>
     <string name="remote_hardware_config">Konfiguration av fjärrhårdvara</string>
     <string name="remote_hardware_enabled">Fjärrhårdvara aktiverad</string>
@@ -653,7 +653,7 @@
     <string name="short_name">Kort namn</string>
     <string name="hardware_model">Hårdvarumodell</string>
     <string name="licensed_amateur_radio">Licensierad radioamatör (HAM)</string>
-    <string name="licensed_amateur_radio_text">Enabling this option disables encryption and is not compatible with the default Meshtastic network.</string>
+    <string name="licensed_amateur_radio_text">Aktivering detta alternativ inaktiverar kryptering och är inte kompatibelt med standard Meshtastic-nätverk.</string>
     <string name="dew_point">Daggpunkt</string>
     <string name="pressure">Tryck</string>
     <string name="gas_resistance">Gasmotstånd</string>
@@ -685,8 +685,8 @@
     <string name="primary">Primär</string>
     <string name="primary_channel_feature">Periodisk sändning av position och telemetri</string>
     <string name="secondary">Sekundär</string>
-    <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>
-    <string name="manual_position_request">Manual position request required</string>
+    <string name="secondary_no_telemetry">Inga periodiska sändningar av telemetri</string>
+    <string name="manual_position_request">Manuell positionsbegäran krävs</string>
     <string name="press_and_drag">Tryck och dra för att ändra ordning</string>
     <string name="unmute">Ljud på</string>
     <string name="dynamic">Dynamisk</string>
@@ -705,12 +705,12 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Använd 12-timmarsformat</string>
     <string name="display_time_in_12h_format">Visar tiden i 12-timmarsformat när denna är aktiverad.</string>
-    <string name="host_metrics_log">Host Metrics Log</string>
+    <string name="host_metrics_log">Logg för värdstatistik</string>
     <string name="host">Värd</string>
     <string name="free_memory">Ledigt minne</string>
     <string name="disk_free">Ledig lagring</string>
     <string name="load">Ladda</string>
-    <string name="user_string">User String</string>
+    <string name="user_string">Användarens sträng</string>
     <string name="navigate_into_label">Navigera till</string>
     <string name="connections">Anslutning</string>
     <string name="map">Mesh Map</string>
@@ -719,13 +719,13 @@
     <string name="bottom_nav_settings">Inställningar</string>
     <string name="set_your_region">Ange din region</string>
     <string name="reply">Svara</string>
-    <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
-    <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
-    <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
+    <string name="map_reporting_summary">Din nod kommer periodiskt skicka ett okrypterat paket till den konfigurerade MQTT-servern som inkluderar id, kort och långt namn, ungefärlig plats, hardvarumodell, enhetsroll, mjukvaru-version, LoRa-region, modeminställning och den primära kanalens namn.</string>
+    <string name="map_reporting_consent_header">Samtycke för att dela okrypterad noddata via MQTT</string>
+    <string name="map_reporting_consent_text">Genom att aktivera den här funktionen bekräftar och samtycker du till överföringen av enhetens geografiska plats i realtid över MQTT-protokollet utan kryptering. Denna platsdata kan användas för ändamål som live-kartrapportering, enhetsspårning och relaterade telemetrifunktioner.</string>
     <string name="i_agree_to_share_my_location">Jag har läst och förstått ovanstående. Jag samtycker till okrypterad överföring av mina noddata via MQTT</string>
     <string name="i_agree">Jag godkänner.</string>
     <string name="should_update_firmware">Uppdatering av fast programvara rekommenderas.</string>
-    <string name="should_update">To benefit from the latest fixes and features, please update your node firmware.\n\nLatest stable firmware version: %1$s</string>
+    <string name="should_update">För att dra nytta av de senaste rättelserna och funktionerna, vänligen uppdatera din nods fasta programvara.\n\nSenaste stabila fasta programvaruversion: %1$s</string>
     <string name="expires">Upphör att gälla</string>
     <string name="time">Tid</string>
     <string name="date">Datum</string>
@@ -736,7 +736,7 @@
     <string name="client_notification">Meddelande från enheten</string>
     <string name="compromised_keys">Läkta nycklar upptäcktes, välj OK för att återskapa.</string>
     <string name="regenerate_private_key">Förnya nyckel</string>
-    <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
+    <string name="regenerate_keys_confirmation">Är du säker på att du vill skapa ny privat nyckel?\n\nNoder som tidigare har bytt nycklar med den här noden måste ta bort den gamla anslutningen och utbyta nycklar på nytt för att kunna återuppta säker kommunikation.</string>
     <string name="export_keys">Exportera nycklar</string>
     <string name="export_keys_confirmation">Exporterar publika och privata nycklar till en fil. Förvara någonstans säkert.</string>
     <string name="modules_unlocked">Modulerna är upplåsta</string>
@@ -772,13 +772,13 @@
     <string name="security_icon_help_green_lock">Ett grönt lås innebär att kanalen är säkert krypterad med antingen en 128 eller 256 bitars AES-nyckel.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Osäker kanal. Inte exakt.</string>
-    <string name="security_icon_help_yellow_open_lock">A yellow open lock means the channel is not securely encrypted, is not used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+    <string name="security_icon_help_yellow_open_lock">Ett gult öppet lås innebär att kanalen inte är säkert krypterad, används inte för exakta platsdata, och använder antingen ingen nyckel alls eller en 1 byte känd nyckel.</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <string name="security_icon_insecure_precise_only">Osäker kanal. Exakt plats.</string>
-    <string name="security_icon_help_red_open_lock">A red open lock means the channel is not securely encrypted, is used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+    <string name="security_icon_help_red_open_lock">Ett gult öppet lås innebär att kanalen inte är säkert krypterad, används för exakta platsdata och använder antingen ingen nyckel alls eller en 1 byte känd nyckel.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
-    <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
-    <string name="security_icon_help_warning_precise_mqtt">A red open lock with a warning means the channel is not securely encrypted, is used for precise location data which is being uplinked to the internet via MQTT, and uses either no key at all or a 1 byte known key.</string>
+    <string name="security_icon_warning_precise_mqtt">Varning: Osäkert, exakt plats &amp; MQTT upplänk</string>
+    <string name="security_icon_help_warning_precise_mqtt">Ett rött öppet lås med varning innebär att kanalen inte är säkert krypterad, används för exakta platsdata som är uppkopplade till internet via MQTT och använder antingen ingen nyckel alls eller en 1 byte känd nyckel.</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Kanalsäkerhet</string>
     <string name="security_icon_help_title_all">Betydelser för kanalsäkerhet</string>
@@ -800,7 +800,7 @@
     <string name="bluetooth_paired_devices">Parkopplade enheter</string>
     <string name="bluetooth_available_devices">Tillgängliga enheter</string>
     <string name="connected_device">Ansluten enhet</string>
-    <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
+    <string name="routing_error_rate_limit_exceeded">Sändningsgräns uppnådd. Försök igen senare.</string>
     <string name="view_release">Visa version</string>
     <string name="download">Ladda ner</string>
     <string name="installed_firmware_version">Installerad version</string>
@@ -825,10 +825,10 @@
     <string name="notifications_for_newly_discovered_nodes">Aviseringar för nyupptäckta noder.</string>
     <string name="low_battery">Lågt batteri</string>
     <string name="notifications_for_low_battery_alerts">Aviseringar för låg batterinivå för den anslutna enheten.</string>
-    <string name="critical_alerts_description">Select packets sent as critical will ignore the mute switch and Do Not Disturb settings in the OS notification center.</string>
+    <string name="critical_alerts_description">Valda paket som skickas som kritiska kommer ignorera Mute och Stör ej inställningar i OS-meddelandecentret.</string>
     <string name="configure_notification_permissions">Konfigurera aviseringsbehörigheter</string>
     <string name="phone_location">Telefonens plats</string>
-    <string name="phone_location_description">Meshtastic uses your phone\'s location to enable a number of features. You can update your location permissions at any time from settings.</string>
+    <string name="phone_location_description">Meshtastic använder telefonens plats för att aktivera ett antal funktioner. Du kan uppdatera dina platsbehörigheter när som helst från inställningar.</string>
     <string name="share_location">Dela plats</string>
     <string name="share_location_description">Använd din telefons GPS för position istället för GPS:en på din nod.</string>
     <string name="distance_measurements">Avståndsmätning</string>
@@ -840,17 +840,17 @@
     <string name="configure_location_permissions">Konfigurera platsbehörigheter</string>
     <string name="skip">Hoppa över</string>
     <string name="settings">inställningar</string>
-    <string name="critical_alerts">Kritiska varningar</string>
-    <string name="critical_alerts_dnd_request_text">To ensure you receive critical alerts, such as
-        SOS messages, even when your device is in \"Do Not Disturb\" mode, you need to grant special
-        permission. Please enable this in the notification settings.
+    <string name="critical_alerts">Kritiska larm</string>
+    <string name="critical_alerts_dnd_request_text">För att försäkra dig om att du får kritiska larm, till exempel
+        SOS-meddelanden, även när din enhet är i läget \"Stör ej\", måste du ge särskild
+        -behörighet. Vänligen aktivera detta i aviseringsinställningarna.
     </string>
-    <string name="configure_critical_alerts">Konfigurera kritiska varningar</string>
+    <string name="configure_critical_alerts">Konfigurera kritiska larm</string>
     <string name="notification_permissions_description">Meshtastic använder aviseringar för att hålla dig uppdaterad om nya meddelanden och andra viktiga händelser. Du kan uppdatera dina aviseringsbehörigheter när som helst från inställningar.</string>
     <string name="next">Nästa</string>
     <string name="grant_permissions">Ge behörigheter</string>
     <string name="nodes_queued_for_deletion">%d noder köade för radering:</string>
-    <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
+    <string name="clean_node_database_description">Varning: Detta tar bort noder från både appen och enhetens databaser.\nMarkeringar är inklusive.</string>
     <string name="connecting_to_device">Ansluter till enhet</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satellit</string>
@@ -875,7 +875,7 @@
     <string name="name_cannot_be_empty">Namn kan inte vara tomt.</string>
     <string name="provider_name_exists">Leverantörens namn finns redan.</string>
     <string name="url_cannot_be_empty">URL kan inte vara odefinierad.</string>
-    <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
+    <string name="url_must_contain_placeholders">URL måste innehålla platshållare.</string>
     <string name="url_template">URL-mall</string>
     <string name="track_point">Muspinne</string>
     <string name="app_settings">App</string>
@@ -886,11 +886,11 @@
     <string name="uplink_feature_description">Meddelanden från mesh-nätet kommer att skickas till internet via vilken nod som helst som är konfigurerad som gateway.</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="icon_meanings">Ikonbetydelser</string>
-    <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
+    <string name="secondary_channel_position_feature">Inaktivering av position på den primära kanalen tillåter periodiska positionsuppdateringar på den första sekundära kanalen med positionen aktiverad, annars krävs manuell positionsbegäran.</string>
     <string name="device_configuration">Konfiguration av enhet</string>
     <string name="remotely_administrating">"[Fjärr] %1$s"</string>
     <string name="device_telemetry_enabled">Skicka enhetstelemetri</string>
-    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
+    <string name="device_telemetry_enabled_summary">Aktivera/inaktivera enhetens telemetrimodul för att skicka mätvärden till nätet</string>
     <string name="any">Valfri</string>
     <string name="one_hour">1 timme</string>
     <string name="eight_hours">8 timmar</string>
@@ -905,4 +905,5 @@
     <string name="analytics_platforms">"Analysplattformar: "</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
+    <string name="relayed_by">Vidaresänt av: %s</string>
 </resources>
