@@ -490,7 +490,7 @@
     <string name="double_tap_as_button_press">Dubbeltryck som knapptryck</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
     <string name="time_zone">Tidszon</string>
-    <string name="led_heartbeat">LED Heartbeat</string>
+    <string name="led_heartbeat">LED pulsering</string>
     <string name="display_config">Display</string>
     <string name="screen_on_for">Håll skärmen tänd</string>
     <string name="carousel_interval">Carousel interval</string>
@@ -514,7 +514,7 @@
     <string name="alert_bell_buzzer">Larmavisering med summer</string>
     <string name="alert_bell_vibra">Larmavisering med vibration</string>
     <string name="output_led_gpio">Utmatning LED (GPIO)</string>
-    <string name="output_led_active_high">Output LED active high</string>
+    <string name="output_led_active_high">Utmatnings-LED aktiv hög</string>
     <string name="output_buzzer_gpio">Utmatning summer (GPIO)</string>
     <string name="use_pwm_buzzer">Använd PWM-summern</string>
     <string name="output_vibra_gpio">Utmatning vibration (GPIO)</string>
@@ -630,7 +630,7 @@
     <string name="serial_mode">Seriellt läge</string>
     <string name="override_console_serial_port">Override console serial port</string>
     <string name="store_forward_enabled"><![CDATA[Lagra & vidarebefordra är aktiverad]]></string>
-    <string name="heartbeat">Heartbeat</string>
+    <string name="heartbeat">Pulsera</string>
     <string name="number_of_records">Antal poster</string>
     <string name="history_return_max">Maxstorlek för historik</string>
     <string name="history_return_window">Returfönstrets storlek för historik</string>
