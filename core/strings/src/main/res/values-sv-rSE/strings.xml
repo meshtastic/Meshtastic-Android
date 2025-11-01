@@ -63,7 +63,7 @@
     <string name="role_router_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden. Syns i nod listan.</string>
     <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Kombinerad ROUTER och CLIENT. Ej för mobila noder.</string>
-    <string name="role_repeater"></string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden utan egen information. Syns ej i nod listan.</string>
     <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">Nod som prioriterar GPS meddelanden.</string>
@@ -695,8 +695,8 @@
     <string name="notes">Anteckningar</string>
     <string name="add_a_note">Lägg till en privat anteckning</string>
     <string name="import_shared_contact">Importera delad kontakt?</string>
-    <string name="unmessageable">Unmessageable</string>
-    <string name="unmonitored_or_infrastructure">Oövervakad eller infrastruktur</string>
+    <string name="unmessageable">Meddelanden mottas ej</string>
+    <string name="unmonitored_or_infrastructure">Inte bevakad eller infrastruktur</string>
     <string name="import_known_shared_contact_text">Varning: Denna kontakt är känd, en import kommer att skriva över tidigare kontaktuppgifter.</string>
     <string name="public_key_changed">Publik nyckel har ändrats</string>
     <string name="import_label">Importera</string>
