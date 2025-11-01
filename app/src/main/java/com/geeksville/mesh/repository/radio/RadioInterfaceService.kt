@@ -118,7 +118,7 @@ constructor(
             .onEach { state ->
                 if (state.enabled) {
                     startInterface()
-                } else if (radioIf is BluetoothInterface) {
+                } else if (radioIf is NordicBleInterface) {
                     stopInterface()
                 }
             }

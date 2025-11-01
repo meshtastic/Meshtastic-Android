@@ -19,10 +19,8 @@ package com.geeksville.mesh.repository.radio
 
 import dagger.assisted.AssistedFactory
 
-/**
- * Factory for creating `BluetoothInterface` instances.
- */
+/** Factory for creating `NordicBleInterface` instances. */
 @AssistedFactory
-interface BluetoothInterfaceFactory {
-    fun create(rest: String): BluetoothInterface
+interface NordicBleInterfaceFactory {
+    fun create(rest: String): NordicBleInterface
 }

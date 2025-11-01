@@ -234,6 +234,9 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
 
+    //    implementation("no.nordicsemi.kotlin.ble:core-android:2.0.0-alpha10")
+    implementation("no.nordicsemi.kotlin.ble:client-android:2.0.0-alpha10")
+
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     googleImplementation(libs.location.services)

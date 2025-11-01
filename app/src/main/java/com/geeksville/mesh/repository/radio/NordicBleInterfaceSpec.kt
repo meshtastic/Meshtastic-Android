@@ -23,13 +23,13 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /** Bluetooth backend implementation. */
-class BluetoothInterfaceSpec
+class NordicBleInterfaceSpec
 @Inject
 constructor(
-    private val factory: BluetoothInterfaceFactory,
+    private val factory: NordicBleInterfaceFactory,
     private val bluetoothRepository: BluetoothRepository,
-) : InterfaceSpec<BluetoothInterface> {
-    override fun createInterface(rest: String): BluetoothInterface = factory.create(rest)
+) : InterfaceSpec<NordicBleInterface> {
+    override fun createInterface(rest: String): NordicBleInterface = factory.create(rest)
 
     /** Return true if this address is still acceptable. For BLE that means, still bonded */
     override fun addressValid(rest: String): Boolean {
