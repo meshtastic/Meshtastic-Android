@@ -17,26 +17,25 @@
 
 package com.geeksville.mesh.ui.message.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,64 +46,75 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.ui.common.components.BottomSheetDialog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Composable
-private fun ReactionItem(emoji: String, emojiCount: Int = 1, onClick: () -> Unit = {}, onLongClick: () -> Unit = {}) {
-    BadgedBox(
-        badge = {
-            if (emojiCount > 1) {
-                Badge { Text(fontWeight = FontWeight.Bold, text = emojiCount.toString()) }
-            }
-        },
-    ) {
-        Surface(
-            modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
-            color = MaterialTheme.colorScheme.primaryContainer,
-            shape = CircleShape,
-        ) {
-            Text(text = emoji, modifier = Modifier.padding(4.dp).clip(CircleShape))
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
 fun ReactionRow(
     modifier: Modifier = Modifier,
     reactions: List<Reaction> = emptyList(),
-    onSendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
 ) {
-    val emojiList = reduceEmojis(reactions.reversed().map { it.emoji }).entries
+    val emojiList = reactions.map { it.emoji }.distinct()
 
-    AnimatedVisibility(emojiList.isNotEmpty()) {
-        LazyRow(
-            modifier = modifier.padding(horizontal = 4.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
+    Box(modifier = modifier) {
+        EmojiStack(
+            offset = 12.dp,
+            modifier =
+            Modifier.combinedClickable(
+                interactionSource = null,
+                indication = null,
+                onLongClick = onShowReactions,
+                onClick = {},
+            ),
         ) {
-            items(emojiList.size) { index ->
-                val entry = emojiList.elementAt(index)
-                ReactionItem(
-                    emoji = entry.key,
-                    emojiCount = entry.value,
-                    onClick = { onSendReaction(entry.key) },
-                    onLongClick = onShowReactions,
-                )
+            emojiList.forEach { emoji ->
+                Box(
+                    modifier =
+                    Modifier.size(24.dp)
+                        .aspectRatio(1f)
+                        .background(color = MaterialTheme.colorScheme.primaryContainer, shape = CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = emoji,
+                        textAlign = TextAlign.Center,
+                        fontSize = 14.sp,
+                        modifier = Modifier.wrapContentSize(),
+                    )
+                }
             }
         }
     }
 }
 
-fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
+@Composable
+fun EmojiStack(modifier: Modifier = Modifier, offset: Dp, content: @Composable () -> Unit) {
+    Layout(content, modifier) { measurables, constraints ->
+        val placeables = measurables.map { measurable -> measurable.measure(constraints) }
+
+        val height = if (placeables.isNotEmpty()) placeables.first().height else 0
+
+        val width =
+            if (placeables.isNotEmpty()) {
+                placeables.first().width + (offset.toPx().toInt() * (placeables.size - 1))
+            } else {
+                0
+            }
+
+        layout(width = width, height = height) {
+            placeables.mapIndexed { index, placeable -> placeable.place(x = offset.toPx().toInt() * index, y = 0) }
+        }
+    }
+}
 
 @Composable
 fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
@@ -143,17 +153,6 @@ fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
         }
     }
 
-@PreviewLightDark
-@Composable
-fun ReactionItemPreview() {
-    AppTheme {
-        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-            ReactionItem(emoji = "\uD83D\uDE42")
-            ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
-        }
-    }
-}
-
 @Preview
 @Composable
 fun ReactionRowPreview() {
@@ -171,6 +170,18 @@ fun ReactionRowPreview() {
                     replyId = 1,
                     user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
+                    timestamp = 1L,
+                ),
+                Reaction(
+                    replyId = 1,
+                    user = MeshProtos.User.getDefaultInstance(),
+                    emoji = "\uD83E\uDEE0",
+                    timestamp = 1L,
+                ),
+                Reaction(
+                    replyId = 1,
+                    user = MeshProtos.User.getDefaultInstance(),
+                    emoji = "\uD83D\uDD12",
                     timestamp = 1L,
                 ),
             ),

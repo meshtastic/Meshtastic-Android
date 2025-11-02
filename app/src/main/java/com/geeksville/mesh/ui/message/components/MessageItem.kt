@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -35,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.rounded.FormatQuote
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -56,11 +58,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.room.util.newStringBuilder
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.model.getStringResFrom
 import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
 import com.geeksville.mesh.ui.common.components.MDText
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
@@ -159,7 +164,7 @@ internal fun MessageItem(
                 onLongClick = { showMessageActionsDialog = true },
                 onClick = {},
             )
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(start = 8.dp, end = 8.dp, bottom = 16.dp),
     ) {
         @Suppress("MagicNumber")
         Column(
@@ -168,68 +173,85 @@ internal fun MessageItem(
                 .align(if (message.fromLocal) Alignment.CenterEnd else Alignment.CenterStart),
             horizontalAlignment = if (message.fromLocal) Alignment.End else Alignment.Start,
         ) {
-            Card(
-                modifier =
-                Modifier.wrapContentSize()
-                    .then(
-                        if (containsBel) {
-                            Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.medium)
-                        } else {
-                            Modifier
-                        },
-                    ),
-                shape = RoundedCornerShape(20.dp),
-                colors = cardColors,
-            ) {
-                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    OriginalMessageSnippet(
-                        message = message,
-                        ourNode = ourNode,
-                        cardColors = cardColors,
-                        onNavigateToOriginalMessage = onNavigateToOriginalMessage,
-                    )
-
-                    Column {
-                        MDText(
-                            text = message.text,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = cardColors.contentColor,
+            Box {
+                Card(
+                    modifier =
+                    Modifier.wrapContentSize()
+                        .then(
+                            if (containsBel) {
+                                Modifier.border(
+                                    2.dp,
+                                    MessageItemColors.Red,
+                                    shape = MaterialTheme.shapes.medium,
+                                )
+                            } else {
+                                Modifier
+                            },
                         )
-                    }
+                        .align(if (message.fromLocal) Alignment.CenterEnd else Alignment.CenterStart),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = cardColors,
+                ) {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        OriginalMessageSnippet(
+                            message = message,
+                            ourNode = ourNode,
+                            cardColors = cardColors,
+                            onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+                        )
 
-                    Row(
-                        modifier = Modifier.padding(horizontal = 4.dp).align(Alignment.End),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        if (message.viaMqtt) {
-                            Icon(
-                                Icons.Default.Cloud,
-                                contentDescription = stringResource(R.string.via_mqtt),
-                                modifier = Modifier.size(12.dp),
+                            MDText(
+                                text = message.text,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = cardColors.contentColor,
                             )
+
+                        Row(
+                            modifier = Modifier.padding(horizontal = 4.dp).align(Alignment.End),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            if (message.viaMqtt) {
+                                Icon(
+                                    Icons.Default.Cloud,
+                                    contentDescription = stringResource(R.string.via_mqtt),
+                                    modifier = Modifier.size(12.dp),
+                                )
+                            }
                         }
                     }
                 }
+
+                ReactionRow(
+                    reactions = emojis,
+                    onShowReactions = onShowReactions,
+                    modifier =
+                    Modifier.align(if (message.fromLocal) Alignment.TopStart else Alignment.TopEnd)
+                        .offset(y = (-14).dp),
+                )
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (containsBel) {
-                    Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
+                val bottomLabel = buildString {
+                    if (containsBel) {
+                        append("\uD83D\uDD14")
+                        append(" · ")
+                    }
+
+                    if(message.fromLocal) {
+                        append(stringResource(message.getStatusStringRes().second))
+                        append(" · ")
+                    }
+
+                    append(message.time)
                 }
-                Text(text = message.time, style = MaterialTheme.typography.labelSmall)
+
+                Text(text = bottomLabel, style = MaterialTheme.typography.labelSmall)
             }
         }
     }
-
-    ReactionRow(
-        modifier = Modifier.fillMaxWidth(),
-        reactions = emojis,
-        onSendReaction = sendReaction,
-        onShowReactions = onShowReactions,
-    )
 }
 
 @Composable
@@ -255,7 +277,7 @@ private fun OriginalMessageSnippet(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
-                    Icons.Default.FormatQuote,
+                    Icons.Rounded.FormatQuote,
                     contentDescription = stringResource(R.string.reply), // Add to strings.xml
                 )
                 Text(
@@ -314,9 +336,23 @@ private fun MessageItemPreview() {
             read = false,
             routingError = 0,
             packetId = 4545,
-            emojis = listOf(),
+            emojis =
+            listOf(
+                Reaction(
+                    replyId = 1,
+                    user = MeshProtos.User.getDefaultInstance(),
+                    emoji = "\uD83D\uDE42",
+                    timestamp = 1L,
+                ),
+                Reaction(
+                    replyId = 1,
+                    user = MeshProtos.User.getDefaultInstance(),
+                    emoji = "\uD83E\uDEE0",
+                    timestamp = 1L,
+                ),
+            ),
             replyId = null,
-            viaMqtt = true,
+            viaMqtt = false,
         )
     val receivedWithOriginalMessage =
         Message(
