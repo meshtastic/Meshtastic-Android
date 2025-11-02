@@ -174,11 +174,11 @@ secrets {
 // workaround for https://github.com/google/ksp/issues/1590
 androidComponents {
     onVariants(selector().all()) { variant ->
-        if(variant.name == "fdroidDebug") {
+        if (variant.name == "fdroidDebug") {
             variant.applicationId = "com.geeksville.mesh.fdroid.debug"
         }
 
-        if(variant.name == "googleDebug") {
+        if (variant.name == "googleDebug") {
             variant.applicationId = "com.geeksville.mesh.google.debug"
         }
     }
