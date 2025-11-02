@@ -162,7 +162,7 @@ constructor(
 
         // Tuning constants for packet-queue reads
         // Time to wait between successive packet-queue reads (ms)
-        private const val INTER_READ_DELAY_MS: Long = 20L
+        private const val INTER_READ_DELAY_MS: Long = 5L
 
         // Delay after a write before attempting a post-write packet-queue read (ms)
         private const val POST_WRITE_DELAY_MS: Long = 200L
@@ -199,7 +199,7 @@ constructor(
                     }
             } catch (e: Exception) {
                 Timber.e(e, "Error connecting to device")
-                service.onDisconnect(true)
+                service.onDisconnect(false)
                 return@launch
             }
 
@@ -219,7 +219,7 @@ constructor(
                     Timber.d("Peripheral state changed to $state")
                     if (!state.isConnected) {
                         toRadioCharacteristic = null // Clear characteristic on disconnect
-                        service.onDisconnect(true)
+                        service.onDisconnect(false)
                     }
                 }
                 ?.launchIn(localScope)
@@ -257,7 +257,7 @@ constructor(
                             fromRadioCharacteristic == null
                         ) {
                             Timber.e("Critical: Meshtastic characteristics not found! Cannot connect.")
-                            service.onDisconnect(true)
+                            service.onDisconnect(false)
                             return@onEach // Stop processing this service discovery event
                         }
 
@@ -329,12 +329,13 @@ constructor(
                             }
                         } catch (e: Exception) {
                             Timber.e(e, "Failed to enable notifications")
-                            service.onDisconnect(true)
+                            service.onDisconnect(false)
                             return@onEach
                         }
 
                         // We no longer need the watchdog and fallbacks: rely on FROMNUM notify -> read FROMRADIO flow.
-                        // The subscription above will read the packet queue whenever a FROMNUM notify arrives and dispatch
+                        // The subscription above will read the packet queue whenever a FROMNUM notify arrives and
+                        // dispatch
                         // to the service. This simplifies the connection flow and avoids redundant reads.
 
                         // Step 3: NOW, with everything fully ready, declare the connection open.
@@ -384,13 +385,23 @@ constructor(
 
     override fun close() {
         Timber.d("Closing NordicBleInterface")
-        // Cancel background work and disconnect peripheral
-        try {
-            // Best-effort disconnect on the service scope. This is non-blocking and will be canceled
-            // if `stopInterface()` cancels the service scope shortly after calling `close()`.
-            localScope.launch { peripheral?.disconnect() }
-        } catch (ex: Exception) {
-            Timber.w(ex, "Error while closing NordicBleInterface")
+        // Best-effort: disable notifications and clear cached characteristics, then disconnect
+        val fn = fromNumCharacteristic
+        localScope.launch {
+            try {
+                fn?.setNotifying(false)
+            } catch (ex: Exception) {
+                Timber.w(ex, "Error disabling notifications on close")
+            }
+            try {
+                peripheral?.disconnect()
+            } catch (ex: Exception) {
+                Timber.w(ex, "Error while closing NordicBleInterface")
+            }
         }
+        // Clear cached references immediately to prevent accidental use
+        toRadioCharacteristic = null
+        fromNumCharacteristic = null
+        fromRadioCharacteristic = null
     }
 }
