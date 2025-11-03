@@ -39,17 +39,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navDeepLink
-import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.ui.metrics.DeviceMetricsScreen
-import com.geeksville.mesh.ui.metrics.EnvironmentMetricsScreen
-import com.geeksville.mesh.ui.metrics.HostMetricsLogScreen
-import com.geeksville.mesh.ui.metrics.PaxMetricsScreen
-import com.geeksville.mesh.ui.metrics.PositionLogScreen
-import com.geeksville.mesh.ui.metrics.PowerMetricsScreen
-import com.geeksville.mesh.ui.metrics.SignalMetricsScreen
-import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
-import com.geeksville.mesh.ui.node.NodeDetailScreen
-import com.geeksville.mesh.ui.node.NodeListScreen
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodeDetailRoutes
@@ -58,6 +47,17 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.node.NodeMapScreen
 import org.meshtastic.feature.map.node.NodeMapViewModel
+import org.meshtastic.feature.node.detail.NodeDetailScreen
+import org.meshtastic.feature.node.list.NodeListScreen
+import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
+import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
+import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
+import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.PaxMetricsScreen
+import org.meshtastic.feature.node.metrics.PositionLogScreen
+import org.meshtastic.feature.node.metrics.PowerMetricsScreen
+import org.meshtastic.feature.node.metrics.SignalMetricsScreen
+import org.meshtastic.feature.node.metrics.TracerouteLogScreen
 
 fun NavGraphBuilder.nodesGraph(navController: NavHostController) {
     navigation<NodesRoutes.NodesGraph>(startDestination = NodesRoutes.Nodes) {

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.node
+package org.meshtastic.feature.node.list
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -69,7 +69,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
-import org.meshtastic.feature.node.list.NodeListViewModel
 import org.meshtastic.proto.AdminProtos
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

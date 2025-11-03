@@ -56,6 +56,7 @@ protobuf {
 dependencies {
     implementation(projects.core.strings)
 
+    implementation(libs.timber)
     // This needs to be API for consuming modules
     api(libs.protobuf.kotlin)
 }

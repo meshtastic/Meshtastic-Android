@@ -94,7 +94,6 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.ConnectionsNavIcon
-import com.geeksville.mesh.ui.metrics.annotateTraceroute
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -120,6 +119,7 @@ import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.feature.node.metrics.annotateTraceroute
 import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber

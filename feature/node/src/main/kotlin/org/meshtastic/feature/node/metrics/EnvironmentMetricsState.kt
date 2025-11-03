@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.feature.node.metrics
 
 import androidx.compose.ui.graphics.Color
 import org.meshtastic.core.model.util.UnitConversions
