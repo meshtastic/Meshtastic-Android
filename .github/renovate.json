@@ -15,6 +15,9 @@
   "git-submodules": {
     "enabled": true
   },
+  "bundler": {
+    "enabled": true
+  },
   "packageRules": [
     {
       "matchUpdateTypes": [
