@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.metrics
+package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
@@ -60,7 +60,6 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
-import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum

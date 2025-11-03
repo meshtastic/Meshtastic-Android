@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.metrics
+package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
@@ -60,12 +60,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
-import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.util.GraphUtil
-import com.geeksville.mesh.util.GraphUtil.createPath
-import com.geeksville.mesh.util.GraphUtil.plotPoint
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
@@ -75,7 +69,11 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Magenta
-import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
+import org.meshtastic.feature.node.metrics.CommonCharts.MAX_PERCENT_VALUE
+import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
+import org.meshtastic.feature.node.metrics.GraphUtil.createPath
+import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry

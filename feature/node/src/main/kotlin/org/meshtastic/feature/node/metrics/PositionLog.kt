@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.metrics
+package org.meshtastic.feature.node.metrics
 
 import android.app.Activity
 import android.content.Intent
@@ -68,7 +68,6 @@ import org.meshtastic.core.proto.formatPositionTime
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.MeshProtos
 import java.text.DateFormat

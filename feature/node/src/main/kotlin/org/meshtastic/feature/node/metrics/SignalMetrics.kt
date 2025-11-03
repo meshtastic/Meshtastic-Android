@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.metrics
+package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
@@ -57,16 +57,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.util.GraphUtil.plotPoint
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.component.SnrAndRssi
-import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
+import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
+import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshProtos.MeshPacket
 

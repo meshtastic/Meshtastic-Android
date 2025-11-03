@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.metrics
+package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ScrollState
@@ -40,11 +40,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.util.GraphUtil.createPath
-import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import org.meshtastic.core.strings.R
-import org.meshtastic.feature.node.metrics.Environment
-import org.meshtastic.feature.node.metrics.EnvironmentGraphingData
+import org.meshtastic.feature.node.metrics.GraphUtil.createPath
+import org.meshtastic.feature.node.metrics.GraphUtil.drawPathWithGradient
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 

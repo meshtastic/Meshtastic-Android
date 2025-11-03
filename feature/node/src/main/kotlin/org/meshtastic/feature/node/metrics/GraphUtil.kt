@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.feature.node.metrics
 
 import android.content.res.Resources
 import androidx.compose.ui.geometry.Offset
