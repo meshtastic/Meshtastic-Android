@@ -12,7 +12,6 @@
     <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>CyclomaticComplexMethod:SettingsNavigation.kt$@Suppress("LongMethod") fun NavGraphBuilder.settingsGraph(navController: NavHostController)</ID>
     <ID>LambdaParameterEventTrailing:NodeActionButton.kt$onClick</ID>
     <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
     <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
@@ -36,6 +35,7 @@
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
     <ID>ModifierMissing:CleanNodeDatabaseScreen.kt$CleanNodeDatabaseScreen</ID>
+    <ID>ModifierMissing:Debug.kt$DebugScreen</ID>
     <ID>ModifierMissing:DeviceConfigItemList.kt$DeviceConfigScreen</ID>
     <ID>ModifierMissing:MapReportingPreference.kt$MapReportingPreference</ID>
     <ID>ModifierMissing:NetworkConfigItemList.kt$NetworkConfigScreen</ID>

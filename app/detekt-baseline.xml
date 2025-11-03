@@ -11,6 +11,7 @@
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:Share.kt$ShareScreen</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
+    <ID>CyclomaticComplexMethod:SettingsNavigation.kt$@Suppress("LongMethod") fun NavGraphBuilder.settingsGraph(navController: NavHostController)</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
     <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided&gt;${ }</ID>
