@@ -217,11 +217,11 @@ constructor(
     val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
         get() = _sharedContactRequested.asStateFlow()
 
-    fun setSharedContactRequested(url: Uri) {
+    fun setSharedContactRequested(url: Uri, onFailure: () -> Unit) {
         runCatching { _sharedContactRequested.value = url.toSharedContact() }
             .onFailure { ex ->
                 Timber.e(ex, "Shared contact error")
-                showSnackBar(R.string.contact_invalid)
+                onFailure()
             }
     }
 
@@ -238,11 +238,12 @@ constructor(
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?>
         get() = _requestChannelSet
 
-    fun requestChannelUrl(url: Uri) = runCatching { _requestChannelSet.value = url.toChannelSet() }
-        .onFailure { ex ->
-            Timber.e(ex, "Channel url error")
-            showSnackBar(R.string.channel_invalid)
-        }
+    fun requestChannelUrl(url: Uri, onFailure: () -> Unit) =
+        runCatching { _requestChannelSet.value = url.toChannelSet() }
+            .onFailure { ex ->
+                Timber.e(ex, "Channel url error")
+                onFailure()
+            }
 
     val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
 
