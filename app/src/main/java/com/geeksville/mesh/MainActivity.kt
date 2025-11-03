@@ -25,6 +25,7 @@ import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -44,6 +45,7 @@ import com.geeksville.mesh.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.feature.intro.AppIntroductionScreen
@@ -115,10 +117,16 @@ class MainActivity : AppCompatActivity() {
                     Timber.d("App link data: $it")
                     if (it.path?.startsWith("/e/") == true || it.path?.startsWith("/E/") == true) {
                         Timber.d("App link data is a channel set")
-                        model.requestChannelUrl(it)
+                        model.requestChannelUrl(
+                            url = it,
+                            onFailure = { Toast.makeText(this, R.string.channel_invalid, Toast.LENGTH_SHORT).show() },
+                        )
                     } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
                         Timber.d("App link data is a shared contact")
-                        model.setSharedContactRequested(it)
+                        model.setSharedContactRequested(
+                            url = it,
+                            onFailure = { Toast.makeText(this, R.string.contact_invalid, Toast.LENGTH_SHORT).show() },
+                        )
                     } else {
                         Timber.d("App link data is not a channel set")
                     }
