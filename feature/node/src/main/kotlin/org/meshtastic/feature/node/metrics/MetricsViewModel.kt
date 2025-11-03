@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.feature.node.metrics
 
 import android.app.Application
 import android.net.Uri
@@ -48,13 +48,11 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.proto.safeNumber
 import org.meshtastic.core.proto.toPosition
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.R
-import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshProtos
@@ -88,7 +86,6 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
-    private val mapPrefs: MapPrefs,
 ) : ViewModel() {
     private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum
 
@@ -115,9 +112,6 @@ constructor(
     }
 
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
-
-    val tileSource
-        get() = CustomTileSource.getTileSource(mapPrefs.mapStyle)
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
 

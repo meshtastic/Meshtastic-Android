@@ -39,7 +39,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navDeepLink
-import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.metrics.DeviceMetricsScreen
 import com.geeksville.mesh.ui.metrics.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.metrics.HostMetricsLogScreen
@@ -58,6 +57,7 @@ import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.node.NodeMapScreen
 import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.feature.node.list.NodeListScreen
+import org.meshtastic.feature.node.metrics.MetricsViewModel
 
 fun NavGraphBuilder.nodesGraph(navController: NavHostController) {
     navigation<NodesRoutes.NodesGraph>(startDestination = NodesRoutes.Nodes) {

@@ -40,11 +40,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.model.Environment
-import com.geeksville.mesh.model.EnvironmentGraphingData
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.node.metrics.Environment
+import org.meshtastic.feature.node.metrics.EnvironmentGraphingData
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 

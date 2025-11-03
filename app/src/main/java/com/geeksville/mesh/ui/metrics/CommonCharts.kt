@@ -56,11 +56,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.geeksville.mesh.model.Environment
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.core.strings.R
+import org.meshtastic.feature.node.metrics.Environment
 import java.text.DateFormat
 
 object CommonCharts {

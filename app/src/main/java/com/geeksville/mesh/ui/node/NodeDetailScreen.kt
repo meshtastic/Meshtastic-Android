@@ -30,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.MetricsViewModel
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.Route
@@ -38,6 +37,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.detail.NodeDetailContent
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
+import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
 
