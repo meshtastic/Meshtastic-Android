@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
@@ -48,8 +47,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -373,21 +370,17 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             }
         },
     ) {
-        Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { paddingValues ->
-            Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                NavHost(
-                    navController = navController,
-                    startDestination = NodesRoutes.NodesGraph,
-                    modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
-                ) {
-                    contactsGraph(navController)
-                    nodesGraph(navController)
-                    mapGraph(navController)
-                    channelsGraph(navController)
-                    connectionsGraph(navController)
-                    settingsGraph(navController)
-                }
-            }
+        NavHost(
+            navController = navController,
+            startDestination = NodesRoutes.NodesGraph,
+            modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
+        ) {
+            contactsGraph(navController)
+            nodesGraph(navController)
+            mapGraph(navController)
+            channelsGraph(navController)
+            connectionsGraph(navController)
+            settingsGraph(navController)
         }
     }
 }

@@ -19,9 +19,6 @@ package com.geeksville.mesh.model
 
 import android.app.Application
 import android.net.Uri
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -42,7 +39,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
@@ -176,26 +172,6 @@ constructor(
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo
-
-    val snackBarHostState = SnackbarHostState()
-
-    fun showSnackBar(text: Int) = showSnackBar(app.getString(text))
-
-    fun showSnackBar(
-        text: String,
-        actionLabel: String? = null,
-        withDismissAction: Boolean = false,
-        duration: SnackbarDuration = if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Indefinite,
-        onActionPerformed: (() -> Unit) = {},
-        onDismissed: (() -> Unit) = {},
-    ) = viewModelScope.launch {
-        snackBarHostState.showSnackbar(text, actionLabel, withDismissAction, duration).run {
-            when (this) {
-                SnackbarResult.ActionPerformed -> onActionPerformed()
-                SnackbarResult.Dismissed -> onDismissed()
-            }
-        }
-    }
 
     init {
         serviceRepository.errorMessage
