@@ -39,7 +39,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navDeepLink
-import com.geeksville.mesh.ui.node.NodeDetailScreen
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodeDetailRoutes
@@ -48,6 +47,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.node.NodeMapScreen
 import org.meshtastic.feature.map.node.NodeMapViewModel
+import org.meshtastic.feature.node.detail.NodeDetailScreen
 import org.meshtastic.feature.node.list.NodeListScreen
 import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
