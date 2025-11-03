@@ -23,7 +23,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,6 +49,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.proto.safeNumber
 import org.meshtastic.core.proto.toPosition
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
