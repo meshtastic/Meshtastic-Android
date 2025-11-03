@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.feature.settings.navigation
+package com.geeksville.mesh.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -32,6 +32,8 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.feature.settings.SettingsScreen
 import org.meshtastic.feature.settings.debugging.DebugScreen
+import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseScreen
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.channel.ChannelConfigScreen
@@ -58,9 +60,6 @@ import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
-
-fun getNavRouteFrom(routeName: String): Route? =
-    ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route
 
 @Suppress("LongMethod")
 fun NavGraphBuilder.settingsGraph(navController: NavHostController) {

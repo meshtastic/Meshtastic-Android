@@ -29,7 +29,6 @@ import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.feature.settings.navigation.configComposable
 import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections]. */

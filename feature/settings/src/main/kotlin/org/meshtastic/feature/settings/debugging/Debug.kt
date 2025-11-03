@@ -103,7 +103,7 @@ private var redactedKeys: List<String> = listOf("session_passkey", "private_key"
 
 @Suppress("LongMethod")
 @Composable
-internal fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewModel()) {
+fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewModel()) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
