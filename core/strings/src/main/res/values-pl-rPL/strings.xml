@@ -61,7 +61,7 @@
     <string name="role_client_mute_desc">Wyciszenie klienta - To samo, co klient, z wyjątkiem pakietów, które nie przeskakują przez ten węzeł, nie przyczynia się do routingu pakietów dla siatki.</string>
     <string name="role_router">Router</string>
     <string name="role_router_desc">Węzeł infrastruktury do rozszerzenia zasięgu sieci poprzez przekazywanie pakietów. Widoczny na liście węzłów.</string>
-    <string name="role_router_client">Router Client</string>
+    <string name="role_router_client">Router Klienta</string>
     <string name="role_router_client_desc">Połączenie zarówno trybu ROUTER, jak i CLIENT. Nie dla urządzeń przenośnych.</string>
     <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Węzeł infrastruktury do rozszerzenia zasięgu sieci poprzez przekazywanie pakietów z minimalnym narzutem. Niewidoczny na liście węzłów.</string>
@@ -109,7 +109,7 @@
     <string name="config_lora_region_summary">The region where you will be using your radios.</string>
     <string name="config_lora_modem_preset_summary">Available modem presets, default is Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Sets the maximum number of hops, default is 3. Increasing hops also increases congestion and should be used carefully. 0 hop broadcast messages will not get ACKs.</string>
-    <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
+    <string name="config_lora_frequency_slot_summary"></string>
     <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="label_long_fast">Long Range - Fast</string>
     <string name="label_long_moderate">Long Range - Moderate</string>
