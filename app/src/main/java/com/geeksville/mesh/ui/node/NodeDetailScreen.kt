@@ -36,6 +36,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.node.component.NodeMenuAction
+import org.meshtastic.feature.node.detail.NodeDetailContent
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
