@@ -323,7 +323,10 @@ private fun MessageItemPreview() {
             viaMqtt = true,
         )
     AppTheme {
-        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp)) {
+        Column(
+            modifier = Modifier.background(MaterialTheme.colorScheme.background),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             MessageItem(
                 message = sent,
                 node = sent.node,
