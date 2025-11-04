@@ -197,7 +197,7 @@ class MeshService : Service() {
             startService(context)
         }
 
-        fun createIntent() = Intent().setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
+        fun createIntent(context: Context) = Intent(context, MeshService::class.java)
 
         /**
          * The minimum firmware version we know how to talk to. We'll still be able to talk to 2.0 firmwares but only
