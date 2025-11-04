@@ -57,8 +57,8 @@ import org.meshtastic.core.ui.theme.AppTheme
 @Composable
 fun MessageActionsDialog(
     status: MessageStatus?,
-    onDismiss: () -> Unit = {},
-    onClickReact: () -> Unit = {},
+    onDismiss: () -> Unit,
+    onClickReact: () -> Unit,
     onClickReply: () -> Unit,
     onClickSelect: () -> Unit,
     onClickStatus: () -> Unit,

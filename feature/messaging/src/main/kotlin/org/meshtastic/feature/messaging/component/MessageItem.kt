@@ -122,6 +122,7 @@ internal fun MessageItem(
         CardDefaults.cardColors()
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
 
+    @Suppress("MagicNumber")
     Card(
         modifier =
         Modifier.fillMaxWidth(.9f)
