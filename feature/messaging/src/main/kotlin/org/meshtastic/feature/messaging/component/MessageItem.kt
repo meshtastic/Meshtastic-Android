@@ -145,11 +145,14 @@ internal fun MessageItem(
                     start = if (!message.fromLocal) 0.dp else 16.dp,
                     end = if (message.fromLocal) 0.dp else 16.dp,
                 )
-                .combinedClickable(onClick = onClick, onLongClick = { showMessageActionsDialog = true })
                 .then(messageModifier),
             colors = cardColors,
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier =
+                Modifier.fillMaxWidth()
+                    .combinedClickable(onClick = onClick, onLongClick = { showMessageActionsDialog = true }),
+            ) {
                 OriginalMessageSnippet(
                     message = message,
                     ourNode = ourNode,
