@@ -22,7 +22,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -136,91 +135,91 @@ internal fun MessageItem(
                     Modifier
                 },
             )
-    Box {
-        Card(
+
+    Card(
+        modifier =
+        Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
+            .padding(
+                top = 4.dp,
+                start = if (!message.fromLocal) 0.dp else 16.dp,
+                end = if (message.fromLocal) 0.dp else 16.dp,
+            )
+            .then(messageModifier),
+        colors = cardColors,
+    ) {
+        Column(
             modifier =
-            Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
-                .padding(
-                    top = 4.dp,
-                    start = if (!message.fromLocal) 0.dp else 16.dp,
-                    end = if (message.fromLocal) 0.dp else 16.dp,
-                )
-                .then(messageModifier),
-            colors = cardColors,
+            Modifier.fillMaxWidth()
+                .combinedClickable(onClick = onClick, onLongClick = { showMessageActionsDialog = true }),
         ) {
-            Column(
-                modifier =
-                Modifier.fillMaxWidth()
-                    .combinedClickable(onClick = onClick, onLongClick = { showMessageActionsDialog = true }),
+            OriginalMessageSnippet(
+                message = message,
+                ourNode = ourNode,
+                cardColors = cardColors,
+                onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                OriginalMessageSnippet(
-                    message = message,
-                    ourNode = ourNode,
-                    cardColors = cardColors,
-                    onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+                val chipNode = if (message.fromLocal) ourNode else node
+                NodeChip(node = chipNode, onClick = onClickChip)
+                Text(
+                    text = with(if (message.fromLocal) ourNode.user else node.user) { "$longName ($id)" },
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.weight(1f, fill = true),
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    val chipNode = if (message.fromLocal) ourNode else node
-                    NodeChip(node = chipNode, onClick = onClickChip)
-                    Text(
-                        text = with(if (message.fromLocal) ourNode.user else node.user) { "$longName ($id)" },
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.weight(1f, fill = true),
+                if (message.viaMqtt) {
+                    Icon(
+                        Icons.Default.Cloud,
+                        contentDescription = stringResource(R.string.via_mqtt),
+                        modifier = Modifier.size(16.dp),
                     )
-                    if (message.viaMqtt) {
-                        Icon(
-                            Icons.Default.Cloud,
-                            contentDescription = stringResource(R.string.via_mqtt),
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
                 }
+            }
 
-                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    AutoLinkText(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = message.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = cardColors.contentColor,
-                    )
+            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                AutoLinkText(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = cardColors.contentColor,
+                )
 
-                    val topPadding = if (!message.fromLocal) 2.dp else 0.dp
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = topPadding, bottom = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (!message.fromLocal) {
-                            if (message.hopsAway == 0) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Snr(message.snr)
-                                    Rssi(message.rssi)
-                                }
-                            } else {
-                                Text(
-                                    text = stringResource(R.string.hops_away_template, message.hopsAway),
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
+                val topPadding = if (!message.fromLocal) 2.dp else 0.dp
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = topPadding, bottom = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (!message.fromLocal) {
+                        if (message.hopsAway == 0) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Snr(message.snr)
+                                Rssi(message.rssi)
                             }
+                        } else {
+                            Text(
+                                text = stringResource(R.string.hops_away_template, message.hopsAway),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
                         }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (containsBel) {
-                                Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
-                            }
-                            Text(text = message.time, style = MaterialTheme.typography.labelSmall)
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (containsBel) {
+                            Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
                         }
+                        Text(text = message.time, style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
         }
     }
+
     ReactionRow(
         modifier = Modifier.fillMaxWidth(),
         reactions = emojis,
