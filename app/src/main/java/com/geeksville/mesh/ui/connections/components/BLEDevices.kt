@@ -43,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.BTScanModel
@@ -51,9 +50,20 @@ import com.geeksville.mesh.model.DeviceListEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.bluetooth_available_devices
+import org.meshtastic.core.strings.bluetooth_disabled
+import org.meshtastic.core.strings.bluetooth_paired_devices
+import org.meshtastic.core.strings.grant_permissions
+import org.meshtastic.core.strings.no_ble_devices
+import org.meshtastic.core.strings.open_settings
+import org.meshtastic.core.strings.permission_missing
+import org.meshtastic.core.strings.permission_missing_31
+import org.meshtastic.core.strings.scan
+import org.meshtastic.core.strings.scanning_bluetooth
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.strings.R as Res
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth

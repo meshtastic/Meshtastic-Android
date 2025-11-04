@@ -32,11 +32,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R as Res
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.map_select_download_region
+import org.meshtastic.core.strings.map_start_download
+import org.meshtastic.core.strings.map_tile_download_estimate
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

@@ -38,10 +38,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.message_delivery_status
+import org.meshtastic.core.strings.react
+import org.meshtastic.core.strings.reply
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {

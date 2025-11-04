@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.node.metrics
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -54,12 +53,19 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.channel_1
+import org.meshtastic.core.strings.channel_2
+import org.meshtastic.core.strings.channel_3
+import org.meshtastic.core.strings.current
+import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
@@ -72,7 +78,6 @@ import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 import kotlin.math.ceil
 import kotlin.math.floor
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("MagicNumber")
 private enum class Power(val color: Color, val min: Float, val max: Float) {
@@ -83,7 +88,7 @@ private enum class Power(val color: Color, val min: Float, val max: Float) {
     fun difference() = max - min
 }
 
-private enum class PowerChannel(@StringRes val strRes: Int) {
+private enum class PowerChannel(val strRes: StringResource) {
     ONE(Res.string.channel_1),
     TWO(Res.string.channel_2),
     THREE(Res.string.channel_3),
@@ -349,7 +354,7 @@ private fun PowerMetricsCard(telemetry: Telemetry) {
 }
 
 @Composable
-private fun PowerChannelColumn(@StringRes titleRes: Int, voltage: Float, current: Float) {
+private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current: Float) {
     Column {
         Text(
             text = stringResource(titleRes),

@@ -45,7 +45,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -54,13 +53,19 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.formatUptime
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.disk_free_indexed
+import org.meshtastic.core.strings.free_memory
+import org.meshtastic.core.strings.load_indexed
+import org.meshtastic.core.strings.uptime
+import org.meshtastic.core.strings.user_string
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.proto.TelemetryProtos
 import java.text.DecimalFormat
-import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -18,7 +18,6 @@
 package org.meshtastic.core.ui.component
 
 import android.util.Base64
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,19 +52,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.ByteString
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.config_security_public_key
+import org.meshtastic.core.strings.encryption_error
+import org.meshtastic.core.strings.encryption_error_text
+import org.meshtastic.core.strings.encryption_pkc
+import org.meshtastic.core.strings.encryption_pkc_text
+import org.meshtastic.core.strings.encryption_psk
+import org.meshtastic.core.strings.encryption_psk_text
+import org.meshtastic.core.strings.security_icon_help_dismiss
+import org.meshtastic.core.strings.security_icon_help_show_all
+import org.meshtastic.core.strings.security_icon_help_show_less
+import org.meshtastic.core.strings.show_all_key_title
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
-import org.meshtastic.core.strings.R as Res
 
 /**
  * function to display information about the current node's encryption key.
@@ -131,9 +143,9 @@ fun NodeKeyStatusIcon(
 enum class NodeKeySecurityState(
     @Stable val icon: ImageVector,
     @Stable val color: @Composable () -> Color,
-    @StringRes val descriptionResId: Int,
-    @StringRes val helpTextResId: Int,
-    @Stable val title: Int,
+    val descriptionResId: StringResource,
+    val helpTextResId: StringResource,
+    @Stable val title: StringResource,
 ) {
     // State for public key mismatch
     PKM(
@@ -164,7 +176,7 @@ enum class NodeKeySecurityState(
 }
 
 @Composable
-private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: ByteString?, onDismiss: () -> Unit = {}) {
+private fun KeyStatusDialog(title: StringResource, text: StringResource, key: ByteString?, onDismiss: () -> Unit = {}) {
     var showAll by rememberSaveable { mutableStateOf(false) }
     AlertDialog(
         modifier = Modifier,

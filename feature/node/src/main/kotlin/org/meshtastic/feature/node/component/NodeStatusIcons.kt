@@ -37,13 +37,19 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.connected
+import org.meshtastic.core.strings.disconnected
+import org.meshtastic.core.strings.favorite
+import org.meshtastic.core.strings.not_connected
+import org.meshtastic.core.strings.unmessageable
+import org.meshtastic.core.strings.unmonitored_or_infrastructure
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)

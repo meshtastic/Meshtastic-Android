@@ -38,17 +38,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.formatUptime
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.details
+import org.meshtastic.core.strings.encryption_error
+import org.meshtastic.core.strings.encryption_error_text
+import org.meshtastic.core.strings.long_name
+import org.meshtastic.core.strings.node_number
+import org.meshtastic.core.strings.node_sort_last_heard
+import org.meshtastic.core.strings.role
+import org.meshtastic.core.strings.short_name
+import org.meshtastic.core.strings.unmonitored_or_infrastructure
+import org.meshtastic.core.strings.uptime
+import org.meshtastic.core.strings.user_id
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {

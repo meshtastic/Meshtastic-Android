@@ -37,13 +37,17 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.last_heard_filter_label
+import org.meshtastic.core.strings.only_favorites
+import org.meshtastic.core.strings.show_precision_circle
+import org.meshtastic.core.strings.show_waypoints
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.MapViewModel
 import kotlin.math.roundToInt
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, mapViewModel: MapViewModel) {

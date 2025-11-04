@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -55,15 +54,19 @@ import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.qr_code
+import org.meshtastic.core.strings.scan_qr_code
+import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import java.net.MalformedURLException
-import org.meshtastic.core.strings.R as Res
 
 /**
  * Composable FloatingActionButton to initiate scanning a QR code for adding a contact. Handles camera permission

@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.node.model
 
-import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.LocationOn
@@ -29,11 +28,21 @@ import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.strings.R as Res
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.device_metrics_log
+import org.meshtastic.core.strings.env_metrics_log
+import org.meshtastic.core.strings.host_metrics_log
+import org.meshtastic.core.strings.node_map
+import org.meshtastic.core.strings.pax_metrics_log
+import org.meshtastic.core.strings.position_log
+import org.meshtastic.core.strings.power_metrics_log
+import org.meshtastic.core.strings.sig_metrics_log
+import org.meshtastic.core.strings.traceroute_log
 
-enum class LogsType(@StringRes val titleRes: Int, val icon: ImageVector, val route: Route) {
+enum class LogsType(val titleRes: StringResource, val icon: ImageVector, val route: Route) {
     DEVICE(Res.string.device_metrics_log, Icons.Default.ChargingStation, NodeDetailRoutes.DeviceMetrics),
     NODE_MAP(Res.string.node_map, Icons.Default.Map, NodeDetailRoutes.NodeMap),
     POSITIONS(Res.string.position_log, Icons.Default.LocationOn, NodeDetailRoutes.PositionLog),

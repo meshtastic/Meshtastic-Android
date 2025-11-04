@@ -30,11 +30,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R as Res
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.configure_critical_alerts
+import org.meshtastic.core.strings.critical_alerts
+import org.meshtastic.core.strings.critical_alerts_dnd_request_text
+import org.meshtastic.core.strings.skip
 
 /**
  * Screen for explaining and guiding the user to configure critical alert settings. This screen is part of the app

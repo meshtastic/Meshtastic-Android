@@ -46,13 +46,15 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.channel_invalid
+import org.meshtastic.core.strings.contact_invalid
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import timber.log.Timber
 import javax.inject.Inject
-import org.meshtastic.core.strings.R as Res
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {

@@ -47,14 +47,28 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.data.model.CustomTileProviderConfig
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add_custom_tile_source
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.delete_custom_tile_source
+import org.meshtastic.core.strings.edit_custom_tile_source
+import org.meshtastic.core.strings.manage_custom_tile_sources
+import org.meshtastic.core.strings.name
+import org.meshtastic.core.strings.name_cannot_be_empty
+import org.meshtastic.core.strings.no_custom_tile_sources_found
+import org.meshtastic.core.strings.provider_name_exists
+import org.meshtastic.core.strings.save
+import org.meshtastic.core.strings.url_cannot_be_empty
+import org.meshtastic.core.strings.url_must_contain_placeholders
+import org.meshtastic.core.strings.url_template
+import org.meshtastic.core.strings.url_template_hint
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.MapViewModel
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable

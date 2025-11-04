@@ -38,13 +38,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.MessageLite
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.discard_changes
+import org.meshtastic.core.strings.save_changes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.feature.settings.radio.ResponseState
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun <T : MessageLite> RadioConfigScreenList(

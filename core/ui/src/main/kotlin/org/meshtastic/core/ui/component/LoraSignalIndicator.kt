@@ -43,13 +43,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.bad
+import org.meshtastic.core.strings.fair
+import org.meshtastic.core.strings.good
+import org.meshtastic.core.strings.none_quality
+import org.meshtastic.core.strings.rssi
+import org.meshtastic.core.strings.signal
+import org.meshtastic.core.strings.signal_quality
+import org.meshtastic.core.strings.snr
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
-import org.meshtastic.core.strings.R as Res
 
 const val SNR_GOOD_THRESHOLD = -7f
 const val SNR_FAIR_THRESHOLD = -15f
@@ -59,7 +68,7 @@ const val RSSI_FAIR_THRESHOLD = -126
 
 @Stable
 enum class Quality(
-    @Stable val nameRes: Int,
+    @Stable val nameRes: StringResource,
     @Stable val imageVector: ImageVector,
     @Stable val color: @Composable () -> Color,
 ) {

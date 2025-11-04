@@ -78,7 +78,6 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -94,12 +93,31 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.qrCode
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.apply
+import org.meshtastic.core.strings.are_you_sure_change_default
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.cant_change_no_radio
+import org.meshtastic.core.strings.channel_invalid
+import org.meshtastic.core.strings.copy
+import org.meshtastic.core.strings.edit
+import org.meshtastic.core.strings.modem_preset
+import org.meshtastic.core.strings.navigate_into_label
+import org.meshtastic.core.strings.qr_code
+import org.meshtastic.core.strings.replace
+import org.meshtastic.core.strings.reset
+import org.meshtastic.core.strings.reset_to_defaults
+import org.meshtastic.core.strings.scan
+import org.meshtastic.core.strings.send
+import org.meshtastic.core.strings.url
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar
@@ -116,7 +134,6 @@ import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.copy
 import timber.log.Timber
-import org.meshtastic.core.strings.R as Res
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel

@@ -48,7 +48,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,11 +55,18 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.close
+import org.meshtastic.core.strings.info
+import org.meshtastic.core.strings.logs
+import org.meshtastic.core.strings.rssi
+import org.meshtastic.core.strings.snr
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MAX_PERCENT_VALUE
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
-import org.meshtastic.core.strings.R as Res
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
@@ -79,7 +85,7 @@ private const val LINE_LIMIT = 4
 private const val TEXT_PAINT_ALPHA = 192
 
 data class LegendData(
-    val nameRes: Int,
+    val nameRes: StringResource,
     val color: Color,
     val isLine: Boolean = false,
     val environmentMetric: Environment? = null,
@@ -269,7 +275,7 @@ fun Legend(legendData: List<LegendData>, displayInfoIcon: Boolean = true, prompt
  * @param onDismiss Executes when the user presses the close button.
  */
 @Composable
-fun LegendInfoDialog(pairedRes: List<Pair<Int, Int>>, onDismiss: () -> Unit) {
+fun LegendInfoDialog(pairedRes: List<Pair<StringResource, StringResource>>, onDismiss: () -> Unit) {
     AlertDialog(
         title = {
             Text(

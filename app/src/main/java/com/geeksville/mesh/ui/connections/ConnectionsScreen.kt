@@ -46,8 +46,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,9 +60,20 @@ import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.connected
+import org.meshtastic.core.strings.connected_device
+import org.meshtastic.core.strings.connected_sleeping
+import org.meshtastic.core.strings.connections
+import org.meshtastic.core.strings.must_set_region
+import org.meshtastic.core.strings.not_connected
+import org.meshtastic.core.strings.set_your_region
+import org.meshtastic.core.strings.warning_not_paired
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.TitledCard
@@ -73,7 +82,6 @@ import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.core.strings.R as Res
 
 fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
     @Suppress("DEPRECATION")
@@ -104,7 +112,6 @@ fun ConnectionsScreen(
     val connectionState by
         connectionsViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
-    val context = LocalContext.current
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
@@ -158,7 +165,7 @@ fun ConnectionsScreen(
 
             ConnectionState.DISCONNECTED -> Res.string.not_connected
             ConnectionState.DEVICE_SLEEP -> Res.string.connected_sleeping
-        }.let { scanModel.setErrorText(context.getString(it)) }
+        }.let { scanModel.setErrorText(getString(it)) }
     }
 
     Scaffold(

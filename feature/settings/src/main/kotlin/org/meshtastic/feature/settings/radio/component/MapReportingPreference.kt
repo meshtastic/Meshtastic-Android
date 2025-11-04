@@ -34,19 +34,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.i_agree
+import org.meshtastic.core.strings.i_agree_to_share_my_location
+import org.meshtastic.core.strings.map_reporting
+import org.meshtastic.core.strings.map_reporting_consent_header
+import org.meshtastic.core.strings.map_reporting_consent_text
+import org.meshtastic.core.strings.map_reporting_interval_seconds
+import org.meshtastic.core.strings.map_reporting_summary
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import kotlin.math.roundToInt
-import org.meshtastic.core.strings.R as Res
 
 private const val POSITION_PRECISION_MIN = 12
 private const val POSITION_PRECISION_MAX = 15

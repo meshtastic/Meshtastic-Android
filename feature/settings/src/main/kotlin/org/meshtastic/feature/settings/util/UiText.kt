@@ -17,15 +17,14 @@
 
 package org.meshtastic.feature.settings.util
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Suppress("SpreadOperator")
 sealed class UiText {
     data class DynamicString(val value: String) : UiText()
 
-    class StringResource(@StringRes val resId: Int, vararg val args: Any) : UiText()
+    class StringResource(val resId: org.jetbrains.compose.resources.StringResource, vararg val args: Any) : UiText()
 
     @Composable
     fun asString(): String = when (this) {

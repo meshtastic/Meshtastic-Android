@@ -22,13 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.formatAgo
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.node_sort_last_heard
 import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun LastHeardInfo(

@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.settings.radio
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -39,11 +38,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.administration
+import org.meshtastic.core.strings.advanced_title
+import org.meshtastic.core.strings.backup_restore
+import org.meshtastic.core.strings.clean_node_database_title
+import org.meshtastic.core.strings.debug_panel
+import org.meshtastic.core.strings.device_configuration
+import org.meshtastic.core.strings.export_configuration
+import org.meshtastic.core.strings.factory_reset
+import org.meshtastic.core.strings.import_configuration
+import org.meshtastic.core.strings.message_device_managed
+import org.meshtastic.core.strings.module_settings
+import org.meshtastic.core.strings.nodedb_reset
+import org.meshtastic.core.strings.radio_configuration
+import org.meshtastic.core.strings.reboot
+import org.meshtastic.core.strings.shutdown
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
@@ -51,7 +67,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.component.WarningDialog
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -169,7 +184,7 @@ fun RadioConfigItemList(
     }
 }
 
-enum class AdminRoute(val icon: ImageVector, @StringRes val title: Int) {
+enum class AdminRoute(val icon: ImageVector, val title: StringResource) {
     REBOOT(Icons.Rounded.RestartAlt, Res.string.reboot),
     SHUTDOWN(Icons.Rounded.PowerSettingsNew, Res.string.shutdown),
     FACTORY_RESET(Icons.Rounded.Restore, Res.string.factory_reset),

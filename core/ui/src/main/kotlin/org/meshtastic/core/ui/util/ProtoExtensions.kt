@@ -18,7 +18,9 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.unknown_age
 import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.MeshProtos
@@ -28,7 +30,6 @@ import org.meshtastic.proto.channel
 import org.meshtastic.proto.channelSettings
 import java.text.DateFormat
 import kotlin.time.Duration.Companion.days
-import org.meshtastic.core.strings.R as Res
 
 private const val SECONDS_TO_MILLIS = 1000L
 

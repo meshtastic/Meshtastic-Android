@@ -56,7 +56,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -64,6 +63,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.date
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.description
+import org.meshtastic.core.strings.expires
+import org.meshtastic.core.strings.locked
+import org.meshtastic.core.strings.name
+import org.meshtastic.core.strings.send
+import org.meshtastic.core.strings.time
+import org.meshtastic.core.strings.waypoint_edit
+import org.meshtastic.core.strings.waypoint_new
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
@@ -73,7 +85,6 @@ import org.meshtastic.proto.waypoint
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalLayoutApi::class)

@@ -17,12 +17,21 @@
 
 package org.meshtastic.core.model
 
-import androidx.annotation.StringRes
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.label_long_fast
+import org.meshtastic.core.strings.label_long_moderate
+import org.meshtastic.core.strings.label_long_slow
+import org.meshtastic.core.strings.label_medium_fast
+import org.meshtastic.core.strings.label_medium_slow
+import org.meshtastic.core.strings.label_short_fast
+import org.meshtastic.core.strings.label_short_slow
+import org.meshtastic.core.strings.label_short_turbo
+import org.meshtastic.core.strings.label_very_long_slow
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.RegionCode
 import kotlin.math.floor
-import org.meshtastic.core.strings.R as Res
 
 /** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
 private fun hash(name: String): UInt { // using UInt instead of Long to match RadioInterface.cpp results
@@ -296,7 +305,7 @@ enum class RegionInfo(
     }
 }
 
-enum class ChannelOption(val modemPreset: ModemPreset, @StringRes val labelRes: Int, val bandwidth: Float) {
+enum class ChannelOption(val modemPreset: ModemPreset, val labelRes: StringResource, val bandwidth: Float) {
     VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, Res.string.label_very_long_slow, .0625f),
     LONG_FAST(ModemPreset.LONG_FAST, Res.string.label_long_fast, .250f),
     LONG_MODERATE(ModemPreset.LONG_MODERATE, Res.string.label_long_moderate, .125f),

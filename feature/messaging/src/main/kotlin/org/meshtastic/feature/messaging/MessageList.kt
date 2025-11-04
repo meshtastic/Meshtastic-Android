@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.messaging
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,26 +44,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.close
+import org.meshtastic.core.strings.relayed_by
+import org.meshtastic.core.strings.resend
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DeliveryInfo(
-    @StringRes title: Int,
-    @StringRes text: Int? = null,
+    title: StringResource,
+    text: StringResource? = null,
     relayNodeName: String? = null,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},

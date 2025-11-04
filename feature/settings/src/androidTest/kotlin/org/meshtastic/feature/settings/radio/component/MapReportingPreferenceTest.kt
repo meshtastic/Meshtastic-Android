@@ -29,7 +29,6 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class MapReportingPreferenceTest {

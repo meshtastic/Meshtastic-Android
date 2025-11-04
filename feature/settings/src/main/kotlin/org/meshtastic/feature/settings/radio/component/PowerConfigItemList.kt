@@ -24,9 +24,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.adc_multiplier_override
+import org.meshtastic.core.strings.adc_multiplier_override_ratio
+import org.meshtastic.core.strings.battery_ina_2xx_i2c_address
+import org.meshtastic.core.strings.config_power_is_power_saving_summary
+import org.meshtastic.core.strings.enable_power_saving_mode
+import org.meshtastic.core.strings.minimum_wake_time_seconds
+import org.meshtastic.core.strings.power
+import org.meshtastic.core.strings.power_config
+import org.meshtastic.core.strings.shutdown_on_power_loss
+import org.meshtastic.core.strings.super_deep_sleep_duration_seconds
+import org.meshtastic.core.strings.wait_for_bluetooth_duration_seconds
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -36,7 +48,6 @@ import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {

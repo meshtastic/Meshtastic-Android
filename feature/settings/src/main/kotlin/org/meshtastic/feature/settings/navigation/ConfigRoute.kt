@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.settings.navigation
 
-import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Bluetooth
@@ -30,13 +29,24 @@ import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.bluetooth
+import org.meshtastic.core.strings.channels
+import org.meshtastic.core.strings.device
+import org.meshtastic.core.strings.display
+import org.meshtastic.core.strings.lora
+import org.meshtastic.core.strings.network
+import org.meshtastic.core.strings.position
+import org.meshtastic.core.strings.power
+import org.meshtastic.core.strings.security
+import org.meshtastic.core.strings.user
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos.DeviceMetadata
-import org.meshtastic.core.strings.R as Res
 
-enum class ConfigRoute(@StringRes val title: Int, val route: Route, val icon: ImageVector?, val type: Int = 0) {
+enum class ConfigRoute(val title: StringResource, val route: Route, val icon: ImageVector?, val type: Int = 0) {
     USER(Res.string.user, SettingsRoutes.User, Icons.Default.Person, 0),
     CHANNELS(Res.string.channels, SettingsRoutes.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
     DEVICE(

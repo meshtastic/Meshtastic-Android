@@ -46,7 +46,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -56,10 +55,20 @@ import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.ui.connections.isIPAddress
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add_network_device
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.confirm_delete_node
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.discovered_network_devices
+import org.meshtastic.core.strings.ip_address
+import org.meshtastic.core.strings.ip_port
+import org.meshtastic.core.strings.no_network_devices
+import org.meshtastic.core.strings.recent_network_devices
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("MagicNumber", "LongMethod")

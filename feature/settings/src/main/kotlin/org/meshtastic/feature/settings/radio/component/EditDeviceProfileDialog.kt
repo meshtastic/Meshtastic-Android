@@ -35,15 +35,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.Descriptors
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.save
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
-import org.meshtastic.core.strings.R as Res
 
 private const val SUPPORTED_FIELDS = 7
 

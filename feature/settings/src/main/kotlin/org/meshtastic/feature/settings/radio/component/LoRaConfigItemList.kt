@@ -26,12 +26,35 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.numChannels
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.advanced
+import org.meshtastic.core.strings.bandwidth
+import org.meshtastic.core.strings.coding_rate
+import org.meshtastic.core.strings.config_lora_frequency_slot_summary
+import org.meshtastic.core.strings.config_lora_hop_limit_summary
+import org.meshtastic.core.strings.config_lora_modem_preset_summary
+import org.meshtastic.core.strings.config_lora_region_summary
+import org.meshtastic.core.strings.frequency_slot
+import org.meshtastic.core.strings.hop_limit
+import org.meshtastic.core.strings.ignore_mqtt
+import org.meshtastic.core.strings.lora
+import org.meshtastic.core.strings.modem_preset
+import org.meshtastic.core.strings.ok_to_mqtt
+import org.meshtastic.core.strings.options
+import org.meshtastic.core.strings.override_frequency_mhz
+import org.meshtastic.core.strings.pa_fan_disabled
+import org.meshtastic.core.strings.region_frequency_plan
+import org.meshtastic.core.strings.spread_factor
+import org.meshtastic.core.strings.sx126x_rx_boosted_gain
+import org.meshtastic.core.strings.tx_enabled
+import org.meshtastic.core.strings.tx_power_dbm
+import org.meshtastic.core.strings.use_modem_preset
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
@@ -41,7 +64,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.hopLimits
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {

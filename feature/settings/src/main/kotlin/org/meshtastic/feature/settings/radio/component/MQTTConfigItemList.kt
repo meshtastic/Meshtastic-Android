@@ -26,11 +26,25 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.address
+import org.meshtastic.core.strings.default_mqtt_address
+import org.meshtastic.core.strings.encryption_enabled
+import org.meshtastic.core.strings.json_output_enabled
+import org.meshtastic.core.strings.map_reporting
+import org.meshtastic.core.strings.mqtt
+import org.meshtastic.core.strings.mqtt_config
+import org.meshtastic.core.strings.mqtt_enabled
+import org.meshtastic.core.strings.password
+import org.meshtastic.core.strings.proxy_to_client_enabled
+import org.meshtastic.core.strings.root_topic
+import org.meshtastic.core.strings.tls_enabled
+import org.meshtastic.core.strings.username
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -38,7 +52,6 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {

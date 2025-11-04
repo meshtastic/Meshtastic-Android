@@ -22,9 +22,34 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.advanced
+import org.meshtastic.core.strings.always_point_north
+import org.meshtastic.core.strings.bold_heading
+import org.meshtastic.core.strings.carousel_interval
+import org.meshtastic.core.strings.compass_orientation
+import org.meshtastic.core.strings.config_display_auto_screen_carousel_secs_summary
+import org.meshtastic.core.strings.config_display_compass_north_top_summary
+import org.meshtastic.core.strings.config_display_displaymode_summary
+import org.meshtastic.core.strings.config_display_flip_screen_summary
+import org.meshtastic.core.strings.config_display_heading_bold_summary
+import org.meshtastic.core.strings.config_display_oled_summary
+import org.meshtastic.core.strings.config_display_screen_on_secs_summary
+import org.meshtastic.core.strings.config_display_units_summary
+import org.meshtastic.core.strings.config_display_wake_on_tap_or_motion_summary
+import org.meshtastic.core.strings.display
+import org.meshtastic.core.strings.display_config
+import org.meshtastic.core.strings.display_mode
+import org.meshtastic.core.strings.display_time_in_12h_format
+import org.meshtastic.core.strings.display_units
+import org.meshtastic.core.strings.flip_screen
+import org.meshtastic.core.strings.oled_type
+import org.meshtastic.core.strings.screen_on_for
+import org.meshtastic.core.strings.use_12h_format
+import org.meshtastic.core.strings.wake_on_tap_or_motion
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -34,7 +59,6 @@ import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {

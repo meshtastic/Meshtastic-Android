@@ -37,6 +37,7 @@ import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
+import com.meshtastic.core.strings.getString
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
@@ -86,6 +87,14 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.connected_count
+import org.meshtastic.core.strings.critical_alert
+import org.meshtastic.core.strings.device_sleeping
+import org.meshtastic.core.strings.disconnected
+import org.meshtastic.core.strings.error_duty_cycle
+import org.meshtastic.core.strings.unknown_username
+import org.meshtastic.core.strings.waypoint_received
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ChannelProtos
@@ -113,7 +122,6 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.math.absoluteValue
-import org.meshtastic.core.strings.R as Res
 
 /**
  * Handles all the communication with android apps. Also keeps an internal model of the network state.

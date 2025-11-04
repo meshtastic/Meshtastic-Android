@@ -17,10 +17,17 @@
 
 package org.meshtastic.core.database.model
 
-import androidx.annotation.StringRes
-import org.meshtastic.core.strings.R as Res
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.node_sort_alpha
+import org.meshtastic.core.strings.node_sort_channel
+import org.meshtastic.core.strings.node_sort_distance
+import org.meshtastic.core.strings.node_sort_hops_away
+import org.meshtastic.core.strings.node_sort_last_heard
+import org.meshtastic.core.strings.node_sort_via_favorite
+import org.meshtastic.core.strings.node_sort_via_mqtt
 
-enum class NodeSortOption(val sqlValue: String, @StringRes val stringRes: Int) {
+enum class NodeSortOption(val sqlValue: String, val stringRes: StringResource) {
     LAST_HEARD("last_heard", Res.string.node_sort_last_heard),
     ALPHABETICAL("alpha", Res.string.node_sort_alpha),
     DISTANCE("distance", Res.string.node_sort_distance),

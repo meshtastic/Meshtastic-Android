@@ -24,20 +24,30 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.hardware_model
+import org.meshtastic.core.strings.licensed_amateur_radio
+import org.meshtastic.core.strings.licensed_amateur_radio_text
+import org.meshtastic.core.strings.long_name
+import org.meshtastic.core.strings.node_id
+import org.meshtastic.core.strings.short_name
+import org.meshtastic.core.strings.unmessageable
+import org.meshtastic.core.strings.unmonitored_or_infrastructure
+import org.meshtastic.core.strings.user
+import org.meshtastic.core.strings.user_config
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.RegularPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {

@@ -26,10 +26,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.send
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun WarningDialog(

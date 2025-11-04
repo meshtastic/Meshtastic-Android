@@ -39,13 +39,38 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.protobuf.ByteString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.model.util.toByteString
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.admin_key
+import org.meshtastic.core.strings.admin_keys
+import org.meshtastic.core.strings.administration
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.config_security_admin_key
+import org.meshtastic.core.strings.config_security_debug_log_api_enabled
+import org.meshtastic.core.strings.config_security_is_managed
+import org.meshtastic.core.strings.config_security_private_key
+import org.meshtastic.core.strings.config_security_public_key
+import org.meshtastic.core.strings.config_security_serial_enabled
+import org.meshtastic.core.strings.debug_log_api_enabled
+import org.meshtastic.core.strings.direct_message_key
+import org.meshtastic.core.strings.export_keys
+import org.meshtastic.core.strings.export_keys_confirmation
+import org.meshtastic.core.strings.legacy_admin_channel
+import org.meshtastic.core.strings.logs
+import org.meshtastic.core.strings.managed_mode
+import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.private_key
+import org.meshtastic.core.strings.public_key
+import org.meshtastic.core.strings.regenerate_keys_confirmation
+import org.meshtastic.core.strings.regenerate_private_key
+import org.meshtastic.core.strings.security
+import org.meshtastic.core.strings.serial_console
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditListPreference
@@ -56,7 +81,6 @@ import org.meshtastic.proto.ConfigProtos.Config.SecurityConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 import java.security.SecureRandom
-import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

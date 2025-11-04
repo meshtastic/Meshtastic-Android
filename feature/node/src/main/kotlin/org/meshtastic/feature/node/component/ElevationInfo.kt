@@ -21,14 +21,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.altitude
+import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun ElevationInfo(

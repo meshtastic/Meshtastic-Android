@@ -33,11 +33,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R as Res
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.app_notifications
+import org.meshtastic.core.strings.configure_notification_permissions
+import org.meshtastic.core.strings.critical_alerts
+import org.meshtastic.core.strings.critical_alerts_description
+import org.meshtastic.core.strings.incoming_messages
+import org.meshtastic.core.strings.low_battery
+import org.meshtastic.core.strings.new_nodes
+import org.meshtastic.core.strings.next
+import org.meshtastic.core.strings.notification_permissions_description
+import org.meshtastic.core.strings.notifications_for_channel_and_direct_messages
+import org.meshtastic.core.strings.notifications_for_low_battery_alerts
+import org.meshtastic.core.strings.notifications_for_newly_discovered_nodes
+import org.meshtastic.core.strings.settings
 
 /**
  * Screen for configuring notification permissions during the app introduction. It explains why notification permissions

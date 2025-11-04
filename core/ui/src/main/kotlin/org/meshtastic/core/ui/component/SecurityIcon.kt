@@ -19,7 +19,6 @@
 
 package org.meshtastic.core.ui.component
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,18 +56,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannel
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.security_icon_badge_warning_description
+import org.meshtastic.core.strings.security_icon_description
+import org.meshtastic.core.strings.security_icon_help_dismiss
+import org.meshtastic.core.strings.security_icon_help_green_lock
+import org.meshtastic.core.strings.security_icon_help_red_open_lock
+import org.meshtastic.core.strings.security_icon_help_show_all
+import org.meshtastic.core.strings.security_icon_help_show_less
+import org.meshtastic.core.strings.security_icon_help_title
+import org.meshtastic.core.strings.security_icon_help_title_all
+import org.meshtastic.core.strings.security_icon_help_warning_precise_mqtt
+import org.meshtastic.core.strings.security_icon_help_yellow_open_lock
+import org.meshtastic.core.strings.security_icon_insecure_no_precise
+import org.meshtastic.core.strings.security_icon_insecure_precise_only
+import org.meshtastic.core.strings.security_icon_secure
+import org.meshtastic.core.strings.security_icon_warning_precise_mqtt
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
-import org.meshtastic.core.strings.R as Res
 
 private const val PRECISE_POSITION_BITS = 32
 
@@ -87,8 +102,8 @@ private const val PRECISE_POSITION_BITS = 32
 enum class SecurityState(
     @Stable val icon: ImageVector,
     @Stable val color: @Composable () -> Color,
-    @StringRes val descriptionResId: Int,
-    @StringRes val helpTextResId: Int,
+    val descriptionResId: StringResource,
+    val helpTextResId: StringResource,
     @Stable val badgeIcon: ImageVector? = null,
     @Stable val badgeIconColor: @Composable () -> Color? = { null },
 ) {

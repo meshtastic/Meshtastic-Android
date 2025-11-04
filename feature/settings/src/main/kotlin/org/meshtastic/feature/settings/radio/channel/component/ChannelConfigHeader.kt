@@ -25,12 +25,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.channels
+import org.meshtastic.core.strings.freq
+import org.meshtastic.core.strings.slot
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 internal fun ChannelConfigHeader(frequency: Float, slot: Int) {

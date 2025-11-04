@@ -32,14 +32,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.actions
+import org.meshtastic.core.strings.favorite
+import org.meshtastic.core.strings.ignore
+import org.meshtastic.core.strings.remove
+import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DeviceActions(

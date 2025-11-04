@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
@@ -50,6 +51,8 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.fallback_node_name
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
@@ -64,7 +67,6 @@ import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
-import org.meshtastic.core.strings.R as Res
 
 private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
@@ -95,10 +97,10 @@ constructor(
      * Creates a fallback node for hidden clients or nodes not yet in the database. This prevents the detail screen from
      * freezing when viewing unknown nodes.
      */
-    private fun createFallbackNode(nodeNum: Int): Node {
+    private suspend fun createFallbackNode(nodeNum: Int): Node {
         val userId = DataPacket.nodeNumToDefaultId(nodeNum)
         val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
-        val longName = app.getString(Res.string.fallback_node_name) + "  $safeUserId"
+        val longName = getString(Res.string.fallback_node_name) + "  $safeUserId"
         val defaultUser =
             MeshProtos.User.newBuilder()
                 .setId(userId)

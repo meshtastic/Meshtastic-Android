@@ -25,11 +25,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.detection_sensor
+import org.meshtastic.core.strings.detection_sensor_config
+import org.meshtastic.core.strings.detection_sensor_enabled
+import org.meshtastic.core.strings.detection_trigger_type
+import org.meshtastic.core.strings.friendly_name
+import org.meshtastic.core.strings.gpio_pin_to_monitor
+import org.meshtastic.core.strings.minimum_broadcast_seconds
+import org.meshtastic.core.strings.send_bell_with_alert_message
+import org.meshtastic.core.strings.state_broadcast_seconds
+import org.meshtastic.core.strings.use_input_pullup_mode
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -41,7 +52,6 @@ import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
