@@ -87,7 +87,8 @@ internal fun MessageItem(
     modifier =
     modifier
         .fillMaxWidth()
-        .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
+        .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background)
+        .padding(horizontal = 8.dp),
 ) {
     var showMessageActionsDialog by remember { mutableStateOf(false) }
     var showEmojiPickerDialog by remember { mutableStateOf(false) }
@@ -115,36 +116,23 @@ internal fun MessageItem(
 
     val containsBel = message.text.contains('\u0007')
     val containerColor =
-        Color(
-            if (message.fromLocal) {
-                ourNode.colors.second
-            } else {
-                node.colors.second
-            },
-        )
-            .copy(alpha = 0.2f)
+        Color(if (message.fromLocal) ourNode.colors.second else node.colors.second).copy(alpha = 0.2f)
+
     val cardColors =
         CardDefaults.cardColors()
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
-    val messageModifier =
-        Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+
+    Card(
+        modifier =
+        Modifier.fillMaxWidth(.9f)
+            .align(if (message.fromLocal) Alignment.End else Alignment.Start)
             .then(
                 if (containsBel) {
                     Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.medium)
                 } else {
                     Modifier
                 },
-            )
-
-    Card(
-        modifier =
-        Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
-            .padding(
-                top = 4.dp,
-                start = if (!message.fromLocal) 0.dp else 16.dp,
-                end = if (message.fromLocal) 0.dp else 16.dp,
-            )
-            .then(messageModifier),
+            ),
         colors = cardColors,
     ) {
         Column(

@@ -18,7 +18,9 @@
 package org.meshtastic.feature.messaging
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -174,7 +176,13 @@ internal fun MessageList(
     }
 
     val coroutineScope = rememberCoroutineScope()
-    LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        state = listState,
+        reverseLayout = true,
+        contentPadding = PaddingValues(vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         items(messages, key = { it.uuid }) { msg ->
             if (ourNode != null) {
                 val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
