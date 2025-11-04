@@ -187,11 +187,11 @@ internal fun MessageList(
                     message = msg,
                     selected = selected,
                     onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
-                    onLongClick = {
+                    onClickChip = onClickChip,
+                    onClickSelect = {
                         selectedIds.toggle(msg.uuid)
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
-                    onClickChip = onClickChip,
                     onStatusClick = { showStatusDialog = msg },
                     onReply = { onReply(msg) },
                     emojis = msg.emojis,

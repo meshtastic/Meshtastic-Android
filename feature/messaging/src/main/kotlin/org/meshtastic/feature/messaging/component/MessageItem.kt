@@ -41,6 +41,10 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,6 +63,7 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
+import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
 
@@ -75,8 +80,8 @@ internal fun MessageItem(
     onShowReactions: () -> Unit = {},
     emojis: List<Reaction> = emptyList(),
     onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
     onClickChip: (Node) -> Unit = {},
+    onClickSelect: () -> Unit = {},
     onStatusClick: () -> Unit = {},
     onNavigateToOriginalMessage: (Int) -> Unit = {},
 ) = Column(
@@ -85,6 +90,30 @@ internal fun MessageItem(
         .fillMaxWidth()
         .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
 ) {
+    var showMessageActionsDialog by remember { mutableStateOf(false) }
+    var showEmojiPickerDialog by remember { mutableStateOf(false) }
+
+    if (showMessageActionsDialog) {
+        MessageActionsDialog(
+            status = if (message.fromLocal) message.status else null,
+            onDismiss = { showMessageActionsDialog = false },
+            onClickReact = { showEmojiPickerDialog = true },
+            onClickReply = onReply,
+            onClickSelect = onClickSelect,
+            onClickStatus = onStatusClick,
+        )
+    }
+
+    if (showEmojiPickerDialog) {
+        EmojiPickerDialog(
+            onConfirm = { selectedEmoji ->
+                showEmojiPickerDialog = false
+                sendReaction(selectedEmoji)
+            },
+            onDismiss = { showEmojiPickerDialog = false },
+        )
+    }
+
     val containsBel = message.text.contains('\u0007')
     val containerColor =
         Color(
@@ -116,7 +145,7 @@ internal fun MessageItem(
                     start = if (!message.fromLocal) 0.dp else 16.dp,
                     end = if (message.fromLocal) 0.dp else 16.dp,
                 )
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                .combinedClickable(onClick = onClick, onLongClick = { showMessageActionsDialog = true })
                 .then(messageModifier),
             colors = cardColors,
         ) {
@@ -148,13 +177,6 @@ internal fun MessageItem(
                             modifier = Modifier.size(16.dp),
                         )
                     }
-                    MessageActions(
-                        isLocal = message.fromLocal,
-                        status = message.status,
-                        onSendReaction = sendReaction,
-                        onSendReply = onReply,
-                        onStatusClick = onStatusClick,
-                    )
                 }
 
                 Column(modifier = Modifier.padding(horizontal = 8.dp)) {
@@ -317,7 +339,7 @@ private fun MessageItemPreview() {
                 node = sent.node,
                 selected = false,
                 onClick = {},
-                onLongClick = {},
+                onClickSelect = {},
                 onStatusClick = {},
                 ourNode = sent.node,
             )
@@ -327,7 +349,7 @@ private fun MessageItemPreview() {
                 node = received.node,
                 selected = false,
                 onClick = {},
-                onLongClick = {},
+                onClickSelect = {},
                 onStatusClick = {},
                 ourNode = sent.node,
             )
@@ -337,7 +359,7 @@ private fun MessageItemPreview() {
                 node = receivedWithOriginalMessage.node,
                 selected = false,
                 onClick = {},
-                onLongClick = {},
+                onClickSelect = {},
                 onStatusClick = {},
                 ourNode = sent.node,
             )
