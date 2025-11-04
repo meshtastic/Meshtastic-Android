@@ -86,7 +86,6 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerInfoWindowComposable
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
-import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
 import kotlinx.coroutines.flow.map
@@ -162,15 +161,13 @@ fun MapView(
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
 
-    val cameraPositionState = rememberCameraPositionState {
-        position =
-            CameraPosition.fromLatLngZoom(
-                LatLng(
-                    ourNodeInfo?.position?.latitudeI?.times(DEG_D) ?: 0.0,
-                    ourNodeInfo?.position?.longitudeI?.times(DEG_D) ?: 0.0,
-                ),
-                7f,
-            )
+    val cameraPositionState = mapViewModel.cameraPositionState
+
+    // Save camera position when it stops moving
+    LaunchedEffect(cameraPositionState.isMoving) {
+        if (!cameraPositionState.isMoving) {
+            mapViewModel.saveCameraPosition(cameraPositionState.position)
+        }
     }
 
     // Location tracking functionality
@@ -221,6 +218,7 @@ fun MapView(
                     .build()
 
             try {
+                @Suppress("MissingPermission")
                 fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
                 Timber.d("Started location tracking")
             } catch (e: SecurityException) {
@@ -349,31 +347,6 @@ fun MapView(
                             longitudeI = (latLng.longitude / DEG_D).toInt()
                         }
                         editingWaypoint = newWaypoint
-                    }
-                },
-                onMapLoaded = {
-                    val pointsToBound: List<LatLng> =
-                        when {
-                            !nodeTracks.isNullOrEmpty() -> nodeTracks.map { it.toLatLng() }
-
-                            allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
-                                allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
-
-                            else -> emptyList()
-                        }
-
-                    if (pointsToBound.isNotEmpty()) {
-                        val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
-
-                        val padding = if (!pointsToBound.isEmpty()) 100 else 48
-
-                        try {
-                            coroutineScope.launch {
-                                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-                            }
-                        } catch (e: IllegalStateException) {
-                            Timber.w("MapView Could not animate to bounds: ${e.message}")
-                        }
                     }
                 },
             ) {
@@ -706,7 +679,7 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
     return speedText
 }
 
-private fun Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+internal fun Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
 
 private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
 
