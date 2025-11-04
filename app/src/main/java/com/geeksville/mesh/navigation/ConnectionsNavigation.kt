@@ -29,7 +29,6 @@ import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections]. */
@@ -55,14 +54,9 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController) {
                 onConfigNavigate = { route -> navController.navigate(route) },
             )
         }
-        configRoutes(navController)
-    }
-}
 
-private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
-    composable<SettingsRoutes.LoRa> { backStackEntry ->
-        val parentEntry =
-            remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
-        LoRaConfigScreen(viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry), navController::popBackStack)
+        navController.configComposable<SettingsRoutes.LoRa, ConnectionsRoutes.ConnectionsGraph> {
+            LoRaConfigScreen(viewModel = it, onBack = navController::popBackStack)
+        }
     }
 }

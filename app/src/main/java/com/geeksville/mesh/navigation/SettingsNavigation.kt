@@ -15,8 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.feature.settings.navigation
+@file:Suppress("Wrapping", "SpacingAroundColon")
 
+package com.geeksville.mesh.navigation
+
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
@@ -25,11 +28,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.navigation.Graph
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.feature.settings.SettingsScreen
 import org.meshtastic.feature.settings.debugging.DebugScreen
+import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseScreen
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.channel.ChannelConfigScreen
@@ -55,9 +61,7 @@ import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
-
-fun getNavRouteFrom(routeName: String): Route? =
-    ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route
+import kotlin.reflect.KClass
 
 @Suppress("LongMethod")
 fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
@@ -92,11 +96,10 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
         }
 
         ConfigRoute.entries.forEach { entry ->
-            composable(entry.route::class) { backStackEntry ->
-                val parentEntry =
-                    remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
-                val viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry)
-
+            navController.configComposable(
+                route = entry.route::class,
+                parentGraphRoute = SettingsRoutes.SettingsGraph::class,
+            ) { viewModel ->
                 when (entry) {
                     ConfigRoute.USER -> UserConfigScreen(viewModel, onBack = navController::popBackStack)
 
@@ -122,11 +125,10 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
         }
 
         ModuleRoute.entries.forEach { entry ->
-            composable(entry.route::class) { backStackEntry ->
-                val parentEntry =
-                    remember(backStackEntry) { navController.getBackStackEntry<SettingsRoutes.SettingsGraph>() }
-                val viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry)
-
+            navController.configComposable(
+                route = entry.route::class,
+                parentGraphRoute = SettingsRoutes.SettingsGraph::class,
+            ) { viewModel ->
                 when (entry) {
                     ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = navController::popBackStack)
 
@@ -170,5 +172,24 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
         ) {
             DebugScreen(onNavigateUp = navController::navigateUp)
         }
+    }
+}
+
+context(_: NavGraphBuilder)
+inline fun <reified R : Route, reified G : Graph> NavHostController.configComposable(
+    noinline content: @Composable (RadioConfigViewModel) -> Unit,
+) {
+    configComposable(route = R::class, parentGraphRoute = G::class, content = content)
+}
+
+context(navGraphBuilder: NavGraphBuilder)
+fun <R : Route, G : Graph> NavHostController.configComposable(
+    route: KClass<R>,
+    parentGraphRoute: KClass<G>,
+    content: @Composable (RadioConfigViewModel) -> Unit,
+) {
+    navGraphBuilder.composable(route = route) { backStackEntry ->
+        val parentEntry = remember(backStackEntry) { getBackStackEntry(parentGraphRoute) }
+        content(hiltViewModel(parentEntry))
     }
 }
