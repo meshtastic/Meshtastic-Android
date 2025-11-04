@@ -38,7 +38,7 @@ class ServiceStarter(appContext: Context, workerParams: WorkerParameters) : Work
         // Indicate whether the task finished successfully with the Result
         Result.success()
     } catch (ex: Exception) {
-        Timber.e("failure starting service, will retry", ex)
+        Timber.e(ex, "failure starting service, will retry")
         Result.retry()
     }
 }
