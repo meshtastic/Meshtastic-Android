@@ -72,7 +72,7 @@ fun MeshService.Companion.startService(context: Context) {
     // to Signal or whatever.
     Timber.i("Trying to start service debug=${BuildConfig.DEBUG}")
 
-    val intent = createIntent()
+    val intent = createIntent(context)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         try {
             context.startForegroundService(intent)

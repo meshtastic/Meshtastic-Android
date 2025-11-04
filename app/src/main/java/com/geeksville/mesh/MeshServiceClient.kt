@@ -111,6 +111,6 @@ constructor(
             Timber.e("Failed to start service from activity - but ignoring because bind will work: ${ex.message}")
         }
 
-        connect(activity, MeshService.createIntent(), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
+        connect(activity, MeshService.createIntent(activity), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
     }
 }
