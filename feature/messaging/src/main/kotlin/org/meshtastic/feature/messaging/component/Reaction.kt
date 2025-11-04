@@ -150,7 +150,6 @@ private fun ReactionItemPreview() {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             ReactionItem(emoji = "\uD83D\uDE42")
             ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
-            ReactionButton()
         }
     }
 }
