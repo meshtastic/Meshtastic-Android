@@ -39,7 +39,7 @@ fun NodeActionDialogs(
             title = Res.string.favorite,
             text =
             stringResource(
-                id = if (node.isFavorite) Res.string.favorite_remove else Res.string.favorite_add,
+                if (node.isFavorite) Res.string.favorite_remove else Res.string.favorite_add,
                 node.user.longName,
             ),
             onConfirm = {
@@ -54,7 +54,7 @@ fun NodeActionDialogs(
             title = Res.string.ignore,
             text =
             stringResource(
-                id = if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add,
+                if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add,
                 node.user.longName,
             ),
             onConfirm = {
