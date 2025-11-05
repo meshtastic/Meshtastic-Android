@@ -51,7 +51,7 @@ fun SimpleAlertDialog(
             modifier = Modifier.padding(horizontal = 16.dp),
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         ) {
-            Text(text = dismissText ?: stringResource(id = R.string.cancel))
+            Text(text = dismissText ?: stringResource(R.string.cancel))
         }
     },
     confirmButton = {
@@ -61,12 +61,12 @@ fun SimpleAlertDialog(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             ) {
-                Text(text = confirmText ?: stringResource(id = R.string.okay))
+                Text(text = confirmText ?: stringResource(R.string.okay))
             }
         }
     },
     title = {
-        Text(text = stringResource(id = title), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+        Text(text = stringResource(title), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
     },
     text = text,
     shape = RoundedCornerShape(16.dp),
@@ -82,9 +82,7 @@ fun SimpleAlertDialog(
     onConfirm = onConfirm,
     onDismiss = onDismiss,
     title = title,
-    text = {
-        Text(text = stringResource(id = text), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-    },
+    text = { Text(text = stringResource(text), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
 )
 
 @Composable

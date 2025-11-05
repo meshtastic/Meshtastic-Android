@@ -66,7 +66,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.mqtt),
+        title = stringResource(R.string.mqtt),
         onBack = onBack,
         configState = formState,
         enabled = state.connected && consentValid,

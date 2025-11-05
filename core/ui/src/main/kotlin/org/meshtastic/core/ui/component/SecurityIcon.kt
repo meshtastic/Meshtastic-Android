@@ -211,11 +211,11 @@ private fun determineSecurityState(
 @Composable
 fun SecurityIcon(
     securityState: SecurityState,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(R.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     var showHelpDialog by rememberSaveable { mutableStateOf(false) }
-    val fullContentDescription = baseContentDescription + " " + stringResource(id = securityState.descriptionResId)
+    val fullContentDescription = baseContentDescription + " " + stringResource(securityState.descriptionResId)
 
     IconButton(
         onClick = {
@@ -252,7 +252,7 @@ fun SecurityIcon(
     isLowEntropyKey: Boolean,
     isPreciseLocation: Boolean = false,
     isMqttEnabled: Boolean = false,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(R.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     val securityState = determineSecurityState(isLowEntropyKey, isPreciseLocation, isMqttEnabled)
@@ -285,7 +285,7 @@ val Channel.isMqttEnabled: Boolean
 @Composable
 fun SecurityIcon(
     channel: Channel,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(R.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) = SecurityIcon(
     isLowEntropyKey = channel.isLowEntropyKey,
@@ -305,7 +305,7 @@ fun SecurityIcon(
 fun SecurityIcon(
     channelSettings: ChannelSettings,
     loraConfig: LoRaConfig,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(R.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     val channel = Channel(channelSettings, loraConfig)
@@ -331,7 +331,7 @@ fun SecurityIcon(
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
     channelIndex: Int,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(R.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     channelSet.getChannel(channelIndex)?.let { channel ->
@@ -357,7 +357,7 @@ fun SecurityIcon(
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
     channelName: String,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(R.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     val channelByNameMap =

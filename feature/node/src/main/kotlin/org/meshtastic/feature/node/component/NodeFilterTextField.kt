@@ -114,7 +114,7 @@ fun NodeFilterTextField(
                     .padding(vertical = 16.dp, horizontal = 24.dp),
             ) {
                 Text(
-                    text = stringResource(id = R.string.node_filter_ignored),
+                    text = stringResource(R.string.node_filter_ignored),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth(),
@@ -135,20 +135,20 @@ private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Un
         value = filterText,
         placeholder = {
             Text(
-                text = stringResource(id = R.string.node_filter_placeholder),
+                text = stringResource(R.string.node_filter_placeholder),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35F),
             )
         },
         leadingIcon = {
-            Icon(Icons.Default.Search, contentDescription = stringResource(id = R.string.node_filter_placeholder))
+            Icon(Icons.Default.Search, contentDescription = stringResource(R.string.node_filter_placeholder))
         },
         onValueChange = onTextChange,
         trailingIcon = {
             if (filterText.isNotEmpty() || isFocused) {
                 Icon(
                     Icons.Default.Clear,
-                    contentDescription = stringResource(id = R.string.desc_node_filter_clear),
+                    contentDescription = stringResource(R.string.desc_node_filter_clear),
                     modifier =
                     Modifier.clickable {
                         onTextChange("")
@@ -192,7 +192,7 @@ private fun NodeSortButton(
 
         NodeSortOption.entries.forEach { sort ->
             DropdownMenuRadio(
-                text = stringResource(id = sort.stringRes),
+                text = stringResource(sort.stringRes),
                 selected = sort == currentSortOption,
                 onClick = { onSortSelect(sort) },
             )

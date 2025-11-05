@@ -50,20 +50,19 @@ internal fun FeatureRow(feature: FeatureUIData) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Icon(
             imageVector = feature.icon,
-            contentDescription =
-            feature.titleRes?.let { stringResource(id = it) } ?: stringResource(id = feature.subtitleRes),
+            contentDescription = feature.titleRes?.let { stringResource(it) } ?: stringResource(feature.subtitleRes),
             modifier = Modifier.padding(end = 16.dp),
             tint = MaterialTheme.colorScheme.primary,
         )
         Column {
             feature.titleRes?.let { titleRes ->
                 Text(
-                    text = stringResource(id = titleRes),
+                    text = stringResource(titleRes),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
             Text(
-                text = stringResource(id = feature.subtitleRes),
+                text = stringResource(feature.subtitleRes),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -85,8 +84,8 @@ internal fun Context.createClickableAnnotatedString(
     @StringRes linkTextRes: Int,
     tag: String,
 ): AnnotatedString {
-    val fullText = stringResource(id = fullTextRes)
-    val linkText = stringResource(id = linkTextRes)
+    val fullText = stringResource(fullTextRes)
+    val linkText = stringResource(linkTextRes)
     val startIndex = fullText.indexOf(linkText)
 
     return buildAnnotatedString {

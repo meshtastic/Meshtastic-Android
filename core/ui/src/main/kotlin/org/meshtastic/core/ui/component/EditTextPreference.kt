@@ -234,7 +234,7 @@ fun EditTextPreference(
                 {
                     Icon(
                         imageVector = Icons.TwoTone.Info,
-                        contentDescription = stringResource(id = R.string.error),
+                        contentDescription = stringResource(R.string.error),
                         tint = MaterialTheme.colorScheme.error,
                     )
                 }

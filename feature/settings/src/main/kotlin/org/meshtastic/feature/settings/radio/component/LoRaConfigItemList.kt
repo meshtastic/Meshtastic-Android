@@ -54,7 +54,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.lora),
+        title = stringResource(R.string.lora),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -69,7 +69,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(R.string.options)) {
                 DropDownPreference(
                     title = stringResource(R.string.region_frequency_plan),
-                    summary = stringResource(id = R.string.config_lora_region_summary),
+                    summary = stringResource(R.string.config_lora_region_summary),
                     enabled = state.connected,
                     items = RegionInfo.entries.map { it.regionCode to it.description },
                     selectedItem = formState.value.region,
@@ -87,7 +87,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 if (formState.value.usePreset) {
                     DropDownPreference(
                         title = stringResource(R.string.modem_preset),
-                        summary = stringResource(id = R.string.config_lora_modem_preset_summary),
+                        summary = stringResource(R.string.config_lora_modem_preset_summary),
                         enabled = state.connected && formState.value.usePreset,
                         items = ChannelOption.entries.map { it.modemPreset to stringResource(it.labelRes) },
                         selectedItem = formState.value.modemPreset,
@@ -150,7 +150,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val hopLimitItems = remember { hopLimits }
                 DropDownPreference(
                     title = stringResource(R.string.hop_limit),
-                    summary = stringResource(id = R.string.config_lora_hop_limit_summary),
+                    summary = stringResource(R.string.config_lora_hop_limit_summary),
                     items = hopLimitItems,
                     selectedItem = formState.value.hopLimit,
                     onItemSelected = { formState.value = formState.value.copy { hopLimit = it } },
@@ -160,7 +160,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 var isFocusedSlot by remember { mutableStateOf(false) }
                 EditTextPreference(
                     title = stringResource(R.string.frequency_slot),
-                    summary = stringResource(id = R.string.config_lora_frequency_slot_summary),
+                    summary = stringResource(R.string.config_lora_frequency_slot_summary),
                     value =
                     if (isFocusedSlot || formState.value.channelNum != 0) {
                         formState.value.channelNum

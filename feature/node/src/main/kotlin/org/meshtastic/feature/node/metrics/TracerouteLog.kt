@@ -185,11 +185,11 @@ private fun DeleteItem(onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(id = R.string.delete),
+                    contentDescription = stringResource(R.string.delete),
                     tint = MaterialTheme.colorScheme.error,
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(text = stringResource(id = R.string.delete), color = MaterialTheme.colorScheme.error)
+                Text(text = stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
             }
         },
     )
@@ -202,7 +202,7 @@ private fun TracerouteItem(icon: ImageVector, text: String, modifier: Modifier =
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(imageVector = icon, contentDescription = stringResource(id = R.string.traceroute))
+            Icon(imageVector = icon, contentDescription = stringResource(R.string.traceroute))
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = text, style = MaterialTheme.typography.bodyLarge)
         }

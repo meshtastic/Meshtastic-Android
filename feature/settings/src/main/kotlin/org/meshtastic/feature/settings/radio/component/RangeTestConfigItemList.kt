@@ -44,7 +44,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.range_test),
+        title = stringResource(R.string.range_test),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

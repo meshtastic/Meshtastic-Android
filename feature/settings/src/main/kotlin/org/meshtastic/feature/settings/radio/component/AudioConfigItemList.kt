@@ -44,7 +44,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.audio),
+        title = stringResource(R.string.audio),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

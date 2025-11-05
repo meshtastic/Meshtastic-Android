@@ -44,7 +44,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.bluetooth),
+        title = stringResource(R.string.bluetooth),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

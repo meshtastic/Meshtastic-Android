@@ -70,9 +70,9 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(imageVector = Icons.Default.Link, contentDescription = stringResource(id = R.string.view_release))
+                Icon(imageVector = Icons.Default.Link, contentDescription = stringResource(R.string.view_release))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(id = R.string.view_release))
+                Text(text = stringResource(R.string.view_release))
             }
             Button(
                 onClick = {
@@ -86,9 +86,9 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(imageVector = Icons.Default.Download, contentDescription = stringResource(id = R.string.download))
+                Icon(imageVector = Icons.Default.Download, contentDescription = stringResource(R.string.download))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(id = R.string.download))
+                Text(text = stringResource(R.string.download))
             }
         }
     }

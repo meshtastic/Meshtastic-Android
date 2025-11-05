@@ -53,7 +53,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.detection_sensor),
+        title = stringResource(R.string.detection_sensor),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

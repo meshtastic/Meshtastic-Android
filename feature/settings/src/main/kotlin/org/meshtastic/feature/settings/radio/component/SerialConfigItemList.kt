@@ -44,7 +44,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.serial),
+        title = stringResource(R.string.serial),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

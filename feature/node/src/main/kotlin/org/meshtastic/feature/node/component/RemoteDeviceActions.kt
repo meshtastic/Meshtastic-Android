@@ -33,7 +33,7 @@ import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction: (NodeDetailAction) -> Unit) {
     if (!node.isEffectivelyUnmessageable) {
         ListItem(
-            text = stringResource(id = R.string.direct_message),
+            text = stringResource(R.string.direct_message),
             leadingIcon = Icons.AutoMirrored.TwoTone.Message,
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
@@ -43,7 +43,7 @@ internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction
     }
 
     ListItem(
-        text = stringResource(id = R.string.exchange_userinfo),
+        text = stringResource(R.string.exchange_userinfo),
         leadingIcon = Icons.Default.Person,
         trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },

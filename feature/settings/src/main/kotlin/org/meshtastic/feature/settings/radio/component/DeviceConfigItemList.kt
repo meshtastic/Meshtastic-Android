@@ -132,7 +132,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     RadioConfigScreenList(
-        title = stringResource(id = R.string.device),
+        title = stringResource(R.string.device),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -150,7 +150,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     enabled = state.connected,
                     selectedItem = formState.value.role,
                     onItemSelected = { selectedRole = it },
-                    summary = stringResource(id = formState.value.role.description),
+                    summary = stringResource(formState.value.role.description),
                 )
 
                 HorizontalDivider()
@@ -160,7 +160,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     enabled = state.connected,
                     selectedItem = formState.value.rebroadcastMode,
                     onItemSelected = { formState.value = formState.value.copy { rebroadcastMode = it } },
-                    summary = stringResource(id = formState.value.rebroadcastMode.description),
+                    summary = stringResource(formState.value.rebroadcastMode.description),
                 )
 
                 HorizontalDivider()
@@ -180,7 +180,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
             TitledCard(title = stringResource(R.string.hardware)) {
                 SwitchPreference(
                     title = stringResource(R.string.double_tap_as_button_press),
-                    summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
+                    summary = stringResource(R.string.config_device_doubleTapAsButtonPress_summary),
                     checked = formState.value.doubleTapAsButtonPress,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { doubleTapAsButtonPress = it } },
@@ -191,7 +191,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
 
                 SwitchPreference(
                     title = stringResource(R.string.triple_click_adhoc_ping),
-                    summary = stringResource(id = R.string.config_device_tripleClickAsAdHocPing_summary),
+                    summary = stringResource(R.string.config_device_tripleClickAsAdHocPing_summary),
                     checked = !formState.value.disableTripleClick,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { disableTripleClick = !it } },
@@ -202,7 +202,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
 
                 SwitchPreference(
                     title = stringResource(R.string.led_heartbeat),
-                    summary = stringResource(id = R.string.config_device_ledHeartbeatEnabled_summary),
+                    summary = stringResource(R.string.config_device_ledHeartbeatEnabled_summary),
                     checked = !formState.value.ledHeartbeatDisabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { ledHeartbeatDisabled = !it } },
@@ -230,7 +230,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 EditTextPreference(
                     title = "",
                     value = formState.value.tzdef,
-                    summary = stringResource(id = R.string.config_device_tzdef_summary),
+                    summary = stringResource(R.string.config_device_tzdef_summary),
                     maxSize = 64, // tzdef max_size:65
                     enabled = state.connected,
                     isError = false,

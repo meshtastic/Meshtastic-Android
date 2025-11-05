@@ -123,7 +123,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
 
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
-        title = stringResource(id = R.string.security),
+        title = stringResource(R.string.security),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -138,7 +138,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             TitledCard(title = stringResource(R.string.direct_message_key)) {
                 EditBase64Preference(
                     title = stringResource(R.string.public_key),
-                    summary = stringResource(id = R.string.config_security_public_key),
+                    summary = stringResource(R.string.config_security_public_key),
                     value = publicKey,
                     enabled = state.connected,
                     readOnly = true,
@@ -153,7 +153,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 HorizontalDivider()
                 EditBase64Preference(
                     title = stringResource(R.string.private_key),
-                    summary = stringResource(id = R.string.config_security_private_key),
+                    summary = stringResource(R.string.config_security_private_key),
                     value = formState.value.privateKey,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -186,7 +186,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             TitledCard(title = stringResource(R.string.admin_keys)) {
                 EditListPreference(
                     title = stringResource(R.string.admin_key),
-                    summary = stringResource(id = R.string.config_security_admin_key),
+                    summary = stringResource(R.string.config_security_admin_key),
                     list = formState.value.adminKeyList,
                     maxCount = 3,
                     enabled = state.connected,
@@ -205,7 +205,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             TitledCard(title = stringResource(R.string.logs)) {
                 SwitchPreference(
                     title = stringResource(R.string.serial_console),
-                    summary = stringResource(id = R.string.config_security_serial_enabled),
+                    summary = stringResource(R.string.config_security_serial_enabled),
                     checked = formState.value.serialEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { serialEnabled = it } },
@@ -214,7 +214,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.debug_log_api_enabled),
-                    summary = stringResource(id = R.string.config_security_debug_log_api_enabled),
+                    summary = stringResource(R.string.config_security_debug_log_api_enabled),
                     checked = formState.value.debugLogApiEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { debugLogApiEnabled = it } },
@@ -226,7 +226,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             TitledCard(title = stringResource(R.string.administration)) {
                 SwitchPreference(
                     title = stringResource(R.string.managed_mode),
-                    summary = stringResource(id = R.string.config_security_is_managed),
+                    summary = stringResource(R.string.config_security_is_managed),
                     checked = formState.value.isManaged,
                     enabled = state.connected && formState.value.adminKeyCount > 0,
                     onCheckedChange = { formState.value = formState.value.copy { isManaged = it } },

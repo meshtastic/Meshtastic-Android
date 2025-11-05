@@ -76,7 +76,7 @@ fun PositionSection(
 
         // Exchange position action
         ListItem(
-            text = stringResource(id = R.string.exchange_position),
+            text = stringResource(R.string.exchange_position),
             leadingIcon = Icons.Default.LocationOn,
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },

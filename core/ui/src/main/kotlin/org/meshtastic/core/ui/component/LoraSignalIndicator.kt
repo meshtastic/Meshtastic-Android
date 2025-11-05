@@ -142,7 +142,7 @@ fun Snr(snr: Float) {
         }
 
     Text(
-        text = "%s %.2fdB".format(stringResource(id = R.string.snr), snr),
+        text = "%s %.2fdB".format(stringResource(R.string.snr), snr),
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )
@@ -159,7 +159,7 @@ fun Rssi(rssi: Int) {
             Quality.BAD.color.invoke()
         }
     Text(
-        text = "%s %ddBm".format(stringResource(id = R.string.rssi), rssi),
+        text = "%s %ddBm".format(stringResource(R.string.rssi), rssi),
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )

@@ -222,7 +222,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     Text(text = annotateTraceroute(response))
                 }
             },
-            dismissText = stringResource(id = R.string.okay),
+            dismissText = stringResource(R.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
         )
     }
@@ -283,7 +283,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                                                 ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
                                             }
                                         } else {
-                                            stringResource(id = destination.label)
+                                            stringResource(destination.label)
                                         },
                                     )
                                 }
@@ -347,7 +347,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                                 ) {
                                     Icon(
                                         imageVector = destination.icon,
-                                        contentDescription = stringResource(id = destination.label),
+                                        contentDescription = stringResource(destination.label),
                                         tint = LocalContentColor.current,
                                     )
                                 }
@@ -357,7 +357,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     selected = isSelected,
                     label = {
                         if (navSuiteType != NavigationSuiteType.ShortNavigationBarCompact) {
-                            Text(stringResource(id = destination.label))
+                            Text(stringResource(destination.label))
                         }
                     },
                     onClick = {

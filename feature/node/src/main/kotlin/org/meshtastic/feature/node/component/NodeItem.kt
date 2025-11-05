@@ -74,7 +74,7 @@ fun NodeItem(
 ) {
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isIgnored = thatNode.isIgnored
-    val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
+    val longName = thatNode.user.longName.ifEmpty { stringResource(R.string.unknown_username) }
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
@@ -165,7 +165,7 @@ fun NodeItem(
                         ElevationInfo(
                             altitude = position.altitude,
                             system = system,
-                            suffix = stringResource(id = R.string.elevation_suffix),
+                            suffix = stringResource(R.string.elevation_suffix),
                             contentColor = contentColor,
                         )
                         val satCount = position.satsInView

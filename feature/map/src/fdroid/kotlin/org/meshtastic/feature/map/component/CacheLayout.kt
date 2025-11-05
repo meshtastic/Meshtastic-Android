@@ -55,7 +55,7 @@ fun CacheLayout(
             .padding(8.dp),
     ) {
         Text(
-            text = stringResource(id = R.string.map_select_download_region),
+            text = stringResource(R.string.map_select_download_region),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall,
@@ -75,13 +75,10 @@ fun CacheLayout(
             horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         ) {
             Button(onClick = onCancelDownload, modifier = Modifier.weight(1f)) {
-                Text(text = stringResource(id = R.string.cancel), color = MaterialTheme.colorScheme.onPrimary)
+                Text(text = stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onPrimary)
             }
             Button(onClick = onExecuteJob, modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(id = R.string.map_start_download),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
+                Text(text = stringResource(R.string.map_start_download), color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }

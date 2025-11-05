@@ -49,7 +49,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.telemetry),
+        title = stringResource(R.string.telemetry),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

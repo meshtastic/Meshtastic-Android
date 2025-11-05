@@ -191,9 +191,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                     shape = RoundedCornerShape(16.dp),
                     text = { IAQScale() },
                     confirmButton = {
-                        TextButton(onClick = { isLegendOpen = false }) {
-                            Text(text = stringResource(id = R.string.close))
-                        }
+                        TextButton(onClick = { isLegendOpen = false }) { Text(text = stringResource(R.string.close)) }
                     },
                 )
             }

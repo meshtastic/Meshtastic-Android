@@ -98,7 +98,7 @@ fun QuickChatScreen(
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(id = R.string.quick_chat),
+                title = stringResource(R.string.quick_chat),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -137,7 +137,7 @@ fun QuickChatScreen(
                 onClick = { showActionDialog = QuickChatAction(position = actions.size) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add))
+                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.add))
             }
         }
     }
@@ -180,7 +180,7 @@ private fun EditQuickChatDialog(
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = stringResource(id = title),
+                    text = stringResource(title),
                     modifier = Modifier.fillMaxWidth(),
                     style =
                     MaterialTheme.typography.titleLarge.copy(
@@ -204,7 +204,7 @@ private fun EditQuickChatDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextFieldWithCounter(
-                    label = stringResource(id = R.string.message),
+                    label = stringResource(R.string.message),
                     value = actionInput.message,
                     maxSize = 200,
                     getSize = { it.toByteArray().size + 1 },
@@ -227,7 +227,7 @@ private fun EditQuickChatDialog(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (isInstant) {
-                        Icon(imageVector = icon, contentDescription = stringResource(id = text))
+                        Icon(imageVector = icon, contentDescription = stringResource(text))
                         Spacer(Modifier.width(12.dp))
                     }
 
@@ -328,7 +328,7 @@ private fun QuickChatItem(
                 if (action.mode == QuickChatAction.Mode.Instant) {
                     Icon(
                         imageVector = Icons.Default.FastForward,
-                        contentDescription = stringResource(id = R.string.quick_chat_instant),
+                        contentDescription = stringResource(R.string.quick_chat_instant),
                     )
                 }
             },
@@ -339,12 +339,12 @@ private fun QuickChatItem(
                     IconButton(onClick = { onEdit(action) }, modifier = Modifier.size(48.dp)) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.quick_chat_edit),
+                            contentDescription = stringResource(R.string.quick_chat_edit),
                         )
                     }
                     Icon(
                         imageVector = Icons.Default.DragHandle,
-                        contentDescription = stringResource(id = R.string.quick_chat),
+                        contentDescription = stringResource(R.string.quick_chat),
                     )
                 }
             },

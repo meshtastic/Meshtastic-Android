@@ -52,7 +52,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.user),
+        title = stringResource(R.string.user),
         onBack = onBack,
         configState = formState,
         enabled = state.connected && validNames,

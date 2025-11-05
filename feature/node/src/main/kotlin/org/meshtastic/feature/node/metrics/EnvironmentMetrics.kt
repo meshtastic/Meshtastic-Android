@@ -140,7 +140,7 @@ private fun TemperatureDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, e
         if (!temperature.isNaN()) {
             val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
             Text(
-                text = textFormat.format(stringResource(id = R.string.temperature), temperature),
+                text = textFormat.format(stringResource(R.string.temperature), temperature),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
             )
@@ -161,7 +161,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.Env
             if (hasHumidity) {
                 val humidity = envMetrics.relativeHumidity!!
                 Text(
-                    text = "%s %.2f%%".format(stringResource(id = R.string.humidity), humidity),
+                    text = "%s %.2f%%".format(stringResource(R.string.humidity), humidity),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     modifier = Modifier.padding(vertical = 0.dp),

@@ -241,8 +241,8 @@ fun ChannelScreen(
                 channelSet = channels // throw away any edits
                 showResetDialog = false
             },
-            title = { Text(text = stringResource(id = R.string.reset_to_defaults)) },
-            text = { Text(text = stringResource(id = R.string.are_you_sure_change_default)) },
+            title = { Text(text = stringResource(R.string.reset_to_defaults)) },
+            text = { Text(text = stringResource(R.string.are_you_sure_change_default)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -257,7 +257,7 @@ fun ChannelScreen(
                         showResetDialog = false
                     },
                 ) {
-                    Text(text = stringResource(id = R.string.apply))
+                    Text(text = stringResource(R.string.apply))
                 }
             },
             dismissButton = {
@@ -267,7 +267,7 @@ fun ChannelScreen(
                         showResetDialog = false
                     },
                 ) {
-                    Text(text = stringResource(id = R.string.cancel))
+                    Text(text = stringResource(R.string.cancel))
                 }
             },
         )

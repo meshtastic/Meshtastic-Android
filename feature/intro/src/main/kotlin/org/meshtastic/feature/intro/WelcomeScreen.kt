@@ -75,7 +75,7 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
                 onSkip = {}, // No skip on welcome
                 onConfigure = onGetStarted,
                 skipButtonText = "", // Not shown
-                configureButtonText = stringResource(id = R.string.get_started),
+                configureButtonText = stringResource(R.string.get_started),
                 showSkipButton = false, // Explicitly hide skip for welcome
             )
         },

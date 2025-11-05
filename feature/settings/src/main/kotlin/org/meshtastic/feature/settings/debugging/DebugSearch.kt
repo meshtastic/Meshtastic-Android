@@ -188,7 +188,7 @@ internal fun DebugSearchState(
                 IconButton(onClick = onExport, modifier = Modifier) {
                     Icon(
                         imageVector = Icons.Outlined.FileDownload,
-                        contentDescription = stringResource(id = R.string.debug_logs_export),
+                        contentDescription = stringResource(R.string.debug_logs_export),
                         modifier = Modifier.size(24.dp),
                     )
                 }
