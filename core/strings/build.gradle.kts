@@ -14,7 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+import com.android.build.api.dsl.androidLibrary
 
-plugins { alias(libs.plugins.meshtastic.android.library) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.compose.multiplatform)
+}
 
-android { namespace = "org.meshtastic.core.strings" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    androidLibrary {
+        namespace = "org.meshtastic.core.strings"
+        androidResources.enable = true
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            // API because consuming modules will always need this dependency
+            api(compose.components.resources)
+        }
+    }
+}
+
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "org.meshtastic.core.strings"
+}
