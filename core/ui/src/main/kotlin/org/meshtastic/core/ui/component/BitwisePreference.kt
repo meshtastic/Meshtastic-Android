@@ -38,7 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,9 +90,9 @@ fun BitwisePreference(
             }
             PreferenceFooter(
                 enabled = enabled,
-                negativeText = R.string.clear,
+                negativeText = Res.string.clear,
                 onNegativeClicked = { onItemSelected(0) },
-                positiveText = R.string.close,
+                positiveText = Res.string.close,
                 onPositiveClicked = { expanded = false },
             )
         }

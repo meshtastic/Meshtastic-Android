@@ -35,85 +35,85 @@ import androidx.compose.material.icons.filled.Usb
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.strings.R
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos.DeviceMetadata
+import org.meshtastic.core.strings.R as Res
 
 enum class ModuleRoute(@StringRes val title: Int, val route: Route, val icon: ImageVector?, val type: Int = 0) {
     MQTT(
-        R.string.mqtt,
+        Res.string.mqtt,
         SettingsRoutes.MQTT,
         Icons.Default.Cloud,
         AdminProtos.AdminMessage.ModuleConfigType.MQTT_CONFIG_VALUE,
     ),
     SERIAL(
-        R.string.serial,
+        Res.string.serial,
         SettingsRoutes.Serial,
         Icons.Default.Usb,
         AdminProtos.AdminMessage.ModuleConfigType.SERIAL_CONFIG_VALUE,
     ),
     EXT_NOTIFICATION(
-        R.string.external_notification,
+        Res.string.external_notification,
         SettingsRoutes.ExtNotification,
         Icons.Default.Notifications,
         AdminProtos.AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG_VALUE,
     ),
     STORE_FORWARD(
-        R.string.store_forward,
+        Res.string.store_forward,
         SettingsRoutes.StoreForward,
         Icons.AutoMirrored.Default.Forward,
         AdminProtos.AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG_VALUE,
     ),
     RANGE_TEST(
-        R.string.range_test,
+        Res.string.range_test,
         SettingsRoutes.RangeTest,
         Icons.Default.Speed,
         AdminProtos.AdminMessage.ModuleConfigType.RANGETEST_CONFIG_VALUE,
     ),
     TELEMETRY(
-        R.string.telemetry,
+        Res.string.telemetry,
         SettingsRoutes.Telemetry,
         Icons.Default.DataUsage,
         AdminProtos.AdminMessage.ModuleConfigType.TELEMETRY_CONFIG_VALUE,
     ),
     CANNED_MESSAGE(
-        R.string.canned_message,
+        Res.string.canned_message,
         SettingsRoutes.CannedMessage,
         Icons.AutoMirrored.Default.Message,
         AdminProtos.AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG_VALUE,
     ),
     AUDIO(
-        R.string.audio,
+        Res.string.audio,
         SettingsRoutes.Audio,
         Icons.AutoMirrored.Default.VolumeUp,
         AdminProtos.AdminMessage.ModuleConfigType.AUDIO_CONFIG_VALUE,
     ),
     REMOTE_HARDWARE(
-        R.string.remote_hardware,
+        Res.string.remote_hardware,
         SettingsRoutes.RemoteHardware,
         Icons.Default.SettingsRemote,
         AdminProtos.AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG_VALUE,
     ),
     NEIGHBOR_INFO(
-        R.string.neighbor_info,
+        Res.string.neighbor_info,
         SettingsRoutes.NeighborInfo,
         Icons.Default.People,
         AdminProtos.AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG_VALUE,
     ),
     AMBIENT_LIGHTING(
-        R.string.ambient_lighting,
+        Res.string.ambient_lighting,
         SettingsRoutes.AmbientLighting,
         Icons.Default.LightMode,
         AdminProtos.AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG_VALUE,
     ),
     DETECTION_SENSOR(
-        R.string.detection_sensor,
+        Res.string.detection_sensor,
         SettingsRoutes.DetectionSensor,
         Icons.Default.Sensors,
         AdminProtos.AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG_VALUE,
     ),
     PAXCOUNTER(
-        R.string.paxcounter,
+        Res.string.paxcounter,
         SettingsRoutes.Paxcounter,
         Icons.Default.PermScanWifi,
         AdminProtos.AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG_VALUE,

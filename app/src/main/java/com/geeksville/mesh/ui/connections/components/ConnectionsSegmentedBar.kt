@@ -34,8 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ui.connections.DeviceType
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LambdaParameterEventTrailing")
 @Composable
@@ -59,9 +59,9 @@ fun ConnectionsSegmentedBar(
 }
 
 private enum class Item(val imageVector: ImageVector, @StringRes val textRes: Int, val deviceType: DeviceType) {
-    BLUETOOTH(imageVector = Icons.Rounded.Bluetooth, textRes = R.string.bluetooth, deviceType = DeviceType.BLE),
-    NETWORK(imageVector = Icons.Rounded.Wifi, textRes = R.string.network, deviceType = DeviceType.TCP),
-    SERIAL(imageVector = Icons.Rounded.Usb, textRes = R.string.serial, deviceType = DeviceType.USB),
+    BLUETOOTH(imageVector = Icons.Rounded.Bluetooth, textRes = Res.string.bluetooth, deviceType = DeviceType.BLE),
+    NETWORK(imageVector = Icons.Rounded.Wifi, textRes = Res.string.network, deviceType = DeviceType.TCP),
+    SERIAL(imageVector = Icons.Rounded.Usb, textRes = Res.string.serial, deviceType = DeviceType.USB),
 }
 
 @Preview(showBackground = true)

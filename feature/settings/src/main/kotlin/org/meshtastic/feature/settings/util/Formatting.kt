@@ -18,9 +18,10 @@
 package org.meshtastic.feature.settings.util
 
 import android.content.Context
+import org.meshtastic.core.strings.R as Res
 
 fun FixedUpdateIntervals.toDisplayString(context: Context): String = if (this == FixedUpdateIntervals.UNSET) {
-    context.getString(org.meshtastic.core.strings.R.string.unset)
+    context.getString(Res.string.unset)
 } else {
     name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 }

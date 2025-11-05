@@ -44,7 +44,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun SignedIntegerEditTextPreference(
@@ -234,7 +234,7 @@ fun EditTextPreference(
                 {
                     Icon(
                         imageVector = Icons.TwoTone.Info,
-                        contentDescription = stringResource(id = R.string.error),
+                        contentDescription = stringResource(Res.string.error),
                         tint = MaterialTheme.colorScheme.error,
                     )
                 }

@@ -28,12 +28,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.R
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.channelSettings
 import org.meshtastic.proto.copy
+import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class ScannedQrCodeDialogTest {
@@ -82,7 +82,7 @@ class ScannedQrCodeDialogTest {
             testScannedQrCodeDialog()
 
             // Verify that the dialog title is displayed
-            onNodeWithText(getString(R.string.new_channel_rcvd)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.new_channel_rcvd)).assertIsDisplayed()
         }
     }
 
@@ -92,8 +92,8 @@ class ScannedQrCodeDialogTest {
             testScannedQrCodeDialog()
 
             // Verify that the "Add" and "Replace" buttons are displayed
-            onNodeWithText(getString(R.string.add)).assertIsDisplayed()
-            onNodeWithText(getString(R.string.replace)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.add)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.replace)).assertIsDisplayed()
         }
     }
 
@@ -103,8 +103,8 @@ class ScannedQrCodeDialogTest {
             testScannedQrCodeDialog()
 
             // Verify the "Cancel" and "Accept" buttons are displayed
-            onNodeWithText(getString(R.string.cancel)).assertIsDisplayed()
-            onNodeWithText(getString(R.string.accept)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.cancel)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.accept)).assertIsDisplayed()
         }
     }
 
@@ -115,7 +115,7 @@ class ScannedQrCodeDialogTest {
             testScannedQrCodeDialog(onDismiss = { onDismissClicked = true })
 
             // Click the "Cancel" button
-            onNodeWithText(getString(R.string.cancel)).performClick()
+            onNodeWithText(getString(Res.string.cancel)).performClick()
         }
 
         // Verify onDismiss is called
@@ -129,7 +129,7 @@ class ScannedQrCodeDialogTest {
             testScannedQrCodeDialog(onConfirm = { actualChannelSet = it })
 
             // Click the "Accept" button
-            onNodeWithText(getString(R.string.accept)).performClick()
+            onNodeWithText(getString(Res.string.accept)).performClick()
         }
 
         // Verify onConfirm is called with the correct ChannelSet
@@ -143,8 +143,8 @@ class ScannedQrCodeDialogTest {
             testScannedQrCodeDialog(onConfirm = { actualChannelSet = it })
 
             // Click the "Add" button then the "Accept" button
-            onNodeWithText(getString(R.string.add)).performClick()
-            onNodeWithText(getString(R.string.accept)).performClick()
+            onNodeWithText(getString(Res.string.add)).performClick()
+            onNodeWithText(getString(Res.string.accept)).performClick()
         }
 
         // Verify onConfirm is called with the correct ChannelSet

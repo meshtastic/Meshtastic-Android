@@ -52,12 +52,12 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.copy
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun ScannedQrCodeDialog(
@@ -189,7 +189,7 @@ fun ScannedQrCodeDialog(
             ) {
                 item {
                     Text(
-                        text = stringResource(id = R.string.new_channel_rcvd),
+                        text = stringResource(Res.string.new_channel_rcvd),
                         modifier = Modifier.padding(20.dp),
                         style = MaterialTheme.typography.titleLarge,
                     )
@@ -239,7 +239,7 @@ fun ScannedQrCodeDialog(
                             modifier = Modifier.height(48.dp).weight(1f),
                             colors = if (!shouldReplace) selectedColors else unselectedColors,
                         ) {
-                            Text(text = stringResource(R.string.add))
+                            Text(text = stringResource(Res.string.add))
                         }
 
                         OutlinedButton(
@@ -248,7 +248,7 @@ fun ScannedQrCodeDialog(
                             enabled = incoming.hasLoraConfig(),
                             colors = if (shouldReplace) selectedColors else unselectedColors,
                         ) {
-                            Text(text = stringResource(R.string.replace))
+                            Text(text = stringResource(Res.string.replace))
                         }
                     }
                 }
@@ -261,7 +261,7 @@ fun ScannedQrCodeDialog(
                     ) {
                         TextButton(onClick = { onDismiss() }) {
                             Text(
-                                text = stringResource(id = R.string.cancel),
+                                text = stringResource(Res.string.cancel),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
@@ -277,7 +277,7 @@ fun ScannedQrCodeDialog(
                             enabled = selectedChannelSet.settingsCount in 1..8,
                         ) {
                             Text(
-                                text = stringResource(id = R.string.accept),
+                                text = stringResource(Res.string.accept),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,

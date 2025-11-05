@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.settings.util
 
-import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -32,10 +31,5 @@ sealed class UiText {
     fun asString(): String = when (this) {
         is DynamicString -> value
         is StringResource -> stringResource(resId, *args)
-    }
-
-    fun asString(context: Context): String = when (this) {
-        is DynamicString -> value
-        is StringResource -> context.getString(resId, *args)
     }
 }

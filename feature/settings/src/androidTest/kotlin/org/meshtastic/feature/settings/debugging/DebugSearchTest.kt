@@ -36,10 +36,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchMatch
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState
+import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class DebugSearchTest {
@@ -49,7 +49,7 @@ class DebugSearchTest {
     @Test
     fun debugSearchBar_showsPlaceholder() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val placeholder = context.getString(R.string.debug_default_search)
+        val placeholder = context.getString(Res.string.debug_default_search)
         composeTestRule.setContent {
             DebugSearchBar(
                 searchState = SearchState(),
@@ -65,7 +65,7 @@ class DebugSearchTest {
     @Test
     fun debugSearchBar_showsClearButtonWhenTextEntered() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val placeholder = context.getString(R.string.debug_default_search)
+        val placeholder = context.getString(Res.string.debug_default_search)
         composeTestRule.setContent {
             var searchText by remember { mutableStateOf("test") }
             DebugSearchBar(
@@ -113,7 +113,7 @@ class DebugSearchTest {
     @Test
     fun debugFilterBar_showsFilterButtonAndMenu() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val filterLabel = context.getString(R.string.debug_filters)
+        val filterLabel = context.getString(Res.string.debug_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf<String>()) }
             var customFilterText by remember { mutableStateOf("") }
@@ -143,7 +143,7 @@ class DebugSearchTest {
     @Test
     fun debugFilterBar_addCustomFilter_displaysActiveFilter() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val activeFiltersLabel = context.getString(R.string.debug_active_filters)
+        val activeFiltersLabel = context.getString(Res.string.debug_active_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf<String>()) }
             var customFilterText by remember { mutableStateOf("") }
@@ -173,7 +173,7 @@ class DebugSearchTest {
     @Test
     fun debugActiveFilters_clearAllFilters_removesFilters() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val activeFiltersLabel = context.getString(R.string.debug_active_filters)
+        val activeFiltersLabel = context.getString(Res.string.debug_active_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf("A", "B")) }
             DebugActiveFilters(

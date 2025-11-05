@@ -57,9 +57,9 @@ import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DeliveryInfo(
@@ -73,19 +73,19 @@ fun DeliveryInfo(
     onDismissRequest = onDismiss,
     dismissButton = {
         FilledTonalButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = stringResource(id = R.string.close))
+            Text(text = stringResource(Res.string.close))
         }
     },
     confirmButton = {
         if (resendOption) {
             FilledTonalButton(onClick = onConfirm, modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(text = stringResource(id = R.string.resend))
+                Text(text = stringResource(Res.string.resend))
             }
         }
     },
     title = {
         Text(
-            text = stringResource(id = title),
+            text = stringResource(title),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall,
@@ -95,14 +95,14 @@ fun DeliveryInfo(
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             text?.let {
                 Text(
-                    text = stringResource(id = it),
+                    text = stringResource(it),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
             relayNodeName?.let {
                 Text(
-                    text = stringResource(R.string.relayed_by, it),
+                    text = stringResource(Res.string.relayed_by, it),
                     modifier = Modifier.padding(top = 8.dp),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,

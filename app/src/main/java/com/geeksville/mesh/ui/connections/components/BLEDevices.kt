@@ -52,8 +52,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.strings.R as Res
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth
@@ -118,12 +118,12 @@ fun BLEDevices(
                     val context = LocalContext.current
                     EmptyStateContent(
                         imageVector = Icons.Rounded.BluetoothDisabled,
-                        text = stringResource(R.string.bluetooth_disabled),
+                        text = stringResource(Res.string.bluetooth_disabled),
                         actionButton = {
                             val intent = Intent(ACTION_BLUETOOTH_SETTINGS)
                             if (intent.resolveActivity(context.packageManager) != null) {
                                 Button(onClick = { settingsLauncher.launch(intent) }) {
-                                    Text(text = stringResource(R.string.open_settings))
+                                    Text(text = stringResource(Res.string.open_settings))
                                 }
                             }
                         },
@@ -142,9 +142,9 @@ fun BLEDevices(
                                 Row(modifier = Modifier.alpha(if (isScanning) 0f else 1f)) {
                                     Icon(
                                         imageVector = Icons.Rounded.Search,
-                                        contentDescription = stringResource(R.string.scan),
+                                        contentDescription = stringResource(Res.string.scan),
                                     )
-                                    Text(stringResource(R.string.scan))
+                                    Text(stringResource(Res.string.scan))
                                 }
 
                                 if (isScanning) {
@@ -159,22 +159,22 @@ fun BLEDevices(
                             imageVector = Icons.Rounded.BluetoothDisabled,
                             text =
                             if (isScanning) {
-                                stringResource(R.string.scanning_bluetooth)
+                                stringResource(Res.string.scanning_bluetooth)
                             } else {
-                                stringResource(R.string.no_ble_devices)
+                                stringResource(Res.string.no_ble_devices)
                             },
                             actionButton = scanButton,
                         )
                     } else {
                         bondedDevices.Section(
-                            title = stringResource(R.string.bluetooth_paired_devices),
+                            title = stringResource(Res.string.bluetooth_paired_devices),
                             connectionState = connectionState,
                             selectedDevice = selectedDevice,
                             onSelect = scanModel::onSelected,
                         )
 
                         availableDevices.Section(
-                            title = stringResource(R.string.bluetooth_available_devices),
+                            title = stringResource(Res.string.bluetooth_available_devices),
                             connectionState = connectionState,
                             selectedDevice = selectedDevice,
                             onSelect = scanModel::onSelected,
@@ -189,13 +189,13 @@ fun BLEDevices(
             EmptyStateContent(
                 text =
                 if (permissionsState.shouldShowRationale) {
-                    stringResource(R.string.permission_missing)
+                    stringResource(Res.string.permission_missing)
                 } else {
-                    stringResource(R.string.permission_missing_31)
+                    stringResource(Res.string.permission_missing_31)
                 },
                 actionButton = {
                     Button(onClick = { checkPermissionsAndScan(permissionsState, scanModel, bluetoothEnabled) }) {
-                        Text(text = stringResource(R.string.grant_permissions))
+                        Text(text = stringResource(Res.string.grant_permissions))
                     }
                 },
             )

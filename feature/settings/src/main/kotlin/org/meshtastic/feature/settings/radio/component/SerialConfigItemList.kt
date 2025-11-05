@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -35,6 +34,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig.SerialConfig
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
@@ -44,7 +44,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.serial),
+        title = stringResource(Res.string.serial),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -56,9 +56,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.serial_config)) {
+            TitledCard(title = stringResource(Res.string.serial_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.serial_enabled),
+                    title = stringResource(Res.string.serial_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
@@ -66,7 +66,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.echo_enabled),
+                    title = stringResource(Res.string.echo_enabled),
                     checked = formState.value.echo,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { echo = it } },
@@ -90,7 +90,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.serial_baud_rate),
+                    title = stringResource(Res.string.serial_baud_rate),
                     enabled = state.connected,
                     items =
                     SerialConfig.Serial_Baud.entries
@@ -101,7 +101,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.timeout),
+                    title = stringResource(Res.string.timeout),
                     value = formState.value.timeout,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -109,7 +109,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.serial_mode),
+                    title = stringResource(Res.string.serial_mode),
                     enabled = state.connected,
                     items =
                     SerialConfig.Serial_Mode.entries
@@ -120,7 +120,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.override_console_serial_port),
+                    title = stringResource(Res.string.override_console_serial_port),
                     checked = formState.value.overrideConsoleSerialPort,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { overrideConsoleSerialPort = it } },

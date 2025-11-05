@@ -62,13 +62,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannel
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
+import org.meshtastic.core.strings.R as Res
 
 private const val PRECISE_POSITION_BITS = 32
 
@@ -96,8 +96,8 @@ enum class SecurityState(
     SECURE(
         icon = Icons.Filled.Lock,
         color = { colorScheme.StatusGreen },
-        descriptionResId = R.string.security_icon_secure,
-        helpTextResId = R.string.security_icon_help_green_lock,
+        descriptionResId = Res.string.security_icon_secure,
+        helpTextResId = Res.string.security_icon_help_green_lock,
     ),
 
     /**
@@ -107,8 +107,8 @@ enum class SecurityState(
     INSECURE_NO_PRECISE(
         icon = Icons.Filled.LockOpen,
         color = { colorScheme.StatusYellow },
-        descriptionResId = R.string.security_icon_insecure_no_precise,
-        helpTextResId = R.string.security_icon_help_yellow_open_lock,
+        descriptionResId = Res.string.security_icon_insecure_no_precise,
+        helpTextResId = Res.string.security_icon_help_yellow_open_lock,
     ),
 
     /**
@@ -118,8 +118,8 @@ enum class SecurityState(
     INSECURE_PRECISE_ONLY(
         icon = Icons.Filled.LockOpen,
         color = { colorScheme.StatusRed },
-        descriptionResId = R.string.security_icon_insecure_precise_only,
-        helpTextResId = R.string.security_icon_help_red_open_lock,
+        descriptionResId = Res.string.security_icon_insecure_precise_only,
+        helpTextResId = Res.string.security_icon_help_red_open_lock,
     ),
 
     /**
@@ -129,8 +129,8 @@ enum class SecurityState(
     INSECURE_PRECISE_MQTT_WARNING(
         icon = Icons.Filled.LockOpen,
         color = { colorScheme.StatusRed },
-        descriptionResId = R.string.security_icon_warning_precise_mqtt,
-        helpTextResId = R.string.security_icon_help_warning_precise_mqtt,
+        descriptionResId = Res.string.security_icon_warning_precise_mqtt,
+        helpTextResId = Res.string.security_icon_help_warning_precise_mqtt,
         badgeIcon = Icons.Filled.Warning,
         badgeIconColor = { colorScheme.StatusYellow },
     ),
@@ -163,7 +163,7 @@ private fun SecurityIconDisplay(
                 ) {
                     Icon(
                         imageVector = badgeIcon,
-                        contentDescription = stringResource(R.string.security_icon_badge_warning_description),
+                        contentDescription = stringResource(Res.string.security_icon_badge_warning_description),
                         tint = badgeIconColor ?: colorScheme.onError, // Default for contrast
                         modifier = Modifier.size(16.dp), // Adjusted badge icon size
                     )
@@ -211,11 +211,11 @@ private fun determineSecurityState(
 @Composable
 fun SecurityIcon(
     securityState: SecurityState,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(Res.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     var showHelpDialog by rememberSaveable { mutableStateOf(false) }
-    val fullContentDescription = baseContentDescription + " " + stringResource(id = securityState.descriptionResId)
+    val fullContentDescription = baseContentDescription + " " + stringResource(securityState.descriptionResId)
 
     IconButton(
         onClick = {
@@ -252,7 +252,7 @@ fun SecurityIcon(
     isLowEntropyKey: Boolean,
     isPreciseLocation: Boolean = false,
     isMqttEnabled: Boolean = false,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(Res.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     val securityState = determineSecurityState(isLowEntropyKey, isPreciseLocation, isMqttEnabled)
@@ -285,7 +285,7 @@ val Channel.isMqttEnabled: Boolean
 @Composable
 fun SecurityIcon(
     channel: Channel,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(Res.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) = SecurityIcon(
     isLowEntropyKey = channel.isLowEntropyKey,
@@ -305,7 +305,7 @@ fun SecurityIcon(
 fun SecurityIcon(
     channelSettings: ChannelSettings,
     loraConfig: LoRaConfig,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(Res.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     val channel = Channel(channelSettings, loraConfig)
@@ -331,7 +331,7 @@ fun SecurityIcon(
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
     channelIndex: Int,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(Res.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     channelSet.getChannel(channelIndex)?.let { channel ->
@@ -357,7 +357,7 @@ fun SecurityIcon(
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
     channelName: String,
-    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    baseContentDescription: String = stringResource(Res.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     val channelByNameMap =
@@ -394,9 +394,9 @@ private fun SecurityHelpDialog(securityState: SecurityState, onDismiss: () -> Un
         title = {
             Text(
                 if (showAll) {
-                    stringResource(R.string.security_icon_help_title_all)
+                    stringResource(Res.string.security_icon_help_title_all)
                 } else {
-                    stringResource(R.string.security_icon_help_title)
+                    stringResource(Res.string.security_icon_help_title)
                 },
             )
         },
@@ -416,13 +416,13 @@ private fun SecurityHelpDialog(securityState: SecurityState, onDismiss: () -> Un
                 TextButton(onClick = { showAll = !showAll }) {
                     Text(
                         if (showAll) {
-                            stringResource(R.string.security_icon_help_show_less)
+                            stringResource(Res.string.security_icon_help_show_less)
                         } else {
-                            stringResource(R.string.security_icon_help_show_all)
+                            stringResource(Res.string.security_icon_help_show_all)
                         },
                     )
                 }
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.security_icon_help_dismiss)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.security_icon_help_dismiss)) }
             }
         },
     )

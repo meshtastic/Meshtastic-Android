@@ -57,7 +57,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.IAQColors.IAQDangerouslyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQExcellent
 import org.meshtastic.core.ui.theme.IAQColors.IAQExtremelyPolluted
@@ -66,6 +65,7 @@ import org.meshtastic.core.ui.theme.IAQColors.IAQHeavilyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQLightlyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQModeratelyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQSeverelyPolluted
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("MagicNumber")
 enum class Iaq(val color: Color, val description: String, val range: IntRange) {
@@ -135,7 +135,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                             Icon(
                                 imageVector =
                                 if (iaqEnum.range.first < 100) Icons.Default.ThumbUp else Icons.Filled.Warning,
-                                contentDescription = stringResource(R.string.air_quality_icon),
+                                contentDescription = stringResource(Res.string.air_quality_icon),
                                 tint = Color.White,
                             )
                         }
@@ -191,9 +191,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                     shape = RoundedCornerShape(16.dp),
                     text = { IAQScale() },
                     confirmButton = {
-                        TextButton(onClick = { isLegendOpen = false }) {
-                            Text(text = stringResource(id = R.string.close))
-                        }
+                        TextButton(onClick = { isLegendOpen = false }) { Text(text = stringResource(Res.string.close)) }
                     },
                 )
             }
@@ -209,7 +207,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
 fun IAQScale(modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(16.dp), horizontalAlignment = Alignment.Start) {
         Text(
-            text = stringResource(R.string.indoor_air_quality_iaq),
+            text = stringResource(Res.string.indoor_air_quality_iaq),
             style =
             MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
             modifier = Modifier.fillMaxWidth(),

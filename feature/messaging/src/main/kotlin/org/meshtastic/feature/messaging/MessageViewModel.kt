@@ -42,6 +42,7 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig.Role
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.sharedContact
 import timber.log.Timber
@@ -130,7 +131,7 @@ constructor(
         if (channel == null) { // no channel specified, so we assume it's a direct message
             val fwVersion = ourNodeInfo.value?.metadata?.firmwareVersion
             val destNode = nodeRepository.getNode(dest)
-
+            val isClientBase = ourNodeInfo.value?.user?.role == Role.CLIENT_BASE
             fwVersion?.let { fw ->
                 val ver = DeviceVersion(asString = fw)
                 val verifiedSharedContactsVersion =
@@ -141,7 +142,7 @@ constructor(
                 if (ver >= verifiedSharedContactsVersion) {
                     sendSharedContact(destNode)
                 } else {
-                    if (!destNode.isFavorite) {
+                    if (!destNode.isFavorite && !isClientBase) {
                         favoriteNode(destNode)
                     }
                 }

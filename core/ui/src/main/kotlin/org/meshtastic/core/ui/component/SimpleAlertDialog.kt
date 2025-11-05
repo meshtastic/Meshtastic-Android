@@ -32,8 +32,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun SimpleAlertDialog(
@@ -51,7 +51,7 @@ fun SimpleAlertDialog(
             modifier = Modifier.padding(horizontal = 16.dp),
             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
         ) {
-            Text(text = dismissText ?: stringResource(id = R.string.cancel))
+            Text(text = dismissText ?: stringResource(Res.string.cancel))
         }
     },
     confirmButton = {
@@ -61,12 +61,12 @@ fun SimpleAlertDialog(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             ) {
-                Text(text = confirmText ?: stringResource(id = R.string.okay))
+                Text(text = confirmText ?: stringResource(Res.string.okay))
             }
         }
     },
     title = {
-        Text(text = stringResource(id = title), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+        Text(text = stringResource(title), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
     },
     text = text,
     shape = RoundedCornerShape(16.dp),
@@ -82,9 +82,7 @@ fun SimpleAlertDialog(
     onConfirm = onConfirm,
     onDismiss = onDismiss,
     title = title,
-    text = {
-        Text(text = stringResource(id = text), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
-    },
+    text = { Text(text = stringResource(text), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
 )
 
 @Composable
@@ -103,5 +101,5 @@ fun SimpleAlertDialog(
 @PreviewLightDark
 @Composable
 private fun SimpleAlertDialogPreview() {
-    AppTheme { SimpleAlertDialog(title = R.string.message, text = R.string.sample_message) }
+    AppTheme { SimpleAlertDialog(title = Res.string.message, text = Res.string.sample_message) }
 }

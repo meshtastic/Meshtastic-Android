@@ -19,9 +19,6 @@ package com.geeksville.mesh.model
 
 import android.app.Application
 import android.net.Uri
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
@@ -42,7 +39,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
@@ -55,7 +51,6 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.toSharedContact
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
@@ -63,6 +58,7 @@ import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import javax.inject.Inject
+import org.meshtastic.core.strings.R as Res
 
 // Given a human name, strip out the first letter of the first three words and return that as the
 // initials for
@@ -177,32 +173,12 @@ constructor(
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo
 
-    val snackBarHostState = SnackbarHostState()
-
-    fun showSnackBar(text: Int) = showSnackBar(app.getString(text))
-
-    fun showSnackBar(
-        text: String,
-        actionLabel: String? = null,
-        withDismissAction: Boolean = false,
-        duration: SnackbarDuration = if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Indefinite,
-        onActionPerformed: (() -> Unit) = {},
-        onDismissed: (() -> Unit) = {},
-    ) = viewModelScope.launch {
-        snackBarHostState.showSnackbar(text, actionLabel, withDismissAction, duration).run {
-            when (this) {
-                SnackbarResult.ActionPerformed -> onActionPerformed()
-                SnackbarResult.Dismissed -> onDismissed()
-            }
-        }
-    }
-
     init {
         serviceRepository.errorMessage
             .filterNotNull()
             .onEach {
                 showAlert(
-                    title = app.getString(R.string.client_notification),
+                    title = app.getString(Res.string.client_notification),
                     message = it,
                     onConfirm = { serviceRepository.clearErrorMessage() },
                     dismissable = false,
@@ -217,11 +193,11 @@ constructor(
     val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
         get() = _sharedContactRequested.asStateFlow()
 
-    fun setSharedContactRequested(url: Uri) {
+    fun setSharedContactRequested(url: Uri, onFailure: () -> Unit) {
         runCatching { _sharedContactRequested.value = url.toSharedContact() }
             .onFailure { ex ->
                 Timber.e(ex, "Shared contact error")
-                showSnackBar(R.string.contact_invalid)
+                onFailure()
             }
     }
 
@@ -238,11 +214,12 @@ constructor(
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?>
         get() = _requestChannelSet
 
-    fun requestChannelUrl(url: Uri) = runCatching { _requestChannelSet.value = url.toChannelSet() }
-        .onFailure { ex ->
-            Timber.e(ex, "Channel url error")
-            showSnackBar(R.string.channel_invalid)
-        }
+    fun requestChannelUrl(url: Uri, onFailure: () -> Unit) =
+        runCatching { _requestChannelSet.value = url.toChannelSet() }
+            .onFailure { ex ->
+                Timber.e(ex, "Channel url error")
+                onFailure()
+            }
 
     val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
 

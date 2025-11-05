@@ -51,10 +51,10 @@ import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import timber.log.Timber
 import javax.inject.Inject
+import org.meshtastic.core.strings.R as Res
 
 /**
  * A sealed class is used here to represent the different types of devices that can be displayed in the list. This is
@@ -135,7 +135,8 @@ constructor(
                     val idBytes = txtRecords["id"]
 
                     val shortName =
-                        shortNameBytes?.let { String(it, Charsets.UTF_8) } ?: context.getString(R.string.meshtastic)
+                        shortNameBytes?.let { String(it, Charsets.UTF_8) }
+                            ?: context.getString(Res.string.meshtastic)
                     val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
                     var displayName = recentMap[address] ?: shortName
                     if (deviceId != null && !displayName.split("_").none { it == deviceId }) {
@@ -282,10 +283,10 @@ constructor(
                 if (state != BluetoothDevice.BOND_BONDING) {
                     Timber.d("Bonding completed, state=$state")
                     if (state == BluetoothDevice.BOND_BONDED) {
-                        setErrorText(context.getString(R.string.pairing_completed))
+                        setErrorText(context.getString(Res.string.pairing_completed))
                         changeDeviceAddress("x${device.address}")
                     } else {
-                        setErrorText(context.getString(R.string.pairing_failed_try_again))
+                        setErrorText(context.getString(Res.string.pairing_failed_try_again))
                     }
                 }
             }

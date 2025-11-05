@@ -29,13 +29,13 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun CopyIconButton(
     valueToCopy: String,
     modifier: Modifier = Modifier,
-    label: String = stringResource(id = R.string.copy),
+    label: String = stringResource(Res.string.copy),
 ) {
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()

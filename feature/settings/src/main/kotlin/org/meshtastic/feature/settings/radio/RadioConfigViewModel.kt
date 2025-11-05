@@ -59,11 +59,10 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
-import org.meshtastic.core.proto.getChannelList
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.util.UiText
@@ -82,6 +81,7 @@ import org.meshtastic.proto.moduleConfig
 import timber.log.Timber
 import java.io.FileOutputStream
 import javax.inject.Inject
+import org.meshtastic.core.strings.R as Res
 
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
@@ -384,7 +384,7 @@ constructor(
             AdminRoute.SHUTDOWN.name ->
                 with(radioConfigState.value) {
                     if (metadata != null && !metadata.canShutdown) {
-                        sendError(R.string.cant_shutdown)
+                        sendError(Res.string.cant_shutdown)
                     } else {
                         requestShutdown(destNum)
                     }

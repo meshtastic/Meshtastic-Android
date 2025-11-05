@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun SatelliteCountInfo(
@@ -36,7 +37,7 @@ fun SatelliteCountInfo(
     IconInfo(
         modifier = modifier,
         icon = Icons.TwoTone.SatelliteAlt,
-        contentDescription = stringResource(org.meshtastic.core.strings.R.string.sats),
+        contentDescription = stringResource(Res.string.sats),
         text = "$satCount",
         contentColor = contentColor,
     )

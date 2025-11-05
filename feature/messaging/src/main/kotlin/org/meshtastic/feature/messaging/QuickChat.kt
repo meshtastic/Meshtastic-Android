@@ -72,12 +72,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.database.entity.QuickChatAction
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun QuickChatScreen(
@@ -98,7 +98,7 @@ fun QuickChatScreen(
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(id = R.string.quick_chat),
+                title = stringResource(Res.string.quick_chat),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -137,7 +137,7 @@ fun QuickChatScreen(
                 onClick = { showActionDialog = QuickChatAction(position = actions.size) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add))
+                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(Res.string.add))
             }
         }
     }
@@ -166,7 +166,7 @@ private fun EditQuickChatDialog(
     var actionInput by remember { mutableStateOf(action) }
     val newQuickChat = remember { action.uuid == 0L }
     val isInstant = actionInput.mode == QuickChatAction.Mode.Instant
-    val title = if (newQuickChat) R.string.quick_chat_new else R.string.quick_chat_edit
+    val title = if (newQuickChat) Res.string.quick_chat_new else Res.string.quick_chat_edit
 
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -180,7 +180,7 @@ private fun EditQuickChatDialog(
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = stringResource(id = title),
+                    text = stringResource(title),
                     modifier = Modifier.fillMaxWidth(),
                     style =
                     MaterialTheme.typography.titleLarge.copy(
@@ -192,7 +192,7 @@ private fun EditQuickChatDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextFieldWithCounter(
-                    label = stringResource(R.string.name),
+                    label = stringResource(Res.string.name),
                     value = actionInput.name,
                     maxSize = 5,
                     singleLine = true,
@@ -204,7 +204,7 @@ private fun EditQuickChatDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextFieldWithCounter(
-                    label = stringResource(id = R.string.message),
+                    label = stringResource(Res.string.message),
                     value = actionInput.message,
                     maxSize = 200,
                     getSize = { it.toByteArray().size + 1 },
@@ -220,14 +220,14 @@ private fun EditQuickChatDialog(
 
                 val (text, icon) =
                     if (isInstant) {
-                        R.string.quick_chat_instant to Icons.Default.FastForward
+                        Res.string.quick_chat_instant to Icons.Default.FastForward
                     } else {
-                        R.string.quick_chat_append to Icons.Default.Add
+                        Res.string.quick_chat_append to Icons.Default.Add
                     }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (isInstant) {
-                        Icon(imageVector = icon, contentDescription = stringResource(id = text))
+                        Icon(imageVector = icon, contentDescription = stringResource(text))
                         Spacer(Modifier.width(12.dp))
                     }
 
@@ -255,7 +255,7 @@ private fun EditQuickChatDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TextButton(modifier = Modifier.weight(1f), onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel))
+                    Text(stringResource(Res.string.cancel))
                 }
 
                 if (!newQuickChat) {
@@ -266,7 +266,7 @@ private fun EditQuickChatDialog(
                             onDismiss()
                         },
                     ) {
-                        Text(text = stringResource(R.string.delete))
+                        Text(text = stringResource(Res.string.delete))
                     }
                 }
 
@@ -278,7 +278,7 @@ private fun EditQuickChatDialog(
                     },
                     enabled = actionInput.name.isNotEmpty() && actionInput.message.isNotEmpty(),
                 ) {
-                    Text(text = stringResource(R.string.save))
+                    Text(text = stringResource(Res.string.save))
                 }
             }
         },
@@ -328,7 +328,7 @@ private fun QuickChatItem(
                 if (action.mode == QuickChatAction.Mode.Instant) {
                     Icon(
                         imageVector = Icons.Default.FastForward,
-                        contentDescription = stringResource(id = R.string.quick_chat_instant),
+                        contentDescription = stringResource(Res.string.quick_chat_instant),
                     )
                 }
             },
@@ -339,12 +339,12 @@ private fun QuickChatItem(
                     IconButton(onClick = { onEdit(action) }, modifier = Modifier.size(48.dp)) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.quick_chat_edit),
+                            contentDescription = stringResource(Res.string.quick_chat_edit),
                         )
                     }
                     Icon(
                         imageVector = Icons.Default.DragHandle,
-                        contentDescription = stringResource(id = R.string.quick_chat),
+                        contentDescription = stringResource(Res.string.quick_chat),
                     )
                 }
             },

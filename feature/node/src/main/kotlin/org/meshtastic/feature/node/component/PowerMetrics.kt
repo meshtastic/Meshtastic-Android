@@ -29,8 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.node.model.VectorMetricInfo
+import org.meshtastic.core.strings.R as Res
 
 /**
  * Displays environmental metrics for a node, including temperature, humidity, pressure, and other sensor data.
@@ -46,16 +46,16 @@ internal fun PowerMetrics(node: Node) {
             buildList {
                 with(node.powerMetrics) {
                     if (ch1Voltage != 0f) {
-                        add(VectorMetricInfo(R.string.channel_1, "%.2fV".format(ch1Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(R.string.channel_1, "%.1fmA".format(ch1Current), Icons.Default.Power))
+                        add(VectorMetricInfo(Res.string.channel_1, "%.2fV".format(ch1Voltage), Icons.Default.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_1, "%.1fmA".format(ch1Current), Icons.Default.Power))
                     }
                     if (ch2Voltage != 0f) {
-                        add(VectorMetricInfo(R.string.channel_2, "%.2fV".format(ch2Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(R.string.channel_2, "%.1fmA".format(ch2Current), Icons.Default.Power))
+                        add(VectorMetricInfo(Res.string.channel_2, "%.2fV".format(ch2Voltage), Icons.Default.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_2, "%.1fmA".format(ch2Current), Icons.Default.Power))
                     }
                     if (ch3Voltage != 0f) {
-                        add(VectorMetricInfo(R.string.channel_3, "%.2fV".format(ch3Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(R.string.channel_3, "%.1fmA".format(ch3Current), Icons.Default.Power))
+                        add(VectorMetricInfo(Res.string.channel_3, "%.2fV".format(ch3Voltage), Icons.Default.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_3, "%.1fmA".format(ch3Current), Icons.Default.Power))
                     }
                 }
             }

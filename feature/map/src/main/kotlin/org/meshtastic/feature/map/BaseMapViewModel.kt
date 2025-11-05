@@ -35,23 +35,23 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("MagicNumber")
 sealed class LastHeardFilter(val seconds: Long, @StringRes val label: Int) {
-    data object Any : LastHeardFilter(0L, R.string.any)
+    data object Any : LastHeardFilter(0L, Res.string.any)
 
-    data object OneHour : LastHeardFilter(TimeUnit.HOURS.toSeconds(1), R.string.one_hour)
+    data object OneHour : LastHeardFilter(TimeUnit.HOURS.toSeconds(1), Res.string.one_hour)
 
-    data object EightHours : LastHeardFilter(TimeUnit.HOURS.toSeconds(8), R.string.eight_hours)
+    data object EightHours : LastHeardFilter(TimeUnit.HOURS.toSeconds(8), Res.string.eight_hours)
 
-    data object OneDay : LastHeardFilter(TimeUnit.DAYS.toSeconds(1), R.string.one_day)
+    data object OneDay : LastHeardFilter(TimeUnit.DAYS.toSeconds(1), Res.string.one_day)
 
-    data object TwoDays : LastHeardFilter(TimeUnit.DAYS.toSeconds(2), R.string.two_days)
+    data object TwoDays : LastHeardFilter(TimeUnit.DAYS.toSeconds(2), Res.string.two_days)
 
     companion object {
         fun fromSeconds(seconds: Long): LastHeardFilter = entries.find { it.seconds == seconds } ?: Any

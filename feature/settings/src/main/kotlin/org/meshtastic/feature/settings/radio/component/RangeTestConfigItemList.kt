@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -35,6 +34,7 @@ import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
@@ -44,7 +44,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.range_test),
+        title = stringResource(Res.string.range_test),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -56,9 +56,9 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.range_test_config)) {
+            TitledCard(title = stringResource(Res.string.range_test_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.range_test_enabled),
+                    title = stringResource(Res.string.range_test_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
@@ -67,7 +67,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 HorizontalDivider()
                 val rangeItems = remember { IntervalConfiguration.RANGE_TEST_SENDER.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.sender_message_interval_seconds),
+                    title = stringResource(Res.string.sender_message_interval_seconds),
                     selectedItem = formState.value.sender.toLong(),
                     enabled = state.connected,
                     items = rangeItems.map { it.value to it.toDisplayString(context = context) },
@@ -75,7 +75,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.save_csv_in_storage_esp32_only),
+                    title = stringResource(Res.string.save_csv_in_storage_esp32_only),
                     checked = formState.value.save,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { save = it } },

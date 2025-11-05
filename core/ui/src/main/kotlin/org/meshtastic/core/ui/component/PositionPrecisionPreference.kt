@@ -33,9 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.R
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import org.meshtastic.core.strings.R as Res
 
 private const val POSITION_ENABLED = 32
 private const val POSITION_DISABLED = 0
@@ -58,7 +58,7 @@ fun PositionPrecisionPreference(
 
     Column(modifier = modifier) {
         SwitchPreference(
-            title = stringResource(R.string.position_enabled),
+            title = stringResource(Res.string.position_enabled),
             checked = value != POSITION_DISABLED,
             enabled = enabled,
             onCheckedChange = { enabled ->
@@ -69,7 +69,7 @@ fun PositionPrecisionPreference(
         )
         if (value != POSITION_DISABLED) {
             SwitchPreference(
-                title = stringResource(R.string.precise_location),
+                title = stringResource(Res.string.precise_location),
                 checked = value == POSITION_ENABLED,
                 enabled = enabled,
                 onCheckedChange = { enabled ->

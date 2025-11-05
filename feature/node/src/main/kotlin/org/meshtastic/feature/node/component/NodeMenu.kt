@@ -20,8 +20,8 @@ package org.meshtastic.feature.node.component
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun NodeActionDialogs(
@@ -36,10 +36,10 @@ fun NodeActionDialogs(
 ) {
     if (displayFavoriteDialog) {
         SimpleAlertDialog(
-            title = R.string.favorite,
+            title = Res.string.favorite,
             text =
             stringResource(
-                id = if (node.isFavorite) R.string.favorite_remove else R.string.favorite_add,
+                if (node.isFavorite) Res.string.favorite_remove else Res.string.favorite_add,
                 node.user.longName,
             ),
             onConfirm = {
@@ -51,10 +51,10 @@ fun NodeActionDialogs(
     }
     if (displayIgnoreDialog) {
         SimpleAlertDialog(
-            title = R.string.ignore,
+            title = Res.string.ignore,
             text =
             stringResource(
-                id = if (node.isIgnored) R.string.ignore_remove else R.string.ignore_add,
+                if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add,
                 node.user.longName,
             ),
             onConfirm = {
@@ -66,8 +66,8 @@ fun NodeActionDialogs(
     }
     if (displayRemoveDialog) {
         SimpleAlertDialog(
-            title = R.string.remove,
-            text = R.string.remove_node_text,
+            title = Res.string.remove,
+            text = Res.string.remove_node_text,
             onConfirm = {
                 onDismissMenuRequest()
                 onConfirmRemove(node)

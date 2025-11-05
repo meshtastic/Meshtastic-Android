@@ -57,6 +57,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -71,7 +72,6 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
@@ -104,6 +104,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 private fun MapView.UpdateMarkers(
@@ -162,7 +163,7 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
 private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     val cache = SqlTileWriterExt()
     val builder = MaterialAlertDialogBuilder(this)
-    builder.setTitle(R.string.map_tile_source)
+    builder.setTitle(getString(Res.string.map_tile_source))
     val sources = cache.sources
     val sourceList = mutableListOf<String>()
     for (i in sources.indices) {
@@ -177,20 +178,20 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
             selectedList.remove(i)
         }
     }
-    builder.setPositiveButton(R.string.clear) { _, _ ->
+    builder.setPositiveButton(getString(Res.string.clear)) { _, _ ->
         for (x in selectedList) {
             val item = sources[x]
             val b = cache.purgeCache(item.source)
             onResult(
                 if (b) {
-                    getString(R.string.map_purge_success, item.source)
+                    getString(Res.string.map_purge_success, item.source)
                 } else {
-                    getString(R.string.map_purge_fail)
+                    getString(Res.string.map_purge_fail)
                 },
             )
         }
     }
-    builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
+    builder.setNegativeButton(getString(Res.string.cancel)) { dialog, _ -> dialog.cancel() }
     builder.show()
 }
 
@@ -223,6 +224,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val resources = LocalResources.current
     val density = LocalDensity.current
 
     val haptic = LocalHapticFeedback.current
@@ -262,7 +264,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
             Timber.d("Telling user we need location turned on for MyLocationNewOverlay")
-            Toast.makeText(context, R.string.location_disabled, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, resources.getString(Res.string.location_disabled), Toast.LENGTH_SHORT).show()
             return
         }
         Timber.d("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
@@ -323,15 +325,15 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 id = u.id
                 title = u.longName
                 snippet =
-                    context.getString(
-                        R.string.map_node_popup_details,
+                    resources.getString(
+                        Res.string.map_node_popup_details,
                         node.gpsString(),
                         formatAgo(node.lastHeard),
                         formatAgo(p.time),
                         if (node.batteryStr != "") node.batteryStr else "?",
                     )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription = context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
+                    subDescription = resources.getString(Res.string.map_subDescription, ourNode.bearing(node), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
@@ -352,14 +354,16 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle(R.string.waypoint_delete)
-        builder.setNeutralButton(R.string.cancel) { _, _ -> Timber.d("User canceled marker delete dialog") }
-        builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
+        builder.setTitle(resources.getString(Res.string.waypoint_delete))
+        builder.setNeutralButton(resources.getString(Res.string.cancel)) { _, _ ->
+            Timber.d("User canceled marker delete dialog")
+        }
+        builder.setNegativeButton(resources.getString(Res.string.delete_for_me)) { _, _ ->
             Timber.d("User deleted waypoint ${waypoint.id} for me")
             mapViewModel.deleteWaypoint(waypoint.id)
         }
         if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
-            builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
+            builder.setPositiveButton(resources.getString(Res.string.delete_for_everyone)) { _, _ ->
                 Timber.d("User deleted waypoint ${waypoint.id} for everyone")
                 mapViewModel.sendWaypoint(waypoint.copy { expire = 1 })
                 mapViewModel.deleteWaypoint(waypoint.id)
@@ -394,7 +398,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     }
 
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
-        context.getString(R.string.you)
+        resources.getString(Res.string.you)
     } else {
         mapViewModel.getUser(id).longName
     }
@@ -434,7 +438,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                snippet = "[$time] ${pt.description}  " + stringResource(R.string.expires) + ": $expireTimeStr"
+                snippet = "[$time] ${pt.description}  " + stringResource(Res.string.expires) + ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
                 setVisible(false) // This seems to be always false, was this intended?
                 setOnLongClickListener {
@@ -447,22 +451,22 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
-        Toast.makeText(context, R.string.calculating, Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, resources.getString(Res.string.calculating), Toast.LENGTH_SHORT).show()
         val cacheManager = CacheManager(map)
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
 
         val mapCacheInfoText =
-            context.getString(
-                R.string.map_cache_info,
+            resources.getString(
+                Res.string.map_cache_info,
                 cacheCapacity / (1024.0 * 1024.0),
                 currentCacheUsage / (1024.0 * 1024.0),
             )
 
         MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.map_cache_manager)
+            .setTitle(resources.getString(Res.string.map_cache_manager))
             .setMessage(mapCacheInfoText)
-            .setPositiveButton(R.string.close) { dialog, _ ->
+            .setPositiveButton(resources.getString(Res.string.close)) { dialog, _ ->
                 showCurrentCacheInfo = false
                 dialog.dismiss()
             }
@@ -524,7 +528,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         val tileCount: Int =
             CacheManager(this)
                 .possibleTilesInArea(downloadRegionBoundingBox, zoomLevelMin.toInt(), zoomLevelMax.toInt())
-        cacheEstimate = context.getString(R.string.map_cache_tiles, tileCount)
+        cacheEstimate = resources.getString(Res.string.map_cache_tiles, tileCount)
     }
 
     val boxOverlayListener =
@@ -556,13 +560,18 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        Toast.makeText(context, R.string.map_download_complete, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            resources.getString(Res.string.map_download_complete),
+                            Toast.LENGTH_SHORT,
+                        )
+                            .show()
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
                         Toast.makeText(
                             context,
-                            context.getString(R.string.map_download_errors, errors),
+                            resources.getString(Res.string.map_download_errors, errors),
                             Toast.LENGTH_SHORT,
                         )
                             .show()
@@ -594,13 +603,13 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun Context.showCacheManagerDialog() {
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.map_offline_manager)
+            .setTitle(resources.getString(Res.string.map_offline_manager))
             .setItems(
                 arrayOf<CharSequence>(
-                    getString(R.string.map_cache_size),
-                    getString(R.string.map_download_region),
-                    getString(R.string.map_clear_tiles),
-                    getString(R.string.cancel),
+                    getString(Res.string.map_cache_size),
+                    getString(Res.string.map_download_region),
+                    getString(Res.string.map_clear_tiles),
+                    getString(Res.string.cancel),
                 ),
             ) { dialog, which ->
                 when (which) {
@@ -652,13 +661,13 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                     MapButton(
                         onClick = ::showMapStyleDialog,
                         icon = Icons.Outlined.Layers,
-                        contentDescription = R.string.map_style_selection,
+                        contentDescription = Res.string.map_style_selection,
                     )
                     Box(modifier = Modifier) {
                         MapButton(
                             onClick = { mapFilterExpanded = true },
                             icon = Icons.Outlined.Tune,
-                            contentDescription = R.string.map_filter,
+                            contentDescription = Res.string.map_filter,
                         )
                         DropdownMenu(
                             expanded = mapFilterExpanded,
@@ -678,7 +687,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                                             tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
-                                            text = stringResource(R.string.only_favorites),
+                                            text = stringResource(Res.string.only_favorites),
                                             modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
@@ -703,7 +712,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                                             tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
-                                            text = stringResource(R.string.show_waypoints),
+                                            text = stringResource(Res.string.show_waypoints),
                                             modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
@@ -728,7 +737,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                                             tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
-                                            text = stringResource(R.string.show_precision_circle),
+                                            text = stringResource(Res.string.show_precision_circle),
                                             modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
@@ -750,7 +759,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                             } else {
                                 Icons.Default.LocationDisabled
                             },
-                            contentDescription = stringResource(R.string.toggle_my_position),
+                            contentDescription = stringResource(Res.string.toggle_my_position),
                         ) {
                             if (locationPermissionsState.allPermissionsGranted) {
                                 map.toggleMyLocation()

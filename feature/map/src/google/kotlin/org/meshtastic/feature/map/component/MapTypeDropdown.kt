@@ -29,8 +29,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.maps.android.compose.MapType
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable
@@ -46,10 +46,10 @@ internal fun MapTypeDropdown(
 
     val googleMapTypes =
         listOf(
-            stringResource(id = R.string.map_type_normal) to MapType.NORMAL,
-            stringResource(id = R.string.map_type_satellite) to MapType.SATELLITE,
-            stringResource(id = R.string.map_type_terrain) to MapType.TERRAIN,
-            stringResource(id = R.string.map_type_hybrid) to MapType.HYBRID,
+            stringResource(Res.string.map_type_normal) to MapType.NORMAL,
+            stringResource(Res.string.map_type_satellite) to MapType.SATELLITE,
+            stringResource(Res.string.map_type_terrain) to MapType.TERRAIN,
+            stringResource(Res.string.map_type_hybrid) to MapType.HYBRID,
         )
 
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
@@ -62,7 +62,7 @@ internal fun MapTypeDropdown(
                 },
                 trailingIcon =
                 if (selectedCustomUrl == null && selectedGoogleMapType == type) {
-                    { Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.selected_map_type)) }
+                    { Icon(Icons.Filled.Check, contentDescription = stringResource(Res.string.selected_map_type)) }
                 } else {
                     null
                 },
@@ -83,7 +83,7 @@ internal fun MapTypeDropdown(
                         {
                             Icon(
                                 Icons.Filled.Check,
-                                contentDescription = stringResource(R.string.selected_map_type),
+                                contentDescription = stringResource(Res.string.selected_map_type),
                             )
                         }
                     } else {
@@ -94,7 +94,7 @@ internal fun MapTypeDropdown(
         }
         HorizontalDivider()
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.manage_custom_tile_sources)) },
+            text = { Text(stringResource(Res.string.manage_custom_tile_sources)) },
             onClick = {
                 onManageCustomTileProvidersClicked()
                 onDismissRequest()

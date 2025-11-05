@@ -64,7 +64,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
@@ -74,6 +73,7 @@ import org.meshtastic.proto.waypoint
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalLayoutApi::class)
@@ -86,7 +86,7 @@ fun EditWaypointDialog(
     modifier: Modifier = Modifier,
 ) {
     var waypointInput by remember { mutableStateOf(waypoint) }
-    val title = if (waypoint.id == 0) R.string.waypoint_new else R.string.waypoint_edit
+    val title = if (waypoint.id == 0) Res.string.waypoint_new else Res.string.waypoint_edit
 
     @Suppress("MagicNumber")
     val emoji = if (waypointInput.icon == 0) 128205 else waypointInput.icon
@@ -145,7 +145,7 @@ fun EditWaypointDialog(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                     )
                     EditTextPreference(
-                        title = stringResource(R.string.name),
+                        title = stringResource(Res.string.name),
                         value = waypointInput.name,
                         maxSize = 29,
                         enabled = true,
@@ -168,7 +168,7 @@ fun EditWaypointDialog(
                         },
                     )
                     EditTextPreference(
-                        title = stringResource(R.string.description),
+                        title = stringResource(Res.string.description),
                         value = waypointInput.description,
                         maxSize = 99,
                         enabled = true,
@@ -182,8 +182,8 @@ fun EditWaypointDialog(
                         modifier = Modifier.fillMaxWidth().size(48.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Image(imageVector = Icons.Default.Lock, contentDescription = stringResource(R.string.locked))
-                        Text(stringResource(R.string.locked))
+                        Image(imageVector = Icons.Default.Lock, contentDescription = stringResource(Res.string.locked))
+                        Text(stringResource(Res.string.locked))
                         Switch(
                             modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End),
                             checked = waypointInput.lockedTo != 0,
@@ -230,9 +230,9 @@ fun EditWaypointDialog(
                     ) {
                         Image(
                             imageVector = Icons.Default.CalendarMonth,
-                            contentDescription = stringResource(R.string.expires),
+                            contentDescription = stringResource(Res.string.expires),
                         )
-                        Text(stringResource(R.string.expires))
+                        Text(stringResource(Res.string.expires))
                         Switch(
                             modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End),
                             checked = waypointInput.expire != Int.MAX_VALUE && waypointInput.expire != 0,
@@ -266,7 +266,7 @@ fun EditWaypointDialog(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = { datePickerDialog.show() }) { Text(stringResource(R.string.date)) }
+                                Button(onClick = { datePickerDialog.show() }) { Text(stringResource(Res.string.date)) }
                                 Text(
                                     modifier = Modifier.padding(top = 4.dp),
                                     text = "$selectedDate",
@@ -275,7 +275,7 @@ fun EditWaypointDialog(
                                 )
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = { timePickerDialog.show() }) { Text(stringResource(R.string.time)) }
+                                Button(onClick = { timePickerDialog.show() }) { Text(stringResource(Res.string.time)) }
                                 Text(
                                     modifier = Modifier.padding(top = 4.dp),
                                     text = "$selectedTime",
@@ -294,7 +294,7 @@ fun EditWaypointDialog(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     TextButton(modifier = modifier.weight(1f), onClick = onDismissRequest) {
-                        Text(stringResource(R.string.cancel))
+                        Text(stringResource(Res.string.cancel))
                     }
                     if (waypoint.id != 0) {
                         Button(
@@ -302,11 +302,11 @@ fun EditWaypointDialog(
                             onClick = { onDeleteClicked(waypointInput) },
                             enabled = waypointInput.name.isNotEmpty(),
                         ) {
-                            Text(stringResource(R.string.delete))
+                            Text(stringResource(Res.string.delete))
                         }
                     }
                     Button(modifier = modifier.weight(1f), onClick = { onSendClicked(waypointInput) }, enabled = true) {
-                        Text(stringResource(R.string.send))
+                        Text(stringResource(Res.string.send))
                     }
                 }
             },

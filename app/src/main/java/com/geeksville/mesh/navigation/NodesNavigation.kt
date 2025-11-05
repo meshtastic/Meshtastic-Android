@@ -39,25 +39,25 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navDeepLink
-import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.ui.metrics.DeviceMetricsScreen
-import com.geeksville.mesh.ui.metrics.EnvironmentMetricsScreen
-import com.geeksville.mesh.ui.metrics.HostMetricsLogScreen
-import com.geeksville.mesh.ui.metrics.PaxMetricsScreen
-import com.geeksville.mesh.ui.metrics.PositionLogScreen
-import com.geeksville.mesh.ui.metrics.PowerMetricsScreen
-import com.geeksville.mesh.ui.metrics.SignalMetricsScreen
-import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
-import com.geeksville.mesh.ui.node.NodeDetailScreen
-import com.geeksville.mesh.ui.node.NodeListScreen
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.node.NodeMapScreen
 import org.meshtastic.feature.map.node.NodeMapViewModel
+import org.meshtastic.feature.node.detail.NodeDetailScreen
+import org.meshtastic.feature.node.list.NodeListScreen
+import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
+import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
+import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
+import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.PaxMetricsScreen
+import org.meshtastic.feature.node.metrics.PositionLogScreen
+import org.meshtastic.feature.node.metrics.PowerMetricsScreen
+import org.meshtastic.feature.node.metrics.SignalMetricsScreen
+import org.meshtastic.feature.node.metrics.TracerouteLogScreen
+import org.meshtastic.core.strings.R as Res
 
 fun NavGraphBuilder.nodesGraph(navController: NavHostController) {
     navigation<NodesRoutes.NodesGraph>(startDestination = NodesRoutes.Nodes) {
@@ -204,49 +204,49 @@ enum class NodeDetailRoute(
     val screenComposable: @Composable (metricsViewModel: MetricsViewModel, onNavigateUp: () -> Unit) -> Unit,
 ) {
     DEVICE(
-        R.string.device,
+        Res.string.device,
         NodeDetailRoutes.DeviceMetrics,
         Icons.Default.Router,
         { metricsVM, onNavigateUp -> DeviceMetricsScreen(metricsVM, onNavigateUp) },
     ),
     POSITION_LOG(
-        R.string.position_log,
+        Res.string.position_log,
         NodeDetailRoutes.PositionLog,
         Icons.Default.LocationOn,
         { metricsVM, onNavigateUp -> PositionLogScreen(metricsVM, onNavigateUp) },
     ),
     ENVIRONMENT(
-        R.string.environment,
+        Res.string.environment,
         NodeDetailRoutes.EnvironmentMetrics,
         Icons.Default.LightMode,
         { metricsVM, onNavigateUp -> EnvironmentMetricsScreen(metricsVM, onNavigateUp) },
     ),
     SIGNAL(
-        R.string.signal,
+        Res.string.signal,
         NodeDetailRoutes.SignalMetrics,
         Icons.Default.CellTower,
         { metricsVM, onNavigateUp -> SignalMetricsScreen(metricsVM, onNavigateUp) },
     ),
     TRACEROUTE(
-        R.string.traceroute,
+        Res.string.traceroute,
         NodeDetailRoutes.TracerouteLog,
         Icons.Default.PermScanWifi,
         { metricsVM, onNavigateUp -> TracerouteLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
     ),
     POWER(
-        R.string.power,
+        Res.string.power,
         NodeDetailRoutes.PowerMetrics,
         Icons.Default.Power,
         { metricsVM, onNavigateUp -> PowerMetricsScreen(metricsVM, onNavigateUp) },
     ),
     HOST(
-        R.string.host,
+        Res.string.host,
         NodeDetailRoutes.HostMetricsLog,
         Icons.Default.Memory,
         { metricsVM, onNavigateUp -> HostMetricsLogScreen(metricsVM, onNavigateUp) },
     ),
     PAX(
-        R.string.pax,
+        Res.string.pax,
         NodeDetailRoutes.PaxMetrics,
         Icons.Default.People,
         { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM, onNavigateUp) },

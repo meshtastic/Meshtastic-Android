@@ -78,6 +78,7 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -101,7 +102,6 @@ import org.meshtastic.core.model.util.qrCode
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar
@@ -117,6 +117,7 @@ import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.copy
 import timber.log.Timber
+import org.meshtastic.core.strings.R as Res
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel
@@ -181,11 +182,12 @@ fun ChannelScreen(
         }
 
     val context = LocalContext.current
+    val resources = LocalResources.current
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
             if (result.contents != null) {
                 viewModel.requestChannelUrl(result.contents.toUri()) {
-                    Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, resources.getString(Res.string.channel_invalid), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -223,7 +225,7 @@ fun ChannelScreen(
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            Toast.makeText(context, R.string.cant_change_no_radio, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, resources.getString(Res.string.cant_change_no_radio), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -241,8 +243,8 @@ fun ChannelScreen(
                 channelSet = channels // throw away any edits
                 showResetDialog = false
             },
-            title = { Text(text = stringResource(id = R.string.reset_to_defaults)) },
-            text = { Text(text = stringResource(id = R.string.are_you_sure_change_default)) },
+            title = { Text(text = stringResource(Res.string.reset_to_defaults)) },
+            text = { Text(text = stringResource(Res.string.are_you_sure_change_default)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -257,7 +259,7 @@ fun ChannelScreen(
                         showResetDialog = false
                     },
                 ) {
-                    Text(text = stringResource(id = R.string.apply))
+                    Text(text = stringResource(Res.string.apply))
                 }
             },
             dismissButton = {
@@ -267,7 +269,7 @@ fun ChannelScreen(
                         showResetDialog = false
                     },
                 ) {
-                    Text(text = stringResource(id = R.string.cancel))
+                    Text(text = stringResource(Res.string.cancel))
                 }
             },
         )
@@ -312,7 +314,8 @@ fun ChannelScreen(
                     onTrackShare = viewModel::trackShare,
                     onConfirm = {
                         viewModel.requestChannelUrl(it) {
-                            Toast.makeText(context, R.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, resources.getString(Res.string.channel_invalid), Toast.LENGTH_SHORT)
+                                .show()
                         }
                     },
                 )
@@ -320,13 +323,13 @@ fun ChannelScreen(
             item {
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                     SegmentedButton(
-                        label = { Text(text = stringResource(R.string.replace)) },
+                        label = { Text(text = stringResource(Res.string.replace)) },
                         onClick = { shouldAddChannelsState = false },
                         selected = !shouldAddChannelsState,
                         shape = SegmentedButtonDefaults.itemShape(0, 2),
                     )
                     SegmentedButton(
-                        label = { Text(text = stringResource(R.string.add)) },
+                        label = { Text(text = stringResource(Res.string.add)) },
                         onClick = { shouldAddChannelsState = true },
                         selected = shouldAddChannelsState,
                         shape = SegmentedButtonDefaults.itemShape(1, 2),
@@ -345,12 +348,12 @@ fun ChannelScreen(
             item {
                 PreferenceFooter(
                     enabled = enabled,
-                    negativeText = R.string.reset,
+                    negativeText = Res.string.reset,
                     onNegativeClicked = {
                         focusManager.clearFocus()
                         showResetDialog = true
                     },
-                    positiveText = R.string.scan,
+                    positiveText = Res.string.scan,
                     onPositiveClicked = {
                         focusManager.clearFocus()
                         if (cameraPermissionState.status.isGranted) {
@@ -400,11 +403,11 @@ private fun EditChannelUrl(
         },
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
-        label = { Text(stringResource(R.string.url)) },
+        label = { Text(stringResource(Res.string.url)) },
         isError = isError,
         shape = RoundedCornerShape(8.dp),
         trailingIcon = {
-            val label = stringResource(R.string.url)
+            val label = stringResource(Res.string.url)
             val isUrlEqual = valueState == channelUrl
             IconButton(
                 onClick = {
@@ -440,9 +443,9 @@ private fun EditChannelUrl(
                     },
                     contentDescription =
                     when {
-                        isError -> stringResource(R.string.copy)
-                        !isUrlEqual -> stringResource(R.string.send)
-                        else -> stringResource(R.string.copy)
+                        isError -> stringResource(Res.string.copy)
+                        !isUrlEqual -> stringResource(Res.string.send)
+                        else -> stringResource(Res.string.copy)
                     },
                     tint =
                     if (isError) {
@@ -470,7 +473,7 @@ private fun QrCodeImage(
     painter =
     channelSet.qrCode(shouldAddChannel)?.let { BitmapPainter(it.asImageBitmap()) }
         ?: painterResource(id = org.meshtastic.core.ui.R.drawable.qrcode),
-    contentDescription = stringResource(R.string.qr_code),
+    contentDescription = stringResource(Res.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
     alpha = if (enabled) 1.0f else 0.7f,
@@ -518,7 +521,7 @@ private fun ChannelListView(
                 enabled = enabled,
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
             ) {
-                Text(text = stringResource(R.string.edit))
+                Text(text = stringResource(Res.string.edit))
             }
         },
         second = {
@@ -543,13 +546,13 @@ private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f).padding(16.dp)) {
-            Text(text = stringResource(R.string.modem_preset), fontSize = 16.sp)
+            Text(text = stringResource(Res.string.modem_preset), fontSize = 16.sp)
             Text(text = modemPresetName, fontSize = 14.sp)
         }
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
             imageVector = Icons.Default.ChevronRight,
-            contentDescription = stringResource(R.string.navigate_into_label),
+            contentDescription = stringResource(Res.string.navigate_into_label),
             modifier = Modifier.padding(end = 16.dp),
         )
     }

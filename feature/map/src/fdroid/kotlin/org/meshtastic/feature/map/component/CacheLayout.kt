@@ -36,7 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -55,7 +55,7 @@ fun CacheLayout(
             .padding(8.dp),
     ) {
         Text(
-            text = stringResource(id = R.string.map_select_download_region),
+            text = stringResource(Res.string.map_select_download_region),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall,
@@ -64,7 +64,7 @@ fun CacheLayout(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = stringResource(R.string.map_tile_download_estimate) + " " + cacheEstimate,
+            text = stringResource(Res.string.map_tile_download_estimate) + " " + cacheEstimate,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge,
@@ -75,13 +75,10 @@ fun CacheLayout(
             horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         ) {
             Button(onClick = onCancelDownload, modifier = Modifier.weight(1f)) {
-                Text(text = stringResource(id = R.string.cancel), color = MaterialTheme.colorScheme.onPrimary)
+                Text(text = stringResource(Res.string.cancel), color = MaterialTheme.colorScheme.onPrimary)
             }
             Button(onClick = onExecuteJob, modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(id = R.string.map_start_download),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
+                Text(text = stringResource(Res.string.map_start_download), color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }

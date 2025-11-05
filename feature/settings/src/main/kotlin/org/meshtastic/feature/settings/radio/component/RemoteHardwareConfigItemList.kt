@@ -26,13 +26,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
@@ -42,7 +42,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.remote_hardware),
+        title = stringResource(Res.string.remote_hardware),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -54,9 +54,9 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.remote_hardware_config)) {
+            TitledCard(title = stringResource(Res.string.remote_hardware_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.remote_hardware_enabled),
+                    title = stringResource(Res.string.remote_hardware_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
@@ -64,7 +64,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.allow_undefined_pin_access),
+                    title = stringResource(Res.string.allow_undefined_pin_access),
                     checked = formState.value.allowUndefinedPinAccess,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { allowUndefinedPinAccess = it } },
@@ -72,7 +72,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()
                 )
                 HorizontalDivider()
                 EditListPreference(
-                    title = stringResource(R.string.available_pins),
+                    title = stringResource(Res.string.available_pins),
                     list = formState.value.availablePinsList,
                     maxCount = 4, // available_pins max_count:4
                     enabled = state.connected,

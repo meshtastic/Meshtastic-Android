@@ -20,10 +20,10 @@ package org.meshtastic.feature.settings.util
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import org.meshtastic.core.strings.R
 import org.xmlpull.v1.XmlPullParser
 import timber.log.Timber
 import java.util.Locale
+import org.meshtastic.core.strings.R as Res
 
 object LanguageUtils {
 
@@ -63,11 +63,11 @@ object LanguageUtils {
 
         return languageTags.associateWith { languageTag ->
             when (languageTag) {
-                SYSTEM_DEFAULT -> getString(R.string.preferences_system_default)
-                "fr-HT" -> getString(R.string.fr_HT)
-                "pt-BR" -> getString(R.string.pt_BR)
-                "zh-CN" -> getString(R.string.zh_CN)
-                "zh-TW" -> getString(R.string.zh_TW)
+                SYSTEM_DEFAULT -> getString(Res.string.preferences_system_default)
+                "fr-HT" -> getString(Res.string.fr_HT)
+                "pt-BR" -> getString(Res.string.pt_BR)
+                "zh-CN" -> getString(Res.string.zh_CN)
+                "zh-TW" -> getString(Res.string.zh_TW)
                 else -> {
                     Locale.forLanguageTag(languageTag).let { locale ->
                         locale.getDisplayLanguage(locale).replaceFirstChar { char ->

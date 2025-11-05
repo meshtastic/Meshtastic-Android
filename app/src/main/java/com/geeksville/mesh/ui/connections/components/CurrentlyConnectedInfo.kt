@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
@@ -45,6 +44,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.core.strings.R as Res
 
 /** Converts Bluetooth RSSI to a 0-4 bar signal strength level. */
 @Composable
@@ -75,7 +75,7 @@ fun CurrentlyConnectedInfo(
 
                 node.metadata?.firmwareVersion?.let { firmwareVersion ->
                     Text(
-                        text = stringResource(R.string.firmware_version, firmwareVersion),
+                        text = stringResource(Res.string.firmware_version, firmwareVersion),
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -94,7 +94,7 @@ fun CurrentlyConnectedInfo(
             ),
             onClick = onClickDisconnect,
         ) {
-            Text(stringResource(R.string.disconnect))
+            Text(stringResource(Res.string.disconnect))
         }
     }
 }

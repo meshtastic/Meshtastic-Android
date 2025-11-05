@@ -40,10 +40,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.preview.BooleanProvider
 import org.meshtastic.core.ui.component.preview.previewNode
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +75,7 @@ fun MainAppBar(
                 IconButton(onClick = onNavigateUp) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.navigate_back),
+                        contentDescription = stringResource(Res.string.navigate_back),
                     )
                 }
             }
@@ -85,7 +85,7 @@ fun MainAppBar(
                     Icon(
                         imageVector =
                         ImageVector.vectorResource(id = org.meshtastic.core.ui.R.drawable.ic_meshtastic),
-                        contentDescription = stringResource(id = R.string.application_icon),
+                        contentDescription = stringResource(Res.string.application_icon),
                     )
                 }
             }

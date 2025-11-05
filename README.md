@@ -61,6 +61,8 @@ You can generate the documentation locally to preview your changes.
 You can help translate the app into your native language using [Crowdin](https://crowdin.meshtastic.org/android).
 
 ## Building the Android App
+> [!WARNING]
+> Debug and release builds can be installed concurrently. This is solely to enable smoother development, and you should avoid running both apps simultaneously. To ensure proper function, force quit the app not in use.
 
 https://meshtastic.org/docs/development/android/
 

@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 /**
  * The initial welcome screen for the app introduction flow. It displays a brief overview of the app's key features.
@@ -53,18 +53,18 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
         listOf(
             FeatureUIData(
                 icon = Icons.Outlined.SettingsInputAntenna,
-                titleRes = R.string.stay_connected_anywhere,
-                subtitleRes = R.string.communicate_off_the_grid,
+                titleRes = Res.string.stay_connected_anywhere,
+                subtitleRes = Res.string.communicate_off_the_grid,
             ),
             FeatureUIData(
                 icon = Icons.Outlined.Hub,
-                titleRes = R.string.create_your_own_networks,
-                subtitleRes = R.string.easily_set_up_private_mesh_networks,
+                titleRes = Res.string.create_your_own_networks,
+                subtitleRes = Res.string.easily_set_up_private_mesh_networks,
             ),
             FeatureUIData(
                 icon = Icons.Outlined.NearMe,
-                titleRes = R.string.track_and_share_locations,
-                subtitleRes = R.string.share_your_location_in_real_time,
+                titleRes = Res.string.track_and_share_locations,
+                subtitleRes = Res.string.share_your_location_in_real_time,
             ),
         )
     }
@@ -75,7 +75,7 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
                 onSkip = {}, // No skip on welcome
                 onConfigure = onGetStarted,
                 skipButtonText = "", // Not shown
-                configureButtonText = stringResource(id = R.string.get_started),
+                configureButtonText = stringResource(Res.string.get_started),
                 showSkipButton = false, // Explicitly hide skip for welcome
             )
         },
@@ -86,12 +86,12 @@ internal fun WelcomeScreen(onGetStarted: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(R.string.intro_welcome),
+                text = stringResource(Res.string.intro_welcome),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = stringResource(R.string.meshtastic),
+                text = stringResource(Res.string.meshtastic),
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center,
             )

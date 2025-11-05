@@ -28,7 +28,13 @@ import timber.log.Timber
  * application components, including analytics and platform-specific helpers, and manages analytics consent based on
  * user preferences.
  */
-@HiltAndroidApp class MeshUtilApplication : Application()
+@HiltAndroidApp
+class MeshUtilApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        initializeMaps(this)
+    }
+}
 
 fun logAssert(executeReliableWrite: Boolean) {
     if (!executeReliableWrite) {

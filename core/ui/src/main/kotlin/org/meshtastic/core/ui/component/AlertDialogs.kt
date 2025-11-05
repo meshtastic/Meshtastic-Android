@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun SimpleAlertDialog(
@@ -72,7 +72,7 @@ fun SimpleAlertDialog(
                 Text(text = message.orEmpty())
             }
         },
-        confirmButton = { TextButton(onClick = onConfirmRequest) { Text(stringResource(id = R.string.okay)) } },
+        confirmButton = { TextButton(onClick = onConfirmRequest) { Text(stringResource(Res.string.okay)) } },
     )
 }
 

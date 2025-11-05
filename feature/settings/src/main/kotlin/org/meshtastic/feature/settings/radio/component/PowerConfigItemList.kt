@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -38,6 +37,7 @@ import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
@@ -48,7 +48,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.power),
+        title = stringResource(Res.string.power),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -60,10 +60,10 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.power_config)) {
+            TitledCard(title = stringResource(Res.string.power_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.enable_power_saving_mode),
-                    summary = stringResource(id = R.string.config_power_is_power_saving_summary),
+                    title = stringResource(Res.string.enable_power_saving_mode),
+                    summary = stringResource(Res.string.config_power_is_power_saving_summary),
                     checked = formState.value.isPowerSaving,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { isPowerSaving = it } },
@@ -72,7 +72,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 HorizontalDivider()
                 val items = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.shutdown_on_power_loss),
+                    title = stringResource(Res.string.shutdown_on_power_loss),
                     selectedItem = formState.value.onBatteryShutdownAfterSecs.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString(context = context) },
@@ -82,7 +82,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.adc_multiplier_override),
+                    title = stringResource(Res.string.adc_multiplier_override),
                     checked = formState.value.adcMultiplierOverride > 0f,
                     enabled = state.connected,
                     onCheckedChange = {
@@ -93,7 +93,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 if (formState.value.adcMultiplierOverride > 0f) {
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(R.string.adc_multiplier_override_ratio),
+                        title = stringResource(Res.string.adc_multiplier_override_ratio),
                         value = formState.value.adcMultiplierOverride,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -103,7 +103,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 HorizontalDivider()
                 val waitBluetoothItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.wait_for_bluetooth_duration_seconds),
+                    title = stringResource(Res.string.wait_for_bluetooth_duration_seconds),
                     selectedItem = formState.value.waitBluetoothSecs.toLong(),
                     enabled = state.connected,
                     items = waitBluetoothItems.map { it.value to it.toDisplayString(context = context) },
@@ -112,7 +112,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 HorizontalDivider()
                 val sdsSecsItems = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.super_deep_sleep_duration_seconds),
+                    title = stringResource(Res.string.super_deep_sleep_duration_seconds),
                     selectedItem = formState.value.sdsSecs.toLong(),
                     onItemSelected = { formState.value = formState.value.copy { sdsSecs = it.toInt() } },
                     enabled = state.connected,
@@ -121,7 +121,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 HorizontalDivider()
                 val minWakeItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.minimum_wake_time_seconds),
+                    title = stringResource(Res.string.minimum_wake_time_seconds),
                     selectedItem = formState.value.minWakeSecs.toLong(),
                     enabled = state.connected,
                     items = minWakeItems.map { it.value to it.toDisplayString(context = context) },
@@ -129,7 +129,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.battery_ina_2xx_i2c_address),
+                    title = stringResource(Res.string.battery_ina_2xx_i2c_address),
                     value = formState.value.deviceBatteryInaAddress,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

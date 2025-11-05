@@ -40,8 +40,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
@@ -56,7 +56,7 @@ internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
         )
     }
     IconButton(onClick = { showEmojiPickerDialog = true }) {
-        Icon(imageVector = Icons.Default.EmojiEmotions, contentDescription = stringResource(R.string.react))
+        Icon(imageVector = Icons.Default.EmojiEmotions, contentDescription = stringResource(Res.string.react))
     }
 }
 
@@ -64,7 +64,7 @@ internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
 private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
     onClick = onClick,
     content = {
-        Icon(imageVector = Icons.AutoMirrored.Filled.Reply, contentDescription = stringResource(R.string.reply))
+        Icon(imageVector = Icons.AutoMirrored.Filled.Reply, contentDescription = stringResource(Res.string.reply))
     },
 )
 
@@ -82,7 +82,7 @@ private fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageS
                     MessageStatus.ERROR -> Icons.TwoTone.CloudOff
                     else -> Icons.TwoTone.Warning
                 },
-                contentDescription = stringResource(R.string.message_delivery_status),
+                contentDescription = stringResource(Res.string.message_delivery_status),
             )
         }
     }

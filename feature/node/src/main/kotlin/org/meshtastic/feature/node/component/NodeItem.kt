@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
@@ -57,6 +56,7 @@ import org.meshtastic.core.ui.component.SignalInfo
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -74,7 +74,7 @@ fun NodeItem(
 ) {
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isIgnored = thatNode.isIgnored
-    val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
+    val longName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
@@ -165,7 +165,7 @@ fun NodeItem(
                         ElevationInfo(
                             altitude = position.altitude,
                             system = system,
-                            suffix = stringResource(id = R.string.elevation_suffix),
+                            suffix = stringResource(Res.string.elevation_suffix),
                             contentColor = contentColor,
                         )
                         val satCount = position.satsInView

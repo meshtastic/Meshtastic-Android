@@ -26,13 +26,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
@@ -42,7 +42,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.store_forward),
+        title = stringResource(Res.string.store_forward),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -54,9 +54,9 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.store_forward_config)) {
+            TitledCard(title = stringResource(Res.string.store_forward_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.store_forward_enabled),
+                    title = stringResource(Res.string.store_forward_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
@@ -64,7 +64,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.heartbeat),
+                    title = stringResource(Res.string.heartbeat),
                     checked = formState.value.heartbeat,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { heartbeat = it } },
@@ -72,7 +72,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.number_of_records),
+                    title = stringResource(Res.string.number_of_records),
                     value = formState.value.records,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -80,7 +80,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.history_return_max),
+                    title = stringResource(Res.string.history_return_max),
                     value = formState.value.historyReturnMax,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -88,7 +88,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.history_return_window),
+                    title = stringResource(Res.string.history_return_window),
                     value = formState.value.historyReturnWindow,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -96,7 +96,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.server),
+                    title = stringResource(Res.string.server),
                     checked = formState.value.isServer,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { isServer = it } },

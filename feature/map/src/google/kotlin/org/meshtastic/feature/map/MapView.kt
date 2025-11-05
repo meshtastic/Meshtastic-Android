@@ -86,7 +86,6 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.MarkerInfoWindowComposable
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
-import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
 import kotlinx.coroutines.flow.map
@@ -97,9 +96,8 @@ import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toString
-import org.meshtastic.core.proto.formatPositionTime
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.map.component.ClusterItemsListDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.CustomTileProviderManagerSheet
@@ -115,6 +113,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
 import timber.log.Timber
 import java.text.DateFormat
+import org.meshtastic.core.strings.R as Res
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 private const val DEG_D = 1e-7
@@ -162,15 +161,13 @@ fun MapView(
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
 
-    val cameraPositionState = rememberCameraPositionState {
-        position =
-            CameraPosition.fromLatLngZoom(
-                LatLng(
-                    ourNodeInfo?.position?.latitudeI?.times(DEG_D) ?: 0.0,
-                    ourNodeInfo?.position?.longitudeI?.times(DEG_D) ?: 0.0,
-                ),
-                7f,
-            )
+    val cameraPositionState = mapViewModel.cameraPositionState
+
+    // Save camera position when it stops moving
+    LaunchedEffect(cameraPositionState.isMoving) {
+        if (!cameraPositionState.isMoving) {
+            mapViewModel.saveCameraPosition(cameraPositionState.position)
+        }
     }
 
     // Location tracking functionality
@@ -221,6 +218,7 @@ fun MapView(
                     .build()
 
             try {
+                @Suppress("MissingPermission")
                 fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
                 Timber.d("Started location tracking")
             } catch (e: SecurityException) {
@@ -351,31 +349,6 @@ fun MapView(
                         editingWaypoint = newWaypoint
                     }
                 },
-                onMapLoaded = {
-                    val pointsToBound: List<LatLng> =
-                        when {
-                            !nodeTracks.isNullOrEmpty() -> nodeTracks.map { it.toLatLng() }
-
-                            allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
-                                allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
-
-                            else -> emptyList()
-                        }
-
-                    if (pointsToBound.isNotEmpty()) {
-                        val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
-
-                        val padding = if (!pointsToBound.isEmpty()) 100 else 48
-
-                        try {
-                            coroutineScope.launch {
-                                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-                            }
-                        } catch (e: IllegalStateException) {
-                            Timber.w("MapView Could not animate to bounds: ${e.message}")
-                        }
-                    }
-                },
             ) {
                 key(currentCustomTileProviderUrl) {
                     currentCustomTileProviderUrl?.let { url ->
@@ -408,7 +381,7 @@ fun MapView(
                                 } else {
                                     MarkerInfoWindowComposable(
                                         state = markerState,
-                                        title = stringResource(R.string.position),
+                                        title = stringResource(Res.string.position),
                                         snippet = formatAgo(position.time),
                                         zIndex = alpha,
                                         infoContent = {
@@ -421,7 +394,7 @@ fun MapView(
                                     ) {
                                         Icon(
                                             imageVector = androidx.compose.material.icons.Icons.Default.TripOrigin,
-                                            contentDescription = stringResource(R.string.track_point),
+                                            contentDescription = stringResource(Res.string.track_point),
                                             tint = color,
                                         )
                                     }
@@ -666,25 +639,28 @@ private fun PositionInfoWindowContent(
 
     Card {
         Column(modifier = Modifier.padding(8.dp)) {
-            PositionRow(label = stringResource(R.string.latitude), value = "%.5f".format(position.latitudeI * DEG_D))
-
-            PositionRow(label = stringResource(R.string.longitude), value = "%.5f".format(position.longitudeI * DEG_D))
-
-            PositionRow(label = stringResource(R.string.sats), value = position.satsInView.toString())
+            PositionRow(label = stringResource(Res.string.latitude), value = "%.5f".format(position.latitudeI * DEG_D))
 
             PositionRow(
-                label = stringResource(R.string.alt),
+                label = stringResource(Res.string.longitude),
+                value = "%.5f".format(position.longitudeI * DEG_D),
+            )
+
+            PositionRow(label = stringResource(Res.string.sats), value = position.satsInView.toString())
+
+            PositionRow(
+                label = stringResource(Res.string.alt),
                 value = position.altitude.metersIn(displayUnits).toString(displayUnits),
             )
 
-            PositionRow(label = stringResource(R.string.speed), value = speedFromPosition(position, displayUnits))
+            PositionRow(label = stringResource(Res.string.speed), value = speedFromPosition(position, displayUnits))
 
             PositionRow(
-                label = stringResource(R.string.heading),
+                label = stringResource(Res.string.heading),
                 value = "%.0f°".format(position.groundTrack * HEADING_DEG),
             )
 
-            PositionRow(label = stringResource(R.string.timestamp), value = position.formatPositionTime(dateFormat))
+            PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime(dateFormat))
         }
     }
 }
@@ -706,7 +682,7 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
     return speedText
 }
 
-private fun Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+internal fun Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
 
 private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
 
