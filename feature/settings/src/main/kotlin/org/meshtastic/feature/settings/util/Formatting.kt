@@ -17,11 +17,13 @@
 
 package org.meshtastic.feature.settings.util
 
-import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.strings.R as Res
 
-fun FixedUpdateIntervals.toDisplayString(context: Context): String = if (this == FixedUpdateIntervals.UNSET) {
-    context.getString(Res.string.unset)
+@Composable
+fun FixedUpdateIntervals.toDisplayString(): String = if (this == FixedUpdateIntervals.UNSET) {
+    stringResource(Res.string.unset)
 } else {
     name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
 }
