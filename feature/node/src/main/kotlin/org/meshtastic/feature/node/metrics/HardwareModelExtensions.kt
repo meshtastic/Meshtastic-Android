@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.core.proto
+package org.meshtastic.feature.node.metrics
 
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
@@ -36,17 +36,4 @@ fun MeshProtos.HardwareModel.safeNumber(fallbackValue: Int = -1): Int = try {
 } catch (e: IllegalArgumentException) {
     Timber.w("Unknown hardware model enum value: $this, using fallback value: $fallbackValue")
     fallbackValue
-}
-
-/**
- * Checks if the hardware model is a known/supported value.
- *
- * @return true if the hardware model is known and supported, false otherwise
- */
-@Suppress("detekt:SwallowedException")
-fun MeshProtos.HardwareModel.isKnown(): Boolean = try {
-    this.number
-    true
-} catch (e: IllegalArgumentException) {
-    false
 }

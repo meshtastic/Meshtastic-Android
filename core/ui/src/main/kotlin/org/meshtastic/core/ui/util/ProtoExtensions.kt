@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.core.proto
+package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
