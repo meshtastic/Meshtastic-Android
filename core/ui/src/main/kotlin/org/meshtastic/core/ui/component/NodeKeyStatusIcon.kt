@@ -106,7 +106,6 @@ fun NodeKeyStatusIcon(
             imageVector = icon,
             contentDescription =
             stringResource(
-                id =
                 when {
                     mismatchKey -> Res.string.encryption_error
                     hasPKC -> Res.string.encryption_pkc

@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -50,6 +51,7 @@ import org.meshtastic.core.strings.R as Res
 @Composable
 fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(16.dp).fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -64,7 +66,12 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                         val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.pageUrl.toUri())
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
-                        Toast.makeText(context, Res.string.error_no_app_to_handle_link, Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            resources.getString(Res.string.error_no_app_to_handle_link),
+                            Toast.LENGTH_LONG,
+                        )
+                            .show()
                         Timber.e(e)
                     }
                 },
@@ -80,7 +87,12 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                         val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.zipUrl.toUri())
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
-                        Toast.makeText(context, Res.string.error_no_app_to_handle_link, Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context,
+                            resources.getString(Res.string.error_no_app_to_handle_link),
+                            Toast.LENGTH_LONG,
+                        )
+                            .show()
                         Timber.e(e)
                     }
                 },

@@ -325,9 +325,9 @@ fun DeleteConfirmationDialog(
     if (showDialog) {
         val deleteMessage =
             pluralStringResource(
-                id = Res.plurals.delete_messages,
-                count = selectedCount,
-                formatArgs = arrayOf(selectedCount), // Pass the count as a format argument
+                Res.plurals.delete_messages,
+                selectedCount,
+                arrayOf(selectedCount), // Pass the count as a format argument
             )
 
         AlertDialog(

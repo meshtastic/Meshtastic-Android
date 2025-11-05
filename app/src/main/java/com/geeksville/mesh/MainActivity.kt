@@ -119,13 +119,17 @@ class MainActivity : AppCompatActivity() {
                         Timber.d("App link data is a channel set")
                         model.requestChannelUrl(
                             url = it,
-                            onFailure = { Toast.makeText(this, Res.string.channel_invalid, Toast.LENGTH_SHORT).show() },
+                            onFailure = {
+                                Toast.makeText(this, getString(Res.string.channel_invalid), Toast.LENGTH_SHORT).show()
+                            },
                         )
                     } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
                         Timber.d("App link data is a shared contact")
                         model.setSharedContactRequested(
                             url = it,
-                            onFailure = { Toast.makeText(this, Res.string.contact_invalid, Toast.LENGTH_SHORT).show() },
+                            onFailure = {
+                                Toast.makeText(this, getString(Res.string.contact_invalid), Toast.LENGTH_SHORT).show()
+                            },
                         )
                     } else {
                         Timber.d("App link data is not a channel set")

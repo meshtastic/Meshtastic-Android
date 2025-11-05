@@ -78,6 +78,7 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -181,11 +182,12 @@ fun ChannelScreen(
         }
 
     val context = LocalContext.current
+    val resources = LocalResources.current
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
             if (result.contents != null) {
                 viewModel.requestChannelUrl(result.contents.toUri()) {
-                    Toast.makeText(context, Res.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, resources.getString(Res.string.channel_invalid), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -223,7 +225,7 @@ fun ChannelScreen(
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            Toast.makeText(context, Res.string.cant_change_no_radio, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, resources.getString(Res.string.cant_change_no_radio), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -312,7 +314,8 @@ fun ChannelScreen(
                     onTrackShare = viewModel::trackShare,
                     onConfirm = {
                         viewModel.requestChannelUrl(it) {
-                            Toast.makeText(context, Res.string.channel_invalid, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, resources.getString(Res.string.channel_invalid), Toast.LENGTH_SHORT)
+                                .show()
                         }
                     },
                 )
