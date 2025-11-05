@@ -39,8 +39,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.MapLayerItem
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable
@@ -55,7 +55,7 @@ fun CustomMapLayersSheet(
         item {
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = stringResource(R.string.manage_map_layers),
+                text = stringResource(Res.string.manage_map_layers),
                 style = MaterialTheme.typography.headlineSmall,
             )
             HorizontalDivider()
@@ -63,7 +63,7 @@ fun CustomMapLayersSheet(
         item {
             Text(
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp),
-                text = stringResource(R.string.map_layer_formats),
+                text = stringResource(Res.string.map_layer_formats),
                 style = MaterialTheme.typography.bodySmall,
             )
         }
@@ -72,7 +72,7 @@ fun CustomMapLayersSheet(
             item {
                 Text(
                     modifier = Modifier.padding(16.dp),
-                    text = stringResource(R.string.no_map_layers_loaded),
+                    text = stringResource(Res.string.no_map_layers_loaded),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -93,9 +93,9 @@ fun CustomMapLayersSheet(
                                     contentDescription =
                                     stringResource(
                                         if (layer.isVisible) {
-                                            R.string.hide_layer
+                                            Res.string.hide_layer
                                         } else {
-                                            R.string.show_layer
+                                            Res.string.show_layer
                                         },
                                     ),
                                 )
@@ -103,7 +103,7 @@ fun CustomMapLayersSheet(
                             IconButton(onClick = { onRemoveLayer(layer.id) }) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.remove_layer),
+                                    contentDescription = stringResource(Res.string.remove_layer),
                                 )
                             }
                         }
@@ -114,7 +114,7 @@ fun CustomMapLayersSheet(
         }
         item {
             Button(modifier = Modifier.fillMaxWidth().padding(16.dp), onClick = onAddLayerClicked) {
-                Text(stringResource(R.string.add_layer))
+                Text(stringResource(Res.string.add_layer))
             }
         }
     }

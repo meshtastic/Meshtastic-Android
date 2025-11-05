@@ -52,7 +52,6 @@ import org.meshtastic.core.proto.safeNumber
 import org.meshtastic.core.proto.toPosition
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshProtos
@@ -66,6 +65,7 @@ import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
+import org.meshtastic.core.strings.R as Res
 
 private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
@@ -99,7 +99,7 @@ constructor(
     private fun createFallbackNode(nodeNum: Int): Node {
         val userId = DataPacket.nodeNumToDefaultId(nodeNum)
         val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
-        val longName = app.getString(R.string.fallback_node_name) + "  $safeUserId"
+        val longName = app.getString(Res.string.fallback_node_name) + "  $safeUserId"
         val defaultUser =
             MeshProtos.User.newBuilder()
                 .setId(userId)

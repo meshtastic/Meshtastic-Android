@@ -62,7 +62,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
@@ -70,6 +69,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
@@ -82,7 +82,7 @@ fun EditWaypointDialog(
     modifier: Modifier = Modifier,
 ) {
     var waypointInput by remember { mutableStateOf(waypoint) }
-    val title = if (waypoint.id == 0) R.string.waypoint_new else R.string.waypoint_edit
+    val title = if (waypoint.id == 0) Res.string.waypoint_new else Res.string.waypoint_edit
     val defaultEmoji = 0x1F4CD // 📍 Round Pushpin
     val currentEmojiCodepoint = if (waypointInput.icon == 0) defaultEmoji else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
@@ -149,7 +149,7 @@ fun EditWaypointDialog(
                     OutlinedTextField(
                         value = waypointInput.name,
                         onValueChange = { waypointInput = waypointInput.copy { name = it.take(29) } },
-                        label = { Text(stringResource(R.string.name)) },
+                        label = { Text(stringResource(Res.string.name)) },
                         singleLine = true,
                         keyboardOptions =
                         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
@@ -170,7 +170,7 @@ fun EditWaypointDialog(
                     OutlinedTextField(
                         value = waypointInput.description,
                         onValueChange = { waypointInput = waypointInput.copy { description = it.take(99) } },
-                        label = { Text(stringResource(R.string.description)) },
+                        label = { Text(stringResource(Res.string.description)) },
                         keyboardOptions =
                         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { /* Handle next/done focus */ }),
@@ -187,10 +187,10 @@ fun EditWaypointDialog(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
                                 imageVector = Icons.Default.Lock,
-                                contentDescription = stringResource(R.string.locked),
+                                contentDescription = stringResource(Res.string.locked),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.locked))
+                            Text(stringResource(Res.string.locked))
                         }
                         Switch(
                             checked = waypointInput.lockedTo != 0,
@@ -206,10 +206,10 @@ fun EditWaypointDialog(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
                                 imageVector = Icons.Default.CalendarMonth,
-                                contentDescription = stringResource(R.string.expires),
+                                contentDescription = stringResource(Res.string.expires),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.expires))
+                            Text(stringResource(Res.string.expires))
                         }
                         Switch(
                             checked = isExpiryEnabled,
@@ -285,7 +285,7 @@ fun EditWaypointDialog(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = { datePickerDialog.show() }) { Text(stringResource(R.string.date)) }
+                                Button(onClick = { datePickerDialog.show() }) { Text(stringResource(Res.string.date)) }
                                 Text(
                                     modifier = Modifier.padding(top = 4.dp),
                                     text = selectedDateString,
@@ -293,7 +293,7 @@ fun EditWaypointDialog(
                                 )
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Button(onClick = { timePickerDialog.show() }) { Text(stringResource(R.string.time)) }
+                                Button(onClick = { timePickerDialog.show() }) { Text(stringResource(Res.string.time)) }
                                 Text(
                                     modifier = Modifier.padding(top = 4.dp),
                                     text = selectedTimeString,
@@ -314,15 +314,15 @@ fun EditWaypointDialog(
                             onClick = { onDeleteClicked(waypointInput) },
                             modifier = Modifier.padding(end = 8.dp),
                         ) {
-                            Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                            Text(stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
                         }
                     }
                     Spacer(modifier = Modifier.weight(1f)) // Pushes delete to left and cancel/send to right
                     TextButton(onClick = onDismissRequest, modifier = Modifier.padding(end = 8.dp)) {
-                        Text(stringResource(R.string.cancel))
+                        Text(stringResource(Res.string.cancel))
                     }
                     Button(onClick = { onSendClicked(waypointInput) }, enabled = waypointInput.name.isNotBlank()) {
-                        Text(stringResource(R.string.send))
+                        Text(stringResource(Res.string.send))
                     }
                 }
             },

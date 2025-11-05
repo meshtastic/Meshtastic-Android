@@ -24,9 +24,9 @@ import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.MeshProtos
+import org.meshtastic.core.strings.R as Res
 
 private const val DEG_D = 1e-7
 
@@ -60,7 +60,7 @@ fun WaypointMarkers(
                     if (waypoint.lockedTo == 0 || waypoint.lockedTo == myNodeNum || !isConnected) {
                         onEditWaypointRequest(waypoint)
                     } else {
-                        Toast.makeText(context, context.getString(R.string.locked), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(Res.string.locked), Toast.LENGTH_SHORT).show()
                     }
                 },
             )

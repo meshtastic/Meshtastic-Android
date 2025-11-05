@@ -31,16 +31,16 @@ import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 enum class LogsType(@StringRes val titleRes: Int, val icon: ImageVector, val route: Route) {
-    DEVICE(R.string.device_metrics_log, Icons.Default.ChargingStation, NodeDetailRoutes.DeviceMetrics),
-    NODE_MAP(R.string.node_map, Icons.Default.Map, NodeDetailRoutes.NodeMap),
-    POSITIONS(R.string.position_log, Icons.Default.LocationOn, NodeDetailRoutes.PositionLog),
-    ENVIRONMENT(R.string.env_metrics_log, Icons.Default.Thermostat, NodeDetailRoutes.EnvironmentMetrics),
-    SIGNAL(R.string.sig_metrics_log, Icons.Default.SignalCellularAlt, NodeDetailRoutes.SignalMetrics),
-    POWER(R.string.power_metrics_log, Icons.Default.Power, NodeDetailRoutes.PowerMetrics),
-    TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, NodeDetailRoutes.TracerouteLog),
-    HOST(R.string.host_metrics_log, Icons.Default.Memory, NodeDetailRoutes.HostMetricsLog),
-    PAX(R.string.pax_metrics_log, Icons.Default.People, NodeDetailRoutes.PaxMetrics),
+    DEVICE(Res.string.device_metrics_log, Icons.Default.ChargingStation, NodeDetailRoutes.DeviceMetrics),
+    NODE_MAP(Res.string.node_map, Icons.Default.Map, NodeDetailRoutes.NodeMap),
+    POSITIONS(Res.string.position_log, Icons.Default.LocationOn, NodeDetailRoutes.PositionLog),
+    ENVIRONMENT(Res.string.env_metrics_log, Icons.Default.Thermostat, NodeDetailRoutes.EnvironmentMetrics),
+    SIGNAL(Res.string.sig_metrics_log, Icons.Default.SignalCellularAlt, NodeDetailRoutes.SignalMetrics),
+    POWER(Res.string.power_metrics_log, Icons.Default.Power, NodeDetailRoutes.PowerMetrics),
+    TRACEROUTE(Res.string.traceroute_log, Icons.Default.Route, NodeDetailRoutes.TracerouteLog),
+    HOST(Res.string.host_metrics_log, Icons.Default.Memory, NodeDetailRoutes.HostMetricsLog),
+    PAX(Res.string.pax_metrics_log, Icons.Default.People, NodeDetailRoutes.PaxMetrics),
 }

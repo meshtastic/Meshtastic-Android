@@ -56,11 +56,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MAX_PERCENT_VALUE
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
+import org.meshtastic.core.strings.R as Res
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
@@ -93,7 +93,7 @@ fun ChartHeader(amount: Int) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "$amount ${stringResource(R.string.logs)}",
+            text = "$amount ${stringResource(Res.string.logs)}",
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = MaterialTheme.typography.labelLarge.fontSize,
@@ -254,7 +254,7 @@ fun Legend(legendData: List<LegendData>, displayInfoIcon: Boolean = true, prompt
             Icon(
                 imageVector = Icons.Default.Info,
                 modifier = Modifier.clickable { promptInfoDialog() },
-                contentDescription = stringResource(R.string.info),
+                contentDescription = stringResource(Res.string.info),
             )
         }
 
@@ -272,7 +272,11 @@ fun Legend(legendData: List<LegendData>, displayInfoIcon: Boolean = true, prompt
 fun LegendInfoDialog(pairedRes: List<Pair<Int, Int>>, onDismiss: () -> Unit) {
     AlertDialog(
         title = {
-            Text(text = stringResource(R.string.info), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+            Text(
+                text = stringResource(Res.string.info),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
         },
         text = {
             Column {
@@ -289,7 +293,7 @@ fun LegendInfoDialog(pairedRes: List<Pair<Int, Int>>, onDismiss: () -> Unit) {
             }
         },
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.close)) } },
         shape = RoundedCornerShape(16.dp),
     )
 }
@@ -322,8 +326,8 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
 private fun LegendPreview() {
     val data =
         listOf(
-            LegendData(nameRes = R.string.rssi, color = Color.Red),
-            LegendData(nameRes = R.string.snr, color = Color.Green),
+            LegendData(nameRes = Res.string.rssi, color = Color.Red),
+            LegendData(nameRes = Res.string.snr, color = Color.Green),
         )
     Legend(legendData = data, promptInfoDialog = {})
 }

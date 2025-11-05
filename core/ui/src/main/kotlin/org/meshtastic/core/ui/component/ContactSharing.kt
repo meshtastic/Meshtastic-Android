@@ -63,6 +63,7 @@ import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import java.net.MalformedURLException
+import org.meshtastic.core.strings.R as Res
 
 /**
  * Composable FloatingActionButton to initiate scanning a QR code for adding a contact. Handles camera permission
@@ -127,17 +128,14 @@ fun AddContactFAB(
             }
         },
     ) {
-        Icon(
-            imageVector = Icons.TwoTone.QrCodeScanner,
-            contentDescription = stringResource(org.meshtastic.core.strings.R.string.scan_qr_code),
-        )
+        Icon(imageVector = Icons.TwoTone.QrCodeScanner, contentDescription = stringResource(Res.string.scan_qr_code))
     }
 }
 
 @Composable
 private fun QrCodeImage(uri: Uri, modifier: Modifier = Modifier) = Image(
     painter = uri.qrCode?.let { BitmapPainter(it.asImageBitmap()) } ?: painterResource(id = R.drawable.qrcode),
-    contentDescription = stringResource(org.meshtastic.core.strings.R.string.qr_code),
+    contentDescription = stringResource(Res.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
 )
@@ -165,7 +163,7 @@ fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     val sharedContact = AdminProtos.SharedContact.newBuilder().setUser(contact.user).setNodeNum(contact.num).build()
     val uri = sharedContact.getSharedContactUrl()
     SimpleAlertDialog(
-        title = org.meshtastic.core.strings.R.string.share_contact,
+        title = Res.string.share_contact,
         text = {
             Column {
                 Text(contact.user.longName)

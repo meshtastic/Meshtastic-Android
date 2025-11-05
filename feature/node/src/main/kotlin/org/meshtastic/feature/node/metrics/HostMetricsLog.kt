@@ -55,12 +55,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.proto.TelemetryProtos
 import java.text.DecimalFormat
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -113,36 +113,36 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Te
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     )
                     LogLine(
-                        label = stringResource(R.string.uptime),
+                        label = stringResource(Res.string.uptime),
                         value = formatUptime(hostMetrics.uptimeSeconds),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     LogLine(
-                        label = stringResource(R.string.free_memory),
+                        label = stringResource(Res.string.free_memory),
                         value = formatBytes(hostMetrics.freememBytes),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     LogLine(
-                        label = stringResource(R.string.disk_free_indexed, 1),
+                        label = stringResource(Res.string.disk_free_indexed, 1),
                         value = formatBytes(hostMetrics.diskfree1Bytes),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     if (hostMetrics.hasDiskfree2Bytes()) {
                         LogLine(
-                            label = stringResource(R.string.disk_free_indexed, 2),
+                            label = stringResource(Res.string.disk_free_indexed, 2),
                             value = formatBytes(hostMetrics.diskfree2Bytes),
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
                     if (hostMetrics.hasDiskfree3Bytes()) {
                         LogLine(
-                            label = stringResource(R.string.disk_free_indexed, 3),
+                            label = stringResource(Res.string.disk_free_indexed, 3),
                             value = formatBytes(hostMetrics.diskfree3Bytes),
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
                     LogLine(
-                        label = stringResource(R.string.load_indexed, 1),
+                        label = stringResource(Res.string.load_indexed, 1),
                         value = (hostMetrics.load1 / 100.0).toString(),
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -154,7 +154,7 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Te
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
                     LogLine(
-                        label = stringResource(R.string.load_indexed, 5),
+                        label = stringResource(Res.string.load_indexed, 5),
                         value = (hostMetrics.load5 / 100.0).toString(),
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -166,7 +166,7 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Te
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
                     LogLine(
-                        label = stringResource(R.string.load_indexed, 15),
+                        label = stringResource(Res.string.load_indexed, 15),
                         value = (hostMetrics.load15 / 100.0).toString(),
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -178,7 +178,7 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Te
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
                     if (hostMetrics.hasUserString()) {
-                        Text(text = stringResource(R.string.user_string), style = MaterialTheme.typography.bodyMedium)
+                        Text(text = stringResource(Res.string.user_string), style = MaterialTheme.typography.bodyMedium)
                         Text(text = hostMetrics.userString, style = TextStyle(fontFamily = FontFamily.Monospace))
                     }
                 }

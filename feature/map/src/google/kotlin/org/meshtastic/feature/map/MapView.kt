@@ -97,7 +97,6 @@ import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.proto.formatPositionTime
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.component.ClusterItemsListDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
@@ -114,6 +113,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
 import timber.log.Timber
 import java.text.DateFormat
+import org.meshtastic.core.strings.R as Res
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 private const val DEG_D = 1e-7
@@ -381,7 +381,7 @@ fun MapView(
                                 } else {
                                     MarkerInfoWindowComposable(
                                         state = markerState,
-                                        title = stringResource(R.string.position),
+                                        title = stringResource(Res.string.position),
                                         snippet = formatAgo(position.time),
                                         zIndex = alpha,
                                         infoContent = {
@@ -394,7 +394,7 @@ fun MapView(
                                     ) {
                                         Icon(
                                             imageVector = androidx.compose.material.icons.Icons.Default.TripOrigin,
-                                            contentDescription = stringResource(R.string.track_point),
+                                            contentDescription = stringResource(Res.string.track_point),
                                             tint = color,
                                         )
                                     }
@@ -639,25 +639,28 @@ private fun PositionInfoWindowContent(
 
     Card {
         Column(modifier = Modifier.padding(8.dp)) {
-            PositionRow(label = stringResource(R.string.latitude), value = "%.5f".format(position.latitudeI * DEG_D))
-
-            PositionRow(label = stringResource(R.string.longitude), value = "%.5f".format(position.longitudeI * DEG_D))
-
-            PositionRow(label = stringResource(R.string.sats), value = position.satsInView.toString())
+            PositionRow(label = stringResource(Res.string.latitude), value = "%.5f".format(position.latitudeI * DEG_D))
 
             PositionRow(
-                label = stringResource(R.string.alt),
+                label = stringResource(Res.string.longitude),
+                value = "%.5f".format(position.longitudeI * DEG_D),
+            )
+
+            PositionRow(label = stringResource(Res.string.sats), value = position.satsInView.toString())
+
+            PositionRow(
+                label = stringResource(Res.string.alt),
                 value = position.altitude.metersIn(displayUnits).toString(displayUnits),
             )
 
-            PositionRow(label = stringResource(R.string.speed), value = speedFromPosition(position, displayUnits))
+            PositionRow(label = stringResource(Res.string.speed), value = speedFromPosition(position, displayUnits))
 
             PositionRow(
-                label = stringResource(R.string.heading),
+                label = stringResource(Res.string.heading),
                 value = "%.0f°".format(position.groundTrack * HEADING_DEG),
             )
 
-            PositionRow(label = stringResource(R.string.timestamp), value = position.formatPositionTime(dateFormat))
+            PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime(dateFormat))
         }
     }
 }

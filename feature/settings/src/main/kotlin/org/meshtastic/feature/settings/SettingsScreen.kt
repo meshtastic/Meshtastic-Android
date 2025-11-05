@@ -64,7 +64,6 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
@@ -83,6 +82,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -139,9 +139,9 @@ fun SettingsScreen(
         EditDeviceProfileDialog(
             title =
             if (deviceProfile != null) {
-                stringResource(R.string.import_configuration)
+                stringResource(Res.string.import_configuration)
             } else {
-                stringResource(R.string.export_configuration)
+                stringResource(Res.string.export_configuration)
             },
             deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
             onConfirm = {
@@ -186,13 +186,13 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(R.string.bottom_nav_settings),
+                title = stringResource(Res.string.bottom_nav_settings),
                 subtitle =
                 if (state.isLocal) {
                     ourNode?.user?.longName
                 } else {
                     val remoteName = viewModel.destNode.value?.user?.longName ?: ""
-                    stringResource(R.string.remotely_administrating, remoteName)
+                    stringResource(Res.string.remotely_administrating, remoteName)
                 },
                 ourNode = ourNode,
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
@@ -233,11 +233,11 @@ fun SettingsScreen(
             val context = LocalContext.current
             val resources = LocalResources.current
 
-            TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
+            TitledCard(title = stringResource(Res.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
                 if (state.analyticsAvailable) {
                     val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
                     SwitchListItem(
-                        text = stringResource(R.string.analytics_okay),
+                        text = stringResource(Res.string.analytics_okay),
                         checked = allowed,
                         leadingIcon = Icons.Default.BugReport,
                         onClick = { viewModel.toggleAnalyticsAllowed() },
@@ -257,7 +257,7 @@ fun SettingsScreen(
                             } else {
                                 Toast.makeText(
                                     context,
-                                    resources.getString(R.string.location_disabled),
+                                    resources.getString(Res.string.location_disabled),
                                     Toast.LENGTH_LONG,
                                 )
                                     .show()
@@ -272,7 +272,7 @@ fun SettingsScreen(
                 }
 
                 SwitchListItem(
-                    text = stringResource(R.string.provide_location_to_mesh),
+                    text = stringResource(Res.string.provide_location_to_mesh),
                     leadingIcon = Icons.Rounded.LocationOn,
                     enabled = !isGpsDisabled,
                     checked = provideLocation,
@@ -286,7 +286,7 @@ fun SettingsScreen(
                 // picker for these devices.
                 val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
                 ListItem(
-                    text = stringResource(R.string.preferences_language),
+                    text = stringResource(Res.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
                     trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 ) {
@@ -304,7 +304,7 @@ fun SettingsScreen(
                 }
 
                 ListItem(
-                    text = stringResource(R.string.theme),
+                    text = stringResource(Res.string.theme),
                     leadingIcon = Icons.Rounded.FormatPaint,
                     trailingIcon = null,
                 ) {
@@ -320,7 +320,7 @@ fun SettingsScreen(
                         }
                     }
                 ListItem(
-                    text = stringResource(R.string.save_rangetest),
+                    text = stringResource(Res.string.save_rangetest),
                     leadingIcon = Icons.Rounded.Output,
                     trailingIcon = null,
                 ) {
@@ -340,7 +340,7 @@ fun SettingsScreen(
                         }
                     }
                 ListItem(
-                    text = stringResource(R.string.export_data_csv),
+                    text = stringResource(Res.string.export_data_csv),
                     leadingIcon = Icons.Rounded.Output,
                     trailingIcon = null,
                 ) {
@@ -354,7 +354,7 @@ fun SettingsScreen(
                 }
 
                 ListItem(
-                    text = stringResource(R.string.intro_show),
+                    text = stringResource(Res.string.intro_show),
                     leadingIcon = Icons.Rounded.WavingHand,
                     trailingIcon = null,
                 ) {
@@ -362,7 +362,7 @@ fun SettingsScreen(
                 }
 
                 ListItem(
-                    text = stringResource(R.string.system_settings),
+                    text = stringResource(Res.string.system_settings),
                     leadingIcon = Icons.Rounded.AppSettingsAlt,
                     trailingIcon = null,
                 ) {
@@ -405,7 +405,7 @@ private fun AppVersionButton(
     }
 
     ListItem(
-        text = stringResource(R.string.app_version),
+        text = stringResource(Res.string.app_version),
         leadingIcon = Icons.Rounded.Memory,
         supportingText = appVersionName,
         trailingIcon = null,
@@ -415,14 +415,14 @@ private fun AppVersionButton(
         when {
             clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
                 clickCount = 0
-                Toast.makeText(context, resources.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG)
+                Toast.makeText(context, resources.getString(Res.string.modules_already_unlocked), Toast.LENGTH_LONG)
                     .show()
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
                 onUnlockExcludedModules()
-                Toast.makeText(context, resources.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
+                Toast.makeText(context, resources.getString(Res.string.modules_unlocked), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -439,7 +439,7 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
     }
 
     MultipleChoiceAlertDialog(
-        title = stringResource(R.string.preferences_language),
+        title = stringResource(Res.string.preferences_language),
         message = "",
         choices = choices,
         onDismissRequest = onDismiss,
@@ -451,16 +451,16 @@ private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit
     val resources = LocalResources.current
     val themeMap = remember {
         mapOf(
-            resources.getString(R.string.dynamic) to MODE_DYNAMIC,
-            resources.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-            resources.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-            resources.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            resources.getString(Res.string.dynamic) to MODE_DYNAMIC,
+            resources.getString(Res.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            resources.getString(Res.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            resources.getString(Res.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
         )
             .mapValues { (_, value) -> { onClickTheme(value) } }
     }
 
     MultipleChoiceAlertDialog(
-        title = stringResource(R.string.choose_theme),
+        title = stringResource(Res.string.choose_theme),
         message = "",
         choices = themeMap,
         onDismissRequest = onDismiss,

@@ -44,8 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.mikepenz.markdown.m3.Markdown
 import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.strings.R
 import timber.log.Timber
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modifier = Modifier) {
@@ -64,15 +64,15 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                         val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.pageUrl.toUri())
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
-                        Toast.makeText(context, R.string.error_no_app_to_handle_link, Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, Res.string.error_no_app_to_handle_link, Toast.LENGTH_LONG).show()
                         Timber.e(e)
                     }
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(imageVector = Icons.Default.Link, contentDescription = stringResource(R.string.view_release))
+                Icon(imageVector = Icons.Default.Link, contentDescription = stringResource(Res.string.view_release))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.view_release))
+                Text(text = stringResource(Res.string.view_release))
             }
             Button(
                 onClick = {
@@ -80,15 +80,15 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                         val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.zipUrl.toUri())
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
-                        Toast.makeText(context, R.string.error_no_app_to_handle_link, Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, Res.string.error_no_app_to_handle_link, Toast.LENGTH_LONG).show()
                         Timber.e(e)
                     }
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(imageVector = Icons.Default.Download, contentDescription = stringResource(R.string.download))
+                Icon(imageVector = Icons.Default.Download, contentDescription = stringResource(Res.string.download))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = stringResource(R.string.download))
+                Text(text = stringResource(Res.string.download))
             }
         }
     }

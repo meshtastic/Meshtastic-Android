@@ -40,11 +40,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.node.metrics.GraphUtil.createPath
 import org.meshtastic.feature.node.metrics.GraphUtil.drawPathWithGradient
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.core.strings.R as Res
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
@@ -53,13 +53,13 @@ private const val Y_AXIS_WEIGHT = 0.1f
 private val LEGEND_DATA_1 =
     listOf(
         LegendData(
-            nameRes = R.string.temperature,
+            nameRes = Res.string.temperature,
             color = Environment.TEMPERATURE.color,
             isLine = true,
             environmentMetric = Environment.TEMPERATURE,
         ),
         LegendData(
-            nameRes = R.string.humidity,
+            nameRes = Res.string.humidity,
             color = Environment.HUMIDITY.color,
             isLine = true,
             environmentMetric = Environment.HUMIDITY,
@@ -68,25 +68,25 @@ private val LEGEND_DATA_1 =
 private val LEGEND_DATA_2 =
     listOf(
         LegendData(
-            nameRes = R.string.iaq,
+            nameRes = Res.string.iaq,
             color = Environment.IAQ.color,
             isLine = true,
             environmentMetric = Environment.IAQ,
         ),
         LegendData(
-            nameRes = R.string.baro_pressure,
+            nameRes = Res.string.baro_pressure,
             color = Environment.BAROMETRIC_PRESSURE.color,
             isLine = true,
             environmentMetric = Environment.BAROMETRIC_PRESSURE,
         ),
         LegendData(
-            nameRes = R.string.lux,
+            nameRes = Res.string.lux,
             color = Environment.LUX.color,
             isLine = true,
             environmentMetric = Environment.LUX,
         ),
         LegendData(
-            nameRes = R.string.uv_lux,
+            nameRes = Res.string.uv_lux,
             color = Environment.UV_LUX.color,
             isLine = true,
             environmentMetric = Environment.UV_LUX,
@@ -96,13 +96,13 @@ private val LEGEND_DATA_2 =
 private val LEGEND_DATA_3 =
     listOf(
         LegendData(
-            nameRes = R.string.soil_temperature,
+            nameRes = Res.string.soil_temperature,
             color = Environment.SOIL_TEMPERATURE.color,
             isLine = true,
             environmentMetric = Environment.SOIL_TEMPERATURE,
         ),
         LegendData(
-            nameRes = R.string.soil_moisture,
+            nameRes = Res.string.soil_moisture,
             color = Environment.SOIL_MOISTURE.color,
             isLine = true,
             environmentMetric = Environment.SOIL_MOISTURE,

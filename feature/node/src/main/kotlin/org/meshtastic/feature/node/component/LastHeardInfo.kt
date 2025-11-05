@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun LastHeardInfo(
@@ -39,7 +40,7 @@ fun LastHeardInfo(
     IconInfo(
         modifier = modifier,
         icon = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
-        contentDescription = stringResource(org.meshtastic.core.strings.R.string.node_sort_last_heard),
+        contentDescription = stringResource(Res.string.node_sort_last_heard),
         text = formatAgo(lastHeard, currentTimeMillis),
         contentColor = contentColor,
     )

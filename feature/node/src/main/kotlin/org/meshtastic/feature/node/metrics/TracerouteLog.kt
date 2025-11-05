@@ -64,7 +64,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
 import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
@@ -76,6 +75,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshProtos
 import java.text.DateFormat
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod")
@@ -95,7 +95,7 @@ fun TracerouteLogScreen(
     if (showDialog != null) {
         val message = showDialog ?: AnnotatedString("") // Should not be null if dialog is shown
         SimpleAlertDialog(
-            title = R.string.traceroute,
+            title = Res.string.traceroute,
             text = { SelectionContainer { Text(text = message) } },
             onDismiss = { showDialog = null },
         )
@@ -185,11 +185,11 @@ private fun DeleteItem(onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete),
+                    contentDescription = stringResource(Res.string.delete),
                     tint = MaterialTheme.colorScheme.error,
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(text = stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                Text(text = stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
             }
         },
     )
@@ -202,7 +202,7 @@ private fun TracerouteItem(icon: ImageVector, text: String, modifier: Modifier =
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(imageVector = icon, contentDescription = stringResource(R.string.traceroute))
+            Icon(imageVector = icon, contentDescription = stringResource(Res.string.traceroute))
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = text, style = MaterialTheme.typography.bodyLarge)
         }
@@ -213,23 +213,23 @@ private fun TracerouteItem(icon: ImageVector, text: String, modifier: Modifier =
 @Composable
 private fun MeshProtos.RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
     this == null -> {
-        stringResource(R.string.routing_error_no_response) to Icons.Default.PersonOff
+        stringResource(Res.string.routing_error_no_response) to Icons.Default.PersonOff
     }
     // A direct route means the sender and receiver are the only two nodes in the route.
     routeCount <= 2 && routeBackCount <= 2 -> { // also check routeBackCount for direct to be more robust
-        stringResource(R.string.traceroute_direct) to Icons.Default.Group
+        stringResource(Res.string.traceroute_direct) to Icons.Default.Group
     }
 
     routeCount == routeBackCount -> {
         val hops = routeCount - 2
-        pluralStringResource(R.plurals.traceroute_hops, hops, hops) to Icons.Default.Groups
+        pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to Icons.Default.Groups
     }
 
     else -> {
         // Asymmetric route
         val towards = maxOf(0, routeCount - 2)
         val back = maxOf(0, routeBackCount - 2)
-        stringResource(R.string.traceroute_diff, towards, back) to Icons.Default.Groups
+        stringResource(Res.string.traceroute_diff, towards, back) to Icons.Default.Groups
     }
 }
 

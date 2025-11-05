@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -36,6 +35,7 @@ import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
@@ -45,7 +45,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(R.string.display),
+        title = stringResource(Res.string.display),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -57,10 +57,10 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.display_config)) {
+            TitledCard(title = stringResource(Res.string.display_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.always_point_north),
-                    summary = stringResource(R.string.config_display_compass_north_top_summary),
+                    title = stringResource(Res.string.always_point_north),
+                    summary = stringResource(Res.string.config_display_compass_north_top_summary),
                     checked = formState.value.compassNorthTop,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { compassNorthTop = it } },
@@ -68,8 +68,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.use_12h_format),
-                    summary = stringResource(R.string.display_time_in_12h_format),
+                    title = stringResource(Res.string.use_12h_format),
+                    summary = stringResource(Res.string.display_time_in_12h_format),
                     enabled = state.connected,
                     checked = formState.value.use12HClock,
                     onCheckedChange = { formState.value = formState.value.copy { use12HClock = it } },
@@ -77,8 +77,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.bold_heading),
-                    summary = stringResource(R.string.config_display_heading_bold_summary),
+                    title = stringResource(Res.string.bold_heading),
+                    summary = stringResource(Res.string.config_display_heading_bold_summary),
                     checked = formState.value.headingBold,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { headingBold = it } },
@@ -86,8 +86,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.display_units),
-                    summary = stringResource(R.string.config_display_units_summary),
+                    title = stringResource(Res.string.display_units),
+                    summary = stringResource(Res.string.config_display_units_summary),
                     enabled = state.connected,
                     items =
                     DisplayConfig.DisplayUnits.entries
@@ -99,12 +99,12 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.advanced)) {
+            TitledCard(title = stringResource(Res.string.advanced)) {
                 val screenOnIntervals = remember { IntervalConfiguration.DISPLAY_SCREEN_ON.allowedIntervals }
                 val carouselIntervals = remember { IntervalConfiguration.DISPLAY_CAROUSEL.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.screen_on_for),
-                    summary = stringResource(R.string.config_display_screen_on_secs_summary),
+                    title = stringResource(Res.string.screen_on_for),
+                    summary = stringResource(Res.string.config_display_screen_on_secs_summary),
                     enabled = state.connected,
                     items = screenOnIntervals.map { it to it.toDisplayString(context = context) },
                     selectedItem =
@@ -114,8 +114,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.carousel_interval),
-                    summary = stringResource(R.string.config_display_auto_screen_carousel_secs_summary),
+                    title = stringResource(Res.string.carousel_interval),
+                    summary = stringResource(Res.string.config_display_auto_screen_carousel_secs_summary),
                     enabled = state.connected,
                     items = carouselIntervals.map { it to it.toDisplayString(context = context) },
                     selectedItem =
@@ -127,8 +127,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.wake_on_tap_or_motion),
-                    summary = stringResource(R.string.config_display_wake_on_tap_or_motion_summary),
+                    title = stringResource(Res.string.wake_on_tap_or_motion),
+                    summary = stringResource(Res.string.config_display_wake_on_tap_or_motion_summary),
                     checked = formState.value.wakeOnTapOrMotion,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { wakeOnTapOrMotion = it } },
@@ -136,8 +136,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.flip_screen),
-                    summary = stringResource(R.string.config_display_flip_screen_summary),
+                    title = stringResource(Res.string.flip_screen),
+                    summary = stringResource(Res.string.config_display_flip_screen_summary),
                     checked = formState.value.flipScreen,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { flipScreen = it } },
@@ -145,8 +145,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.display_mode),
-                    summary = stringResource(R.string.config_display_displaymode_summary),
+                    title = stringResource(Res.string.display_mode),
+                    summary = stringResource(Res.string.config_display_displaymode_summary),
                     enabled = state.connected,
                     items =
                     DisplayConfig.DisplayMode.entries
@@ -157,8 +157,8 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.oled_type),
-                    summary = stringResource(R.string.config_display_oled_summary),
+                    title = stringResource(Res.string.oled_type),
+                    summary = stringResource(Res.string.config_display_oled_summary),
                     enabled = state.connected,
                     items =
                     DisplayConfig.OledType.entries
@@ -169,7 +169,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.compass_orientation),
+                    title = stringResource(Res.string.compass_orientation),
                     enabled = state.connected,
                     items =
                     DisplayConfig.CompassOrientation.entries

@@ -53,10 +53,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.Contact
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable
@@ -197,10 +197,10 @@ private fun ContactItemPreview() {
     val sampleContact =
         Contact(
             contactKey = "0^all",
-            shortName = stringResource(R.string.some_username),
-            longName = stringResource(R.string.unknown_username),
+            shortName = stringResource(Res.string.some_username),
+            longName = stringResource(Res.string.unknown_username),
             lastMessageTime = "Mon",
-            lastMessageText = stringResource(R.string.sample_message),
+            lastMessageText = stringResource(Res.string.sample_message),
             unreadCount = 2,
             messageCount = 10,
             isMuted = true,

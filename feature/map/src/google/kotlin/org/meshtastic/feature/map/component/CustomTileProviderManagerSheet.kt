@@ -53,8 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import org.meshtastic.core.data.model.CustomTileProviderConfig
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable
@@ -89,7 +89,7 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
     LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text(
-                text = stringResource(R.string.manage_custom_tile_sources),
+                text = stringResource(Res.string.manage_custom_tile_sources),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(16.dp),
             )
@@ -99,7 +99,7 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
         if (customTileProviders.isEmpty()) {
             item {
                 Text(
-                    text = stringResource(R.string.no_custom_tile_sources_found),
+                    text = stringResource(Res.string.no_custom_tile_sources_found),
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -119,13 +119,13 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
                             ) {
                                 Icon(
                                     Icons.Filled.Edit,
-                                    contentDescription = stringResource(R.string.edit_custom_tile_source),
+                                    contentDescription = stringResource(Res.string.edit_custom_tile_source),
                                 )
                             }
                             IconButton(onClick = { mapViewModel.removeCustomTileProvider(config.id) }) {
                                 Icon(
                                     Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.delete_custom_tile_source),
+                                    contentDescription = stringResource(Res.string.delete_custom_tile_source),
                                 )
                             }
                         }
@@ -143,7 +143,7 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
                 },
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
             ) {
-                Text(stringResource(R.string.add_custom_tile_source))
+                Text(stringResource(Res.string.add_custom_tile_source))
             }
         }
     }
@@ -163,10 +163,10 @@ private fun AddEditCustomTileProviderDialog(
     var urlError by remember { mutableStateOf<String?>(null) }
     val customTileProviders by mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle()
 
-    val emptyNameError = stringResource(R.string.name_cannot_be_empty)
-    val providerNameExistsError = stringResource(R.string.provider_name_exists)
-    val urlCannotBeEmptyError = stringResource(R.string.url_cannot_be_empty)
-    val urlMustContainPlaceholdersError = stringResource(R.string.url_must_contain_placeholders)
+    val emptyNameError = stringResource(Res.string.name_cannot_be_empty)
+    val providerNameExistsError = stringResource(Res.string.provider_name_exists)
+    val urlCannotBeEmptyError = stringResource(Res.string.url_cannot_be_empty)
+    val urlMustContainPlaceholdersError = stringResource(Res.string.url_must_contain_placeholders)
 
     fun validateAndSave() {
         val currentNameError =
@@ -186,9 +186,9 @@ private fun AddEditCustomTileProviderDialog(
         title = {
             Text(
                 if (config == null) {
-                    stringResource(R.string.add_custom_tile_source)
+                    stringResource(Res.string.add_custom_tile_source)
                 } else {
-                    stringResource(R.string.edit_custom_tile_source)
+                    stringResource(Res.string.edit_custom_tile_source)
                 },
             )
         },
@@ -200,7 +200,7 @@ private fun AddEditCustomTileProviderDialog(
                         name = it
                         nameError = null
                     },
-                    label = { Text(stringResource(R.string.name)) },
+                    label = { Text(stringResource(Res.string.name)) },
                     isError = nameError != null,
                     supportingText = { nameError?.let { Text(it) } },
                     singleLine = true,
@@ -211,13 +211,13 @@ private fun AddEditCustomTileProviderDialog(
                         url = it
                         urlError = null
                     },
-                    label = { Text(stringResource(R.string.url_template)) },
+                    label = { Text(stringResource(Res.string.url_template)) },
                     isError = urlError != null,
                     supportingText = {
                         if (urlError != null) {
                             Text(urlError!!)
                         } else {
-                            Text(stringResource(R.string.url_template_hint))
+                            Text(stringResource(Res.string.url_template_hint))
                         }
                     },
                     singleLine = false,
@@ -225,8 +225,8 @@ private fun AddEditCustomTileProviderDialog(
                 )
             }
         },
-        confirmButton = { Button(onClick = { validateAndSave() }) { Text(stringResource(R.string.save)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        confirmButton = { Button(onClick = { validateAndSave() }) { Text(stringResource(Res.string.save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 

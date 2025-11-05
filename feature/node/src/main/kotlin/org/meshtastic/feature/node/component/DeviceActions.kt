@@ -34,12 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.NodeDetailAction
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DeviceActions(
@@ -67,9 +67,9 @@ fun DeviceActions(
         onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
         onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
     )
-    TitledCard(title = stringResource(R.string.actions), modifier = modifier) {
+    TitledCard(title = stringResource(Res.string.actions), modifier = modifier) {
         ListItem(
-            text = stringResource(R.string.share_contact),
+            text = stringResource(Res.string.share_contact),
             leadingIcon = Icons.Rounded.QrCode2,
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.ShareContact) },
@@ -82,7 +82,7 @@ fun DeviceActions(
         InsetDivider()
 
         SwitchListItem(
-            text = stringResource(R.string.favorite),
+            text = stringResource(Res.string.favorite),
             leadingIcon = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
             leadingIconTint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
             checked = node.isFavorite,
@@ -92,7 +92,7 @@ fun DeviceActions(
         InsetDivider()
 
         SwitchListItem(
-            text = stringResource(R.string.ignore),
+            text = stringResource(Res.string.ignore),
             leadingIcon =
             if (node.isIgnored) Icons.AutoMirrored.Outlined.VolumeMute else Icons.AutoMirrored.Default.VolumeUp,
             checked = node.isIgnored,
@@ -102,7 +102,7 @@ fun DeviceActions(
         InsetDivider()
 
         ListItem(
-            text = stringResource(R.string.remove),
+            text = stringResource(Res.string.remove),
             leadingIcon = Icons.Rounded.Delete,
             trailingIcon = null,
             onClick = { displayRemoveDialog = true },

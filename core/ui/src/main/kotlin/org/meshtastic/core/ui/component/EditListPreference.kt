@@ -41,11 +41,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.ByteString
-import org.meshtastic.core.strings.R
 import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePin
 import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePinType
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.remoteHardwarePin
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable
@@ -84,7 +84,7 @@ inline fun <reified T> EditListPreference(
                     ) {
                         Icon(
                             imageVector = Icons.TwoTone.Close,
-                            contentDescription = stringResource(R.string.delete),
+                            contentDescription = stringResource(Res.string.delete),
                             modifier = Modifier.wrapContentSize(),
                         )
                     }
@@ -119,7 +119,7 @@ inline fun <reified T> EditListPreference(
                 }
                 is RemoteHardwarePin -> {
                     EditTextPreference(
-                        title = stringResource(R.string.gpio_pin),
+                        title = stringResource(Res.string.gpio_pin),
                         value = value.gpioPin,
                         enabled = enabled,
                         keyboardActions = keyboardActions,
@@ -131,7 +131,7 @@ inline fun <reified T> EditListPreference(
                         },
                     )
                     EditTextPreference(
-                        title = stringResource(R.string.name),
+                        title = stringResource(Res.string.name),
                         value = value.name,
                         maxSize = 14, // name max_size:15
                         enabled = enabled,
@@ -146,7 +146,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                     DropDownPreference(
-                        title = stringResource(R.string.type),
+                        title = stringResource(Res.string.type),
                         enabled = enabled,
                         items =
                         RemoteHardwarePinType.entries
@@ -176,7 +176,7 @@ inline fun <reified T> EditListPreference(
             },
             enabled = maxCount > listState.size,
         ) {
-            Text(text = stringResource(R.string.add))
+            Text(text = stringResource(Res.string.add))
         }
     }
 }
@@ -186,7 +186,7 @@ inline fun <reified T> EditListPreference(
 private fun EditListPreferencePreview() {
     Column {
         EditListPreference(
-            title = stringResource(R.string.ignore_incoming),
+            title = stringResource(Res.string.ignore_incoming),
             summary = "This is a summary",
             list = listOf(12345, 67890),
             maxCount = 4,

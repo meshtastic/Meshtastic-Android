@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun MapScreen(
@@ -44,7 +44,7 @@ fun MapScreen(
         modifier = modifier,
         topBar = {
             MainAppBar(
-                title = stringResource(R.string.map),
+                title = stringResource(Res.string.map),
                 ourNode = ourNodeInfo,
                 showNodeChip = ourNodeInfo != null && isConnected,
                 canNavigateUp = false,

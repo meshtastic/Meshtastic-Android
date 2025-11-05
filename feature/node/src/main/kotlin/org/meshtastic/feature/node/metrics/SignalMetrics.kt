@@ -57,7 +57,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
@@ -68,6 +67,7 @@ import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("MagicNumber")
 private enum class Metric(val color: Color, val min: Float, val max: Float) {
@@ -85,8 +85,8 @@ private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIG
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = R.string.rssi, color = Metric.RSSI.color, environmentMetric = null),
-        LegendData(nameRes = R.string.snr, color = Metric.SNR.color, environmentMetric = null),
+        LegendData(nameRes = Res.string.rssi, color = Metric.RSSI.color, environmentMetric = null),
+        LegendData(nameRes = Res.string.snr, color = Metric.SNR.color, environmentMetric = null),
     )
 
 @Composable
@@ -114,8 +114,8 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 LegendInfoDialog(
                     pairedRes =
                     listOf(
-                        Pair(R.string.snr, R.string.snr_definition),
-                        Pair(R.string.rssi, R.string.rssi_definition),
+                        Pair(Res.string.snr, Res.string.snr_definition),
+                        Pair(Res.string.rssi, Res.string.rssi_definition),
                     ),
                     onDismiss = { displayInfoDialog = false },
                 )

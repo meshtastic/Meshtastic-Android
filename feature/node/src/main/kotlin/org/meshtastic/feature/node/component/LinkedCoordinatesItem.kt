@@ -38,12 +38,12 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.formatAgo
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
 import timber.log.Timber
 import java.net.URLEncoder
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -56,7 +56,7 @@ fun LinkedCoordinatesItem(node: Node) {
     val coordinates = GPSFormat.toDec(node.latitude, node.longitude)
 
     BasicListItem(
-        text = stringResource(R.string.last_position_update),
+        text = stringResource(Res.string.last_position_update),
         leadingIcon = Icons.Default.LocationOn,
         supportingText = "$ago • $coordinates",
         trailingContent = Icons.AutoMirrored.Rounded.KeyboardArrowRight.icon(),

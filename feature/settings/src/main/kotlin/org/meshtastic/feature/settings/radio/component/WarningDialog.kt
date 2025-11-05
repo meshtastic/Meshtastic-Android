@@ -28,8 +28,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun WarningDialog(
@@ -42,7 +42,7 @@ fun WarningDialog(
         onDismissRequest = {},
         icon = { icon?.let { Icon(imageVector = it, contentDescription = null) } },
         title = { Text(text = title) },
-        dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(Res.string.cancel)) } },
         confirmButton = {
             Button(
                 onClick = {
@@ -50,7 +50,7 @@ fun WarningDialog(
                     onConfirm()
                 },
             ) {
-                Text(stringResource(R.string.send))
+                Text(stringResource(Res.string.send))
             }
         },
     )

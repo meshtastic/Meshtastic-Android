@@ -26,7 +26,7 @@ import androidx.compose.material.icons.outlined.Router
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 /**
  * Screen for configuring location permissions during the app introduction. It explains why location permissions are
@@ -42,8 +42,8 @@ internal fun LocationScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfi
     val context = LocalContext.current
     val annotatedString =
         context.createClickableAnnotatedString(
-            fullTextRes = R.string.phone_location_description,
-            linkTextRes = R.string.settings,
+            fullTextRes = Res.string.phone_location_description,
+            linkTextRes = Res.string.settings,
             tag = SETTINGS_TAG,
         )
 
@@ -51,34 +51,34 @@ internal fun LocationScreen(showNextButton: Boolean, onSkip: () -> Unit, onConfi
         listOf(
             FeatureUIData(
                 icon = Icons.Outlined.LocationOn,
-                titleRes = R.string.share_location,
-                subtitleRes = R.string.share_location_description,
+                titleRes = Res.string.share_location,
+                subtitleRes = Res.string.share_location_description,
             ),
             FeatureUIData(
                 icon = Icons.Outlined.Router,
-                titleRes = R.string.distance_measurements,
-                subtitleRes = R.string.distance_measurements_description,
+                titleRes = Res.string.distance_measurements,
+                subtitleRes = Res.string.distance_measurements_description,
             ),
             FeatureUIData(
                 icon = Icons.Outlined.Router, // Consider a different icon if appropriate
-                titleRes = R.string.distance_filters,
-                subtitleRes = R.string.distance_filters_description,
+                titleRes = Res.string.distance_filters,
+                subtitleRes = Res.string.distance_filters_description,
             ),
             FeatureUIData(
                 icon = Icons.Outlined.LocationOn, // Consider a different icon if appropriate
-                titleRes = R.string.mesh_map_location,
-                subtitleRes = R.string.mesh_map_location_description,
+                titleRes = Res.string.mesh_map_location,
+                subtitleRes = Res.string.mesh_map_location_description,
             ),
         )
     }
 
     PermissionScreenLayout(
-        headlineRes = R.string.phone_location,
+        headlineRes = Res.string.phone_location,
         annotatedDescription = annotatedString,
         features = features,
         onSkip = onSkip,
         onConfigure = onConfigure,
-        configureButtonTextRes = if (showNextButton) R.string.next else R.string.configure_location_permissions,
+        configureButtonTextRes = if (showNextButton) Res.string.next else Res.string.configure_location_permissions,
         onAnnotationClick = {
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
             intent.data = Uri.fromParts("package", context.packageName, null)

@@ -29,8 +29,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun MapButton(
@@ -57,5 +57,5 @@ fun MapButton(icon: ImageVector, contentDescription: String?, modifier: Modifier
 @PreviewLightDark
 @Composable
 private fun MapButtonPreview() {
-    AppTheme { MapButton(icon = Icons.Outlined.Layers, contentDescription = R.string.map_style_selection) }
+    AppTheme { MapButton(icon = Icons.Outlined.Layers, contentDescription = Res.string.map_style_selection) }
 }

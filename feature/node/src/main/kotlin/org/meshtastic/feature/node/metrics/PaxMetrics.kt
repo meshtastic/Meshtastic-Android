@@ -56,7 +56,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
@@ -65,15 +64,16 @@ import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
 import java.text.DateFormat
 import java.util.Date
+import org.meshtastic.core.strings.R as Res
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
 private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
 private enum class PaxSeries(val color: Color, val legendRes: Int) {
-    PAX(Color.Black, R.string.pax),
-    BLE(Color.Cyan, R.string.ble_devices),
-    WIFI(Color.Green, R.string.wifi_devices),
+    PAX(Color.Black, Res.string.pax),
+    BLE(Color.Cyan, Res.string.ble_devices),
+    WIFI(Color.Green, Res.string.wifi_devices),
 }
 
 @Suppress("LongMethod")
@@ -228,7 +228,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             // List
             if (paxMetrics.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.no_pax_metrics_logs),
+                    text = stringResource(Res.string.no_pax_metrics_logs),
                     modifier = Modifier.fillMaxSize().padding(16.dp),
                     textAlign = TextAlign.Center,
                 )
@@ -314,7 +314,7 @@ fun PaxMetricsItem(log: MeshLog, pax: PaxcountProtos.Paxcount, dateFormat: DateF
                 modifier = Modifier.weight(1f, fill = true),
             )
             Text(
-                text = stringResource(R.string.uptime) + ": " + formatUptime(pax.uptime),
+                text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.End,
                 modifier = Modifier.alignByBaseline(),

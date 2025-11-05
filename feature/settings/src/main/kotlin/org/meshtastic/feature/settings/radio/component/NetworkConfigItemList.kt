@@ -42,7 +42,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditIPv4Preference
 import org.meshtastic.core.ui.component.EditPasswordPreference
@@ -55,10 +54,11 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ConfigProtos.Config.NetworkConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
-    SimpleAlertDialog(title = R.string.error, text = R.string.wifi_qr_code_error, onDismiss = onDismiss)
+    SimpleAlertDialog(title = Res.string.error, text = Res.string.wifi_qr_code_error, onDismiss = onDismiss)
 
 @Composable
 fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
@@ -100,7 +100,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(R.string.network),
+        title = stringResource(Res.string.network),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -118,11 +118,11 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 connectionStatus.ethernet?.status?.isConnected == true
             ) {
                 item {
-                    TitledCard(title = stringResource(R.string.connection_status)) {
+                    TitledCard(title = stringResource(Res.string.connection_status)) {
                         connectionStatus.wifi?.let { wifiStatus ->
                             if (wifiStatus.status.isConnected) {
                                 ListItem(
-                                    text = stringResource(R.string.wifi_ip),
+                                    text = stringResource(Res.string.wifi_ip),
                                     supportingText = formatIpAddress(wifiStatus.status.ipAddress),
                                     trailingIcon = null,
                                 )
@@ -131,7 +131,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                         connectionStatus.ethernet?.let { ethernetStatus ->
                             if (ethernetStatus.status.isConnected) {
                                 ListItem(
-                                    text = stringResource(R.string.ethernet_ip),
+                                    text = stringResource(Res.string.ethernet_ip),
                                     supportingText = formatIpAddress(ethernetStatus.status.ipAddress),
                                     trailingIcon = null,
                                 )
@@ -143,10 +143,10 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
         }
         if (state.metadata?.hasWifi == true) {
             item {
-                TitledCard(title = stringResource(R.string.wifi_config)) {
+                TitledCard(title = stringResource(Res.string.wifi_config)) {
                     SwitchPreference(
-                        title = stringResource(R.string.wifi_enabled),
-                        summary = stringResource(R.string.config_network_wifi_enabled_summary),
+                        title = stringResource(Res.string.wifi_enabled),
+                        summary = stringResource(Res.string.config_network_wifi_enabled_summary),
                         checked = formState.value.wifiEnabled,
                         enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy { wifiEnabled = it } },
@@ -154,7 +154,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                     )
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(R.string.ssid),
+                        title = stringResource(Res.string.ssid),
                         value = formState.value.wifiSsid,
                         maxSize = 32, // wifi_ssid max_size:33
                         enabled = state.connected,
@@ -166,7 +166,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                     )
                     HorizontalDivider()
                     EditPasswordPreference(
-                        title = stringResource(R.string.password),
+                        title = stringResource(Res.string.password),
                         value = formState.value.wifiPsk,
                         maxSize = 64, // wifi_psk max_size:65
                         enabled = state.connected,
@@ -179,17 +179,17 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(48.dp),
                         enabled = state.connected,
                     ) {
-                        Text(text = stringResource(R.string.wifi_qr_code_scan))
+                        Text(text = stringResource(Res.string.wifi_qr_code_scan))
                     }
                 }
             }
         }
         if (state.metadata?.hasEthernet == true) {
             item {
-                TitledCard(title = stringResource(R.string.ethernet_config)) {
+                TitledCard(title = stringResource(Res.string.ethernet_config)) {
                     SwitchPreference(
-                        title = stringResource(R.string.ethernet_enabled),
-                        summary = stringResource(R.string.config_network_eth_enabled_summary),
+                        title = stringResource(Res.string.ethernet_enabled),
+                        summary = stringResource(Res.string.config_network_eth_enabled_summary),
                         checked = formState.value.ethEnabled,
                         enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy { ethEnabled = it } },
@@ -201,10 +201,10 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
 
         if (state.metadata?.hasEthernet == true || state.metadata?.hasWifi == true) {
             item {
-                TitledCard(title = stringResource(R.string.udp_config)) {
+                TitledCard(title = stringResource(Res.string.udp_config)) {
                     SwitchPreference(
-                        title = stringResource(R.string.udp_enabled),
-                        summary = stringResource(R.string.config_network_udp_enabled_summary),
+                        title = stringResource(Res.string.udp_enabled),
+                        summary = stringResource(Res.string.config_network_udp_enabled_summary),
                         checked = formState.value.enabledProtocols == 1,
                         enabled = state.connected,
                         onCheckedChange = {
@@ -218,9 +218,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
         }
 
         item {
-            TitledCard(title = stringResource(R.string.advanced)) {
+            TitledCard(title = stringResource(Res.string.advanced)) {
                 EditTextPreference(
-                    title = stringResource(R.string.ntp_server),
+                    title = stringResource(Res.string.ntp_server),
                     value = formState.value.ntpServer,
                     maxSize = 32, // ntp_server max_size:33
                     enabled = state.connected,
@@ -232,7 +232,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.rsyslog_server),
+                    title = stringResource(Res.string.rsyslog_server),
                     value = formState.value.rsyslogServer,
                     maxSize = 32, // rsyslog_server max_size:33
                     enabled = state.connected,
@@ -244,7 +244,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.ipv4_mode),
+                    title = stringResource(Res.string.ipv4_mode),
                     enabled = state.connected,
                     items =
                     NetworkConfig.AddressMode.entries
@@ -255,7 +255,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 EditIPv4Preference(
-                    title = stringResource(R.string.ip),
+                    title = stringResource(Res.string.ip),
                     value = formState.value.ipv4Config.ip,
                     enabled = state.connected && formState.value.addressMode == NetworkConfig.AddressMode.STATIC,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -266,7 +266,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 EditIPv4Preference(
-                    title = stringResource(R.string.gateway),
+                    title = stringResource(Res.string.gateway),
                     value = formState.value.ipv4Config.gateway,
                     enabled = state.connected && formState.value.addressMode == NetworkConfig.AddressMode.STATIC,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -277,7 +277,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 )
                 HorizontalDivider()
                 EditIPv4Preference(
-                    title = stringResource(R.string.subnet),
+                    title = stringResource(Res.string.subnet),
                     value = formState.value.ipv4Config.subnet,
                     enabled = state.connected && formState.value.addressMode == NetworkConfig.AddressMode.STATIC,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

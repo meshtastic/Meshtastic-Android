@@ -61,11 +61,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.strings.R as Res
 
 /**
  * function to display information about the current node's encryption key.
@@ -85,9 +85,9 @@ fun NodeKeyStatusIcon(
     if (showEncryptionDialog) {
         val (title, text) =
             when {
-                mismatchKey -> R.string.encryption_error to R.string.encryption_error_text
-                hasPKC -> R.string.encryption_pkc to R.string.encryption_pkc_text
-                else -> R.string.encryption_psk to R.string.encryption_psk_text
+                mismatchKey -> Res.string.encryption_error to Res.string.encryption_error_text
+                hasPKC -> Res.string.encryption_pkc to Res.string.encryption_pkc_text
+                else -> Res.string.encryption_psk to Res.string.encryption_psk_text
             }
         KeyStatusDialog(title, text, publicKey) { showEncryptionDialog = false }
     }
@@ -108,9 +108,9 @@ fun NodeKeyStatusIcon(
             stringResource(
                 id =
                 when {
-                    mismatchKey -> R.string.encryption_error
-                    hasPKC -> R.string.encryption_pkc
-                    else -> R.string.encryption_psk
+                    mismatchKey -> Res.string.encryption_error
+                    hasPKC -> Res.string.encryption_pkc
+                    else -> Res.string.encryption_psk
                 },
             ),
             tint = tint,
@@ -140,27 +140,27 @@ enum class NodeKeySecurityState(
     PKM(
         icon = Icons.Default.KeyOff,
         color = { colorScheme.StatusRed },
-        descriptionResId = R.string.encryption_error,
-        helpTextResId = R.string.encryption_error_text,
-        title = R.string.encryption_error,
+        descriptionResId = Res.string.encryption_error,
+        helpTextResId = Res.string.encryption_error_text,
+        title = Res.string.encryption_error,
     ),
 
     // State for public key encryption
     PKC(
         icon = Icons.Default.Lock,
         color = { colorScheme.StatusGreen },
-        title = R.string.encryption_pkc,
-        helpTextResId = R.string.encryption_pkc_text,
-        descriptionResId = R.string.encryption_pkc,
+        title = Res.string.encryption_pkc,
+        helpTextResId = Res.string.encryption_pkc_text,
+        descriptionResId = Res.string.encryption_pkc,
     ),
 
     // State for shared key encryption
     PSK(
         icon = Icons.Default.LockOpen,
         color = { colorScheme.StatusYellow },
-        title = R.string.encryption_psk,
-        helpTextResId = R.string.encryption_psk_text,
-        descriptionResId = R.string.encryption_psk,
+        title = Res.string.encryption_psk,
+        helpTextResId = Res.string.encryption_psk_text,
+        descriptionResId = Res.string.encryption_psk,
     ),
 }
 
@@ -172,7 +172,7 @@ private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: By
         onDismissRequest = onDismiss,
         title = {
             if (showAll) {
-                Text(stringResource(R.string.show_all_key_title))
+                Text(stringResource(Res.string.show_all_key_title))
             } else {
                 Text(stringResource(title))
             }
@@ -184,10 +184,10 @@ private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: By
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = stringResource(text), textAlign = TextAlign.Center)
                     Spacer(Modifier.height(16.dp))
-                    if (key != null && title == R.string.encryption_pkc) {
+                    if (key != null && title == Res.string.encryption_pkc) {
                         val keyString = Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
                         Text(
-                            text = stringResource(R.string.config_security_public_key) + ":",
+                            text = stringResource(Res.string.config_security_public_key) + ":",
                             textAlign = TextAlign.Center,
                         )
                         Spacer(Modifier.height(8.dp))
@@ -208,13 +208,13 @@ private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: By
                 TextButton(onClick = { showAll = !showAll }) {
                     Text(
                         if (showAll) {
-                            stringResource(R.string.security_icon_help_show_less)
+                            stringResource(Res.string.security_icon_help_show_less)
                         } else {
-                            stringResource(R.string.security_icon_help_show_all)
+                            stringResource(Res.string.security_icon_help_show_all)
                         },
                     )
                 }
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.security_icon_help_dismiss)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.security_icon_help_dismiss)) }
             }
         },
     )
@@ -256,7 +256,9 @@ private fun AllKeyStates() {
 @PreviewLightDark
 @Composable
 private fun KeyStatusDialogErrorPreview() {
-    AppTheme { KeyStatusDialog(title = R.string.encryption_error, text = R.string.encryption_error_text, key = null) }
+    AppTheme {
+        KeyStatusDialog(title = Res.string.encryption_error, text = Res.string.encryption_error_text, key = null)
+    }
 }
 
 @PreviewLightDark
@@ -264,8 +266,8 @@ private fun KeyStatusDialogErrorPreview() {
 private fun KeyStatusDialogPkcPreview() {
     AppTheme {
         KeyStatusDialog(
-            title = R.string.encryption_pkc,
-            text = R.string.encryption_pkc_text,
+            title = Res.string.encryption_pkc,
+            text = Res.string.encryption_pkc_text,
             key = Channel.getRandomKey(),
         )
     }
@@ -274,7 +276,7 @@ private fun KeyStatusDialogPkcPreview() {
 @PreviewLightDark
 @Composable
 private fun KeyStatusDialogPskPreview() {
-    AppTheme { KeyStatusDialog(title = R.string.encryption_psk, text = R.string.encryption_psk_text, key = null) }
+    AppTheme { KeyStatusDialog(title = Res.string.encryption_psk, text = Res.string.encryption_psk_text, key = null) }
 }
 
 @Preview

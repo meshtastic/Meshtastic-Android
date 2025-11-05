@@ -25,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DistanceInfo(
@@ -37,7 +37,7 @@ fun DistanceInfo(
     IconInfo(
         modifier = modifier,
         icon = Icons.Rounded.SocialDistance,
-        contentDescription = stringResource(R.string.distance),
+        contentDescription = stringResource(Res.string.distance),
         text = distance,
         contentColor = contentColor,
     )

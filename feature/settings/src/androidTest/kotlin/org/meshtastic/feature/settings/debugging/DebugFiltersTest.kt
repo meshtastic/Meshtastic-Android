@@ -36,8 +36,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.strings.R
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
+import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class DebugFiltersTest {
@@ -47,7 +47,7 @@ class DebugFiltersTest {
     @Test
     fun debugFilterBar_showsFilterButtonAndMenu() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val filterLabel = context.getString(R.string.debug_filters)
+        val filterLabel = context.getString(Res.string.debug_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf<String>()) }
             var customFilterText by remember { mutableStateOf("") }
@@ -77,7 +77,7 @@ class DebugFiltersTest {
     @Test
     fun debugFilterBar_addCustomFilter_displaysActiveFilter() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val activeFiltersLabel = context.getString(R.string.debug_active_filters)
+        val activeFiltersLabel = context.getString(Res.string.debug_active_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf<String>()) }
             var customFilterText by remember { mutableStateOf("") }
@@ -109,7 +109,7 @@ class DebugFiltersTest {
     @Test
     fun debugActiveFilters_clearAllFilters_removesFilters() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val activeFiltersLabel = context.getString(R.string.debug_active_filters)
+        val activeFiltersLabel = context.getString(Res.string.debug_active_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf("A", "B")) }
             DebugActiveFilters(

@@ -51,7 +51,6 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.toSharedContact
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
@@ -59,6 +58,7 @@ import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import javax.inject.Inject
+import org.meshtastic.core.strings.R as Res
 
 // Given a human name, strip out the first letter of the first three words and return that as the
 // initials for
@@ -178,7 +178,7 @@ constructor(
             .filterNotNull()
             .onEach {
                 showAlert(
-                    title = app.getString(R.string.client_notification),
+                    title = app.getString(Res.string.client_notification),
                     message = it,
                     onConfirm = { serviceRepository.clearErrorMessage() },
                     dismissable = false,

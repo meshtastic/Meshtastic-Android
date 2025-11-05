@@ -40,7 +40,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SignalCellular0Bar
 import org.meshtastic.core.ui.icon.SignalCellular1Bar
@@ -52,6 +51,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.strings.R as Res
 
 private const val SIZE_ICON = 20
 
@@ -116,7 +116,7 @@ fun MaterialBluetoothSignalInfo(rssi: Int, modifier: Modifier = Modifier) {
     MaterialSignalInfo(
         modifier = modifier,
         signalBars = getBluetoothSignalBars(rssi = rssi),
-        signalStrengthValue = stringResource(R.string.dbm_value, rssi),
+        signalStrengthValue = stringResource(Res.string.dbm_value, rssi),
         typeIcon = Icons.Rounded.Bluetooth,
     )
 }

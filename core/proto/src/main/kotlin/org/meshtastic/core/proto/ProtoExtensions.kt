@@ -28,6 +28,7 @@ import org.meshtastic.proto.channel
 import org.meshtastic.proto.channelSettings
 import java.text.DateFormat
 import kotlin.time.Duration.Companion.days
+import org.meshtastic.core.strings.R as Res
 
 private const val SECONDS_TO_MILLIS = 1000L
 
@@ -38,7 +39,7 @@ fun MeshProtos.Position.formatPositionTime(dateFormat: DateFormat): String {
     val isOlderThanSixMonths = time * SECONDS_TO_MILLIS < sixMonthsAgo
     val timeText =
         if (isOlderThanSixMonths) {
-            stringResource(org.meshtastic.core.strings.R.string.unknown_age)
+            stringResource(Res.string.unknown_age)
         } else {
             dateFormat.format(time * SECONDS_TO_MILLIS)
         }
