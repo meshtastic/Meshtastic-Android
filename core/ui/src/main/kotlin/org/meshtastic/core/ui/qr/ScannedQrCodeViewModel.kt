@@ -23,8 +23,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.RadioConfigRepository
-import org.meshtastic.core.proto.getChannelList
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ChannelProtos
