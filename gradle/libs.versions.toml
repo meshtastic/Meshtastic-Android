@@ -9,7 +9,7 @@ androidxComposeMaterial3Adaptive = "1.2.0"
 androidxTracing = "1.9.4"
 datastore = "1.1.7"
 lifecycle = "2.9.4"
-navigation = "2.9.5"
+navigation = "2.9.6"
 navigation3 = "1.0.0-beta01"
 room = "2.8.3"
 
