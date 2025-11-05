@@ -42,7 +42,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.neighbor_info),
+        title = stringResource(R.string.neighbor_info),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -73,7 +73,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.transmit_over_lora),
-                    summary = stringResource(id = R.string.config_device_transmitOverLora_summary),
+                    summary = stringResource(R.string.config_device_transmitOverLora_summary),
                     checked = formState.value.transmitOverLora,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { transmitOverLora = it } },

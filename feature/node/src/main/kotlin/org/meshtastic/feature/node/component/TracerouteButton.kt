@@ -42,7 +42,7 @@ private const val COOL_DOWN_TIME_MS = 30000L
 
 @Composable
 fun TracerouteButton(
-    text: String = stringResource(id = R.string.traceroute),
+    text: String = stringResource(R.string.traceroute),
     lastTracerouteTime: Long?,
     onClick: () -> Unit,
 ) {

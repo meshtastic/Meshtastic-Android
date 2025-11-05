@@ -50,8 +50,8 @@ internal fun CriticalAlertsScreen(onSkip: () -> Unit, onConfigure: () -> Unit) {
             IntroBottomBar(
                 onSkip = onSkip,
                 onConfigure = onConfigure,
-                configureButtonText = stringResource(id = R.string.configure_critical_alerts),
-                skipButtonText = stringResource(id = R.string.skip),
+                configureButtonText = stringResource(R.string.configure_critical_alerts),
+                skipButtonText = stringResource(R.string.skip),
             )
         },
     ) { innerPadding ->

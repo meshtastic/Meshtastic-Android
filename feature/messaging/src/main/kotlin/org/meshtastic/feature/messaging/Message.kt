@@ -160,7 +160,7 @@ fun MessageScreen(
             Triple(index, id, name)
         }
     val (channelIndex, nodeId, rawChannelName) = channelInfo
-    val unknownChannelText = stringResource(id = R.string.unknown_channel)
+    val unknownChannelText = stringResource(R.string.unknown_channel)
     val channelName = rawChannelName ?: unknownChannelText
 
     val title =
@@ -350,10 +350,7 @@ private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState
             }
         },
     ) {
-        Icon(
-            imageVector = Icons.Default.ArrowDownward,
-            contentDescription = stringResource(id = R.string.scroll_to_bottom),
-        )
+        Icon(imageVector = Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.scroll_to_bottom))
     }
 }
 
@@ -529,22 +526,19 @@ private fun ActionModeTopBar(selectedCount: Int, onAction: (MessageMenuAction) -
         IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.clear_selection),
+                contentDescription = stringResource(R.string.clear_selection),
             )
         }
     },
     actions = {
         IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
-            Icon(imageVector = Icons.Default.ContentCopy, contentDescription = stringResource(id = R.string.copy))
+            Icon(imageVector = Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy))
         }
         IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete))
+            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
         }
         IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
-            Icon(
-                imageVector = Icons.Default.SelectAll,
-                contentDescription = stringResource(id = R.string.select_all),
-            )
+            Icon(imageVector = Icons.Default.SelectAll, contentDescription = stringResource(R.string.select_all))
         }
     },
 )
@@ -586,7 +580,7 @@ private fun MessageTopBar(
         IconButton(onClick = onNavigateBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.navigate_back),
+                contentDescription = stringResource(R.string.navigate_back),
             )
         }
     },
@@ -615,7 +609,7 @@ private fun MessageTopBarActions(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }, enabled = true) {
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.overflow_menu))
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(R.string.overflow_menu))
         }
         OverFlowMenu(
             expanded = expanded,
@@ -662,7 +656,7 @@ private fun OverFlowMenu(
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(id = R.string.quick_chat)) },
+                text = { Text(stringResource(R.string.quick_chat)) },
                 onClick = {
                     onDismiss()
                     onNavigateToQuickChatOptions()
@@ -670,7 +664,7 @@ private fun OverFlowMenu(
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.ChatBubbleOutline,
-                        contentDescription = stringResource(id = R.string.quick_chat),
+                        contentDescription = stringResource(R.string.quick_chat),
                     )
                 },
             )
@@ -775,10 +769,7 @@ private fun MessageInput(
         // cursor position and multi-byte characters, likely outside simple inputTransformation.
         trailingIcon = {
             IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(id = R.string.send),
-                )
+                Icon(imageVector = Icons.AutoMirrored.Default.Send, contentDescription = stringResource(R.string.send))
             }
         },
     )

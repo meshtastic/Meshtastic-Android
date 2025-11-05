@@ -58,10 +58,10 @@ fun <T> PacketResponseStateDialog(state: ResponseState<T>, onDismiss: () -> Unit
                     if (state.total == state.completed) onComplete()
                 }
                 if (state is ResponseState.Success) {
-                    Text(text = stringResource(id = R.string.delivery_confirmed))
+                    Text(text = stringResource(R.string.delivery_confirmed))
                 }
                 if (state is ResponseState.Error) {
-                    Text(text = stringResource(id = R.string.error), minLines = 2)
+                    Text(text = stringResource(R.string.error), minLines = 2)
                     Text(text = state.error.asString())
                 }
             }

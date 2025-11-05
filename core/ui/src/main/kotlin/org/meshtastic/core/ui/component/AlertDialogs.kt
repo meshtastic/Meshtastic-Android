@@ -72,7 +72,7 @@ fun SimpleAlertDialog(
                 Text(text = message.orEmpty())
             }
         },
-        confirmButton = { TextButton(onClick = onConfirmRequest) { Text(stringResource(id = R.string.okay)) } },
+        confirmButton = { TextButton(onClick = onConfirmRequest) { Text(stringResource(R.string.okay)) } },
     )
 }
 

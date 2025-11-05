@@ -92,8 +92,8 @@ internal fun PermissionScreenLayout(
             IntroBottomBar(
                 onSkip = onSkip,
                 onConfigure = onConfigure,
-                configureButtonText = stringResource(id = configureButtonTextRes),
-                skipButtonText = stringResource(id = R.string.skip),
+                configureButtonText = stringResource(configureButtonTextRes),
+                skipButtonText = stringResource(R.string.skip),
             )
         },
     ) { innerPadding ->

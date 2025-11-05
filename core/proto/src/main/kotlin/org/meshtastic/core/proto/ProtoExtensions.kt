@@ -38,7 +38,7 @@ fun MeshProtos.Position.formatPositionTime(dateFormat: DateFormat): String {
     val isOlderThanSixMonths = time * SECONDS_TO_MILLIS < sixMonthsAgo
     val timeText =
         if (isOlderThanSixMonths) {
-            stringResource(id = org.meshtastic.core.strings.R.string.unknown_age)
+            stringResource(org.meshtastic.core.strings.R.string.unknown_age)
         } else {
             dateFormat.format(time * SECONDS_TO_MILLIS)
         }

@@ -45,9 +45,9 @@ fun PreferenceFooter(
 ) {
     PreferenceFooter(
         enabled = enabled,
-        negativeText = stringResource(id = negativeText),
+        negativeText = stringResource(negativeText),
         onNegativeClicked = onNegativeClicked,
-        positiveText = stringResource(id = positiveText),
+        positiveText = stringResource(positiveText),
         onPositiveClicked = onPositiveClicked,
         modifier = modifier,
     )

@@ -95,7 +95,7 @@ fun DebugCustomFilterInput(
             },
             enabled = customFilterText.isNotBlank(),
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.debug_filter_add))
+            Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.debug_filter_add))
         }
     }
 }
@@ -144,7 +144,7 @@ internal fun DebugPresetFilters(
                         if (filter in filterTexts) {
                             Icon(
                                 imageVector = Icons.Filled.Done,
-                                contentDescription = stringResource(id = R.string.debug_filter_included),
+                                contentDescription = stringResource(R.string.debug_filter_included),
                             )
                         }
                     },
@@ -181,7 +181,7 @@ internal fun DebugFilterBar(
                         } else {
                             Icons.TwoTone.FilterAltOff
                         },
-                        contentDescription = stringResource(id = R.string.debug_filters),
+                        contentDescription = stringResource(R.string.debug_filters),
                     )
                 }
             }
@@ -256,7 +256,7 @@ internal fun DebugActiveFilters(
                 IconButton(onClick = { onFilterTextsChange(emptyList()) }) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(id = R.string.debug_filter_clear),
+                        contentDescription = stringResource(R.string.debug_filter_clear),
                     )
                 }
             }

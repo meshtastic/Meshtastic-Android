@@ -75,7 +75,7 @@ fun MainAppBar(
                 IconButton(onClick = onNavigateUp) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.navigate_back),
+                        contentDescription = stringResource(R.string.navigate_back),
                     )
                 }
             }
@@ -85,7 +85,7 @@ fun MainAppBar(
                     Icon(
                         imageVector =
                         ImageVector.vectorResource(id = org.meshtastic.core.ui.R.drawable.ic_meshtastic),
-                        contentDescription = stringResource(id = R.string.application_icon),
+                        contentDescription = stringResource(R.string.application_icon),
                     )
                 }
             }

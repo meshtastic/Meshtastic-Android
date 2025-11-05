@@ -57,7 +57,7 @@ fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewM
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.external_notification),
+        title = stringResource(R.string.external_notification),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

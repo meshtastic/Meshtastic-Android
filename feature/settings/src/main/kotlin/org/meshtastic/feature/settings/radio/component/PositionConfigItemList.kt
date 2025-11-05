@@ -121,7 +121,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     RadioConfigScreenList(
-        title = stringResource(id = R.string.position),
+        title = stringResource(R.string.position),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -147,7 +147,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 val items = remember { IntervalConfiguration.POSITION_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(R.string.broadcast_interval),
-                    summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
+                    summary = stringResource(R.string.config_position_broadcast_secs_summary),
                     enabled = state.connected,
                     items = items.map { it to it.toDisplayString(context = context) },
                     selectedItem =
@@ -170,7 +170,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     DropDownPreference(
                         title = stringResource(R.string.minimum_interval),
                         summary =
-                        stringResource(id = R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
+                        stringResource(R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
                         enabled = state.connected,
                         items = smartItems.map { it to it.toDisplayString(context = context) },
                         selectedItem =
@@ -184,8 +184,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(R.string.minimum_distance),
-                        summary =
-                        stringResource(id = R.string.config_position_broadcast_smart_minimum_distance_summary),
+                        summary = stringResource(R.string.config_position_broadcast_smart_minimum_distance_summary),
                         value = formState.value.broadcastSmartMinimumDistance,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -261,7 +260,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     val items = remember { IntervalConfiguration.GPS_UPDATE.allowedIntervals }
                     DropDownPreference(
                         title = stringResource(R.string.update_interval),
-                        summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
+                        summary = stringResource(R.string.config_position_gps_update_interval_summary),
                         enabled = state.connected,
                         items = items.map { it to it.toDisplayString(context = context) },
                         selectedItem =
@@ -277,7 +276,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             TitledCard(title = stringResource(R.string.position_flags)) {
                 BitwisePreference(
                     title = stringResource(R.string.position_flags),
-                    summary = stringResource(id = R.string.config_position_flags_summary),
+                    summary = stringResource(R.string.config_position_flags_summary),
                     value = formState.value.positionFlags,
                     enabled = state.connected,
                     items =

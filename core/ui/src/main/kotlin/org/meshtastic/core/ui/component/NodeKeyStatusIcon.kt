@@ -174,7 +174,7 @@ private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: By
             if (showAll) {
                 Text(stringResource(R.string.show_all_key_title))
             } else {
-                Text(stringResource(id = title))
+                Text(stringResource(title))
             }
         },
         text = {
@@ -182,12 +182,12 @@ private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: By
                 AllKeyStates()
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = stringResource(id = text), textAlign = TextAlign.Center)
+                    Text(text = stringResource(text), textAlign = TextAlign.Center)
                     Spacer(Modifier.height(16.dp))
                     if (key != null && title == R.string.encryption_pkc) {
                         val keyString = Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
                         Text(
-                            text = stringResource(id = R.string.config_security_public_key) + ":",
+                            text = stringResource(R.string.config_security_public_key) + ":",
                             textAlign = TextAlign.Center,
                         )
                         Spacer(Modifier.height(8.dp))

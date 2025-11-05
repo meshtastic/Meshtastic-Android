@@ -32,11 +32,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.strings.R
 
 @Composable
-fun CopyIconButton(
-    valueToCopy: String,
-    modifier: Modifier = Modifier,
-    label: String = stringResource(id = R.string.copy),
-) {
+fun CopyIconButton(valueToCopy: String, modifier: Modifier = Modifier, label: String = stringResource(R.string.copy)) {
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     IconButton(

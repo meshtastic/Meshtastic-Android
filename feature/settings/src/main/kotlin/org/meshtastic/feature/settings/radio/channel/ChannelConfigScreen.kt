@@ -81,7 +81,7 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     }
 
     ChannelConfigScreen(
-        title = stringResource(id = R.string.channels),
+        title = stringResource(R.string.channels),
         onBack = onBack,
         settingsList = state.channelList,
         loraConfig = state.radioConfig.lora,

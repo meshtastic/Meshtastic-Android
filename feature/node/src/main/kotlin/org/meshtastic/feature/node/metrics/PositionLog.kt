@@ -143,15 +143,15 @@ private fun ActionButtons(
             enabled = clearButtonEnabled,
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
         ) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.clear))
+            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.clear))
             Spacer(Modifier.width(8.dp))
-            Text(text = stringResource(id = R.string.clear))
+            Text(text = stringResource(R.string.clear))
         }
 
         OutlinedButton(modifier = Modifier.weight(1f), onClick = onSave, enabled = saveButtonEnabled) {
-            Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(id = R.string.save))
+            Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(R.string.save))
             Spacer(Modifier.width(8.dp))
-            Text(text = stringResource(id = R.string.save))
+            Text(text = stringResource(R.string.save))
         }
     }
 }

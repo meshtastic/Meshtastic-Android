@@ -50,10 +50,10 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.only_favorites)) },
+            text = { Text(stringResource(R.string.only_favorites)) },
             onClick = { mapViewModel.toggleOnlyFavorites() },
             leadingIcon = {
-                Icon(imageVector = Icons.Filled.Star, contentDescription = stringResource(id = R.string.only_favorites))
+                Icon(imageVector = Icons.Filled.Star, contentDescription = stringResource(R.string.only_favorites))
             },
             trailingIcon = {
                 Checkbox(
@@ -63,13 +63,10 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             },
         )
         DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.show_waypoints)) },
+            text = { Text(stringResource(R.string.show_waypoints)) },
             onClick = { mapViewModel.toggleShowWaypointsOnMap() },
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Place,
-                    contentDescription = stringResource(id = R.string.show_waypoints),
-                )
+                Icon(imageVector = Icons.Filled.Place, contentDescription = stringResource(R.string.show_waypoints))
             },
             trailingIcon = {
                 Checkbox(
@@ -79,12 +76,12 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             },
         )
         DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.show_precision_circle)) },
+            text = { Text(stringResource(R.string.show_precision_circle)) },
             onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Outlined.RadioButtonUnchecked, // Placeholder icon
-                    contentDescription = stringResource(id = R.string.show_precision_circle),
+                    contentDescription = stringResource(R.string.show_precision_circle),
                 )
             },
             trailingIcon = {

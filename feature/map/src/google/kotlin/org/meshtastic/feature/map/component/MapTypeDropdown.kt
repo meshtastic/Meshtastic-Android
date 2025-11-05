@@ -46,10 +46,10 @@ internal fun MapTypeDropdown(
 
     val googleMapTypes =
         listOf(
-            stringResource(id = R.string.map_type_normal) to MapType.NORMAL,
-            stringResource(id = R.string.map_type_satellite) to MapType.SATELLITE,
-            stringResource(id = R.string.map_type_terrain) to MapType.TERRAIN,
-            stringResource(id = R.string.map_type_hybrid) to MapType.HYBRID,
+            stringResource(R.string.map_type_normal) to MapType.NORMAL,
+            stringResource(R.string.map_type_satellite) to MapType.SATELLITE,
+            stringResource(R.string.map_type_terrain) to MapType.TERRAIN,
+            stringResource(R.string.map_type_hybrid) to MapType.HYBRID,
         )
 
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {

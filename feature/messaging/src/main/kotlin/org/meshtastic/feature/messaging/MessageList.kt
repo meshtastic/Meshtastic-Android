@@ -73,19 +73,19 @@ fun DeliveryInfo(
     onDismissRequest = onDismiss,
     dismissButton = {
         FilledTonalButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = stringResource(id = R.string.close))
+            Text(text = stringResource(R.string.close))
         }
     },
     confirmButton = {
         if (resendOption) {
             FilledTonalButton(onClick = onConfirm, modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(text = stringResource(id = R.string.resend))
+                Text(text = stringResource(R.string.resend))
             }
         }
     },
     title = {
         Text(
-            text = stringResource(id = title),
+            text = stringResource(title),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall,
@@ -95,7 +95,7 @@ fun DeliveryInfo(
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             text?.let {
                 Text(
-                    text = stringResource(id = it),
+                    text = stringResource(it),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                 )

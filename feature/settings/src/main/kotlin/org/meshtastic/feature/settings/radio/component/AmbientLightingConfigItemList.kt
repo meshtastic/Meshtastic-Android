@@ -42,7 +42,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.ambient_lighting),
+        title = stringResource(R.string.ambient_lighting),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

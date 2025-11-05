@@ -55,7 +55,7 @@ fun MetricsSection(
     val nonPositionLogs = availableLogs.filter { it != LogsType.NODE_MAP && it != LogsType.POSITIONS }
 
     if (nonPositionLogs.isNotEmpty()) {
-        TitledCard(title = stringResource(id = R.string.logs), modifier = modifier) {
+        TitledCard(title = stringResource(R.string.logs), modifier = modifier) {
             nonPositionLogs.forEach { type ->
                 ListItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
                     onAction(NodeDetailAction.Navigate(type.route))

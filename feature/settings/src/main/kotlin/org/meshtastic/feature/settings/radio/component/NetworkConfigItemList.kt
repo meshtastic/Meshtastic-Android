@@ -100,7 +100,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.network),
+        title = stringResource(R.string.network),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -146,7 +146,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 TitledCard(title = stringResource(R.string.wifi_config)) {
                     SwitchPreference(
                         title = stringResource(R.string.wifi_enabled),
-                        summary = stringResource(id = R.string.config_network_wifi_enabled_summary),
+                        summary = stringResource(R.string.config_network_wifi_enabled_summary),
                         checked = formState.value.wifiEnabled,
                         enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy { wifiEnabled = it } },
@@ -189,7 +189,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 TitledCard(title = stringResource(R.string.ethernet_config)) {
                     SwitchPreference(
                         title = stringResource(R.string.ethernet_enabled),
-                        summary = stringResource(id = R.string.config_network_eth_enabled_summary),
+                        summary = stringResource(R.string.config_network_eth_enabled_summary),
                         checked = formState.value.ethEnabled,
                         enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy { ethEnabled = it } },
@@ -204,7 +204,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 TitledCard(title = stringResource(R.string.udp_config)) {
                     SwitchPreference(
                         title = stringResource(R.string.udp_enabled),
-                        summary = stringResource(id = R.string.config_network_udp_enabled_summary),
+                        summary = stringResource(R.string.config_network_udp_enabled_summary),
                         checked = formState.value.enabledProtocols == 1,
                         enabled = state.connected,
                         onCheckedChange = {

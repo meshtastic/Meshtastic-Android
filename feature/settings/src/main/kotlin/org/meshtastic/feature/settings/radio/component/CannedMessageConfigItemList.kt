@@ -52,7 +52,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.canned_message),
+        title = stringResource(R.string.canned_message),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

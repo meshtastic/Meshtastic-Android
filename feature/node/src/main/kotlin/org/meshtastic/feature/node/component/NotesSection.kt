@@ -54,7 +54,7 @@ fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modif
                 value = notes,
                 onValueChange = { notes = it },
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
-                placeholder = { Text(stringResource(id = R.string.add_a_note)) },
+                placeholder = { Text(stringResource(R.string.add_a_note)) },
                 trailingIcon = {
                     IconButton(
                         onClick = {
@@ -63,7 +63,7 @@ fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modif
                         },
                         enabled = edited,
                     ) {
-                        Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(id = R.string.save))
+                        Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(R.string.save))
                     }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

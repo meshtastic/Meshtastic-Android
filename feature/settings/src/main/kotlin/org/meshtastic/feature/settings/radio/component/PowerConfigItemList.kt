@@ -48,7 +48,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.power),
+        title = stringResource(R.string.power),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -63,7 +63,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
             TitledCard(title = stringResource(R.string.power_config)) {
                 SwitchPreference(
                     title = stringResource(R.string.enable_power_saving_mode),
-                    summary = stringResource(id = R.string.config_power_is_power_saving_summary),
+                    summary = stringResource(R.string.config_power_is_power_saving_summary),
                     checked = formState.value.isPowerSaving,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { isPowerSaving = it } },

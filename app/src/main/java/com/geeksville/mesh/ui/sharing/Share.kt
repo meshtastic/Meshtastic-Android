@@ -61,7 +61,7 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(id = R.string.share_to),
+                title = stringResource(R.string.share_to),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -92,10 +92,7 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
                 modifier = Modifier.fillMaxWidth().padding(24.dp),
                 enabled = selectedContact.isNotEmpty(),
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(id = R.string.share),
-                )
+                Icon(imageVector = Icons.AutoMirrored.Default.Send, contentDescription = stringResource(R.string.share))
             }
         }
     }

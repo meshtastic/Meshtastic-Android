@@ -69,7 +69,7 @@ fun DeviceActions(
     )
     TitledCard(title = stringResource(R.string.actions), modifier = modifier) {
         ListItem(
-            text = stringResource(id = R.string.share_contact),
+            text = stringResource(R.string.share_contact),
             leadingIcon = Icons.Rounded.QrCode2,
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.ShareContact) },
@@ -102,7 +102,7 @@ fun DeviceActions(
         InsetDivider()
 
         ListItem(
-            text = stringResource(id = R.string.remove),
+            text = stringResource(R.string.remove),
             leadingIcon = Icons.Rounded.Delete,
             trailingIcon = null,
             onClick = { displayRemoveDialog = true },

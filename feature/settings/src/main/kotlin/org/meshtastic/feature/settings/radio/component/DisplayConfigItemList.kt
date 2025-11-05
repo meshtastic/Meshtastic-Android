@@ -45,7 +45,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.display),
+        title = stringResource(R.string.display),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -60,7 +60,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
             TitledCard(title = stringResource(R.string.display_config)) {
                 SwitchPreference(
                     title = stringResource(R.string.always_point_north),
-                    summary = stringResource(id = R.string.config_display_compass_north_top_summary),
+                    summary = stringResource(R.string.config_display_compass_north_top_summary),
                     checked = formState.value.compassNorthTop,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { compassNorthTop = it } },
@@ -78,7 +78,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.bold_heading),
-                    summary = stringResource(id = R.string.config_display_heading_bold_summary),
+                    summary = stringResource(R.string.config_display_heading_bold_summary),
                     checked = formState.value.headingBold,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { headingBold = it } },
@@ -87,7 +87,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(R.string.display_units),
-                    summary = stringResource(id = R.string.config_display_units_summary),
+                    summary = stringResource(R.string.config_display_units_summary),
                     enabled = state.connected,
                     items =
                     DisplayConfig.DisplayUnits.entries
@@ -104,7 +104,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 val carouselIntervals = remember { IntervalConfiguration.DISPLAY_CAROUSEL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(R.string.screen_on_for),
-                    summary = stringResource(id = R.string.config_display_screen_on_secs_summary),
+                    summary = stringResource(R.string.config_display_screen_on_secs_summary),
                     enabled = state.connected,
                     items = screenOnIntervals.map { it to it.toDisplayString(context = context) },
                     selectedItem =
@@ -115,7 +115,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(R.string.carousel_interval),
-                    summary = stringResource(id = R.string.config_display_auto_screen_carousel_secs_summary),
+                    summary = stringResource(R.string.config_display_auto_screen_carousel_secs_summary),
                     enabled = state.connected,
                     items = carouselIntervals.map { it to it.toDisplayString(context = context) },
                     selectedItem =
@@ -128,7 +128,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.wake_on_tap_or_motion),
-                    summary = stringResource(id = R.string.config_display_wake_on_tap_or_motion_summary),
+                    summary = stringResource(R.string.config_display_wake_on_tap_or_motion_summary),
                     checked = formState.value.wakeOnTapOrMotion,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { wakeOnTapOrMotion = it } },
@@ -137,7 +137,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(R.string.flip_screen),
-                    summary = stringResource(id = R.string.config_display_flip_screen_summary),
+                    summary = stringResource(R.string.config_display_flip_screen_summary),
                     checked = formState.value.flipScreen,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { flipScreen = it } },
@@ -146,7 +146,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(R.string.display_mode),
-                    summary = stringResource(id = R.string.config_display_displaymode_summary),
+                    summary = stringResource(R.string.config_display_displaymode_summary),
                     enabled = state.connected,
                     items =
                     DisplayConfig.DisplayMode.entries
@@ -158,7 +158,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(R.string.oled_type),
-                    summary = stringResource(id = R.string.config_display_oled_summary),
+                    summary = stringResource(R.string.config_display_oled_summary),
                     enabled = state.connected,
                     items =
                     DisplayConfig.OledType.entries

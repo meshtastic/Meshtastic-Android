@@ -349,7 +349,7 @@ fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
-        Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.debug_clear))
+        Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.debug_clear))
     }
     if (showDeleteLogsDialog) {
         SimpleAlertDialog(
@@ -426,7 +426,7 @@ private fun DecodedPayloadBlock(
 
     Column(modifier = modifier) {
         Text(
-            text = stringResource(id = R.string.debug_decoded_payload),
+            text = stringResource(R.string.debug_decoded_payload),
             style = commonTextStyle,
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
         )
@@ -595,11 +595,11 @@ private fun DebugMenuActionsPreview() {
             IconButton(onClick = { /* Preview only */ }, modifier = Modifier.padding(4.dp)) {
                 Icon(
                     imageVector = Icons.Outlined.FileDownload,
-                    contentDescription = stringResource(id = R.string.debug_logs_export),
+                    contentDescription = stringResource(R.string.debug_logs_export),
                 )
             }
             IconButton(onClick = { /* Preview only */ }, modifier = Modifier.padding(4.dp)) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.debug_clear))
+                Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.debug_clear))
             }
         }
     }
@@ -637,7 +637,7 @@ private fun DebugScreenEmptyPreview() {
                                             Text(text = "Filters", style = TextStyle(fontWeight = FontWeight.Bold))
                                             Icon(
                                                 imageVector = Icons.TwoTone.FilterAltOff,
-                                                contentDescription = stringResource(id = R.string.debug_filters),
+                                                contentDescription = stringResource(R.string.debug_filters),
                                             )
                                         }
                                     }

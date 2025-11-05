@@ -189,7 +189,7 @@ fun ScannedQrCodeDialog(
             ) {
                 item {
                     Text(
-                        text = stringResource(id = R.string.new_channel_rcvd),
+                        text = stringResource(R.string.new_channel_rcvd),
                         modifier = Modifier.padding(20.dp),
                         style = MaterialTheme.typography.titleLarge,
                     )
@@ -261,7 +261,7 @@ fun ScannedQrCodeDialog(
                     ) {
                         TextButton(onClick = { onDismiss() }) {
                             Text(
-                                text = stringResource(id = R.string.cancel),
+                                text = stringResource(R.string.cancel),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
@@ -277,7 +277,7 @@ fun ScannedQrCodeDialog(
                             enabled = selectedChannelSet.settingsCount in 1..8,
                         ) {
                             Text(
-                                text = stringResource(id = R.string.accept),
+                                text = stringResource(R.string.accept),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,

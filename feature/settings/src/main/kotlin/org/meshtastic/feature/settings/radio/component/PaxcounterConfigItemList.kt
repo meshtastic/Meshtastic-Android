@@ -48,7 +48,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), on
     val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.paxcounter),
+        title = stringResource(R.string.paxcounter),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

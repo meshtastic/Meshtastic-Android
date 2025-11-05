@@ -42,7 +42,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.remote_hardware),
+        title = stringResource(R.string.remote_hardware),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,

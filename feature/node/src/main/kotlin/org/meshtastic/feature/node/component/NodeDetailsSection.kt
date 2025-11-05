@@ -57,19 +57,19 @@ fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.KeyOff,
-                    contentDescription = stringResource(id = R.string.encryption_error),
+                    contentDescription = stringResource(R.string.encryption_error),
                     tint = Color.Red,
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = stringResource(id = R.string.encryption_error),
+                    text = stringResource(R.string.encryption_error),
                     style = MaterialTheme.typography.titleLarge.copy(color = Color.Red),
                     textAlign = TextAlign.Center,
                 )
             }
             Spacer(Modifier.height(16.dp))
             Text(
-                text = stringResource(id = R.string.encryption_error_text),
+                text = stringResource(R.string.encryption_error_text),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )

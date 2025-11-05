@@ -54,9 +54,9 @@ fun AdministrationSection(
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    TitledCard(stringResource(id = R.string.administration), modifier = modifier) {
+    TitledCard(stringResource(R.string.administration), modifier = modifier) {
         ListItem(
-            text = stringResource(id = R.string.request_metadata),
+            text = stringResource(R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
@@ -65,7 +65,7 @@ fun AdministrationSection(
         InsetDivider()
 
         ListItem(
-            text = stringResource(id = R.string.remote_admin),
+            text = stringResource(R.string.remote_admin),
             leadingIcon = Icons.Default.Settings,
             enabled = metricsState.isLocal || node.metadata != null,
         ) {

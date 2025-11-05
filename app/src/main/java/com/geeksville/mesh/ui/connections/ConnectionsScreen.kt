@@ -203,7 +203,7 @@ fun ConnectionsScreen(
                                 TitledCard(title = null) {
                                     ListItem(
                                         leadingIcon = Icons.Rounded.Language,
-                                        text = stringResource(id = R.string.set_your_region),
+                                        text = stringResource(R.string.set_your_region),
                                     ) {
                                         isWaiting = true
                                         radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)

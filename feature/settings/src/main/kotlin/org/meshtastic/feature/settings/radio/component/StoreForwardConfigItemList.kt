@@ -42,7 +42,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.store_forward),
+        title = stringResource(R.string.store_forward),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
