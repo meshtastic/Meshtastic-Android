@@ -19,7 +19,6 @@ package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
 import android.content.Context
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,12 +66,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.hasGps
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
@@ -223,6 +225,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val resources = LocalResources.current
     val density = LocalDensity.current
@@ -264,7 +267,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
             Timber.d("Telling user we need location turned on for MyLocationNewOverlay")
-            Toast.makeText(context, resources.getString(Res.string.location_disabled), Toast.LENGTH_SHORT).show()
+            scope.launch { context.showToast(Res.string.location_disabled) }
             return
         }
         Timber.d("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
@@ -451,7 +454,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
-        Toast.makeText(context, resources.getString(Res.string.calculating), Toast.LENGTH_SHORT).show()
+        scope.launch { context.showToast(Res.string.calculating) }
         val cacheManager = CacheManager(map)
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
@@ -560,21 +563,11 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        Toast.makeText(
-                            context,
-                            resources.getString(Res.string.map_download_complete),
-                            Toast.LENGTH_SHORT,
-                        )
-                            .show()
+                        scope.launch { context.showToast(Res.string.map_download_complete) }
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        Toast.makeText(
-                            context,
-                            resources.getString(Res.string.map_download_errors, errors),
-                            Toast.LENGTH_SHORT,
-                        )
-                            .show()
+                        scope.launch { context.showToast(Res.string.map_download_errors, errors) }
                         writer.onDetach()
                     },
                 ),
@@ -619,7 +612,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                         dialog.dismiss()
                     }
 
-                    2 -> purgeTileSource { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
+                    2 -> purgeTileSource { scope.launch { context.showToast(it) } }
                     else -> dialog.dismiss()
                 }
             }

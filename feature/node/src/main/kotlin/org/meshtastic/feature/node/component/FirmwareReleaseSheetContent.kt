@@ -19,7 +19,6 @@ package org.meshtastic.feature.node.component
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,21 +36,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.mikepenz.markdown.m3.Markdown
+import kotlinx.coroutines.launch
 import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.ui.util.showToast
 import timber.log.Timber
 import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modifier = Modifier) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val resources = LocalResources.current
+
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()).padding(16.dp).fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -66,12 +68,7 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                         val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.pageUrl.toUri())
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
-                        Toast.makeText(
-                            context,
-                            resources.getString(Res.string.error_no_app_to_handle_link),
-                            Toast.LENGTH_LONG,
-                        )
-                            .show()
+                        scope.launch { context.showToast(Res.string.error_no_app_to_handle_link) }
                         Timber.e(e)
                     }
                 },
@@ -87,12 +84,7 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                         val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.zipUrl.toUri())
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
-                        Toast.makeText(
-                            context,
-                            resources.getString(Res.string.error_no_app_to_handle_link),
-                            Toast.LENGTH_LONG,
-                        )
-                            .show()
+                        scope.launch { context.showToast(Res.string.error_no_app_to_handle_link) }
                         Timber.e(e)
                     }
                 },

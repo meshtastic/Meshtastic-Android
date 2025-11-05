@@ -21,7 +21,6 @@ import android.Manifest
 import android.content.ClipData
 import android.net.Uri
 import android.os.RemoteException
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -78,7 +77,6 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -107,6 +105,7 @@ import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -181,13 +180,13 @@ fun ChannelScreen(
             settings.addAll(result)
         }
 
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val resources = LocalResources.current
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
             if (result.contents != null) {
                 viewModel.requestChannelUrl(result.contents.toUri()) {
-                    Toast.makeText(context, resources.getString(Res.string.channel_invalid), Toast.LENGTH_SHORT).show()
+                    scope.launch { context.showToast(Res.string.channel_invalid) }
                 }
             }
         }
@@ -225,7 +224,7 @@ fun ChannelScreen(
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            Toast.makeText(context, resources.getString(Res.string.cant_change_no_radio), Toast.LENGTH_SHORT).show()
+            scope.launch { context.showToast(Res.string.cant_change_no_radio) }
         }
     }
 
@@ -314,8 +313,7 @@ fun ChannelScreen(
                     onTrackShare = viewModel::trackShare,
                     onConfirm = {
                         viewModel.requestChannelUrl(it) {
-                            Toast.makeText(context, resources.getString(Res.string.channel_invalid), Toast.LENGTH_SHORT)
-                                .show()
+                            scope.launch { context.showToast(Res.string.channel_invalid) }
                         }
                     },
                 )

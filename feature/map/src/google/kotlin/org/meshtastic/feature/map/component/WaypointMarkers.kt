@@ -17,13 +17,15 @@
 
 package org.meshtastic.feature.map.component
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberUpdatedMarkerState
+import kotlinx.coroutines.launch
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.core.strings.R as Res
@@ -39,6 +41,7 @@ fun WaypointMarkers(
     unicodeEmojiToBitmapProvider: (Int) -> BitmapDescriptor,
     onEditWaypointRequest: (MeshProtos.Waypoint) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     if (mapFilterState.showWaypoints) {
         displayableWaypoints.forEach { waypoint ->
@@ -60,7 +63,7 @@ fun WaypointMarkers(
                     if (waypoint.lockedTo == 0 || waypoint.lockedTo == myNodeNum || !isConnected) {
                         onEditWaypointRequest(waypoint)
                     } else {
-                        Toast.makeText(context, context.getString(Res.string.locked), Toast.LENGTH_SHORT).show()
+                        scope.launch { context.showToast(Res.string.locked) }
                     }
                 },
             )
