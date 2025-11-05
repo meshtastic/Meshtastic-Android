@@ -44,8 +44,8 @@ androidx-annotation = { module = "androidx.annotation:annotation", version = "1.
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.17.0" }
-androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0-alpha03" }
-androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.0.1" }
+androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0-beta01" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", version = "1.6.0" }
@@ -66,7 +66,7 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 
 # Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.10.01" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.11.00" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
