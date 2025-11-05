@@ -40,10 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,9 +58,9 @@ fun NodeStatusIcons(isThisNode: Boolean, isUnmessageable: Boolean, isFavorite: B
                         Text(
                             stringResource(
                                 if (isConnected) {
-                                    R.string.connected
+                                    Res.string.connected
                                 } else {
-                                    R.string.disconnected
+                                    Res.string.disconnected
                                 },
                             ),
                         )
@@ -72,14 +72,14 @@ fun NodeStatusIcons(isThisNode: Boolean, isUnmessageable: Boolean, isFavorite: B
                     @Suppress("MagicNumber")
                     Icon(
                         imageVector = Icons.TwoTone.CloudDone,
-                        contentDescription = stringResource(R.string.connected),
+                        contentDescription = stringResource(Res.string.connected),
                         modifier = Modifier.size(24.dp), // Smaller size for badge
                         tint = MaterialTheme.colorScheme.StatusGreen,
                     )
                 } else {
                     Icon(
                         imageVector = Icons.TwoTone.CloudOff,
-                        contentDescription = stringResource(R.string.not_connected),
+                        contentDescription = stringResource(Res.string.not_connected),
                         modifier = Modifier.size(24.dp), // Smaller size for badge
                         tint = MaterialTheme.colorScheme.StatusRed,
                     )
@@ -90,13 +90,13 @@ fun NodeStatusIcons(isThisNode: Boolean, isUnmessageable: Boolean, isFavorite: B
         if (isUnmessageable) {
             TooltipBox(
                 positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                tooltip = { PlainTooltip { Text(stringResource(R.string.unmonitored_or_infrastructure)) } },
+                tooltip = { PlainTooltip { Text(stringResource(Res.string.unmonitored_or_infrastructure)) } },
                 state = rememberTooltipState(),
             ) {
                 IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
                     Icon(
                         imageVector = Icons.Rounded.NoCell,
-                        contentDescription = stringResource(R.string.unmessageable),
+                        contentDescription = stringResource(Res.string.unmessageable),
                         modifier = Modifier.size(24.dp), // Smaller size for badge
                     )
                 }
@@ -105,13 +105,13 @@ fun NodeStatusIcons(isThisNode: Boolean, isUnmessageable: Boolean, isFavorite: B
         if (isFavorite && !isThisNode) {
             TooltipBox(
                 positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                tooltip = { PlainTooltip { Text(stringResource(R.string.favorite)) } },
+                tooltip = { PlainTooltip { Text(stringResource(Res.string.favorite)) } },
                 state = rememberTooltipState(),
             ) {
                 IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
                     Icon(
                         imageVector = Icons.Rounded.Star,
-                        contentDescription = stringResource(R.string.favorite),
+                        contentDescription = stringResource(Res.string.favorite),
                         modifier = Modifier.size(24.dp), // Smaller size for badge
                         tint = MaterialTheme.colorScheme.StatusYellow,
                     )

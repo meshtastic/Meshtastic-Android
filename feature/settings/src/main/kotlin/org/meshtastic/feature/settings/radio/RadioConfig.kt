@@ -44,7 +44,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
@@ -52,6 +51,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.component.WarningDialog
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -76,7 +76,7 @@ fun RadioConfigItemList(
     }
 
     Column {
-        TitledCard(title = stringResource(R.string.radio_configuration)) {
+        TitledCard(title = stringResource(Res.string.radio_configuration)) {
             if (isManaged) {
                 ManagedMessage()
             }
@@ -85,7 +85,7 @@ fun RadioConfigItemList(
             }
         }
 
-        TitledCard(title = stringResource(R.string.device_configuration), modifier = Modifier.padding(top = 16.dp)) {
+        TitledCard(title = stringResource(Res.string.device_configuration), modifier = Modifier.padding(top = 16.dp)) {
             if (isManaged) {
                 ManagedMessage()
             }
@@ -94,7 +94,7 @@ fun RadioConfigItemList(
             }
         }
 
-        TitledCard(title = stringResource(R.string.module_settings), modifier = Modifier.padding(top = 16.dp)) {
+        TitledCard(title = stringResource(Res.string.module_settings), modifier = Modifier.padding(top = 16.dp)) {
             if (isManaged) {
                 ManagedMessage()
             }
@@ -106,19 +106,19 @@ fun RadioConfigItemList(
     }
 
     if (state.isLocal) {
-        TitledCard(title = stringResource(R.string.backup_restore), modifier = Modifier.padding(top = 16.dp)) {
+        TitledCard(title = stringResource(Res.string.backup_restore), modifier = Modifier.padding(top = 16.dp)) {
             if (isManaged) {
                 ManagedMessage()
             }
 
             ListItem(
-                text = stringResource(R.string.import_configuration),
+                text = stringResource(Res.string.import_configuration),
                 leadingIcon = Icons.Default.Download,
                 enabled = enabled,
                 onClick = onImport,
             )
             ListItem(
-                text = stringResource(R.string.export_configuration),
+                text = stringResource(Res.string.export_configuration),
                 leadingIcon = Icons.Default.Upload,
                 enabled = enabled,
                 onClick = onExport,
@@ -126,7 +126,7 @@ fun RadioConfigItemList(
         }
     }
 
-    TitledCard(title = stringResource(R.string.administration), modifier = Modifier.padding(top = 16.dp)) {
+    TitledCard(title = stringResource(Res.string.administration), modifier = Modifier.padding(top = 16.dp)) {
         AdminRoute.entries.forEach { route ->
             var showDialog by remember { mutableStateOf(false) }
             if (showDialog) {
@@ -148,20 +148,20 @@ fun RadioConfigItemList(
         }
     }
 
-    TitledCard(title = stringResource(R.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
+    TitledCard(title = stringResource(Res.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
         if (isManaged) {
             ManagedMessage()
         }
 
         ListItem(
-            text = stringResource(R.string.clean_node_database_title),
+            text = stringResource(Res.string.clean_node_database_title),
             leadingIcon = Icons.Rounded.CleaningServices,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
         )
 
         ListItem(
-            text = stringResource(R.string.debug_panel),
+            text = stringResource(Res.string.debug_panel),
             leadingIcon = Icons.Rounded.BugReport,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.DebugPanel) },
@@ -170,10 +170,10 @@ fun RadioConfigItemList(
 }
 
 enum class AdminRoute(val icon: ImageVector, @StringRes val title: Int) {
-    REBOOT(Icons.Rounded.RestartAlt, R.string.reboot),
-    SHUTDOWN(Icons.Rounded.PowerSettingsNew, R.string.shutdown),
-    FACTORY_RESET(Icons.Rounded.Restore, R.string.factory_reset),
-    NODEDB_RESET(Icons.Rounded.Storage, R.string.nodedb_reset),
+    REBOOT(Icons.Rounded.RestartAlt, Res.string.reboot),
+    SHUTDOWN(Icons.Rounded.PowerSettingsNew, Res.string.shutdown),
+    FACTORY_RESET(Icons.Rounded.Restore, Res.string.factory_reset),
+    NODEDB_RESET(Icons.Rounded.Storage, Res.string.nodedb_reset),
 }
 
 @Preview(showBackground = true)
@@ -189,7 +189,7 @@ private fun RadioSettingsScreenPreview() = AppTheme {
 @Composable
 private fun ManagedMessage() {
     Text(
-        text = stringResource(R.string.message_device_managed),
+        text = stringResource(Res.string.message_device_managed),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         color = MaterialTheme.colorScheme.StatusRed,
     )

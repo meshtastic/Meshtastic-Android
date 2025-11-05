@@ -45,12 +45,12 @@ import com.geeksville.mesh.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import timber.log.Timber
 import javax.inject.Inject
+import org.meshtastic.core.strings.R as Res
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -119,13 +119,13 @@ class MainActivity : AppCompatActivity() {
                         Timber.d("App link data is a channel set")
                         model.requestChannelUrl(
                             url = it,
-                            onFailure = { Toast.makeText(this, R.string.channel_invalid, Toast.LENGTH_SHORT).show() },
+                            onFailure = { Toast.makeText(this, Res.string.channel_invalid, Toast.LENGTH_SHORT).show() },
                         )
                     } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
                         Timber.d("App link data is a shared contact")
                         model.setSharedContactRequested(
                             url = it,
-                            onFailure = { Toast.makeText(this, R.string.contact_invalid, Toast.LENGTH_SHORT).show() },
+                            onFailure = { Toast.makeText(this, Res.string.contact_invalid, Toast.LENGTH_SHORT).show() },
                         )
                     } else {
                         Timber.d("App link data is not a channel set")

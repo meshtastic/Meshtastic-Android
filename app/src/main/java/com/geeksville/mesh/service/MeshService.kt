@@ -85,7 +85,6 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ChannelProtos
@@ -114,6 +113,7 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.math.absoluteValue
+import org.meshtastic.core.strings.R as Res
 
 /**
  * Handles all the communication with android apps. Also keeps an internal model of the network state.
@@ -224,7 +224,7 @@ class MeshService : Service() {
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
-        return name ?: getString(R.string.unknown_username)
+        return name ?: getString(Res.string.unknown_username)
     }
 
     /** start our location requests (if they weren't already running) */
@@ -269,7 +269,7 @@ class MeshService : Service() {
         serviceNotifications.showAlertNotification(
             contactKey,
             getSenderName(dataPacket),
-            dataPacket.alert ?: getString(R.string.critical_alert),
+            dataPacket.alert ?: getString(Res.string.critical_alert),
         )
     }
 
@@ -278,7 +278,7 @@ class MeshService : Service() {
             when (dataPacket.dataType) {
                 Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
                 Portnums.PortNum.WAYPOINT_APP_VALUE -> {
-                    getString(R.string.waypoint_received, dataPacket.waypoint!!.name)
+                    getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
                 }
 
                 else -> return
@@ -786,7 +786,7 @@ class MeshService : Service() {
                         val u = MeshProtos.Routing.parseFrom(data.payload)
 
                         if (u.errorReason == MeshProtos.Routing.Error.DUTY_CYCLE_LIMIT) {
-                            serviceRepository.setErrorMessage(getString(R.string.error_duty_cycle))
+                            serviceRepository.setErrorMessage(getString(Res.string.error_duty_cycle))
                         }
 
                         handleAckNak(data.requestId, fromId, u.errorReasonValue, dataPacket.relayNode)
@@ -1317,10 +1317,10 @@ class MeshService : Service() {
     private fun updateServiceStatusNotification(telemetry: TelemetryProtos.Telemetry? = null): Notification {
         val notificationSummary =
             when (connectionStateHolder.getState()) {
-                ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
+                ConnectionState.CONNECTED -> getString(Res.string.connected_count).format(numOnlineNodes)
 
-                ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
-                ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
+                ConnectionState.DISCONNECTED -> getString(Res.string.disconnected)
+                ConnectionState.DEVICE_SLEEP -> getString(Res.string.device_sleeping)
             }
         return serviceNotifications.updateServiceStateNotification(
             summaryString = notificationSummary,

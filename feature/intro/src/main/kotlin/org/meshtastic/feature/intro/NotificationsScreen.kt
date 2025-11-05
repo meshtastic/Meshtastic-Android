@@ -37,7 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 /**
  * Screen for configuring notification permissions during the app introduction. It explains why notification permissions
@@ -53,8 +53,8 @@ internal fun NotificationsScreen(showNextButton: Boolean, onSkip: () -> Unit, on
     val context = LocalContext.current
     val annotatedString =
         context.createClickableAnnotatedString(
-            fullTextRes = R.string.notification_permissions_description,
-            linkTextRes = R.string.settings,
+            fullTextRes = Res.string.notification_permissions_description,
+            linkTextRes = Res.string.settings,
             tag = SETTINGS_TAG,
         )
 
@@ -62,41 +62,44 @@ internal fun NotificationsScreen(showNextButton: Boolean, onSkip: () -> Unit, on
         listOf(
             FeatureUIData(
                 icon = Icons.Outlined.Message,
-                titleRes = R.string.incoming_messages,
-                subtitleRes = R.string.notifications_for_channel_and_direct_messages,
+                titleRes = Res.string.incoming_messages,
+                subtitleRes = Res.string.notifications_for_channel_and_direct_messages,
             ),
             FeatureUIData(
                 icon = Icons.Outlined.SpeakerPhone,
-                titleRes = R.string.new_nodes,
-                subtitleRes = R.string.notifications_for_newly_discovered_nodes,
+                titleRes = Res.string.new_nodes,
+                subtitleRes = Res.string.notifications_for_newly_discovered_nodes,
             ),
             FeatureUIData(
                 icon = Icons.Outlined.BatteryAlert,
-                titleRes = R.string.low_battery,
-                subtitleRes = R.string.notifications_for_low_battery_alerts,
+                titleRes = Res.string.low_battery,
+                subtitleRes = Res.string.notifications_for_low_battery_alerts,
             ),
         )
     }
 
     PermissionScreenLayout(
-        headlineRes = R.string.app_notifications,
+        headlineRes = Res.string.app_notifications,
         annotatedDescription = annotatedString,
         features = features,
         additionalContent = {
             Text(
-                text = stringResource(R.string.critical_alerts),
+                text = stringResource(Res.string.critical_alerts),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(16.dp))
             FeatureRow(
                 feature =
-                FeatureUIData(icon = Icons.Filled.Notifications, subtitleRes = R.string.critical_alerts_description),
+                FeatureUIData(
+                    icon = Icons.Filled.Notifications,
+                    subtitleRes = Res.string.critical_alerts_description,
+                ),
             )
         },
         onSkip = onSkip,
         onConfigure = onConfigure,
-        configureButtonTextRes = if (showNextButton) R.string.next else R.string.configure_notification_permissions,
+        configureButtonTextRes = if (showNextButton) Res.string.next else Res.string.configure_notification_permissions,
         onAnnotationClick = {
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
             intent.data = Uri.fromParts("package", context.packageName, null)

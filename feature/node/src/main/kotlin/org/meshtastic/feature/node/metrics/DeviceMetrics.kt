@@ -60,7 +60,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.OptionLabel
@@ -77,6 +76,7 @@ import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.core.strings.R as Res
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
@@ -98,15 +98,15 @@ private enum class Device(val color: Color) {
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true, environmentMetric = null),
+        LegendData(nameRes = Res.string.battery, color = Device.BATTERY.color, isLine = true, environmentMetric = null),
         LegendData(
-            nameRes = R.string.channel_utilization,
+            nameRes = Res.string.channel_utilization,
             color = Device.CH_UTIL.color,
             isLine = false,
             environmentMetric = null,
         ),
         LegendData(
-            nameRes = R.string.air_utilization,
+            nameRes = Res.string.air_utilization,
             color = Device.AIR_UTIL.color,
             isLine = false,
             environmentMetric = null,
@@ -138,8 +138,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 LegendInfoDialog(
                     pairedRes =
                     listOf(
-                        Pair(R.string.channel_utilization, R.string.ch_util_definition),
-                        Pair(R.string.air_utilization, R.string.air_util_definition),
+                        Pair(Res.string.channel_utilization, Res.string.ch_util_definition),
+                        Pair(Res.string.air_utilization, Res.string.air_util_definition),
                     ),
                     onDismiss = { displayInfoDialog = false },
                 )
@@ -341,7 +341,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                     /* Channel Utilization and Air Utilization Tx */
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         val text =
-                            stringResource(R.string.channel_air_util)
+                            stringResource(Res.string.channel_air_util)
                                 .format(deviceMetrics.channelUtilization, deviceMetrics.airUtilTx)
                         Text(
                             text = text,
@@ -404,8 +404,8 @@ private fun DeviceMetricsScreenPreview() {
                     LegendInfoDialog(
                         pairedRes =
                         listOf(
-                            Pair(R.string.channel_utilization, R.string.ch_util_definition),
-                            Pair(R.string.air_utilization, R.string.air_util_definition),
+                            Pair(Res.string.channel_utilization, Res.string.ch_util_definition),
+                            Pair(Res.string.air_utilization, Res.string.air_util_definition),
                         ),
                         onDismiss = { displayInfoDialog = false },
                     )

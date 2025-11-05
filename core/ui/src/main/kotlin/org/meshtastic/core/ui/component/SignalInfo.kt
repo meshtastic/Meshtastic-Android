@@ -34,9 +34,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 const val MAX_VALID_SNR = 100F
 const val MAX_VALID_RSSI = 0
@@ -51,14 +51,14 @@ fun SignalInfo(
 ) {
     val text =
         if (isThisNode) {
-            stringResource(R.string.channel_air_util)
+            stringResource(Res.string.channel_air_util)
                 .format(node.deviceMetrics.channelUtilization, node.deviceMetrics.airUtilTx)
         } else {
             buildList {
                 val hopsString =
                     "%s: %s"
                         .format(
-                            stringResource(R.string.hops_away),
+                            stringResource(Res.string.hops_away),
                             if (node.hopsAway == -1) {
                                 "?"
                             } else {
@@ -98,11 +98,11 @@ fun SignalInfo(
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = quality.imageVector,
-                        contentDescription = stringResource(R.string.signal_quality),
+                        contentDescription = stringResource(Res.string.signal_quality),
                         tint = quality.color.invoke(),
                     )
                     Text(
-                        text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
+                        text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = contentColor,
                         maxLines = 1,

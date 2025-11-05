@@ -60,7 +60,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
@@ -73,6 +72,7 @@ import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 import kotlin.math.ceil
 import kotlin.math.floor
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("MagicNumber")
 private enum class Power(val color: Color, val min: Float, val max: Float) {
@@ -84,9 +84,9 @@ private enum class Power(val color: Color, val min: Float, val max: Float) {
 }
 
 private enum class PowerChannel(@StringRes val strRes: Int) {
-    ONE(R.string.channel_1),
-    TWO(R.string.channel_2),
-    THREE(R.string.channel_3),
+    ONE(Res.string.channel_1),
+    TWO(Res.string.channel_2),
+    THREE(Res.string.channel_3),
 }
 
 private const val CHART_WEIGHT = 1f
@@ -112,8 +112,8 @@ fun minMaxGraphVoltage(valueMin: Float, valueMax: Float): Pair<Float, Float> {
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true, environmentMetric = null),
-        LegendData(nameRes = R.string.voltage, color = VOLTAGE_COLOR, isLine = true, environmentMetric = null),
+        LegendData(nameRes = Res.string.current, color = Power.CURRENT.color, isLine = true, environmentMetric = null),
+        LegendData(nameRes = Res.string.voltage, color = VOLTAGE_COLOR, isLine = true, environmentMetric = null),
     )
 
 @Composable
@@ -321,21 +321,21 @@ private fun PowerMetricsCard(telemetry: Telemetry) {
                         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                             if (telemetry.powerMetrics.hasCh1Current() || telemetry.powerMetrics.hasCh1Voltage()) {
                                 PowerChannelColumn(
-                                    R.string.channel_1,
+                                    Res.string.channel_1,
                                     telemetry.powerMetrics.ch1Voltage,
                                     telemetry.powerMetrics.ch1Current,
                                 )
                             }
                             if (telemetry.powerMetrics.hasCh2Current() || telemetry.powerMetrics.hasCh2Voltage()) {
                                 PowerChannelColumn(
-                                    R.string.channel_2,
+                                    Res.string.channel_2,
                                     telemetry.powerMetrics.ch2Voltage,
                                     telemetry.powerMetrics.ch2Current,
                                 )
                             }
                             if (telemetry.powerMetrics.hasCh3Current() || telemetry.powerMetrics.hasCh3Voltage()) {
                                 PowerChannelColumn(
-                                    R.string.channel_3,
+                                    Res.string.channel_3,
                                     telemetry.powerMetrics.ch3Voltage,
                                     telemetry.powerMetrics.ch3Current,
                                 )

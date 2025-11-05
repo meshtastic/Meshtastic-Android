@@ -41,13 +41,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import kotlin.math.roundToInt
+import org.meshtastic.core.strings.R as Res
 
 private const val POSITION_PRECISION_MIN = 12
 private const val POSITION_PRECISION_MAX = 15
@@ -70,8 +70,8 @@ fun MapReportingPreference(
         var showMapReportingWarning by rememberSaveable { mutableStateOf(mapReportingEnabled) }
         LaunchedEffect(mapReportingEnabled) { showMapReportingWarning = mapReportingEnabled }
         SwitchPreference(
-            title = stringResource(R.string.map_reporting),
-            summary = stringResource(R.string.map_reporting_summary),
+            title = stringResource(Res.string.map_reporting),
+            summary = stringResource(Res.string.map_reporting_summary),
             checked = showMapReportingWarning,
             enabled = enabled,
             onCheckedChange = { checked ->
@@ -85,13 +85,13 @@ fun MapReportingPreference(
         )
         AnimatedVisibility(showMapReportingWarning) {
             Card(modifier = Modifier.padding(16.dp)) {
-                Text(text = stringResource(R.string.map_reporting_consent_header), modifier = Modifier.padding(16.dp))
+                Text(text = stringResource(Res.string.map_reporting_consent_header), modifier = Modifier.padding(16.dp))
                 HorizontalDivider()
-                Text(stringResource(R.string.map_reporting_consent_text), modifier = Modifier.padding(16.dp))
+                Text(stringResource(Res.string.map_reporting_consent_text), modifier = Modifier.padding(16.dp))
 
                 SwitchPreference(
-                    title = stringResource(R.string.i_agree),
-                    summary = stringResource(R.string.i_agree_to_share_my_location),
+                    title = stringResource(Res.string.i_agree),
+                    summary = stringResource(Res.string.i_agree_to_share_my_location),
                     checked = shouldReportLocation,
                     enabled = enabled,
                     onCheckedChange = { checked ->
@@ -125,7 +125,7 @@ fun MapReportingPreference(
                     val publishItems = remember { IntervalConfiguration.BROADCAST_MEDIUM.allowedIntervals }
                     DropDownPreference(
                         modifier = Modifier.padding(bottom = 16.dp),
-                        title = stringResource(R.string.map_reporting_interval_seconds),
+                        title = stringResource(Res.string.map_reporting_interval_seconds),
                         items = publishItems.map { it.value to it.toDisplayString(context = context) },
                         selectedItem = publishIntervalSecs,
                         enabled = enabled,

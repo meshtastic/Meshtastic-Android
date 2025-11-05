@@ -65,12 +65,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.proto.formatPositionTime
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.MeshProtos
 import java.text.DateFormat
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 private fun RowScope.PositionText(text: String, weight: Float) {
@@ -91,15 +91,15 @@ private const val WEIGHT_40 = .40f
 @Composable
 private fun HeaderItem(compactWidth: Boolean) {
     Row(modifier = Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        PositionText(stringResource(R.string.latitude), WEIGHT_20)
-        PositionText(stringResource(R.string.longitude), WEIGHT_20)
-        PositionText(stringResource(R.string.sats), WEIGHT_10)
-        PositionText(stringResource(R.string.alt), WEIGHT_15)
+        PositionText(stringResource(Res.string.latitude), WEIGHT_20)
+        PositionText(stringResource(Res.string.longitude), WEIGHT_20)
+        PositionText(stringResource(Res.string.sats), WEIGHT_10)
+        PositionText(stringResource(Res.string.alt), WEIGHT_15)
         if (!compactWidth) {
-            PositionText(stringResource(R.string.speed), WEIGHT_15)
-            PositionText(stringResource(R.string.heading), WEIGHT_15)
+            PositionText(stringResource(Res.string.speed), WEIGHT_15)
+            PositionText(stringResource(Res.string.heading), WEIGHT_15)
         }
-        PositionText(stringResource(R.string.timestamp), WEIGHT_40)
+        PositionText(stringResource(Res.string.timestamp), WEIGHT_40)
     }
 }
 
@@ -143,15 +143,15 @@ private fun ActionButtons(
             enabled = clearButtonEnabled,
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
         ) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(R.string.clear))
+            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(Res.string.clear))
             Spacer(Modifier.width(8.dp))
-            Text(text = stringResource(R.string.clear))
+            Text(text = stringResource(Res.string.clear))
         }
 
         OutlinedButton(modifier = Modifier.weight(1f), onClick = onSave, enabled = saveButtonEnabled) {
-            Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(R.string.save))
+            Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(Res.string.save))
             Spacer(Modifier.width(8.dp))
-            Text(text = stringResource(R.string.save))
+            Text(text = stringResource(Res.string.save))
         }
     }
 }

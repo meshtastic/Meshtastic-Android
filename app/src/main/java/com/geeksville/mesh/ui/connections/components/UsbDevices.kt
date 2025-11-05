@@ -26,9 +26,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun UsbDevices(
@@ -54,7 +54,7 @@ private fun UsbDevices(
 ) {
     when {
         usbDevices.isEmpty() ->
-            EmptyStateContent(imageVector = Icons.Rounded.UsbOff, text = stringResource(R.string.no_usb_devices))
+            EmptyStateContent(imageVector = Icons.Rounded.UsbOff, text = stringResource(Res.string.no_usb_devices))
 
         else ->
             TitledCard(title = null) {

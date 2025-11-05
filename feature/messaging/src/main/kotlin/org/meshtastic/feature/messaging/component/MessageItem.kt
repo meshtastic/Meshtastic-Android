@@ -53,7 +53,6 @@ import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
@@ -61,6 +60,7 @@ import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -144,7 +144,7 @@ internal fun MessageItem(
                     if (message.viaMqtt) {
                         Icon(
                             Icons.Default.Cloud,
-                            contentDescription = stringResource(R.string.via_mqtt),
+                            contentDescription = stringResource(Res.string.via_mqtt),
                             modifier = Modifier.size(16.dp),
                         )
                     }
@@ -179,7 +179,7 @@ internal fun MessageItem(
                                 }
                             } else {
                                 Text(
-                                    text = stringResource(R.string.hops_away_template, message.hopsAway),
+                                    text = stringResource(Res.string.hops_away_template, message.hopsAway),
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                             }
@@ -228,7 +228,7 @@ private fun OriginalMessageSnippet(
             ) {
                 Icon(
                     Icons.Default.FormatQuote,
-                    contentDescription = stringResource(R.string.reply), // Add to strings.xml
+                    contentDescription = stringResource(Res.string.reply), // Add to strings.xml
                 )
                 Text(
                     text = originalMessageNode.user.shortName,
@@ -254,7 +254,7 @@ private fun OriginalMessageSnippet(
 private fun MessageItemPreview() {
     val sent =
         Message(
-            text = stringResource(R.string.sample_message),
+            text = stringResource(Res.string.sample_message),
             time = "10:00",
             fromLocal = true,
             status = MessageStatus.DELIVERED,

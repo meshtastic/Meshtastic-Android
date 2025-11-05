@@ -35,7 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun EditPasswordPreference(
@@ -67,9 +67,9 @@ fun EditPasswordPreference(
                     imageVector = if (isPasswordVisible) Icons.TwoTone.VisibilityOff else Icons.TwoTone.VisibilityOff,
                     contentDescription =
                     if (isPasswordVisible) {
-                        stringResource(R.string.hide_password)
+                        stringResource(Res.string.hide_password)
                     } else {
-                        stringResource(R.string.show_password)
+                        stringResource(Res.string.show_password)
                     },
                 )
             }

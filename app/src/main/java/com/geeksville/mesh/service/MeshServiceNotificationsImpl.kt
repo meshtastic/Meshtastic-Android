@@ -43,11 +43,11 @@ import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
-import org.meshtastic.core.strings.R
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.LocalStats
 import javax.inject.Inject
+import org.meshtastic.core.strings.R as Res
 
 /**
  * Manages the creation and display of all app notifications.
@@ -79,54 +79,58 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         object ServiceState :
             NotificationType(
                 "my_service",
-                R.string.meshtastic_service_notifications,
+                Res.string.meshtastic_service_notifications,
                 NotificationManager.IMPORTANCE_MIN,
             )
 
         object DirectMessage :
             NotificationType(
                 "my_messages",
-                R.string.meshtastic_messages_notifications,
+                Res.string.meshtastic_messages_notifications,
                 NotificationManager.IMPORTANCE_HIGH,
             )
 
         object BroadcastMessage :
             NotificationType(
                 "my_broadcasts",
-                R.string.meshtastic_broadcast_notifications,
+                Res.string.meshtastic_broadcast_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object Alert :
             NotificationType(
                 "my_alerts",
-                R.string.meshtastic_alerts_notifications,
+                Res.string.meshtastic_alerts_notifications,
                 NotificationManager.IMPORTANCE_HIGH,
             )
 
         object NewNode :
             NotificationType(
                 "new_nodes",
-                R.string.meshtastic_new_nodes_notifications,
+                Res.string.meshtastic_new_nodes_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object LowBatteryLocal :
             NotificationType(
                 "low_battery",
-                R.string.meshtastic_low_battery_notifications,
+                Res.string.meshtastic_low_battery_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object LowBatteryRemote :
             NotificationType(
                 "low_battery_remote",
-                R.string.meshtastic_low_battery_temporary_remote_notifications,
+                Res.string.meshtastic_low_battery_temporary_remote_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object Client :
-            NotificationType("client_notifications", R.string.client_notification, NotificationManager.IMPORTANCE_HIGH)
+            NotificationType(
+                "client_notifications",
+                Res.string.client_notification,
+                NotificationManager.IMPORTANCE_HIGH,
+            )
 
         companion object {
             // A list of all types for easy initialization.
@@ -241,7 +245,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
                 null
             }
 
-        cachedMessage = message ?: cachedMessage ?: context.getString(R.string.no_local_stats)
+        cachedMessage = message ?: cachedMessage ?: context.getString(Res.string.no_local_stats)
 
         val notification =
             createServiceStateNotification(
@@ -277,7 +281,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
 
     override fun showClientNotification(clientNotification: MeshProtos.ClientNotification) {
         val notification =
-            createClientNotification(context.getString(R.string.client_notification), clientNotification.message)
+            createClientNotification(context.getString(Res.string.client_notification), clientNotification.message)
         notificationManager.notify(clientNotification.toString().hashCode(), notification)
     }
 
@@ -357,7 +361,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
     }
 
     private fun createNewNodeSeenNotification(name: String, message: String?): Notification {
-        val title = context.getString(R.string.new_node_seen).format(name)
+        val title = context.getString(Res.string.new_node_seen).format(name)
         val builder =
             commonBuilder(NotificationType.NewNode)
                 .setCategory(Notification.CATEGORY_STATUS)
@@ -375,9 +379,9 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
 
     private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
-        val title = context.getString(R.string.low_battery_title).format(node.shortName)
+        val title = context.getString(Res.string.low_battery_title).format(node.shortName)
         val message =
-            context.getString(R.string.low_battery_message).format(node.longName, node.deviceMetrics.batteryLevel)
+            context.getString(Res.string.low_battery_message).format(node.longName, node.deviceMetrics.batteryLevel)
 
         return commonBuilder(type)
             .setCategory(Notification.CATEGORY_STATUS)
@@ -427,7 +431,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
     }
 
     private fun createReplyAction(contactKey: String): NotificationCompat.Action {
-        val replyLabel = context.getString(R.string.reply)
+        val replyLabel = context.getString(Res.string.reply)
         val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(replyLabel).build()
 
         val replyIntent =

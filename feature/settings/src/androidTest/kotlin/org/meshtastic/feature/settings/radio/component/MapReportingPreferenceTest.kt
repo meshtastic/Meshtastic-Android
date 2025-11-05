@@ -29,7 +29,7 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class MapReportingPreferenceTest {
@@ -69,8 +69,8 @@ class MapReportingPreferenceTest {
         composeTestRule.apply {
             testMapReportingPreference()
             // Verify that the dialog title is displayed
-            onNodeWithText(getString(R.string.map_reporting)).assertIsDisplayed()
-            onNodeWithText(getString(R.string.map_reporting_summary)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.map_reporting)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.map_reporting_summary)).assertIsDisplayed()
         }
     }
 
@@ -78,16 +78,16 @@ class MapReportingPreferenceTest {
     fun testMapReportingPreference_toggleMapReporting() {
         composeTestRule.apply {
             testMapReportingPreference()
-            onNodeWithText(getString(R.string.i_agree)).assertIsNotDisplayed()
-            onNodeWithText(getString(R.string.map_reporting)).performClick()
+            onNodeWithText(getString(Res.string.i_agree)).assertIsNotDisplayed()
+            onNodeWithText(getString(Res.string.map_reporting)).performClick()
             Assert.assertFalse(mapReportingEnabled)
             Assert.assertFalse(shouldReportLocation)
-            onNodeWithText(getString(R.string.i_agree)).assertIsDisplayed()
-            onNodeWithText(getString(R.string.i_agree)).performClick()
+            onNodeWithText(getString(Res.string.i_agree)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.i_agree)).performClick()
             Assert.assertTrue(shouldReportLocation)
             Assert.assertTrue(mapReportingEnabled)
-            onNodeWithText(getString(R.string.map_reporting)).performClick()
-            onNodeWithText(getString(R.string.i_agree)).assertIsNotDisplayed()
+            onNodeWithText(getString(Res.string.map_reporting)).performClick()
+            onNodeWithText(getString(Res.string.i_agree)).assertIsNotDisplayed()
             Assert.assertTrue(shouldReportLocation)
             Assert.assertFalse(mapReportingEnabled)
         }

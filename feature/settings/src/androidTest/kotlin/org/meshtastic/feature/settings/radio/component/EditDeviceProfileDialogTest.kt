@@ -27,10 +27,10 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.strings.R
 import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 import org.meshtastic.proto.deviceProfile
 import org.meshtastic.proto.position
+import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class EditDeviceProfileDialogTest {
@@ -77,8 +77,8 @@ class EditDeviceProfileDialogTest {
             testEditDeviceProfileDialog()
 
             // Verify the "Cancel" and "Save" buttons are displayed
-            onNodeWithText(getString(R.string.cancel)).assertIsDisplayed()
-            onNodeWithText(getString(R.string.save)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.cancel)).assertIsDisplayed()
+            onNodeWithText(getString(Res.string.save)).assertIsDisplayed()
         }
     }
 
@@ -89,7 +89,7 @@ class EditDeviceProfileDialogTest {
             testEditDeviceProfileDialog(onDismiss = { onDismissClicked = true })
 
             // Click the "Cancel" button
-            onNodeWithText(getString(R.string.cancel)).performClick()
+            onNodeWithText(getString(Res.string.cancel)).performClick()
         }
 
         // Verify onDismiss is called
@@ -102,7 +102,7 @@ class EditDeviceProfileDialogTest {
         composeTestRule.apply {
             testEditDeviceProfileDialog(onConfirm = { actualDeviceProfile = it })
 
-            onNodeWithText(getString(R.string.save)).performClick()
+            onNodeWithText(getString(Res.string.save)).performClick()
         }
 
         // Verify onConfirm is called with the correct DeviceProfile

@@ -34,11 +34,11 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.getShortDate
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.channelSet
 import javax.inject.Inject
 import kotlin.collections.map
+import org.meshtastic.core.strings.R as Res
 
 @HiltViewModel
 class ContactsViewModel
@@ -87,7 +87,7 @@ constructor(
                 val shortName = user.shortName
                 val longName =
                     if (toBroadcast) {
-                        channelSet.getChannel(data.channel)?.name ?: context.getString(R.string.channel_name)
+                        channelSet.getChannel(data.channel)?.name ?: context.getString(Res.string.channel_name)
                     } else {
                         user.longName
                     }

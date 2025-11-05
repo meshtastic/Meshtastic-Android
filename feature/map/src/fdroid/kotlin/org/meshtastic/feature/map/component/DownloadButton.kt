@@ -31,7 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
@@ -51,7 +51,7 @@ fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
         FloatingActionButton(onClick = onClick, contentColor = MaterialTheme.colorScheme.primary) {
             Icon(
                 imageVector = Icons.Default.Download,
-                contentDescription = stringResource(R.string.map_download_region),
+                contentDescription = stringResource(Res.string.map_download_region),
                 modifier = Modifier.scale(1.25f),
             )
         }

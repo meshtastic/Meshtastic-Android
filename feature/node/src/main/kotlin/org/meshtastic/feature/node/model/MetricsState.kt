@@ -24,11 +24,11 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.strings.R
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.TelemetryProtos
 import java.util.concurrent.TimeUnit
+import org.meshtastic.core.strings.R as Res
 
 data class MetricsState(
     val isLocal: Boolean = false,
@@ -88,12 +88,12 @@ data class MetricsState(
 /** Supported time frames used to display data. */
 @Suppress("MagicNumber")
 enum class TimeFrame(val seconds: Long, @StringRes val strRes: Int) {
-    TWENTY_FOUR_HOURS(TimeUnit.DAYS.toSeconds(1), R.string.twenty_four_hours),
-    FORTY_EIGHT_HOURS(TimeUnit.DAYS.toSeconds(2), R.string.forty_eight_hours),
-    ONE_WEEK(TimeUnit.DAYS.toSeconds(7), R.string.one_week),
-    TWO_WEEKS(TimeUnit.DAYS.toSeconds(14), R.string.two_weeks),
-    FOUR_WEEKS(TimeUnit.DAYS.toSeconds(28), R.string.four_weeks),
-    MAX(0L, R.string.max),
+    TWENTY_FOUR_HOURS(TimeUnit.DAYS.toSeconds(1), Res.string.twenty_four_hours),
+    FORTY_EIGHT_HOURS(TimeUnit.DAYS.toSeconds(2), Res.string.forty_eight_hours),
+    ONE_WEEK(TimeUnit.DAYS.toSeconds(7), Res.string.one_week),
+    TWO_WEEKS(TimeUnit.DAYS.toSeconds(14), Res.string.two_weeks),
+    FOUR_WEEKS(TimeUnit.DAYS.toSeconds(28), Res.string.four_weeks),
+    MAX(0L, Res.string.max),
     ;
 
     fun calculateOldestTime(): Long = if (this == MAX) {

@@ -60,7 +60,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
@@ -70,6 +69,7 @@ import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 import org.meshtastic.proto.AdminProtos
+import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -95,8 +95,8 @@ fun NodeListScreen(viewModel: NodeListViewModel = hiltViewModel(), navigateToNod
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(R.string.nodes),
-                subtitle = stringResource(R.string.node_count_template, onlineNodeCount, totalNodeCount),
+                title = stringResource(Res.string.nodes),
+                subtitle = stringResource(Res.string.node_count_template, onlineNodeCount, totalNodeCount),
                 ourNode = ourNode,
                 showNodeChip = false,
                 canNavigateUp = false,
@@ -233,7 +233,7 @@ private fun ContextMenu(
                     contentDescription = null,
                 )
             },
-            text = { Text(stringResource(if (isFavorite) R.string.remove_favorite else R.string.add_favorite)) },
+            text = { Text(stringResource(if (isFavorite) Res.string.remove_favorite else Res.string.add_favorite)) },
         )
 
         DropdownMenuItem(
@@ -250,7 +250,7 @@ private fun ContextMenu(
             },
             text = {
                 Text(
-                    text = stringResource(if (isIgnored) R.string.remove_ignored else R.string.ignore),
+                    text = stringResource(if (isIgnored) Res.string.remove_ignored else Res.string.ignore),
                     color = MaterialTheme.colorScheme.StatusRed,
                 )
             },
@@ -271,7 +271,7 @@ private fun ContextMenu(
             },
             text = {
                 Text(
-                    text = stringResource(R.string.remove),
+                    text = stringResource(Res.string.remove),
                     color = if (isIgnored) Color.Unspecified else MaterialTheme.colorScheme.StatusRed,
                 )
             },

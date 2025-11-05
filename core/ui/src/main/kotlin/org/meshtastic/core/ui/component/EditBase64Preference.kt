@@ -48,7 +48,7 @@ import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.model.util.toByteString
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable
@@ -77,8 +77,8 @@ fun EditBase64Preference(
 
     val (icon, description) =
         when {
-            isError -> Icons.TwoTone.Close to stringResource(R.string.error)
-            onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(R.string.reset)
+            isError -> Icons.TwoTone.Close to stringResource(Res.string.error)
+            onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(Res.string.reset)
             else -> null to null
         }
     Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {

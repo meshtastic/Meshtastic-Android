@@ -43,9 +43,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.contact.ContactItem
 import com.geeksville.mesh.ui.contact.ContactsViewModel
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun ShareScreen(viewModel: ContactsViewModel = hiltViewModel(), onConfirm: (String) -> Unit, onNavigateUp: () -> Unit) {
@@ -61,7 +61,7 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(R.string.share_to),
+                title = stringResource(Res.string.share_to),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -92,7 +92,10 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
                 modifier = Modifier.fillMaxWidth().padding(24.dp),
                 enabled = selectedContact.isNotEmpty(),
             ) {
-                Icon(imageVector = Icons.AutoMirrored.Default.Send, contentDescription = stringResource(R.string.share))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.Send,
+                    contentDescription = stringResource(Res.string.share),
+                )
             }
         }
     }
@@ -107,10 +110,10 @@ private fun ShareScreenPreview() {
             listOf(
                 Contact(
                     contactKey = "0^all",
-                    shortName = stringResource(R.string.some_username),
-                    longName = stringResource(R.string.unknown_username),
+                    shortName = stringResource(Res.string.some_username),
+                    longName = stringResource(Res.string.unknown_username),
                     lastMessageTime = "3 minutes ago",
-                    lastMessageText = stringResource(R.string.sample_message),
+                    lastMessageText = stringResource(Res.string.sample_message),
                     unreadCount = 2,
                     messageCount = 10,
                     isMuted = true,

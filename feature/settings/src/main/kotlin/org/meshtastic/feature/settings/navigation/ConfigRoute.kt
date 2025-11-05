@@ -32,57 +32,57 @@ import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.strings.R
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos.DeviceMetadata
+import org.meshtastic.core.strings.R as Res
 
 enum class ConfigRoute(@StringRes val title: Int, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    USER(R.string.user, SettingsRoutes.User, Icons.Default.Person, 0),
-    CHANNELS(R.string.channels, SettingsRoutes.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
+    USER(Res.string.user, SettingsRoutes.User, Icons.Default.Person, 0),
+    CHANNELS(Res.string.channels, SettingsRoutes.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
     DEVICE(
-        R.string.device,
+        Res.string.device,
         SettingsRoutes.Device,
         Icons.Default.Router,
         AdminProtos.AdminMessage.ConfigType.DEVICE_CONFIG_VALUE,
     ),
     POSITION(
-        R.string.position,
+        Res.string.position,
         SettingsRoutes.Position,
         Icons.Default.LocationOn,
         AdminProtos.AdminMessage.ConfigType.POSITION_CONFIG_VALUE,
     ),
     POWER(
-        R.string.power,
+        Res.string.power,
         SettingsRoutes.Power,
         Icons.Default.Power,
         AdminProtos.AdminMessage.ConfigType.POWER_CONFIG_VALUE,
     ),
     NETWORK(
-        R.string.network,
+        Res.string.network,
         SettingsRoutes.Network,
         Icons.Default.Wifi,
         AdminProtos.AdminMessage.ConfigType.NETWORK_CONFIG_VALUE,
     ),
     DISPLAY(
-        R.string.display,
+        Res.string.display,
         SettingsRoutes.Display,
         Icons.Default.DisplaySettings,
         AdminProtos.AdminMessage.ConfigType.DISPLAY_CONFIG_VALUE,
     ),
     LORA(
-        R.string.lora,
+        Res.string.lora,
         SettingsRoutes.LoRa,
         Icons.Default.CellTower,
         AdminProtos.AdminMessage.ConfigType.LORA_CONFIG_VALUE,
     ),
     BLUETOOTH(
-        R.string.bluetooth,
+        Res.string.bluetooth,
         SettingsRoutes.Bluetooth,
         Icons.Default.Bluetooth,
         AdminProtos.AdminMessage.ConfigType.BLUETOOTH_CONFIG_VALUE,
     ),
     SECURITY(
-        R.string.security,
+        Res.string.security,
         SettingsRoutes.Security,
         Icons.Default.Security,
         AdminProtos.AdminMessage.ConfigType.SECURITY_CONFIG_VALUE,
