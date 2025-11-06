@@ -249,8 +249,21 @@ interface PacketDao {
 
     @Upsert suspend fun insert(reaction: ReactionEntity)
 
+    @Transaction
+    suspend fun deleteAll() {
+        deleteAllPackets()
+        deleteAllReactions()
+        deleteAllContactSettings()
+    }
+
     @Query("DELETE FROM packet")
-    suspend fun deleteAll()
+    suspend fun deleteAllPackets()
+
+    @Query("DELETE FROM reactions")
+    suspend fun deleteAllReactions()
+
+    @Query("DELETE FROM contact_settings")
+    suspend fun deleteAllContactSettings()
 
     /**
      * One-time migration: Remap all message DataPacket.channel indices to new mapping using PSK after a channel
