@@ -2231,6 +2231,7 @@ class MeshService : Service() {
                         latitudeI = Position.degI(currentPosition.latitude)
                         longitudeI = Position.degI(currentPosition.longitude)
                         altitude = currentPosition.altitude
+                        time = currentSecond()
                     }
                     packetHandler.sendToRadio(
                         newMeshPacketTo(destNum).buildMeshPacket(
