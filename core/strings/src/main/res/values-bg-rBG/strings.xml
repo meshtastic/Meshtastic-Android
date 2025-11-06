@@ -314,10 +314,10 @@
     <string name="mute_1_week">1 седмица</string>
     <string name="mute_always">Винаги</string>
     <string name="currently">В момента:</string>
-    <string name="mute_status_always">Always muted</string>
-    <string name="mute_status_unmuted">Not muted</string>
-    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
-    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
+    <string name="mute_status_always">Винаги заглушен</string>
+    <string name="mute_status_unmuted">Не е заглушен</string>
+    <string name="mute_status_muted_for_days">Заглушшен за %1d дни, %.1f часа</string>
+    <string name="mute_status_muted_for_hours">Заглушен за %.1f часа</string>
     <string name="replace">Замяна</string>
     <string name="wifi_qr_code_scan">Сканиране на QR код за WiFi</string>
     <string name="wifi_qr_code_error">Невалиден формат на QR кода на идентификационните данни за WiFi</string>
