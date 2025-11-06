@@ -22,7 +22,7 @@
 
 # Needed for protobufs
 -keep class com.google.protobuf.** { *; }
--keep class com.geeksville.mesh.** { *; }
+-keep class org.meshtastic.proto.** { *; }
 
 # eclipse.paho.client
 -keep class org.eclipse.paho.client.mqttv3.logging.JSR47Logger { *; }

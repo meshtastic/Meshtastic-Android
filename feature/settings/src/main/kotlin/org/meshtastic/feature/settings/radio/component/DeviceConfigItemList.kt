@@ -130,7 +130,6 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         }
     }
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
     RadioConfigScreenList(
         title = stringResource(Res.string.device),
         onBack = onBack,
@@ -170,7 +169,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     title = stringResource(Res.string.nodeinfo_broadcast_interval),
                     selectedItem = formState.value.nodeInfoBroadcastSecs.toLong(),
                     enabled = state.connected,
-                    items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString(context = context) },
+                    items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it.toInt() } },
                 )
             }

@@ -24,7 +24,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
@@ -50,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -62,6 +62,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.ui.component.ListItem
@@ -70,6 +71,7 @@ import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -230,8 +232,8 @@ fun SettingsScreen(
                 onNavigate = onNavigate,
             )
 
+            val scope = rememberCoroutineScope()
             val context = LocalContext.current
-            val resources = LocalResources.current
 
             TitledCard(title = stringResource(Res.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
                 if (state.analyticsAvailable) {
@@ -255,12 +257,7 @@ fun SettingsScreen(
                             if (!isGpsDisabled) {
                                 settingsViewModel.meshService?.startProvideLocation()
                             } else {
-                                Toast.makeText(
-                                    context,
-                                    resources.getString(Res.string.location_disabled),
-                                    Toast.LENGTH_LONG,
-                                )
-                                    .show()
+                                context.showToast(Res.string.location_disabled)
                             }
                         } else {
                             // Request permissions if not granted and user wants to provide location
@@ -393,8 +390,8 @@ private fun AppVersionButton(
     appVersionName: String,
     onUnlockExcludedModules: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val resources = LocalResources.current
     var clickCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(clickCount) {
@@ -415,14 +412,13 @@ private fun AppVersionButton(
         when {
             clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
                 clickCount = 0
-                Toast.makeText(context, resources.getString(Res.string.modules_already_unlocked), Toast.LENGTH_LONG)
-                    .show()
+                scope.launch { context.showToast(Res.string.modules_already_unlocked) }
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
                 onUnlockExcludedModules()
-                Toast.makeText(context, resources.getString(Res.string.modules_unlocked), Toast.LENGTH_LONG).show()
+                scope.launch { context.showToast(Res.string.modules_unlocked) }
             }
         }
     }

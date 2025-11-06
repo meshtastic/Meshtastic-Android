@@ -19,7 +19,6 @@ package org.meshtastic.feature.settings.debugging
 
 import android.content.Context
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
@@ -86,6 +85,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import timber.log.Timber
 import java.io.IOException
@@ -396,23 +396,9 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
                 }
             } ?: run { throw IOException("Unable to open output stream for URI: $targetUri") }
 
-            withContext(Dispatchers.Main) {
-                Toast.makeText(
-                    context,
-                    context.getString(Res.string.debug_export_success, logs.size),
-                    Toast.LENGTH_LONG,
-                )
-                    .show()
-            }
+            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
         } catch (e: IOException) {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(
-                    context,
-                    context.getString(Res.string.debug_export_failed, e.message ?: ""),
-                    Toast.LENGTH_LONG,
-                )
-                    .show()
-            }
+            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
             Timber.w(e, "Error:IOException ")
         }
     }

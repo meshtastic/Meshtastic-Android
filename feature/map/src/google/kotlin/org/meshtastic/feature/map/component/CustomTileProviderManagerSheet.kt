@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.map.component
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import org.meshtastic.core.data.model.CustomTileProviderConfig
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.core.strings.R as Res
 
@@ -64,11 +64,7 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
     var showEditDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        mapViewModel.errorFlow.collectLatest { errorMessage ->
-            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-        }
-    }
+    LaunchedEffect(Unit) { mapViewModel.errorFlow.collectLatest { errorMessage -> context.showToast(errorMessage) } }
 
     if (showEditDialog) {
         AddEditCustomTileProviderDialog(

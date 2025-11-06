@@ -20,7 +20,6 @@ package org.meshtastic.feature.node.component
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
@@ -41,6 +40,7 @@ import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.showToast
 import timber.log.Timber
 import java.net.URLEncoder
 import org.meshtastic.core.strings.R as Res
@@ -69,7 +69,7 @@ fun LinkedCoordinatesItem(node: Node) {
                 if (intent.resolveActivity(context.packageManager) != null) {
                     context.startActivity(intent)
                 } else {
-                    Toast.makeText(context, "No application available to open this location!", Toast.LENGTH_LONG).show()
+                    coroutineScope.launch { context.showToast("No application available to open this location!") }
                 }
             } catch (ex: ActivityNotFoundException) {
                 Timber.d("Failed to open geo intent: $ex")

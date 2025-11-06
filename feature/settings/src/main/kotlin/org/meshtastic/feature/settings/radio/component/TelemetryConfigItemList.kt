@@ -22,7 +22,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,7 +45,6 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
     val formState = rememberConfigState(initialValue = telemetryConfig)
 
     val firmwareVersion = state.metadata?.firmwareVersion ?: "1"
-    val context = LocalContext.current
 
     RadioConfigScreenList(
         title = stringResource(Res.string.telemetry),
@@ -78,7 +76,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                     title = stringResource(Res.string.device_metrics_update_interval_seconds),
                     selectedItem = formState.value.deviceUpdateInterval.toLong(),
                     enabled = state.connected,
-                    items = items.map { it.value to it.toDisplayString(context = context) },
+                    items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { deviceUpdateInterval = it.toInt() } },
                 )
                 HorizontalDivider()
@@ -95,7 +93,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                     title = stringResource(Res.string.environment_metrics_update_interval_seconds),
                     selectedItem = formState.value.environmentUpdateInterval.toLong(),
                     enabled = state.connected,
-                    items = envItems.map { it.value to it.toDisplayString(context = context) },
+                    items = envItems.map { it.value to it.toDisplayString() },
                     onItemSelected = {
                         formState.value = formState.value.copy { environmentUpdateInterval = it.toInt() }
                     },
@@ -130,7 +128,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                     title = stringResource(Res.string.air_quality_metrics_update_interval_seconds),
                     selectedItem = formState.value.airQualityInterval.toLong(),
                     enabled = state.connected,
-                    items = airItems.map { it.value to it.toDisplayString(context = context) },
+                    items = airItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { airQualityInterval = it.toInt() } },
                 )
                 HorizontalDivider()
@@ -147,7 +145,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                     title = stringResource(Res.string.power_metrics_update_interval_seconds),
                     selectedItem = formState.value.powerUpdateInterval.toLong(),
                     enabled = state.connected,
-                    items = powerItems.map { it.value to it.toDisplayString(context = context) },
+                    items = powerItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { powerUpdateInterval = it.toInt() } },
                 )
                 HorizontalDivider()
