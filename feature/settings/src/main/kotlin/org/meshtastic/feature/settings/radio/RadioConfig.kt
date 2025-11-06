@@ -81,7 +81,7 @@ fun RadioConfigItemList(
     state: RadioConfigState,
     isManaged: Boolean,
     excludedModulesUnlocked: Boolean = false,
-    onPreserveFavoritesToggled: (Boolean) -> Unit = {},
+    onPreserveFavoritesToggle: (Boolean) -> Unit = {},
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
@@ -167,7 +167,7 @@ fun RadioConfigItemList(
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                     enabled = enabled,
                                     checked = state.nodeDbResetPreserveFavorites,
-                                    onCheckedChange = onPreserveFavoritesToggled,
+                                    onCheckedChange = onPreserveFavoritesToggle,
                                 )
                             }
                         }
