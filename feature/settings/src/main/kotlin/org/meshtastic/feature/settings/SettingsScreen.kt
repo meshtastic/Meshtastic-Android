@@ -257,7 +257,7 @@ fun SettingsScreen(
                             if (!isGpsDisabled) {
                                 settingsViewModel.meshService?.startProvideLocation()
                             } else {
-                                scope.launch { context.showToast(Res.string.location_disabled) }
+                                context.showToast(Res.string.location_disabled)
                             }
                         } else {
                             // Request permissions if not granted and user wants to provide location
