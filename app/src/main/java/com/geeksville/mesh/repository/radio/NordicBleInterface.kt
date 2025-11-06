@@ -35,8 +35,6 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
@@ -45,7 +43,6 @@ import no.nordicsemi.kotlin.ble.client.android.native
 import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
 import java.util.UUID
-import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.toKotlinUuid
 
@@ -84,9 +81,6 @@ constructor(
     private var fromNumCharacteristic: RemoteCharacteristic? = null
     private var fromRadioCharacteristic: RemoteCharacteristic? = null
 
-    // Ensure only one coroutine performs packet-queue reads at a time to avoid races with the peripheral
-    private val packetQueueMutex = Mutex()
-
     /** Creates a flow that reads from the packet queue until it's empty. */
     private fun packetQueueFlow(): Flow<ByteArray> = channelFlow {
         while (isActive) {
@@ -100,37 +94,34 @@ constructor(
     }
 
     /**
-     * Drains the FROMRADIO packet queue and dispatches each packet to the service. This function serializes access with
-     * [packetQueueMutex] to avoid concurrent reads.
+     * Drains the FROMRADIO packet queue and dispatches each packet to the service.
      *
      * @param source A short label indicating why we're draining ("notify", "initial", "post-write").
      */
-    private suspend fun drainPacketQueueAndDispatch(source: String) {
-        packetQueueMutex.withLock {
-            var drainedCount = 0
-            packetQueueFlow()
-                .onEach { packet ->
-                    drainedCount++
-                    Timber.d(
-                        "[$source] Read packet queue returned ${packet.size} bytes: ${
-                            packet.joinToString(
-                                prefix = "[",
-                                postfix = "]",
-                            ) { b ->
-                                String.format("0x%02x", b)
-                            }
-                        } - dispatching to service.handleFromRadio()",
-                    )
-                    dispatchPacket(packet, source)
+    private fun drainPacketQueueAndDispatch(source: String) {
+        var drainedCount = 0
+        packetQueueFlow()
+            .onEach { packet ->
+                drainedCount++
+                Timber.d(
+                    "[$source] Read packet queue returned ${packet.size} bytes: ${
+                        packet.joinToString(
+                            prefix = "[",
+                            postfix = "]",
+                        ) { b ->
+                            String.format("0x%02x", b)
+                        }
+                    } - dispatching to service.handleFromRadio()",
+                )
+                dispatchPacket(packet, source)
+            }
+            .catch { ex -> Timber.w(ex, "Exception while draining packet queue (source=$source)") }
+            .onCompletion {
+                if (drainedCount > 0) {
+                    Timber.d("[$source] Drained $drainedCount packets from packet queue")
                 }
-                .catch { ex -> Timber.w(ex, "Exception while draining packet queue (source=$source)") }
-                .onCompletion {
-                    if (drainedCount > 0) {
-                        Timber.d("[$source] Drained $drainedCount packets from packet queue")
-                    }
-                }
-                .launchIn(localScope)
-        }
+            }
+            .launchIn(localScope)
     }
 
     private fun dispatchPacket(packet: ByteArray, source: String) {
@@ -161,7 +152,7 @@ constructor(
         private const val INTER_READ_DELAY_MS: Long = 5L
 
         // Delay after a write before attempting a post-write packet-queue read (ms)
-        private const val POST_WRITE_DELAY_MS: Long = 200L
+        private const val POST_WRITE_DELAY_MS: Long = 25L
     }
 
     init {
@@ -169,7 +160,7 @@ constructor(
     }
 
     private suspend fun findPeripheral(): Peripheral =
-        centralManager.scan(timeout = 5.seconds).mapNotNull { it.peripheral }.firstOrNull { it.address == address }
+        centralManager.scan().mapNotNull { it.peripheral }.firstOrNull { it.address == address }
             ?: throw RadioNotConnectedException("Device not found")
 
     /**
