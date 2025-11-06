@@ -15,15 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.feature.settings.util
+package org.meshtastic.core.ui.util
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import org.meshtastic.core.strings.R as Res
+import android.content.Context
+import android.widget.Toast
+import androidx.annotation.StringRes
 
-@Composable
-fun FixedUpdateIntervals.toDisplayString(): String = if (this == FixedUpdateIntervals.UNSET) {
-    stringResource(Res.string.unset)
-} else {
-    name.split('_').joinToString(" ") { word -> word.lowercase().replaceFirstChar { it.uppercase() } }
+suspend fun Context.showToast(@StringRes resId: Int) {
+    showToast(getString(resId))
+}
+
+suspend fun Context.showToast(text: CharSequence) {
+    Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+}
+
+suspend fun Context.showToast(@StringRes resId: Int, vararg formatArgs: Any) {
+    Toast.makeText(this, getString(resId, formatArgs), Toast.LENGTH_SHORT).show()
 }
