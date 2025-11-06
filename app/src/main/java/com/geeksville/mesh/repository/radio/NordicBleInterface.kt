@@ -46,6 +46,16 @@ import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.toKotlinUuid
 
+/**
+ * A [IRadioInterface] implementation for BLE devices using Nordic Kotlin BLE Library.
+ * https://github.com/NordicSemiconductor/Kotlin-BLE-Library.
+ *
+ * This class is responsible for connecting to and communicating with a Meshtastic device over BLE.
+ *
+ * @param context The application context.
+ * @param service The [RadioInterfaceService] to use for handling radio events.
+ * @param address The BLE address of the device to connect to.
+ */
 @SuppressLint("MissingPermission")
 class NordicBleInterface
 @AssistedInject
@@ -59,29 +69,12 @@ constructor(
     private val localScope: CoroutineScope
         get() = service.serviceScope
 
-    // CentralManager must be created using the service scope. Create it lazily in connect() so that
-    // it binds to the current `service.serviceScope` for this interface lifecycle.
     private lateinit var centralManager: CentralManager
 
-    /**
-     * Store a reference to the characteristic to avoid re-discovering it for every write. This is more efficient and
-     * reliable.
-     */
     private var toRadioCharacteristic: RemoteCharacteristic? = null
-
-    /**
-     * NOTE: The mesh hardware exposes two related characteristics:
-     * - FROMRADIO (packet queue) - a read-only packet queue containing the next packet bytes
-     * - FROMNUM (notify/read/write) - a small counter/notify characteristic; when it notifies the phone should read
-     *   FROMRADIO to fetch the full payload.
-     *
-     * Keep both cached here: "fromNumCharacteristic" is the notify side, and "fromRadioCharacteristic" is the packet
-     * queue that we will read when notified.
-     */
     private var fromNumCharacteristic: RemoteCharacteristic? = null
     private var fromRadioCharacteristic: RemoteCharacteristic? = null
 
-    /** Creates a flow that reads from the packet queue until it's empty. */
     private fun packetQueueFlow(): Flow<ByteArray> = channelFlow {
         while (isActive) {
             val packet = fromRadioCharacteristic?.read()
@@ -93,11 +86,6 @@ constructor(
         }
     }
 
-    /**
-     * Drains the FROMRADIO packet queue and dispatches each packet to the service.
-     *
-     * @param source A short label indicating why we're draining ("notify", "initial", "post-write").
-     */
     private fun drainPacketQueueAndDispatch(source: String) {
         var drainedCount = 0
         packetQueueFlow()
@@ -143,15 +131,9 @@ constructor(
         val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
         val BTM_TORADIO_CHARACTER: UUID = UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
         val BTM_FROMNUM_CHARACTER: UUID = UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
-
-        // packet queue characteristic that must be read after a FROMNUM notify
         val BTM_FROMRADIO_CHARACTER: UUID = UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
 
-        // Tuning constants for packet-queue reads
-        // Time to wait between successive packet-queue reads (ms)
         private const val INTER_READ_DELAY_MS: Long = 5L
-
-        // Delay after a write before attempting a post-write packet-queue read (ms)
         private const val POST_WRITE_DELAY_MS: Long = 25L
     }
 
@@ -163,13 +145,6 @@ constructor(
         centralManager.scan().mapNotNull { it.peripheral }.firstOrNull { it.address == address }
             ?: throw RadioNotConnectedException("Device not found")
 
-    /**
-     * Establishes a connection to the BLE peripheral.
-     *
-     * This function launches a coroutine to handle the entire connection lifecycle, including scanning, connecting,
-     * service discovery, and setting up notifications. It also monitors the connection state and handles disconnection
-     * events.
-     */
     private fun connect() {
         localScope.launch {
             try {
@@ -186,12 +161,6 @@ constructor(
         }
     }
 
-    /**
-     * Scans for the peripheral and establishes a connection.
-     *
-     * @return The connected [Peripheral].
-     * @throws RadioNotConnectedException if the device is not found.
-     */
     private suspend fun findAndConnectPeripheral(): Peripheral {
         val p = findPeripheral()
         centralManager.connect(
@@ -202,9 +171,6 @@ constructor(
         return p
     }
 
-    /**
-     * Observes changes in the peripheral's state, PHY, and connection parameters. It also handles disconnection events.
-     */
     private fun observePeripheralChanges() {
         peripheral?.let { p ->
             p.phy.onEach { phy -> Timber.d("PHY changed to $phy") }.launchIn(localScope)
@@ -222,11 +188,6 @@ constructor(
         centralManager.state.onEach { state -> Timber.d("CentralManager state changed to $state") }.launchIn(localScope)
     }
 
-    /**
-     * Discovers services and sets up the required characteristics for communication.
-     *
-     * @param peripheral The connected [Peripheral].
-     */
     @OptIn(ExperimentalUuidApi::class)
     private fun discoverServicesAndSetupCharacteristics(peripheral: Peripheral) {
         localScope.launch {
@@ -259,7 +220,6 @@ constructor(
         }
     }
 
-    /** Logs information about the discovered characteristics. */
     @OptIn(ExperimentalUuidApi::class)
     private fun logCharacteristicInfo() {
         try {
@@ -281,7 +241,6 @@ constructor(
         }
     }
 
-    /** Sets up notifications for the 'fromNum' characteristic and performs an initial packet queue drain. */
     @OptIn(ExperimentalUuidApi::class)
     private fun setupNotifications() {
         localScope.launch {
@@ -309,40 +268,30 @@ constructor(
 
         localScope.launch {
             try {
-                Timber.d("Enabling notifications...")
                 fromNumCharacteristic?.setNotifying(true)
-                Timber.d("Notifications enabled and confirmed.")
                 drainPacketQueueAndDispatch("initial")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to enable notifications or perform initial drain")
                 service.onDisconnect(false)
             }
         }
-        Timber.d("BLE services discovered and reader subscribed. Connection is ready.")
         service.onConnect()
     }
 
-    /** Writes data to the cached 'toRadio' characteristic. */
+    /**
+     * Sends a packet to the radio.
+     *
+     * @param p The packet to send.
+     */
     override fun handleSendToRadio(p: ByteArray) {
-        Timber.d("handleSendToRadio called with ${p.size} bytes.")
         val characteristic = toRadioCharacteristic
         if (peripheral == null || characteristic == null) {
-            Timber.w(
-                "Peripheral not ready, cannot send data. Peripheral is ${if (peripheral == null) "null" else "not null"}. Characteristic is ${if (characteristic == null) "null" else "not null"}.",
-            )
             return
         }
 
-        Timber.d("Peripheral and characteristic are ready, proceeding to write.")
         localScope.launch {
             try {
-                Timber.d("Writing to characteristic...")
                 characteristic.write(p, writeType = WriteType.WITHOUT_RESPONSE)
-                Timber.d("Write operation completed without throwing an exception.")
-
-                // Single quick post-write read: some peripherals queue FROMRADIO after accepting a ToRadio
-                // write but may not immediately notify. Try a single delayed read to capture that queued data
-                // without resorting to full polling.
                 localScope.launch {
                     delay(POST_WRITE_DELAY_MS)
                     drainPacketQueueAndDispatch("post-write")
@@ -353,9 +302,8 @@ constructor(
         }
     }
 
+    /** Closes the connection to the device. */
     override fun close() {
-        Timber.d("Closing NordicBleInterface")
-        // Best-effort: disable notifications and clear cached characteristics, then disconnect
         val fn = fromNumCharacteristic
         localScope.launch {
             try {
@@ -369,7 +317,6 @@ constructor(
                 Timber.w(ex, "Error while closing NordicBleInterface")
             }
         }
-        // Clear cached references immediately to prevent accidental use
         toRadioCharacteristic = null
         fromNumCharacteristic = null
         fromRadioCharacteristic = null
