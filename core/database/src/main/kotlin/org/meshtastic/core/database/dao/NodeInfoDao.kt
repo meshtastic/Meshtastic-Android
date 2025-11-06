@@ -182,8 +182,20 @@ interface NodeInfoDao {
         lastHeardMin: Int,
     ): Flow<List<NodeWithRelations>>
 
+    @Transaction
+    fun clearNodeInfo(preserveFavorites: Boolean) {
+        if (preserveFavorites) {
+            deleteNonFavoriteNodes()
+        } else {
+            deleteAllNodes()
+        }
+    }
+
+    @Query("DELETE FROM nodes WHERE is_favorite = 0")
+    fun deleteNonFavoriteNodes()
+
     @Query("DELETE FROM nodes")
-    fun clearNodeInfo()
+    fun deleteAllNodes()
 
     @Query("DELETE FROM nodes WHERE num=:num")
     fun deleteNode(num: Int)

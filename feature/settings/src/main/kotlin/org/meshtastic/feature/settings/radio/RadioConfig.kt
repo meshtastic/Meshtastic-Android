@@ -17,7 +17,10 @@
 
 package org.meshtastic.feature.settings.radio
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
@@ -28,7 +31,9 @@ import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,12 +74,14 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.component.WarningDialog
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigItemList(
     state: RadioConfigState,
     isManaged: Boolean,
     excludedModulesUnlocked: Boolean = false,
+    onPreserveFavoritesToggled: (Boolean) -> Unit = {},
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
@@ -147,6 +155,23 @@ fun RadioConfigItemList(
             if (showDialog) {
                 WarningDialog(
                     title = "${stringResource(route.title)}?",
+                    text = {
+                        if (route == AdminRoute.NODEDB_RESET) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(text = stringResource(Res.string.preserve_favorites))
+                                Switch(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                    enabled = enabled,
+                                    checked = state.nodeDbResetPreserveFavorites,
+                                    onCheckedChange = onPreserveFavoritesToggled,
+                                )
+                            }
+                        }
+                    },
                     onDismiss = { showDialog = false },
                     onConfirm = { onRouteClick(route) },
                 )

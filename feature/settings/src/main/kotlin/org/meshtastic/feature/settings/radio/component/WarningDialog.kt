@@ -37,6 +37,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 fun WarningDialog(
     icon: ImageVector? = Icons.Rounded.Warning,
     title: String,
+    text: @Composable () -> Unit = {},
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
@@ -44,6 +45,7 @@ fun WarningDialog(
         onDismissRequest = {},
         icon = { icon?.let { Icon(imageVector = it, contentDescription = null) } },
         title = { Text(text = title) },
+        text = text,
         dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(Res.string.cancel)) } },
         confirmButton = {
             Button(
