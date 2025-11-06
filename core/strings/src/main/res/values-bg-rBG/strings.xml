@@ -313,7 +313,7 @@
     <string name="mute_8_hours">8 часа</string>
     <string name="mute_1_week">1 седмица</string>
     <string name="mute_always">Винаги</string>
-    <string name="currently">Currently:</string>
+    <string name="currently">В момента:</string>
     <string name="mute_status_always">Always muted</string>
     <string name="mute_status_unmuted">Not muted</string>
     <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
