@@ -1779,10 +1779,8 @@ class MeshService : Service() {
         }
         // Keep BLE awake and allow the firmware to settle before the node-info stage.
         serviceScope.handledLaunch {
-            delay(250)
             sendHeartbeat()
             // Small delay helps older radios finalize the first stage before the second request
-            delay(250)
             startNodeInfoOnly()
         }
     }

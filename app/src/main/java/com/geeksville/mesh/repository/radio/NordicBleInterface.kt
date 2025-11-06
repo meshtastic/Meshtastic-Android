@@ -112,12 +112,14 @@ constructor(
                 .onEach { packet ->
                     drainedCount++
                     Timber.d(
-                        "[$source] Read packet queue returned ${packet.size} bytes: ${packet.joinToString(
-                            prefix = "[",
-                            postfix = "]",
-                        ) { b ->
-                            String.format("0x%02x", b)
-                        }} - dispatching to service.handleFromRadio()",
+                        "[$source] Read packet queue returned ${packet.size} bytes: ${
+                            packet.joinToString(
+                                prefix = "[",
+                                postfix = "]",
+                            ) { b ->
+                                String.format("0x%02x", b)
+                            }
+                        } - dispatching to service.handleFromRadio()",
                     )
                     dispatchPacket(packet, source)
                 }
@@ -351,12 +353,8 @@ constructor(
                 // write but may not immediately notify. Try a single delayed read to capture that queued data
                 // without resorting to full polling.
                 localScope.launch {
-                    try {
-                        delay(POST_WRITE_DELAY_MS)
-                        drainPacketQueueAndDispatch("post-write")
-                    } catch (re: Exception) {
-                        Timber.w(re, "Post-write packet-queue single read failed (non-fatal)")
-                    }
+                    delay(POST_WRITE_DELAY_MS)
+                    drainPacketQueueAndDispatch("post-write")
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error writing to characteristic")
