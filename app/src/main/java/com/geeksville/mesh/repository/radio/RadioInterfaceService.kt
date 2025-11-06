@@ -118,7 +118,7 @@ constructor(
             .onEach { state ->
                 if (state.enabled) {
                     startInterface()
-                } else if (radioIf is BluetoothInterface) {
+                } else if (radioIf is NordicBleInterface) {
                     stopInterface()
                 }
             }
@@ -221,9 +221,22 @@ constructor(
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     fun handleFromRadio(p: ByteArray) {
+        Timber.d(
+            "RadioInterfaceService.handleFromRadio called with ${p.size} bytes: ${p.joinToString(
+                prefix = "[",
+                postfix = "]",
+            ) { b ->
+                String.format("0x%02x", b)
+            }}",
+        )
+
         if (logReceives) {
-            receivedPacketsLog.write(p)
-            receivedPacketsLog.flush()
+            try {
+                receivedPacketsLog.write(p)
+                receivedPacketsLog.flush()
+            } catch (t: Throwable) {
+                Timber.w(t, "Failed to write receive log in handleFromRadio")
+            }
         }
 
         if (radioIf is SerialInterface) {
@@ -232,8 +245,13 @@ constructor(
 
         // ignoreException { Timber.d("FromRadio: ${MeshProtos.FromRadio.parseFrom(p)}") }
 
-        processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
-        emitReceiveActivity()
+        try {
+            processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
+            emitReceiveActivity()
+            Timber.d("RadioInterfaceService.handleFromRadio dispatched successfully")
+        } catch (t: Throwable) {
+            Timber.e(t, "RadioInterfaceService.handleFromRadio failed while emitting data")
+        }
     }
 
     fun onConnect() {

@@ -17,7 +17,6 @@
     <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided&gt;${ }</ID>
     <ID>EmptyFunctionBlock:TrustAllX509TrustManager.kt$TrustAllX509TrustManager${}</ID>
     <ID>FinalNewline:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
-    <ID>FinalNewline:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
     <ID>FinalNewline:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
     <ID>FinalNewline:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>FinalNewline:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
@@ -34,14 +33,13 @@
     <ID>FinalNewline:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
     <ID>FinalNewline:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
-    <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
+    <ID>ImplicitDefaultLocale:MeshService.kt$MeshService$String.format("0x%02x", b)</ID>
+    <ID>ImplicitDefaultLocale:NordicBleInterface.kt$NordicBleInterface$String.format("0x%02x", b)</ID>
+    <ID>ImplicitDefaultLocale:RadioInterfaceService.kt$RadioInterfaceService$String.format("0x%02x", b)</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
     <ID>LongMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1000</ID>
-    <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$500</ID>
-    <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$512</ID>
     <ID>MagicNumber:Contacts.kt$7</ID>
     <ID>MagicNumber:Contacts.kt$8</ID>
     <ID>MagicNumber:MQTTRepository.kt$MQTTRepository$512</ID>
@@ -58,9 +56,6 @@
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$32809</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$9114</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$10</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$1000</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$2500</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
     <ID>MagicNumber:ServiceClient.kt$ServiceClient$500</ID>
@@ -73,7 +68,15 @@
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$500</ID>
     <ID>MagicNumber:UIState.kt$4</ID>
     <ID>MatchingDeclarationName:MeshServiceStarter.kt$ServiceStarter : Worker</ID>
-    <ID>MaxLineLength:BluetoothInterface.kt$/* Info for the esp32 device side code. See that source for the 'gold' standard docs on this interface. MeshBluetoothService UUID 6ba1b218-15a8-461f-9fa8-5dcae273eafd FIXME - notify vs indication for fromradio output. Using notify for now, not sure if that is best FIXME - in the esp32 mesh management code, occasionally mirror the current net db to flash, so that if we reboot we still have a good guess of users who are out there. FIXME - make sure this protocol is guaranteed robust and won't drop packets "According to the BLE specification the notification length can be max ATT_MTU - 3. The 3 bytes subtracted is the 3-byte header(OP-code (operation, 1 byte) and the attribute handle (2 bytes)). In BLE 4.1 the ATT_MTU is 23 bytes (20 bytes for payload), but in BLE 4.2 the ATT_MTU can be negotiated up to 247 bytes." MAXPACKET is 256? look into what the lora lib uses. FIXME Characteristics: UUID properties description 8ba2bcc2-ee02-4a55-a531-c525c5e454d5 read fromradio - contains a newly received packet destined towards the phone (up to MAXPACKET bytes? per packet). After reading the esp32 will put the next packet in this mailbox. If the FIFO is empty it will put an empty packet in this mailbox. f75c76d2-129e-4dad-a1dd-7866124401e7 write toradio - write ToRadio protobufs to this charstic to send them (up to MAXPACKET len) ed9da18c-a800-4f66-a670-aa7547e34453 read|notify|write fromnum - the current packet # in the message waiting inside fromradio, if the phone sees this notify it should read messages until it catches up with this number. The phone can write to this register to go backwards up to FIXME packets, to handle the rare case of a fromradio packet was dropped after the esp32 callback was called, but before it arrives at the phone. If the phone writes to this register the esp32 will discard older packets and put the next packet &gt;= fromnum in fromradio. When the esp32 advances fromnum, it will delay doing the notify by 100ms, in the hopes that the notify will never actally need to be sent if the phone is already pulling from fromradio. Note: that if the phone ever sees this number decrease, it means the esp32 has rebooted. Re: queue management Not all messages are kept in the fromradio queue (filtered based on SubPacket): * only the most recent Position and User messages for a particular node are kept * all Data SubPackets are kept * No WantNodeNum / DenyNodeNum messages are kept A variable keepAllPackets, if set to true will suppress this behavior and instead keep everything for forwarding to the phone (for debugging) */</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService$"Config complete id mismatch: received=$configCompleteId expected one of [$configOnlyNonce,$nodeInfoNonce]"</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService$"handleConfigComplete called with id=$configCompleteId, configOnly=$configOnlyNonce, nodeInfo=$nodeInfoNonce"</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService$"setOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed isUnmessagable: $isUnmessagable"</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService.&lt;no name provided&gt;$"sendData dest=${p.to}, id=${p.id} &lt;- ${bytes.size} bytes (connectionState=${connectionStateHolder.getState()})"</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"Peripheral not ready, cannot send data. Peripheral is ${if (peripheral == null) "null" else "not null"}. Characteristic is ${if (characteristic == null) "null" else "not null"}."</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"fromNumCharacteristic discovered: uuid=${fromNumCharacteristic?.uuid} instanceId=${fromNumCharacteristic?.instanceId}"</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"fromRadioCharacteristic discovered (packet queue): uuid=${fromRadioCharacteristic?.uuid} instanceId=${fromRadioCharacteristic?.instanceId}"</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"service.serviceScope not active while dispatching from packet queue (source=$source); using localScope as fallback"</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"toRadioCharacteristic discovered: uuid=${toRadioCharacteristic?.uuid} instanceId=${toRadioCharacteristic?.instanceId}"</ID>
     <ID>ModifierClickableOrder:Channel.kt$clickable(onClick = onClick)</ID>
     <ID>ModifierMissing:BLEDevices.kt$BLEDevices</ID>
     <ID>ModifierMissing:Channel.kt$ChannelScreen</ID>
@@ -88,7 +91,6 @@
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>NewLineAtEndOfFile:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
-    <ID>NewLineAtEndOfFile:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
     <ID>NewLineAtEndOfFile:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>NewLineAtEndOfFile:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
@@ -118,20 +120,20 @@
     <ID>PreviewPublic:Channel.kt$ModemPresetInfoPreview</ID>
     <ID>PreviewPublic:EmptyStateContent.kt$EmptyStateContentPreview</ID>
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
-    <ID>SwallowedException:BluetoothInterface.kt$BluetoothInterface$ex: CancellationException</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
-    <ID>SwallowedException:MeshService.kt$MeshService$ex: BLEException</ID>
-    <ID>SwallowedException:MeshService.kt$MeshService$ex: CancellationException</ID>
     <ID>SwallowedException:NsdManager.kt$ex: IllegalArgumentException</ID>
     <ID>SwallowedException:ServiceClient.kt$ServiceClient$ex: IllegalArgumentException</ID>
     <ID>SwallowedException:TCPInterface.kt$TCPInterface$ex: SocketTimeoutException</ID>
     <ID>TooGenericExceptionCaught:BTScanModel.kt$BTScanModel$ex: Throwable</ID>
-    <ID>TooGenericExceptionCaught:BluetoothInterface.kt$BluetoothInterface$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:Exceptions.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:MQTTRepository.kt$MQTTRepository$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService.&lt;no name provided&gt;$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshServiceStarter.kt$ServiceStarter$ex: Exception</ID>
+    <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$ex: Exception</ID>
+    <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:RadioInterfaceService.kt$RadioInterfaceService$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:SyncContinuation.kt$Continuation$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
     <ID>TooGenericExceptionThrown:MeshService.kt$MeshService$throw Exception("Can't set user without a NodeInfo")</ID>
@@ -140,11 +142,10 @@
     <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Service not bound")</ID>
     <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("SyncContinuation timeout")</ID>
     <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("This shouldn't happen")</ID>
-    <ID>TooManyFunctions:BluetoothInterface.kt$BluetoothInterface : IRadioInterface</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService : Service</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided&gt; : Stub</ID>
+    <ID>TooManyFunctions:NordicBleInterface.kt$NordicBleInterface : IRadioInterface</ID>
     <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService</ID>
-    <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : Closeable</ID>
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModel</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>

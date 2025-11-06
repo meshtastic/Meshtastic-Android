@@ -243,6 +243,8 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
 
+    implementation(libs.nordic)
+
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     googleImplementation(libs.location.services)

@@ -32,7 +32,7 @@ abstract class RadioRepositoryModule {
     @Multibinds abstract fun interfaceMap(): Map<InterfaceId, @JvmSuppressWildcards InterfaceSpec<*>>
 
     @[Binds IntoMap InterfaceMapKey(InterfaceId.BLUETOOTH)]
-    abstract fun bindBluetoothInterfaceSpec(spec: BluetoothInterfaceSpec): @JvmSuppressWildcards InterfaceSpec<*>
+    abstract fun bindBluetoothInterfaceSpec(spec: NordicBleInterfaceSpec): @JvmSuppressWildcards InterfaceSpec<*>
 
     @[Binds IntoMap InterfaceMapKey(InterfaceId.MOCK)]
     abstract fun bindMockInterfaceSpec(spec: MockInterfaceSpec): @JvmSuppressWildcards InterfaceSpec<*>
