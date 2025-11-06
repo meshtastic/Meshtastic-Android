@@ -1990,6 +1990,9 @@ class MeshService : Service() {
         Timber.d("Clearing nodeDB")
         discardNodeDB()
         nodeRepository.clearNodeDB()
+
+        Timber.d("Clearing packetDB")
+        packetRepository.get().clearPacketDB()
     }
 
     private fun updateLastAddress(deviceAddr: String?) {
