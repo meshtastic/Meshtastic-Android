@@ -109,7 +109,7 @@ constructor(
     val appVersionName
         get() = buildConfigProvider.versionName
 
-    // Node DB cache limit (bounded by DatabaseConstants)
+    // Device DB cache limit (bounded by DatabaseConstants)
     private val _dbCacheLimit = MutableStateFlow(databaseManager.getCacheLimit())
     val dbCacheLimit: StateFlow<Int> = _dbCacheLimit.asStateFlow()
 
