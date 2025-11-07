@@ -136,8 +136,7 @@ constructor(
     }
 
     private fun enforceCacheLimit(activeDbName: String) {
-        val limit = prefs.getInt(DatabaseConstants.CACHE_LIMIT_KEY, DatabaseConstants.DEFAULT_CACHE_LIMIT)
-            .coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
+        val limit = getCacheLimit()
 
         val all = listExistingDbNames()
         if (all.size <= limit) return
@@ -153,6 +152,19 @@ constructor(
             prefs.edit().remove(lastUsedKey(name)).apply()
             Timber.i("Evicted cached DB ${anonymizeDbName(name)}")
         }
+    }
+
+    fun getCacheLimit(): Int =
+        prefs.getInt(DatabaseConstants.CACHE_LIMIT_KEY, DatabaseConstants.DEFAULT_CACHE_LIMIT)
+            .coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
+
+    fun setCacheLimit(limit: Int) {
+        val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
+        if (clamped == getCacheLimit()) return
+        prefs.edit().putInt(DatabaseConstants.CACHE_LIMIT_KEY, clamped).apply()
+        // Enforce asynchronously with current active DB protected
+        val active = _currentDb.value?.openHelper?.databaseName ?: defaultDbName()
+        managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = active) }
     }
 
     private fun anonymizeAddress(address: String?): String =
