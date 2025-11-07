@@ -24,6 +24,7 @@ import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import java.security.MessageDigest
@@ -68,11 +70,23 @@ constructor(
     /** Switch active database to the one associated with [address]. Serialized via mutex. */
     suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
         val dbName = buildDbName(address)
-        val db = dbCache[dbName] ?: buildRoomDb(dbName).also { dbCache[dbName] = it }
+
+        // Fast path: no-op if already on this address
+        if (_currentAddress.value == address && _currentDb.value != null) {
+            markLastUsed(dbName)
+            return
+        }
+
+        // Build/open Room DB off the main thread
+        val db = dbCache[dbName] ?: withContext(Dispatchers.IO) { buildRoomDb(dbName) }.also { dbCache[dbName] = it }
+
         _currentDb.value = db
         _currentAddress.value = address
         markLastUsed(dbName)
-        enforceCacheLimit(activeDbName = dbName)
+
+        // Defer LRU eviction so switch is not blocked by filesystem work
+        managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = dbName) }
+
         Timber.i("Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}")
     }
 
