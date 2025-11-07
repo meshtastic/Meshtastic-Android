@@ -40,7 +40,6 @@ import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
-import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.material3.Scaffold
@@ -65,11 +64,12 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.meshtastic.core.common.gpsDisabled
+import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
-import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
@@ -312,7 +312,11 @@ fun SettingsScreen(
 
                 // Node DB cache limit (App setting)
                 val cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value
-                val cacheItems = remember { (1..10).map { it.toLong() to it.toString() } }
+                val cacheItems = remember {
+                    (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map {
+                        it.toLong() to it.toString()
+                    }
+                }
                 DropDownPreference(
                     title = stringResource(Res.string.device_db_cache_limit),
                     enabled = true,

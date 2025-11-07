@@ -37,6 +37,7 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
@@ -108,12 +109,12 @@ constructor(
     val appVersionName
         get() = buildConfigProvider.versionName
 
-    // Node DB cache limit (1..10)
+    // Node DB cache limit (bounded by DatabaseConstants)
     private val _dbCacheLimit = MutableStateFlow(databaseManager.getCacheLimit())
     val dbCacheLimit: StateFlow<Int> = _dbCacheLimit.asStateFlow()
 
     fun setDbCacheLimit(limit: Int) {
-        val clamped = limit.coerceIn(1, 10)
+        val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
         databaseManager.setCacheLimit(clamped)
         _dbCacheLimit.value = clamped
     }

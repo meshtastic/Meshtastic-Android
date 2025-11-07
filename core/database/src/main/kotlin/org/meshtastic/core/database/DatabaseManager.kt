@@ -24,12 +24,12 @@ import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -39,15 +39,9 @@ import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Manages per-device Room database instances for node data, with LRU eviction.
- */
+/** Manages per-device Room database instances for node data, with LRU eviction. */
 @Singleton
-class DatabaseManager
-@Inject
-constructor(
-    private val app: Application,
-) {
+class DatabaseManager @Inject constructor(private val app: Application) {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -55,9 +49,7 @@ constructor(
 
     private val _currentDb = MutableStateFlow<MeshtasticDatabase?>(null)
     val currentDb: StateFlow<MeshtasticDatabase> =
-        _currentDb
-            .filterNotNull()
-            .stateIn(managerScope, SharingStarted.Eagerly, buildRoomDb(defaultDbName()))
+        _currentDb.filterNotNull().stateIn(managerScope, SharingStarted.Eagerly, buildRoomDb(app, defaultDbName()))
 
     private val _currentAddress = MutableStateFlow<String?>(null)
     val currentAddress: StateFlow<String?> = _currentAddress
@@ -78,7 +70,9 @@ constructor(
         }
 
         // Build/open Room DB off the main thread
-        val db = dbCache[dbName] ?: withContext(Dispatchers.IO) { buildRoomDb(dbName) }.also { dbCache[dbName] = it }
+        val db =
+            dbCache[dbName]
+                ?: withContext(Dispatchers.IO) { buildRoomDb(app, dbName) }.also { dbCache[dbName] = it }
 
         _currentDb.value = db
         _currentAddress.value = address
@@ -98,19 +92,6 @@ constructor(
             .fallbackToDestructiveMigration(false)
             .build()
 
-    private fun defaultDbName(): String = DatabaseConstants.DEFAULT_DB_NAME
-
-    private fun buildDbName(address: String?): String =
-        if (address.isNullOrBlank()) defaultDbName() else "${DatabaseConstants.DB_PREFIX}_${shortSha1(normalizeAddress(address))}"
-
-    private fun normalizeAddress(addr: String?): String = addr?.uppercase()?.replace(":", "") ?: "DEFAULT"
-
-    private fun shortSha1(s: String): String =
-        MessageDigest.getInstance("SHA-1")
-            .digest(s.toByteArray())
-            .joinToString("") { "%02x".format(it) }
-            .take(10)
-
     private fun markLastUsed(dbName: String) {
         prefs.edit().putLong(lastUsedKey(dbName), System.currentTimeMillis()).apply()
     }
@@ -118,12 +99,8 @@ constructor(
     private fun lastUsed(dbName: String): Long {
         val k = lastUsedKey(dbName)
         val v = prefs.getLong(k, 0L)
-        return if (v == 0L) getDbFile(dbName)?.lastModified() ?: 0L else v
+        return if (v == 0L) getDbFile(app, dbName)?.lastModified() ?: 0L else v
     }
-
-    private fun lastUsedKey(dbName: String) = "db_last_used:$dbName"
-
-    private fun getDbFile(dbName: String): File? = app.getDatabasePath(dbName).takeIf { it.exists() }
 
     private fun listExistingDbNames(): List<String> {
         val base = app.getDatabasePath(DatabaseConstants.LEGACY_DB_NAME)
@@ -135,28 +112,23 @@ constructor(
             .distinct()
     }
 
-    private fun enforceCacheLimit(activeDbName: String) {
+    private suspend fun enforceCacheLimit(activeDbName: String) = mutex.withLock {
         val limit = getCacheLimit()
-
         val all = listExistingDbNames()
         if (all.size <= limit) return
-
-        val victims = all
-            .filter { it != activeDbName }
-            .sortedBy { lastUsed(it) }
-            .take(all.size - limit)
-
+        val victims = all.filter { it != activeDbName }.sortedBy { lastUsed(it) }.take(all.size - limit)
         victims.forEach { name ->
             runCatching { dbCache.remove(name)?.close() }
+                .onFailure { Timber.w(it, "Failed to close database %s", name) }
             app.deleteDatabase(name)
             prefs.edit().remove(lastUsedKey(name)).apply()
             Timber.i("Evicted cached DB ${anonymizeDbName(name)}")
         }
     }
 
-    fun getCacheLimit(): Int =
-        prefs.getInt(DatabaseConstants.CACHE_LIMIT_KEY, DatabaseConstants.DEFAULT_CACHE_LIMIT)
-            .coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
+    fun getCacheLimit(): Int = prefs
+        .getInt(DatabaseConstants.CACHE_LIMIT_KEY, DatabaseConstants.DEFAULT_CACHE_LIMIT)
+        .coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
 
     fun setCacheLimit(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
@@ -166,13 +138,6 @@ constructor(
         val active = _currentDb.value?.openHelper?.databaseName ?: defaultDbName()
         managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = active) }
     }
-
-    private fun anonymizeAddress(address: String?): String =
-        address?.let { it.take(2) + "…" + it.takeLast(2) } ?: "null"
-
-    private fun anonymizeDbName(name: String): String =
-        if (name == DatabaseConstants.LEGACY_DB_NAME || name == DatabaseConstants.DEFAULT_DB_NAME) name
-        else name.take(DatabaseConstants.DB_PREFIX.length + 1 + 3) + "…"
 }
 
 object DatabaseConstants {
@@ -184,6 +149,47 @@ object DatabaseConstants {
     const val DEFAULT_CACHE_LIMIT: Int = 3
     const val MIN_CACHE_LIMIT: Int = 1
     const val MAX_CACHE_LIMIT: Int = 10
+
+    // Display/truncation and hash sizing for DB names
+    const val DB_NAME_HASH_LEN: Int = 10
+    const val DB_NAME_SEPARATOR_LEN: Int = 1
+    const val DB_NAME_SUFFIX_LEN: Int = 3
 }
 
+// File-private helpers (kept outside the class to reduce class function count)
+private fun defaultDbName(): String = DatabaseConstants.DEFAULT_DB_NAME
 
+private fun normalizeAddress(addr: String?): String = addr?.uppercase()?.replace(":", "") ?: "DEFAULT"
+
+private fun shortSha1(s: String): String = MessageDigest.getInstance("SHA-1")
+    .digest(s.toByteArray())
+    .joinToString("") { "%02x".format(it) }
+    .take(DatabaseConstants.DB_NAME_HASH_LEN)
+
+private fun buildDbName(address: String?): String = if (address.isNullOrBlank()) {
+    defaultDbName()
+} else {
+    "${DatabaseConstants.DB_PREFIX}_${shortSha1(normalizeAddress(address))}"
+}
+
+private fun lastUsedKey(dbName: String) = "db_last_used:$dbName"
+
+private fun anonymizeAddress(address: String?): String = address?.let { it.take(2) + "…" + it.takeLast(2) } ?: "null"
+
+private fun anonymizeDbName(name: String): String =
+    if (name == DatabaseConstants.LEGACY_DB_NAME || name == DatabaseConstants.DEFAULT_DB_NAME) {
+        name
+    } else {
+        name.take(
+            DatabaseConstants.DB_PREFIX.length +
+                DatabaseConstants.DB_NAME_SEPARATOR_LEN +
+                DatabaseConstants.DB_NAME_SUFFIX_LEN,
+        ) + "…"
+    }
+
+private fun buildRoomDb(app: Application, dbName: String): MeshtasticDatabase =
+    Room.databaseBuilder(app.applicationContext, MeshtasticDatabase::class.java, dbName)
+        .fallbackToDestructiveMigration(false)
+        .build()
+
+private fun getDbFile(app: Application, dbName: String): File? = app.getDatabasePath(dbName).takeIf { it.exists() }

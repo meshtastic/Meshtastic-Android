@@ -18,13 +18,14 @@
 package com.geeksville.mesh
 
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
-import kotlinx.coroutines.runBlocking
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import timber.log.Timber
@@ -41,9 +42,11 @@ class MeshUtilApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         initializeMaps(this)
-        // Initialize DatabaseManager early with current device address so DAO consumers have an active DB
+        // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
-        runBlocking { entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress) }
+        CoroutineScope(Dispatchers.Default).launch {
+            entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress)
+        }
     }
 }
 
@@ -51,6 +54,7 @@ class MeshUtilApplication : Application() {
 @InstallIn(SingletonComponent::class)
 interface AppEntryPoint {
     fun databaseManager(): DatabaseManager
+
     fun meshPrefs(): MeshPrefs
 }
 

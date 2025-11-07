@@ -31,8 +31,7 @@ constructor(
     private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
 ) {
-    fun getAllActions() =
-        dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
+    fun getAllActions() = dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
 
     suspend fun upsert(action: QuickChatAction) =
         withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().upsert(action) }
@@ -42,6 +41,7 @@ constructor(
     suspend fun delete(action: QuickChatAction) =
         withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().delete(action) }
 
-    suspend fun setItemPosition(uuid: Long, newPos: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().updateActionPosition(uuid, newPos) }
+    suspend fun setItemPosition(uuid: Long, newPos: Int) = withContext(dispatchers.io) {
+        dbManager.currentDb.value.quickChatActionDao().updateActionPosition(uuid, newPos)
+    }
 }

@@ -30,7 +30,8 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.data.datasource.NodeInfoDataSource
+import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
+import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
@@ -49,12 +50,13 @@ class NodeRepository
 @Inject
 constructor(
     processLifecycle: Lifecycle,
-    private val nodeInfoDataSource: NodeInfoDataSource,
+    private val nodeInfoReadDataSource: NodeInfoReadDataSource,
+    private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
 ) {
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?> =
-        nodeInfoDataSource
+        nodeInfoReadDataSource
             .myNodeInfoFlow()
             .flowOn(dispatchers.io)
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, null)
@@ -69,11 +71,12 @@ constructor(
     val myId: StateFlow<String?>
         get() = _myId
 
-    fun getNodeDBbyNum() = nodeInfoDataSource.nodeDBbyNumFlow().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
+    fun getNodeDBbyNum() =
+        nodeInfoReadDataSource.nodeDBbyNumFlow().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
 
     // A map from nodeNum to Node
     val nodeDBbyNum: StateFlow<Map<Int, Node>> =
-        nodeInfoDataSource
+        nodeInfoReadDataSource
             .nodeDBbyNumFlow()
             .mapLatest { map -> map.mapValues { (_, it) -> it.toModel() } }
             .onEach {
@@ -116,7 +119,7 @@ constructor(
         includeUnknown: Boolean = true,
         onlyOnline: Boolean = false,
         onlyDirect: Boolean = false,
-    ) = nodeInfoDataSource
+    ) = nodeInfoReadDataSource
         .getNodesFlow(
             sort = sort.sqlValue,
             filter = filter,
@@ -128,40 +131,46 @@ constructor(
         .flowOn(dispatchers.io)
         .conflate()
 
-    suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) { nodeInfoDataSource.upsert(node) }
+    suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(node) }
 
     suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) =
-        withContext(dispatchers.io) { nodeInfoDataSource.installConfig(mi, nodes) }
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.installConfig(mi, nodes) }
 
-    suspend fun clearNodeDB() = withContext(dispatchers.io) { nodeInfoDataSource.clearNodeDB() }
+    suspend fun clearNodeDB() = withContext(dispatchers.io) { nodeInfoWriteDataSource.clearNodeDB() }
 
     suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
-        nodeInfoDataSource.deleteNode(num)
-        nodeInfoDataSource.deleteMetadata(num)
+        nodeInfoWriteDataSource.deleteNode(num)
+        nodeInfoWriteDataSource.deleteMetadata(num)
     }
 
     suspend fun deleteNodes(nodeNums: List<Int>) = withContext(dispatchers.io) {
-        nodeInfoDataSource.deleteNodes(nodeNums)
-        nodeNums.forEach { nodeInfoDataSource.deleteMetadata(it) }
+        nodeInfoWriteDataSource.deleteNodes(nodeNums)
+        nodeNums.forEach { nodeInfoWriteDataSource.deleteMetadata(it) }
     }
 
     suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> =
-        withContext(dispatchers.io) { nodeInfoDataSource.getNodesOlderThan(lastHeard) }
+        withContext(dispatchers.io) { nodeInfoReadDataSource.getNodesOlderThan(lastHeard) }
 
-    suspend fun getUnknownNodes(): List<NodeEntity> = withContext(dispatchers.io) { nodeInfoDataSource.getUnknownNodes() }
+    suspend fun getUnknownNodes(): List<NodeEntity> =
+        withContext(dispatchers.io) { nodeInfoReadDataSource.getUnknownNodes() }
 
-    suspend fun insertMetadata(metadata: MetadataEntity) = withContext(dispatchers.io) { nodeInfoDataSource.upsert(metadata) }
+    suspend fun insertMetadata(metadata: MetadataEntity) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(metadata) }
 
     val onlineNodeCount: Flow<Int> =
-        nodeInfoDataSource
+        nodeInfoReadDataSource
             .nodeDBbyNumFlow()
             .mapLatest { map -> map.values.count { it.node.lastHeard > onlineTimeThreshold() } }
             .flowOn(dispatchers.io)
             .conflate()
 
     val totalNodeCount: Flow<Int> =
-        nodeInfoDataSource.nodeDBbyNumFlow().mapLatest { map -> map.values.count() }.flowOn(dispatchers.io).conflate()
+        nodeInfoReadDataSource
+            .nodeDBbyNumFlow()
+            .mapLatest { map -> map.values.count() }
+            .flowOn(dispatchers.io)
+            .conflate()
 
     suspend fun setNodeNotes(num: Int, notes: String) =
-        withContext(dispatchers.io) { nodeInfoDataSource.setNodeNotes(num, notes) }
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.setNodeNotes(num, notes) }
 }

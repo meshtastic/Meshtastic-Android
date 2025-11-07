@@ -54,28 +54,26 @@ constructor(
     fun getUnreadCountTotal(): Flow<Int> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal() }
 
-    suspend fun clearUnreadCount(contact: String, timestamp: Long) = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp)
-    }
+    suspend fun clearUnreadCount(contact: String, timestamp: Long) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp) }
 
-    suspend fun getQueuedPackets(): List<DataPacket>? = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().getQueuedPackets()
-    }
+    suspend fun getQueuedPackets(): List<DataPacket>? =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getQueuedPackets() }
 
-    suspend fun insert(packet: Packet) = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().insert(packet) }
+    suspend fun insert(packet: Packet) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().insert(packet) }
 
     suspend fun getMessagesFrom(contact: String, getNode: suspend (String?) -> Node) = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().getMessagesFrom(contact)
-            .mapLatest { packets ->
-                packets.map { packet ->
-                    val message = packet.toMessage(getNode)
-                    message.replyId
-                        .takeIf { it != null && it != 0 }
-                        ?.let { getPacketByPacketId(it) }
-                        ?.toMessage(getNode)
-                        ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
-                }
+        dbManager.currentDb.value.packetDao().getMessagesFrom(contact).mapLatest { packets ->
+            packets.map { packet ->
+                val message = packet.toMessage(getNode)
+                message.replyId
+                    .takeIf { it != null && it != 0 }
+                    ?.let { getPacketByPacketId(it) }
+                    ?.toMessage(getNode)
+                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
             }
+        }
     }
 
     suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) =
@@ -103,15 +101,18 @@ constructor(
     suspend fun deleteWaypoint(id: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteWaypoint(id) }
 
-    suspend fun delete(packet: Packet) = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().delete(packet) }
+    suspend fun delete(packet: Packet) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().delete(packet) }
 
-    suspend fun update(packet: Packet) = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().update(packet) }
+    suspend fun update(packet: Packet) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().update(packet) }
 
     fun getContactSettings(): Flow<Map<String, ContactSettings>> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactSettings() }
 
-    suspend fun getContactSettings(contact: String) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getContactSettings(contact) ?: ContactSettings(contact) }
+    suspend fun getContactSettings(contact: String) = withContext(dispatchers.io) {
+        dbManager.currentDb.value.packetDao().getContactSettings(contact) ?: ContactSettings(contact)
+    }
 
     suspend fun setMuteUntil(contacts: List<String>, until: Long) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().setMuteUntil(contacts, until) }
@@ -122,5 +123,7 @@ constructor(
     suspend fun clearPacketDB() = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteAll() }
 
     suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().migrateChannelsByPSK(oldSettings, newSettings) }
+        withContext(dispatchers.io) {
+            dbManager.currentDb.value.packetDao().migrateChannelsByPSK(oldSettings, newSettings)
+        }
 }
