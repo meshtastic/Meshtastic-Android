@@ -1968,6 +1968,7 @@ class MeshService : Service() {
                 }
             },
         )
+        updateNodeInfo(node.num) { it.isIgnored = !node.isIgnored }
     }
 
     private fun sendReaction(reaction: ServiceAction.Reaction) = toRemoteExceptions {
