@@ -77,6 +77,7 @@ import org.meshtastic.core.model.getFullTracerouteResponse
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
+import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ConnectionState
@@ -137,6 +138,8 @@ class MeshService : Service() {
     @Inject lateinit var serviceRepository: ServiceRepository
 
     @Inject lateinit var nodeRepository: NodeRepository
+
+    @Inject lateinit var databaseManager: DatabaseManager
 
     @Inject lateinit var mqttRepository: MQTTRepository
 
@@ -2003,8 +2006,14 @@ class MeshService : Service() {
                 "SetDeviceAddress: Device address changed from ${currentAddr.anonymize} to ${deviceAddr.anonymize}",
             )
             meshPrefs.deviceAddress = deviceAddr
-            clearDatabases()
-            clearNotifications()
+            serviceScope.handledLaunch {
+                // Clear only in-memory caches to avoid cross-device bleed
+                discardNodeDB()
+                // Switch active on-disk DB to device-specific database
+                databaseManager.switchActiveDatabase(deviceAddr)
+                // Do not clear packet DB here; messages are per-device and should persist
+                clearNotifications()
+            }
         } else {
             Timber.d("SetDeviceAddress: Device address is unchanged, ignoring.")
         }

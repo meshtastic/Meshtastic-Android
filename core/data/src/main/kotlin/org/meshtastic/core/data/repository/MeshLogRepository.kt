@@ -24,7 +24,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.database.dao.MeshLogDao
+import kotlinx.coroutines.flow.flatMapLatest
+import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.proto.MeshProtos
@@ -37,16 +38,16 @@ import javax.inject.Inject
 class MeshLogRepository
 @Inject
 constructor(
-    private val meshLogDaoLazy: Lazy<MeshLogDao>,
+    private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
 ) {
-    private val meshLogDao by lazy { meshLogDaoLazy.get() }
-
     fun getAllLogs(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> =
-        meshLogDao.getAllLogs(maxItems).flowOn(dispatchers.io).conflate()
+        dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogs(maxItems) }.flowOn(dispatchers.io).conflate()
 
     fun getAllLogsInReceiveOrder(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> =
-        meshLogDao.getAllLogsInReceiveOrder(maxItems).flowOn(dispatchers.io).conflate()
+        dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogsInReceiveOrder(maxItems) }
+            .flowOn(dispatchers.io)
+            .conflate()
 
     private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
         Telemetry.parseFrom(log.fromRadio.packet.decoded.payload)
@@ -106,8 +107,8 @@ constructor(
     }
         .getOrNull()
 
-    fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = meshLogDao
-        .getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
+    fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = dbManager.currentDb
+        .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS) }
         .distinctUntilChanged()
         .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
         .flowOn(dispatchers.io)
@@ -117,7 +118,10 @@ constructor(
         portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE,
         maxItem: Int = MAX_MESH_PACKETS,
     ): Flow<List<MeshLog>> =
-        meshLogDao.getLogsFrom(nodeNum, portNum, maxItem).distinctUntilChanged().flowOn(dispatchers.io)
+        dbManager.currentDb
+            .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, portNum, maxItem) }
+            .distinctUntilChanged()
+            .flowOn(dispatchers.io)
 
     /*
      * Retrieves MeshPackets matching 'nodeNum' and 'portNum'.
@@ -130,14 +134,14 @@ constructor(
         .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
         .flowOn(dispatchers.io)
 
-    suspend fun insert(log: MeshLog) = withContext(dispatchers.io) { meshLogDao.insert(log) }
+    suspend fun insert(log: MeshLog) = withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().insert(log) }
 
-    suspend fun deleteAll() = withContext(dispatchers.io) { meshLogDao.deleteAll() }
+    suspend fun deleteAll() = withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteAll() }
 
-    suspend fun deleteLog(uuid: String) = withContext(dispatchers.io) { meshLogDao.deleteLog(uuid) }
+    suspend fun deleteLog(uuid: String) = withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteLog(uuid) }
 
     suspend fun deleteLogs(nodeNum: Int, portNum: Int) =
-        withContext(dispatchers.io) { meshLogDao.deleteLogs(nodeNum, portNum) }
+        withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteLogs(nodeNum, portNum) }
 
     companion object {
         private const val MAX_ITEMS = 500
