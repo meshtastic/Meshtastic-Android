@@ -47,6 +47,22 @@ class DatabaseManager @Inject constructor(private val app: Application) {
 
     private val mutex = Mutex()
 
+    // Expose the DB cache limit as a reactive stream so UI can observe changes.
+    private val _cacheLimit = MutableStateFlow(getCacheLimit())
+    val cacheLimit: StateFlow<Int> = _cacheLimit
+
+    // Keep cache-limit StateFlow in sync if some other component updates SharedPreferences.
+    private val prefsListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == DatabaseConstants.CACHE_LIMIT_KEY) {
+                _cacheLimit.value = getCacheLimit()
+            }
+        }
+
+    init {
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener)
+    }
+
     private val _currentDb = MutableStateFlow<MeshtasticDatabase?>(null)
     val currentDb: StateFlow<MeshtasticDatabase> =
         _currentDb.filterNotNull().stateIn(managerScope, SharingStarted.Eagerly, buildRoomDb(app, defaultDbName()))
@@ -86,11 +102,6 @@ class DatabaseManager @Inject constructor(private val app: Application) {
 
     /** Execute [block] with the current DB instance. */
     fun <T> withDb(block: (MeshtasticDatabase) -> T): T = block(currentDb.value)
-
-    private fun buildRoomDb(dbName: String): MeshtasticDatabase =
-        Room.databaseBuilder(app.applicationContext, MeshtasticDatabase::class.java, dbName)
-            .fallbackToDestructiveMigration(false)
-            .build()
 
     private fun markLastUsed(dbName: String) {
         prefs.edit().putLong(lastUsedKey(dbName), System.currentTimeMillis()).apply()
@@ -134,6 +145,7 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
         if (clamped == getCacheLimit()) return
         prefs.edit().putInt(DatabaseConstants.CACHE_LIMIT_KEY, clamped).apply()
+        _cacheLimit.value = clamped
         // Enforce asynchronously with current active DB protected
         val active = _currentDb.value?.openHelper?.databaseName ?: defaultDbName()
         managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = active) }
@@ -174,7 +186,12 @@ private fun buildDbName(address: String?): String = if (address.isNullOrBlank())
 
 private fun lastUsedKey(dbName: String) = "db_last_used:$dbName"
 
-private fun anonymizeAddress(address: String?): String = address?.let { it.take(2) + "…" + it.takeLast(2) } ?: "null"
+private fun anonymizeAddress(address: String?): String =
+    when {
+        address == null -> "null"
+        address.length <= 4 -> address
+        else -> address.take(2) + "…" + address.takeLast(2)
+    }
 
 private fun anonymizeDbName(name: String): String =
     if (name == DatabaseConstants.LEGACY_DB_NAME || name == DatabaseConstants.DEFAULT_DB_NAME) {

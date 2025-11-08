@@ -89,9 +89,9 @@ constructor(
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId) }
 
     suspend fun deleteMessages(uuidList: List<Long>) = withContext(dispatchers.io) {
-        val dao = dbManager.currentDb.value.packetDao()
         for (chunk in uuidList.chunked(500)) {
-            dao.deleteMessages(chunk)
+            // Fetch DAO per chunk to avoid holding a stale reference if the active DB switches
+            dbManager.currentDb.value.packetDao().deleteMessages(chunk)
         }
     }
 

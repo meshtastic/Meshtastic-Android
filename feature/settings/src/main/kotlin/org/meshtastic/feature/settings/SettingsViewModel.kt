@@ -110,13 +110,11 @@ constructor(
         get() = buildConfigProvider.versionName
 
     // Device DB cache limit (bounded by DatabaseConstants)
-    private val _dbCacheLimit = MutableStateFlow(databaseManager.getCacheLimit())
-    val dbCacheLimit: StateFlow<Int> = _dbCacheLimit.asStateFlow()
+    val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
 
     fun setDbCacheLimit(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
         databaseManager.setCacheLimit(clamped)
-        _dbCacheLimit.value = clamped
     }
 
     fun setProvideLocation(value: Boolean) {
