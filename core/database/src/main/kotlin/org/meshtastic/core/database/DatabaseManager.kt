@@ -166,6 +166,10 @@ object DatabaseConstants {
     const val DB_NAME_HASH_LEN: Int = 10
     const val DB_NAME_SEPARATOR_LEN: Int = 1
     const val DB_NAME_SUFFIX_LEN: Int = 3
+
+    // Address anonymization sizing
+    const val ADDRESS_ANON_SHORT_LEN: Int = 4
+    const val ADDRESS_ANON_EDGE_LEN: Int = 2
 }
 
 // File-private helpers (kept outside the class to reduce class function count)
@@ -186,12 +190,14 @@ private fun buildDbName(address: String?): String = if (address.isNullOrBlank())
 
 private fun lastUsedKey(dbName: String) = "db_last_used:$dbName"
 
-private fun anonymizeAddress(address: String?): String =
-    when {
-        address == null -> "null"
-        address.length <= 4 -> address
-        else -> address.take(2) + "…" + address.takeLast(2)
-    }
+private fun anonymizeAddress(address: String?): String = when {
+    address == null -> "null"
+    address.length <= DatabaseConstants.ADDRESS_ANON_SHORT_LEN -> address
+    else ->
+        address.take(DatabaseConstants.ADDRESS_ANON_EDGE_LEN) +
+            "…" +
+            address.takeLast(DatabaseConstants.ADDRESS_ANON_EDGE_LEN)
+}
 
 private fun anonymizeDbName(name: String): String =
     if (name == DatabaseConstants.LEGACY_DB_NAME || name == DatabaseConstants.DEFAULT_DB_NAME) {
