@@ -242,39 +242,27 @@ constructor(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    private fun setupNotifications() {
-        localScope.launch {
-            fromNumCharacteristic
-                ?.subscribe()
-                ?.onEach { notifyBytes ->
-                    try {
-                        Timber.d(
-                            "FROMNUM notify, ${notifyBytes.size} bytes: ${
-                                notifyBytes.joinToString(
-                                    prefix = "[",
-                                    postfix = "]",
-                                ) { b -> String.format("0x%02x", b) }
-                            } - reading packet queue",
-                        )
-                        drainPacketQueueAndDispatch("notify")
-                    } catch (ex: Exception) {
-                        Timber.e(ex, "Error handling incoming FROMNUM notify")
-                    }
+    private suspend fun setupNotifications() {
+        fromNumCharacteristic
+            ?.subscribe()
+            ?.onEach { notifyBytes ->
+                try {
+                    Timber.d(
+                        "FROMNUM notify, ${notifyBytes.size} bytes: ${
+                            notifyBytes.joinToString(
+                                prefix = "[",
+                                postfix = "]",
+                            ) { b -> String.format("0x%02x", b) }
+                        } - reading packet queue",
+                    )
+                    drainPacketQueueAndDispatch("notify")
+                } catch (ex: Exception) {
+                    Timber.e(ex, "Error handling incoming FROMNUM notify")
                 }
-                ?.catch { e -> Timber.e(e, "Error in subscribe flow for fromNumCharacteristic") }
-                ?.onCompletion { cause -> Timber.d("fromNum subscribe flow completed, cause=$cause") }
-                ?.launchIn(scope = localScope)
-        }
-
-        localScope.launch {
-            try {
-                fromNumCharacteristic?.setNotifying(true)
-                drainPacketQueueAndDispatch("initial")
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to enable notifications or perform initial drain")
-                service.onDisconnect(false)
             }
-        }
+            ?.catch { e -> Timber.e(e, "Error in subscribe flow for fromNumCharacteristic") }
+            ?.onCompletion { cause -> Timber.d("fromNum subscribe flow completed, cause=$cause") }
+            ?.launchIn(scope = localScope)
         service.onConnect()
     }
 
