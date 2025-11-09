@@ -472,6 +472,8 @@
     <string name="allow_input_source">Luba sisend allikas</string>
     <string name="send_bell">Saada Kõll</string>
     <string name="messages">Sõnum</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Tuvastusanduri sätted</string>
     <string name="detection_sensor_enabled">Tuvastusandur lubatud</string>
     <string name="minimum_broadcast_seconds">Minimaalne edastusaeg (sekund)</string>
