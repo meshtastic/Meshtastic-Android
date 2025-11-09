@@ -472,6 +472,8 @@
     <string name="allow_input_source">Giriş kaynağına izin ver</string>
     <string name="send_bell">Zil gönder</string>
     <string name="messages">Mesajlar</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Algılama Sensörü Ayarları</string>
     <string name="detection_sensor_enabled">Algılama Sensörü etkinleştirildi</string>
     <string name="minimum_broadcast_seconds">Minimum yayın (saniye)</string>
