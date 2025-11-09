@@ -37,6 +37,8 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.database.DatabaseConstants
+import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
@@ -71,6 +73,7 @@ constructor(
     private val uiPrefs: UiPrefs,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val buildConfigProvider: BuildConfigProvider,
+    private val databaseManager: DatabaseManager,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
@@ -105,6 +108,14 @@ constructor(
 
     val appVersionName
         get() = buildConfigProvider.versionName
+
+    // Device DB cache limit (bounded by DatabaseConstants)
+    val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
+
+    fun setDbCacheLimit(limit: Int) {
+        val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
+        databaseManager.setCacheLimit(clamped)
+    }
 
     fun setProvideLocation(value: Boolean) {
         myNodeNum?.let { uiPrefs.setShouldProvideNodeLocation(it, value) }
