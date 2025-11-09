@@ -472,6 +472,8 @@
     <string name="allow_input_source">Consenti sorgente di input</string>
     <string name="send_bell">Invia campanella</string>
     <string name="messages">Messaggi</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Configurazione Sensore Rilevamento</string>
     <string name="detection_sensor_enabled">Sensore Rilevamento attivo</string>
     <string name="minimum_broadcast_seconds">Trasmissione minima (secondi)</string>
