@@ -472,6 +472,8 @@
     <string name="allow_input_source">Permitir fonte de entrada</string>
     <string name="send_bell">Enviar sino</string>
     <string name="messages">Mensagens</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Configuração do Sensor de Deteção</string>
     <string name="detection_sensor_enabled">Sensor de deteção ativado</string>
     <string name="minimum_broadcast_seconds">Transmissão mínima (segundos)</string>
