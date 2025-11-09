@@ -476,6 +476,8 @@
     <string name="allow_input_source">Allow input source</string>
     <string name="send_bell">Odeslat zvonek</string>
     <string name="messages">Zprávy</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Konfigurace detekčního senzoru</string>
     <string name="detection_sensor_enabled">Detekční senzor povolen</string>
     <string name="minimum_broadcast_seconds">Minimální vysílání (sekundy)</string>
