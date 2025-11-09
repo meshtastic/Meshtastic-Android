@@ -208,6 +208,8 @@ class MeshService : Service() {
         // Two-stage config flow nonces to avoid stale BLE packets, mirroring Meshtastic-Apple
         private const val DEFAULT_CONFIG_ONLY_NONCE = 69420
         private const val DEFAULT_NODE_INFO_NONCE = 69421
+
+        private const val HEARTBEAT_INTERVAL = 25L
     }
 
     private val serviceJob = Job()
@@ -1779,7 +1781,9 @@ class MeshService : Service() {
         }
         // Keep BLE awake and allow the firmware to settle before the node-info stage.
         serviceScope.handledLaunch {
+            delay(HEARTBEAT_INTERVAL)
             sendHeartbeat()
+            delay(HEARTBEAT_INTERVAL)
             startNodeInfoOnly()
         }
     }
