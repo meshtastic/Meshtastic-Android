@@ -471,6 +471,8 @@
     <string name="allow_input_source">入力ソースを許可</string>
     <string name="send_bell">ベルを送信</string>
     <string name="messages">メッセージ</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">検出センサ設定</string>
     <string name="detection_sensor_enabled">検出センサーを有効化</string>
     <string name="minimum_broadcast_seconds">最小ブロードキャスト間隔(秒)</string>
