@@ -138,7 +138,7 @@ constructor(
                         // send packet to the radio and wait for response
                         val response = sendPacket(packet)
                         Timber.d("queueJob packet id=${packet.id.toUInt()} waiting")
-                        val success = response.get(2, TimeUnit.MINUTES)
+                        val success = response.get(250, TimeUnit.MILLISECONDS)
                         Timber.d("queueJob packet id=${packet.id.toUInt()} success $success")
                     } catch (e: TimeoutException) {
                         Timber.d("queueJob packet id=${packet.id.toUInt()} timeout")
