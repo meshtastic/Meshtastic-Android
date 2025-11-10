@@ -470,6 +470,8 @@
     <string name="allow_input_source">입력 소스 허용</string>
     <string name="send_bell">벨 전송</string>
     <string name="messages">메시지기기</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">감지 센서 설정</string>
     <string name="detection_sensor_enabled">감지 센서 활성화</string>
     <string name="minimum_broadcast_seconds">최소 전송 간격 (초)</string>

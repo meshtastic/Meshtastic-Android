@@ -473,6 +473,8 @@ Rango de Valores 0 - 500.</string>
     <string name="allow_input_source">Allow input source</string>
     <string name="send_bell">Mandar campana 🔔</string>
     <string name="messages">Mensajes</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Configuración del sensor detector</string>
     <string name="detection_sensor_enabled">Sensor detector activado</string>
     <string name="minimum_broadcast_seconds">Tiempo mínimo de transmisión (segundos)</string>

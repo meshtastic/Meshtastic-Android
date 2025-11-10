@@ -472,6 +472,8 @@
     <string name="allow_input_source">Bemeneti forrás engedélyezése</string>
     <string name="send_bell">Harangjel küldése</string>
     <string name="messages">Üzenetek</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Érzékelő szenzor beállításai</string>
     <string name="detection_sensor_enabled">Érzékelő szenzor engedélyezve</string>
     <string name="minimum_broadcast_seconds">Minimális sugárzási idő (másodperc)</string>

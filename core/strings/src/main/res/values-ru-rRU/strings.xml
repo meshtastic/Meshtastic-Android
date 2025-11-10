@@ -476,6 +476,8 @@
     <string name="allow_input_source">Разрешить источник ввода</string>
     <string name="send_bell">Отправить колокольчик</string>
     <string name="messages">Сообщения</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Настройка датчика обнаружения</string>
     <string name="detection_sensor_enabled">Датчик определения включен</string>
     <string name="minimum_broadcast_seconds">Минимальная трансляция (в секундах)</string>

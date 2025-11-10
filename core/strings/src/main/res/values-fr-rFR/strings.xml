@@ -472,6 +472,8 @@
     <string name="allow_input_source">Autoriser la source d\'entrée</string>
     <string name="send_bell">Envoyer une sonnerie</string>
     <string name="messages">Messages</string>
+    <string name="device_db_cache_limit">Device DB cache limit</string>
+    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Configuration du capteur de détection</string>
     <string name="detection_sensor_enabled">Capteur de détection activé</string>
     <string name="minimum_broadcast_seconds">Diffusion minimale (secondes)</string>
