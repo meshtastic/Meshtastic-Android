@@ -103,7 +103,7 @@
     <string name="config_display_flip_screen_summary">Pööra ekraani vertikaalselt.</string>
     <string name="config_display_units_summary">Seadme ekraanil kuvatavad ühikud.</string>
     <string name="config_display_oled_summary">Tühista automaatse OLED-ekraani tuvastamine.</string>
-    <string name="config_display_displaymode_summary">Muuda vaikimisi ekraanipaigutust.</string>
+    <string name="config_display_displaymode_summary">Tühista vaikimisi ekraanipaigutus.</string>
     <string name="config_display_heading_bold_summary">Paksenda ekraani pealkirjatekst.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">Vajalik, et teie seadmes oleks kiirendusmõõtur.</string>
     <string name="config_lora_region_summary">Raadio kasutama hakkamise piirkond.</string>
@@ -472,8 +472,8 @@
     <string name="allow_input_source">Luba sisend allikas</string>
     <string name="send_bell">Saada Kõll</string>
     <string name="messages">Sõnum</string>
-    <string name="device_db_cache_limit">Device DB cache limit</string>
-    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
+    <string name="device_db_cache_limit">Seadme DB vahemälu piirang</string>
+    <string name="device_db_cache_limit_summary">Maksimaalne telefonis hoitav seadmete andmebaaside arv</string>
     <string name="detection_sensor_config">Tuvastusanduri sätted</string>
     <string name="detection_sensor_enabled">Tuvastusandur lubatud</string>
     <string name="minimum_broadcast_seconds">Minimaalne edastusaeg (sekund)</string>
@@ -644,7 +644,7 @@
     <string name="environment_metrics_on_screen_enabled">Keskkonnamõõdikute ekraanil kuvamine lubatud</string>
     <string name="environment_metrics_use_fahrenheit">Keskkonnamõõdikud kasutavad Fahrenheiti</string>
     <string name="air_quality_metrics_module_enabled">Õhukvaliteedi moodul on lubatud</string>
-    <string name="air_quality_metrics_update_interval_seconds">Õhupuhtusmõõdikute värskendamise intervall</string>
+    <string name="air_quality_metrics_update_interval_seconds">Õhukvaliteedi näidikute värskendamise intervall</string>
     <string name="air_quality_icon">Õhukvaliteedi ikoon</string>
     <string name="power_metrics_module_enabled">Toitemõõdiku moodul on lubatud</string>
     <string name="power_metrics_update_interval_seconds">Toitemõõdikute värskendamise intervall</string>
