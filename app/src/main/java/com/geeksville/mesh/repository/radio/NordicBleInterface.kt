@@ -26,7 +26,6 @@ import com.geeksville.mesh.service.RadioNotConnectedException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
@@ -86,7 +85,6 @@ constructor(
             // Use safe call and Elvis operator for cleaner loop termination if read fails or returns empty
             val packet = fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() } ?: break
             send(packet)
-            delay(INTER_READ_DELAY_MS)
         }
     }
 
@@ -215,10 +213,7 @@ constructor(
                 try {
                     characteristic.write(p, writeType = WriteType.WITHOUT_RESPONSE)
                     // Post-write action initiation
-                    localScope.launch {
-                        delay(POST_WRITE_DELAY_MS)
-                        drainPacketQueueAndDispatch("post-write")
-                    }
+                    localScope.launch { drainPacketQueueAndDispatch("post-write") }
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to write packet to $address")
                 }
@@ -257,11 +252,6 @@ constructor(
     private fun logFromNumNotification(notifyBytes: ByteArray) {
         val hexString = notifyBytes.joinToString(prefix = "[", postfix = "]") { b -> String.format("0x%02x", b) }
         Timber.d("FROMNUM notify, ${notifyBytes.size} bytes: $hexString - reading packet queue")
-    }
-
-    companion object {
-        private const val INTER_READ_DELAY_MS: Long = 5L
-        private const val POST_WRITE_DELAY_MS: Long = 5L
     }
 }
 

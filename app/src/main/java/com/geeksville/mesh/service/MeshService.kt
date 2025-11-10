@@ -212,7 +212,7 @@ class MeshService : Service() {
         private const val DEFAULT_CONFIG_ONLY_NONCE = 69420
         private const val DEFAULT_NODE_INFO_NONCE = 69421
 
-        private const val HEARTBEAT_INTERVAL = 25L
+        private const val WANT_CONFIG_DELAY = 50L
     }
 
     private val serviceJob = Job()
@@ -1784,9 +1784,9 @@ class MeshService : Service() {
         }
         // Keep BLE awake and allow the firmware to settle before the node-info stage.
         serviceScope.handledLaunch {
-            delay(HEARTBEAT_INTERVAL)
+            delay(WANT_CONFIG_DELAY)
             sendHeartbeat()
-            delay(HEARTBEAT_INTERVAL)
+            delay(WANT_CONFIG_DELAY)
             startNodeInfoOnly()
         }
     }
