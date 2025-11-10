@@ -206,7 +206,11 @@ constructor(
                         fromRadioCharacteristic =
                             meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIO_CHARACTER.toKotlinUuid() }
 
-                        if (listOf(toRadioCharacteristic, fromNumCharacteristic, fromRadioCharacteristic).all { it != null }){
+                        if (
+                            listOf(toRadioCharacteristic, fromNumCharacteristic, fromRadioCharacteristic).all {
+                                it != null
+                            }
+                        ) {
                             logCharacteristicInfo()
                             setupNotifications()
                             service.onConnect()
@@ -260,8 +264,10 @@ constructor(
 
     /** Closes the connection to the device. */
     override fun close() {
-        connectionScope.cancel()
-        serviceScope.launch { peripheral?.disconnect() }
+        serviceScope.launch {
+            peripheral?.disconnect()
+            connectionScope.cancel()
+        }
     }
 
     // --- Logging Helpers ---
