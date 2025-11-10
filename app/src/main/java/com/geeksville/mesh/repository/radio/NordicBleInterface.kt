@@ -83,7 +83,10 @@ constructor(
     private fun packetQueueFlow(): Flow<ByteArray> = channelFlow {
         while (isActive) {
             // Use safe call and Elvis operator for cleaner loop termination if read fails or returns empty
-            val packet = fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() } ?: break
+            val packet = fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() } ?: run {
+                Timber.d("Packet queue drain complete (empty or null read)")
+                break
+            }
             send(packet)
         }
     }
