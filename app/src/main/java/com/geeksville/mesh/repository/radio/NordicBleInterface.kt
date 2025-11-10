@@ -83,10 +83,12 @@ constructor(
     private fun packetQueueFlow(): Flow<ByteArray> = channelFlow {
         while (isActive) {
             // Use safe call and Elvis operator for cleaner loop termination if read fails or returns empty
-            val packet = fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() } ?: run {
-                Timber.d("Packet queue drain complete (empty or null read)")
-                break
-            }
+            val packet =
+                fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() }
+                    ?: run {
+                        Timber.d("Packet queue drain complete (empty or null read)")
+                        break
+                    }
             send(packet)
         }
     }
@@ -134,6 +136,7 @@ constructor(
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Failed to connect to peripheral $address")
+                service.onDisconnect(false)
             }
         }
     }
@@ -154,7 +157,14 @@ constructor(
             p.connectionParameters
                 .onEach { Timber.d("Peripheral $address: Connection parameters changed to $it") }
                 .launchIn(localScope)
-            p.state.onEach { state -> Timber.d("Peripheral $address: State changed to $state") }.launchIn(localScope)
+            p.state
+                .onEach { state ->
+                    Timber.d("Peripheral $address: State changed to $state")
+                    if (!state.isConnected) {
+                        service.onDisconnect(false)
+                    }
+                }
+                .launchIn(localScope)
         }
         centralManager.state.onEach { state -> Timber.d("CentralManager state changed to $state") }.launchIn(localScope)
     }
@@ -180,6 +190,7 @@ constructor(
                         service.onConnect()
                     } else {
                         Timber.w("Meshtastic service not found on peripheral $address")
+                        service.onDisconnect(false)
                     }
                 }
                 .launchIn(localScope)

@@ -47,7 +47,7 @@ interface BluetoothRepositoryModule {
         @Singleton
         fun provideCentralManager(
             @ApplicationContext context: Context,
-            @Singleton coroutineScope: CoroutineScope,
+            coroutineScope: CoroutineScope,
         ): CentralManager = CentralManager.native(context, coroutineScope)
 
         @Provides
