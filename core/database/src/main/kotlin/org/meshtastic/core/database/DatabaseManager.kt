@@ -97,6 +97,9 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         // Defer LRU eviction so switch is not blocked by filesystem work
         managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = dbName) }
 
+        // One-time cleanup: remove legacy DB if present and not active
+        managerScope.launch(Dispatchers.IO) { cleanupLegacyDbIfNeeded(activeDbName = dbName) }
+
         Timber.i("Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}")
     }
 
@@ -126,8 +129,11 @@ class DatabaseManager @Inject constructor(private val app: Application) {
     private suspend fun enforceCacheLimit(activeDbName: String) = mutex.withLock {
         val limit = getCacheLimit()
         val all = listExistingDbNames()
-        if (all.size <= limit) return
-        val victims = all.filter { it != activeDbName }.sortedBy { lastUsed(it) }.take(all.size - limit)
+        // Only enforce the limit over device-specific DBs; exclude legacy and default DBs
+        val deviceDbs =
+            all.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
+        if (deviceDbs.size <= limit) return
+        val victims = deviceDbs.filter { it != activeDbName }.sortedBy { lastUsed(it) }.take(deviceDbs.size - limit)
         victims.forEach { name ->
             runCatching { dbCache.remove(name)?.close() }
                 .onFailure { Timber.w(it, "Failed to close database %s", name) }
@@ -150,6 +156,28 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         val active = _currentDb.value?.openHelper?.databaseName ?: defaultDbName()
         managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = active) }
     }
+
+    private suspend fun cleanupLegacyDbIfNeeded(activeDbName: String) = mutex.withLock {
+        if (prefs.getBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, false)) return
+        val legacy = DatabaseConstants.LEGACY_DB_NAME
+        if (legacy == activeDbName) {
+            // Never delete the active DB; mark as cleaned to avoid repeated checks
+            prefs.edit().putBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, true).apply()
+            return
+        }
+        val legacyFile = getDbFile(app, legacy)
+        if (legacyFile != null) {
+            runCatching { dbCache.remove(legacy)?.close() }
+                .onFailure { Timber.w(it, "Failed to close legacy database %s before deletion", legacy) }
+            val deleted = app.deleteDatabase(legacy)
+            if (deleted) {
+                Timber.i("Deleted legacy DB ${anonymizeDbName(legacy)}")
+            } else {
+                Timber.w("Attempted to delete legacy DB %s but deleteDatabase returned false", legacy)
+            }
+        }
+        prefs.edit().putBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, true).apply()
+    }
 }
 
 object DatabaseConstants {
@@ -161,6 +189,8 @@ object DatabaseConstants {
     const val DEFAULT_CACHE_LIMIT: Int = 3
     const val MIN_CACHE_LIMIT: Int = 1
     const val MAX_CACHE_LIMIT: Int = 10
+
+    const val LEGACY_DB_CLEANED_KEY: String = "legacy_db_cleaned"
 
     // Display/truncation and hash sizing for DB names
     const val DB_NAME_HASH_LEN: Int = 10
