@@ -84,10 +84,7 @@ constructor(
     private fun packetQueueFlow(): Flow<ByteArray> = channelFlow {
         while (isActive) {
             // Use safe call and Elvis operator for cleaner loop termination if read fails or returns empty
-            val packet = fromRadioCharacteristic?.read() ?: break
-
-            if (packet.isEmpty()) break
-
+            val packet = fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() } ?: break
             send(packet)
             delay(INTER_READ_DELAY_MS)
         }
@@ -252,7 +249,8 @@ constructor(
     private fun logPacketRead(source: String, packet: ByteArray) {
         val hexString = packet.joinToString(prefix = "[", postfix = "]") { b -> String.format("0x%02x", b) }
         Timber.d(
-            "[$source] Read packet queue returned ${packet.size} bytes: $hexString - dispatching to service.handleFromRadio()",
+            "[$source] Read packet queue returned ${packet.size}" +
+                " bytes: $hexString - dispatching to service.handleFromRadio()",
         )
     }
 
