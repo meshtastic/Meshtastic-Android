@@ -26,6 +26,8 @@ import com.geeksville.mesh.service.RadioNotConnectedException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
@@ -53,7 +55,7 @@ import kotlin.uuid.toKotlinUuid
  *
  * This class is responsible for connecting to and communicating with a Meshtastic device over BLE.
  *
- * @param localScope The coroutine scope to use for launching coroutines.
+ * @param serviceScope The coroutine scope to use for launching coroutines.
  * @param centralManager The central manager provided by Nordic BLE Library.
  * @param service The [RadioInterfaceService] to use for handling radio events.
  * @param address The BLE address of the device to connect to.
@@ -62,11 +64,13 @@ import kotlin.uuid.toKotlinUuid
 class NordicBleInterface
 @AssistedInject
 constructor(
-    private val localScope: CoroutineScope,
+    private val serviceScope: CoroutineScope,
     private val centralManager: CentralManager,
     private val service: RadioInterfaceService,
     @Assisted val address: String,
 ) : IRadioInterface {
+
+    private val connectionScope = CoroutineScope(serviceScope.coroutineContext + SupervisorJob())
 
     private var peripheral: Peripheral? = null
 
@@ -94,7 +98,7 @@ constructor(
     }
 
     private fun dispatchPacket(packet: ByteArray, source: String) {
-        localScope.launch {
+        connectionScope.launch {
             try {
                 service.handleFromRadio(p = packet)
             } catch (t: Throwable) {
@@ -117,7 +121,7 @@ constructor(
                     Timber.d("[$source] Drained $drainedCount packets from packet queue")
                 }
             }
-            .launchIn(localScope)
+            .launchIn(connectionScope)
     }
 
     // --- Connection & Discovery Logic ---
@@ -127,10 +131,11 @@ constructor(
             ?: throw RadioNotConnectedException("Device not found at address $address")
 
     private fun connect() {
-        localScope.launch {
+        connectionScope.launch {
             try {
                 peripheral = findAndConnectPeripheral()
                 peripheral?.let {
+                    onConnected()
                     observePeripheralChanges()
                     discoverServicesAndSetupCharacteristics(it)
                 }
@@ -151,12 +156,26 @@ constructor(
         return p
     }
 
+    private suspend fun onConnected() {
+        try {
+            peripheral?.let { p ->
+                val rssi = p.readRssi()
+                Timber.d("Peripheral $address: RSSI: $rssi dBm")
+
+                val phyInUse = p.readPhy()
+                Timber.d("Peripheral $address: PHY in use: $phyInUse")
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to read initial connection properties for $address")
+        }
+    }
+
     private fun observePeripheralChanges() {
         peripheral?.let { p ->
-            p.phy.onEach { phy -> Timber.d("Peripheral $address: PHY changed to $phy") }.launchIn(localScope)
+            p.phy.onEach { phy -> Timber.d("Peripheral $address: PHY changed to $phy") }.launchIn(connectionScope)
             p.connectionParameters
                 .onEach { Timber.d("Peripheral $address: Connection parameters changed to $it") }
-                .launchIn(localScope)
+                .launchIn(connectionScope)
             p.state
                 .onEach { state ->
                     Timber.d("Peripheral $address: State changed to $state")
@@ -164,14 +183,16 @@ constructor(
                         service.onDisconnect(false)
                     }
                 }
-                .launchIn(localScope)
+                .launchIn(connectionScope)
         }
-        centralManager.state.onEach { state -> Timber.d("CentralManager state changed to $state") }.launchIn(localScope)
+        centralManager.state
+            .onEach { state -> Timber.d("CentralManager state changed to $state") }
+            .launchIn(connectionScope)
     }
 
     @OptIn(ExperimentalUuidApi::class)
     private fun discoverServicesAndSetupCharacteristics(peripheral: Peripheral) {
-        localScope.launch {
+        connectionScope.launch {
             peripheral
                 .services(listOf(BTM_SERVICE_UUID.toKotlinUuid()))
                 .onEach { services ->
@@ -193,7 +214,7 @@ constructor(
                         service.onDisconnect(false)
                     }
                 }
-                .launchIn(localScope)
+                .launchIn(connectionScope)
         }
     }
 
@@ -209,7 +230,7 @@ constructor(
             }
             ?.catch { e -> Timber.e(e, "Error in subscribe flow for fromNumCharacteristic") }
             ?.onCompletion { cause -> Timber.d("fromNum subscribe flow completed, cause=$cause") }
-            ?.launchIn(scope = localScope)
+            ?.launchIn(scope = connectionScope)
     }
 
     // --- IRadioInterface Implementation ---
@@ -223,11 +244,11 @@ constructor(
         toRadioCharacteristic?.let { characteristic ->
             if (peripheral == null) return@let
 
-            localScope.launch {
+            connectionScope.launch {
                 try {
                     characteristic.write(p, writeType = WriteType.WITHOUT_RESPONSE)
                     // Post-write action initiation
-                    localScope.launch { drainPacketQueueAndDispatch("post-write") }
+                    connectionScope.launch { drainPacketQueueAndDispatch("post-write") }
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to write packet to $address")
                 }
@@ -237,7 +258,8 @@ constructor(
 
     /** Closes the connection to the device. */
     override fun close() {
-        localScope.launch { peripheral?.disconnect() }
+        connectionScope.cancel()
+        serviceScope.launch { peripheral?.disconnect() }
     }
 
     // --- Logging Helpers ---
