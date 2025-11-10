@@ -472,8 +472,8 @@
     <string name="allow_input_source">Eingabequelle zulassen</string>
     <string name="send_bell">Glocke senden</string>
     <string name="messages">Nachrichten</string>
-    <string name="device_db_cache_limit">Device DB cache limit</string>
-    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
+    <string name="device_db_cache_limit">Limit der Gerätedatenbanken</string>
+    <string name="device_db_cache_limit_summary">Maximale Anzahl der Gerätedatenbanken auf diesem Telefon</string>
     <string name="detection_sensor_config">Sensoreinstellungen für Erkennung</string>
     <string name="detection_sensor_enabled">Erkennungssensor aktiviert</string>
     <string name="minimum_broadcast_seconds">Minimale Übertragungszeit (Sekunden)</string>
