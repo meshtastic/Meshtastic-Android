@@ -206,9 +206,11 @@ constructor(
                         fromRadioCharacteristic =
                             meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIO_CHARACTER.toKotlinUuid() }
 
-                        logCharacteristicInfo()
-                        setupNotifications()
-                        service.onConnect()
+                        if (listOf(toRadioCharacteristic, fromNumCharacteristic, fromRadioCharacteristic).all { it != null }){
+                            logCharacteristicInfo()
+                            setupNotifications()
+                            service.onConnect()
+                        }
                     } else {
                         Timber.w("Meshtastic service not found on peripheral $address")
                         service.onDisconnect(false)
