@@ -79,6 +79,9 @@ class DatabaseManager @Inject constructor(private val app: Application) {
     suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
         val dbName = buildDbName(address)
 
+        // Remember the previously active DB name (if any) so we can record its last-used time as well.
+        val previousDbName = _currentDb.value?.openHelper?.databaseName
+
         // Fast path: no-op if already on this address
         if (_currentAddress.value == address && _currentDb.value != null) {
             markLastUsed(dbName)
@@ -93,6 +96,9 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         _currentDb.value = db
         _currentAddress.value = address
         markLastUsed(dbName)
+        // Also mark the previous DB as used "just now" so LRU has an accurate, recent timestamp
+        // even on first run after upgrade where no timestamp might exist yet.
+        previousDbName?.let { markLastUsed(it) }
 
         // Defer LRU eviction so switch is not blocked by filesystem work
         managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = dbName) }
@@ -132,8 +138,20 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         // Only enforce the limit over device-specific DBs; exclude legacy and default DBs
         val deviceDbs =
             all.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
+        Timber.d(
+            "LRU check: limit=%d, active=%s, deviceDbs=%s",
+            limit,
+            anonymizeDbName(activeDbName),
+            deviceDbs.joinToString(", ") { anonymizeDbName(it) },
+        )
         if (deviceDbs.size <= limit) return
-        val victims = deviceDbs.filter { it != activeDbName }.sortedBy { lastUsed(it) }.take(deviceDbs.size - limit)
+        val usageSnapshot = deviceDbs.associateWith { lastUsed(it) }
+        Timber.d(
+            "LRU lastUsed(ms): %s",
+            usageSnapshot.entries.joinToString(", ") { (name, ts) -> "${anonymizeDbName(name)}=$ts" },
+        )
+        val victims = selectEvictionVictims(deviceDbs, activeDbName, limit) { lastUsed(it) }
+        Timber.i("LRU victims: %s", victims.joinToString(", ") { anonymizeDbName(it) })
         victims.forEach { name ->
             runCatching { dbCache.remove(name)?.close() }
                 .onFailure { Timber.w(it, "Failed to close database %s", name) }
@@ -205,7 +223,16 @@ object DatabaseConstants {
 // File-private helpers (kept outside the class to reduce class function count)
 private fun defaultDbName(): String = DatabaseConstants.DEFAULT_DB_NAME
 
-private fun normalizeAddress(addr: String?): String = addr?.uppercase()?.replace(":", "") ?: "DEFAULT"
+private fun normalizeAddress(addr: String?): String {
+    val u = addr?.trim()?.uppercase()
+    val normalized =
+        when {
+            u.isNullOrBlank() -> "DEFAULT"
+            u == "N" || u == "NULL" -> "DEFAULT"
+            else -> u.replace(":", "")
+        }
+    return normalized
+}
 
 private fun shortSha1(s: String): String = MessageDigest.getInstance("SHA-1")
     .digest(s.toByteArray())
@@ -246,3 +273,35 @@ private fun buildRoomDb(app: Application, dbName: String): MeshtasticDatabase =
         .build()
 
 private fun getDbFile(app: Application, dbName: String): File? = app.getDatabasePath(dbName).takeIf { it.exists() }
+
+/**
+ * Compute which DBs to evict using LRU policy.
+ *
+ * Rules:
+ * - Only consider device-specific DBs (exclude legacy and default)
+ * - Never evict the active DB
+ * - If number of device DBs is within the limit, evict none
+ * - Otherwise evict the (size - limit) least-recently-used DBs
+ */
+internal fun selectEvictionVictims(
+    dbNames: List<String>,
+    activeDbName: String,
+    limit: Int,
+    lastUsedProvider: (String) -> Long,
+): List<String> {
+    val deviceDbNames =
+        dbNames.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
+    val victims =
+        if (limit < 1 || deviceDbNames.size <= limit) {
+            emptyList()
+        } else {
+            val candidates = deviceDbNames.filter { it != activeDbName }
+            if (candidates.isEmpty()) {
+                emptyList()
+            } else {
+                val toEvict = deviceDbNames.size - limit
+                candidates.sortedBy { lastUsedProvider(it) }.take(toEvict)
+            }
+        }
+    return victims
+}
