@@ -150,7 +150,7 @@ class DatabaseManager @Inject constructor(private val app: Application) {
             "LRU lastUsed(ms): %s",
             usageSnapshot.entries.joinToString(", ") { (name, ts) -> "${anonymizeDbName(name)}=$ts" },
         )
-        val victims = selectEvictionVictims(deviceDbs, activeDbName, limit) { lastUsed(it) }
+        val victims = selectEvictionVictims(deviceDbs, activeDbName, limit, usageSnapshot)
         Timber.i("LRU victims: %s", victims.joinToString(", ") { anonymizeDbName(it) })
         victims.forEach { name ->
             runCatching { dbCache.remove(name)?.close() }
@@ -282,12 +282,14 @@ private fun getDbFile(app: Application, dbName: String): File? = app.getDatabase
  * - Never evict the active DB
  * - If number of device DBs is within the limit, evict none
  * - Otherwise evict the (size - limit) least-recently-used DBs
+ *
+ * Pass a precomputed [lastUsedMsByDb] snapshot to avoid redundant IO/lookups.
  */
 internal fun selectEvictionVictims(
     dbNames: List<String>,
     activeDbName: String,
     limit: Int,
-    lastUsedProvider: (String) -> Long,
+    lastUsedMsByDb: Map<String, Long>,
 ): List<String> {
     val deviceDbNames =
         dbNames.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
@@ -300,7 +302,7 @@ internal fun selectEvictionVictims(
                 emptyList()
             } else {
                 val toEvict = deviceDbNames.size - limit
-                candidates.sortedBy { lastUsedProvider(it) }.take(toEvict)
+                candidates.sortedBy { lastUsedMsByDb[it] ?: 0L }.take(toEvict)
             }
         }
     return victims
