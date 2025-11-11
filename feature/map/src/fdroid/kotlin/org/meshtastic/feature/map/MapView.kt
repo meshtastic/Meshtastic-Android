@@ -47,6 +47,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -55,8 +56,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -115,6 +118,7 @@ import org.meshtastic.core.strings.show_waypoints
 import org.meshtastic.core.strings.toggle_my_position
 import org.meshtastic.core.strings.waypoint_delete
 import org.meshtastic.core.strings.you
+import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
@@ -204,41 +208,6 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
         }
     }
 
-private fun Context.purgeTileSource(onResult: (String) -> Unit) {
-    val cache = SqlTileWriterExt()
-    val builder = MaterialAlertDialogBuilder(this)
-    builder.setTitle(com.meshtastic.core.strings.getString(Res.string.map_tile_source))
-    val sources = cache.sources
-    val sourceList = mutableListOf<String>()
-    for (i in sources.indices) {
-        sourceList.add(sources[i].source as String)
-    }
-    val selected: BooleanArray? = null
-    val selectedList = mutableListOf<Int>()
-    builder.setMultiChoiceItems(sourceList.toTypedArray(), selected) { _, i, b ->
-        if (b) {
-            selectedList.add(i)
-        } else {
-            selectedList.remove(i)
-        }
-    }
-    builder.setPositiveButton(com.meshtastic.core.strings.getString(Res.string.clear)) { _, _ ->
-        for (x in selectedList) {
-            val item = sources[x]
-            val b = cache.purgeCache(item.source)
-            onResult(
-                if (b) {
-                    com.meshtastic.core.strings.getString(Res.string.map_purge_success, item.source.toString())
-                } else {
-                    com.meshtastic.core.strings.getString(Res.string.map_purge_fail)
-                },
-            )
-        }
-    }
-    builder.setNegativeButton(com.meshtastic.core.strings.getString(Res.string.cancel)) { dialog, _ -> dialog.cancel() }
-    builder.show()
-}
-
 /**
  * Main composable for displaying the map view, including nodes, waypoints, and user location. It handles user
  * interactions for map manipulation, filtering, and offline caching.
@@ -267,6 +236,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCacheManagerDialog by remember { mutableStateOf(false) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
+    var showPurgeTileSourceDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -771,7 +741,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                     }
                     CacheManagerOption.DownloadRegion -> map.generateBoxOverlay()
 
-                    CacheManagerOption.ClearTiles -> {} // purgeTileSource { scope.launch { context.showToast(it) } }
+                    CacheManagerOption.ClearTiles -> showPurgeTileSourceDialog = true
                     CacheManagerOption.Cancel -> Unit
                 }
                 showCacheManagerDialog = false
@@ -782,6 +752,10 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     if (showCurrentCacheInfo) {
         CacheInfoDialog(mapView = map, onDismiss = { showCurrentCacheInfo = false })
+    }
+
+    if(showPurgeTileSourceDialog) {
+        PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
     }
 
     if (showEditWaypointDialog != null) {
@@ -856,6 +830,67 @@ private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
         )
     }
 }
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val cache = SqlTileWriterExt()
+
+    val sourceList by derivedStateOf {
+        cache.sources.map {
+            it.source as String
+        }
+    }
+
+    val selected = remember { mutableStateListOf<Int>() }
+
+    MapsDialog(
+        title = stringResource(Res.string.map_tile_source),
+        positiveButton = {
+            TextButton(enabled = selected.isNotEmpty(), onClick = {
+                selected.forEach { selectedIndex ->
+                    val source = sourceList[selectedIndex]
+                    scope.launch {
+                        context.showToast(
+                            if(cache.purgeCache(source)) {
+                                getString(Res.string.map_purge_success, source)
+                            } else {
+                                getString(Res.string.map_purge_fail)
+                            }
+                        )
+                    }
+                }
+
+                onDismiss()
+            }) {
+                Text(text = stringResource(Res.string.clear))
+            }
+        },
+        negativeButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(Res.string.cancel))
+            }
+        },
+        onDismiss = onDismiss) {
+       sourceList.forEachIndexed { index, source ->
+           val isSelected = selected.contains(index)
+           BasicListItem(text = source,
+               trailingContent = {
+                   Checkbox(checked = isSelected, onCheckedChange = {})
+               }, onClick = {
+                   if(isSelected) {
+                       selected.remove(index)
+                   } else {
+                       selected.add(index)
+                   }
+               }) {
+           }
+       }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
