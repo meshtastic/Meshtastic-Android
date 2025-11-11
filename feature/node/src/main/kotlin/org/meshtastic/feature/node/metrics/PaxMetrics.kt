@@ -48,14 +48,21 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.util.formatUptime
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.ble_devices
+import org.meshtastic.core.strings.no_pax_metrics_logs
+import org.meshtastic.core.strings.pax
+import org.meshtastic.core.strings.uptime
+import org.meshtastic.core.strings.wifi_devices
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
@@ -64,13 +71,12 @@ import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
 import java.text.DateFormat
 import java.util.Date
-import org.meshtastic.core.strings.R as Res
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
 private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
-private enum class PaxSeries(val color: Color, val legendRes: Int) {
+private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
     PAX(Color.Black, Res.string.pax),
     BLE(Color.Cyan, Res.string.ble_devices),
     WIFI(Color.Green, Res.string.wifi_devices),

@@ -32,10 +32,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.manage_map_layers
+import org.meshtastic.core.strings.map_filter
+import org.meshtastic.core.strings.map_tile_source
+import org.meshtastic.core.strings.orient_north
+import org.meshtastic.core.strings.toggle_my_position
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.MapViewModel
-import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

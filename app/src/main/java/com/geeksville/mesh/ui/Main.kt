@@ -21,7 +21,6 @@ package com.geeksville.mesh.ui
 
 import android.Manifest
 import android.os.Build
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -71,8 +70,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
@@ -100,6 +97,9 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
@@ -108,6 +108,25 @@ import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.app_too_old
+import org.meshtastic.core.strings.bottom_nav_settings
+import org.meshtastic.core.strings.client_notification
+import org.meshtastic.core.strings.compromised_keys
+import org.meshtastic.core.strings.connected
+import org.meshtastic.core.strings.connections
+import org.meshtastic.core.strings.conversations
+import org.meshtastic.core.strings.device_sleeping
+import org.meshtastic.core.strings.disconnected
+import org.meshtastic.core.strings.firmware_old
+import org.meshtastic.core.strings.firmware_too_old
+import org.meshtastic.core.strings.map
+import org.meshtastic.core.strings.must_update
+import org.meshtastic.core.strings.nodes
+import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.should_update
+import org.meshtastic.core.strings.should_update_firmware
+import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
@@ -122,9 +141,8 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.feature.node.metrics.annotateTraceroute
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
-import org.meshtastic.core.strings.R as Res
 
-enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
+enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
     Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
     Nodes(Res.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
     Map(Res.string.map, MeshtasticIcons.Map, MapRoutes.Map),
@@ -392,7 +410,6 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val resources = LocalResources.current
 
     val myFirmwareVersion = myNodeInfo?.firmwareVersion
 
@@ -424,8 +441,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE && BuildConfig.DEBUG.not()
                 if (isOld) {
                     viewModel.showAlert(
-                        resources.getString(Res.string.app_too_old),
-                        resources.getString(Res.string.must_update),
+                        getString(Res.string.app_too_old),
+                        getString(Res.string.must_update),
                         dismissable = false,
                         onConfirm = {
                             val service = viewModel.meshService ?: return@showAlert
@@ -436,8 +453,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                     myFirmwareVersion?.let {
                         val curVer = DeviceVersion(it)
                         if (curVer < MeshService.absoluteMinDeviceVersion) {
-                            val title = resources.getString(Res.string.firmware_too_old)
-                            val message = resources.getString(Res.string.firmware_old)
+                            val title = getString(Res.string.firmware_too_old)
+                            val message = getString(Res.string.firmware_old)
                             viewModel.showAlert(
                                 title = title,
                                 html = message,
@@ -448,9 +465,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                                 },
                             )
                         } else if (curVer < MeshService.minDeviceVersion) {
-                            val title = resources.getString(Res.string.should_update_firmware)
-                            val message =
-                                resources.getString(Res.string.should_update, latestStableFirmwareRelease.asString)
+                            val title = getString(Res.string.should_update_firmware)
+                            val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
                             viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
                         }
                     }

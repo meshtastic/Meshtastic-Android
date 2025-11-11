@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.intro
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -37,13 +36,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R as Res
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.skip
 
 /**
  * A generic layout for screens within the app introduction flow. It typically presents a headline, a descriptive text
@@ -60,13 +61,13 @@ import org.meshtastic.core.strings.R as Res
  */
 @Composable
 internal fun PermissionScreenLayout(
-    @StringRes headlineRes: Int,
+    headlineRes: StringResource,
     annotatedDescription: AnnotatedString,
     features: List<FeatureUIData>,
     additionalContent: (@Composable () -> Unit)? = null,
     onSkip: () -> Unit,
     onConfigure: () -> Unit,
-    @StringRes configureButtonTextRes: Int,
+    configureButtonTextRes: StringResource,
     onAnnotationClick: (String) -> Unit,
 ) {
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }

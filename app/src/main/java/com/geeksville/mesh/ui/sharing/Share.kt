@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -43,9 +42,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.contact.ContactItem
 import com.geeksville.mesh.ui.contact.ContactsViewModel
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.sample_message
+import org.meshtastic.core.strings.share
+import org.meshtastic.core.strings.share_to
+import org.meshtastic.core.strings.some_username
+import org.meshtastic.core.strings.unknown_username
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun ShareScreen(viewModel: ContactsViewModel = hiltViewModel(), onConfirm: (String) -> Unit, onNavigateUp: () -> Unit) {

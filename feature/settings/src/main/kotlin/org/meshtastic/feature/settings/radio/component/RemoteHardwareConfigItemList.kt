@@ -23,16 +23,21 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.allow_undefined_pin_access
+import org.meshtastic.core.strings.available_pins
+import org.meshtastic.core.strings.remote_hardware
+import org.meshtastic.core.strings.remote_hardware_config
+import org.meshtastic.core.strings.remote_hardware_enabled
 import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {

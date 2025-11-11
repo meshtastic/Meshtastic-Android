@@ -56,7 +56,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -66,6 +65,51 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.accept
+import org.meshtastic.core.strings.are_you_sure
+import org.meshtastic.core.strings.button_gpio
+import org.meshtastic.core.strings.buzzer_gpio
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.config_device_doubleTapAsButtonPress_summary
+import org.meshtastic.core.strings.config_device_ledHeartbeatEnabled_summary
+import org.meshtastic.core.strings.config_device_tripleClickAsAdHocPing_summary
+import org.meshtastic.core.strings.config_device_tzdef_summary
+import org.meshtastic.core.strings.config_device_use_phone_tz
+import org.meshtastic.core.strings.device
+import org.meshtastic.core.strings.double_tap_as_button_press
+import org.meshtastic.core.strings.gpio
+import org.meshtastic.core.strings.hardware
+import org.meshtastic.core.strings.i_know_what_i_m_doing
+import org.meshtastic.core.strings.led_heartbeat
+import org.meshtastic.core.strings.nodeinfo_broadcast_interval
+import org.meshtastic.core.strings.options
+import org.meshtastic.core.strings.rebroadcast_mode
+import org.meshtastic.core.strings.rebroadcast_mode_all_desc
+import org.meshtastic.core.strings.rebroadcast_mode_all_skip_decoding_desc
+import org.meshtastic.core.strings.rebroadcast_mode_core_portnums_only_desc
+import org.meshtastic.core.strings.rebroadcast_mode_known_only_desc
+import org.meshtastic.core.strings.rebroadcast_mode_local_only_desc
+import org.meshtastic.core.strings.rebroadcast_mode_none_desc
+import org.meshtastic.core.strings.role
+import org.meshtastic.core.strings.role_client_desc
+import org.meshtastic.core.strings.role_client_hidden_desc
+import org.meshtastic.core.strings.role_client_mute_desc
+import org.meshtastic.core.strings.role_lost_and_found_desc
+import org.meshtastic.core.strings.role_repeater_desc
+import org.meshtastic.core.strings.role_router_client_desc
+import org.meshtastic.core.strings.role_router_desc
+import org.meshtastic.core.strings.role_router_late_desc
+import org.meshtastic.core.strings.role_sensor_desc
+import org.meshtastic.core.strings.role_tak_desc
+import org.meshtastic.core.strings.role_tak_tracker_desc
+import org.meshtastic.core.strings.role_tracker_desc
+import org.meshtastic.core.strings.router_role_confirmation_text
+import org.meshtastic.core.strings.time_zone
+import org.meshtastic.core.strings.triple_click_adhoc_ping
+import org.meshtastic.core.strings.unrecognized
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
@@ -79,9 +123,8 @@ import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 import java.time.ZoneId
-import org.meshtastic.core.strings.R as Res
 
-private val DeviceConfig.Role.description: Int
+private val DeviceConfig.Role.description: StringResource
     get() =
         when (this) {
             DeviceConfig.Role.CLIENT -> Res.string.role_client_desc
@@ -99,7 +142,7 @@ private val DeviceConfig.Role.description: Int
             else -> Res.string.unrecognized
         }
 
-private val DeviceConfig.RebroadcastMode.description: Int
+private val DeviceConfig.RebroadcastMode.description: StringResource
     get() =
         when (this) {
             DeviceConfig.RebroadcastMode.ALL -> Res.string.rebroadcast_mode_all_desc

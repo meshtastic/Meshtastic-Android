@@ -39,16 +39,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.ByteString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.model.util.toByteString
-import org.meshtastic.core.strings.R as Res
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.error
+import org.meshtastic.core.strings.reset
 
 @Suppress("LongMethod")
 @Composable

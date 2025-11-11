@@ -38,19 +38,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.device
+import org.meshtastic.core.strings.hardware
+import org.meshtastic.core.strings.supported
+import org.meshtastic.core.strings.supported_by_community
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.model.MetricsState
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {

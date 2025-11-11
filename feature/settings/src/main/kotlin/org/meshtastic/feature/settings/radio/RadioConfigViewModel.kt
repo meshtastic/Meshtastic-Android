@@ -25,7 +25,6 @@ import android.net.Uri
 import android.os.RemoteException
 import android.util.Base64
 import androidx.annotation.RequiresPermission
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
@@ -46,6 +45,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.StringResource
 import org.json.JSONObject
 import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.data.repository.NodeRepository
@@ -62,6 +62,8 @@ import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cant_shutdown
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -81,7 +83,6 @@ import org.meshtastic.proto.moduleConfig
 import timber.log.Timber
 import java.io.FileOutputStream
 import javax.inject.Inject
-import org.meshtastic.core.strings.R as Res
 
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
@@ -606,7 +607,7 @@ constructor(
 
     private fun sendError(error: String) = setResponseStateError(UiText.DynamicString(error))
 
-    private fun sendError(@StringRes id: Int) = setResponseStateError(UiText.StringResource(id))
+    private fun sendError(id: StringResource) = setResponseStateError(UiText.StringResource(id))
 
     private fun setResponseStateError(error: UiText) {
         _radioConfigState.update { it.copy(responseState = ResponseState.Error(error)) }

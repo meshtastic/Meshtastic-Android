@@ -55,19 +55,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.Contact
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.model.util.formatMuteRemainingTime
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.close_selection
+import org.meshtastic.core.strings.conversations
+import org.meshtastic.core.strings.currently
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.delete_messages
+import org.meshtastic.core.strings.delete_selection
+import org.meshtastic.core.strings.mute_1_week
+import org.meshtastic.core.strings.mute_8_hours
+import org.meshtastic.core.strings.mute_always
+import org.meshtastic.core.strings.mute_notifications
+import org.meshtastic.core.strings.mute_status_always
+import org.meshtastic.core.strings.mute_status_muted_for_days
+import org.meshtastic.core.strings.mute_status_muted_for_hours
+import org.meshtastic.core.strings.mute_status_unmuted
+import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.select_all
+import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.proto.AppOnlyProtos
 import java.util.concurrent.TimeUnit
-import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")

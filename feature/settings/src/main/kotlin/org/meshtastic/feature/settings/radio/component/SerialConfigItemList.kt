@@ -23,9 +23,18 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.echo_enabled
+import org.meshtastic.core.strings.override_console_serial_port
+import org.meshtastic.core.strings.serial
+import org.meshtastic.core.strings.serial_baud_rate
+import org.meshtastic.core.strings.serial_config
+import org.meshtastic.core.strings.serial_enabled
+import org.meshtastic.core.strings.serial_mode
+import org.meshtastic.core.strings.timeout
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -34,7 +43,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig.SerialConfig
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {

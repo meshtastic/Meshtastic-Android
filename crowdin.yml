@@ -2,7 +2,7 @@ pull_request_labels:
   - automation
   - l10n
 files:
-  - source: /**/src/main/res/values/strings.xml
+  - source: /**/src/commonMain/composeResources/values/strings.xml
     translation: /%original_path%-%android_code%/strings.xml
     translate_attributes: 0
     content_segmentation: 0

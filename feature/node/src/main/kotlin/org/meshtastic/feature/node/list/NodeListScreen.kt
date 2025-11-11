@@ -53,13 +53,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add_favorite
+import org.meshtastic.core.strings.ignore
+import org.meshtastic.core.strings.node_count_template
+import org.meshtastic.core.strings.nodes
+import org.meshtastic.core.strings.remove
+import org.meshtastic.core.strings.remove_favorite
+import org.meshtastic.core.strings.remove_ignored
 import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
@@ -69,7 +77,6 @@ import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 import org.meshtastic.proto.AdminProtos
-import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")

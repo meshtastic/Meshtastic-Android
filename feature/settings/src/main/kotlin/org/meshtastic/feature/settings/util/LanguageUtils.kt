@@ -20,10 +20,16 @@ package org.meshtastic.feature.settings.util
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import com.meshtastic.core.strings.getString
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.fr_HT
+import org.meshtastic.core.strings.preferences_system_default
+import org.meshtastic.core.strings.pt_BR
+import org.meshtastic.core.strings.zh_CN
+import org.meshtastic.core.strings.zh_TW
 import org.xmlpull.v1.XmlPullParser
 import timber.log.Timber
 import java.util.Locale
-import org.meshtastic.core.strings.R as Res
 
 object LanguageUtils {
 

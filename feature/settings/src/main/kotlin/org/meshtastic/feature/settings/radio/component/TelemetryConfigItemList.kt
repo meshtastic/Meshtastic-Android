@@ -22,10 +22,25 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.air_quality_metrics_module_enabled
+import org.meshtastic.core.strings.air_quality_metrics_update_interval_seconds
+import org.meshtastic.core.strings.device_metrics_update_interval_seconds
+import org.meshtastic.core.strings.device_telemetry_enabled
+import org.meshtastic.core.strings.device_telemetry_enabled_summary
+import org.meshtastic.core.strings.environment_metrics_module_enabled
+import org.meshtastic.core.strings.environment_metrics_on_screen_enabled
+import org.meshtastic.core.strings.environment_metrics_update_interval_seconds
+import org.meshtastic.core.strings.environment_metrics_use_fahrenheit
+import org.meshtastic.core.strings.power_metrics_module_enabled
+import org.meshtastic.core.strings.power_metrics_on_screen_enabled
+import org.meshtastic.core.strings.power_metrics_update_interval_seconds
+import org.meshtastic.core.strings.telemetry
+import org.meshtastic.core.strings.telemetry_config
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -34,7 +49,6 @@ import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-import org.meshtastic.core.strings.R as Res
 
 private const val MIN_FW_FOR_TELEMETRY_TOGGLE = "2.7.12"
 

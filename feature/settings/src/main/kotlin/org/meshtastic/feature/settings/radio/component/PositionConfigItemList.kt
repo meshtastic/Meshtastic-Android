@@ -35,14 +35,39 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.core.location.LocationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.advanced_device_gps
+import org.meshtastic.core.strings.altitude
+import org.meshtastic.core.strings.broadcast_interval
+import org.meshtastic.core.strings.config_position_broadcast_secs_summary
+import org.meshtastic.core.strings.config_position_broadcast_smart_minimum_distance_summary
+import org.meshtastic.core.strings.config_position_broadcast_smart_minimum_interval_secs_summary
+import org.meshtastic.core.strings.config_position_flags_summary
+import org.meshtastic.core.strings.config_position_gps_update_interval_summary
+import org.meshtastic.core.strings.device_gps
+import org.meshtastic.core.strings.fixed_position
+import org.meshtastic.core.strings.gps_en_gpio
+import org.meshtastic.core.strings.gps_mode
+import org.meshtastic.core.strings.gps_receive_gpio
+import org.meshtastic.core.strings.gps_transmit_gpio
+import org.meshtastic.core.strings.latitude
+import org.meshtastic.core.strings.longitude
+import org.meshtastic.core.strings.minimum_distance
+import org.meshtastic.core.strings.minimum_interval
+import org.meshtastic.core.strings.position
+import org.meshtastic.core.strings.position_config_set_fixed_from_phone
+import org.meshtastic.core.strings.position_flags
+import org.meshtastic.core.strings.position_packet
+import org.meshtastic.core.strings.smart_position
+import org.meshtastic.core.strings.update_interval
 import org.meshtastic.core.ui.component.BitwisePreference
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -56,7 +81,6 @@ import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ConfigProtos.Config.PositionConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
-import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

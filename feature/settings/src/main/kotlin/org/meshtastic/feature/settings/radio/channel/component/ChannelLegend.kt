@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.settings.radio.channel.component
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,11 +41,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.strings.R as Res
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.channel_features
+import org.meshtastic.core.strings.downlink_enabled
+import org.meshtastic.core.strings.downlink_feature_description
+import org.meshtastic.core.strings.icon_meanings
+import org.meshtastic.core.strings.info
+import org.meshtastic.core.strings.location_sharing
+import org.meshtastic.core.strings.manual_position_request
+import org.meshtastic.core.strings.periodic_position_broadcast
+import org.meshtastic.core.strings.primary
+import org.meshtastic.core.strings.primary_channel_feature
+import org.meshtastic.core.strings.secondary
+import org.meshtastic.core.strings.secondary_channel_position_feature
+import org.meshtastic.core.strings.secondary_no_telemetry
+import org.meshtastic.core.strings.security_icon_help_dismiss
+import org.meshtastic.core.strings.uplink_enabled
+import org.meshtastic.core.strings.uplink_feature_description
 
 /**
  * At this firmware version periodic position sharing on a secondary channel was implemented. To enable this feature the
@@ -57,8 +73,8 @@ internal const val SECONDARY_CHANNEL_EPOCH = "2.6.10"
 
 internal enum class ChannelIcons(
     val icon: ImageVector,
-    @StringRes val descriptionResId: Int,
-    @StringRes val additionalInfoResId: Int,
+    val descriptionResId: StringResource,
+    val additionalInfoResId: StringResource,
 ) {
     LOCATION(
         icon = Icons.Filled.LocationOn,

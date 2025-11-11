@@ -58,7 +58,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -66,13 +65,47 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.hasGps
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.calculating
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.clear
+import org.meshtastic.core.strings.close
+import org.meshtastic.core.strings.delete_for_everyone
+import org.meshtastic.core.strings.delete_for_me
+import org.meshtastic.core.strings.expires
+import org.meshtastic.core.strings.location_disabled
+import org.meshtastic.core.strings.map_cache_info
+import org.meshtastic.core.strings.map_cache_manager
+import org.meshtastic.core.strings.map_cache_size
+import org.meshtastic.core.strings.map_cache_tiles
+import org.meshtastic.core.strings.map_clear_tiles
+import org.meshtastic.core.strings.map_download_complete
+import org.meshtastic.core.strings.map_download_errors
+import org.meshtastic.core.strings.map_download_region
+import org.meshtastic.core.strings.map_filter
+import org.meshtastic.core.strings.map_node_popup_details
+import org.meshtastic.core.strings.map_offline_manager
+import org.meshtastic.core.strings.map_purge_fail
+import org.meshtastic.core.strings.map_purge_success
+import org.meshtastic.core.strings.map_style_selection
+import org.meshtastic.core.strings.map_subDescription
+import org.meshtastic.core.strings.map_tile_source
+import org.meshtastic.core.strings.only_favorites
+import org.meshtastic.core.strings.show_precision_circle
+import org.meshtastic.core.strings.show_waypoints
+import org.meshtastic.core.strings.toggle_my_position
+import org.meshtastic.core.strings.waypoint_delete
+import org.meshtastic.core.strings.you
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
@@ -106,7 +139,6 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 private fun MapView.UpdateMarkers(
@@ -186,7 +218,7 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
             val b = cache.purgeCache(item.source)
             onResult(
                 if (b) {
-                    getString(Res.string.map_purge_success, item.source)
+                    getString(Res.string.map_purge_success, item.source.toString())
                 } else {
                     getString(Res.string.map_purge_fail)
                 },
@@ -336,7 +368,8 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                         if (node.batteryStr != "") node.batteryStr else "?",
                     )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription = resources.getString(Res.string.map_subDescription, ourNode.bearing(node), dist)
+                    subDescription =
+                        resources.getString(Res.string.map_subDescription, ourNode.bearing(node).toString(), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
@@ -460,7 +493,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         val currentCacheUsage = cacheManager.currentCacheUsage()
 
         val mapCacheInfoText =
-            resources.getString(
+            getString(
                 Res.string.map_cache_info,
                 cacheCapacity / (1024.0 * 1024.0),
                 currentCacheUsage / (1024.0 * 1024.0),

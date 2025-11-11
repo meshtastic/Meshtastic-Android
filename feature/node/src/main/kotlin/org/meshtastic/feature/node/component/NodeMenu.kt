@@ -18,10 +18,18 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.favorite
+import org.meshtastic.core.strings.favorite_add
+import org.meshtastic.core.strings.favorite_remove
+import org.meshtastic.core.strings.ignore
+import org.meshtastic.core.strings.ignore_add
+import org.meshtastic.core.strings.ignore_remove
+import org.meshtastic.core.strings.remove
+import org.meshtastic.core.strings.remove_node_text
 import org.meshtastic.core.ui.component.SimpleAlertDialog
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun NodeActionDialogs(

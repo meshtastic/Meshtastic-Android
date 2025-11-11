@@ -23,14 +23,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.import_known_shared_contact_text
+import org.meshtastic.core.strings.import_label
+import org.meshtastic.core.strings.import_shared_contact
+import org.meshtastic.core.strings.public_key_changed
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.component.compareUsers
 import org.meshtastic.core.ui.component.userFieldsToString
 import org.meshtastic.proto.AdminProtos
-import org.meshtastic.core.strings.R as Res
 
 /** A dialog for importing a shared contact that was scanned from a QR code. */
 @Composable

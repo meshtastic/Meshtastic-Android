@@ -17,15 +17,37 @@
 
 package org.meshtastic.core.database.model
 
-import androidx.annotation.StringRes
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.delivery_confirmed
+import org.meshtastic.core.strings.error
+import org.meshtastic.core.strings.message_delivery_status
+import org.meshtastic.core.strings.message_status_enroute
+import org.meshtastic.core.strings.message_status_queued
+import org.meshtastic.core.strings.routing_error_admin_bad_session_key
+import org.meshtastic.core.strings.routing_error_admin_public_key_unauthorized
+import org.meshtastic.core.strings.routing_error_bad_request
+import org.meshtastic.core.strings.routing_error_duty_cycle_limit
+import org.meshtastic.core.strings.routing_error_got_nak
+import org.meshtastic.core.strings.routing_error_max_retransmit
+import org.meshtastic.core.strings.routing_error_no_channel
+import org.meshtastic.core.strings.routing_error_no_interface
+import org.meshtastic.core.strings.routing_error_no_response
+import org.meshtastic.core.strings.routing_error_no_route
+import org.meshtastic.core.strings.routing_error_none
+import org.meshtastic.core.strings.routing_error_not_authorized
+import org.meshtastic.core.strings.routing_error_pki_failed
+import org.meshtastic.core.strings.routing_error_pki_unknown_pubkey
+import org.meshtastic.core.strings.routing_error_rate_limit_exceeded
+import org.meshtastic.core.strings.routing_error_timeout
+import org.meshtastic.core.strings.routing_error_too_large
+import org.meshtastic.core.strings.unrecognized
 import org.meshtastic.proto.MeshProtos.Routing
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("CyclomaticComplexMethod")
-@StringRes
-fun getStringResFrom(routingError: Int): Int = when (routingError) {
+fun getStringResFrom(routingError: Int): StringResource = when (routingError) {
     Routing.Error.NONE_VALUE -> Res.string.routing_error_none
     Routing.Error.NO_ROUTE_VALUE -> Res.string.routing_error_no_route
     Routing.Error.GOT_NAK_VALUE -> Res.string.routing_error_got_nak
@@ -66,7 +88,7 @@ data class Message(
     val viaMqtt: Boolean = false,
     val relayNode: Int? = null,
 ) {
-    fun getStatusStringRes(): Pair<Int, Int> {
+    fun getStatusStringRes(): Pair<StringResource, StringResource> {
         val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status
         val text =
             when (status) {

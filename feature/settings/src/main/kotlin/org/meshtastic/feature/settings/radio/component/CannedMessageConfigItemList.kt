@@ -27,11 +27,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.allow_input_source
+import org.meshtastic.core.strings.canned_message
+import org.meshtastic.core.strings.canned_message_config
+import org.meshtastic.core.strings.canned_message_enabled
+import org.meshtastic.core.strings.generate_input_event_on_ccw
+import org.meshtastic.core.strings.generate_input_event_on_cw
+import org.meshtastic.core.strings.generate_input_event_on_press
+import org.meshtastic.core.strings.gpio_pin_for_rotary_encoder_a_port
+import org.meshtastic.core.strings.gpio_pin_for_rotary_encoder_b_port
+import org.meshtastic.core.strings.gpio_pin_for_rotary_encoder_press_port
+import org.meshtastic.core.strings.messages
+import org.meshtastic.core.strings.rotary_encoder_1_enabled
+import org.meshtastic.core.strings.send_bell
+import org.meshtastic.core.strings.up_down_select_input_enabled
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -40,7 +55,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig.CannedMessageConfig
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {

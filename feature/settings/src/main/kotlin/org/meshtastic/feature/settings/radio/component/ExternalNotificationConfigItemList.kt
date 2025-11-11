@@ -28,11 +28,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.advanced
+import org.meshtastic.core.strings.alert_bell_buzzer
+import org.meshtastic.core.strings.alert_bell_led
+import org.meshtastic.core.strings.alert_bell_vibra
+import org.meshtastic.core.strings.alert_message_buzzer
+import org.meshtastic.core.strings.alert_message_led
+import org.meshtastic.core.strings.alert_message_vibra
+import org.meshtastic.core.strings.external_notification
+import org.meshtastic.core.strings.external_notification_config
+import org.meshtastic.core.strings.external_notification_enabled
+import org.meshtastic.core.strings.nag_timeout_seconds
+import org.meshtastic.core.strings.notifications_on_alert_bell_receipt
+import org.meshtastic.core.strings.notifications_on_message_receipt
+import org.meshtastic.core.strings.output_buzzer_gpio
+import org.meshtastic.core.strings.output_duration_milliseconds
+import org.meshtastic.core.strings.output_led_active_high
+import org.meshtastic.core.strings.output_led_gpio
+import org.meshtastic.core.strings.output_vibra_gpio
+import org.meshtastic.core.strings.ringtone
+import org.meshtastic.core.strings.use_i2s_as_buzzer
+import org.meshtastic.core.strings.use_pwm_buzzer
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -43,7 +65,6 @@ import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {

@@ -34,7 +34,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -42,6 +41,33 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.advanced
+import org.meshtastic.core.strings.config_network_eth_enabled_summary
+import org.meshtastic.core.strings.config_network_udp_enabled_summary
+import org.meshtastic.core.strings.config_network_wifi_enabled_summary
+import org.meshtastic.core.strings.connection_status
+import org.meshtastic.core.strings.error
+import org.meshtastic.core.strings.ethernet_config
+import org.meshtastic.core.strings.ethernet_enabled
+import org.meshtastic.core.strings.ethernet_ip
+import org.meshtastic.core.strings.gateway
+import org.meshtastic.core.strings.ip
+import org.meshtastic.core.strings.ipv4_mode
+import org.meshtastic.core.strings.network
+import org.meshtastic.core.strings.ntp_server
+import org.meshtastic.core.strings.password
+import org.meshtastic.core.strings.rsyslog_server
+import org.meshtastic.core.strings.ssid
+import org.meshtastic.core.strings.subnet
+import org.meshtastic.core.strings.udp_config
+import org.meshtastic.core.strings.udp_enabled
+import org.meshtastic.core.strings.wifi_config
+import org.meshtastic.core.strings.wifi_enabled
+import org.meshtastic.core.strings.wifi_ip
+import org.meshtastic.core.strings.wifi_qr_code_error
+import org.meshtastic.core.strings.wifi_qr_code_scan
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditIPv4Preference
 import org.meshtastic.core.ui.component.EditPasswordPreference
@@ -54,7 +80,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ConfigProtos.Config.NetworkConfig
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =

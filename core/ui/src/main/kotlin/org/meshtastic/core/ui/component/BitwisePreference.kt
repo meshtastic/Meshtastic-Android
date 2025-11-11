@@ -38,7 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R as Res
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.clear
+import org.meshtastic.core.strings.close
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -40,11 +40,19 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.baro_pressure
+import org.meshtastic.core.strings.humidity
+import org.meshtastic.core.strings.iaq
+import org.meshtastic.core.strings.lux
+import org.meshtastic.core.strings.soil_moisture
+import org.meshtastic.core.strings.soil_temperature
+import org.meshtastic.core.strings.temperature
+import org.meshtastic.core.strings.uv_lux
 import org.meshtastic.feature.node.metrics.GraphUtil.createPath
 import org.meshtastic.feature.node.metrics.GraphUtil.drawPathWithGradient
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
-import org.meshtastic.core.strings.R as Res
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f

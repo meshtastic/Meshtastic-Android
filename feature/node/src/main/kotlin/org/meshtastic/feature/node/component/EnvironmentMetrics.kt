@@ -35,16 +35,33 @@ import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.model.util.toSmallDistanceString
 import org.meshtastic.core.model.util.toSpeedString
+import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.current
+import org.meshtastic.core.strings.dew_point
+import org.meshtastic.core.strings.distance
+import org.meshtastic.core.strings.gas_resistance
+import org.meshtastic.core.strings.humidity
+import org.meshtastic.core.strings.iaq
+import org.meshtastic.core.strings.lux
+import org.meshtastic.core.strings.pressure
+import org.meshtastic.core.strings.radiation
+import org.meshtastic.core.strings.soil_moisture
+import org.meshtastic.core.strings.soil_temperature
+import org.meshtastic.core.strings.temperature
+import org.meshtastic.core.strings.uv_lux
+import org.meshtastic.core.strings.voltage
+import org.meshtastic.core.strings.weight
+import org.meshtastic.core.strings.wind
 import org.meshtastic.feature.node.model.DrawableMetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
 import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable

@@ -17,7 +17,6 @@
 
 package org.meshtastic.core.ui.component
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.material3.Icon
@@ -28,11 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ClickableTextField(
-    @StringRes label: Int,
+    label: StringResource,
     enabled: Boolean,
     trailingIcon: ImageVector,
     value: String,

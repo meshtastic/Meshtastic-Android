@@ -64,7 +64,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
 
-# Compose
+# AndroidX Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.11.00" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
@@ -99,7 +99,7 @@ protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protob
 zxing-core = { module = "com.google.zxing:core", version = "3.5.3" }
 truth = { module = "com.google.truth:truth", version = "1.4.5" }
 
-# Kotlin
+# Jetbrains
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
@@ -169,13 +169,16 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 [plugins]
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 android-lint = { id = "com.android.lint", version.ref = "agp" }
 
-# Kotlin
-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+# Jetbrains
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version = "1.9.1" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.3" }
@@ -212,4 +215,5 @@ meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-hilt = { id = "meshtastic.hilt" }
 meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
+meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
 meshtastic-spotless = { id = "meshtastic.spotless" }

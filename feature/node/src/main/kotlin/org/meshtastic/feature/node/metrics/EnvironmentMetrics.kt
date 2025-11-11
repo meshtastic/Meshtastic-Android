@@ -42,14 +42,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.current
+import org.meshtastic.core.strings.gas_resistance
+import org.meshtastic.core.strings.humidity
+import org.meshtastic.core.strings.iaq
+import org.meshtastic.core.strings.iaq_definition
+import org.meshtastic.core.strings.lux
+import org.meshtastic.core.strings.radiation
+import org.meshtastic.core.strings.soil_moisture
+import org.meshtastic.core.strings.soil_temperature
+import org.meshtastic.core.strings.temperature
+import org.meshtastic.core.strings.uv_lux
+import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.core.ui.component.MainAppBar
@@ -61,7 +74,6 @@ import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 import org.meshtastic.proto.copy
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {

@@ -50,14 +50,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.debug_active_filters
+import org.meshtastic.core.strings.debug_filter_add
+import org.meshtastic.core.strings.debug_filter_clear
+import org.meshtastic.core.strings.debug_filter_included
+import org.meshtastic.core.strings.debug_filters
+import org.meshtastic.core.strings.match_all
+import org.meshtastic.core.strings.match_any
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun DebugCustomFilterInput(

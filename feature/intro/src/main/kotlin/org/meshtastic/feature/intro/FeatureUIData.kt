@@ -17,8 +17,8 @@
 
 package org.meshtastic.feature.intro
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.StringResource
 
 /**
  * Data class representing the UI elements for a feature row in the app introduction.
@@ -29,6 +29,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
  */
 internal data class FeatureUIData(
     val icon: ImageVector,
-    @StringRes val titleRes: Int? = null,
-    @StringRes val subtitleRes: Int,
+    val titleRes: StringResource? = null,
+    val subtitleRes: StringResource,
 )

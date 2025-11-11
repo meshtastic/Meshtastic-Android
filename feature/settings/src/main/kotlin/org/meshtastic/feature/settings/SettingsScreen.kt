@@ -54,18 +54,44 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.analytics_okay
+import org.meshtastic.core.strings.app_settings
+import org.meshtastic.core.strings.app_version
+import org.meshtastic.core.strings.bottom_nav_settings
+import org.meshtastic.core.strings.choose_theme
+import org.meshtastic.core.strings.device_db_cache_limit
+import org.meshtastic.core.strings.device_db_cache_limit_summary
+import org.meshtastic.core.strings.dynamic
+import org.meshtastic.core.strings.export_configuration
+import org.meshtastic.core.strings.export_data_csv
+import org.meshtastic.core.strings.import_configuration
+import org.meshtastic.core.strings.intro_show
+import org.meshtastic.core.strings.location_disabled
+import org.meshtastic.core.strings.modules_already_unlocked
+import org.meshtastic.core.strings.modules_unlocked
+import org.meshtastic.core.strings.preferences_language
+import org.meshtastic.core.strings.provide_location_to_mesh
+import org.meshtastic.core.strings.remotely_administrating
+import org.meshtastic.core.strings.save_rangetest
+import org.meshtastic.core.strings.system_settings
+import org.meshtastic.core.strings.theme
+import org.meshtastic.core.strings.theme_dark
+import org.meshtastic.core.strings.theme_light
+import org.meshtastic.core.strings.theme_system
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
@@ -86,7 +112,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
-import org.meshtastic.core.strings.R as Res
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")

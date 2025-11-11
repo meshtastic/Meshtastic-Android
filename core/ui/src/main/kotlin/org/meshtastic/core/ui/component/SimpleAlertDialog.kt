@@ -17,7 +17,6 @@
 
 package org.meshtastic.core.ui.component
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,16 +27,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.message
+import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.sample_message
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun SimpleAlertDialog(
-    @StringRes title: Int,
+    title: StringResource,
     text: @Composable (() -> Unit)? = null,
     confirmText: String? = null,
     onConfirm: (() -> Unit)? = null,
@@ -74,8 +78,8 @@ fun SimpleAlertDialog(
 
 @Composable
 fun SimpleAlertDialog(
-    @StringRes title: Int,
-    @StringRes text: Int,
+    title: StringResource,
+    text: StringResource,
     onConfirm: (() -> Unit)? = null,
     onDismiss: () -> Unit = {},
 ) = SimpleAlertDialog(
@@ -87,7 +91,7 @@ fun SimpleAlertDialog(
 
 @Composable
 fun SimpleAlertDialog(
-    @StringRes title: Int,
+    title: StringResource,
     text: String,
     onConfirm: (() -> Unit)? = null,
     onDismiss: () -> Unit = {},

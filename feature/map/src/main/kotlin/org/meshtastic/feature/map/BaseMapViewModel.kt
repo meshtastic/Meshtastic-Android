@@ -18,7 +18,6 @@
 package org.meshtastic.feature.map
 
 import android.os.RemoteException
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +27,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.Packet
@@ -35,14 +35,19 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.any
+import org.meshtastic.core.strings.eight_hours
+import org.meshtastic.core.strings.one_day
+import org.meshtastic.core.strings.one_hour
+import org.meshtastic.core.strings.two_days
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("MagicNumber")
-sealed class LastHeardFilter(val seconds: Long, @StringRes val label: Int) {
+sealed class LastHeardFilter(val seconds: Long, val label: StringResource) {
     data object Any : LastHeardFilter(0L, Res.string.any)
 
     data object OneHour : LastHeardFilter(TimeUnit.HOURS.toSeconds(1), Res.string.one_hour)

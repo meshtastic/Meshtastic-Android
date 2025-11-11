@@ -17,7 +17,6 @@
 
 package org.meshtastic.feature.settings.navigation
 
-import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Forward
 import androidx.compose.material.icons.automirrored.filled.Message
@@ -33,13 +32,27 @@ import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.ambient_lighting
+import org.meshtastic.core.strings.audio
+import org.meshtastic.core.strings.canned_message
+import org.meshtastic.core.strings.detection_sensor
+import org.meshtastic.core.strings.external_notification
+import org.meshtastic.core.strings.mqtt
+import org.meshtastic.core.strings.neighbor_info
+import org.meshtastic.core.strings.paxcounter
+import org.meshtastic.core.strings.range_test
+import org.meshtastic.core.strings.remote_hardware
+import org.meshtastic.core.strings.serial
+import org.meshtastic.core.strings.store_forward
+import org.meshtastic.core.strings.telemetry
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos.DeviceMetadata
-import org.meshtastic.core.strings.R as Res
 
-enum class ModuleRoute(@StringRes val title: Int, val route: Route, val icon: ImageVector?, val type: Int = 0) {
+enum class ModuleRoute(val title: StringResource, val route: Route, val icon: ImageVector?, val type: Int = 0) {
     MQTT(
         Res.string.mqtt,
         SettingsRoutes.MQTT,

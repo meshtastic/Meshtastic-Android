@@ -85,7 +85,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -95,18 +94,42 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.alert_bell_text
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.cancel_reply
+import org.meshtastic.core.strings.clear_selection
+import org.meshtastic.core.strings.copy
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.delete_messages
+import org.meshtastic.core.strings.delete_messages_title
+import org.meshtastic.core.strings.message_input_label
+import org.meshtastic.core.strings.navigate_back
+import org.meshtastic.core.strings.overflow_menu
+import org.meshtastic.core.strings.quick_chat
+import org.meshtastic.core.strings.quick_chat_hide
+import org.meshtastic.core.strings.quick_chat_show
+import org.meshtastic.core.strings.reply
+import org.meshtastic.core.strings.replying_to
+import org.meshtastic.core.strings.scroll_to_bottom
+import org.meshtastic.core.strings.select_all
+import org.meshtastic.core.strings.send
+import org.meshtastic.core.strings.type_a_message
+import org.meshtastic.core.strings.unknown
+import org.meshtastic.core.strings.unknown_channel
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
 import java.nio.charset.StandardCharsets
-import org.meshtastic.core.strings.R as Res
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50

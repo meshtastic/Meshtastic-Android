@@ -112,5 +112,10 @@ gradlePlugin {
             implementationClass = "SpotlessConventionPlugin"
         }
 
+        register("kmpLibrary") {
+            id = libs.plugins.meshtastic.kmp.library.get().pluginId
+            implementationClass = "KmpLibraryConventionPlugin"
+        }
+
     }
 }

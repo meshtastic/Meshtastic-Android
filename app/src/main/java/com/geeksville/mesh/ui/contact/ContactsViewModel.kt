@@ -17,15 +17,14 @@
 
 package com.geeksville.mesh.ui.contact
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.model.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
@@ -34,17 +33,17 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.getShortDate
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.channel_name
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.channelSet
 import javax.inject.Inject
 import kotlin.collections.map
-import org.meshtastic.core.strings.R as Res
 
 @HiltViewModel
 class ContactsViewModel
 @Inject
 constructor(
-    @ApplicationContext private val context: Context,
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
@@ -87,7 +86,7 @@ constructor(
                 val shortName = user.shortName
                 val longName =
                     if (toBroadcast) {
-                        channelSet.getChannel(data.channel)?.name ?: context.getString(Res.string.channel_name)
+                        channelSet.getChannel(data.channel)?.name ?: getString(Res.string.channel_name)
                     } else {
                         user.longName
                     }

@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.connections.components
 
-import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Usb
@@ -30,12 +29,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ui.connections.DeviceType
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.bluetooth
+import org.meshtastic.core.strings.network
+import org.meshtastic.core.strings.serial
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("LambdaParameterEventTrailing")
 @Composable
@@ -58,7 +61,7 @@ fun ConnectionsSegmentedBar(
     }
 }
 
-private enum class Item(val imageVector: ImageVector, @StringRes val textRes: Int, val deviceType: DeviceType) {
+private enum class Item(val imageVector: ImageVector, val textRes: StringResource, val deviceType: DeviceType) {
     BLUETOOTH(imageVector = Icons.Rounded.Bluetooth, textRes = Res.string.bluetooth, deviceType = DeviceType.BLE),
     NETWORK(imageVector = Icons.Rounded.Wifi, textRes = Res.string.network, deviceType = DeviceType.TCP),
     SERIAL(imageVector = Icons.Rounded.Usb, textRes = Res.string.serial, deviceType = DeviceType.USB),

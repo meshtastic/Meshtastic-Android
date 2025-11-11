@@ -43,12 +43,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.are_you_sure
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.clean_node_database_confirmation
+import org.meshtastic.core.strings.clean_node_database_description
+import org.meshtastic.core.strings.clean_node_database_title
+import org.meshtastic.core.strings.clean_nodes_older_than
+import org.meshtastic.core.strings.clean_now
+import org.meshtastic.core.strings.clean_unknown_nodes
+import org.meshtastic.core.strings.nodes_queued_for_deletion
 import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.strings.R as Res
 
 /**
  * Composable screen for cleaning the node database. Allows users to specify criteria for deleting nodes. The list of

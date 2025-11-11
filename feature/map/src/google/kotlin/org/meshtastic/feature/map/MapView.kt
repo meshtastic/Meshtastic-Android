@@ -58,7 +58,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -90,12 +89,23 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.alt
+import org.meshtastic.core.strings.heading
+import org.meshtastic.core.strings.latitude
+import org.meshtastic.core.strings.longitude
+import org.meshtastic.core.strings.position
+import org.meshtastic.core.strings.sats
+import org.meshtastic.core.strings.speed
+import org.meshtastic.core.strings.timestamp
+import org.meshtastic.core.strings.track_point
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.map.component.ClusterItemsListDialog
@@ -113,7 +123,6 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
 import timber.log.Timber
 import java.text.DateFormat
-import org.meshtastic.core.strings.R as Res
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 private const val DEG_D = 1e-7

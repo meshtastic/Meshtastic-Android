@@ -26,11 +26,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.maps.android.compose.MapType
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.manage_custom_tile_sources
+import org.meshtastic.core.strings.map_type_hybrid
+import org.meshtastic.core.strings.map_type_normal
+import org.meshtastic.core.strings.map_type_satellite
+import org.meshtastic.core.strings.map_type_terrain
+import org.meshtastic.core.strings.selected_map_type
 import org.meshtastic.feature.map.MapViewModel
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable

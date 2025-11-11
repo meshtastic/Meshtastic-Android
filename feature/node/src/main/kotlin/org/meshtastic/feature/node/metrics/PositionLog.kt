@@ -54,7 +54,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,15 +61,25 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.alt
+import org.meshtastic.core.strings.clear
+import org.meshtastic.core.strings.heading
+import org.meshtastic.core.strings.latitude
+import org.meshtastic.core.strings.longitude
+import org.meshtastic.core.strings.sats
+import org.meshtastic.core.strings.save
+import org.meshtastic.core.strings.speed
+import org.meshtastic.core.strings.timestamp
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.MeshProtos
 import java.text.DateFormat
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 private fun RowScope.PositionText(text: String, weight: Float) {

@@ -35,17 +35,23 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.ByteString
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.gpio_pin
+import org.meshtastic.core.strings.ignore_incoming
+import org.meshtastic.core.strings.name
+import org.meshtastic.core.strings.type
 import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePin
 import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePinType
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.remoteHardwarePin
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable

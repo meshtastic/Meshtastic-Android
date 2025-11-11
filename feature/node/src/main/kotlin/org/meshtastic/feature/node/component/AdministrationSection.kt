@@ -26,13 +26,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ServiceAction
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.administration
+import org.meshtastic.core.strings.firmware
+import org.meshtastic.core.strings.firmware_edition
+import org.meshtastic.core.strings.installed_firmware_version
+import org.meshtastic.core.strings.latest_alpha_firmware
+import org.meshtastic.core.strings.latest_stable_firmware
+import org.meshtastic.core.strings.remote_admin
+import org.meshtastic.core.strings.request_metadata
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
@@ -43,7 +52,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.proto.MeshProtos
-import org.meshtastic.core.strings.R as Res
 
 @Suppress("LongMethod")
 @Composable

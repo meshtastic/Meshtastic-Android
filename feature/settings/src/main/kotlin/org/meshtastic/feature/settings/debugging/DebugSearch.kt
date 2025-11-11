@@ -46,18 +46,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.debug_default_search
+import org.meshtastic.core.strings.debug_logs_export
+import org.meshtastic.core.strings.debug_search_clear
+import org.meshtastic.core.strings.debug_search_next
+import org.meshtastic.core.strings.debug_search_prev
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchMatch
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 internal fun DebugSearchNavigation(

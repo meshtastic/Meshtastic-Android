@@ -22,7 +22,6 @@
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
 
-    <string name="app_name" translatable="false">Meshtastic</string>
     <string name="some_username" translatable="false">SKH</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 

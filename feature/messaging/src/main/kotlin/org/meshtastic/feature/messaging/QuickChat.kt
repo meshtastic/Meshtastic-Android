@@ -64,20 +64,31 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.QuickChatAction
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.message
+import org.meshtastic.core.strings.name
+import org.meshtastic.core.strings.quick_chat
+import org.meshtastic.core.strings.quick_chat_append
+import org.meshtastic.core.strings.quick_chat_edit
+import org.meshtastic.core.strings.quick_chat_instant
+import org.meshtastic.core.strings.quick_chat_new
+import org.meshtastic.core.strings.save
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.strings.R as Res
 
 @Composable
 fun QuickChatScreen(

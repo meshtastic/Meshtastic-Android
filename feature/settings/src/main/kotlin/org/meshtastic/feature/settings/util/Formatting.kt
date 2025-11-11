@@ -18,8 +18,9 @@
 package org.meshtastic.feature.settings.util
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import org.meshtastic.core.strings.R as Res
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.unset
 
 @Composable
 fun FixedUpdateIntervals.toDisplayString(): String = if (this == FixedUpdateIntervals.UNSET) {
