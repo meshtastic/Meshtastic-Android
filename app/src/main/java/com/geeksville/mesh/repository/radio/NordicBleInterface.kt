@@ -20,6 +20,7 @@ package com.geeksville.mesh.repository.radio
 import android.annotation.SuppressLint
 import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_FROMNUM_CHARACTER
 import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_FROMRADIO_CHARACTER
+import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_LOGRADIO_CHARACTER
 import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_SERVICE_UUID
 import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_TORADIO_CHARACTER
 import com.geeksville.mesh.service.RadioNotConnectedException
@@ -32,7 +33,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -80,6 +80,7 @@ constructor(
     private var toRadioCharacteristic: RemoteCharacteristic? = null
     private var fromNumCharacteristic: RemoteCharacteristic? = null
     private var fromRadioCharacteristic: RemoteCharacteristic? = null
+    private var logRadioCharacteristic: RemoteCharacteristic? = null
 
     init {
         connect()
@@ -210,6 +211,8 @@ constructor(
                             meshtasticService.characteristics.find { it.uuid == BTM_FROMNUM_CHARACTER.toKotlinUuid() }
                         fromRadioCharacteristic =
                             meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIO_CHARACTER.toKotlinUuid() }
+                        logRadioCharacteristic =
+                            meshtasticService.characteristics.find { it.uuid == BTM_LOGRADIO_CHARACTER.toKotlinUuid() }
 
                         if (
                             listOf(toRadioCharacteristic, fromNumCharacteristic, fromRadioCharacteristic).all {
@@ -244,6 +247,16 @@ constructor(
             }
             ?.catch { e -> Timber.e(e, "Error in subscribe flow for fromNumCharacteristic") }
             ?.onCompletion { cause -> Timber.d("fromNum subscribe flow completed, cause=$cause") }
+            ?.launchIn(scope = connectionScope)
+
+        logRadioCharacteristic
+            ?.subscribe()
+            ?.onEach { notifyBytes ->
+                logLogRadioNotification(notifyBytes)
+                dispatchPacket(notifyBytes, "log-radio")
+            }
+            ?.catch { e -> Timber.e(e, "Error in subscribe flow for logRadioCharacteristic") }
+            ?.onCompletion { cause -> Timber.d("logRadio subscribe flow completed, cause=$cause") }
             ?.launchIn(scope = connectionScope)
     }
 
@@ -292,6 +305,9 @@ constructor(
         Timber.d(
             "fromRadioCharacteristic discovered (packet queue): uuid=${fromRadioCharacteristic?.uuid} instanceId=${fromRadioCharacteristic?.instanceId}",
         )
+        Timber.d(
+            "logRadioCharacteristic discovered: uuid=${logRadioCharacteristic?.uuid} instanceId=${logRadioCharacteristic?.instanceId}",
+        )
     }
 
     private fun logPacketRead(source: String, packet: ByteArray) {
@@ -303,8 +319,11 @@ constructor(
     }
 
     private fun logFromNumNotification(notifyBytes: ByteArray) {
-        val hexString = notifyBytes.joinToString(prefix = "[", postfix = "]") { b -> String.format("0x%02x", b) }
-        Timber.d("FROMNUM notify, ${notifyBytes.size} bytes: $hexString - reading packet queue")
+        Timber.d("FROMNUM notify, ${notifyBytes.size} reading packet queue")
+    }
+
+    private fun logLogRadioNotification(notifyBytes: ByteArray) {
+        Timber.d("LOGRADIO notify, ${notifyBytes.size} bytes: reading packet queue")
     }
 }
 
@@ -313,4 +332,5 @@ object BleUuidConstants {
     val BTM_TORADIO_CHARACTER: UUID = UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
     val BTM_FROMNUM_CHARACTER: UUID = UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
     val BTM_FROMRADIO_CHARACTER: UUID = UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
+    val BTM_LOGRADIO_CHARACTER: UUID = UUID.fromString("5a3d6e49-06e6-4423-9944-e9de8cdf9547")
 }

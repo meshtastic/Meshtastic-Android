@@ -221,15 +221,6 @@ constructor(
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     fun handleFromRadio(p: ByteArray) {
-        Timber.d(
-            "RadioInterfaceService.handleFromRadio called with ${p.size} bytes: ${p.joinToString(
-                prefix = "[",
-                postfix = "]",
-            ) { b ->
-                String.format("0x%02x", b)
-            }}",
-        )
-
         if (logReceives) {
             try {
                 receivedPacketsLog.write(p)
@@ -248,7 +239,6 @@ constructor(
         try {
             processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
             emitReceiveActivity()
-            Timber.d("RadioInterfaceService.handleFromRadio dispatched successfully")
         } catch (t: Throwable) {
             Timber.e(t, "RadioInterfaceService.handleFromRadio failed while emitting data")
         }

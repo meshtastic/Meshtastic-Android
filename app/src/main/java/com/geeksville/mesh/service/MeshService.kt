@@ -220,7 +220,7 @@ class MeshService : Service() {
         private const val DEFAULT_CONFIG_ONLY_NONCE = 69420
         private const val DEFAULT_NODE_INFO_NONCE = 69421
 
-        private const val WANT_CONFIG_DELAY = 50L
+        private const val WANT_CONFIG_DELAY = 100L
     }
 
     private val serviceJob = Job()
@@ -1355,54 +1355,93 @@ class MeshService : Service() {
 
     private val packetHandlers: Map<PayloadVariantCase, ((MeshProtos.FromRadio) -> Unit)> by lazy {
         PayloadVariantCase.entries.associateWith { variant: PayloadVariantCase ->
-            Timber.d("PacketHandler - handling $variant")
             when (variant) {
-                PayloadVariantCase.PACKET -> { proto: MeshProtos.FromRadio -> handleReceivedMeshPacket(proto.packet) }
+                PayloadVariantCase.PACKET -> { proto: MeshProtos.FromRadio ->
+                    handleReceivedMeshPacket(proto.packet)
+                    Timber.d("Received variant Packet: ${proto.packet.toOneLineString()}")
+                }
 
                 PayloadVariantCase.CONFIG_COMPLETE_ID -> { proto: MeshProtos.FromRadio ->
                     handleConfigComplete(proto.configCompleteId)
+                    Timber.d("Received variant ConfigCompleteId: ${proto.configCompleteId.toOneLineString()}")
                 }
 
-                PayloadVariantCase.MY_INFO -> { proto: MeshProtos.FromRadio -> handleMyInfo(proto.myInfo) }
-                PayloadVariantCase.NODE_INFO -> { proto: MeshProtos.FromRadio -> handleNodeInfo(proto.nodeInfo) }
+                PayloadVariantCase.MY_INFO -> { proto: MeshProtos.FromRadio ->
+                    handleMyInfo(proto.myInfo)
+                    Timber.d("Received variant MyInfo: ${proto.myInfo.toOneLineString()}")
+                }
 
-                PayloadVariantCase.CHANNEL -> { proto: MeshProtos.FromRadio -> handleChannel(proto.channel) }
-                PayloadVariantCase.CONFIG -> { proto: MeshProtos.FromRadio -> handleDeviceConfig(proto.config) }
+                PayloadVariantCase.NODE_INFO -> { proto: MeshProtos.FromRadio ->
+                    handleNodeInfo(proto.nodeInfo)
+                    Timber.d("Received variant NodeInfo: ${proto.nodeInfo.toOneLineString()}")
+                }
+
+                PayloadVariantCase.CHANNEL -> { proto: MeshProtos.FromRadio ->
+                    handleChannel(proto.channel)
+                    Timber.d("Received variant Channel: ${proto.channel.toOneLineString()}")
+                }
+
+                PayloadVariantCase.CONFIG -> { proto: MeshProtos.FromRadio ->
+                    handleDeviceConfig(proto.config)
+                    Timber.d("Received variant Config: ${proto.config.toOneLineString()}")
+                }
 
                 PayloadVariantCase.MODULECONFIG -> { proto: MeshProtos.FromRadio ->
                     handleModuleConfig(proto.moduleConfig)
+                    Timber.d("Received variant ModuleConfig: ${proto.moduleConfig.toOneLineString()}")
                 }
 
                 PayloadVariantCase.QUEUESTATUS -> { proto: MeshProtos.FromRadio ->
                     packetHandler.handleQueueStatus((proto.queueStatus))
+                    Timber.d("Received variant QueueStatus: ${proto.queueStatus.toOneLineString()}")
                 }
 
-                PayloadVariantCase.METADATA -> { proto: MeshProtos.FromRadio -> handleMetadata(proto.metadata) }
+                PayloadVariantCase.METADATA -> { proto: MeshProtos.FromRadio ->
+                    handleMetadata(proto.metadata)
+                    Timber.d("Received variant Metadata: ${proto.metadata.toOneLineString()}")
+                }
+
                 PayloadVariantCase.MQTTCLIENTPROXYMESSAGE -> { proto: MeshProtos.FromRadio ->
                     handleMqttProxyMessage(proto.mqttClientProxyMessage)
+                    Timber.d(
+                        "Received variant MqttClientProxyMessage: ${proto.mqttClientProxyMessage.toOneLineString()}",
+                    )
                 }
 
                 PayloadVariantCase.DEVICEUICONFIG -> { proto: MeshProtos.FromRadio ->
                     handleDeviceUiConfig(proto.deviceuiConfig)
+                    Timber.d("Received variant DeviceUiConfig: ${proto.deviceuiConfig.toOneLineString()}")
                 }
 
-                PayloadVariantCase.FILEINFO -> { proto: MeshProtos.FromRadio -> handleFileInfo(proto.fileInfo) }
+                PayloadVariantCase.FILEINFO -> { proto: MeshProtos.FromRadio ->
+                    handleFileInfo(proto.fileInfo)
+                    Timber.d("Received variant FileInfo: ${proto.fileInfo.toOneLineString()}")
+                }
+
                 PayloadVariantCase.CLIENTNOTIFICATION -> { proto: MeshProtos.FromRadio ->
                     handleClientNotification(proto.clientNotification)
+                    Timber.d("Received variant ClientNotification: ${proto.clientNotification.toOneLineString()}")
                 }
 
-                PayloadVariantCase.LOG_RECORD -> { proto: MeshProtos.FromRadio -> handleLogReord(proto.logRecord) }
+                PayloadVariantCase.LOG_RECORD -> { proto: MeshProtos.FromRadio ->
+                    handleLogRecord(proto.logRecord)
+                    Timber.d("Received variant LogRecord: ${proto.logRecord.toOneLineString()}")
+                }
 
-                PayloadVariantCase.REBOOTED -> { proto: MeshProtos.FromRadio -> handleRebooted(proto.rebooted) }
+                PayloadVariantCase.REBOOTED -> { proto: MeshProtos.FromRadio ->
+                    handleRebooted(proto.rebooted)
+                    Timber.d("Received variant Rebooted: ${proto.rebooted.toOneLineString()}")
+                }
+
                 PayloadVariantCase.XMODEMPACKET -> { proto: MeshProtos.FromRadio ->
                     handleXmodemPacket(proto.xmodemPacket)
+                    Timber.d("Received variant XmodemPacket: ${proto.xmodemPacket.toOneLineString()}")
                 }
 
                 // Explicitly handle default/unwanted cases to satisfy the exhaustive `when`
                 PayloadVariantCase.PAYLOADVARIANT_NOT_SET -> { proto ->
                     Timber.e("Unexpected or unrecognized FromRadio variant: ${proto.payloadVariantCase}")
-                    // Additional debug: log raw bytes if possible (can't access bytes here) and full proto
-                    Timber.d("Full FromRadio proto: $proto")
+                    Timber.d("Full FromRadio proto: ${proto.toOneLineString()}")
                 }
             }
         }
@@ -1412,21 +1451,43 @@ class MeshService : Service() {
         packetHandlers[this.payloadVariantCase]?.invoke(this)
     }
 
+    /**
+     * Parses and routes incoming data from the radio.
+     *
+     * This function first attempts to parse the data as a `FromRadio` protobuf message. If that fails, it then tries to
+     * parse it as a `LogRecord` for debugging purposes.
+     */
     private fun onReceiveFromRadio(bytes: ByteArray) {
-        try {
-            val proto = MeshProtos.FromRadio.parseFrom(bytes)
-            if (proto.payloadVariantCase == PayloadVariantCase.PAYLOADVARIANT_NOT_SET) {
-                Timber.w(
-                    "Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=${bytes.joinToString(",") { b ->
-                        String.format("0x%02x", b)
-                    }} proto=$proto",
-                )
+        runCatching { MeshProtos.FromRadio.parseFrom(bytes) }
+            .onSuccess { proto ->
+                when (proto.payloadVariantCase) {
+                    PayloadVariantCase.PAYLOADVARIANT_NOT_SET -> {
+                        Timber.w(
+                            "Received FromRadio with no payload set. proto=$proto, rawBytes=${bytes.toHexString()}",
+                        )
+                    }
+
+                    else -> {
+                        proto.route()
+                    }
+                }
             }
-            proto.route()
-        } catch (ex: InvalidProtocolBufferException) {
-            Timber.e("Invalid Protobuf from radio, len=${bytes.size}", ex)
-        }
+            .onFailure { primaryException ->
+                runCatching {
+                    val logRecord = MeshProtos.LogRecord.parseFrom(bytes)
+                    handleLogRecord(logRecord)
+                }
+                    .onFailure { _ ->
+                        Timber.e(
+                            primaryException,
+                            "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord.",
+                        )
+                    }
+            }
     }
+
+    /** Extension function to convert a ByteArray to a hex string for logging. Example output: "0x0a,0x1f,0x..." */
+    private fun ByteArray.toHexString(): String = this.joinToString(",") { byte -> String.format("0x%02x", byte) }
 
     // A provisional MyNodeInfo that we will install if all of our node config downloads go okay
     private var newMyNodeInfo: MyNodeEntity? = null
@@ -1676,7 +1737,7 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
     }
 
-    private fun handleLogReord(logRecord: MeshProtos.LogRecord) {
+    private fun handleLogRecord(logRecord: MeshProtos.LogRecord) {
         Timber.d("Received logRecord ${logRecord.toOneLineString()}")
         val packetToSave =
             MeshLog(
