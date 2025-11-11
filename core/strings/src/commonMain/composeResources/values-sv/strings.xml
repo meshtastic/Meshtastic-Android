@@ -59,7 +59,6 @@
     <string name="role_client_desc">App uppkopplad eller fristående nod.</string>
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Nod som inte vidarebefordrar meddelanden.</string>
-    <string name="role_router">Router</string>
     <string name="role_router_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden. Syns i nod listan.</string>
     <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Kombinerad ROUTER och CLIENT. Ej för mobila noder.</string>
@@ -81,7 +80,6 @@
     <string name="role_router_late_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden men endast efter alla noder. Syns i nod listan.</string>
     <string name="rebroadcast_mode_all">Alla</string>
     <string name="rebroadcast_mode_all_desc">Vidarebefordra alla mottagna meddelanden med samma lora inställningar.</string>
-    <string name="rebroadcast_mode_all_skip_decoding">All Skip Decoding</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Vidarebefordra alla mottagna meddelanden med samma lora inställningar utan avkodning. Endast valbar som REPEATER. Om vald med annan roll används ALL.</string>
     <string name="rebroadcast_mode_local_only">Endast lokalt</string>
     <string name="rebroadcast_mode_local_only_desc">Ignorerar mottagna meddelanden från okända kanaler som är öppna eller krypterade. Vidarebefordrar endast meddelanden för nodens primära och sekundära kanaler.</string>
@@ -89,7 +87,6 @@
     <string name="rebroadcast_mode_known_only_desc">Ignorerar mottagna meddelanden från okända meshnätverk som är öppna eller krypterade samt från noder som inte finns i nod listan. Vidarebefordrar endast meddelanden för kända kanaler.</string>
     <string name="rebroadcast_mode_none">Ingen</string>
     <string name="rebroadcast_mode_none_desc">Endast för SENSOR, TRACKER och TAK_TRACKER. Stoppar all annan vidarebefordran av meddelanden.</string>
-    <string name="rebroadcast_mode_core_portnums_only">Core Portnums Only</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignorerar meddelanden från icke-standard portnummer. Exempelvis: TAK, RangeTest, PaxCounters, etc. Vidarebefordrar endast standard portnummer. Exempelvis: NodeInfo, Text, Position, Telemetri och Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Dubbelklick på supporterad accelerometer räknas som användarknapp.</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">Skicka en position på den primära kanalen när användarknappen är trippelklickad.</string>
@@ -109,7 +106,6 @@
     <string name="config_lora_region_summary">Regionen där du kommer att använda din radio.</string>
     <string name="config_lora_modem_preset_summary">Tillgängliga modemförinställningar, standard är Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Sätter det maximala antalet hopp, standard är 3. Ökat antal hopp ökar också trängseln och bör användas med försiktighet. 0 hopp sända meddelanden kommer inte att få ACKs.</string>
-    <string name="config_lora_frequency_slot_summary">Your node’s operating frequency is calculated based on the region, modem preset, and this field. When 0, the slot is automatically calculated based on the primary channel name and will change from the default public slot. Change back to the public default slot if private primary and public secondary channels are configured.</string>
     <string name="label_very_long_slow">Mycket lång räckvidd - långsamt</string>
     <string name="label_long_fast">Lång räckvidd - snabbt</string>
     <string name="label_long_moderate">Lång räckvidd - måttligt</string>
@@ -461,19 +457,9 @@
     <string name="blue">Blått</string>
     <string name="canned_message_config">Inställningar för fördefinierade meddelanden</string>
     <string name="canned_message_enabled">Fördefinierade meddelanden är aktiverat</string>
-    <string name="rotary_encoder_1_enabled">Rotary encoder #1 enabled</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">GPIO pin for rotary encoder A port</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">GPIO pin for rotary encoder B port</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">GPIO pin for rotary encoder Press port</string>
-    <string name="generate_input_event_on_press">Generate input event on Press</string>
-    <string name="generate_input_event_on_cw">Generate input event on CW</string>
-    <string name="generate_input_event_on_ccw">Generate input event on CCW</string>
-    <string name="up_down_select_input_enabled">Up/Down/Select input enabled</string>
     <string name="allow_input_source">Tillåt indatakälla</string>
     <string name="send_bell">Skicka ljudavisering</string>
     <string name="messages">Meddelanden</string>
-    <string name="device_db_cache_limit">Device DB cache limit</string>
-    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Inställningar för detekteringssensor</string>
     <string name="detection_sensor_enabled">Detektionssensor aktiverad</string>
     <string name="minimum_broadcast_seconds">Minsta sändningsintervall (sekunder)</string>
@@ -481,7 +467,6 @@
     <string name="send_bell_with_alert_message">Skicka ljudavisering med larmmeddelande</string>
     <string name="friendly_name">Visningsnamn</string>
     <string name="gpio_pin_to_monitor">GPIO-pin att övervaka</string>
-    <string name="detection_trigger_type">Detection trigger type</string>
     <string name="use_input_pullup_mode">Använd INPUT_PULLUP-läge</string>
     <string name="device_config">Enhet</string>
     <string name="role">Enhetens roll</string>
@@ -490,12 +475,10 @@
     <string name="rebroadcast_mode">Återutsändningsläge</string>
     <string name="nodeinfo_broadcast_interval">Sändningsintervall för nod-info</string>
     <string name="double_tap_as_button_press">Dubbeltryck som knapptryck</string>
-    <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
     <string name="time_zone">Tidszon</string>
     <string name="led_heartbeat">LED pulsering</string>
     <string name="display_config">Display</string>
     <string name="screen_on_for">Håll skärmen tänd</string>
-    <string name="carousel_interval">Carousel interval</string>
     <string name="compass_north_top">Kompassens norrläge uppåt</string>
     <string name="flip_screen">Vänd skärmen</string>
     <string name="display_units">Visa enheter</string>
@@ -542,7 +525,6 @@
     <string name="ignore_incoming">Ignorera inkommande</string>
     <string name="sx126x_rx_boosted_gain">RX förstärkt gain</string>
     <string name="override_frequency_mhz">Åsidosätt </string>
-    <string name="pa_fan_disabled">PA fan disabled</string>
     <string name="ignore_mqtt">Ignorera MQTT</string>
     <string name="ok_to_mqtt">Ok till MQTT</string>
     <string name="mqtt_config">MQTT-konfiguration</string>
@@ -554,9 +536,6 @@
     <string name="json_output_enabled">JSON-utdata aktiverad</string>
     <string name="tls_enabled">TLS är aktiverat</string>
     <string name="root_topic">Rotämne (root topic)</string>
-    <string name="proxy_to_client_enabled">Proxy to client enabled</string>
-    <string name="map_reporting">Map reporting</string>
-    <string name="map_reporting_interval_seconds">Map reporting interval (seconds)</string>
     <string name="neighbor_info_config">Konfiguration av grannskapsinformation</string>
     <string name="neighbor_info_enabled">Grannskapsinformation aktiverat</string>
     <string name="update_interval_seconds">Uppdateringsintervall (sekunder)</string>
@@ -577,8 +556,6 @@
     <string name="subnet">Subnät</string>
     <string name="paxcounter_config">Konfiguration av PAX-räknare</string>
     <string name="paxcounter_enabled">PAX-räknare aktiverad</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI threshold (defaults to -80)</string>
-    <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI threshold (defaults to -80)</string>
     <string name="position_config">Plats</string>
     <string name="position_broadcast_interval_seconds">Sändningsintervall av position (sekunder)</string>
     <string name="smart_position_enabled">Smart position aktiverad</string>
@@ -598,13 +575,9 @@
     <string name="power_config">Ströminställningar</string>
     <string name="enable_power_saving_mode">Aktivera strömsparläge</string>
     <string name="shutdown_on_power_loss">Stäng av vid strömförlust</string>
-    <string name="shutdown_on_battery_delay_seconds">Shutdown on battery delay (seconds)</string>
-    <string name="adc_multiplier_override">ADC multiplier override</string>
-    <string name="adc_multiplier_override_ratio">ADC multiplier override ratio</string>
     <string name="wait_for_bluetooth_duration_seconds">Vänta in Bluetooth (sekunder)</string>
     <string name="super_deep_sleep_duration_seconds">Tid för djup strömsparläge</string>
     <string name="light_sleep_duration_seconds">Tid för lätt strömsparläge</string>
-    <string name="minimum_wake_time_seconds">Minimum wake time</string>
     <string name="battery_ina_2xx_i2c_address">Batteriets INA_2XX I2C-adress</string>
     <string name="range_test_config">Räckvidstest konfiguration</string>
     <string name="range_test_enabled">Räckvidstest aktiverat</string>
@@ -612,7 +585,6 @@
     <string name="save_csv_in_storage_esp32_only">Spara .CSV i enheten (endast ESP32)</string>
     <string name="remote_hardware_config">Konfiguration av fjärrhårdvara</string>
     <string name="remote_hardware_enabled">Fjärrhårdvara aktiverad</string>
-    <string name="allow_undefined_pin_access">Allow undefined pin access</string>
     <string name="available_pins">Tillgängliga pin</string>
     <string name="security_config">Säkerhet</string>
     <string name="direct_message_key">Knapp för direktmeddelanden</string>
@@ -622,7 +594,6 @@
     <string name="admin_key">Admin-nyckel</string>
     <string name="managed_mode">Hanterat läge</string>
     <string name="serial_console">Seriell konsol</string>
-    <string name="debug_log_api_enabled">Debug log API enabled</string>
     <string name="legacy_admin_channel">Äldre typ av adminkanal</string>
     <string name="serial_config">Seriell konfiguration</string>
     <string name="serial_enabled">Seriell aktiverad</string>
@@ -630,7 +601,6 @@
     <string name="serial_baud_rate">Den seriella kommunikationens hastighet</string>
     <string name="timeout">Timeout</string>
     <string name="serial_mode">Seriellt läge</string>
-    <string name="override_console_serial_port">Override console serial port</string>
     <string name="store_forward_enabled"><![CDATA[Lagra & vidarebefordra är aktiverad]]></string>
     <string name="heartbeat">Pulsera</string>
     <string name="number_of_records">Antal poster</string>
@@ -886,7 +856,6 @@
     <string name="location_sharing">Positionsdelning</string>
     <string name="periodic_position_broadcast">Periodisk positionssändning</string>
     <string name="uplink_feature_description">Meddelanden från mesh-nätet kommer att skickas till internet via vilken nod som helst som är konfigurerad som gateway.</string>
-    <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="icon_meanings">Ikonbetydelser</string>
     <string name="secondary_channel_position_feature">Inaktivering av position på den primära kanalen tillåter periodiska positionsuppdateringar på den första sekundära kanalen med positionen aktiverad, annars krävs manuell positionsbegäran.</string>
     <string name="device_configuration">Konfiguration av enhet</string>
@@ -908,5 +877,4 @@
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
     <string name="relayed_by">Vidaresänt av: %s</string>
-    <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
