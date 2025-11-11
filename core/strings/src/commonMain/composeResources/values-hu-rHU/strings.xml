@@ -905,4 +905,5 @@
     <string name="for_more_information_see_our_privacy_policy">További információért lásd az adatvédelmi irányelveinket.</string>
     <string name="unset">Nincs beállítva – 0</string>
     <string name="relayed_by">Relayed by: %s</string>
+    <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
