@@ -175,7 +175,7 @@ android-lint = { id = "com.android.lint", version.ref = "agp" }
 
 # Jetbrains
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-compose-multiplatform = { id = "org.jetbrains.compose", version = "1.9.1" }
+compose-multiplatform = { id = "org.jetbrains.compose", version = "1.9.3" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
