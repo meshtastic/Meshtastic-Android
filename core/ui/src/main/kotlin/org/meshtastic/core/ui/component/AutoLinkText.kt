@@ -37,6 +37,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.text.util.LinkifyCompat
 import org.meshtastic.core.ui.theme.HyperlinkBlue
+import java.util.regex.Pattern
 
 private val DefaultTextLinkStyles =
     TextLinkStyles(style = SpanStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline))
@@ -55,26 +56,41 @@ fun AutoLinkText(
 
 private fun linkify(text: String) = Factory.getInstance().newSpannable(text).also {
     LinkifyCompat.addLinks(it, Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS)
+    // Add geo: URI pattern for location links with optional label in parentheses
+    val geoPattern = Pattern.compile("geo:[-+]?\\d*\\.?\\d+,[-+]?\\d*\\.?\\d+(?:\\([^)]*\\))?")
+    Linkify.addLinks(it, geoPattern, "geo:")
 }
 
 private fun Spannable.toAnnotatedString(linkStyles: TextLinkStyles): AnnotatedString = buildAnnotatedString {
     val spannable = this@toAnnotatedString
     var lastEnd = 0
-    spannable.getSpans(0, spannable.length, Any::class.java).forEach { span ->
-        val start = spannable.getSpanStart(span)
-        val end = spannable.getSpanEnd(span)
-        append(spannable.subSequence(lastEnd, start))
-        when (span) {
-            is URLSpan ->
-                withLink(LinkAnnotation.Url(url = span.url, styles = linkStyles)) {
-                    append(spannable.subSequence(start, end))
-                }
 
-            else -> append(spannable.subSequence(start, end))
+    // Get only URLSpan objects and sort them by start position
+    val urlSpans =
+        spannable
+            .getSpans(0, spannable.length, URLSpan::class.java)
+            .map { span -> Triple(span, spannable.getSpanStart(span), spannable.getSpanEnd(span)) }
+            .sortedBy { it.second }
+
+    urlSpans.forEach { (span, start, end) ->
+        // Skip overlapping spans
+        if (start < lastEnd) return@forEach
+
+        // Append text before the link
+        if (start > lastEnd) {
+            append(spannable.subSequence(lastEnd, start))
         }
+
+        // Append the link
+        withLink(LinkAnnotation.Url(url = span.url, styles = linkStyles)) { append(spannable.subSequence(start, end)) }
+
         lastEnd = end
     }
-    append(spannable.subSequence(lastEnd, spannable.length))
+
+    // Append remaining text
+    if (lastEnd < spannable.length) {
+        append(spannable.subSequence(lastEnd, spannable.length))
+    }
 }
 
 @Preview(showBackground = true)

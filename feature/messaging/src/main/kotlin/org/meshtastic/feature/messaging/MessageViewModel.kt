@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.DEFAULT_MAP_URL
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.QuickChatActionRepository
@@ -50,6 +51,7 @@ import javax.inject.Inject
 private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
 
 @HiltViewModel
+@Suppress("LongParameterList")
 class MessageViewModel
 @Inject
 constructor(
@@ -60,7 +62,6 @@ constructor(
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
-    buildConfigProvider: org.meshtastic.core.common.BuildConfigProvider,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
@@ -83,28 +84,16 @@ constructor(
             val actions = quickChatActionRepository.getAllActions()
             var isEmpty = true
             actions.collect { list ->
-                if (isEmpty) {
-                    // Find existing location pin action (position 0)
-                    val existingLocationPin = list.find { it.position == 0 && it.name == "📍" }
-
-                    if (existingLocationPin == null && list.isEmpty()) {
-                        // No actions exist, create default location pin
-                        quickChatActionRepository.upsert(
-                            org.meshtastic.core.database.entity.QuickChatAction(
-                                name = "📍",
-                                message = buildConfigProvider.defaultMapUrl,
-                                mode = org.meshtastic.core.database.entity.QuickChatAction.Mode.Append,
-                                position = 0,
-                            ),
-                        )
-                    } else if (
-                        existingLocationPin != null && existingLocationPin.message != buildConfigProvider.defaultMapUrl
-                    ) {
-                        // Update existing location pin with correct URL for current build variant
-                        quickChatActionRepository.upsert(
-                            existingLocationPin.copy(message = buildConfigProvider.defaultMapUrl),
-                        )
-                    }
+                if (isEmpty && list.isEmpty()) {
+                    // No actions exist, create default location pin with label
+                    quickChatActionRepository.upsert(
+                        org.meshtastic.core.database.entity.QuickChatAction(
+                            name = "📍",
+                            message = DEFAULT_MAP_URL,
+                            mode = org.meshtastic.core.database.entity.QuickChatAction.Mode.Append,
+                            position = 0,
+                        ),
+                    )
                 }
                 isEmpty = false
             }

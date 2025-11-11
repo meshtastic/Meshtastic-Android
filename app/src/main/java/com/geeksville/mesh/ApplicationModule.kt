@@ -51,7 +51,6 @@ interface ApplicationModule {
             override val versionName: String = BuildConfig.VERSION_NAME
             override val absoluteMinFwVersion: String = BuildConfig.ABS_MIN_FW_VERSION
             override val minFwVersion: String = BuildConfig.MIN_FW_VERSION
-            override val defaultMapUrl: String = BuildConfig.DEFAULT_MAP_URL
         }
     }
 }
