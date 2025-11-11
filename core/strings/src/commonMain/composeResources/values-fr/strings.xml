@@ -95,7 +95,6 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Envoyer une position sur le canal principal lorsque le bouton utilisateur est triple-cliqué.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Contrôle la LED clignotante sur l\'appareil. Pour la plupart des appareils cela contrôlera une des 4 LED, celles du chargeur et du GPS ne sont pas contrôlables.</string>
     <string name="config_device_tzdef_summary">Fuseau horaire pour les dates sur l\'écran de l\'appareil et les logs.</string>
-    <string name="config_device_use_phone_tz">Use phone time zone</string>
     <string name="config_device_transmitOverLora_summary">Que ce soit en plus de l\'envoyer à MQTT et à PhoneAPI, notre NeighborInfo devrait être transmis par LoRa. Non disponible sur un canal avec la clé et le nom par défaut.</string>
     <string name="config_display_screen_on_secs_summary">Combien de temps l\'écran reste allumé après que le bouton utilisateur soit appuyé ou que les messages soient reçus.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Bascule automatiquement sur la page suivante de l\'écran comme un carrousel, en fonction de l\'intervalle spécifié.</string>
@@ -180,9 +179,6 @@
     <string name="ip_port">Port :</string>
     <string name="connected">Connecté</string>
     <string name="connected_to">Connecté à la radio (%s)</string>
-    <string name="connection_status">Current connections:</string>
-    <string name="wifi_ip">Wifi IP:</string>
-    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="not_connected">Non connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="app_too_old">Mise à jour de l’application requise</string>
@@ -313,11 +309,6 @@
     <string name="mute_8_hours">8 heures</string>
     <string name="mute_1_week">1 semaine</string>
     <string name="mute_always">Toujours</string>
-    <string name="currently">Currently:</string>
-    <string name="mute_status_always">Always muted</string>
-    <string name="mute_status_unmuted">Not muted</string>
-    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
-    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
     <string name="replace">Remplacer</string>
     <string name="wifi_qr_code_scan">Scanner le code QR WiFi</string>
     <string name="wifi_qr_code_error">Format du code QR d\'identification WiFi invalide</string>
@@ -336,7 +327,6 @@
     <string name="ch_util_definition">Utilisation pour le canal actuel, y compris TX bien formé, RX et RX mal formé (AKA bruit).</string>
     <string name="air_util_definition">Pourcentage de temps d\'antenne pour la transmission utilisée au cours de la dernière heure.</string>
     <string name="iaq">IAQ</string>
-    <string name="show_all_key_title">Encryption Key Meanings</string>
     <string name="encryption_psk">Clé partagée</string>
     <string name="encryption_psk_text">Seuls les messages vers les canaux peuvent être senvoyés/reçus. Les messages directs nécessitent la fonctionnalité d\'infrastructure de clé publique disponible dans le firmware 2.5+.</string>
     <string name="encryption_pkc">Chiffrement de clé publique</string>
@@ -472,8 +462,6 @@
     <string name="allow_input_source">Autoriser la source d\'entrée</string>
     <string name="send_bell">Envoyer une sonnerie</string>
     <string name="messages">Messages</string>
-    <string name="device_db_cache_limit">Device DB cache limit</string>
-    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">Configuration du capteur de détection</string>
     <string name="detection_sensor_enabled">Capteur de détection activé</string>
     <string name="minimum_broadcast_seconds">Diffusion minimale (secondes)</string>
@@ -601,10 +589,6 @@
     <string name="shutdown_on_battery_delay_seconds">Délai d’extinction sur batterie (secondes)</string>
     <string name="adc_multiplier_override">Remplacer le multiplicateur ADC</string>
     <string name="adc_multiplier_override_ratio">Facteur de remplacement du multiplicateur ADC</string>
-    <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration</string>
-    <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
-    <string name="light_sleep_duration_seconds">Light sleep duration</string>
-    <string name="minimum_wake_time_seconds">Minimum wake time</string>
     <string name="battery_ina_2xx_i2c_address">Adresse I2C de la batterie INA_2XX</string>
     <string name="range_test_config">Configuration des tests de portée</string>
     <string name="range_test_enabled">Test de portée activé</string>
@@ -638,16 +622,12 @@
     <string name="history_return_window">Fenêtre de retour d’historique</string>
     <string name="server">Serveur</string>
     <string name="telemetry_config">Configuration de la Télémétrie</string>
-    <string name="device_metrics_update_interval_seconds">Device metrics update interval</string>
-    <string name="environment_metrics_update_interval_seconds">Environment metrics update interval</string>
     <string name="environment_metrics_module_enabled">Module de métriques de l\'environnement activé</string>
     <string name="environment_metrics_on_screen_enabled">Mesures d\'environnement à l\'écran activées</string>
     <string name="environment_metrics_use_fahrenheit">Les mesures environnementales utilisent Fahrenheit</string>
     <string name="air_quality_metrics_module_enabled">Module de mesure de la qualité de l\'air activé</string>
-    <string name="air_quality_metrics_update_interval_seconds">Air quality metrics update interval</string>
     <string name="air_quality_icon">Icône de la qualité de l\'air</string>
     <string name="power_metrics_module_enabled">Module de mesure de puissance activé</string>
-    <string name="power_metrics_update_interval_seconds">Power metrics update interval</string>
     <string name="power_metrics_on_screen_enabled">Indicateurs d\'alimentation à l\'écran activés</string>
     <string name="user_config">Configuration de l\'utilisateur</string>
     <string name="node_id">Identifiant (ID) du nœud</string>
@@ -903,7 +883,4 @@
     <string name="analytics_notice">Les statistiques sont collectées pour nous aider à améliorer l\'application Android (merci), nous recevrons des informations anonymes sur le comportement de l\'utilisateur. Cela inclut les rapports de plantage, les écrans utilisés dans l\'application, etc.</string>
     <string name="analytics_platforms">"Plateformes d'analyse : "</string>
     <string name="for_more_information_see_our_privacy_policy">Pour plus d\'informations, consultez notre politique de confidentialité.</string>
-    <string name="unset">Unset - 0</string>
-    <string name="relayed_by">Relayed by: %s</string>
-    <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
