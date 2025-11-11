@@ -60,5 +60,3 @@ class DatabaseManagerLegacyCleanupTest {
         assertFalse("Legacy DB should be deleted after switch", legacyFile.exists())
     }
 }
-
-
