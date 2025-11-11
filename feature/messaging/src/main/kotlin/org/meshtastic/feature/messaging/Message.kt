@@ -300,6 +300,7 @@ fun MessageScreen(
                 QuickChatRow(
                     enabled = connectionState.isConnected(),
                     actions = quickChatActions,
+                    userPosition = ourNode?.validPosition,
                     onClick = { action ->
                         handleQuickChatAction(
                             action = action,
@@ -700,6 +701,7 @@ private fun OverFlowMenu(
  *
  * @param enabled Whether the buttons should be enabled.
  * @param actions The list of [QuickChatAction]s to display.
+ * @param userPosition Current user position, used to determine if location-based actions can be enabled.
  * @param onClick Callback when a quick chat button is clicked.
  */
 @Composable
@@ -707,6 +709,7 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
+    userPosition: MeshProtos.Position?,
     onClick: (QuickChatAction) -> Unit,
 ) {
     val alertActionMessage = stringResource(R.string.alert_bell_text)
@@ -725,7 +728,10 @@ private fun QuickChatRow(
 
     LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         items(allActions, key = { it.position }) { action ->
-            Button(onClick = { onClick(action) }, enabled = enabled) { Text(text = action.name) }
+            val requiresPosition =
+                action.message.contains("%LAT", ignoreCase = true) || action.message.contains("%LON", ignoreCase = true)
+            val isEnabled = enabled && (!requiresPosition || userPosition != null)
+            Button(onClick = { onClick(action) }, enabled = isEnabled) { Text(text = action.name) }
         }
     }
 }
