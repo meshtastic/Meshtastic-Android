@@ -137,7 +137,7 @@ constructor(
         withContext(dispatchers.io) { nodeInfoWriteDataSource.installConfig(mi, nodes) }
 
     suspend fun clearNodeDB(preserveFavorites: Boolean = false) =
-        withContext(dispatchers.io) {nodeInfoWriteDataSource.clearNodeDB(preserveFavorites) }
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.clearNodeDB(preserveFavorites) }
 
     suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
         nodeInfoWriteDataSource.deleteNode(num)
