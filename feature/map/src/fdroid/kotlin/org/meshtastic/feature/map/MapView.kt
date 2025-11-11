@@ -24,10 +24,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.LocationDisabled
@@ -36,12 +41,16 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,7 +74,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.io.File
+import java.text.DateFormat
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
@@ -105,6 +117,7 @@ import org.meshtastic.core.strings.show_waypoints
 import org.meshtastic.core.strings.toggle_my_position
 import org.meshtastic.core.strings.waypoint_delete
 import org.meshtastic.core.strings.you
+import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
@@ -136,8 +149,6 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import timber.log.Timber
-import java.io.File
-import java.text.DateFormat
 
 @Composable
 private fun MapView.UpdateMarkers(
@@ -220,7 +231,7 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
                     com.meshtastic.core.strings.getString(Res.string.map_purge_success, item.source.toString())
                 } else {
                     com.meshtastic.core.strings.getString(Res.string.map_purge_fail)
-                },
+                }
             )
         }
     }
@@ -254,6 +265,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
+    var showCacheManagerDialog by remember { mutableStateOf(false) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
@@ -409,14 +421,12 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
             }
         }
         val dialog = builder.show()
-        for (
-        button in
-        setOf(
-            androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
-            androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
-            androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE,
-        )
-        ) {
+        for (button in
+            setOf(
+                androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
+                androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
+                androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE,
+            )) {
             with(dialog.getButton(button)) {
                 textSize = 12F
                 isAllCaps = false
@@ -436,11 +446,12 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         }
     }
 
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
-        com.meshtastic.core.strings.getString(Res.string.you)
-    } else {
-        mapViewModel.getUser(id).longName
-    }
+    fun getUsername(id: String?) =
+        if (id == DataPacket.ID_LOCAL) {
+            com.meshtastic.core.strings.getString(Res.string.you)
+        } else {
+            mapViewModel.getUser(id).longName
+        }
 
     @Composable
     @Suppress("MagicNumber")
@@ -630,35 +641,12 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         dialog.show()
     }
 
-    fun Context.showCacheManagerDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle(com.meshtastic.core.strings.getString(Res.string.map_offline_manager))
-            .setItems(
-                arrayOf<CharSequence>(
-                    com.meshtastic.core.strings.getString(Res.string.map_cache_size),
-                    com.meshtastic.core.strings.getString(Res.string.map_download_region),
-                    com.meshtastic.core.strings.getString(Res.string.map_clear_tiles),
-                    com.meshtastic.core.strings.getString(Res.string.cancel),
-                ),
-            ) { dialog, which ->
-                when (which) {
-                    0 -> showCurrentCacheInfo = true
-                    1 -> {
-                        map.generateBoxOverlay()
-                        dialog.dismiss()
-                    }
-
-                    2 -> purgeTileSource { scope.launch { context.showToast(it) } }
-                    else -> dialog.dismiss()
-                }
-            }
-            .show()
-    }
-
     Scaffold(
         floatingActionButton = {
-            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { context.showCacheManagerDialog() }
-        },
+            DownloadButton(true /*showDownloadButton && downloadRegionBoundingBox == null*/) {
+                showCacheManagerDialog = true
+            }
+        }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             AndroidView(
@@ -783,11 +771,11 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                     if (hasGps) {
                         MapButton(
                             icon =
-                            if (myLocationOverlay == null) {
-                                Icons.Outlined.MyLocation
-                            } else {
-                                Icons.Default.LocationDisabled
-                            },
+                                if (myLocationOverlay == null) {
+                                    Icons.Outlined.MyLocation
+                                } else {
+                                    Icons.Default.LocationDisabled
+                                },
                             contentDescription = stringResource(Res.string.toggle_my_position),
                         ) {
                             if (locationPermissionsState.allPermissionsGranted) {
@@ -803,6 +791,22 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         }
     }
 
+    if (showCacheManagerDialog) {
+        CacheManagerDialog(
+            onClickOption = { option ->
+                when (option) {
+                    CacheManagerOption.CurrentCacheSize -> showCurrentCacheInfo = true
+                    CacheManagerOption.DownloadRegion -> map.generateBoxOverlay()
+
+                    CacheManagerOption.ClearTiles -> {} // purgeTileSource { scope.launch { context.showToast(it) } }
+                    CacheManagerOption.Cancel -> Unit
+                }
+                showCacheManagerDialog = false
+            },
+            onDismiss = { showCacheManagerDialog = false },
+        )
+    }
+
     if (showEditWaypointDialog != null) {
         EditWaypointDialog(
             waypoint = showEditWaypointDialog ?: return, // Safe call
@@ -816,7 +820,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                         if (expire == 0) expire = Int.MAX_VALUE
                         lockedTo = if (waypoint.lockedTo != 0) mapViewModel.myNodeNum ?: 0 else 0
                         if (waypoint.icon == 0) icon = 128205
-                    },
+                    }
                 )
             },
             onDeleteClicked = { waypoint ->
@@ -829,5 +833,47 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 showEditWaypointDialog = null
             },
         )
+    }
+}
+
+private enum class CacheManagerOption(val label: StringResource) {
+    CurrentCacheSize(label = Res.string.map_cache_size),
+    DownloadRegion(label = Res.string.map_download_region),
+    ClearTiles(label = Res.string.map_clear_tiles),
+    Cancel(label = Res.string.cancel),
+}
+
+@Composable
+private fun CacheManagerDialog(onClickOption: (CacheManagerOption) -> Unit, onDismiss: () -> Unit) {
+    MapsDialog(title = stringResource(Res.string.map_offline_manager), onDismiss = onDismiss) {
+        CacheManagerOption.entries.forEach { option ->
+            ListItem(text = stringResource(option.label), trailingIcon = null) {
+                onClickOption(option)
+                onDismiss()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MapsDialog(title: String, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.wrapContentWidth().wrapContentHeight(),
+            shape = MaterialTheme.shapes.large,
+            color = AlertDialogDefaults.containerColor,
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+        ) {
+            Column {
+                Text(
+                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) { content() }
+            }
+        }
     }
 }
