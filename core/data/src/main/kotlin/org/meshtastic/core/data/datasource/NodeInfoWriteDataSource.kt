@@ -26,7 +26,7 @@ interface NodeInfoWriteDataSource {
 
     suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>)
 
-    suspend fun clearNodeDB()
+    suspend fun clearNodeDB(preserveFavorites: Boolean)
 
     suspend fun deleteNode(num: Int)
 

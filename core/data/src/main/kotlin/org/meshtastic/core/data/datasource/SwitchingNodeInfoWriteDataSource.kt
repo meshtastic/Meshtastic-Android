@@ -40,8 +40,8 @@ constructor(
     override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) =
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().installConfig(mi, nodes) } }
 
-    override suspend fun clearNodeDB() =
-        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearNodeInfo() } }
+    override suspend fun clearNodeDB(preserveFavorites: Boolean) =
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearNodeInfo(preserveFavorites) } }
 
     override suspend fun deleteNode(num: Int) =
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteNode(num) } }

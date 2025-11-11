@@ -63,6 +63,7 @@ import org.meshtastic.core.strings.import_configuration
 import org.meshtastic.core.strings.message_device_managed
 import org.meshtastic.core.strings.module_settings
 import org.meshtastic.core.strings.nodedb_reset
+import org.meshtastic.core.strings.preserve_favorites
 import org.meshtastic.core.strings.radio_configuration
 import org.meshtastic.core.strings.reboot
 import org.meshtastic.core.strings.shutdown
