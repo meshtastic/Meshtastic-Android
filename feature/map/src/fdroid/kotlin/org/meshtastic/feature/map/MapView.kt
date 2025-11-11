@@ -18,7 +18,6 @@
 package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
-import android.content.Context
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -587,7 +586,11 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         dialog.show()
     }
 
-    Scaffold(floatingActionButton = { DownloadButton(true /*showDownloadButton && downloadRegionBoundingBox == null*/) { showCacheManagerDialog = true } }) { innerPadding ->
+    Scaffold(
+        floatingActionButton = {
+            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog = true }
+        },
+    ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             AndroidView(
                 factory = {
@@ -754,7 +757,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         CacheInfoDialog(mapView = map, onDismiss = { showCurrentCacheInfo = false })
     }
 
-    if(showPurgeTileSourceDialog) {
+    if (showPurgeTileSourceDialog) {
         PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
     }
 
@@ -838,59 +841,54 @@ private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
     val cache = SqlTileWriterExt()
 
-    val sourceList by derivedStateOf {
-        cache.sources.map {
-            it.source as String
-        }
-    }
+    val sourceList by derivedStateOf { cache.sources.map { it.source as String } }
 
     val selected = remember { mutableStateListOf<Int>() }
 
     MapsDialog(
         title = stringResource(Res.string.map_tile_source),
         positiveButton = {
-            TextButton(enabled = selected.isNotEmpty(), onClick = {
-                selected.forEach { selectedIndex ->
-                    val source = sourceList[selectedIndex]
-                    scope.launch {
-                        context.showToast(
-                            if(cache.purgeCache(source)) {
-                                getString(Res.string.map_purge_success, source)
-                            } else {
-                                getString(Res.string.map_purge_fail)
-                            }
-                        )
+            TextButton(
+                enabled = selected.isNotEmpty(),
+                onClick = {
+                    selected.forEach { selectedIndex ->
+                        val source = sourceList[selectedIndex]
+                        scope.launch {
+                            context.showToast(
+                                if (cache.purgeCache(source)) {
+                                    getString(Res.string.map_purge_success, source)
+                                } else {
+                                    getString(Res.string.map_purge_fail)
+                                },
+                            )
+                        }
                     }
-                }
 
-                onDismiss()
-            }) {
+                    onDismiss()
+                },
+            ) {
                 Text(text = stringResource(Res.string.clear))
             }
         },
-        negativeButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(Res.string.cancel))
-            }
-        },
-        onDismiss = onDismiss) {
-       sourceList.forEachIndexed { index, source ->
-           val isSelected = selected.contains(index)
-           BasicListItem(text = source,
-               trailingContent = {
-                   Checkbox(checked = isSelected, onCheckedChange = {})
-               }, onClick = {
-                   if(isSelected) {
-                       selected.remove(index)
-                   } else {
-                       selected.add(index)
-                   }
-               }) {
-           }
-       }
+        negativeButton = { TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.cancel)) } },
+        onDismiss = onDismiss,
+    ) {
+        sourceList.forEachIndexed { index, source ->
+            val isSelected = selected.contains(index)
+            BasicListItem(
+                text = source,
+                trailingContent = { Checkbox(checked = isSelected, onCheckedChange = {}) },
+                onClick = {
+                    if (isSelected) {
+                        selected.remove(index)
+                    } else {
+                        selected.add(index)
+                    }
+                },
+            ) {}
+        }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
