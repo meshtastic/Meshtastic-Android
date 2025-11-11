@@ -53,7 +53,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -488,13 +487,12 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
 
 @Composable
 private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    val resources = LocalResources.current
     val themeMap = remember {
         mapOf(
-            resources.getString(Res.string.dynamic) to MODE_DYNAMIC,
-            resources.getString(Res.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-            resources.getString(Res.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-            resources.getString(Res.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            getString(Res.string.dynamic) to MODE_DYNAMIC,
+            getString(Res.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            getString(Res.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            getString(Res.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
         )
             .mapValues { (_, value) -> { onClickTheme(value) } }
     }

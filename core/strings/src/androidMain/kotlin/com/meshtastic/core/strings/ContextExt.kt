@@ -17,23 +17,13 @@
 
 package com.meshtastic.core.strings
 
-import android.content.Context
-import android.content.res.Resources
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 
-fun Context.getString(stringResource: StringResource): String = runBlocking {
+fun getString(stringResource: StringResource): String = runBlocking {
     org.jetbrains.compose.resources.getString(stringResource)
 }
 
-fun Context.getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
-    org.jetbrains.compose.resources.getString(stringResource, *formatArgs)
-}
-
-fun Resources.getString(stringResource: StringResource): String = runBlocking {
-    org.jetbrains.compose.resources.getString(stringResource)
-}
-
-fun Resources.getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
+fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
     org.jetbrains.compose.resources.getString(stringResource, *formatArgs)
 }

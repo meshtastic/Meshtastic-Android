@@ -65,7 +65,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -197,7 +196,7 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
 private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     val cache = SqlTileWriterExt()
     val builder = MaterialAlertDialogBuilder(this)
-    builder.setTitle(getString(Res.string.map_tile_source))
+    builder.setTitle(com.meshtastic.core.strings.getString(Res.string.map_tile_source))
     val sources = cache.sources
     val sourceList = mutableListOf<String>()
     for (i in sources.indices) {
@@ -212,20 +211,20 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
             selectedList.remove(i)
         }
     }
-    builder.setPositiveButton(getString(Res.string.clear)) { _, _ ->
+    builder.setPositiveButton(com.meshtastic.core.strings.getString(Res.string.clear)) { _, _ ->
         for (x in selectedList) {
             val item = sources[x]
             val b = cache.purgeCache(item.source)
             onResult(
                 if (b) {
-                    getString(Res.string.map_purge_success, item.source.toString())
+                    com.meshtastic.core.strings.getString(Res.string.map_purge_success, item.source.toString())
                 } else {
-                    getString(Res.string.map_purge_fail)
+                    com.meshtastic.core.strings.getString(Res.string.map_purge_fail)
                 },
             )
         }
     }
-    builder.setNegativeButton(getString(Res.string.cancel)) { dialog, _ -> dialog.cancel() }
+    builder.setNegativeButton(com.meshtastic.core.strings.getString(Res.string.cancel)) { dialog, _ -> dialog.cancel() }
     builder.show()
 }
 
@@ -360,7 +359,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 id = u.id
                 title = u.longName
                 snippet =
-                    resources.getString(
+                    com.meshtastic.core.strings.getString(
                         Res.string.map_node_popup_details,
                         node.gpsString(),
                         formatAgo(node.lastHeard),
@@ -369,7 +368,11 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                     )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
                     subDescription =
-                        resources.getString(Res.string.map_subDescription, ourNode.bearing(node).toString(), dist)
+                        com.meshtastic.core.strings.getString(
+                            Res.string.map_subDescription,
+                            ourNode.bearing(node).toString(),
+                            dist,
+                        )
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
@@ -390,16 +393,16 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle(resources.getString(Res.string.waypoint_delete))
-        builder.setNeutralButton(resources.getString(Res.string.cancel)) { _, _ ->
+        builder.setTitle(com.meshtastic.core.strings.getString(Res.string.waypoint_delete))
+        builder.setNeutralButton(com.meshtastic.core.strings.getString(Res.string.cancel)) { _, _ ->
             Timber.d("User canceled marker delete dialog")
         }
-        builder.setNegativeButton(resources.getString(Res.string.delete_for_me)) { _, _ ->
+        builder.setNegativeButton(com.meshtastic.core.strings.getString(Res.string.delete_for_me)) { _, _ ->
             Timber.d("User deleted waypoint ${waypoint.id} for me")
             mapViewModel.deleteWaypoint(waypoint.id)
         }
         if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
-            builder.setPositiveButton(resources.getString(Res.string.delete_for_everyone)) { _, _ ->
+            builder.setPositiveButton(com.meshtastic.core.strings.getString(Res.string.delete_for_everyone)) { _, _ ->
                 Timber.d("User deleted waypoint ${waypoint.id} for everyone")
                 mapViewModel.sendWaypoint(waypoint.copy { expire = 1 })
                 mapViewModel.deleteWaypoint(waypoint.id)
@@ -434,7 +437,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     }
 
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
-        resources.getString(Res.string.you)
+        com.meshtastic.core.strings.getString(Res.string.you)
     } else {
         mapViewModel.getUser(id).longName
     }
@@ -500,9 +503,9 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
             )
 
         MaterialAlertDialogBuilder(context)
-            .setTitle(resources.getString(Res.string.map_cache_manager))
+            .setTitle(getString(Res.string.map_cache_manager))
             .setMessage(mapCacheInfoText)
-            .setPositiveButton(resources.getString(Res.string.close)) { dialog, _ ->
+            .setPositiveButton(getString(Res.string.close)) { dialog, _ ->
                 showCurrentCacheInfo = false
                 dialog.dismiss()
             }
@@ -564,7 +567,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         val tileCount: Int =
             CacheManager(this)
                 .possibleTilesInArea(downloadRegionBoundingBox, zoomLevelMin.toInt(), zoomLevelMax.toInt())
-        cacheEstimate = resources.getString(Res.string.map_cache_tiles, tileCount)
+        cacheEstimate = com.meshtastic.core.strings.getString(Res.string.map_cache_tiles, tileCount)
     }
 
     val boxOverlayListener =
@@ -629,13 +632,13 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun Context.showCacheManagerDialog() {
         MaterialAlertDialogBuilder(this)
-            .setTitle(resources.getString(Res.string.map_offline_manager))
+            .setTitle(com.meshtastic.core.strings.getString(Res.string.map_offline_manager))
             .setItems(
                 arrayOf<CharSequence>(
-                    getString(Res.string.map_cache_size),
-                    getString(Res.string.map_download_region),
-                    getString(Res.string.map_clear_tiles),
-                    getString(Res.string.cancel),
+                    com.meshtastic.core.strings.getString(Res.string.map_cache_size),
+                    com.meshtastic.core.strings.getString(Res.string.map_download_region),
+                    com.meshtastic.core.strings.getString(Res.string.map_clear_tiles),
+                    com.meshtastic.core.strings.getString(Res.string.cancel),
                 ),
             ) { dialog, which ->
                 when (which) {
