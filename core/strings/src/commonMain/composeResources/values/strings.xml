@@ -198,14 +198,14 @@
     <string name="pairing_failed_try_again">Pairing failed, please select again</string>
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
     <string name="share">Share</string>
-    <string name="new_node_seen">New Node Seen: %s</string>
+    <string name="new_node_seen">New Node Seen: %1$s</string>
     <string name="disconnected">Disconnected</string>
     <string name="device_sleeping">Device sleeping</string>
     <string name="connected_count">Connected: %1$s online</string>
     <string name="ip_address">IP Address:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Connected</string>
-    <string name="connected_to">Connected to radio (%s)</string>
+    <string name="connected_to">Connected to radio (%1$s)</string>
     <string name="connection_status">Current connections:</string>
     <string name="wifi_ip">Wifi IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
@@ -263,7 +263,7 @@
     <string name="provide_location_to_mesh">Provide phone location to mesh</string>
     <plurals name="delete_messages">
         <item quantity="one">Delete message?</item>
-        <item quantity="other">Delete %s messages?</item>
+        <item quantity="other">Delete %1$s messages?</item>
     </plurals>
     <string name="delete">Delete</string>
     <string name="delete_for_everyone">Delete for everyone</string>
@@ -304,8 +304,8 @@
     <string name="error">Error</string>
     <string name="ignore">Ignore</string>
     <string name="remove_ignored">Remove from ignored</string>
-    <string name="ignore_add">Add \'%s\' to ignore list?</string>
-    <string name="ignore_remove">Remove \'%s\' from ignore list?</string>
+    <string name="ignore_add">Add \'%1$s\' to ignore list?</string>
+    <string name="ignore_remove">Remove \'%1$s\' from ignore list?</string>
     <string name="map_select_download_region">Select download region</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
     <string name="map_start_download">Start Download</string>
@@ -318,10 +318,10 @@
     <string name="calculating">Calculating…</string>
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_cache_size">Current Cache size</string>
-    <string name="map_cache_info">Cache Capacity: %1$.2f MB\nCache Usage: %2$.2f MB</string>
+    <string name="map_cache_info">Cache Capacity: %1$d MB\nCache Usage: %2$d MB</string>
     <string name="map_clear_tiles">Clear Downloaded Tiles</string>
     <string name="map_tile_source">Tile Source</string>
-    <string name="map_purge_success">SQL Cache purged for %s</string>
+    <string name="map_purge_success">SQL Cache purged for %1$s</string>
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
     <string name="map_cache_manager">Cache Manager</string>
     <string name="map_download_complete">Download complete!</string>
@@ -331,7 +331,7 @@
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_new">New waypoint</string>
-    <string name="waypoint_received">Received waypoint: %s</string>
+    <string name="waypoint_received">Received waypoint: %1$s</string>
     <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
     <string name="remove">Remove</string>
     <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
@@ -412,8 +412,8 @@
     <string name="favorite">Favorite</string>
     <string name="add_favorite">Add to favorites</string>
     <string name="remove_favorite">Remove from favorites</string>
-    <string name="favorite_add">Add \'%s\' as a favorite node?</string>
-    <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
+    <string name="favorite_add">Add \'%1$s\' as a favorite node?</string>
+    <string name="favorite_remove">Remove \'%1$s\' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics Log</string>
     <string name="channel_1">Channel 1</string>
     <string name="channel_2">Channel 2</string>
@@ -425,7 +425,7 @@
     <string name="i_know_what_i_m_doing">I know what I\'m doing.</string>
     <string name="low_battery_message">Node %1$s has a low battery (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
-    <string name="low_battery_title">Low battery: %s</string>
+    <string name="low_battery_title">Low battery: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
     <string name="baro_pressure">Barometric Pressure</string>
     <string name="udp_enabled">Enabled</string>
@@ -935,7 +935,7 @@
     <string name="eight_hours">8 Hours</string>
     <string name="one_day">24 Hours</string>
     <string name="two_days">48 Hours</string>
-    <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
+    <string name="last_heard_filter_label">Filter by Last Heard time: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">No application available to handle link.</string>
     <string name="system_settings">System Settings</string>
@@ -949,6 +949,6 @@
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
     <string name="unset">Unset - 0</string>
-    <string name="relayed_by">Relayed by: %s</string>
+    <string name="relayed_by">Relayed by: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
