@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY and FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
@@ -133,7 +134,7 @@ constructor(
     // --- Connection & Discovery Logic ---
 
     private suspend fun findPeripheral(): Peripheral =
-        centralManager.scan(5.seconds).mapNotNull { it.peripheral }.firstOrNull { it.address == address }
+        centralManager.getBondedPeripherals().firstOrNull { it.address == address }
             ?: throw RadioNotConnectedException("Device not found at address $address")
 
     private fun connect() {
@@ -221,6 +222,10 @@ constructor(
                             setupNotifications()
                             service.onConnect()
                         }
+                        else {
+                            Timber.w("One or more characteristics not found on peripheral $address")
+                            service.onDisconnect(false)
+                        }
                     } else {
                         Timber.w("Meshtastic service not found on peripheral $address")
                         service.onDisconnect(false)
@@ -270,7 +275,7 @@ constructor(
 
     /** Closes the connection to the device. */
     override fun close() {
-        serviceScope.launch {
+        runBlocking {
             connectionScope.cancel()
             peripheral?.disconnect()
             service.onDisconnect(true)
