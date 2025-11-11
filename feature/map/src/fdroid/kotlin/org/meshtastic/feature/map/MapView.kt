@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Checkbox
@@ -236,6 +237,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     var showCacheManagerDialog by remember { mutableStateOf(false) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showPurgeTileSourceDialog by remember { mutableStateOf(false) }
+    var showMapStyleDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -571,21 +573,6 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         }
     }
 
-    fun showMapStyleDialog() {
-        val builder = MaterialAlertDialogBuilder(context)
-        val mapStyles: Array<CharSequence> = CustomTileSource.mTileSources.values.toTypedArray()
-
-        val mapStyleInt = mapViewModel.mapStyleId
-        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
-            Timber.d("Set mapStyleId pref to $which")
-            mapViewModel.mapStyleId = which
-            dialog.dismiss()
-            map.setTileSource(loadOnlineTileSourceBase())
-        }
-        val dialog = builder.create()
-        dialog.show()
-    }
-
     Scaffold(
         floatingActionButton = {
             DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog = true }
@@ -619,7 +606,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     MapButton(
-                        onClick = ::showMapStyleDialog,
+                        onClick = { showMapStyleDialog = true },
                         icon = Icons.Outlined.Layers,
                         contentDescription = Res.string.map_style_selection,
                     )
@@ -734,6 +721,17 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         }
     }
 
+    if (showMapStyleDialog) {
+        MapStyleDialog(
+            selectedMapStyle = mapViewModel.mapStyleId,
+            onDismiss = { showMapStyleDialog = false },
+            onSelectMapStyle = {
+                mapViewModel.mapStyleId = it
+                map.setTileSource(loadOnlineTileSourceBase())
+            },
+        )
+    }
+
     if (showCacheManagerDialog) {
         CacheManagerDialog(
             onClickOption = { option ->
@@ -787,6 +785,25 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 showEditWaypointDialog = null
             },
         )
+    }
+}
+
+@Composable
+private fun MapStyleDialog(selectedMapStyle: Int, onDismiss: () -> Unit, onSelectMapStyle: (Int) -> Unit) {
+    val selected = remember { mutableStateOf(selectedMapStyle) }
+
+    MapsDialog(onDismiss = onDismiss) {
+        CustomTileSource.mTileSources.values.forEachIndexed { index, style ->
+            ListItem(
+                text = style,
+                trailingIcon = if (index == selected.value) Icons.Rounded.Check else null,
+                onClick = {
+                    selected.value = index
+                    onSelectMapStyle(index)
+                    onDismiss()
+                },
+            )
+        }
     }
 }
 
@@ -893,7 +910,7 @@ private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MapsDialog(
-    title: String,
+    title: String? = null,
     onDismiss: () -> Unit,
     positiveButton: (@Composable () -> Unit)? = null,
     negativeButton: (@Composable () -> Unit)? = null,
@@ -907,11 +924,13 @@ private fun MapsDialog(
             tonalElevation = AlertDialogDefaults.TonalElevation,
         ) {
             Column {
-                Text(
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                )
+                title?.let {
+                    Text(
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
+                        text = it,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
 
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) { content() }
                 if (positiveButton != null || negativeButton != null) {
