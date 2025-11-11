@@ -237,6 +237,7 @@ fun SettingsScreen(
                 state = state,
                 isManaged = localConfig.security.isManaged,
                 excludedModulesUnlocked = excludedModulesUnlocked,
+                onPreserveFavoritesToggle = { viewModel.setPreserveFavorites(it) },
                 onRouteClick = { route ->
                     isWaiting = true
                     viewModel.setResponseStateLoading(route)

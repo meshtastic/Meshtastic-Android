@@ -100,6 +100,7 @@ data class RadioConfigState(
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = false,
+    val nodeDbResetPreserveFavorites: Boolean = false,
 )
 
 @Suppress("LongParameterList")
@@ -134,6 +135,10 @@ constructor(
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
+
+    fun setPreserveFavorites(preserveFavorites: Boolean) {
+        viewModelScope.launch { _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) } }
+    }
 
     private val _currentDeviceProfile = MutableStateFlow(deviceProfile {})
     val currentDeviceProfile
@@ -365,20 +370,22 @@ constructor(
         }
     }
 
-    private fun requestNodedbReset(destNum: Int) {
+    private fun requestNodedbReset(destNum: Int, preserveFavorites: Boolean) {
         request(
             destNum,
-            { service, packetId, dest -> service.requestNodedbReset(packetId, dest) },
+            { service, packetId, dest -> service.requestNodedbReset(packetId, dest, preserveFavorites) },
             "Request NodeDB reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { nodeRepository.clearNodeDB() }
+            viewModelScope.launch { nodeRepository.clearNodeDB(preserveFavorites) }
         }
     }
 
     private fun sendAdminRequest(destNum: Int) {
         val route = radioConfigState.value.route
         _radioConfigState.update { it.copy(route = "") } // setter (response is PortNum.ROUTING_APP)
+
+        val preserveFavorites = radioConfigState.value.nodeDbResetPreserveFavorites
 
         when (route) {
             AdminRoute.REBOOT.name -> requestReboot(destNum)
@@ -392,7 +399,7 @@ constructor(
                 }
 
             AdminRoute.FACTORY_RESET.name -> requestFactoryReset(destNum)
-            AdminRoute.NODEDB_RESET.name -> requestNodedbReset(destNum)
+            AdminRoute.NODEDB_RESET.name -> requestNodedbReset(destNum, preserveFavorites)
         }
     }
 
@@ -535,6 +542,7 @@ constructor(
                 connected = it.connected,
                 route = route.name,
                 metadata = it.metadata,
+                nodeDbResetPreserveFavorites = it.nodeDbResetPreserveFavorites,
                 responseState = ResponseState.Loading(),
             )
         }
