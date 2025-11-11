@@ -57,6 +57,10 @@ constructor(
     private val connectionStateHolder: MeshServiceConnectionStateHolder,
 ) {
 
+    companion object {
+        private const val TIMEOUT_MS = 250L
+    }
+
     private var queueJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -138,7 +142,7 @@ constructor(
                         // send packet to the radio and wait for response
                         val response = sendPacket(packet)
                         Timber.d("queueJob packet id=${packet.id.toUInt()} waiting")
-                        val success = response.get(2, TimeUnit.MINUTES)
+                        val success = response.get(TIMEOUT_MS, TimeUnit.MILLISECONDS)
                         Timber.d("queueJob packet id=${packet.id.toUInt()} success $success")
                     } catch (e: TimeoutException) {
                         Timber.d("queueJob packet id=${packet.id.toUInt()} timeout")
