@@ -30,6 +30,8 @@ import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -42,7 +44,13 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,9 +67,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.database.DatabaseConstants
@@ -259,7 +267,6 @@ fun SettingsScreen(
                 onNavigate = onNavigate,
             )
 
-            val scope = rememberCoroutineScope()
             val context = LocalContext.current
 
             TitledCard(title = stringResource(Res.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
@@ -485,22 +492,37 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
     )
 }
 
+private enum class ThemeOption(val label: StringResource, val mode: Int) {
+    DYNAMIC(label = Res.string.dynamic, mode = MODE_DYNAMIC),
+    LIGHT(label = Res.string.theme_light, mode = AppCompatDelegate.MODE_NIGHT_NO),
+    DARK(label = Res.string.theme_dark, mode = AppCompatDelegate.MODE_NIGHT_YES),
+    SYSTEM(label = Res.string.theme_system, mode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    val themeMap = remember {
-        mapOf(
-            getString(Res.string.dynamic) to MODE_DYNAMIC,
-            getString(Res.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-            getString(Res.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-            getString(Res.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-        )
-            .mapValues { (_, value) -> { onClickTheme(value) } }
-    }
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.wrapContentWidth().wrapContentHeight(),
+            shape = MaterialTheme.shapes.large,
+            color = AlertDialogDefaults.containerColor,
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+        ) {
+            Column {
+                Text(
+                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
+                    text = stringResource(Res.string.choose_theme),
+                    style = MaterialTheme.typography.titleLarge,
+                )
 
-    MultipleChoiceAlertDialog(
-        title = stringResource(Res.string.choose_theme),
-        message = "",
-        choices = themeMap,
-        onDismissRequest = onDismiss,
-    )
+                ThemeOption.entries.forEach { option ->
+                    ListItem(text = stringResource(option.label), trailingIcon = null) {
+                        onClickTheme(option.mode)
+                        onDismiss()
+                    }
+                }
+            }
+        }
+    }
 }
