@@ -908,4 +908,5 @@
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <string name="unset">Ei asetettu – 0</string>
     <string name="relayed_by">Välittänyt: %s</string>
+    <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
