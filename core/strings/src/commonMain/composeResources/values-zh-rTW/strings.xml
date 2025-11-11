@@ -906,4 +906,5 @@
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%s</string>
+    <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
