@@ -470,8 +470,6 @@
     <string name="allow_input_source">允許外部輸入</string>
     <string name="send_bell">發送振鈴</string>
     <string name="messages">訊息</string>
-    <string name="device_db_cache_limit">Device DB cache limit</string>
-    <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
     <string name="detection_sensor_config">偵測感測器設定</string>
     <string name="detection_sensor_enabled">啟用偵測感測器</string>
     <string name="minimum_broadcast_seconds">最短廣播間隔 (秒)</string>
@@ -906,5 +904,4 @@
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%s</string>
-    <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
