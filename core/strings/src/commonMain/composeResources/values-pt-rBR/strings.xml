@@ -895,9 +895,9 @@
     <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
     <string name="any">Any</string>
     <string name="one_hour">1 Hour</string>
-    <string name="eight_hours">8 Hours</string>
-    <string name="one_day">24 Hours</string>
-    <string name="two_days">48 Hours</string>
+    <string name="eight_hours">8 Horas</string>
+    <string name="one_day">24 Horas</string>
+    <string name="two_days">48 Horas</string>
     <string name="last_heard_filter_label">Filter by Last Heard time: %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">No application available to handle link.</string>
@@ -908,4 +908,5 @@
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <string name="unset">Unset - 0</string>
     <string name="relayed_by">Relayed by: %s</string>
+    <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
