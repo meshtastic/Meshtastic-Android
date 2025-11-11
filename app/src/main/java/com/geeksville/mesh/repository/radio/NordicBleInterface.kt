@@ -31,6 +31,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
@@ -38,6 +39,8 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
@@ -71,6 +74,7 @@ constructor(
 ) : IRadioInterface {
 
     private val connectionScope = CoroutineScope(serviceScope.coroutineContext + SupervisorJob())
+    private val drainMutex = Mutex()
 
     private var peripheral: Peripheral? = null
 
@@ -107,21 +111,23 @@ constructor(
         }
     }
 
-    private fun drainPacketQueueAndDispatch(source: String) {
-        var drainedCount = 0
-        packetQueueFlow()
-            .onEach { packet ->
-                drainedCount++
-                logPacketRead(source, packet)
-                dispatchPacket(packet, source)
-            }
-            .catch { ex -> Timber.w(ex, "Exception while draining packet queue (source=$source)") }
-            .onCompletion {
-                if (drainedCount > 0) {
-                    Timber.d("[$source] Drained $drainedCount packets from packet queue")
+    private suspend fun drainPacketQueueAndDispatch(source: String) {
+        drainMutex.withLock {
+            var drainedCount = 0
+            packetQueueFlow()
+                .onEach { packet ->
+                    drainedCount++
+                    logPacketRead(source, packet)
+                    dispatchPacket(packet, source)
                 }
-            }
-            .launchIn(connectionScope)
+                .catch { ex -> Timber.w(ex, "Exception while draining packet queue (source=$source)") }
+                .onCompletion {
+                    if (drainedCount > 0) {
+                        Timber.d("[$source] Drained $drainedCount packets from packet queue")
+                    }
+                }
+                .collect()
+        }
     }
 
     // --- Connection & Discovery Logic ---
@@ -232,7 +238,7 @@ constructor(
             ?.subscribe()
             ?.onEach { notifyBytes ->
                 logFromNumNotification(notifyBytes)
-                drainPacketQueueAndDispatch("notify")
+                connectionScope.launch { drainPacketQueueAndDispatch("notify") }
             }
             ?.catch { e -> Timber.e(e, "Error in subscribe flow for fromNumCharacteristic") }
             ?.onCompletion { cause -> Timber.d("fromNum subscribe flow completed, cause=$cause") }
@@ -254,7 +260,7 @@ constructor(
                 try {
                     characteristic.write(p, writeType = WriteType.WITHOUT_RESPONSE)
                     // Post-write action initiation
-                    connectionScope.launch { drainPacketQueueAndDispatch("post-write") }
+                    drainPacketQueueAndDispatch("post-write")
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to write packet to $address")
                 }
@@ -265,8 +271,8 @@ constructor(
     /** Closes the connection to the device. */
     override fun close() {
         serviceScope.launch {
-            peripheral?.disconnect()
             connectionScope.cancel()
+            peripheral?.disconnect()
         }
     }
 
