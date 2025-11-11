@@ -908,4 +908,5 @@
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="relayed_by">Weitergeleitet von: %s</string>
+    <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
