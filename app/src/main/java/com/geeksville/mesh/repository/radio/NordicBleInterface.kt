@@ -273,6 +273,7 @@ constructor(
         serviceScope.launch {
             connectionScope.cancel()
             peripheral?.disconnect()
+            service.onDisconnect(true)
         }
     }
 
