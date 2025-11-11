@@ -23,7 +23,7 @@
     <string name="zh_TW" translatable="false">繁體中文</string>
 
     <string name="some_username" translatable="false">SKH</string>
-    <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
+    <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I'm kinda scared.</string>
 
     <string name="default_mqtt_address" translatable="false">mqtt.meshtastic.org</string>
 
@@ -99,7 +99,7 @@
     <string name="rebroadcast_mode_local_only">Local Only</string>
     <string name="rebroadcast_mode_local_only_desc">Ignores observed messages from foreign meshes that are open or those which it cannot decrypt. Only rebroadcasts message on the nodes local primary / secondary channels.</string>
     <string name="rebroadcast_mode_known_only">Known Only</string>
-    <string name="rebroadcast_mode_known_only_desc">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node\'s known list.</string>
+    <string name="rebroadcast_mode_known_only_desc">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node's known list.</string>
     <string name="rebroadcast_mode_none">None</string>
     <string name="rebroadcast_mode_none_desc">Only permitted for SENSOR, TRACKER and TAK_TRACKER roles, this will inhibit all rebroadcasts, not unlike CLIENT_MUTE role.</string>
     <string name="rebroadcast_mode_core_portnums_only">Core Portnums Only</string>
@@ -147,7 +147,7 @@
     <string name="config_position_gps_update_interval_summary">How often should we try to get a GPS position (&lt;10sec keeps GPS on).</string>
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
 
-    <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
+    <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don't use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
 
     <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
     <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
@@ -181,7 +181,7 @@
     <string name="application_icon">application icon</string>
     <string name="unknown_username">Unknown Username</string>
     <string name="send">Send</string>
-    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven't yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">You</string>
     <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="accept">Accept</string>
@@ -246,7 +246,7 @@
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">You must set a region!</string>
-    <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
+    <string name="cant_change_no_radio">Couldn't change channel, because radio is not yet connected. Please try again.</string>
     <string name="save_rangetest">Export rangetest packets</string>
     <string name="export_data_csv">Export all packets</string>
     <string name="reset">Reset</string>
@@ -297,15 +297,15 @@
     <string name="bluetooth_disabled">Bluetooth is disabled. Please enable it in your device settings.</string>
     <string name="open_settings">Open settings</string>
     <string name="firmware_version">Firmware version: %1$s</string>
-    <string name="permission_missing_31">Meshtastic needs \"Nearby devices\" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
+    <string name="permission_missing_31">Meshtastic needs "Nearby devices" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
     <string name="direct_message">Direct Message</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="delivery_confirmed">Delivery confirmed</string>
     <string name="error">Error</string>
     <string name="ignore">Ignore</string>
     <string name="remove_ignored">Remove from ignored</string>
-    <string name="ignore_add">Add \'%1$s\' to ignore list?</string>
-    <string name="ignore_remove">Remove \'%1$s\' from ignore list?</string>
+    <string name="ignore_add">Add '%1$s' to ignore list?</string>
+    <string name="ignore_remove">Remove '%1$s' from ignore list?</string>
     <string name="map_select_download_region">Select download region</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
     <string name="map_start_download">Start Download</string>
@@ -412,8 +412,8 @@
     <string name="favorite">Favorite</string>
     <string name="add_favorite">Add to favorites</string>
     <string name="remove_favorite">Remove from favorites</string>
-    <string name="favorite_add">Add \'%1$s\' as a favorite node?</string>
-    <string name="favorite_remove">Remove \'%1$s\' as a favorite node?</string>
+    <string name="favorite_add">Add '%1$s' as a favorite node?</string>
+    <string name="favorite_remove">Remove '%1$s' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics Log</string>
     <string name="channel_1">Channel 1</string>
     <string name="channel_2">Channel 2</string>
@@ -422,7 +422,7 @@
     <string name="voltage">Voltage</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
-    <string name="i_know_what_i_m_doing">I know what I\'m doing.</string>
+    <string name="i_know_what_i_m_doing">I know what I'm doing.</string>
     <string name="low_battery_message">Node %1$s has a low battery (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
     <string name="low_battery_title">Low battery: %1$s</string>
@@ -866,7 +866,7 @@
     <string name="critical_alerts_description">Select packets sent as critical will ignore the mute switch and Do Not Disturb settings in the OS notification center.</string>
     <string name="configure_notification_permissions">Configure notification permissions</string>
     <string name="phone_location">Phone Location</string>
-    <string name="phone_location_description">Meshtastic uses your phone\'s location to enable a number of features. You can update your location permissions at any time from settings.</string>
+    <string name="phone_location_description">Meshtastic uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>
     <string name="share_location">Share Location</string>
     <string name="share_location_description">Use your phone GPS to send locations to your node to instead of using a hardware GPS on your node.</string>
     <string name="distance_measurements">Distance Measurements</string>
@@ -922,7 +922,7 @@
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
-    <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node\'s configured gateway.</string>
+    <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node's configured gateway.</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="icon_meanings">Icon Meanings</string>
     <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
