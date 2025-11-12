@@ -306,6 +306,7 @@ fun MessageScreen(
                             action = action,
                             messageInputState = messageInputState,
                             userPosition = ourNode?.validPosition,
+                            ourNode = ourNode,
                             onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
                         )
                     },
@@ -432,17 +433,26 @@ private fun handleQuickChatAction(
     action: QuickChatAction,
     messageInputState: TextFieldState,
     userPosition: MeshProtos.Position?,
+    ourNode: Node?,
     onSendMessage: (String) -> Unit,
 ) {
     val processedMessage =
-        if (action.message.contains("%LAT", ignoreCase = true) || action.message.contains("%LON", ignoreCase = true)) {
+        if (
+            action.message.contains("%LAT", ignoreCase = true) ||
+            action.message.contains("%LON", ignoreCase = true) ||
+            action.message.contains("%SNAME", ignoreCase = true)
+        ) {
+            var result = action.message
             userPosition?.let {
                 val latitude = "%.7f".format(it.latitudeI * 1e-7)
                 val longitude = "%.7f".format(it.longitudeI * 1e-7)
-                action.message
-                    .replace("%LAT", latitude, ignoreCase = true)
-                    .replace("%LON", longitude, ignoreCase = true)
-            } ?: action.message
+                result =
+                    result.replace("%LAT", latitude, ignoreCase = true).replace("%LON", longitude, ignoreCase = true)
+            }
+            ourNode?.user?.shortName?.let { shortName ->
+                result = result.replace("%SNAME", shortName, ignoreCase = true)
+            }
+            result
         } else {
             action.message
         }

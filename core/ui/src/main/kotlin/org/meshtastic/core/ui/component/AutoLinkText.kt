@@ -56,8 +56,8 @@ fun AutoLinkText(
 
 private fun linkify(text: String) = Factory.getInstance().newSpannable(text).also {
     LinkifyCompat.addLinks(it, Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS)
-    // Add geo: URI pattern for location links with optional label in parentheses
-    val geoPattern = Pattern.compile("geo:[-+]?\\d*\\.?\\d+,[-+]?\\d*\\.?\\d+(?:\\([^)]*\\))?")
+    // Add geo: URI pattern for location links with optional query params and label in parentheses
+    val geoPattern = Pattern.compile("geo:[-+]?\\d*\\.?\\d+,[-+]?\\d*\\.?\\d+(?:\\?[^\\s]*)?")
     Linkify.addLinks(it, geoPattern, "geo:")
 }
 
