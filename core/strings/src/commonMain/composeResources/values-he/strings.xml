@@ -81,7 +81,7 @@
         <item quantity="one">מחק הודעה?</item>
         <item quantity="two">מחק %1$s הודעות?</item>
         <item quantity="many">מחק %s הודעות?</item>
-        <item quantity="other">מחק %s הודעות?</item>
+        <item quantity="other">מחק %1$s הודעות?</item>
     </plurals>
     <string name="delete">מחק</string>
     <string name="delete_for_everyone">מחק לכולם</string>
