@@ -86,7 +86,6 @@
     <string name="disconnected">Dekonekte</string>
     <string name="device_sleeping">Aparèy ap dòmi</string>
     <string name="ip_address">Adrès IP:</string>
-    <string name="connected_to">Konekte ak radyo (%s)</string>
     <string name="not_connected">Pa konekte</string>
     <string name="connected_sleeping">Konekte ak radyo, men li ap dòmi</string>
     <string name="app_too_old">Aplikasyon twò ansyen</string>
@@ -148,8 +147,6 @@
     <string name="delivery_confirmed">Livrezon konfime</string>
     <string name="error">Erè</string>
     <string name="ignore">Ignoré</string>
-    <string name="ignore_add">Ajoute \'%s\' nan lis ignòre?</string>
-    <string name="ignore_remove">Retire \'%s\' nan lis ignòre?</string>
     <string name="map_select_download_region">Chwazi rejyon telechajman</string>
     <string name="map_tile_download_estimate">Estimasyon telechajman tèk</string>
     <string name="map_start_download">Kòmanse telechajman</string>
@@ -161,10 +158,8 @@
     <string name="calculating">Ap kalkile…</string>
     <string name="map_offline_manager">Manadjè Offline</string>
     <string name="map_cache_size">Gwosè Kach aktyèl</string>
-    <string name="map_cache_info">Kapasite Kach: %1$.2f MB\nItilizasyon Kach: %2$.2f MB</string>
     <string name="map_clear_tiles">Efase Tèk Telechaje</string>
     <string name="map_tile_source">Sous Tèk</string>
-    <string name="map_purge_success">Kach SQL efase pou %s</string>
     <string name="map_purge_fail">Echèk efase Kach SQL, tcheke logcat pou detay</string>
     <string name="map_cache_manager">Manadjè Kach</string>
     <string name="map_download_complete">Telechajman konplè!</string>
@@ -174,7 +169,6 @@
     <string name="waypoint_edit">Modifye pwen</string>
     <string name="waypoint_delete">Efase pwen?</string>
     <string name="waypoint_new">Nouvo pwen</string>
-    <string name="waypoint_received">Pwen resevwa: %s</string>
     <string name="error_duty_cycle">Limit sik devwa rive. Pa ka voye mesaj kounye a, tanpri eseye ankò pita.</string>
     <string name="remove">Retire</string>
     <string name="remove_node_text">Pwen sa a ap retire nan lis ou jiskaske nœud ou a resevwa done soti nan li ankò.</string>
