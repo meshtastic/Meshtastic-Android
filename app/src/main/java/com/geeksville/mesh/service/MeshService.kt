@@ -26,12 +26,15 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
+import android.util.Log
+import androidx.annotation.VisibleForTesting
 import androidx.core.app.ServiceCompat
 import androidx.core.location.LocationCompat
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.repository.network.MQTTRepository
+import com.geeksville.mesh.repository.radio.InterfaceId
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
@@ -50,7 +53,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.hasLocationPermission
@@ -118,6 +123,7 @@ import org.meshtastic.proto.position
 import org.meshtastic.proto.telemetry
 import org.meshtastic.proto.user
 import timber.log.Timber
+import java.util.ArrayDeque
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -220,11 +226,65 @@ class MeshService : Service() {
         private const val DEFAULT_CONFIG_ONLY_NONCE = 69420
         private const val DEFAULT_NODE_INFO_NONCE = 69421
 
-        private const val WANT_CONFIG_DELAY = 250L
+        private const val WANT_CONFIG_DELAY = 50L
+        private const val HISTORY_TAG = "HistoryReplay"
+        private const val DEFAULT_HISTORY_RETURN_WINDOW_MINUTES = 60 * 24
+        private const val DEFAULT_HISTORY_RETURN_MAX_MESSAGES = 100
+        private const val MAX_EARLY_PACKET_BUFFER = 128
+
+        @VisibleForTesting
+        internal fun buildStoreForwardHistoryRequest(
+            lastRequest: Int,
+            historyReturnWindow: Int,
+            historyReturnMax: Int,
+        ): StoreAndForwardProtos.StoreAndForward {
+            val historyBuilder = StoreAndForwardProtos.StoreAndForward.History.newBuilder()
+            if (lastRequest > 0) historyBuilder.lastRequest = lastRequest
+            if (historyReturnWindow > 0) historyBuilder.window = historyReturnWindow
+            if (historyReturnMax > 0) historyBuilder.historyMessages = historyReturnMax
+            return StoreAndForwardProtos.StoreAndForward.newBuilder()
+                .setRr(StoreAndForwardProtos.StoreAndForward.RequestResponse.CLIENT_HISTORY)
+                .setHistory(historyBuilder)
+                .build()
+        }
+
+        @VisibleForTesting
+        internal fun resolveHistoryRequestParameters(window: Int, max: Int): Pair<Int, Int> {
+            val resolvedWindow = if (window > 0) window else DEFAULT_HISTORY_RETURN_WINDOW_MINUTES
+            val resolvedMax = if (max > 0) max else DEFAULT_HISTORY_RETURN_MAX_MESSAGES
+            return resolvedWindow to resolvedMax
+        }
     }
 
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
+    private inline fun historyLog(
+        priority: Int = Log.INFO,
+        throwable: Throwable? = null,
+        crossinline message: () -> String,
+    ) {
+        if (!BuildConfig.DEBUG) return
+        val timber = Timber.tag(HISTORY_TAG)
+        val msg = message()
+        if (throwable != null) {
+            timber.log(priority, throwable, msg)
+        } else {
+            timber.log(priority, msg)
+        }
+    }
+
+    private fun activeDeviceAddress(): String? =
+        meshPrefs.deviceAddress?.takeIf { !it.equals(NO_DEVICE_SELECTED, ignoreCase = true) && it.isNotBlank() }
+
+    private fun currentTransport(address: String? = meshPrefs.deviceAddress): String = when (address?.firstOrNull()) {
+        InterfaceId.BLUETOOTH.id -> "BLE"
+        InterfaceId.TCP.id -> "TCP"
+        InterfaceId.SERIAL.id -> "Serial"
+        InterfaceId.MOCK.id -> "Mock"
+        InterfaceId.NOP.id -> "NOP"
+        else -> "Unknown"
+    }
 
     private var locationFlow: Job? = null
     private var mqttMessageFlow: Job? = null
@@ -312,9 +372,16 @@ class MeshService : Service() {
         // Switch to the IO thread
         serviceScope.handledLaunch { radioInterfaceService.connect() }
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(serviceScope)
-        radioInterfaceService.receivedData.onEach(::onReceiveFromRadio).launchIn(serviceScope)
-        radioInterfaceService.connectionError
-            .onEach { error -> Timber.e("BLE Connection Error: ${error.message}") }
+        radioInterfaceService.receivedData
+            .onStart {
+                historyLog { "rxCollector START transport=${currentTransport()} scope=${serviceScope.hashCode()}" }
+            }
+            .onCompletion { cause ->
+                historyLog(Log.WARN) {
+                    "rxCollector STOP transport=${currentTransport()} cause=${cause?.message ?: "completed"}"
+                }
+            }
+            .onEach(::onReceiveFromRadio)
             .launchIn(serviceScope)
         radioConfigRepository.localConfigFlow.onEach { localConfig = it }.launchIn(serviceScope)
         radioConfigRepository.moduleConfigFlow.onEach { moduleConfig = it }.launchIn(serviceScope)
@@ -424,6 +491,7 @@ class MeshService : Service() {
         myNodeInfo = null
         nodeDBbyNodeNum.clear()
         haveNodeDB = false
+        earlyReceivedPackets.clear()
     }
 
     private var myNodeInfo: MyNodeEntity? = null
@@ -761,7 +829,6 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
-                        Timber.d("Received WAYPOINT_APP from $fromId")
                         val u = MeshProtos.Waypoint.parseFrom(data.payload)
                         // Validate locked Waypoints from the original sender
                         if (u.lockedTo != 0 && u.lockedTo != packet.from) return
@@ -769,8 +836,8 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.POSITION_APP_VALUE -> {
-                        Timber.d("Received POSITION_APP from $fromId")
                         val u = MeshProtos.Position.parseFrom(data.payload)
+                        // Timber.d("position_app ${packet.from} ${u.toOneLineString()}")
                         if (data.wantResponse && u.latitudeI == 0 && u.longitudeI == 0) {
                             Timber.d("Ignoring nop position update from position request")
                         } else {
@@ -780,7 +847,6 @@ class MeshService : Service() {
 
                     Portnums.PortNum.NODEINFO_APP_VALUE ->
                         if (!fromUs) {
-                            Timber.d("Received NODEINFO_APP from $fromId")
                             val u =
                                 MeshProtos.User.parseFrom(data.payload).copy {
                                     if (isLicensed) clearPublicKey()
@@ -791,7 +857,6 @@ class MeshService : Service() {
 
                     // Handle new telemetry info
                     Portnums.PortNum.TELEMETRY_APP_VALUE -> {
-                        Timber.d("Received TELEMETRY_APP from $fromId")
                         val u =
                             TelemetryProtos.Telemetry.parseFrom(data.payload).copy {
                                 if (time == 0) time = (dataPacket.time / 1000L).toInt()
@@ -800,7 +865,6 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.ROUTING_APP_VALUE -> {
-                        Timber.d("Received ROUTING_APP from $fromId")
                         // We always send ACKs to other apps, because they might care about the
                         // messages they sent
                         shouldBroadcast = true
@@ -815,28 +879,24 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.ADMIN_APP_VALUE -> {
-                        Timber.d("Received ADMIN_APP from $fromId")
                         val u = AdminProtos.AdminMessage.parseFrom(data.payload)
                         handleReceivedAdmin(packet.from, u)
                         shouldBroadcast = false
                     }
 
                     Portnums.PortNum.PAXCOUNTER_APP_VALUE -> {
-                        Timber.d("Received PAXCOUNTER_APP from $fromId")
                         val p = PaxcountProtos.Paxcount.parseFrom(data.payload)
                         handleReceivedPaxcounter(packet.from, p)
                         shouldBroadcast = false
                     }
 
                     Portnums.PortNum.STORE_FORWARD_APP_VALUE -> {
-                        Timber.d("Received STORE_FORWARD_APP from $fromId")
                         val u = StoreAndForwardProtos.StoreAndForward.parseFrom(data.payload)
                         handleReceivedStoreAndForward(dataPacket, u)
                         shouldBroadcast = false
                     }
 
                     Portnums.PortNum.RANGE_TEST_APP_VALUE -> {
-                        Timber.d("Received RANGE_TEST_APP from $fromId")
                         if (!moduleConfig.rangeTest.enabled) return
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
                         rememberDataPacket(u)
@@ -867,7 +927,7 @@ class MeshService : Service() {
                         }
                     }
 
-                    else -> Timber.d("No custom processing needed for ${data.portnumValue} from $fromId")
+                    else -> Timber.d("No custom processing needed for ${data.portnumValue}")
                 }
 
                 // We always tell other apps when new data packets arrive
@@ -973,7 +1033,10 @@ class MeshService : Service() {
         if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0) {
             Timber.d("Ignoring nop position update for the local node")
         } else {
-            updateNodeInfo(fromNum) { it.setPosition(p, (defaultTime / 1000L).toInt()) }
+            updateNodeInfo(fromNum) {
+                Timber.d("update position: ${it.longName?.toPIIString()} with ${p.toPIIString()}")
+                it.setPosition(p, (defaultTime / 1000L).toInt())
+            }
         }
     }
 
@@ -1040,7 +1103,79 @@ class MeshService : Service() {
         updateNodeInfo(fromNum) { it.paxcounter = p }
     }
 
+    /**
+     * Ask the connected radio to replay any packets it buffered while the client was offline.
+     *
+     * Radios deliver history via the Store & Forward protocol regardless of transport, so we piggyback on that
+     * mechanism after BLE/Wi‑Fi reconnects.
+     */
+    private fun requestHistoryReplay(trigger: String) {
+        val address = activeDeviceAddress()
+        val failure =
+            when {
+                address == null -> "no_active_address"
+                myNodeNum == null -> "no_my_node"
+                else -> null
+            }
+        if (failure != null) {
+            historyLog { "requestHistory skipped trigger=$trigger reason=$failure" }
+            return
+        }
+
+        val safeAddress = address!!
+        val myNum = myNodeNum!!
+        val storeForwardConfig = moduleConfig.storeForward
+        val lastRequest = meshPrefs.getStoreForwardLastRequest(safeAddress)
+        val (window, max) =
+            resolveHistoryRequestParameters(storeForwardConfig.historyReturnWindow, storeForwardConfig.historyReturnMax)
+        val windowSource = if (storeForwardConfig.historyReturnWindow > 0) "config" else "default"
+        val maxSource = if (storeForwardConfig.historyReturnMax > 0) "config" else "default"
+        val sourceSummary = "window=$window($windowSource) max=$max($maxSource)"
+        val request =
+            buildStoreForwardHistoryRequest(
+                lastRequest = lastRequest,
+                historyReturnWindow = window,
+                historyReturnMax = max,
+            )
+        val logContext = "trigger=$trigger transport=${currentTransport(safeAddress)} addr=$safeAddress"
+        historyLog { "requestHistory $logContext lastRequest=$lastRequest $sourceSummary" }
+
+        runCatching {
+            packetHandler.sendToRadio(
+                newMeshPacketTo(myNum).buildMeshPacket(priority = MeshPacket.Priority.BACKGROUND) {
+                    portnumValue = Portnums.PortNum.STORE_FORWARD_APP_VALUE
+                    payload = ByteString.copyFrom(request.toByteArray())
+                },
+            )
+        }
+            .onFailure { ex -> historyLog(Log.WARN, ex) { "requestHistory failed $logContext" } }
+    }
+
+    private fun updateStoreForwardLastRequest(source: String, lastRequest: Int) {
+        if (lastRequest <= 0) return
+        val address = activeDeviceAddress() ?: return
+        val current = meshPrefs.getStoreForwardLastRequest(address)
+        val transport = currentTransport(address)
+        val logContext = "source=$source transport=$transport address=$address"
+        if (lastRequest != current) {
+            meshPrefs.setStoreForwardLastRequest(address, lastRequest)
+            historyLog { "historyMarker updated $logContext from=$current to=$lastRequest" }
+        } else {
+            historyLog(Log.DEBUG) { "historyMarker unchanged $logContext value=$lastRequest" }
+        }
+    }
+
     private fun handleReceivedStoreAndForward(dataPacket: DataPacket, s: StoreAndForwardProtos.StoreAndForward) {
+        Timber.d("StoreAndForward: ${s.variantCase} ${s.rr} from ${dataPacket.from}")
+        val transport = currentTransport()
+        val lastRequest =
+            if (s.variantCase == StoreAndForwardProtos.StoreAndForward.VariantCase.HISTORY) {
+                s.history.lastRequest
+            } else {
+                0
+            }
+        val baseContext = "transport=$transport from=${dataPacket.from}"
+        historyLog { "rxStoreForward $baseContext variant=${s.variantCase} rr=${s.rr} lastRequest=$lastRequest" }
         when (s.variantCase) {
             StoreAndForwardProtos.StoreAndForward.VariantCase.STATS -> {
                 val u =
@@ -1052,6 +1187,11 @@ class MeshService : Service() {
             }
 
             StoreAndForwardProtos.StoreAndForward.VariantCase.HISTORY -> {
+                val history = s.history
+                val historySummary =
+                    "routerHistory $baseContext messages=${history.historyMessages} " +
+                        "window=${history.window} lastRequest=${history.lastRequest}"
+                historyLog(Log.DEBUG) { historySummary }
                 val text =
                     """
                     Total messages: ${s.history.historyMessages}
@@ -1065,12 +1205,17 @@ class MeshService : Service() {
                         dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
                     )
                 rememberDataPacket(u)
+                updateStoreForwardLastRequest("router_history", s.history.lastRequest)
             }
 
             StoreAndForwardProtos.StoreAndForward.VariantCase.TEXT -> {
                 if (s.rr == StoreAndForwardProtos.StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
                     dataPacket.to = DataPacket.ID_BROADCAST
                 }
+                val textLog =
+                    "rxText $baseContext id=${dataPacket.id} ts=${dataPacket.time} " +
+                        "to=${dataPacket.to} decision=remember"
+                historyLog(Log.DEBUG) { textLog }
                 val u =
                     dataPacket.copy(bytes = s.text.toByteArray(), dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
                 rememberDataPacket(u)
@@ -1080,29 +1225,59 @@ class MeshService : Service() {
         }
     }
 
+    private val earlyReceivedPackets = ArrayDeque<MeshPacket>()
+
     // If apps try to send packets when our radio is sleeping, we queue them here instead
     private val offlineSentPackets = mutableListOf<DataPacket>()
 
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
-        Timber.d("[packet]: ${packet.toOneLineString()}")
+        val preparedPacket =
+            packet
+                .toBuilder()
+                .apply {
+                    // If the rxTime was not set by the device, update with current time
+                    if (packet.rxTime == 0) setRxTime(currentSecond())
+                }
+                .build()
+
         if (haveNodeDB) {
-            processReceivedMeshPacket(
-                packet
-                    .toBuilder()
-                    .apply {
-                        // If the rxTime was not set by the device, update with current time
-                        if (packet.rxTime == 0) setRxTime(currentSecond())
-                    }
-                    .build(),
-            )
-        } else {
-            Timber.w("Ignoring early received packet: ${packet.toOneLineString()}")
-            // earlyReceivedPackets.add(packet)
-            // logAssert(earlyReceivedPackets.size < 128) // The max should normally be about 32,
-            // but if the device is
-            // messed up it might try to send forever
+            processReceivedMeshPacket(preparedPacket)
+            return
         }
+
+        val queueSize = earlyReceivedPackets.size
+        if (queueSize >= MAX_EARLY_PACKET_BUFFER) {
+            val dropped = earlyReceivedPackets.removeFirst()
+            historyLog(Log.WARN) {
+                val portLabel =
+                    if (dropped.hasDecoded()) {
+                        Portnums.PortNum.forNumber(dropped.decoded.portnumValue)?.name
+                            ?: dropped.decoded.portnumValue.toString()
+                    } else {
+                        "unknown"
+                    }
+                "dropEarlyPacket bufferFull size=$queueSize id=${dropped.id} port=$portLabel"
+            }
+        }
+
+        earlyReceivedPackets.addLast(preparedPacket)
+        val portLabel =
+            if (preparedPacket.hasDecoded()) {
+                Portnums.PortNum.forNumber(preparedPacket.decoded.portnumValue)?.name
+                    ?: preparedPacket.decoded.portnumValue.toString()
+            } else {
+                "unknown"
+            }
+        historyLog { "queueEarlyPacket size=${earlyReceivedPackets.size} id=${preparedPacket.id} port=$portLabel" }
+    }
+
+    private fun flushEarlyReceivedPackets(reason: String) {
+        if (earlyReceivedPackets.isEmpty()) return
+        val packets = earlyReceivedPackets.toList()
+        earlyReceivedPackets.clear()
+        historyLog { "replayEarlyPackets reason=$reason count=${packets.size}" }
+        packets.forEach(::processReceivedMeshPacket)
     }
 
     private fun sendNow(p: DataPacket) {
@@ -1150,6 +1325,12 @@ class MeshService : Service() {
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun processReceivedMeshPacket(packet: MeshPacket) {
         val fromNum = packet.from
+
+        // FIXME, perhaps we could learn our node ID by looking at any to packets the radio
+        // decided to pass through to us (except for broadcast packets)
+        // val toNum = packet.to
+
+        // Timber.d("Received: $packet")
         if (packet.hasDecoded()) {
             val packetToSave =
                 MeshLog(
@@ -1240,6 +1421,7 @@ class MeshService : Service() {
     private var connectTimeMsec = 0L
 
     // Called when we gain/lose connection to our radio
+    @Suppress("CyclomaticComplexMethod")
     private fun onConnectionChanged(c: ConnectionState) {
         Timber.d("onConnectionChanged: ${connectionStateHolder.getState()} -> $c")
 
@@ -1278,7 +1460,6 @@ class MeshService : Service() {
         }
 
         fun startDisconnect() {
-            Timber.d("Starting disconnect")
             packetHandler.stopPacketQueue()
             stopLocationRequests()
             stopMqttClientProxy()
@@ -1291,7 +1472,10 @@ class MeshService : Service() {
         }
 
         fun startConnect() {
-            Timber.d("Starting connect")
+            historyLog {
+                val address = meshPrefs.deviceAddress ?: "null"
+                "onReconnect transport=${currentTransport()} node=$address"
+            }
             try {
                 connectTimeMsec = System.currentTimeMillis()
                 startConfigOnly()
@@ -1359,6 +1543,7 @@ class MeshService : Service() {
 
     private val packetHandlers: Map<PayloadVariantCase, ((MeshProtos.FromRadio) -> Unit)> by lazy {
         PayloadVariantCase.entries.associateWith { variant: PayloadVariantCase ->
+            Timber.d("PacketHandler - handling $variant")
             when (variant) {
                 PayloadVariantCase.PACKET -> { proto: MeshProtos.FromRadio -> handleReceivedMeshPacket(proto.packet) }
 
@@ -1367,11 +1552,9 @@ class MeshService : Service() {
                 }
 
                 PayloadVariantCase.MY_INFO -> { proto: MeshProtos.FromRadio -> handleMyInfo(proto.myInfo) }
-
                 PayloadVariantCase.NODE_INFO -> { proto: MeshProtos.FromRadio -> handleNodeInfo(proto.nodeInfo) }
 
                 PayloadVariantCase.CHANNEL -> { proto: MeshProtos.FromRadio -> handleChannel(proto.channel) }
-
                 PayloadVariantCase.CONFIG -> { proto: MeshProtos.FromRadio -> handleDeviceConfig(proto.config) }
 
                 PayloadVariantCase.MODULECONFIG -> { proto: MeshProtos.FromRadio ->
@@ -1383,7 +1566,6 @@ class MeshService : Service() {
                 }
 
                 PayloadVariantCase.METADATA -> { proto: MeshProtos.FromRadio -> handleMetadata(proto.metadata) }
-
                 PayloadVariantCase.MQTTCLIENTPROXYMESSAGE -> { proto: MeshProtos.FromRadio ->
                     handleMqttProxyMessage(proto.mqttClientProxyMessage)
                 }
@@ -1393,22 +1575,22 @@ class MeshService : Service() {
                 }
 
                 PayloadVariantCase.FILEINFO -> { proto: MeshProtos.FromRadio -> handleFileInfo(proto.fileInfo) }
-
                 PayloadVariantCase.CLIENTNOTIFICATION -> { proto: MeshProtos.FromRadio ->
                     handleClientNotification(proto.clientNotification)
                 }
 
-                PayloadVariantCase.LOG_RECORD -> { proto: MeshProtos.FromRadio -> handleLogRecord(proto.logRecord) }
+                PayloadVariantCase.LOG_RECORD -> { proto: MeshProtos.FromRadio -> handleLogReord(proto.logRecord) }
 
                 PayloadVariantCase.REBOOTED -> { proto: MeshProtos.FromRadio -> handleRebooted(proto.rebooted) }
-
                 PayloadVariantCase.XMODEMPACKET -> { proto: MeshProtos.FromRadio ->
                     handleXmodemPacket(proto.xmodemPacket)
                 }
 
                 // Explicitly handle default/unwanted cases to satisfy the exhaustive `when`
                 PayloadVariantCase.PAYLOADVARIANT_NOT_SET -> { proto ->
-                    Timber.d("Received variant PayloadVariantUnset: Full FromRadio proto: ${proto.toPIIString()}")
+                    Timber.e("Unexpected or unrecognized FromRadio variant: ${proto.payloadVariantCase}")
+                    // Additional debug: log raw bytes if possible (can't access bytes here) and full proto
+                    Timber.d("Full FromRadio proto: $proto")
                 }
             }
         }
@@ -1418,32 +1600,21 @@ class MeshService : Service() {
         packetHandlers[this.payloadVariantCase]?.invoke(this)
     }
 
-    /**
-     * Parses and routes incoming data from the radio.
-     *
-     * This function first attempts to parse the data as a `FromRadio` protobuf message. If that fails, it then tries to
-     * parse it as a `LogRecord` for debugging purposes.
-     */
     private fun onReceiveFromRadio(bytes: ByteArray) {
-        runCatching { MeshProtos.FromRadio.parseFrom(bytes) }
-            .onSuccess { proto -> proto.route() }
-            .onFailure { primaryException ->
-                runCatching {
-                    val logRecord = MeshProtos.LogRecord.parseFrom(bytes)
-                    handleLogRecord(logRecord)
-                }
-                    .onFailure { _ ->
-                        val packet = bytes.toHexString()
-                        Timber.e(
-                            primaryException,
-                            "Failed to parse radio packet (len=${bytes.size} contents=$packet). Not a valid FromRadio or LogRecord.",
-                        )
-                    }
+        try {
+            val proto = MeshProtos.FromRadio.parseFrom(bytes)
+            if (proto.payloadVariantCase == PayloadVariantCase.PAYLOADVARIANT_NOT_SET) {
+                Timber.w(
+                    "Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=${bytes.joinToString(",") { b ->
+                        String.format("0x%02x", b)
+                    }} proto=$proto",
+                )
             }
+            proto.route()
+        } catch (ex: InvalidProtocolBufferException) {
+            Timber.e("Invalid Protobuf from radio, len=${bytes.size}", ex)
+        }
     }
-
-    /** Extension function to convert a ByteArray to a hex string for logging. Example output: "0x0a,0x1f,0x..." */
-    private fun ByteArray.toHexString(): String = this.joinToString(",") { byte -> String.format("0x%02x", byte) }
 
     // A provisional MyNodeInfo that we will install if all of our node config downloads go okay
     private var newMyNodeInfo: MyNodeEntity? = null
@@ -1456,7 +1627,7 @@ class MeshService : Service() {
     private var nodeInfoNonce: Int = DEFAULT_NODE_INFO_NONCE
 
     private fun handleDeviceConfig(config: ConfigProtos.Config) {
-        Timber.d("[deviceConfig] ${config.toPIIString()}")
+        Timber.d("Received config ${config.toOneLineString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1472,7 +1643,7 @@ class MeshService : Service() {
     }
 
     private fun handleModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
-        Timber.d("[moduleConfig] ${config.toPIIString()}")
+        Timber.d("Received moduleConfig ${config.toOneLineString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1488,7 +1659,7 @@ class MeshService : Service() {
     }
 
     private fun handleChannel(ch: ChannelProtos.Channel) {
-        Timber.d("[channel] ${ch.toPIIString()}")
+        Timber.d("Received channel ${ch.index}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1546,7 +1717,13 @@ class MeshService : Service() {
     }
 
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
-        Timber.d("[nodeInfo] ${info.toPIIString()}")
+        Timber.d(
+            "Received nodeinfo num=${info.num}," +
+                " hasUser=${info.hasUser()}," +
+                " hasPosition=${info.hasPosition()}," +
+                " hasDeviceMetrics=${info.hasDeviceMetrics()}",
+        )
+
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1611,7 +1788,6 @@ class MeshService : Service() {
 
     /** Update MyNodeInfo (called from either new API version or the old one) */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
-        Timber.d("[myInfo] ${myInfo.toPIIString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1635,7 +1811,7 @@ class MeshService : Service() {
 
     /** Update our DeviceMetadata */
     private fun handleMetadata(metadata: MeshProtos.DeviceMetadata) {
-        Timber.d("[deviceMetadata] ${metadata.toPIIString()}")
+        Timber.d("Received deviceMetadata ${metadata.toOneLineString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1651,7 +1827,6 @@ class MeshService : Service() {
 
     /** Publish MqttClientProxyMessage (fromRadio) */
     private fun handleMqttProxyMessage(message: MeshProtos.MqttClientProxyMessage) {
-        Timber.d("[mqttClientProxyMessage] ${message.toPIIString()}")
         with(message) {
             when (payloadVariantCase) {
                 MeshProtos.MqttClientProxyMessage.PayloadVariantCase.TEXT -> {
@@ -1668,25 +1843,16 @@ class MeshService : Service() {
     }
 
     private fun handleClientNotification(notification: MeshProtos.ClientNotification) {
-        Timber.d("[clientNotification] ${notification.toPIIString()}")
+        Timber.d("Received clientNotification ${notification.toOneLineString()}")
         serviceRepository.setClientNotification(notification)
         serviceNotifications.showClientNotification(notification)
         // if the future for the originating request is still in the queue, complete as unsuccessful
         // for now
         packetHandler.removeResponse(notification.replyId, complete = false)
-        val packetToSave =
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "ClientNotification",
-                received_date = System.currentTimeMillis(),
-                raw_message = notification.toString(),
-                fromRadio = fromRadio { this.clientNotification = notification },
-            )
-        insertMeshLog(packetToSave)
     }
 
     private fun handleFileInfo(fileInfo: MeshProtos.FileInfo) {
-        Timber.d("[fileInfo] ${fileInfo.toPIIString()}")
+        Timber.d("Received fileInfo ${fileInfo.toOneLineString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1698,8 +1864,8 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
     }
 
-    private fun handleLogRecord(logRecord: MeshProtos.LogRecord) {
-        Timber.d("[logRecord] ${logRecord.toPIIString()}")
+    private fun handleLogReord(logRecord: MeshProtos.LogRecord) {
+        Timber.d("Received logRecord ${logRecord.toOneLineString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1712,7 +1878,7 @@ class MeshService : Service() {
     }
 
     private fun handleRebooted(rebooted: Boolean) {
-        Timber.d("[rebooted] $rebooted")
+        Timber.d("Received rebooted ${rebooted.toOneLineString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1725,7 +1891,7 @@ class MeshService : Service() {
     }
 
     private fun handleXmodemPacket(xmodemPacket: XmodemProtos.XModem) {
-        Timber.d("[xmodemPacket] ${xmodemPacket.toPIIString()}")
+        Timber.d("Received XmodemPacket ${xmodemPacket.toOneLineString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1738,7 +1904,7 @@ class MeshService : Service() {
     }
 
     private fun handleDeviceUiConfig(deviceuiConfig: DeviceUIProtos.DeviceUIConfig) {
-        Timber.d("[deviceuiConfig] ${deviceuiConfig.toPIIString()}")
+        Timber.d("Received deviceUIConfig ${deviceuiConfig.toOneLineString()}")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1773,16 +1939,24 @@ class MeshService : Service() {
     }
 
     private fun onHasSettings() {
+        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
         processQueuedPackets()
         startMqttClientProxy()
         serviceBroadcasts.broadcastConnection()
         sendAnalytics()
         reportConnection()
-        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
+        historyLog {
+            val ports =
+                rememberDataType.joinToString(",") { port -> Portnums.PortNum.forNumber(port)?.name ?: port.toString() }
+            "subscribePorts afterReconnect ports=$ports"
+        }
+        requestHistoryReplay("onHasSettings")
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
-        Timber.d("[configCompleteId]: ${configCompleteId.toPIIString()}")
+        Timber.d(
+            "handleConfigComplete called with id=$configCompleteId, configOnly=$configOnlyNonce, nodeInfo=$nodeInfoNonce",
+        )
         when (configCompleteId) {
             configOnlyNonce -> handleConfigOnlyComplete()
             nodeInfoNonce -> handleNodeInfoComplete()
@@ -1849,6 +2023,7 @@ class MeshService : Service() {
             newNodes.clear()
             serviceScope.handledLaunch { nodeRepository.installConfig(myNodeInfo!!, nodeDBbyNodeNum.values.toList()) }
             haveNodeDB = true
+            flushEarlyReceivedPackets("node_info_complete")
             sendAnalytics()
             onHasSettings()
         }
@@ -2038,12 +2213,24 @@ class MeshService : Service() {
             Timber.d(
                 "SetDeviceAddress: Device address changed from ${currentAddr.anonymize} to ${deviceAddr.anonymize}",
             )
+            val currentLabel = currentAddr ?: "null"
+            val nextLabel = deviceAddr ?: "null"
+            val nextTransport = currentTransport(deviceAddr)
+            historyLog { "dbSwitch request current=$currentLabel next=$nextLabel transportNext=$nextTransport" }
             meshPrefs.deviceAddress = deviceAddr
             serviceScope.handledLaunch {
                 // Clear only in-memory caches to avoid cross-device bleed
                 discardNodeDB()
                 // Switch active on-disk DB to device-specific database
                 databaseManager.switchActiveDatabase(deviceAddr)
+                val activeAddress = databaseManager.currentAddress.value
+                val activeLabel = activeAddress ?: "null"
+                val transportLabel = currentTransport()
+                val meshAddress = meshPrefs.deviceAddress ?: "null"
+                val nodeId = myNodeInfo?.myNodeNum?.toString() ?: "unknown"
+                val dbSummary =
+                    "dbSwitch activeAddress=$activeLabel nodeId=$nodeId transport=$transportLabel addr=$meshAddress"
+                historyLog { dbSummary }
                 // Do not clear packet DB here; messages are per-device and should persist
                 clearNotifications()
             }
