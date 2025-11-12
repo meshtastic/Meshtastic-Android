@@ -95,7 +95,6 @@
     <string name="connected_count">Pripojený: %1$s online</string>
     <string name="ip_address">IP adresa:</string>
     <string name="ip_port">Port:</string>
-    <string name="connected_to">Pripojené k vysielaču (%s)</string>
     <string name="not_connected">Nepripojené</string>
     <string name="connected_sleeping">Pripojené k uspanému vysielaču</string>
     <string name="app_too_old">Aplikáciu je potrebné aktualizovať</string>
@@ -160,8 +159,6 @@
     <string name="delivery_confirmed">Doručenie potvrdené</string>
     <string name="error">Chyba</string>
     <string name="ignore">Ignorovať</string>
-    <string name="ignore_add">Pridať \'%s\' do zoznamu ignorovaných?</string>
-    <string name="ignore_remove">Odstrániť \'%s\' zo zoznamu ignorovaných?</string>
     <string name="map_select_download_region">Vybrať oblasť na stiahnutie</string>
     <string name="map_tile_download_estimate">Odhad sťahovania dlaždíc:</string>
     <string name="map_start_download">Spustiť sťahovanie</string>
@@ -174,10 +171,8 @@
     <string name="calculating">Prepočítavanie…</string>
     <string name="map_offline_manager">Offline manager</string>
     <string name="map_cache_size">Aktuálna veľkosť cache</string>
-    <string name="map_cache_info">Kapacita cache: %1$.2f MB\nVyužitie cache: %2$.2f MB</string>
     <string name="map_clear_tiles">Vymazať stiahnuté dlaždice</string>
     <string name="map_tile_source">Zdroj dlaždíc</string>
-    <string name="map_purge_success">SQL Cache vyčistená pre %s</string>
     <string name="map_purge_fail">Vyčistenie SQL Cache zlyhalo, podrobnosti nájdete v logcat</string>
     <string name="map_cache_manager">Cache Manager</string>
     <string name="map_download_complete">Sťahovanie dokončené!</string>
@@ -187,7 +182,6 @@
     <string name="waypoint_edit">Editovať cieľový bod</string>
     <string name="waypoint_delete">Vymazať cieľový bod?</string>
     <string name="waypoint_new">Nový cieľový bod</string>
-    <string name="waypoint_received">Prijatý cieľový bod: %s</string>
     <string name="error_duty_cycle">Dosiahnutý limit pracovného cyklu. Nedá sa teraz posielať správy, skúste neskôr.</string>
     <string name="remove">Odstrániť</string>
     <string name="remove_node_text">Tento uzol bude odstránený z vášho zoznamu, kým váš uzol opäť príjme jeho údaje.</string>
@@ -256,8 +250,6 @@
     <string name="alert_bell_text">Znak zvončeku upozornení!</string>
     <string name="critical_alert">Kritická výstraha!</string>
     <string name="favorite">Obľúbený</string>
-    <string name="favorite_add">Pridať \'%s\', ako obľúbený uzol?</string>
-    <string name="favorite_remove">Odstrániť \'%s\' obľúbený uzol?</string>
     <string name="power_metrics_log">Záznamník výkonu</string>
     <string name="channel_1">Kanál 1</string>
     <string name="channel_2">Kanál 2</string>
@@ -269,7 +261,6 @@
     <string name="i_know_what_i_m_doing">Viem čo robím.</string>
     <string name="low_battery_message">Uzol %1$s má slabú batériu (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Upozornenia o slabej batérii</string>
-    <string name="low_battery_title">Slabá batéria: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornenia o slabej batérii (obľúbene uzle)</string>
     <string name="baro_pressure">Barometrický tlak</string>
     <string name="udp_config">Konfigurácia UDP</string>
