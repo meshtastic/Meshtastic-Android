@@ -85,6 +85,7 @@
     <string name="disconnected">Na ceangailte</string>
     <string name="device_sleeping">Gléas ina chodladh</string>
     <string name="ip_address">Seoladh IP:</string>
+    <string name="connected_to">Ceangailte le raidió (%1$s)</string>
     <string name="not_connected">Ní ceangailte</string>
     <string name="connected_sleeping">Ceangailte le raidió, ach tá sé ina chodladh</string>
     <string name="app_too_old">Nuashonrú feidhmchláir riachtanach</string>
@@ -150,6 +151,8 @@
     <string name="delivery_confirmed">Seachadadh deimhnithe</string>
     <string name="error">Earráid</string>
     <string name="ignore">Ignóra</string>
+    <string name="ignore_add">Cuir ‘%1$s’ leis an liosta ignorálacha?</string>
+    <string name="ignore_remove">Bain ‘%1$s’ ón liosta ignorálacha?</string>
     <string name="map_select_download_region">Roghnaigh réigiún íoslódála</string>
     <string name="map_tile_download_estimate">Meastachán íoslódála tile:</string>
     <string name="map_start_download">Tosaigh íoslódáil</string>
@@ -161,8 +164,10 @@
     <string name="calculating">Á ríomh…</string>
     <string name="map_offline_manager">Bainisteoir as líne</string>
     <string name="map_cache_size">Méid na Cásla Reatha</string>
+    <string name="map_cache_info">Cumas an Cásla: %1$d MB\nÚsáid an Cásla: %2$d MB</string>
     <string name="map_clear_tiles">Glan na Tíleanna Íoslódáilte</string>
     <string name="map_tile_source">Foinse Tíle</string>
+    <string name="map_purge_success">Cásla SQL glanta do %1$s</string>
     <string name="map_purge_fail">Teip ar ghlanadh Cásla SQL, féach logcat le haghaidh sonraí</string>
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_download_complete">Íoslódáil críochnaithe!</string>
@@ -172,6 +177,7 @@
     <string name="waypoint_edit">Cuir in eagar an pointe bealach</string>
     <string name="waypoint_delete">Scrios an pointe bealach?</string>
     <string name="waypoint_new">Pointe bealach nua</string>
+    <string name="waypoint_received">Pointe bealach faighte: %1$s</string>
     <string name="error_duty_cycle">Teorainn na Ciorcad Oibre bainte. Ní féidir teachtaireachtaí a sheoladh faoi láthair, déan iarracht arís níos déanaí.</string>
     <string name="remove">Bain</string>
     <string name="remove_node_text">Bainfear an nod seo ón liosta go dtí go bhfaighidh do nod sonraí uaidh arís.</string>
