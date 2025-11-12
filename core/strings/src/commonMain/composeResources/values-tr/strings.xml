@@ -100,7 +100,6 @@
     <string name="ip_address">IP Adresi:</string>
     <string name="ip_port">Bağlantı noktası:</string>
     <string name="connected">Bağlandı</string>
-    <string name="connected_to">(%s) telsizine bağlandı </string>
     <string name="not_connected">Bağlı değil</string>
     <string name="connected_sleeping">Cihaza bağlandı, ancak uyku durumunda</string>
     <string name="app_too_old">Uygulama güncellemesi gerekli</string>
@@ -171,8 +170,6 @@
     <string name="delivery_confirmed">Teslim Edildi</string>
     <string name="error">Hata</string>
     <string name="ignore">Yok say</string>
-    <string name="ignore_add">Yoksay listesine \'%s\' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
-    <string name="ignore_remove">Yoksay listesinden \'%s\' çıkarılsın mı? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="map_select_download_region">İndirilecek bölgeyi seçin</string>
     <string name="map_tile_download_estimate">Tahmini indirme boyutu:</string>
     <string name="map_start_download">İndirmeye başla</string>
@@ -185,10 +182,8 @@
     <string name="calculating">Hesaplanıyor…</string>
     <string name="map_offline_manager">Çevrim dışı işlemleri</string>
     <string name="map_cache_size">Önbellek doluluğu</string>
-    <string name="map_cache_info">Önbellek Kapasitesi: %1$.2f MB\nÖnbellek Kullanımı: %2$.2f MB</string>
     <string name="map_clear_tiles">Harita Parçalarını Sil</string>
     <string name="map_tile_source">Harita Kaynağı</string>
-    <string name="map_purge_success">%s için SQL önbelleği temizlendi</string>
     <string name="map_purge_fail">SQL Önbellek temizleme başarısız, ayrıntılar için logcat\' e bakın</string>
     <string name="map_cache_manager">Önbellek Yöneticisi</string>
     <string name="map_download_complete">İndirme tamamlandı!</string>
@@ -198,7 +193,6 @@
     <string name="waypoint_edit">Yer işareti düzenle</string>
     <string name="waypoint_delete">Yer işaretini sil?</string>
     <string name="waypoint_new">Yeni yer işareti</string>
-    <string name="waypoint_received">Alınan yer işareti: %s</string>
     <string name="error_duty_cycle">Zaman limitine (duty cycle) ulaşıldı. Şu anda mesaj gönderilemiyor, lütfen daha sonra tekrar deneyin.</string>
     <string name="remove">Kaldır</string>
     <string name="remove_node_text">Bu node, kendisinden yeniden paket alınana kadar listenizden kaldırılacaktır.</string>
@@ -265,8 +259,6 @@
     <string name="alert_bell_text">Zili Çaldır!</string>
     <string name="critical_alert">Kritik Uyarı!</string>
     <string name="favorite">Favori</string>
-    <string name="favorite_add">\'%s\' düğümünü favorilere eklemek istiyor musunuz?</string>
-    <string name="favorite_remove">\'%s\' düğümünü favorilerden silmek istiyor musunuz?</string>
     <string name="power_metrics_log">Güç Ölçüm Kayıtları</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -278,7 +270,6 @@
     <string name="i_know_what_i_m_doing">Ne yaptığımı biliyorum.</string>
     <string name="low_battery_message">%1$s Düğümünün pili düşük (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Düşük pil bildirimleri</string>
-    <string name="low_battery_title">Düşük pil: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Düşük pil bildirimleri (favori düğümler)</string>
     <string name="baro_pressure">Barometrik Basınç</string>
     <string name="udp_enabled">Açık</string>
