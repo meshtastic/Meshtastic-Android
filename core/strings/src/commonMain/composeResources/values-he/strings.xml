@@ -79,7 +79,7 @@
     <string name="provide_location_to_mesh">ספק מיקום טלפון לרשת המש</string>
     <plurals name="delete_messages">
         <item quantity="one">מחק הודעה?</item>
-        <item quantity="two">מחק %s הודעות?</item>
+        <item quantity="two">מחק %1$s הודעות?</item>
         <item quantity="many">מחק %s הודעות?</item>
         <item quantity="other">מחק %s הודעות?</item>
     </plurals>
