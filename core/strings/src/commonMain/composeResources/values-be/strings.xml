@@ -92,7 +92,6 @@
     <string name="report_bug">Паведаміць пра памылку</string>
     <string name="report_a_bug">Паведаміць пра памылку</string>
     <string name="share">Падзяліцца</string>
-    <string name="new_node_seen">Убачылі новы вузел: %s</string>
     <string name="disconnected">Адлучана</string>
     <string name="ip_address">IP-адрас:</string>
     <string name="ip_port">Порт:</string>
