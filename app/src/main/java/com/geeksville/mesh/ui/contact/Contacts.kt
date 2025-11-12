@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.VolumeMute
@@ -45,11 +47,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +64,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.Contact
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.ContactSettings
@@ -84,6 +90,8 @@ import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.select_all
 import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.ScrollToTopEvent
+import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.proto.AppOnlyProtos
 import java.util.concurrent.TimeUnit
 
@@ -91,11 +99,12 @@ import java.util.concurrent.TimeUnit
 @Suppress("LongMethod")
 @Composable
 fun ContactsScreen(
+    onNavigateToShare: () -> Unit,
     viewModel: ContactsViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit = {},
     onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
-    onNavigateToShare: () -> Unit,
+    scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
 ) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
@@ -108,6 +117,17 @@ fun ContactsScreen(
 
     // State for contacts list
     val contacts by viewModel.contactList.collectAsStateWithLifecycle()
+
+    val contactsListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(scrollToTopEvents) {
+        scrollToTopEvents?.collectLatest { event ->
+            if (event is ScrollToTopEvent.ConversationsTabPressed) {
+                contactsListState.smartScrollToTop(coroutineScope)
+            }
+        }
+    }
 
     // Derived state for selected contacts and count
     val selectedContacts =
@@ -205,8 +225,9 @@ fun ContactsScreen(
                 selectedList = selectedContactKeys,
                 onClick = onContactClick,
                 onLongClick = onContactLongClick,
-                channels = channels,
                 onNodeChipClick = onNodeChipClick,
+                listState = contactsListState,
+                channels = channels,
             )
         }
     }
@@ -424,11 +445,12 @@ fun ContactListView(
     selectedList: List<String>,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
-    channels: AppOnlyProtos.ChannelSet? = null,
     onNodeChipClick: (Contact) -> Unit,
+    listState: LazyListState,
+    channels: AppOnlyProtos.ChannelSet? = null,
 ) {
     val haptics = LocalHapticFeedback.current
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
         items(contacts, key = { it.contactKey }) { contact ->
             val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
 

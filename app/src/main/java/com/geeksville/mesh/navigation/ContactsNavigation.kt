@@ -25,15 +25,17 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.geeksville.mesh.ui.contact.ContactsScreen
 import com.geeksville.mesh.ui.sharing.ShareScreen
+import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.MessageScreen
 import org.meshtastic.feature.messaging.QuickChatScreen
 
 @Suppress("LongMethod")
-fun NavGraphBuilder.contactsGraph(navController: NavHostController) {
+fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopEvents: Flow<ScrollToTopEvent>) {
     navigation<ContactsRoutes.ContactsGraph>(startDestination = ContactsRoutes.Contacts) {
         composable<ContactsRoutes.Contacts>(
             deepLinks = listOf(navDeepLink<ContactsRoutes.Contacts>(basePath = "$DEEP_LINK_BASE_URI/contacts")),
@@ -48,6 +50,7 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController) {
                 onNavigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
                 onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                 onNavigateToShare = { navController.navigate(ChannelsRoutes.ChannelsGraph) },
+                scrollToTopEvents = scrollToTopEvents,
             )
         }
         composable<ContactsRoutes.Messages>(
