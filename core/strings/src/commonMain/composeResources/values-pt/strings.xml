@@ -121,7 +121,6 @@
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
     <string name="connected">Ligado</string>
-    <string name="connected_to">Ligado ao rádio (%s)</string>
     <string name="not_connected">Desligado</string>
     <string name="connected_sleeping">Ligado ao rádio, mas está a dormir</string>
     <string name="app_too_old">A aplicação é muito antiga</string>
@@ -185,8 +184,6 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Erro</string>
     <string name="ignore">Ignorar</string>
-    <string name="ignore_add">Adicionar \'%s\' para a lista de ignorados?</string>
-    <string name="ignore_remove">Remover \'%s\' de lista dos ignorados?</string>
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
@@ -199,10 +196,8 @@
     <string name="calculating">Calculando…</string>
     <string name="map_offline_manager">Gerenciador offline</string>
     <string name="map_cache_size">Tamanho atual do cache</string>
-    <string name="map_cache_info">Capacidade do Cache: %1$.2f MB\nCache Utilizado: %2$.2f MB</string>
     <string name="map_clear_tiles">Limpar blocos baixados</string>
     <string name="map_tile_source">Fonte dos blocos</string>
-    <string name="map_purge_success">Cache SQL removido para %s</string>
     <string name="map_purge_fail">Falha na remoção do cache SQL, consulte logcat para obter detalhes</string>
     <string name="map_cache_manager">Gerenciador de cache</string>
     <string name="map_download_complete">Download concluído!</string>
@@ -212,7 +207,6 @@
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_delete">Apagar o ponto de referência?</string>
     <string name="waypoint_new">Novo ponto de referência</string>
-    <string name="waypoint_received">Ponto de passagem recebido %s</string>
     <string name="error_duty_cycle">Limite do ciclo de trabalho atingido. Não é possível enviar mensagens no momento. Tente novamente mais tarde.</string>
     <string name="remove">Remover</string>
     <string name="remove_node_text">Este node será removido da sua lista até que o seu node receba dados dele novamente.</string>
@@ -279,8 +273,6 @@
     <string name="alert_bell_text">Símbolo de alerta</string>
     <string name="critical_alert">Alerta crítico!</string>
     <string name="favorite">Favoritos</string>
-    <string name="favorite_add">Adicione \'%s\' como um nó favorito?</string>
-    <string name="favorite_remove">Remover \'%s\' como um nó favorito?</string>
     <string name="power_metrics_log">Histórico de telemetria de energia</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
@@ -292,7 +284,6 @@
     <string name="i_know_what_i_m_doing">Eu sei o que estou a fazer.</string>
     <string name="low_battery_message">O node %1$s tem a bateria fraca (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notificação de bateria fraca</string>
-    <string name="low_battery_title">Bateria fraca: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificações de bateria fraca (nodes favoritos)</string>
     <string name="baro_pressure">Pressão atmosférica</string>
     <string name="udp_config">Configuração UDP</string>
