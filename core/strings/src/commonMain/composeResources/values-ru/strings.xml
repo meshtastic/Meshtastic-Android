@@ -159,14 +159,12 @@
     <string name="pairing_failed_try_again">Сопряжение не удалось, пожалуйста, выберите еще раз</string>
     <string name="location_disabled">Доступ к местоположению выключен, невозможно посылать местоположение в сеть.</string>
     <string name="share">Поделиться</string>
-    <string name="new_node_seen">Возник новый узел - %s</string>
     <string name="disconnected">Отключено</string>
     <string name="device_sleeping">Устройство спит</string>
     <string name="connected_count">Подключено: %1$s в сети</string>
     <string name="ip_address">IP-адрес:</string>
     <string name="ip_port">Порт:</string>
     <string name="connected">Подключено</string>
-    <string name="connected_to">Подключен к радиостанции (%s)</string>
     <string name="not_connected">Нет соединения</string>
     <string name="connected_sleeping">Подключен к радиостанции, но она спит</string>
     <string name="app_too_old">Требуется обновление приложения</string>
@@ -263,8 +261,6 @@
     <string name="error">Ошибка</string>
     <string name="ignore">Игнорировать</string>
     <string name="remove_ignored">Удалить из игнорируемых</string>
-    <string name="ignore_add">Добавить \'%s\' в список игнорируемых?</string>
-    <string name="ignore_remove">Удалить \'%s\' из списка игнорируемых?</string>
     <string name="map_select_download_region">Выберите регион загрузки</string>
     <string name="map_tile_download_estimate">Предполагаемое время загрузки файла:</string>
     <string name="map_start_download">Начать скачивание</string>
@@ -277,10 +273,8 @@
     <string name="calculating">Вычисление…</string>
     <string name="map_offline_manager">Оффлайн менеджер</string>
     <string name="map_cache_size">Текущий размер кэша</string>
-    <string name="map_cache_info">Емкость кэша: %1$.2f MB\nИспользование кэша: %2$.2f MB</string>
     <string name="map_clear_tiles">Очистить загруженные файлы</string>
     <string name="map_tile_source">Источник файла</string>
-    <string name="map_purge_success">Кэш SQL очищен для %s</string>
     <string name="map_purge_fail">Ошибка очистки кэша SQL, подробности в logcat</string>
     <string name="map_cache_manager">Менеджер кэша</string>
     <string name="map_download_complete">Скачивание завершено!</string>
@@ -290,7 +284,6 @@
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_delete">Удалить путевую точку?</string>
     <string name="waypoint_new">Установить путевую точку</string>
-    <string name="waypoint_received">Принята путевая точка: %s</string>
     <string name="error_duty_cycle">Достигнут лимит отправки сообщений в единицу времени. Не удается отправить сообщения прямо сейчас, пожалуйста, повторите попытку позже.</string>
     <string name="remove">Удалить</string>
     <string name="remove_node_text">Этот узел будет удалён из вашего списка, пока ваш узел снова не получит данные от него.</string>
@@ -365,8 +358,6 @@
     <string name="favorite">Избранное</string>
     <string name="add_favorite">Добавить в избранные</string>
     <string name="remove_favorite">Убрать из избранных</string>
-    <string name="favorite_add">Добавить \'%s\' как избранный узел?</string>
-    <string name="favorite_remove">Удалить \'%s\' как избранный узел?</string>
     <string name="power_metrics_log">Журнал энергопотребления</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
@@ -378,7 +369,6 @@
     <string name="i_know_what_i_m_doing">Я знаю, что делаю.</string>
     <string name="low_battery_message">Узел %1$s имеет низкий заряд батареи (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Уведомление о низком уровне заряда</string>
-    <string name="low_battery_title">Низкий заряд батареи: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (избранные узлы)</string>
     <string name="baro_pressure">Давление на барометре</string>
     <string name="udp_enabled">Включено</string>
@@ -865,6 +855,5 @@
     <string name="eight_hours">8 часов</string>
     <string name="one_day">24 часа</string>
     <string name="two_days">48 часов</string>
-    <string name="last_heard_filter_label">Фильтр по времени последнего сообщения: %s</string>
     <string name="dbm_value">%1$d dBm</string>
 </resources>
