@@ -91,7 +91,6 @@
     <string name="disconnected">Prekinjeno</string>
     <string name="device_sleeping">Naprava je v \"spanju\"</string>
     <string name="ip_address">IP naslov:</string>
-    <string name="connected_to">Povezana z radiem (%s)</string>
     <string name="not_connected">Ni povezano</string>
     <string name="connected_sleeping">Povezan z radiem, vendar radio \"spi\"</string>
     <string name="app_too_old">Aplikacija je prestara</string>
@@ -156,8 +155,6 @@
     <string name="delivery_confirmed">Prejem potrjen</string>
     <string name="error">Napaka</string>
     <string name="ignore">Prezri</string>
-    <string name="ignore_add">Dodaj \'%s\' na prezrto listo?</string>
-    <string name="ignore_remove">Odstrani \'%s\' iz prezrte liste?</string>
     <string name="map_select_download_region">Prenesi izbrano regijo</string>
     <string name="map_tile_download_estimate">Ocena prenosa plošče:</string>
     <string name="map_start_download">Začni prenos</string>
@@ -169,10 +166,8 @@
     <string name="calculating">Preračunavam…</string>
     <string name="map_offline_manager">Upravljalnik brez povezave</string>
     <string name="map_cache_size">Trenutna velikost predpomnilnika</string>
-    <string name="map_cache_info">Velikost predpomnilnika: %1$.2f MB\nUporaba predpomnilnika: %2$.2f MB</string>
     <string name="map_clear_tiles">Počisti izbrane ploščice</string>
     <string name="map_tile_source">Vir plošcice</string>
-    <string name="map_purge_success">Predpomnilnik SQL očiščen za %s</string>
     <string name="map_purge_fail">Čiščenje predpomnilnika SQL Cache ni uspelo, za podrobnosti glejte logcat</string>
     <string name="map_cache_manager">Upravitelj predpomnilnika</string>
     <string name="map_download_complete">Prenos končan!</string>
@@ -182,7 +177,6 @@
     <string name="waypoint_edit">Uredi točko poti</string>
     <string name="waypoint_delete">Izbriši točko poti?</string>
     <string name="waypoint_new">Nova točka poti</string>
-    <string name="waypoint_received">Prejeta točka poti: %s</string>
     <string name="error_duty_cycle">Dosežena je omejitev delovnega cikla. Trenutno ne morete pošiljati sporočil, poskusite kasneje.</string>
     <string name="remove">Odstrani</string>
     <string name="remove_node_text">To vozlišče bo odstranjeno z vašega seznama, dokler vaše vozlišče znova ne prejme njegovih podatkov.</string>
