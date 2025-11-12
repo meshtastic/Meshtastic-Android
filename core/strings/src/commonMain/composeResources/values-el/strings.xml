@@ -79,7 +79,7 @@
     <string name="provide_location_to_mesh">Παρέχετε τοποθεσία στο πλέγμα</string>
     <plurals name="delete_messages">
         <item quantity="one">Διαγραφή μηνύματος;</item>
-        <item quantity="other">Διαγραφή %s μηνυμάτων;</item>
+        <item quantity="other">Διαγραφή %1$s μηνυμάτων;</item>
     </plurals>
     <string name="delete">Διαγραφή</string>
     <string name="delete_for_everyone">Διαγραφή για όλους</string>
