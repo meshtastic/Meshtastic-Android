@@ -851,7 +851,7 @@
     <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <string name="next">Avançar</string>
     <string name="grant_permissions">Conceder Permissões</string>
-    <string name="nodes_queued_for_deletion">%d nós na fila para exclusão:</string>
+    <string name="nodes_queued_for_deletion">%1$d nós na fila para exclusão:</string>
     <string name="clean_node_database_description">Cuidado: Isso irá remover nós dos bancos de dados do aplicativo e do dispositivo.\nSeleções são somadas.</string>
     <string name="connecting_to_device">Conectando ao dispositivo</string>
     <string name="map_type_normal">Normal</string>
@@ -907,6 +907,6 @@
     <string name="analytics_platforms">"Analytics platforms: "</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <string name="unset">Unset - 0</string>
-    <string name="relayed_by">Relayed by: %s</string>
+    <string name="relayed_by">Relayed by: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>

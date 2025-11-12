@@ -855,7 +855,7 @@
     <string name="notification_permissions_description">Meshtastic использует уведомления, чтобы держать вас в курсе новых сообщений и других важных событий. Вы можете обновить разрешения уведомлений в любое время из настроек.</string>
     <string name="next">Далее</string>
     <string name="grant_permissions">Предоставить разрешения</string>
-    <string name="nodes_queued_for_deletion">%d узлов в очереди для удаления:</string>
+    <string name="nodes_queued_for_deletion">%1$d узлов в очереди для удаления:</string>
     <string name="clean_node_database_description">Осторожно: Это удаляет узлы из базы данных в приложении и устройства.\nВыбор является совокупным</string>
     <string name="connecting_to_device">Подключение к устройству</string>
     <string name="map_type_normal">Обычный</string>
@@ -911,6 +911,6 @@
     <string name="analytics_platforms">"Analytics platforms: "</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <string name="unset">Unset - 0</string>
-    <string name="relayed_by">Relayed by: %s</string>
+    <string name="relayed_by">Relayed by: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>

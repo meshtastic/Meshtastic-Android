@@ -850,7 +850,7 @@
     <string name="notification_permissions_description">Meshtastic 使用通知来随时更新新消息和其他重要事件。您可以随时从设置中更新您的通知权限。</string>
     <string name="next">下一步</string>
     <string name="grant_permissions">Grant Permissions</string>
-    <string name="nodes_queued_for_deletion">%d 节点待删除：</string>
+    <string name="nodes_queued_for_deletion">%1$d 节点待删除：</string>
     <string name="clean_node_database_description">注意：这将从应用内和设备上的数据库中移除节点。\n选择是附加性的。</string>
     <string name="connecting_to_device">正在连接设备</string>
     <string name="map_type_normal">普通</string>
@@ -906,6 +906,6 @@
     <string name="analytics_platforms">"Analytics platforms: "</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <string name="unset">Unset - 0</string>
-    <string name="relayed_by">Relayed by: %s</string>
+    <string name="relayed_by">Relayed by: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>

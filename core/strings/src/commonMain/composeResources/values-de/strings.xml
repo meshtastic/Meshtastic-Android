@@ -851,7 +851,7 @@
     <string name="notification_permissions_description">Meshtastic nutzt Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
     <string name="grant_permissions">Berechtigungen erteilen</string>
-    <string name="nodes_queued_for_deletion">%d Knoten in der Warteschlange zum Löschen:</string>
+    <string name="nodes_queued_for_deletion">%1$d Knoten in der Warteschlange zum Löschen:</string>
     <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
     <string name="connecting_to_device">Verbinde mit Gerät</string>
     <string name="map_type_normal">Normal</string>
@@ -907,6 +907,6 @@
     <string name="analytics_platforms">"Analyse Plattformen: "</string>
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <string name="unset">Nicht gesetzt - 0</string>
-    <string name="relayed_by">Weitergeleitet von: %s</string>
+    <string name="relayed_by">Weitergeleitet von: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>

@@ -848,7 +848,7 @@
     <string name="notification_permissions_description">Meshtastic utilise les notifications pour vous tenir à jour sur les nouveaux messages et autres événements importants. Vous pouvez mettre à jour vos autorisations de notification à tout moment à partir des paramètres.</string>
     <string name="next">Suivant</string>
     <string name="grant_permissions">Accorder les autorisations</string>
-    <string name="nodes_queued_for_deletion">%d nœuds en attente de suppression :</string>
+    <string name="nodes_queued_for_deletion">%1$d nœuds en attente de suppression :</string>
     <string name="clean_node_database_description">Attention : Ceci supprime les nœuds des bases de données in-app et on-device.\nLes sélections sont additionnelles.</string>
     <string name="connecting_to_device">Connexion à l\'appareil</string>
     <string name="map_type_normal">Normal</string>
@@ -904,6 +904,6 @@
     <string name="analytics_platforms">"Plateformes d'analyse : "</string>
     <string name="for_more_information_see_our_privacy_policy">Pour plus d\'informations, consultez notre politique de confidentialité.</string>
     <string name="unset">Unset - 0</string>
-    <string name="relayed_by">Relayed by: %s</string>
+    <string name="relayed_by">Relayed by: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>

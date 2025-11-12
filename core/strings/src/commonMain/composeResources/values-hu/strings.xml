@@ -848,7 +848,7 @@
     <string name="notification_permissions_description">A Meshtastic értesítésekkel tájékoztat az új üzenetekről és más fontos eseményekről. Az értesítési engedélyeket bármikor módosíthatod a beállításokban.</string>
     <string name="next">Tovább</string>
     <string name="grant_permissions">Engedély megadása</string>
-    <string name="nodes_queued_for_deletion">%d csomópont vár törlésre:</string>
+    <string name="nodes_queued_for_deletion">%1$d csomópont vár törlésre:</string>
     <string name="clean_node_database_description">Figyelem: Ez eltávolítja a csomópontokat az alkalmazás és az eszköz adatbázisából.\nA kijelölések összeadódnak.</string>
     <string name="connecting_to_device">Csatlakozás az eszközhöz</string>
     <string name="map_type_normal">Normál</string>
@@ -904,6 +904,6 @@
     <string name="analytics_platforms">"Analitikai platformok: "</string>
     <string name="for_more_information_see_our_privacy_policy">További információért lásd az adatvédelmi irányelveinket.</string>
     <string name="unset">Nincs beállítva – 0</string>
-    <string name="relayed_by">Relayed by: %s</string>
+    <string name="relayed_by">Relayed by: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>

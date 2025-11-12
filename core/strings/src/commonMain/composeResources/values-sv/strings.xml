@@ -851,7 +851,7 @@
     <string name="notification_permissions_description">Meshtastic använder aviseringar för att hålla dig uppdaterad om nya meddelanden och andra viktiga händelser. Du kan uppdatera dina aviseringsbehörigheter när som helst från inställningar.</string>
     <string name="next">Nästa</string>
     <string name="grant_permissions">Ge behörigheter</string>
-    <string name="nodes_queued_for_deletion">%d noder köade för radering:</string>
+    <string name="nodes_queued_for_deletion">%1$d noder köade för radering:</string>
     <string name="clean_node_database_description">Varning: Detta tar bort noder från både appen och enhetens databaser.\nMarkeringar är inklusive.</string>
     <string name="connecting_to_device">Ansluter till enhet</string>
     <string name="map_type_normal">Normal</string>
@@ -907,6 +907,6 @@
     <string name="analytics_platforms">"Analysplattformar: "</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
-    <string name="relayed_by">Vidaresänt av: %s</string>
+    <string name="relayed_by">Vidaresänt av: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>

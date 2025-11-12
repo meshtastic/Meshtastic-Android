@@ -849,7 +849,7 @@
     <string name="notification_permissions_description">Meshtastic 使用通知功能讓您隨時了解新訊息和其他重要事件。您可以隨時在設定中更新通知權限。</string>
     <string name="next">繼續</string>
     <string name="grant_permissions">授予權限</string>
-    <string name="nodes_queued_for_deletion">%d 個節點已排定移除：</string>
+    <string name="nodes_queued_for_deletion">%1$d 個節點已排定移除：</string>
     <string name="clean_node_database_description">注意：這會將節點從應用程式和裝置資料庫中移除。\n所選的項目將會加入待處理中。</string>
     <string name="connecting_to_device">正在連線至裝置</string>
     <string name="map_type_normal">標準</string>
@@ -905,6 +905,6 @@
     <string name="analytics_platforms">"分析平台: "</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
-    <string name="relayed_by">經由：%s</string>
+    <string name="relayed_by">經由：%1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>

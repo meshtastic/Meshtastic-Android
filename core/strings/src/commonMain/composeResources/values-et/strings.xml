@@ -851,7 +851,7 @@
     <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <string name="next">Järgmine</string>
     <string name="grant_permissions">Anna luba</string>
-    <string name="nodes_queued_for_deletion">%d eemaldatavat sõlme nimekirjas:</string>
+    <string name="nodes_queued_for_deletion">%1$d eemaldatavat sõlme nimekirjas:</string>
     <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
     <string name="connecting_to_device">Ühendan seadet</string>
     <string name="map_type_normal">Normaalne</string>
@@ -907,6 +907,6 @@
     <string name="analytics_platforms">"Analüütika platvormid: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
     <string name="unset">Tühistatud - 0</string>
-    <string name="relayed_by">Edastaja: %s</string>
+    <string name="relayed_by">Edastaja: %1$s</string>
     <string name="preserve_favorites">Säilita lemmikud?</string>
 </resources>

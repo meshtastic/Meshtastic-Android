@@ -852,7 +852,7 @@
     <string name="notification_permissions_description">Meshtastic vás pomocí oznámení upozorní na nové zprávy a důležité události. Nastavení oznámení si můžete kdykoli upravit.</string>
     <string name="next">Další</string>
     <string name="grant_permissions">Povolit oprávnění</string>
-    <string name="nodes_queued_for_deletion">%d uzlů zařazeno k odstranění:</string>
+    <string name="nodes_queued_for_deletion">%1$d uzlů zařazeno k odstranění:</string>
     <string name="clean_node_database_description">Varování: Tímto odstraníte uzly z databází v aplikaci i v zařízení.\nVybrané položky se sčítají (kombinují).</string>
     <string name="connecting_to_device">Connecting to device</string>
     <string name="map_type_normal">Normální</string>
@@ -908,6 +908,6 @@
     <string name="analytics_platforms">"Analytics platforms: "</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
     <string name="unset">Unset - 0</string>
-    <string name="relayed_by">Relayed by: %s</string>
+    <string name="relayed_by">Relayed by: %1$s</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
 </resources>
