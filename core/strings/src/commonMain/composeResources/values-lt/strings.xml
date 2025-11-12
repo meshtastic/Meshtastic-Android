@@ -115,9 +115,9 @@
     <string name="provide_location_to_mesh">Pateikti telefono vietą tinklui</string>
     <plurals name="delete_messages">
         <item quantity="one">Ištrinti pranešimą?</item>
-        <item quantity="few">Ištrinti %s pranešimus?</item>
-        <item quantity="many">Ištrinti %s pranešimus?</item>
-        <item quantity="other">Ištrinti %s pranešimus?</item>
+        <item quantity="few">Ištrinti %1$s pranešimus?</item>
+        <item quantity="many">Ištrinti %1$s pranešimus?</item>
+        <item quantity="other">Ištrinti %1$s pranešimus?</item>
     </plurals>
     <string name="delete">Ištrinti</string>
     <string name="delete_for_everyone">Ištrinti visiems</string>

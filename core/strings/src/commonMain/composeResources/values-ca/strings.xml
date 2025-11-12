@@ -49,7 +49,7 @@
     <string name="routing_error_bad_request">Sol·licitud errònia.</string>
     <string name="routing_error_duty_cycle_limit">Límit regional de cicle de servei assolit</string>
     <string name="routing_error_not_authorized">No Autoritzat</string>
-    <string name="routing_error_pki_failed">Falla d\'encriptació</string>
+    <string name="routing_error_pki_failed">Falla d'encriptació</string>
     <string name="routing_error_pki_unknown_pubkey">Clau Pública Desconeguda</string>
     <string name="routing_error_admin_bad_session_key">Clau de sessió incorrecta</string>
     <string name="routing_error_admin_public_key_unauthorized">Clau Pública no autoritzada</string>
@@ -74,18 +74,18 @@
     <!-- Position Config -->
     <string name="channel_name">Nom del canal</string>
     <string name="qr_code">Codi QR</string>
-    <string name="application_icon">icona de l\'aplicació</string>
-    <string name="unknown_username">Nom d\'usuari desconegut</string>
+    <string name="application_icon">icona de l'aplicació</string>
+    <string name="unknown_username">Nom d'usuari desconegut</string>
     <string name="send">Enviar</string>
-    <string name="warning_not_paired">Encara no has emparellat una ràdio compatible amb Meshtastic amb aquest telèfon. Si us plau emparella un dispositiu i configura el teu nom d\'usuari. \n\nAquesta aplicació de codi obert està en desenvolupament. Si hi trobes problemes publica-ho en el nostre fòrum https://github.com/orgs/meshtastic/discussions\n\nPer a més informació visita la nostra pàgina web - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Encara no has emparellat una ràdio compatible amb Meshtastic amb aquest telèfon. Si us plau emparella un dispositiu i configura el teu nom d'usuari. \n\nAquesta aplicació de codi obert està en desenvolupament. Si hi trobes problemes publica-ho en el nostre fòrum https://github.com/orgs/meshtastic/discussions\n\nPer a més informació visita la nostra pàgina web - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="accept">Acceptar</string>
     <string name="cancel">Cancel·lar</string>
     <string name="save_changes">Desar</string>
     <string name="new_channel_rcvd">Nova URL de canal rebuda</string>
-    <string name="report_bug">Informar d\'error</string>
-    <string name="report_a_bug">Informar d\'un error</string>
-    <string name="report_bug_text">Estàs segur que vols informar d\'un error? Després d\'informar-ne, si us plau publica en https://github.com/orgs/meshtastic/discussions de tal manera que puguem emparellar l\'informe amb allò que has trobat.</string>
+    <string name="report_bug">Informar d'error</string>
+    <string name="report_a_bug">Informar d'un error</string>
+    <string name="report_bug_text">Estàs segur que vols informar d'un error? Després d'informar-ne, si us plau publica en https://github.com/orgs/meshtastic/discussions de tal manera que puguem emparellar l'informe amb allò que has trobat.</string>
     <string name="report">Informe</string>
     <string name="pairing_completed">Emparellament completat, iniciar servei</string>
     <string name="pairing_failed_try_again">Emparellament fallit, si us plau selecciona un altre cop</string>
@@ -97,20 +97,20 @@
     <string name="connected_to">Connectat a ràdio (%1$s)</string>
     <string name="not_connected">No connectat</string>
     <string name="connected_sleeping">Connectat a ràdio, però està hivernant</string>
-    <string name="app_too_old">Actualització de l\'aplicació necessària</string>
-    <string name="must_update">Has d\'actualitzar aquesta aplicació a la app store (o Github). És massa antiga per comunicar-se amb aquest firmware de la ràdio. Si us plau llegeix el nostre <a href="https://meshtastic.org/docs/software/android/installation">docs</a> sobre aquesta temàtica.</string>
+    <string name="app_too_old">Actualització de l'aplicació necessària</string>
+    <string name="must_update">Has d'actualitzar aquesta aplicació a la app store (o Github). És massa antiga per comunicar-se amb aquest firmware de la ràdio. Si us plau llegeix el nostre <a href="https://meshtastic.org/docs/software/android/installation">docs</a> sobre aquesta temàtica.</string>
     <string name="none">Cap (desactivat)</string>
     <string name="meshtastic_service_notifications">Notificacions de servei</string>
     <string name="about">Sobre</string>
-    <string name="channel_invalid">La URL d\'aquest canal és invàlida i no es pot fer servir</string>
+    <string name="channel_invalid">La URL d'aquest canal és invàlida i no es pot fer servir</string>
     <string name="debug_panel">Panell de depuració</string>
     <string name="clear">Netejar</string>
-    <string name="message_delivery_status">Estat d\'entrega del missatge</string>
+    <string name="message_delivery_status">Estat d'entrega del missatge</string>
     <string name="firmware_too_old">Actualització de firmware necessària.</string>
     <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació. Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="okay">Acceptar</string>
     <string name="must_set_region">Has de configurar la regió!</string>
-    <string name="cant_change_no_radio">No s\'ha pogut canviar el canal perquè la ràdio no està configurada correctament. Si us plau torna-ho a provar.</string>
+    <string name="cant_change_no_radio">No s'ha pogut canviar el canal perquè la ràdio no està configurada correctament. Si us plau torna-ho a provar.</string>
     <string name="reset">Restablir</string>
     <string name="scan">Escanejar</string>
     <string name="add_network_device">Afegir</string>
@@ -125,13 +125,13 @@
     <string name="provide_location_to_mesh">Proveir la posició del telèfon a la xarxa</string>
     <plurals name="delete_messages">
         <item quantity="one">Esborrar missatge?</item>
-        <item quantity="other">Esborrar %s missatges?</item>
+        <item quantity="other">Esborrar %1$s missatges?</item>
     </plurals>
     <string name="delete">Esborrar</string>
     <string name="delete_for_everyone">Esborrar per a tothom</string>
     <string name="delete_for_me">Esborrar per a mi</string>
     <string name="select_all">Seleccionar tot</string>
-    <string name="map_style_selection">Selecció d\'estil</string>
+    <string name="map_style_selection">Selecció d'estil</string>
     <string name="map_download_region">Descarregar regió</string>
     <string name="name">Nom</string>
     <string name="description">Descripció</string>
@@ -156,8 +156,8 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Error</string>
     <string name="ignore">Ignorar</string>
-    <string name="ignore_add">Afegir \'%1$s\' a la llista d\'ignorats?</string>
-    <string name="ignore_remove">Treure \'%1$s\' de la llista d\'ignorats?</string>
+    <string name="ignore_add">Afegir '%1$s' a la llista d'ignorats?</string>
+    <string name="ignore_remove">Treure '%1$s' de la llista d'ignorats?</string>
     <string name="map_select_download_region">Seleccionar regió a descarregar</string>
     <string name="map_tile_download_estimate">Estimació de descàrrega de tessel·les:</string>
     <string name="map_start_download">Iniciar descarrega</string>
