@@ -172,14 +172,12 @@
     <string name="pairing_failed_try_again">Pároztatás sikertelen, kérem próbálja meg újra.</string>
     <string name="location_disabled">A földrajzi helyhez való hozzáférés le van tiltva, nem lehet pozíciót közölni a mesh hálózattal.</string>
     <string name="share">Megosztás</string>
-    <string name="new_node_seen">Új csomópont észlelve: %s</string>
     <string name="disconnected">Szétkapcsolva</string>
     <string name="device_sleeping">Az eszköz alszik</string>
     <string name="connected_count">Kapcsolódva: %1$s elérhető</string>
     <string name="ip_address">IP cím:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Kapcsolódva</string>
-    <string name="connected_to">Kapcsolódva a(z) %s rádióhoz</string>
     <string name="not_connected">Nincs kapcsolat</string>
     <string name="connected_sleeping">Kapcsolódva a rádióhoz, de az alvó üzemmódban van</string>
     <string name="app_too_old">Az alkalmazás frissítése szükséges</string>
@@ -275,8 +273,6 @@
     <string name="error">Hiba</string>
     <string name="ignore">Mellőzés</string>
     <string name="remove_ignored">Eltávolítás a mellőzöttek közül</string>
-    <string name="ignore_add">Hozzáadod „%s”-t a figyelmen kívül hagyási listához?</string>
-    <string name="ignore_remove">Eltávolítod „%s”-t a figyelmen kívül hagyási listáról?</string>
     <string name="map_select_download_region">Válassz letöltési régiót</string>
     <string name="map_tile_download_estimate">Csempe letöltés számítása:</string>
     <string name="map_start_download">Letöltés indítása</string>
@@ -289,10 +285,8 @@
     <string name="calculating">Számolás…</string>
     <string name="map_offline_manager">Offline kezelő</string>
     <string name="map_cache_size">Gyorsítótár mérete jelenleg</string>
-    <string name="map_cache_info">Gyorsítótár kapacitása: %1$.2f MB\nGyorsítótár kihasználtsága: %2$.2f MB</string>
     <string name="map_clear_tiles">Letöltött csempék törlése</string>
     <string name="map_tile_source">Csempe forrás</string>
-    <string name="map_purge_success">SQL gyorsítótár kiürítve %s számára</string>
     <string name="map_purge_fail">SQL gyorsítótár kiürítése sikertelen, a részleteket lásd a logcat-ben</string>
     <string name="map_cache_manager">Gyorsítótár kezelő</string>
     <string name="map_download_complete">A letöltés befejeződött!</string>
@@ -302,7 +296,6 @@
     <string name="waypoint_edit">Útpont szerkesztés</string>
     <string name="waypoint_delete">Útpont törlés?</string>
     <string name="waypoint_new">Új útpont</string>
-    <string name="waypoint_received">Útvonalpont érkezett: %s</string>
     <string name="error_duty_cycle">Elérte a Duty Cycle korlátot. Most nem lehet üzenetet küldeni, próbáld újra később.</string>
     <string name="remove">Törlés</string>
     <string name="remove_node_text">Ez a csomópont kikerül a listádról, amíg az eszközöd újra nem kap adatot tőle.</string>
@@ -378,8 +371,6 @@
     <string name="favorite">Kedvenc</string>
     <string name="add_favorite">Hozzáadás a kedvencekhez</string>
     <string name="remove_favorite">Eltávolítás a kedvencek közül</string>
-    <string name="favorite_add">Hozzáadod „%s”-t kedvenc csomópontként?</string>
-    <string name="favorite_remove">Eltávolítod „%s”-t a kedvencek közül?</string>
     <string name="power_metrics_log">Energia-mérési napló</string>
     <string name="channel_1">1. csatorna</string>
     <string name="channel_2">2. csatorna</string>
@@ -391,7 +382,6 @@
     <string name="i_know_what_i_m_doing">Tudom, mit csinálok.</string>
     <string name="low_battery_message">A %1$s csomópont akkumulátora alacsony (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Alacsony töltöttség értesítések</string>
-    <string name="low_battery_title">Alacsony töltöttség: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Alacsony töltöttségű értesítések (kedvenc csomópontok)</string>
     <string name="baro_pressure">Légnyomás</string>
     <string name="udp_enabled">Engedélyezve</string>
@@ -885,7 +875,6 @@
     <string name="eight_hours">8 óra</string>
     <string name="one_day">24 óra</string>
     <string name="two_days">48 óra</string>
-    <string name="last_heard_filter_label">Szűrés az utolsó észlelés ideje szerint: %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Nincs alkalmazás a hivatkozás kezeléséhez.</string>
     <string name="system_settings">Rendszerbeállítások</string>
