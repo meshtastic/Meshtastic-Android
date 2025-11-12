@@ -94,6 +94,7 @@
     <string name="disconnected">Desconnectat</string>
     <string name="device_sleeping">Dispositiu hivernant</string>
     <string name="ip_address">Adreça IP:</string>
+    <string name="connected_to">Connectat a ràdio (%1$s)</string>
     <string name="not_connected">No connectat</string>
     <string name="connected_sleeping">Connectat a ràdio, però està hivernant</string>
     <string name="app_too_old">Actualització de l\'aplicació necessària</string>
@@ -155,6 +156,8 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Error</string>
     <string name="ignore">Ignorar</string>
+    <string name="ignore_add">Afegir \'%1$s\' a la llista d\'ignorats?</string>
+    <string name="ignore_remove">Treure \'%1$s\' de la llista d\'ignorats?</string>
     <string name="map_select_download_region">Seleccionar regió a descarregar</string>
     <string name="map_tile_download_estimate">Estimació de descàrrega de tessel·les:</string>
     <string name="map_start_download">Iniciar descarrega</string>
@@ -166,8 +169,10 @@
     <string name="calculating">Calculant…</string>
     <string name="map_offline_manager">Director fora de línia</string>
     <string name="map_cache_size">Mida actual de la memòria cau</string>
+    <string name="map_cache_info">Mida total de la memòria cau: %1$d MB\nMemoria cau feta servir: %2$d MB</string>
     <string name="map_clear_tiles">Netejar tessel·les descarregades</string>
     <string name="map_tile_source">Font de tessel·la</string>
+    <string name="map_purge_success">Memòria cau SQL %1$s purgada</string>
     <string name="map_purge_fail">Error en la purga de la memòria cau SQL, veure logcat per a detalls</string>
     <string name="map_cache_manager">Director de la memòria cau</string>
     <string name="map_download_complete">Descarrega completa!</string>
@@ -177,6 +182,7 @@
     <string name="waypoint_edit">Editar punt de pas</string>
     <string name="waypoint_delete">Esborrar punt de pas?</string>
     <string name="waypoint_new">Nou punt de pas</string>
+    <string name="waypoint_received">Punt de pas rebut: %1$s</string>
     <string name="error_duty_cycle">Límit del cicle de treball assolit. No es podran enviar més missatges, intenta-ho més tard.</string>
     <string name="remove">Eliminar</string>
     <string name="remove_node_text">Aquest node serà eliminat de la teva llista fins que rebi dades un altre cop.</string>

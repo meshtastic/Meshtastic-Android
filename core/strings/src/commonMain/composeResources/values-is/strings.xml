@@ -39,6 +39,7 @@
     <string name="disconnected">Aftengd</string>
     <string name="device_sleeping">Radíó er í svefnham</string>
     <string name="ip_address">IP Tala:</string>
+    <string name="connected_to">Tengdur við radíó (%1$s)</string>
     <string name="not_connected">Ekki tengdur</string>
     <string name="connected_sleeping">Tengdur við radíó, en það er í svefnham</string>
     <string name="app_too_old">Uppfærsla á smáforriti nauðsynleg</string>
@@ -98,6 +99,8 @@
     <string name="direct_message">Bein skilaboð</string>
     <string name="nodedb_reset">Endurræsa NodeDB</string>
     <string name="ignore">Hunsa</string>
+    <string name="ignore_add">Bæta \'%1$s\' við Ignore lista?</string>
+    <string name="ignore_remove">Fjarlægja \'%1$s\' frá hunsa lista?</string>
     <string name="map_select_download_region">Veldu svæði til að niðurhala</string>
     <string name="map_tile_download_estimate">Áætlaður niðurhalstími reits:</string>
     <string name="map_start_download">Hefja niðurhal</string>
@@ -108,8 +111,10 @@
     <string name="calculating">Reiknar…</string>
     <string name="map_offline_manager">Sýsla með utankerfis kort</string>
     <string name="map_cache_size">Núverandi stærð skyndiminnis</string>
+    <string name="map_cache_info">Stærð skyndiminnis: %1$d MB\nNýtt skyndiminni: %2$d MB</string>
     <string name="map_clear_tiles">Hreinsa burt niðurhalaða reiti</string>
     <string name="map_tile_source">Uppruni reits</string>
+    <string name="map_purge_success">SQL skyndiminni hreinsað fyrir %1$s</string>
     <string name="map_purge_fail">Hreinsun SQL skyndiminnis mistókts, sjá upplýsingar í logcat</string>
     <string name="map_cache_manager">Sýsla með skyndiminni</string>
     <string name="map_download_complete">Niðurhali lokið!</string>
@@ -119,6 +124,7 @@
     <string name="waypoint_edit">Breyta leiðarpunkti</string>
     <string name="waypoint_delete">Eyða leiðarpunkti?</string>
     <string name="waypoint_new">Nýr leiðarpunktur</string>
+    <string name="waypoint_received">Móttekin leiðarpunktur: %1$s</string>
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
     <string name="region_frequency_plan">Svæði</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->

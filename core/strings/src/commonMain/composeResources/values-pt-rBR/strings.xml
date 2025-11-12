@@ -96,12 +96,14 @@
     <string name="pairing_failed_try_again">Pareamento falhou, favor selecionar novamente</string>
     <string name="location_disabled">Localização desativada, não será possível informar sua posição.</string>
     <string name="share">Compartilhar</string>
+    <string name="new_node_seen">Novo Nó Visto: %1$s</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo em suspensão (sleep)</string>
     <string name="connected_count">Conectado: %1$s ligado(s)</string>
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
     <string name="connected">Conectado</string>
+    <string name="connected_to">Conectado ao rádio (%1$s)</string>
     <string name="not_connected">Não conectado</string>
     <string name="connected_sleeping">Conectado ao rádio, mas ele está em suspensão (sleep)</string>
     <string name="app_too_old">Atualização do aplicativo necessária</string>
@@ -190,6 +192,8 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Erro</string>
     <string name="ignore">Ignorar</string>
+    <string name="ignore_add">Adicionar \'%1$s\' na lista de ignorados?</string>
+    <string name="ignore_remove">Remover \'%1$s\' da lista de ignorados?</string>
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
@@ -202,8 +206,10 @@
     <string name="calculating">Calculando…</string>
     <string name="map_offline_manager">Gerenciador offline</string>
     <string name="map_cache_size">Tamanho atual do cache</string>
+    <string name="map_cache_info">Capacidade do Cache: %1$d MB\nCache Utilizado: %2$d MB</string>
     <string name="map_clear_tiles">Limpar blocos baixados</string>
     <string name="map_tile_source">Fonte dos blocos</string>
+    <string name="map_purge_success">Cache SQL removido para %1$s</string>
     <string name="map_purge_fail">Falha na remoção do cache SQL, consulte logcat para obter detalhes</string>
     <string name="map_cache_manager">Gerenciador de cache</string>
     <string name="map_download_complete">Download concluído!</string>
@@ -213,6 +219,7 @@
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_delete">Excluir ponto de referência?</string>
     <string name="waypoint_new">Novo ponto de referência</string>
+    <string name="waypoint_received">Ponto de referência recebido: %1$s</string>
     <string name="error_duty_cycle">Limite de capacidade atingido. Não é possível enviar mensagens no momento. Por favor, tente novamente mais tarde.</string>
     <string name="remove">Excluir</string>
     <string name="remove_node_text">Este dispositivo será excluído de sua lista até que seu dispositivo receba dados dele novamente.</string>
@@ -283,6 +290,8 @@
     <string name="alert_bell_text">Caractere de Alerta!</string>
     <string name="critical_alert">Alerta Crítico!</string>
     <string name="favorite">Favorito</string>
+    <string name="favorite_add">Adicionar \'%1$s\' como um nó favorito?</string>
+    <string name="favorite_remove">Remover \'%1$s\' como um nó favorito?</string>
     <string name="power_metrics_log">Log de Métricas de Energia</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
@@ -294,6 +303,7 @@
     <string name="i_know_what_i_m_doing">Eu sei o que estou fazendo.</string>
     <string name="low_battery_message">O nó %1$s está com bateria fraca (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notificações de bateria fraca</string>
+    <string name="low_battery_title">Bateria fraca: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificações de bateria fraca (nós favoritos)</string>
     <string name="baro_pressure">Pressão Barométrica</string>
     <string name="udp_config">Configuração UDP</string>

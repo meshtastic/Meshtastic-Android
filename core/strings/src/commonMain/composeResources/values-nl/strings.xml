@@ -97,6 +97,7 @@
     <string name="ip_address">IP-adres:</string>
     <string name="ip_port">Poort:</string>
     <string name="connected">Verbonden</string>
+    <string name="connected_to">Verbonden met radio (%1$s)</string>
     <string name="not_connected">Niet verbonden</string>
     <string name="connected_sleeping">Verbonden met radio in slaapstand</string>
     <string name="app_too_old">Applicatie bijwerken vereist</string>
@@ -160,6 +161,8 @@
     <string name="delivery_confirmed">Aflevering bevestigd</string>
     <string name="error">Fout</string>
     <string name="ignore">Negeer</string>
+    <string name="ignore_add">Voeg \'%1$s\' toe aan negeerlijst?</string>
+    <string name="ignore_remove">Verwijder \'%1$s\' uit negeerlijst?</string>
     <string name="map_select_download_region">Selecteer regio om te downloaden</string>
     <string name="map_tile_download_estimate">Geschatte download tegels:</string>
     <string name="map_start_download">Download starten</string>
@@ -172,8 +175,10 @@
     <string name="calculating">Berekenen…</string>
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_cache_size">Huidige cache grootte</string>
+    <string name="map_cache_info">Cache capaciteit: %1$d MB\nCache gebruik: %2$d MB</string>
     <string name="map_clear_tiles">Wis gedownloade tegels</string>
     <string name="map_tile_source">Bron tegel</string>
+    <string name="map_purge_success">SQL cache gewist voor %1$s</string>
     <string name="map_purge_fail">SQL cache verwijderen mislukt, zie logcat voor details</string>
     <string name="map_cache_manager">Cachemanager</string>
     <string name="map_download_complete">Download voltooid!</string>
@@ -183,6 +188,7 @@
     <string name="waypoint_edit">Wijzig waypoint</string>
     <string name="waypoint_delete">Waypoint verwijderen?</string>
     <string name="waypoint_new">Nieuw waypoint</string>
+    <string name="waypoint_received">Ontvangen waypoint: %1$s</string>
     <string name="error_duty_cycle">Limiet van Duty Cycle bereikt. Kan nu geen berichten verzenden, probeer het later opnieuw.</string>
     <string name="remove">Verwijder</string>
     <string name="remove_node_text">Deze node zal worden verwijderd uit jouw lijst totdat je node hier opnieuw gegevens van ontvangt.</string>
@@ -249,6 +255,8 @@
     <string name="alert_bell_text">Melding Bell teken!</string>
     <string name="critical_alert">Kritieke Waarschuwing!</string>
     <string name="favorite">Favoriet</string>
+    <string name="favorite_add">\'%1$s\' aan favorieten toevoegen?</string>
+    <string name="favorite_remove">\'%1$s\' uit favorieten verwijderen?</string>
     <string name="power_metrics_log">Energiegegevenslogboek</string>
     <string name="channel_1">Kanaal 1</string>
     <string name="channel_2">Kanaal 2</string>
@@ -258,6 +266,7 @@
     <string name="are_you_sure">Weet u het zeker?</string>
     <string name="i_know_what_i_m_doing">Ik weet waar ik mee bezig ben.</string>
     <string name="meshtastic_low_battery_notifications">Batterij bijna leeg</string>
+    <string name="low_battery_title">Batterij bijna leeg: %1$s</string>
     <string name="baro_pressure">Luchtdruk</string>
     <string name="udp_config">UDP Configuratie</string>
     <string name="toggle_my_position">Wissel mijn positie</string>

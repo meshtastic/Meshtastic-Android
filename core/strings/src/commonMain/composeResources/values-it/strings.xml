@@ -111,12 +111,14 @@
     <string name="pairing_failed_try_again">Abbinamento fallito, effettuare una nuova selezione</string>
     <string name="location_disabled">L\'accesso alla posizione è disattivato, non è possibile fornire la posizione al mesh.</string>
     <string name="share">Condividi</string>
+    <string name="new_node_seen">Nuovo nodo scoperto:%1$s</string>
     <string name="disconnected">Disconnesso</string>
     <string name="device_sleeping">Il dispositivo è inattivo</string>
     <string name="connected_count">Connesso: %1$s online</string>
     <string name="ip_address">Indirizzo IP:</string>
     <string name="ip_port">Porta:</string>
     <string name="connected">Connesso</string>
+    <string name="connected_to">Connesso alla radio (%1$s)</string>
     <string name="not_connected">Non connesso</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
     <string name="app_too_old">Aggiornamento dell\'applicazione necessario</string>
@@ -210,6 +212,8 @@
     <string name="delivery_confirmed">Consegna confermata</string>
     <string name="error">Errore</string>
     <string name="ignore">Ignora</string>
+    <string name="ignore_add">Aggiungere \'%1$s\' alla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
+    <string name="ignore_remove">Rimuovere \'%1$s\' dalla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
     <string name="map_select_download_region">Seleziona la regione da scaricare</string>
     <string name="map_tile_download_estimate">Stima dei riquadri da scaricare:</string>
     <string name="map_start_download">Inizia download</string>
@@ -222,8 +226,10 @@
     <string name="calculating">Calcolo…</string>
     <string name="map_offline_manager">Gestore Offline</string>
     <string name="map_cache_size">Dimensione Cache attuale</string>
+    <string name="map_cache_info">Capacità Cache: %1$d MB\nCache utilizzata: %2$d MB</string>
     <string name="map_clear_tiles">Cancella i riquadri mappa scaricati</string>
     <string name="map_tile_source">Sorgente Riquadri Mappa</string>
+    <string name="map_purge_success">Cache SQL eliminata per %1$s</string>
     <string name="map_purge_fail">Eliminazione della cache SQL non riuscita, vedere logcat per i dettagli</string>
     <string name="map_cache_manager">Gestione della cache</string>
     <string name="map_download_complete">Scaricamento completato!</string>
@@ -233,6 +239,7 @@
     <string name="waypoint_edit">Modifica waypoint</string>
     <string name="waypoint_delete">Elimina waypoint?</string>
     <string name="waypoint_new">Nuovo waypoint</string>
+    <string name="waypoint_received">Waypoint ricevuto: %1$s</string>
     <string name="error_duty_cycle">Limite di Duty Cycle raggiunto. Impossibile inviare messaggi in questo momento, riprovare più tardi.</string>
     <string name="remove">Elimina</string>
     <string name="remove_node_text">Questo nodo verrà rimosso dalla tua lista fino a quando il tuo nodo non riceverà di nuovo dei dati.</string>
@@ -303,6 +310,8 @@
     <string name="alert_bell_text">Carattere Campana Di Allarme!</string>
     <string name="critical_alert">Avvisi critici</string>
     <string name="favorite">Preferito</string>
+    <string name="favorite_add">Aggiungere \'%1$s\' ai nodi preferiti?</string>
+    <string name="favorite_remove">Rimuovere \'%1$s\' dai nodi preferiti?</string>
     <string name="power_metrics_log">Registro Metriche Alimentazione</string>
     <string name="channel_1">Canale 1</string>
     <string name="channel_2">Canale 2</string>
@@ -314,6 +323,7 @@
     <string name="i_know_what_i_m_doing">So cosa sto facendo.</string>
     <string name="low_battery_message">Il nodo %1$s ha la batteria quasi scarica (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notifica di batteria scarica</string>
+    <string name="low_battery_title">Poca energia rimanente nella batteria: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifiche batteria scarica (nodi preferiti)</string>
     <string name="baro_pressure">Pressione barometrica</string>
     <string name="udp_enabled">Abilitato</string>

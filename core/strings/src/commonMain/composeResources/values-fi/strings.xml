@@ -172,12 +172,14 @@
     <string name="pairing_failed_try_again">Laiteparin muodostaminen epäonnistui, valitse uudelleen</string>
     <string name="location_disabled">Sijainnin käyttöoikeus on poistettu käytöstä, joten emme voi tarjota sijaintia mesh-verkkoon.</string>
     <string name="share">Jaa</string>
+    <string name="new_node_seen">Uusi laite nähty: %1$s</string>
     <string name="disconnected">Ei yhdistetty</string>
     <string name="device_sleeping">Laite on lepotilassa</string>
     <string name="connected_count">Yhdistetty: %1$s verkossa</string>
     <string name="ip_address">IP-osoite:</string>
     <string name="ip_port">Portti:</string>
     <string name="connected">Yhdistetty</string>
+    <string name="connected_to">Yhdistetty radioon (%1$s)</string>
     <string name="connection_status">Aktiiviset yhteydet:</string>
     <string name="wifi_ip">WiFi-verkon IP:</string>
     <string name="ethernet_ip">Ethernet-verkon IP:</string>
@@ -276,6 +278,8 @@
     <string name="error">Virhe</string>
     <string name="ignore">Jätä huomiotta</string>
     <string name="remove_ignored">Poista huomioimattomista</string>
+    <string name="ignore_add">Lisää \'%1$s\' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
+    <string name="ignore_remove">Poistetaanko \'%1$s\' jätä huomiotta listalta? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
     <string name="map_select_download_region">Valitse ladattava kartta-alue</string>
     <string name="map_tile_download_estimate">Laattojen latauksessa kuluva aika-arvio:</string>
     <string name="map_start_download">Aloita Lataus</string>
@@ -288,8 +292,10 @@
     <string name="calculating">Lasketaan…</string>
     <string name="map_offline_manager">Offline hallinta</string>
     <string name="map_cache_size">Nykyinen välimuistin koko</string>
+    <string name="map_cache_info">Välimuistin tallennustilan määrä: %1$d Mt\nVälimuistin käyttö: %2$d Mt</string>
     <string name="map_clear_tiles">Tyhjennä kartan laatat</string>
     <string name="map_tile_source">Laatatietolähde</string>
+    <string name="map_purge_success">SQL-välimuisti tyhjennetty %1$s: lle</string>
     <string name="map_purge_fail">SQL-välimuistin tyhjennys epäonnistui, katso logcat saadaksesi lisätietoja</string>
     <string name="map_cache_manager">Välimuistin Hallinta</string>
     <string name="map_download_complete">Lataus on valmis!</string>
@@ -299,6 +305,7 @@
     <string name="waypoint_edit">Muokkaa reittipistettä</string>
     <string name="waypoint_delete">Poista reittipiste?</string>
     <string name="waypoint_new">Uusi reittipiste</string>
+    <string name="waypoint_received">Vastaanotettu reittipiste: %1$s</string>
     <string name="error_duty_cycle">Duty Cyclen raja saavutettu. Viestien lähettäminen ei ole tällä hetkellä mahdollista. Yritä myöhemmin uudelleen.</string>
     <string name="remove">Poista</string>
     <string name="remove_node_text">Tämä laite poistetaan luettelosta siihen saakka, kunnes sen tiedot vastaanotetaan uudelleen.</string>
@@ -379,6 +386,8 @@
     <string name="favorite">Suosikki</string>
     <string name="add_favorite">Lisää suosikkeihin</string>
     <string name="remove_favorite">Poista suosikeista</string>
+    <string name="favorite_add">Lisää \'%1$s\' radio suosikkeihin?</string>
+    <string name="favorite_remove">Poista \'%1$s\' radio suosikeista?</string>
     <string name="power_metrics_log">Tehomittausdata</string>
     <string name="channel_1">Kanava 1</string>
     <string name="channel_2">Kanava 2</string>
@@ -390,6 +399,7 @@
     <string name="i_know_what_i_m_doing">Tiedän mitä olen tekemässä.</string>
     <string name="low_battery_message">Laitteen %1$s akun varaustila on vähissä (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Akun vähäisen varauksen ilmoitukset</string>
+    <string name="low_battery_title">Akku vähissä: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akun vähäisen varauksen ilmoitukset (suosikkilaitteet)</string>
     <string name="baro_pressure">Barometrinen paine</string>
     <string name="udp_enabled">Käytössä</string>
@@ -888,6 +898,7 @@
     <string name="eight_hours">8 tuntia</string>
     <string name="one_day">24 tuntia</string>
     <string name="two_days">48 tuntia</string>
+    <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Ei sovellusta linkin avaamiseen.</string>
     <string name="system_settings">Järjestelmäasetukset</string>
@@ -896,5 +907,6 @@
     <string name="analytics_platforms">"Analytiikka-alustat: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <string name="unset">Ei asetettu – 0</string>
+    <string name="relayed_by">Välittänyt: %1$s</string>
     <string name="preserve_favorites">Säilytä suosikit?</string>
 </resources>

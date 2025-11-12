@@ -102,6 +102,7 @@
     <string name="ip_address">IP 주소:</string>
     <string name="ip_port">포트:</string>
     <string name="connected">연결됨</string>
+    <string name="connected_to">(%1$s)에 연결됨</string>
     <string name="not_connected">연결되지 않음</string>
     <string name="connected_sleeping">연결되었지만, 해당 장치는 절전모드입니다.</string>
     <string name="app_too_old">앱 업데이트가 필요합니다.</string>
@@ -169,6 +170,8 @@
     <string name="delivery_confirmed">발송 확인 됨</string>
     <string name="error">오류</string>
     <string name="ignore">무시하기</string>
+    <string name="ignore_add">%1$s를 무시 목록에 추가하시겠습니까?</string>
+    <string name="ignore_remove">%1$s를 무시 목록에서 삭제하시겠습니까?</string>
     <string name="map_select_download_region">다운로드 지역 선택</string>
     <string name="map_tile_download_estimate">맵 타일 다운로드 예상:</string>
     <string name="map_start_download">다운로드 시작</string>
@@ -181,8 +184,10 @@
     <string name="calculating">계산 중...</string>
     <string name="map_offline_manager">오프라인 관리자</string>
     <string name="map_cache_size">현재 캐시 크기</string>
+    <string name="map_cache_info">캐시 용량: %1$dMB\n캐시 사용량: %2$dMB</string>
     <string name="map_clear_tiles">다운로드한 타일 지우기</string>
     <string name="map_tile_source">타일 소스</string>
+    <string name="map_purge_success">%1$s에 대한 SQL 캐시가 제거되었습니다.</string>
     <string name="map_purge_fail">SQL 캐시 제거 실패, 자세한 내용은 logcat 참조</string>
     <string name="map_cache_manager">캐시 관리자</string>
     <string name="map_download_complete">다운로드 완료!</string>
@@ -192,6 +197,7 @@
     <string name="waypoint_edit">웨이포인트 편집</string>
     <string name="waypoint_delete">웨이포인트 삭제?</string>
     <string name="waypoint_new">새 웨이포인트</string>
+    <string name="waypoint_received">웨이포인트 수신: %1$s</string>
     <string name="error_duty_cycle">듀티 사이클 제한에 도달했습니다. 지금은 메시지를 보낼 수 없습니다. 나중에 다시 시도하세요.</string>
     <string name="remove">지우기</string>
     <string name="remove_node_text">이 노드는 당신의 노드에서 데이터를 수신할 때 까지 목록에서 삭제됩니다.</string>
@@ -259,6 +265,8 @@
     <string name="alert_bell_text">알람 종 문자!</string>
     <string name="critical_alert">중요 경고!</string>
     <string name="favorite">즐겨찾기</string>
+    <string name="favorite_add">\'%1$s\'를 즐겨찾기 하시겠습니까?</string>
+    <string name="favorite_remove">\'%1$s\'를 즐겨찾기 취소하시겠습니까?</string>
     <string name="power_metrics_log">전원 메트릭 로그</string>
     <string name="channel_1">채널 1</string>
     <string name="channel_2">채널 2</string>
@@ -270,6 +278,7 @@
     <string name="i_know_what_i_m_doing">뭘하는지 알고 있습니다</string>
     <string name="low_battery_message">%1$s 노드의 배터리가 낮습니다. (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">배터리 부족 알림</string>
+    <string name="low_battery_title">배터리  부족: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">배터리 부족 알림 (즐겨찾기 노드)</string>
     <string name="baro_pressure">기압</string>
     <string name="udp_enabled">활성화</string>

@@ -84,6 +84,7 @@
     <string name="disconnected">Atsijungta</string>
     <string name="device_sleeping">Įrenginys miega</string>
     <string name="ip_address">IP adresas:</string>
+    <string name="connected_to">Prisijungta prie radijo (%1$s)</string>
     <string name="not_connected">Neprijungtas</string>
     <string name="connected_sleeping">Prisijungta prie radijo, bet jis yra miego režime</string>
     <string name="app_too_old">Reikalingas programos atnaujinimas</string>
@@ -148,6 +149,8 @@
     <string name="delivery_confirmed">Nustatymas įkeltas</string>
     <string name="error">Klaida</string>
     <string name="ignore">Ignoruoti</string>
+    <string name="ignore_add">Ar pridėti „%1$s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
+    <string name="ignore_remove">Ar pašalinti „%1$s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="map_select_download_region">Pasirinkite atsisiuntimo regioną</string>
     <string name="map_tile_download_estimate">Plytelių atsisiuntimo apskaičiavimas:</string>
     <string name="map_start_download">Pradėti atsiuntimą</string>
@@ -159,8 +162,10 @@
     <string name="calculating">Skaičiuojama…</string>
     <string name="map_offline_manager">Neprisijungusio režimo valdymas</string>
     <string name="map_cache_size">Dabartinis talpyklos dydis</string>
+    <string name="map_cache_info">Talpyklos talpa: %1$d MB\nTalpyklos naudojimas: %2$d MB</string>
     <string name="map_clear_tiles">Ištrinti atsisiųstas plyteles</string>
     <string name="map_tile_source">Plytelių šaltinis</string>
+    <string name="map_purge_success">SQL talpykla išvalyta %1$s</string>
     <string name="map_purge_fail">SQL talpyklos išvalymas nepavyko, detales žiūrėkite logcat</string>
     <string name="map_cache_manager">Talpyklos valdymas</string>
     <string name="map_download_complete">Atsiuntimas baigtas!</string>
@@ -170,6 +175,7 @@
     <string name="waypoint_edit">Redaguoti kelio tašką</string>
     <string name="waypoint_delete">Ištrinti orientyrą?</string>
     <string name="waypoint_new">Naujas orientyras</string>
+    <string name="waypoint_received">Gautas orientyras: %1$s</string>
     <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
     <string name="remove">Pašalinti</string>
     <string name="remove_node_text">Šis įtaisas bus pašalintas iš jūsų sąrašo iki tol kol vėl iš jo gausite žinutę / duomenų paketą.</string>

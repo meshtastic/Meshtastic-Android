@@ -104,6 +104,7 @@
     <string name="device_sleeping">Urządzenie uśpione</string>
     <string name="ip_address">Adres IP:</string>
     <string name="connected">Połączony</string>
+    <string name="connected_to">Połączono z urządzeniem (%1$s)</string>
     <string name="not_connected">Nie połączono</string>
     <string name="connected_sleeping">Połączono z urządzeniem, ale jest ono w stanie uśpienia</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
@@ -169,6 +170,8 @@
     <string name="delivery_confirmed">Dostarczono</string>
     <string name="error">Błąd</string>
     <string name="ignore">Zignoruj</string>
+    <string name="ignore_add">Dodać \'%1$s\' do listy ignorowanych?</string>
+    <string name="ignore_remove">Usunąć \'%1$s\' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
     <string name="map_select_download_region">Wybierz region do pobrania</string>
     <string name="map_tile_download_estimate">Szacowany czas pobrania:</string>
     <string name="map_start_download">Rozpocznij pobieranie</string>
@@ -181,8 +184,10 @@
     <string name="calculating">Obliczanie…</string>
     <string name="map_offline_manager">Menedżer map offline</string>
     <string name="map_cache_size">Aktualny rozmiar pamięci podręcznej</string>
+    <string name="map_cache_info">Pojemność pamięci: %1$d MB\nUżycie pamięci: %2$d MB</string>
     <string name="map_clear_tiles">Wyczyść pobrane mapy offline</string>
     <string name="map_tile_source">Źródło map</string>
+    <string name="map_purge_success">Pamięć podręczna wyczyszczona dla %1$s</string>
     <string name="map_purge_fail">Usuwanie pamięci podręcznej SQL nie powiodło się, zobacz logcat</string>
     <string name="map_cache_manager">Zarządzanie pamięcią podręczną</string>
     <string name="map_download_complete">Pobieranie ukończone!</string>
@@ -192,6 +197,7 @@
     <string name="waypoint_edit">Edytuj punkt nawigacji</string>
     <string name="waypoint_delete">Usuń punkt nawigacji?</string>
     <string name="waypoint_new">Nowy punkt nawigacyjny</string>
+    <string name="waypoint_received">Otrzymano punkt orientacyjny: %1$s</string>
     <string name="error_duty_cycle">Osiągnięto limit nadawania. Nie można wysłać wiadomości w tej chwili, spróbuj później.</string>
     <string name="remove">Usuń</string>
     <string name="remove_node_text">Węzeł będzie usunięty z listy dopóki nie otrzymasz ponownie danych od niego.</string>
@@ -260,6 +266,8 @@
     <string name="alert_bell_text">Znak ostrzegawczy!</string>
     <string name="critical_alert">Krytyczny alert!</string>
     <string name="favorite">Ulubiony</string>
+    <string name="favorite_add">Dodać węzeł \'%1$s\' do ulubionych?</string>
+    <string name="favorite_remove">Usunąć węzeł \'%1$s\' z ulubionych?</string>
     <string name="power_metrics_log">Historia zasilania</string>
     <string name="channel_1">Kanał 1</string>
     <string name="channel_2">Kanał 2</string>
@@ -271,6 +279,7 @@
     <string name="i_know_what_i_m_doing">Wiem, co robię.</string>
     <string name="low_battery_message">Węzeł %1$s ma niski poziom baterii (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Powiadomienia o niskim poziomie baterii</string>
+    <string name="low_battery_title">Niski poziom baterii: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Powiadomienia o niskim poziomie baterii (ulubione węzły)</string>
     <string name="baro_pressure">Ciśnienie barometryczne</string>
     <string name="udp_enabled">Włączony</string>

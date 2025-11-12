@@ -135,12 +135,14 @@
     <string name="pairing_failed_try_again">Сдвояването не бе успешно, моля, опитайте отново</string>
     <string name="location_disabled">Достъпът до местоположението е изключен, не може да предостави позиция на мрежата.</string>
     <string name="share">Сподели</string>
+    <string name="new_node_seen">Видян нов възел: %1$s</string>
     <string name="disconnected">Прекъсната връзка</string>
     <string name="device_sleeping">Устройството спи</string>
     <string name="connected_count">Свързани: %1$s онлайн</string>
     <string name="ip_address">IP адрес:</string>
     <string name="ip_port">Порт:</string>
     <string name="connected">Свързано</string>
+    <string name="connected_to">Свързан с радио (%1$s)</string>
     <string name="connection_status">Текущи връзки:</string>
     <string name="wifi_ip">Wifi IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
@@ -232,6 +234,8 @@
     <string name="error">Грешка</string>
     <string name="ignore">Игнорирай</string>
     <string name="remove_ignored">Премахване от игнорирани</string>
+    <string name="ignore_add">Добави \'%1$s\' към списъка с игнорирани?</string>
+    <string name="ignore_remove">Изтрий \'%1$s\' от списъка с игнорирани?</string>
     <string name="map_select_download_region">Избор на регион за сваляне</string>
     <string name="map_tile_download_estimate">Прогноза за изтегляне на картинки:</string>
     <string name="map_start_download">Започни свалянето</string>
@@ -244,8 +248,10 @@
     <string name="calculating">Изчисляване…</string>
     <string name="map_offline_manager">Управление извън линия</string>
     <string name="map_cache_size">Текущ размер на свалените данни</string>
+    <string name="map_cache_info">Капацитет: %1$d MB\nИзползвани: %2$d MB</string>
     <string name="map_clear_tiles">Изчистване на свалените карти</string>
     <string name="map_tile_source">Източник на карти</string>
+    <string name="map_purge_success">Свалените SQL данни бяха изчистени успешно за %1$s</string>
     <string name="map_purge_fail">Изчистването на SQL кеша е неуспешно, вижте logcat за подробности</string>
     <string name="map_cache_manager">Мениджър на кеш</string>
     <string name="map_download_complete">Свалянето приключи!</string>
@@ -255,6 +261,7 @@
     <string name="waypoint_edit">Редактиране на пътна точка</string>
     <string name="waypoint_delete">Изтриване на пътна точка?</string>
     <string name="waypoint_new">Нова пътна точка</string>
+    <string name="waypoint_received">Получена пътна точка: %1$s</string>
     <string name="error_duty_cycle">Достигнат лимит на Duty Cycle. Не може да се изпрати съобщение сега, опитайте по-късно.</string>
     <string name="remove">Изтрий</string>
     <string name="remove_node_text">Този възел ще бъде премахнат от вашия списък, докато вашият възел не получи данни от него отново.</string>
@@ -329,6 +336,8 @@
     <string name="favorite">Любим</string>
     <string name="add_favorite">Добавяне към любими</string>
     <string name="remove_favorite">Премахване от любими</string>
+    <string name="favorite_add">Добавяне на \'%1$s\' като любим възел?</string>
+    <string name="favorite_remove">Премахване на \'%1$s\' като любим възел?</string>
     <string name="power_metrics_log">Журнал на показателите на захранването</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
@@ -340,6 +349,7 @@
     <string name="i_know_what_i_m_doing">Знам какво правя.</string>
     <string name="low_battery_message">Възелът %1$s има изтощена батерия (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Известия за изтощена батерия</string>
+    <string name="low_battery_title">Батерията е изтощена: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Известия за изтощена батерия (любими възли)</string>
     <string name="baro_pressure">Барометрично налягане</string>
     <string name="udp_enabled">Активиран</string>
@@ -705,6 +715,7 @@
     <string name="eight_hours">8 часа</string>
     <string name="one_day">24 часа</string>
     <string name="two_days">48 часа</string>
+    <string name="last_heard_filter_label">Филтриране по време на последното чуване: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Няма налично приложение за обработка на връзката.</string>
     <string name="system_settings">Системни настройки</string>

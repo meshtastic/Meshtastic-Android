@@ -146,6 +146,7 @@
     <string name="ip_address">IP adresa:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Připojeno</string>
+    <string name="connected_to">Připojeno k vysílači (%1$s)</string>
     <string name="not_connected">Nepřipojeno</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači</string>
     <string name="app_too_old">Aplikace je příliš stará</string>
@@ -228,6 +229,8 @@
     <string name="delivery_confirmed">Doručeno</string>
     <string name="error">Chyba</string>
     <string name="ignore">Ignorovat</string>
+    <string name="ignore_add">Přidat \'%1$s\' do seznamu ignorovaných?</string>
+    <string name="ignore_remove">Odstranit \'%1$s\' ze seznamu ignorování?</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
     <string name="map_start_download">Zahájit stahování</string>
@@ -240,8 +243,10 @@
     <string name="calculating">Vypočítávám…</string>
     <string name="map_offline_manager">Správce Offline</string>
     <string name="map_cache_size">Aktuální velikost mezipaměti</string>
+    <string name="map_cache_info">Kapacita mezipaměti: %1$d MB\nvyužití mezipaměti: %2$d MB</string>
     <string name="map_clear_tiles">Vymazat stažené dlaždice</string>
     <string name="map_tile_source">Zdroj dlaždic</string>
+    <string name="map_purge_success">Mezipaměť SQL vyčištěna pro %1$s</string>
     <string name="map_purge_fail">Vyčištění mezipaměti SQL selhalo, podrobnosti naleznete v logcat</string>
     <string name="map_cache_manager">Správce mezipaměti</string>
     <string name="map_download_complete">Stahování dokončeno!</string>
@@ -251,6 +256,7 @@
     <string name="waypoint_edit">Upravit waypoint</string>
     <string name="waypoint_delete">Smazat waypoint?</string>
     <string name="waypoint_new">Nový waypoint</string>
+    <string name="waypoint_received">Přijatý waypoint: %1$s</string>
     <string name="error_duty_cycle">Byl dosažen limit pro cyklus. Momentálně nelze odesílat zprávy, zkuste to prosím později.</string>
     <string name="remove">Odstranit</string>
     <string name="remove_node_text">Tento uzel bude odstraněn z vašeho seznamu, dokud z něj váš uzel znovu neobdrží data.</string>
@@ -322,6 +328,8 @@
     <string name="critical_alert">Kritické varování!</string>
     <string name="favorite">Oblíbené</string>
     <string name="add_favorite">Přidat do oblíbených</string>
+    <string name="favorite_add">Přidat \'%1$s\' jako oblíbený uzel?</string>
+    <string name="favorite_remove">Odstranit \'%1$s\' z oblíbených uzlů?</string>
     <string name="power_metrics_log">Protokol metrik napájení</string>
     <string name="channel_1">Kanál 1</string>
     <string name="channel_2">Kanál 2</string>
@@ -333,6 +341,7 @@
     <string name="i_know_what_i_m_doing">Vím co dělám.</string>
     <string name="low_battery_message">Uzel %1$s má nízký stav baterie (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Upozornění na nízký stav baterie</string>
+    <string name="low_battery_title">Nízký stav baterie: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornění na nízký stav baterie (oblíbené uzly)</string>
     <string name="baro_pressure">Barometrický tlak</string>
     <string name="udp_enabled">Povoleno</string>
@@ -759,6 +768,7 @@
     <string name="eight_hours">8 hodin</string>
     <string name="one_day">24 hodin</string>
     <string name="two_days">48 hodin</string>
+    <string name="last_heard_filter_label">Filtrovat podle času posledního slyšení: %1$s</string>
     <string name="system_settings">Nastavení systému</string>
     <string name="no_local_stats">Žádné statistiky k dispozici</string>
     <string name="analytics_notice">Shromažďujeme analytická data, která nám pomáhají vylepšovat aplikaci pro Android (děkujeme). Získáváme anonymizované informace o chování uživatelů, například hlášení o pádech aplikace, používání jednotlivých obrazovek apod.</string>
