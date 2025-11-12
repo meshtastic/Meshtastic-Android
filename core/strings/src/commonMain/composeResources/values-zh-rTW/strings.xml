@@ -172,14 +172,12 @@
     <string name="pairing_failed_try_again">配對失敗，請重新選擇</string>
     <string name="location_disabled">位置訪問已關閉,無法向設備提供位置.</string>
     <string name="share">分享</string>
-    <string name="new_node_seen">發現新節點： %s</string>
     <string name="disconnected">已中斷連線</string>
     <string name="device_sleeping">設備休眠中</string>
     <string name="connected_count">已連接:%1$s 在線</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">Ip_ 埠：</string>
     <string name="connected">已連線</string>
-    <string name="connected_to">已連接至設備 (%s)</string>
     <string name="connection_status">目前連線：</string>
     <string name="wifi_ip">WIFI IP：</string>
     <string name="ethernet_ip">乙太網路 IP：</string>
@@ -277,8 +275,6 @@
     <string name="error">錯誤</string>
     <string name="ignore">忽略</string>
     <string name="remove_ignored">從忽略清單中移除</string>
-    <string name="ignore_add">將 \'%s\' 加入忽略清單嗎？</string>
-    <string name="ignore_remove">從忽略清單中移除 \'%s\' 嗎？</string>
     <string name="map_select_download_region">選擇下載地區</string>
     <string name="map_tile_download_estimate">圖磚下載估計:</string>
     <string name="map_start_download">開始下載</string>
@@ -291,10 +287,8 @@
     <string name="calculating">正在計算……</string>
     <string name="map_offline_manager">離線管理</string>
     <string name="map_cache_size">目前快取大小</string>
-    <string name="map_cache_info">快取容量: %1$.2f MB\n快取使用: %2$.2f MB</string>
     <string name="map_clear_tiles">清除下載的圖磚</string>
     <string name="map_tile_source">圖磚來源</string>
-    <string name="map_purge_success">清除 %s 的 SQL 快取</string>
     <string name="map_purge_fail">SQL快取清除失敗，請查看logcat以獲取詳細資訊。</string>
     <string name="map_cache_manager">快取管理</string>
     <string name="map_download_complete">下載已完成！</string>
@@ -304,7 +298,6 @@
     <string name="waypoint_edit">編輯航點</string>
     <string name="waypoint_delete">刪除航點?</string>
     <string name="waypoint_new">新建航點</string>
-    <string name="waypoint_received">收到編輯航點：%s</string>
     <string name="error_duty_cycle">達到循環工作週期限制。目前無法發送訊息，請稍後再試。</string>
     <string name="remove">移除</string>
     <string name="remove_node_text">該節點將從您的列表中移除，直到您的節點再次收到來自該節點的數據。</string>
@@ -384,8 +377,6 @@
     <string name="favorite">收藏</string>
     <string name="add_favorite">新增至我的最愛</string>
     <string name="remove_favorite">從我的最愛中移除</string>
-    <string name="favorite_add">是否將“%s”添加為我的最愛節點？</string>
-    <string name="favorite_remove">是否從我的最愛節點中删除“%s”？</string>
     <string name="power_metrics_log">功率計量日誌</string>
     <string name="channel_1">頻道1</string>
     <string name="channel_2">頻道2</string>
@@ -397,7 +388,6 @@
     <string name="i_know_what_i_m_doing">我知道我在做什麼。</string>
     <string name="low_battery_message">節點 %1$s 電量過低 (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">低電量通知</string>
-    <string name="low_battery_title">低電量:%s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低電量通知(收藏節點)</string>
     <string name="baro_pressure">氣壓</string>
     <string name="udp_enabled">已啟用</string>
@@ -894,7 +884,6 @@
     <string name="eight_hours">8 小時</string>
     <string name="one_day">24 小時</string>
     <string name="two_days">48 小時</string>
-    <string name="last_heard_filter_label">依最後收到時間篩選：%s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">沒有應用程式可以開啟此連結。</string>
     <string name="system_settings">系統設定</string>
@@ -903,5 +892,4 @@
     <string name="analytics_platforms">"分析平台: "</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
-    <string name="relayed_by">經由：%s</string>
 </resources>
