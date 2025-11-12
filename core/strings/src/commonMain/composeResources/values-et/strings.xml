@@ -907,5 +907,6 @@
     <string name="analytics_platforms">"Analüütika platvormid: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
     <string name="unset">Tühistatud - 0</string>
+    <string name="relayed_by">Edastab: %1$s</string>
     <string name="preserve_favorites">Säilita lemmikud?</string>
 </resources>
