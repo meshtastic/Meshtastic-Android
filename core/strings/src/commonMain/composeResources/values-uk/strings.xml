@@ -57,7 +57,6 @@
     <string name="device_sleeping">Пристрій в режимі сну</string>
     <string name="ip_address">IP Адреса:</string>
     <string name="ip_port">Порт:</string>
-    <string name="connected_to">Підключено до радіомодуля (%s)</string>
     <string name="not_connected">Не підключено</string>
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
@@ -125,8 +124,6 @@
     <string name="delivery_confirmed">Доставку підтверджено</string>
     <string name="error">Помилка</string>
     <string name="ignore">Ігнорувати</string>
-    <string name="ignore_add">Додати \'%s\' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
-    <string name="ignore_remove">Видалити \'%s\' з чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <string name="map_select_download_region">Оберіть регіон завантаження</string>
     <string name="map_tile_download_estimate">Час завантаження фрагментів:</string>
     <string name="map_start_download">Почати завантаження</string>
@@ -138,10 +135,8 @@
     <string name="calculating">Обчислюю…</string>
     <string name="map_offline_manager">Управління в автономному режимі</string>
     <string name="map_cache_size">Поточний розмір кешу</string>
-    <string name="map_cache_info">Місткість кешу: %1$.2f МБ\nВикористання кешу: %2$.2f МБ</string>
     <string name="map_clear_tiles">Очистити завантажені плитки</string>
     <string name="map_tile_source">Джерело плиток</string>
-    <string name="map_purge_success">SQL кеш очищено для %s</string>
     <string name="map_purge_fail">Помилка очищення кешу SQL, перегляньте logcat для деталей</string>
     <string name="map_cache_manager">Керування кешем</string>
     <string name="map_download_complete">Звантаження завершено!</string>
@@ -151,7 +146,6 @@
     <string name="waypoint_edit">Редагувати точку</string>
     <string name="waypoint_delete">Видалити мітку?</string>
     <string name="waypoint_new">Новий мітка</string>
-    <string name="waypoint_received">Отримано точку маршруту: %s</string>
     <string name="error_duty_cycle">Досягнуто обмеження заповнення каналу. Неможливо надіслати повідомлення зараз, будь ласка, спробуйте ще раз пізніше.</string>
     <string name="remove">Видалити</string>
     <string name="remove_node_text">Цей вузол буде видалений зі списку доки ваш вузол не отримає дані з нього знову.</string>
@@ -176,8 +170,6 @@
     <string name="max">Макс</string>
     <string name="copy">Копіювати</string>
     <string name="favorite">Обране</string>
-    <string name="favorite_add">Додати \'%s\' як обраний вузол?</string>
-    <string name="favorite_remove">Видалити \'%s\' з обраних вузлів?</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>
@@ -186,7 +178,6 @@
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">]]></string>
     <string name="i_know_what_i_m_doing">Я знаю, що роблю.</string>
     <string name="meshtastic_low_battery_notifications">Сповіщення про низький рівень заряду</string>
-    <string name="low_battery_title">Низький заряд батареї: %s</string>
     <string name="udp_enabled">Увімкнено</string>
     <string name="udp_config">Налаштування UDP</string>
     <string name="user">Користувач</string>
