@@ -86,6 +86,7 @@
     <string name="disconnected">I shkëputur</string>
     <string name="device_sleeping">Pajisja po fle</string>
     <string name="ip_address">Adresa IP:</string>
+    <string name="connected_to">E lidhur me radio (%1$s)</string>
     <string name="not_connected">Nuk është lidhur</string>
     <string name="connected_sleeping">E lidhur me radio, por është në gjumë</string>
     <string name="app_too_old">Përditësimi i aplikacionit kërkohet</string>
@@ -147,6 +148,8 @@
     <string name="delivery_confirmed">Dërgimi i konfirmuar</string>
     <string name="error">Gabim</string>
     <string name="ignore">Injoro</string>
+    <string name="ignore_add">Të shtohet ‘%1$s’ në listën e injoruar?</string>
+    <string name="ignore_remove">Të hiqet ‘%1$s’ nga lista e injoruar?</string>
     <string name="map_select_download_region">Zgjidh rajonin për shkarkim</string>
     <string name="map_tile_download_estimate">Parashikimi i shkarkimit të pllakatës:</string>
     <string name="map_start_download">Filloni shkarkimin</string>
@@ -158,8 +161,10 @@
     <string name="calculating">Po llogaritet…</string>
     <string name="map_offline_manager">Menaxheri Offline</string>
     <string name="map_cache_size">Madhësia e aktuale e cache</string>
+    <string name="map_cache_info">Kapasiteti i Cache: %1$d MB\nPërdorimi i Cache: %2$d MB</string>
     <string name="map_clear_tiles">Pastroni pllakat e shkarkuara</string>
     <string name="map_tile_source">Burimi i pllakatave</string>
+    <string name="map_purge_success">Cache SQL u pastrua për %1$s</string>
     <string name="map_purge_fail">Pastrimi i Cache SQL ka dështuar, shihni logcat për detaje</string>
     <string name="map_cache_manager">Menaxheri i Cache</string>
     <string name="map_download_complete">Shkarkimi përfundoi!</string>
@@ -169,6 +174,7 @@
     <string name="waypoint_edit">Redakto pikën e rreshtit</string>
     <string name="waypoint_delete">Të fshihet pika e rreshtit?</string>
     <string name="waypoint_new">Pikë e re rreshti</string>
+    <string name="waypoint_received">Pikë rreshti e marrë: %1$s</string>
     <string name="error_duty_cycle">Cikli i detyrës ka arritur kufirin. Nuk mund të dërgoni mesazhe tani, ju lutem provoni përsëri më vonë.</string>
     <string name="remove">Hiq</string>
     <string name="remove_node_text">Ky node do të hiqet nga lista juaj derisa pajisja juaj të marrë të dhëna prej tij përsëri.</string>
