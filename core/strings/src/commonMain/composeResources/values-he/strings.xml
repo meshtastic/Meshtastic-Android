@@ -47,7 +47,6 @@
     <string name="device_sleeping">מכשיר במצב שינה</string>
     <string name="ip_address">‏כתובת IP:</string>
     <string name="ip_port">פורט:</string>
-    <string name="connected_to">מחובר למכשיר (%s)</string>
     <string name="not_connected">לא מחובר</string>
     <string name="connected_sleeping">מחובר למכשיר, אך הוא במצב שינה</string>
     <string name="app_too_old">נדרש עדכון של האפליקציה</string>
@@ -112,8 +111,6 @@
     <string name="nodedb_reset">איפוס NodeDB</string>
     <string name="error">שגיאה</string>
     <string name="ignore">התעלם</string>
-    <string name="ignore_add">הוסף \'%s\' לרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
-    <string name="ignore_remove">הורד \'%s\' מרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="map_select_download_region">בחר אזור להורדה</string>
     <string name="map_tile_download_estimate">הערכת זמן להורדה:</string>
     <string name="map_start_download">התחל הורדה</string>
@@ -124,10 +121,8 @@
     <string name="calculating">מחשב…</string>
     <string name="map_offline_manager">ניהול מפות שמורות</string>
     <string name="map_cache_size">גודל מטמון נוכחי</string>
-    <string name="map_cache_info">מקום אחסון מטמון: %1$.2fMB\nמטמון משומש: %2$.2fMB</string>
     <string name="map_clear_tiles">מחק אזורי מפה שהורדו</string>
     <string name="map_tile_source">מקור מפות</string>
-    <string name="map_purge_success">אופס מטמון SQK עבור %s</string>
     <string name="map_purge_fail">נכשל איפוס מטמון SQL, ראה logcat לפרטים</string>
     <string name="map_cache_manager">ניהול מטמון</string>
     <string name="map_download_complete">ההורדה הושלמה!</string>
@@ -137,7 +132,6 @@
     <string name="waypoint_edit">ערוך נקודת ציון</string>
     <string name="waypoint_delete">מחק נקודת ציון?</string>
     <string name="waypoint_new">נקודת ציון חדשה</string>
-    <string name="waypoint_received">התקבל נקודת ציון: %s</string>
     <string name="error_duty_cycle">הגעת לרף ה-duty cycle. לא ניתן לשלוח הודעות כרגע, בבקשה נסה שוב מאוחר יותר.</string>
     <string name="messages">הודעות</string>
     <string name="region_frequency_plan">אזור</string>
