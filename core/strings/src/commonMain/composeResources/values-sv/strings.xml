@@ -168,14 +168,12 @@
     <string name="pairing_failed_try_again">Parkoppling misslyckades, försök igen</string>
     <string name="location_disabled">Platsåtkomst är avstängd, kan inte leverera position till meshnätverket.</string>
     <string name="share">Dela</string>
-    <string name="new_node_seen">Ny nod: %s</string>
     <string name="disconnected">Frånkopplad</string>
     <string name="device_sleeping">Enheten i sovläge</string>
     <string name="connected_count">Anslutna: %1$s online</string>
     <string name="ip_address">IP-adress:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Ansluten</string>
-    <string name="connected_to">Ansluten till radioenhet (%s)</string>
     <string name="connection_status">Aktuella anslutningar:</string>
     <string name="wifi_ip">Wifi IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
@@ -274,8 +272,6 @@
     <string name="error">Fel</string>
     <string name="ignore">Ignorera</string>
     <string name="remove_ignored">Ta bort från ignorerade</string>
-    <string name="ignore_add">Lägg till \'%s\' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
-    <string name="ignore_remove">Ta bort \'%s\' från ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
     <string name="map_select_download_region">Välj nedladdningsområde</string>
     <string name="map_tile_download_estimate">Kartdelar estimat:</string>
     <string name="map_start_download">Starta Hämtning</string>
@@ -288,10 +284,8 @@
     <string name="calculating">Beräknar…</string>
     <string name="map_offline_manager">Offline-hanterare</string>
     <string name="map_cache_size">Aktuell cachestorlek</string>
-    <string name="map_cache_info">Cache-kapacitet: %1$.2f MB\nCache-användning: %2$.2f MB</string>
     <string name="map_clear_tiles">Rensa hämtade kartdelar</string>
     <string name="map_tile_source">Källa för kartdelar</string>
-    <string name="map_purge_success">SQL-cache rensad för %s</string>
     <string name="map_purge_fail">SQL-cache rensning misslyckades, se logcat för detaljer</string>
     <string name="map_cache_manager">Cache-hanterare</string>
     <string name="map_download_complete">Nedladdningen slutförd!</string>
@@ -301,7 +295,6 @@
     <string name="waypoint_edit">Redigera vägpunkt</string>
     <string name="waypoint_delete">Radera vägpunkt?</string>
     <string name="waypoint_new">Ny vägpunkt</string>
-    <string name="waypoint_received">Mottagen vägpunkt: %s</string>
     <string name="error_duty_cycle">Gränsen för sändningscykeln har uppnåtts. Kan inte skicka meddelanden just nu, försök igen senare.</string>
     <string name="remove">Ta bort</string>
     <string name="remove_node_text">Denna nod kommer att tas bort från din lista till dess att din nod tar emot data från den igen.</string>
@@ -382,8 +375,6 @@
     <string name="favorite">Favorit</string>
     <string name="add_favorite">Lägg till i favoriter</string>
     <string name="remove_favorite">Ta bort från Favoriter</string>
-    <string name="favorite_add">Lägg till \'%s\' som en favoritnod?</string>
-    <string name="favorite_remove">Ta bort \'%s\' som en favoritnod?</string>
     <string name="power_metrics_log">Logg över strömvärden</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -395,7 +386,6 @@
     <string name="i_know_what_i_m_doing">Jag vet vad jag håller på med.</string>
     <string name="low_battery_message">Noden %1$s har ett lågt batteri (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Avisering vid låg batterinivå</string>
-    <string name="low_battery_title">Lågt batteri: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Meddelanden om lågt batteri (favoritnoder)</string>
     <string name="baro_pressure">Lufttryck</string>
     <string name="udp_enabled">Aktiverad</string>
@@ -867,7 +857,6 @@
     <string name="eight_hours">8 timmar</string>
     <string name="one_day">24 timmar</string>
     <string name="two_days">48 timmar</string>
-    <string name="last_heard_filter_label">Filtrera på senaste kontakt: %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Saknar applikation för att hantera länken.</string>
     <string name="system_settings">Systeminställningar</string>
@@ -876,5 +865,4 @@
     <string name="analytics_platforms">"Analysplattformar: "</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
-    <string name="relayed_by">Vidaresänt av: %s</string>
 </resources>
