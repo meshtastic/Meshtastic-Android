@@ -49,6 +49,7 @@
     <string name="device_sleeping">Συσκευή σε ύπνωση</string>
     <string name="ip_address">IP διεύθυνση:</string>
     <string name="ip_port">Θύρα:</string>
+    <string name="connected_to">Συνδεδεμένο στο radio (%1$s)</string>
     <string name="not_connected">Αποσυνδεδεμένο</string>
     <string name="connected_sleeping">Συνδεδεμένο στο radio, αλλά βρίσκεται σε ύπνωση</string>
     <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>
@@ -116,6 +117,8 @@
     <string name="calculating">Υπολογισμός…</string>
     <string name="map_offline_manager">Διαχειριστής Εκτός Δικτύου</string>
     <string name="map_cache_size">Μέγεθος τρέχουσας προσωρινής μνήμης</string>
+    <string name="map_cache_info">Χωρητικότητα προσωρινής μνήμης: %1$d MB\nΧρήση προσωρινής μνήμης: %2$d MB</string>
+    <string name="map_purge_success">Η προσωρινή μνήμη SQL καθαρίστηκε για %1$s</string>
     <string name="map_cache_manager">Διαχείριση Προσωρινής Αποθήκευσης</string>
     <string name="map_download_complete">Η λήψη ολοκληρώθηκε!</string>
     <string name="map_download_errors">Λήψη ολοκληρώθηκε με %d σφάλματα</string>
