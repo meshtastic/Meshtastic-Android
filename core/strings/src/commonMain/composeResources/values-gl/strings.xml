@@ -51,6 +51,7 @@
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo durmindo</string>
     <string name="ip_address">Enderezo IP:</string>
+    <string name="connected_to">Conectado á radio (%1$s)</string>
     <string name="not_connected">Non conectado</string>
     <string name="connected_sleeping">Conectado á radio, pero está durmindo</string>
     <string name="app_too_old">Actualización da aplicación requerida</string>
@@ -112,6 +113,8 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Erro</string>
     <string name="ignore">Ignorar</string>
+    <string name="ignore_add">Engadir \'%1$s\' á lista de ignorar?</string>
+    <string name="ignore_remove">Quitar \'%1$s\' da lista de ignorar?</string>
     <string name="map_select_download_region">Seleccionar a rexión de descarga</string>
     <string name="map_tile_download_estimate">Descarga de \'tile\' estimada:</string>
     <string name="map_start_download">Comezar a descarga</string>
@@ -123,8 +126,10 @@
     <string name="calculating">Calculando…</string>
     <string name="map_offline_manager">Xestor sen rede</string>
     <string name="map_cache_size">Tamaño de caché actual</string>
+    <string name="map_cache_info">Capacidade de Caché: %1$d MB\nUso de Caché: %2$d MB</string>
     <string name="map_clear_tiles">Limpar \'tiles\' descargadas</string>
     <string name="map_tile_source">Fonte de \'tile\'</string>
+    <string name="map_purge_success">Caché SQL purgada para %1$s</string>
     <string name="map_purge_fail">A purga de Caché SQL fallou, mira logcat para os detalles</string>
     <string name="map_cache_manager">Xestor de caché</string>
     <string name="map_download_complete">Descarga completada!</string>
@@ -134,6 +139,7 @@
     <string name="waypoint_edit">Editar punto de ruta</string>
     <string name="waypoint_delete">Eliminar punto de ruta?</string>
     <string name="waypoint_new">Novo punto de ruta</string>
+    <string name="waypoint_received">Punto de ruta recibido:%1$s</string>
     <string name="error_duty_cycle">O límite do Ciclo de Traballo de Sinal foi alcanzado. Non se pode enviar mensaxes agora, inténtao despois.</string>
     <string name="remove">Eliminar</string>
     <string name="remove_node_text">Este nodo será retirado da túa lista ata que o teu nodo reciba datos seus de novo.</string>
