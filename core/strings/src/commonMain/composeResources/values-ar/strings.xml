@@ -71,7 +71,6 @@
     <string name="disconnected">انقطع الاتصال</string>
     <string name="device_sleeping">الجهاز في وضعية السكون</string>
     <string name="ip_address">عنوان الـ IP:</string>
-    <string name="connected_to">متصل بالراديو (%s)</string>
     <string name="not_connected">غير متصل</string>
     <string name="connected_sleeping">تم الاتصال بالراديو، إلا أن الجهاز في وضعية السكون</string>
     <string name="app_too_old">مطلوب تحديث التطبيق</string>
@@ -97,7 +96,6 @@
     <string name="direct_message">رسالة مباشره</string>
     <string name="error">غلط</string>
     <string name="ignore">تجاهل</string>
-    <string name="ignore_add">أضف \'%s\' إلى قائمة التجاهل؟</string>
     <string name="map_select_download_region">حدد جهة التحميل</string>
     <string name="map_start_download">ابدأ التحميل</string>
     <string name="close">أغلق</string>
@@ -147,8 +145,6 @@
     <string name="copy">نسخ</string>
     <string name="critical_alert">تنبيه حرج!</string>
     <string name="favorite">المفضلة</string>
-    <string name="favorite_add">إضافة \'%s\' كعقدة مفضلة؟</string>
-    <string name="favorite_remove">إزالة \'%s\' كعقدة مفضلة؟</string>
     <string name="channel_1">القناة 1</string>
     <string name="channel_2">القناة 2</string>
     <string name="channel_3">القناة 3</string>
@@ -157,7 +153,6 @@
     <string name="are_you_sure">هل أنت متيقِّن؟</string>
     <string name="i_know_what_i_m_doing">أنا أعرف ما أفعله.</string>
     <string name="meshtastic_low_battery_notifications">إشعارات انخفاض شدة البطارية</string>
-    <string name="low_battery_title">البطارية منخفضه: %s</string>
     <string name="baro_pressure">الضغط الجوي</string>
     <string name="user">اسم المستخدم</string>
     <string name="channels">القنوات</string>
