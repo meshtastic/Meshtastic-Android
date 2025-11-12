@@ -171,12 +171,14 @@
     <string name="pairing_failed_try_again">Le jumelage a échoué, veuillez sélectionner à nouveau</string>
     <string name="location_disabled">L\'accès à la localisation est désactivé, impossible de fournir la position du maillage.</string>
     <string name="share">Partager</string>
+    <string name="new_node_seen">Nouveau nœud vu : %1$s</string>
     <string name="disconnected">Déconnecté</string>
     <string name="device_sleeping">Appareil en veille</string>
     <string name="connected_count">Connectés : %1$s sur en ligne</string>
     <string name="ip_address">Adresse IP:</string>
     <string name="ip_port">Port :</string>
     <string name="connected">Connecté</string>
+    <string name="connected_to">Connecté à la radio (%1$s)</string>
     <string name="not_connected">Non connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="app_too_old">Mise à jour de l’application requise</string>
@@ -272,6 +274,8 @@
     <string name="error">Erreur</string>
     <string name="ignore">Ignorer</string>
     <string name="remove_ignored">Supprimer des ignorés</string>
+    <string name="ignore_add">Ajouter \'%1$s\' à la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
+    <string name="ignore_remove">Supprimer \'%1$s\' de la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
     <string name="map_select_download_region">Sélectionnez la région de téléchargement</string>
     <string name="map_tile_download_estimate">Estimation du téléchargement de tuiles :</string>
     <string name="map_start_download">Commencer le téléchargement</string>
@@ -284,8 +288,10 @@
     <string name="calculating">Calcul en cours…</string>
     <string name="map_offline_manager">Gestionnaire hors-ligne</string>
     <string name="map_cache_size">Taille actuelle du cache</string>
+    <string name="map_cache_info">Capacité du cache : %1$d MB\nUtilisation du cache : %2$d MB</string>
     <string name="map_clear_tiles">Effacer les vignettes inutiles</string>
     <string name="map_tile_source">Source de la vignette</string>
+    <string name="map_purge_success">Cache SQL purgé pour %1$s</string>
     <string name="map_purge_fail">La purge du cache SQL a échoué, consultez « logcat » pour plus de détails</string>
     <string name="map_cache_manager">Gestionnaire du cache</string>
     <string name="map_download_complete">Téléchargement terminé !</string>
@@ -295,6 +301,7 @@
     <string name="waypoint_edit">Modifier le repère</string>
     <string name="waypoint_delete">Supprimer le repère ?</string>
     <string name="waypoint_new">Nouveau point de repère</string>
+    <string name="waypoint_received">Point de passage reçu : %1$s</string>
     <string name="error_duty_cycle">Limite du temps d\'utilisation atteinte. Vous ne pouvez pas envoyer de messages maintenant, veuillez réessayer plus tard.</string>
     <string name="remove">Supprimer</string>
     <string name="remove_node_text">Ce nœud sera supprimé de votre liste jusqu\'à ce que votre nœud reçoive à nouveau des données.</string>
@@ -369,6 +376,8 @@
     <string name="favorite">Favoris</string>
     <string name="add_favorite">Ajouter aux favoris</string>
     <string name="remove_favorite">Supprimer des favoris</string>
+    <string name="favorite_add">Ajouter «%1$s» en tant que nœud favori ?</string>
+    <string name="favorite_remove">Supprimer «%1$s» comme nœud favori ?</string>
     <string name="power_metrics_log">Journal des métriques de puissance</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
@@ -380,6 +389,7 @@
     <string name="i_know_what_i_m_doing">Je sais ce que je fais</string>
     <string name="low_battery_message">La batterie du nœud %1$s est faible (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notifications de batterie faible</string>
+    <string name="low_battery_title">Batterie faible : %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifications de batterie faible (nœuds favoris)</string>
     <string name="baro_pressure">Pression Barométrique</string>
     <string name="udp_enabled">Activé</string>
@@ -865,6 +875,7 @@
     <string name="eight_hours">8 Heures</string>
     <string name="one_day">24 Heures</string>
     <string name="two_days">48 Heures</string>
+    <string name="last_heard_filter_label">Filtrer par la dernière écoute : %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Aucune application disponible pour gérer ce lien.</string>
     <string name="system_settings">Paramètres système</string>
