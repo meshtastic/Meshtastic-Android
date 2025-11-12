@@ -91,6 +91,7 @@
     <string name="disconnected">Frakoblet</string>
     <string name="device_sleeping">Enhet sover</string>
     <string name="ip_address">IP-adresse:</string>
+    <string name="connected_to">Tilkoblet til radio (%1$s)</string>
     <string name="not_connected">Ikke tilkoblet</string>
     <string name="connected_sleeping">Tilkoblet radio, men den sover</string>
     <string name="app_too_old">Applikasjon for gammel</string>
@@ -153,6 +154,8 @@
     <string name="delivery_confirmed">Leveringen er bekreftet</string>
     <string name="error">Feil</string>
     <string name="ignore">Ignorer</string>
+    <string name="ignore_add">Legg til \'%1$s\' i ignorereringslisten?</string>
+    <string name="ignore_remove">Fjern \'%1$s fra ignoreringslisten?</string>
     <string name="map_select_download_region">Velg nedlastingsregionen</string>
     <string name="map_tile_download_estimate">Tile nedlastingsestimat:</string>
     <string name="map_start_download">Start nedlasting</string>
@@ -164,8 +167,10 @@
     <string name="calculating">Beregner…</string>
     <string name="map_offline_manager">Offlinemodus</string>
     <string name="map_cache_size">Nåværende størrelse for mellomlager</string>
+    <string name="map_cache_info">Cache Kapasitet: %1$d MB\nCache Bruker: %2$d MB</string>
     <string name="map_clear_tiles">Tøm nedlastede fliser</string>
     <string name="map_tile_source">Fliskilde</string>
+    <string name="map_purge_success">SQL-mellomlager tømt for %1$s</string>
     <string name="map_purge_fail">Tømming av SQL-mellomlager feilet, se logcat for detaljer</string>
     <string name="map_cache_manager">Mellomlagerbehandler</string>
     <string name="map_download_complete">Nedlastingen er fullført!</string>
@@ -175,6 +180,7 @@
     <string name="waypoint_edit">Rediger veipunkt</string>
     <string name="waypoint_delete">Fjern veipunkt?</string>
     <string name="waypoint_new">Nytt veipunkt</string>
+    <string name="waypoint_received">Mottatt veipunkt: %1$s</string>
     <string name="error_duty_cycle">Grensen for sykluser er nådd. Kan ikke sende meldinger akkurat nå, prøv igjen senere.</string>
     <string name="remove">Fjern</string>
     <string name="remove_node_text">Denne noden vil bli fjernet fra listen din helt til din node mottar data fra den igjen.</string>
