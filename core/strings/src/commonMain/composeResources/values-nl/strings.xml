@@ -129,7 +129,7 @@
     <string name="provide_location_to_mesh">Geef telefoon locatie door aan mesh</string>
     <plurals name="delete_messages">
         <item quantity="one">Bericht verwijderen?</item>
-        <item quantity="other">%s berichten verwijderen?</item>
+        <item quantity="other">%1$s berichten verwijderen?</item>
     </plurals>
     <string name="delete">Verwijder</string>
     <string name="delete_for_everyone">Verwijder voor iedereen</string>
