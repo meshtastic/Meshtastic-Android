@@ -96,6 +96,8 @@
     <string name="connected_count">接続済み: %1$s オンライン</string>
     <string name="ip_address">IPアドレス</string>
     <string name="ip_port">ポート:</string>
+    <string name="connected_to">Meshtasticデバイスに接続しました
+(%1$s)</string>
     <string name="not_connected">接続されていません</string>
     <string name="connected_sleeping">接続しましたが、Meshtasticデバイスはスリープ状態です。</string>
     <string name="app_too_old">アプリを更新して下さい。</string>
@@ -157,6 +159,8 @@
     <string name="delivery_confirmed">受信を確認しました</string>
     <string name="error">エラー</string>
     <string name="ignore">無視</string>
+    <string name="ignore_add">\'%1$s\'を無視リストに追加しますか？</string>
+    <string name="ignore_remove">\'%1$s\'を無視リストから削除しますか？</string>
     <string name="map_select_download_region">指定範囲の地図タイルをダウンロード</string>
     <string name="map_tile_download_estimate">ダウンロードする地図タイルの予測数:</string>
     <string name="map_start_download">ダウンロード開始</string>
@@ -169,8 +173,10 @@
     <string name="calculating">計算中…</string>
     <string name="map_offline_manager">オフライン地図の管理</string>
     <string name="map_cache_size">現在のキャッシュサイズ</string>
+    <string name="map_cache_info">キャッシュ容量: %1$d MB\nキャッシュ使用量: %2$d MB</string>
     <string name="map_clear_tiles">ダウンロード済みの地図タイルを消去</string>
     <string name="map_tile_source">地図タイルのソース</string>
+    <string name="map_purge_success">%1$sがSQLキャッシュから削除されました。</string>
     <string name="map_purge_fail">SQL キャッシュの削除に失敗しました。詳細は logcat を参照してください。</string>
     <string name="map_cache_manager">キャッシュの管理</string>
     <string name="map_download_complete">ダウンロード完了！</string>
@@ -180,6 +186,7 @@
     <string name="waypoint_edit">ウェイポイントを編集</string>
     <string name="waypoint_delete">ウェイポイントを削除しますか？</string>
     <string name="waypoint_new">新規ウェイポイント</string>
+    <string name="waypoint_received">受信したウェイポイント: %1$s</string>
     <string name="error_duty_cycle">デューティサイクル制限に達しました。現在メッセージを送信できません。しばらくしてからもう一度お試しください。</string>
     <string name="remove">削除</string>
     <string name="remove_node_text">このノードから再びデータを受信するまで、このノードはリストに表示されなくなります。</string>
@@ -245,6 +252,8 @@
     <string name="alert_bell_text">アラートベル！</string>
     <string name="critical_alert">緊急アラート</string>
     <string name="favorite">お気に入り</string>
+    <string name="favorite_add">%1$s\' をお気に入りのノードとして追加しますか？</string>
+    <string name="favorite_remove">お気に入りのノードとして「%1$s」を削除しますか？</string>
     <string name="power_metrics_log">電力指標ログ</string>
     <string name="channel_1">チャンネル 1</string>
     <string name="channel_2">チャンネル 2</string>
@@ -256,6 +265,7 @@
     <string name="i_know_what_i_m_doing">はい、了承します</string>
     <string name="low_battery_message">ノード %1$s のバッテリー残量が少なくなっています (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">バッテリー残量低下通知</string>
+    <string name="low_battery_title">バッテリー低残量: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">バッテリー残量低下通知 (お気に入りノード)</string>
     <string name="baro_pressure">大気圧</string>
     <string name="udp_config">UDP Config</string>
@@ -534,6 +544,7 @@
     <string name="eight_hours">8時間</string>
     <string name="one_day">24時間</string>
     <string name="two_days">48時間</string>
+    <string name="last_heard_filter_label">最後に受信した時間でフィルター: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">リンクを処理できるアプリケーションがありません。</string>
     <string name="system_settings">システム設定</string>
