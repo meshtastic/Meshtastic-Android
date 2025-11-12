@@ -119,7 +119,6 @@
     <string name="ip_address">Dirección IP:</string>
     <string name="ip_port">Puerto:</string>
     <string name="connected">Conectado</string>
-    <string name="connected_to">Conectado a la radio (%s)</string>
     <string name="not_connected">No está conectado</string>
     <string name="connected_sleeping">Conectado a la radio, pero está en reposo</string>
     <string name="app_too_old">Es necesario actualizar la aplicación</string>
@@ -201,8 +200,6 @@
     <string name="delivery_confirmed">Envío confirmado</string>
     <string name="error">Error</string>
     <string name="ignore">Ignorar</string>
-    <string name="ignore_add">¿Añadir \'%s\' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
-    <string name="ignore_remove">¿Eliminar \'%s\' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
     <string name="map_select_download_region">Seleccionar región de descarga</string>
     <string name="map_tile_download_estimate">Estimación de descarga de ficha:</string>
     <string name="map_start_download">Comenzar Descarga</string>
@@ -215,10 +212,8 @@
     <string name="calculating">Calculando…</string>
     <string name="map_offline_manager">Administrador sin conexión</string>
     <string name="map_cache_size">Tamaño actual de Caché</string>
-    <string name="map_cache_info">Capacidad del caché: %1$.2f MB\nUso del caché: %2$.2f MB</string>
     <string name="map_clear_tiles">Limpiar Fichas descargadas</string>
     <string name="map_tile_source">Fuente de Fichas</string>
-    <string name="map_purge_success">Caché SQL purgado para %s</string>
     <string name="map_purge_fail">Error en la purga del caché SQL, consulte logcat para obtener más detalles</string>
     <string name="map_cache_manager">Gestor de Caché</string>
     <string name="map_download_complete">¡Descarga completa!</string>
@@ -228,7 +223,6 @@
     <string name="waypoint_edit">Editar punto de referencia</string>
     <string name="waypoint_delete">¿Eliminar punto de referencia?</string>
     <string name="waypoint_new">Nuevo punto de referencia</string>
-    <string name="waypoint_received">Punto de referencia recibido: %s</string>
     <string name="error_duty_cycle">Límite de Ciclo de Trabajo alcanzado. No se pueden enviar mensajes en este momento, por favor inténtalo de nuevo más tarde.</string>
     <string name="remove">Quitar</string>
     <string name="remove_node_text">Este nodo será retirado de tu lista hasta que tu nodo reciba datos de él otra vez.</string>
@@ -300,8 +294,6 @@ Rango de Valores 0 - 500.</string>
     <string name="alert_bell_text">¡Carácter Campana de Alerta!</string>
     <string name="critical_alert">¡Alerta Crítica!</string>
     <string name="favorite">Favorito</string>
-    <string name="favorite_add">¿Añadir \'%s\' como un nodo favorito?</string>
-    <string name="favorite_remove">¿Eliminar \'%s\' como un nodo favorito?</string>
     <string name="power_metrics_log">Registro de métricas de energía</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
@@ -313,7 +305,6 @@ Rango de Valores 0 - 500.</string>
     <string name="i_know_what_i_m_doing">Sé lo que estoy haciendo</string>
     <string name="low_battery_message">El nodo %1$s tiene poca batería (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notificaciones de batería baja</string>
-    <string name="low_battery_title">Batería baja: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificaciones de batería baja (nodos favoritos)</string>
     <string name="baro_pressure">Presión Barométrica</string>
     <string name="udp_enabled">Habilitado</string>
