@@ -172,14 +172,12 @@
     <string name="pairing_failed_try_again">Sidumine ebaõnnestus, vali palun uuesti</string>
     <string name="location_disabled">Juurdepääs asukohale on välja lülitatud, ei saa asukohta teistele jagada.</string>
     <string name="share">Jaga</string>
-    <string name="new_node_seen">Uus sõlm nähtud: %s</string>
     <string name="disconnected">Ühendus katkenud</string>
     <string name="device_sleeping">Seade on unerežiimis</string>
     <string name="connected_count">Ühendatud: %1$s aktiivset</string>
     <string name="ip_address">IP-aadress:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Ühendatud</string>
-    <string name="connected_to">Ühendatud raadioga (%s)</string>
     <string name="connection_status">Praegused ühendused:</string>
     <string name="wifi_ip">Wifi IP-aadress:</string>
     <string name="ethernet_ip">Etherneti IP-aadress:</string>
@@ -278,8 +276,6 @@
     <string name="error">Viga</string>
     <string name="ignore">Eira</string>
     <string name="remove_ignored">Eemalda ignoreeritute hulgast</string>
-    <string name="ignore_add">Lisa \'%s\' eiramis loendisse?</string>
-    <string name="ignore_remove">Eemaldada \'%s\' eiramis loendist?</string>
     <string name="map_select_download_region">Vali allalaetav piirkond</string>
     <string name="map_tile_download_estimate">Paanide allalaadimise prognoos:</string>
     <string name="map_start_download">Alusta allalaadimist</string>
@@ -292,10 +288,8 @@
     <string name="calculating">Arvutan…</string>
     <string name="map_offline_manager">Võrguühenduseta haldur</string>
     <string name="map_cache_size">Praegune vahemälu suurus</string>
-    <string name="map_cache_info">Vahemälu maht: %1$.2f MB\nVahemälu kasutus: %2$.2f MB</string>
     <string name="map_clear_tiles">Tühjenda allalaetud paanid</string>
     <string name="map_tile_source">Paani allikas</string>
-    <string name="map_purge_success">SQL-i vahemälu puhastatud %s jaoks</string>
     <string name="map_purge_fail">SQL-i vahemälu tühjendamine ebaõnnestus, vaata üksikasju logcat\'ist</string>
     <string name="map_cache_manager">Vahemälu haldamine</string>
     <string name="map_download_complete">Allalaadimine on lõppenud!</string>
@@ -305,7 +299,6 @@
     <string name="waypoint_edit">Muuda teekonnapunkti</string>
     <string name="waypoint_delete">Eemalda teekonnapunkt?</string>
     <string name="waypoint_new">Uus teekonnapunkti</string>
-    <string name="waypoint_received">Vastuvõetud teekonnapunkt %s</string>
     <string name="error_duty_cycle">Töötsükli limiit on saavutatud. Sõnumite saatmine ei ole hetkel võimalik. Proovi hiljem uuesti.</string>
     <string name="remove">Eemalda</string>
     <string name="remove_node_text">Antud sõlm eemaldatakse loendist kuniks sinu sõlm võtab sellelt vastu uuesti andmeid.</string>
@@ -386,8 +379,6 @@
     <string name="favorite">Lemmik</string>
     <string name="add_favorite">Lisa lemmikutesse</string>
     <string name="remove_favorite">Eemalda lemmikutest</string>
-    <string name="favorite_add">Lisa \'%s\' lemmik sõlmede hulka?</string>
-    <string name="favorite_remove">Eemalda \'%s\' lemmik sõlmede hulgast?</string>
     <string name="power_metrics_log">Toitepinge andurite logi</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -399,7 +390,6 @@
     <string name="i_know_what_i_m_doing">Ma tean mida teen.</string>
     <string name="low_battery_message">Sõlmel %1$s on akupinge madal (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Madala akupinge hoiatus</string>
-    <string name="low_battery_title">Madal akupinge: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Madala akupinge teated (lemmik sõlmed)</string>
     <string name="baro_pressure">Baromeetri rõhk</string>
     <string name="udp_enabled">Lubatud</string>
@@ -898,7 +888,6 @@
     <string name="eight_hours">8 tundi</string>
     <string name="one_day">24 tundi</string>
     <string name="two_days">48 tundi</string>
-    <string name="last_heard_filter_label">Filtreeri viimase kuulmise aja järgi: %s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Lingi haldamiseks pole rakendust saadaval.</string>
     <string name="system_settings">Süsteemi sätted</string>
@@ -907,6 +896,5 @@
     <string name="analytics_platforms">"Analüütika platvormid: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
     <string name="unset">Tühistatud - 0</string>
-    <string name="relayed_by">Edastaja: %s</string>
     <string name="preserve_favorites">Säilita lemmikud?</string>
 </resources>
