@@ -172,12 +172,14 @@
     <string name="pairing_failed_try_again">Kopplung fehlgeschlagen, bitte erneut auswählen</string>
     <string name="location_disabled">Standortzugriff ist deaktiviert, es kann kein Standort zum Mesh bereitgestellt werden.</string>
     <string name="share">Teilen</string>
+    <string name="new_node_seen">Neuen Knoten gesehen: %1$s</string>
     <string name="disconnected">Verbindung getrennt</string>
     <string name="device_sleeping">Gerät schläft</string>
     <string name="connected_count">Verbunden: %1$s online</string>
     <string name="ip_address">IP-Adresse:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Verbunden</string>
+    <string name="connected_to">Mit Funkgerät verbunden (%1$s)</string>
     <string name="connection_status">Aktuelle Verbindungen:</string>
     <string name="wifi_ip">WLAN IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
@@ -276,6 +278,8 @@
     <string name="error">Fehler</string>
     <string name="ignore">Ignorieren</string>
     <string name="remove_ignored">Aus Ignorierliste entfernen</string>
+    <string name="ignore_add">\'%1$s\' zur Ignorieren-Liste hinzufügen?</string>
+    <string name="ignore_remove">\'%1$s\' von der Ignorieren-Liste entfernen?</string>
     <string name="map_select_download_region">Region zum Herunterladen auswählen</string>
     <string name="map_tile_download_estimate">Herunterladen der Kacheln (Schätzung):</string>
     <string name="map_start_download">Herunterladen starten</string>
@@ -288,8 +292,10 @@
     <string name="calculating">Wird berechnet...</string>
     <string name="map_offline_manager">Offline-Verwaltung</string>
     <string name="map_cache_size">Aktuelle Zwischenspeichergröße</string>
+    <string name="map_cache_info">Zwischenspeichergröße: %1$d MB\nZwischenspeicherverwendung: %2$d MB</string>
     <string name="map_clear_tiles">Heruntergeladene Kacheln löschen</string>
     <string name="map_tile_source">Kachel-Quelle</string>
+    <string name="map_purge_success">SQL-Zwischenspeicher gelöscht für %1$s</string>
     <string name="map_purge_fail">Das Säubern des SQL-Zwischenspeichers ist fehlgeschlagen, siehe Logcat für Details</string>
     <string name="map_cache_manager">Zwischenspeicher-Verwaltung</string>
     <string name="map_download_complete">Herunterladen abgeschlossen!</string>
@@ -299,6 +305,7 @@
     <string name="waypoint_edit">Wegpunkt bearbeiten</string>
     <string name="waypoint_delete">Wegpunkt löschen?</string>
     <string name="waypoint_new">Wegpunkt hinzufügen</string>
+    <string name="waypoint_received">Wegpunkt %1$s empfangen</string>
     <string name="error_duty_cycle">Limit für den aktuellen Betriebszyklus erreicht. Nachrichten können momentan nicht gesendet werden, bitte versuchen Sie es später erneut.</string>
     <string name="remove">Entfernen</string>
     <string name="remove_node_text">Dieser Knoten wird aus der Liste entfernt, bis dein Knoten wieder Daten von ihm erhält.</string>
@@ -379,6 +386,8 @@
     <string name="favorite">Favorit</string>
     <string name="add_favorite">Zu Favoriten hinzufügen</string>
     <string name="remove_favorite">Von Favoriten entfernen</string>
+    <string name="favorite_add">\'%1$s\' als Favorit hinzufügen?</string>
+    <string name="favorite_remove">\'%1$s\' als Favorit entfernen?</string>
     <string name="power_metrics_log">Energiedatenprotokoll</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -390,6 +399,7 @@
     <string name="i_know_what_i_m_doing">Ich weiß was ich tue.</string>
     <string name="low_battery_message">Knoten %1$s hat einen niedrigen Ladezustand (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Benachrichtigung leerer Akku</string>
+    <string name="low_battery_title">Leerer Akku: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akkustands Warnung (für Favoriten)</string>
     <string name="baro_pressure">Luftdruck</string>
     <string name="udp_enabled">Aktiviert</string>
@@ -888,6 +898,7 @@
     <string name="eight_hours">8 Stunden</string>
     <string name="one_day">24 Stunden</string>
     <string name="two_days">48 Stunden</string>
+    <string name="last_heard_filter_label">Filtern nach letztem Empfang: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Keine Anwendung zum Bearbeiten des Links verfügbar.</string>
     <string name="system_settings">Systemeinstellungen</string>
