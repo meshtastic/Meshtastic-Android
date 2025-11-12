@@ -119,14 +119,12 @@
     <string name="pairing_failed_try_again">配对失败，请重新选择</string>
     <string name="location_disabled">位置访问已关闭，无法向网络提供位置信息</string>
     <string name="share">分享</string>
-    <string name="new_node_seen">新节点: %s</string>
     <string name="disconnected">已断开连接</string>
     <string name="device_sleeping">设备休眠中</string>
     <string name="connected_count">已连接：%1$s / 在线</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">端口：</string>
     <string name="connected">已连接</string>
-    <string name="connected_to">已连接至设备 (%s)</string>
     <string name="not_connected">尚未联机</string>
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
     <string name="app_too_old">需要更新应用程序</string>
@@ -213,8 +211,6 @@
     <string name="error">错误</string>
     <string name="ignore">忽略</string>
     <string name="remove_ignored">从忽略中删除</string>
-    <string name="ignore_add">添加 \'%s\' 到忽略列表？</string>
-    <string name="ignore_remove">从忽略列表中删除 \'%s\' ？</string>
     <string name="map_select_download_region">选择下载地区</string>
     <string name="map_tile_download_estimate">局部地图下载估算:</string>
     <string name="map_start_download">开始下载</string>
@@ -227,10 +223,8 @@
     <string name="calculating">正在计算……</string>
     <string name="map_offline_manager">离线管理</string>
     <string name="map_cache_size">当前缓存大小</string>
-    <string name="map_cache_info">缓存容量: %1$.2f MB\n缓存使用: %2$.2f MB</string>
     <string name="map_clear_tiles">清除下载的区域地图</string>
     <string name="map_tile_source">区域地图来源</string>
-    <string name="map_purge_success">清除 %s 的 SQL 缓存</string>
     <string name="map_purge_fail">清除 SQL 缓存失败，请查看 logcat 纪录</string>
     <string name="map_cache_manager">缓存管理员</string>
     <string name="map_download_complete">下载已完成！</string>
@@ -240,7 +234,6 @@
     <string name="waypoint_edit">编辑航点</string>
     <string name="waypoint_delete">删除航点?</string>
     <string name="waypoint_new">新建航点</string>
-    <string name="waypoint_received">收到航点：%s</string>
     <string name="error_duty_cycle">触及占空比上限。暂时无法发送消息，请稍后再试。</string>
     <string name="remove">移除</string>
     <string name="remove_node_text">此节点将从您的列表中删除，直到您的节点再次收到它的数据。</string>
@@ -310,8 +303,6 @@
     <string name="alert_bell_text">警铃字符！</string>
     <string name="critical_alert">关键告警！</string>
     <string name="favorite">收藏</string>
-    <string name="favorite_add">添加 \'%s\'为收藏节点？</string>
-    <string name="favorite_remove">不再把\'%s\'作为收藏节点？</string>
     <string name="power_metrics_log">电源计量日志</string>
     <string name="channel_1">频道 1</string>
     <string name="channel_2">频道 2</string>
@@ -323,7 +314,6 @@
     <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
     <string name="low_battery_message">节点 %1$s 电量低(%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">低电量通知</string>
-    <string name="low_battery_title">电池电量低: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低电量通知 (收藏节点)</string>
     <string name="baro_pressure">气压</string>
     <string name="udp_enabled">启用</string>
