@@ -92,8 +92,8 @@
     <string name="provide_location_to_mesh">Укажіть розташування для мережі</string>
     <plurals name="delete_messages">
         <item quantity="one">Видалити повідомлення?</item>
-        <item quantity="few">Видалити %s повідомлення?</item>
-        <item quantity="many">Видалити %s повідомлення?</item>
+        <item quantity="few">Видалити %1$s повідомлення?</item>
+        <item quantity="many">Видалити %1$s повідомлення?</item>
         <item quantity="other">Видалити %1$s повідомлення?</item>
     </plurals>
     <string name="delete">Видалити</string>
