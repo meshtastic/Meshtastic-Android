@@ -128,6 +128,7 @@ import org.meshtastic.core.strings.should_update
 import org.meshtastic.core.strings.should_update_firmware
 import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.Map
@@ -380,9 +381,37 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                         }
                     },
                     onClick = {
-                        navController.navigate(destination.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
+                        val isRepress = destination == topLevelDestination
+                        if (isRepress) {
+                            when (destination) {
+                                TopLevelDestination.Nodes -> {
+                                    val onNodesList = currentDestination?.hasRoute(NodesRoutes.Nodes::class) == true
+                                    if (!onNodesList) {
+                                        navController.navigate(destination.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                    uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
+                                }
+                                TopLevelDestination.Conversations -> {
+                                    val onConversationsList =
+                                        currentDestination?.hasRoute(ContactsRoutes.Contacts::class) == true
+                                    if (!onConversationsList) {
+                                        navController.navigate(destination.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                    uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
+                                }
+                                else -> Unit
+                            }
+                        } else {
+                            navController.navigate(destination.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                            }
                         }
                     },
                 )
@@ -394,8 +423,8 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             startDestination = NodesRoutes.NodesGraph,
             modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
         ) {
-            contactsGraph(navController)
-            nodesGraph(navController)
+            contactsGraph(navController, uIViewModel.scrollToTopEventFlow)
+            nodesGraph(navController, uIViewModel.scrollToTopEventFlow)
             mapGraph(navController)
             channelsGraph(navController)
             connectionsGraph(navController)

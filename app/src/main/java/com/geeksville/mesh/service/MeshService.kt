@@ -2324,7 +2324,9 @@ class MeshService : Service() {
             override fun requestNodedbReset(requestId: Int, destNum: Int, preserveFavorites: Boolean) =
                 toRemoteExceptions {
                     packetHandler.sendToRadio(
-                        newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { nodedbReset = preserveFavorites },
+                        newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
+                            nodedbReset = if (preserveFavorites) 1 else 0
+                        },
                     )
                 }
 
