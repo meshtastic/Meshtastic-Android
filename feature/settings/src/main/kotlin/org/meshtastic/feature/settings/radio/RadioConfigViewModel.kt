@@ -370,8 +370,7 @@ constructor(
                 // Clear the service's in-memory node cache first so screens refresh immediately.
                 val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
                 meshService?.let { service ->
-                    val packetId = service.packetId
-                    existingNodeNums.forEach { service.removeByNodenum(packetId, it) }
+                    existingNodeNums.forEach { service.removeByNodenum(service.packetId, it) }
                 }
                 nodeRepository.clearNodeDB()
             }
@@ -389,8 +388,7 @@ constructor(
                 // Clear the service's in-memory node cache as well so UI updates immediately.
                 val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
                 meshService?.let { service ->
-                    val packetId = service.packetId
-                    existingNodeNums.forEach { service.removeByNodenum(packetId, it) }
+                    existingNodeNums.forEach { service.removeByNodenum(service.packetId, it) }
                 }
                 nodeRepository.clearNodeDB(preserveFavorites)
             }
