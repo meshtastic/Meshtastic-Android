@@ -58,7 +58,7 @@
     <string name="role_tak_tracker_desc">Aktivizon transmetimet automatikisht TAK PLI dhe zvogëlon transmetimet rutinë.</string>
     <string name="rebroadcast_mode_all_desc">Ritransmeton çdo mesazh të vërejtur, nëse ishte në kanalin tonë privat ose nga një tjetër rrjet me të njëjtat parametra LoRa.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Po të njëjtën sjellje si ALL, por kalon pa dekoduar paketat dhe thjesht i ritransmeton. I disponueshëm vetëm për rolin Repeater. Vendosja e kësaj në rolet e tjera do të rezultojë në sjelljen e ALL.</string>
-    <string name="rebroadcast_mode_local_only_desc">Injoron mesazhet e vëzhguara nga rrjete të huaja që janë të hapura ose ato që nuk mund t'i dekodoj. Vetëm ritransmeton mesazhe në kanalet lokale primare / dytësore të nyjës.</string>
+    <string name="rebroadcast_mode_local_only_desc">Injoron mesazhet e vëzhguara nga rrjete të huaja që janë të hapura ose ato që nuk mund t\'i dekodoj. Vetëm ritransmeton mesazhe në kanalet lokale primare / dytësore të nyjës.</string>
     <string name="rebroadcast_mode_known_only_desc">Injoron mesazhet e vëzhguara nga rrjete të huaja si LOCAL ONLY, por e çon më tutje duke injoruar edhe mesazhet nga nyje që nuk janë në listën e njohur të nyjës.</string>
     <string name="rebroadcast_mode_none">Asnjë</string>
     <string name="rebroadcast_mode_none_desc">Lejohet vetëm për rolet SENSOR, TRACKER dhe TAK_TRACKER, kjo do të pengojë të gjitha ritransmetimet, jo ndryshe nga roli CLIENT_MUTE.</string>
