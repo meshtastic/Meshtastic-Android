@@ -230,6 +230,18 @@ constructor(
         _requestChannelSet.value = null
     }
 
+    private val _deepLinkRequested: MutableStateFlow<Uri?> = MutableStateFlow(null)
+    val deepLinkRequested: StateFlow<Uri?>
+        get() = _deepLinkRequested.asStateFlow()
+
+    fun setDeepLinkRequested(url: Uri) {
+        _deepLinkRequested.value = url
+    }
+
+    fun clearDeepLinkRequested() {
+        _deepLinkRequested.value = null
+    }
+
     override fun onCleared() {
         super.onCleared()
         Timber.d("ViewModel cleared")
