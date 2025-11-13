@@ -139,7 +139,7 @@
     <string name="provide_location_to_mesh">Ağda telefon konumunu kullan</string>
     <plurals name="delete_messages">
         <item quantity="one">Mesajı sil?</item>
-        <item quantity="other">%s adet mesajı sil?</item>
+        <item quantity="other">%1$s adet mesajı sil?</item>
     </plurals>
     <string name="delete">Sil</string>
     <string name="delete_for_everyone">Herkesten sil</string>
