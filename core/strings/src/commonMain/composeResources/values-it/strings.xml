@@ -36,7 +36,7 @@
     <string name="node_filter_show_ignored">Nodi ignorati</string>
     <string name="unrecognized">Non riconosciuto</string>
     <string name="message_status_enroute">In attesa di conferma</string>
-    <string name="message_status_queued">In coda per l'invio</string>
+    <string name="message_status_queued">In coda per l\'invio</string>
     <string name="routing_error_none">Confermato</string>
     <string name="routing_error_no_route">Nessun percorso</string>
     <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
@@ -55,9 +55,9 @@
     <string name="routing_error_admin_public_key_unauthorized">Chiave Pubblica non autorizzata</string>
     <string name="role_client_desc">App collegata o dispositivo di messaggistica standalone.</string>
     <string name="role_client_mute_desc">Dispositivo che non inoltra pacchetti da altri dispositivi.</string>
-    <string name="role_router_desc">Nodo d'infrastruttura per estendere la copertura di rete tramite inoltro dei messaggi. Visibile nell'elenco dei nodi.</string>
+    <string name="role_router_desc">Nodo d\'infrastruttura per estendere la copertura di rete tramite inoltro dei messaggi. Visibile nell\'elenco dei nodi.</string>
     <string name="role_router_client_desc">Combinazione di ROUTER e CLIENT. Non per dispositivi mobili.</string>
-    <string name="role_repeater_desc">Nodo d'infrastruttura per estendere la copertura della rete tramite inoltro dei messaggi con overhead minimo. Non visibile nell'elenco dei nodi.</string>
+    <string name="role_repeater_desc">Nodo d\'infrastruttura per estendere la copertura della rete tramite inoltro dei messaggi con overhead minimo. Non visibile nell\'elenco dei nodi.</string>
     <string name="role_tracker_desc">Dà priorità alla trasmissione di pacchetti di posizione GPS.</string>
     <string name="role_sensor">Sensore</string>
     <string name="role_sensor_desc">Dà priorità alla trasmissione di pacchetti di telemetria.</string>
@@ -66,9 +66,9 @@
     <string name="role_client_hidden_desc">Dispositivo che trasmette solo quando necessario, per risparmiare energia o restare invisibile.</string>
     <string name="role_lost_and_found_desc">Trasmette a intervalli regolari la posizione come messaggio nel canale predefinito per aiutare il recupero del dispositivo.</string>
     <string name="role_tak_tracker_desc">Abilita le trasmissioni automatiche TAK PLI e riduce le trasmissioni di routine.</string>
-    <string name="role_router_late_desc">Nodo dell'infrastruttura che ritrasmette sempre i pacchetti una volta ma solo dopo tutte le altre modalità, garantendo una copertura aggiuntiva per i cluster locali. Visibile nella lista dei nodi.</string>
+    <string name="role_router_late_desc">Nodo dell\'infrastruttura che ritrasmette sempre i pacchetti una volta ma solo dopo tutte le altre modalità, garantendo una copertura aggiuntiva per i cluster locali. Visibile nella lista dei nodi.</string>
     <string name="rebroadcast_mode_all">Tutti</string>
-    <string name="rebroadcast_mode_all_desc">Ritrasmettere qualsiasi messaggio osservato, se era sul nostro canale privato o da un'altra mesh con gli stessi parametri lora.</string>
+    <string name="rebroadcast_mode_all_desc">Ritrasmettere qualsiasi messaggio osservato, se era sul nostro canale privato o da un\'altra mesh con gli stessi parametri lora.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Stesso comportamento di ALL ma salta la decodifica dei pacchetti e semplicemente li ritrasmette. Disponibile solo nel ruolo Repeater. Attivando questo su qualsiasi altro ruolo, si otterrà il comportamento di ALL.</string>
     <string name="rebroadcast_mode_local_only">Solo Locale</string>
     <string name="rebroadcast_mode_local_only_desc">Ignora i messaggi osservati da mesh esterne aperte o quelli che non possono essere decifrati. Ritrasmette il messaggio solo nei canali locali primario / secondario dei nodi.</string>
@@ -77,7 +77,7 @@
     <string name="rebroadcast_mode_none_desc">Permesso solo per i ruoli SENSOR, TRACKER e TAK_TRACKER, questo inibirà tutte le ritrasmissioni, come il ruolo CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignora pacchetti da numeri di porta non standard come: TAK, RangeTest, PaxCounter, ecc. Ritrasmette solo pacchetti con numeri di porta standard: NodeInfo, Testo, Posizione, Telemetria e Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Considera il doppio tocco sugli accelerometri supportati come la pressione di un pulsante utente.</string>
-    <string name="config_device_ledHeartbeatEnabled_summary">Controlla il LED lampeggiante del dispositivo. Per la maggior parte dei dispositivi questo controllerà uno dei LED (fino a 4), il LED dell'alimentazione e il LED del GPS non sono controllabili.</string>
+    <string name="config_device_ledHeartbeatEnabled_summary">Controlla il LED lampeggiante del dispositivo. Per la maggior parte dei dispositivi questo controllerà uno dei LED (fino a 4), il LED dell\'alimentazione e il LED del GPS non sono controllabili.</string>
     <string name="config_device_transmitOverLora_summary">Se oltre a inviarli tramite MQTT e PhoneAPI, i dati NeighborInfo devono essere trasmessi tramite LoRa. Non disponibile su un canale con chiave e nome predefiniti.</string>
     <string name="config_display_screen_on_secs_summary">Per quanto tempo lo schermo rimane acceso dopo che il pulsante utente viene premuto o i messaggi vengono ricevuti.</string>
     <string name="config_network_udp_enabled_summary">Abilita la trasmissione di pacchetti tramite UDP sulla rete locale.</string>
@@ -92,7 +92,7 @@
     <string name="debug">Debug</string>
     <string name="channel_name">Nome del canale</string>
     <string name="qr_code">Codice QR</string>
-    <string name="application_icon">Icona dell'applicazione</string>
+    <string name="application_icon">Icona dell\'applicazione</string>
     <string name="unknown_username">Nome Utente Sconosciuto</string>
     <string name="send">Invia</string>
     <string name="warning_not_paired">Non è ancora stato abbinato un dispositivo radio compatibile Meshtastic a questo telefono. È necessario abbinare un dispositivo e impostare il nome utente.\n\nQuesta applicazione open-source è ancora in via di sviluppo, se si riscontrano problemi, rivolgersi al forum: https://github.com/orgs/meshtastic/discussions\n\nPer maggiori informazioni visitare la pagina web - www.meshtastic.org.</string>
@@ -109,7 +109,7 @@
     <string name="report">Invia Segnalazione</string>
     <string name="pairing_completed">Abbinamento completato, attivazione in corso del servizio</string>
     <string name="pairing_failed_try_again">Abbinamento fallito, effettuare una nuova selezione</string>
-    <string name="location_disabled">L'accesso alla posizione è disattivato, non è possibile fornire la posizione al mesh.</string>
+    <string name="location_disabled">L\'accesso alla posizione è disattivato, non è possibile fornire la posizione al mesh.</string>
     <string name="share">Condividi</string>
     <string name="new_node_seen">Nuovo nodo scoperto:%1$s</string>
     <string name="disconnected">Disconnesso</string>
@@ -121,12 +121,12 @@
     <string name="connected_to">Connesso alla radio (%1$s)</string>
     <string name="not_connected">Non connesso</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
-    <string name="app_too_old">Aggiornamento dell'applicazione necessario</string>
-    <string name="must_update">È necessario aggiornare questa applicazione nell'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/installation">documenti</a> su questo argomento.</string>
+    <string name="app_too_old">Aggiornamento dell\'applicazione necessario</string>
+    <string name="must_update">È necessario aggiornare questa applicazione nell\'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/installation">documenti</a> su questo argomento.</string>
     <string name="none">Nessuno (disattiva)</string>
     <string name="meshtastic_service_notifications">Notifiche di servizio</string>
     <string name="about">Informazioni</string>
-    <string name="channel_invalid">L'URL di questo Canale non è valida e non può essere usata</string>
+    <string name="channel_invalid">L\'URL di questo Canale non è valida e non può essere usata</string>
     <string name="debug_panel">Pannello Di Debug</string>
     <string name="debug_decoded_payload">Payload decodificato:</string>
     <string name="debug_logs_export">Esporta i logs</string>
@@ -152,7 +152,7 @@
     <string name="meshtastic_broadcast_notifications">Notifiche di messaggi broadcast</string>
     <string name="meshtastic_alerts_notifications">Notifiche di allarme</string>
     <string name="firmware_too_old">È necessario aggiornare il firmware.</string>
-    <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all'installazione del firmware</a>.</string>
+    <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all\'installazione del firmware</a>.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Devi impostare una regione!</string>
     <string name="cant_change_no_radio">Impossibile cambiare il canale, perché la radio non è ancora connessa. Riprova.</string>
@@ -212,8 +212,8 @@
     <string name="delivery_confirmed">Consegna confermata</string>
     <string name="error">Errore</string>
     <string name="ignore">Ignora</string>
-    <string name="ignore_add">Aggiungere '%1$s' alla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
-    <string name="ignore_remove">Rimuovere '%1$s' dalla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
+    <string name="ignore_add">Aggiungere \'%1$s\' alla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
+    <string name="ignore_remove">Rimuovere \'%1$s\' dalla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
     <string name="map_select_download_region">Seleziona la regione da scaricare</string>
     <string name="map_tile_download_estimate">Stima dei riquadri da scaricare:</string>
     <string name="map_start_download">Inizia download</string>
@@ -268,15 +268,15 @@
     <string name="encryption_psk">Chiave Condivisa</string>
     <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
     <string name="encryption_error">Chiave pubblica errata</string>
-    <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
+    <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l\'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
     <string name="exchange_userinfo">Scambia informazioni utente</string>
     <string name="meshtastic_new_nodes_notifications">Notifiche di nuovi nodi</string>
     <string name="more_details">Ulteriori informazioni</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Rapporto segnale-rumore (Signal-to-Noise Ratio), una misura utilizzata nelle comunicazioni per quantificare il livello di un segnale desiderato rispetto al livello di rumore di fondo. In Meshtastic e in altri sistemi wireless, un SNR più elevato indica un segnale più chiaro che può migliorare l'affidabilità e la qualità della trasmissione dei dati.</string>
+    <string name="snr_definition">Rapporto segnale-rumore (Signal-to-Noise Ratio), una misura utilizzata nelle comunicazioni per quantificare il livello di un segnale desiderato rispetto al livello di rumore di fondo. In Meshtastic e in altri sistemi wireless, un SNR più elevato indica un segnale più chiaro che può migliorare l\'affidabilità e la qualità della trasmissione dei dati.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Indicatore di forza del segnale ricevuto (Received Signal Strength Indicator), una misura utilizzata per determinare il livello di potenza ricevuto dall'antenna. Un valore RSSI più elevato indica generalmente una connessione più forte e più stabile.</string>
-    <string name="iaq_definition">(Qualità dell'aria interna) scala relativa del valore della qualità dell'aria indoor, misurato da Bosch BME680. Valore Intervallo 0–500.</string>
+    <string name="rssi_definition">Indicatore di forza del segnale ricevuto (Received Signal Strength Indicator), una misura utilizzata per determinare il livello di potenza ricevuto dall\'antenna. Un valore RSSI più elevato indica generalmente una connessione più forte e più stabile.</string>
+    <string name="iaq_definition">(Qualità dell\'aria interna) scala relativa del valore della qualità dell\'aria indoor, misurato da Bosch BME680. Valore Intervallo 0–500.</string>
     <string name="device_metrics_log">Registro Metriche Dispositivo</string>
     <string name="node_map">Mappa Dei Nodi</string>
     <string name="position_log">Registro Posizione</string>
@@ -310,8 +310,8 @@
     <string name="alert_bell_text">Carattere Campana Di Allarme!</string>
     <string name="critical_alert">Avvisi critici</string>
     <string name="favorite">Preferito</string>
-    <string name="favorite_add">Aggiungere '%1$s' ai nodi preferiti?</string>
-    <string name="favorite_remove">Rimuovere '%1$s' dai nodi preferiti?</string>
+    <string name="favorite_add">Aggiungere \'%1$s\' ai nodi preferiti?</string>
+    <string name="favorite_remove">Rimuovere \'%1$s\' dai nodi preferiti?</string>
     <string name="power_metrics_log">Registro Metriche Alimentazione</string>
     <string name="channel_1">Canale 1</string>
     <string name="channel_2">Canale 2</string>
@@ -385,9 +385,9 @@
     <string name="canned_message_config">Configurazione Messaggi Preconfezionati</string>
     <string name="canned_message_enabled">Messaggi preconfezionati abilitati</string>
     <string name="rotary_encoder_1_enabled">Encoder rotativo #1 abilitato</string>
-    <string name="gpio_pin_for_rotary_encoder_a_port">Pin GPIO della porta A dell'encoder rotativo</string>
-    <string name="gpio_pin_for_rotary_encoder_b_port">Pin GPIO della porta B dell'encoder rotativo</string>
-    <string name="gpio_pin_for_rotary_encoder_press_port">Pin GPIO della porta Pulsante dell'encoder rotativo</string>
+    <string name="gpio_pin_for_rotary_encoder_a_port">Pin GPIO della porta A dell\'encoder rotativo</string>
+    <string name="gpio_pin_for_rotary_encoder_b_port">Pin GPIO della porta B dell\'encoder rotativo</string>
+    <string name="gpio_pin_for_rotary_encoder_press_port">Pin GPIO della porta Pulsante dell\'encoder rotativo</string>
     <string name="generate_input_event_on_press">Evento generato dalla Pressione del pulsante</string>
     <string name="generate_input_event_on_cw">Evento generato dalla rotazione in senso orario</string>
     <string name="generate_input_event_on_ccw">Evento generato dalla rotazione in senso antiorario</string>
@@ -535,8 +535,8 @@
     <string name="environment_metrics_module_enabled">Modulo metriche ambientali abilitato</string>
     <string name="environment_metrics_on_screen_enabled">Metriche ambientali visualizzate su schermo</string>
     <string name="environment_metrics_use_fahrenheit">Usa i gradi Fahrenheit nelle metriche ambientali</string>
-    <string name="air_quality_metrics_module_enabled">Modulo metriche della qualità dell'aria abilitato</string>
-    <string name="air_quality_icon">Icona della qualità dell'aria</string>
+    <string name="air_quality_metrics_module_enabled">Modulo metriche della qualità dell\'aria abilitato</string>
+    <string name="air_quality_icon">Icona della qualità dell\'aria</string>
     <string name="power_metrics_module_enabled">Modulo metriche di alimentazione abilitato</string>
     <string name="power_metrics_on_screen_enabled">Metriche di alimentazione visualizzate su schermo</string>
     <string name="user_config">Configurazione Utente</string>
@@ -555,7 +555,7 @@
     <string name="weight">Peso</string>
     <string name="radiation">Radiazione</string>
     <string name="store_forward_config"><![CDATA[Configurazione Salva & Inoltra]]></string>
-    <string name="indoor_air_quality_iaq">Qualità dell'Aria Interna (IAQ)</string>
+    <string name="indoor_air_quality_iaq">Qualità dell\'Aria Interna (IAQ)</string>
     <string name="url">URL</string>
     <string name="backup_restore"><![CDATA[Backup & Ripristino]]></string>
     <string name="import_configuration">Importa configurazione</string>
@@ -580,7 +580,7 @@
     <string name="secondary_no_telemetry">Nessuna trasmissione telemetria periodica</string>
     <string name="manual_position_request">Richiesta posizione manuale mandatoria</string>
     <string name="press_and_drag">Premi e trascina per riordinare</string>
-    <string name="unmute">Riattiva l'audio</string>
+    <string name="unmute">Riattiva l\'audio</string>
     <string name="dynamic">Dinamico</string>
     <string name="scan_qr_code">Scansiona codice QR</string>
     <string name="share_contact">Condividi contatto</string>
@@ -589,7 +589,7 @@
     <string name="import_shared_contact">Importare Contatto Condiviso?</string>
     <string name="unmessageable">Non messaggabile</string>
     <string name="unmonitored_or_infrastructure">Non monitorato o Infrastruttura</string>
-    <string name="import_known_shared_contact_text">Attenzione: Questo contatto è noto, l'importazione sovrascriverà le informazioni di contatto precedenti.</string>
+    <string name="import_known_shared_contact_text">Attenzione: Questo contatto è noto, l\'importazione sovrascriverà le informazioni di contatto precedenti.</string>
     <string name="public_key_changed">Chiave Pubblica Modificata</string>
     <string name="import_label">Importa</string>
     <string name="request_metadata">Richiedi Metadati</string>
@@ -613,7 +613,7 @@
     <string name="reply">Rispondi</string>
     <string name="map_reporting_summary">Il nodo invierà periodicamente un pacchetto di report mappa non cifrato al server MQTT configurato, questo include il nome id lungo e breve, posizione approssimativa, modello hardware, ruolo, versione firmware, regione LoRa, configurazione modem e nome del canale primario.</string>
     <string name="map_reporting_consent_header">Do il consenso a condividere i dati non cifrati del nodo tramite MQTT</string>
-    <string name="map_reporting_consent_text">Abilitando questa funzione, l'utente riconosce e acconsente espressamente alla trasmissione della posizione geografica in tempo reale del suo dispositivo su protocollo MQTT senza crittografia. Questi dati di localizzazione possono essere utilizzati per scopi quali la compilazione di mappe in tempo reale, il tracking del dispositivo e le relative funzioni di telemetria.</string>
+    <string name="map_reporting_consent_text">Abilitando questa funzione, l\'utente riconosce e acconsente espressamente alla trasmissione della posizione geografica in tempo reale del suo dispositivo su protocollo MQTT senza crittografia. Questi dati di localizzazione possono essere utilizzati per scopi quali la compilazione di mappe in tempo reale, il tracking del dispositivo e le relative funzioni di telemetria.</string>
     <string name="i_agree_to_share_my_location">Ho letto e accetto quanto sopra. Acconsento volontariamente alla trasmissione non crittografata dei dati del mio nodo tramite MQTT</string>
     <string name="i_agree">Sono d’accordo.</string>
     <string name="should_update_firmware">Aggiornamento Firmware Consigliato.</string>
@@ -655,22 +655,22 @@
     <string name="message_device_managed">Questa radio è gestita e può essere modificata solo da un amministratore remoto.</string>
     <string name="advanced_title">Avanzate</string>
     <string name="clean_node_database_title">Azzera il database dei nodi</string>
-    <string name="clean_nodes_older_than">Elimina i nodi visti per l'ultima volta più di %1$d giorni fa</string>
+    <string name="clean_nodes_older_than">Elimina i nodi visti per l\'ultima volta più di %1$d giorni fa</string>
     <string name="clean_unknown_nodes">Elimina solo i nodi sconosciuti</string>
     <string name="clean_low_interaction_nodes">Elimina i nodi con bassa/nessuna interazione</string>
     <string name="clean_ignored_nodes">Elimina i nodi ignorati</string>
     <string name="clean_now">Elimina ora</string>
     <string name="clean_node_database_confirmation">Questo rimuoverà %1$d nodi dal tuo database. Questa azione non può essere annullata.</string>
-    <string name="security_icon_help_green_lock">L'icona di un lucchetto verde chiuso indica che il canale è criptato in modo sicuro con una chiave AES a 128 o 256 bit</string>
+    <string name="security_icon_help_green_lock">L\'icona di un lucchetto verde chiuso indica che il canale è criptato in modo sicuro con una chiave AES a 128 o 256 bit</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Canale non sicuro, non preciso</string>
-    <string name="security_icon_help_yellow_open_lock">L'icona di un lucchetto giallo aperto indica che il canale non è criptato, non viene utilizzato per dati di posizione precisa e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
+    <string name="security_icon_help_yellow_open_lock">L\'icona di un lucchetto giallo aperto indica che il canale non è criptato, non viene utilizzato per dati di posizione precisa e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <string name="security_icon_insecure_precise_only">Canale non sicuro, posizione precisa</string>
-    <string name="security_icon_help_red_open_lock">L'icona di un lucchetto rosso aperto indica che il canale non è criptato, viene utilizzato per dati di posizione precisa e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
+    <string name="security_icon_help_red_open_lock">L\'icona di un lucchetto rosso aperto indica che il canale non è criptato, viene utilizzato per dati di posizione precisa e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <string name="security_icon_warning_precise_mqtt">Attenzione: Insicuro, posizione precisa &amp; MQTT Uplink</string>
-    <string name="security_icon_help_warning_precise_mqtt">L'icona di un lucchetto rosso aperto con un avvertimento indica che il canale non è criptato in modo sicuro, viene usato per la posizione precisa e viene fatto l'uplink su internet attraverso MQTT e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
+    <string name="security_icon_help_warning_precise_mqtt">L\'icona di un lucchetto rosso aperto con un avvertimento indica che il canale non è criptato in modo sicuro, viene usato per la posizione precisa e viene fatto l\'uplink su internet attraverso MQTT e non utilizza una chiave oppure ne usa una da 1 byte conosciuta.</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Sicurezza del canale</string>
     <string name="security_icon_help_title_all">Significato di sicurezza del canale</string>
@@ -708,7 +708,7 @@
     <string name="easily_set_up_private_mesh_networks">Crea reti mesh private in modo semplice per connessioni sicure e affidabili in zone remote</string>
     <string name="track_and_share_locations">Visualizza e condividi la posizione</string>
     <string name="share_your_location_in_real_time">Condividi la tua posizione in tempo reale e mantieni il tuo gruppo coordinato con le funzionalità GPS integrate.</string>
-    <string name="app_notifications">Notifiche dell'app</string>
+    <string name="app_notifications">Notifiche dell\'app</string>
     <string name="incoming_messages">Messaggi in arrivo</string>
     <string name="notifications_for_channel_and_direct_messages">Notifiche per i canali e i messaggi diretti</string>
     <string name="new_nodes">Nuovi nodi</string>
@@ -724,9 +724,9 @@
     <string name="distance_measurements">Misure di distanza</string>
     <string name="distance_measurements_description">Visualizza la distanza tra il telefono e gli altri nodi Meshtastic con posizione attiva.</string>
     <string name="distance_filters">Filtri distanza</string>
-    <string name="distance_filters_description">Filtra l'elenco dei nodi e la mappa mesh in base alla prossimità al tuo telefono.</string>
+    <string name="distance_filters_description">Filtra l\'elenco dei nodi e la mappa mesh in base alla prossimità al tuo telefono.</string>
     <string name="mesh_map_location">Posizione sulla mappa della Mesh</string>
-    <string name="mesh_map_location_description">Abilita l'indicatore blu per il tuo telefono sulla mappa della mesh.</string>
+    <string name="mesh_map_location_description">Abilita l\'indicatore blu per il tuo telefono sulla mappa della mesh.</string>
     <string name="configure_location_permissions">Configura i permessi sulla posizione</string>
     <string name="skip">Ignora</string>
     <string name="settings">impostazioni</string>
@@ -739,8 +739,8 @@
     <string name="notification_permissions_description">Meshtastic utilizza le notifiche per tenerti aggiornato su nuovi messaggi e altri eventi importanti. È possibile aggiornare i permessi di notifica in qualsiasi momento dalle impostazioni.</string>
     <string name="next">Avanti</string>
     <string name="grant_permissions">Concedi permessi</string>
-    <string name="nodes_queued_for_deletion">%d nodi in coda per l'eliminazione:</string>
-    <string name="clean_node_database_description">Attenzione: questo rimuove i nodi dal database dell'app e sul dispositivo. Le selezioni\nsono additive.</string>
+    <string name="nodes_queued_for_deletion">%d nodi in coda per l\'eliminazione:</string>
+    <string name="clean_node_database_description">Attenzione: questo rimuove i nodi dal database dell\'app e sul dispositivo. Le selezioni\nsono additive.</string>
     <string name="connecting_to_device">Connessione al dispositivo in corso…</string>
     <string name="map_type_normal">Normale</string>
     <string name="map_type_satellite">Satelliti</string>
@@ -764,9 +764,9 @@
     <string name="delete_custom_tile_source">Elimina sorgenti Tile personalizzati</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="provider_name_exists">Il nome del provider esiste.</string>
-    <string name="url_cannot_be_empty">L'URL non può essere vuoto.</string>
-    <string name="url_must_contain_placeholders">L'URL deve contenere dei placeholder.</string>
-    <string name="url_template">Template dell'URL</string>
+    <string name="url_cannot_be_empty">L\'URL non può essere vuoto.</string>
+    <string name="url_must_contain_placeholders">L\'URL deve contenere dei placeholder.</string>
+    <string name="url_template">Template dell\'URL</string>
     <string name="track_point">punto di interesse</string>
     <string name="app_settings">App</string>
     <string name="app_version">Versione</string>
