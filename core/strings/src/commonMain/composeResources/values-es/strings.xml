@@ -167,7 +167,7 @@
     <string name="provide_location_to_mesh">Proporcionar la ubicación del teléfono a la malla</string>
     <plurals name="delete_messages">
         <item quantity="one">Deseas eliminar el mensaje?</item>
-        <item quantity="other">Deseas eliminar %s mensajes?</item>
+        <item quantity="other">Deseas eliminar %1$s mensajes?</item>
     </plurals>
     <string name="delete">Eliminar</string>
     <string name="delete_for_everyone">Eliminar para todos</string>
