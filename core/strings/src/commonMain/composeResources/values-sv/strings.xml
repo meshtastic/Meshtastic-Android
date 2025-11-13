@@ -233,7 +233,7 @@
     <string name="provide_location_to_mesh">Dela telefonens position till meshnätverket</string>
     <plurals name="delete_messages">
         <item quantity="one">Ta bort meddelande?</item>
-        <item quantity="other">Ta bort %s meddelanden?</item>
+        <item quantity="other">Ta bort %1$s meddelanden?</item>
     </plurals>
     <string name="delete">Radera</string>
     <string name="delete_for_everyone">Radera för alla</string>
