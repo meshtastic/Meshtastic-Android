@@ -202,7 +202,7 @@ internal fun MessageList(
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val messageRows by
+    val messageRows =
         rememberMessageRows(
             messages = state.messages,
             showUnreadDivider = showUnreadDivider,
