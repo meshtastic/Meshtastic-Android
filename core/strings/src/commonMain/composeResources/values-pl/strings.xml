@@ -117,7 +117,7 @@
     <string name="clear">Czyść</string>
     <string name="message_delivery_status">Status doręczenia wiadomości</string>
     <string name="meshtastic_alerts_notifications">Powiadomienia alertowe</string>
-    <string name="firmware_too_old">Wymagana aktualizacja firmware\'u.</string>
+    <string name="firmware_too_old">Wymagana aktualizacja firmware'u.</string>
     <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nasz przewodnik instalacji oprogramowania układowego</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musisz ustawić region!</string>
@@ -136,9 +136,9 @@
     <string name="provide_location_to_mesh">Podaj lokalizację telefonu do sieci</string>
     <plurals name="delete_messages">
         <item quantity="one">Usunąć wiadomość?</item>
-        <item quantity="few">Usunąć %s wiadomości?</item>
-        <item quantity="many">Usunąć %s wiadomości?</item>
-        <item quantity="other">Usunąć %s wiadomości?</item>
+        <item quantity="few">Usunąć %1$s wiadomości?</item>
+        <item quantity="many">Usunąć %1$s wiadomości?</item>
+        <item quantity="other">Usunąć %1$s wiadomości?</item>
     </plurals>
     <string name="delete">Usuń</string>
     <string name="delete_for_everyone">Usuń dla wszystkich</string>
@@ -170,8 +170,8 @@
     <string name="delivery_confirmed">Dostarczono</string>
     <string name="error">Błąd</string>
     <string name="ignore">Zignoruj</string>
-    <string name="ignore_add">Dodać \'%1$s\' do listy ignorowanych?</string>
-    <string name="ignore_remove">Usunąć \'%1$s\' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
+    <string name="ignore_add">Dodać '%1$s' do listy ignorowanych?</string>
+    <string name="ignore_remove">Usunąć '%1$s' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
     <string name="map_select_download_region">Wybierz region do pobrania</string>
     <string name="map_tile_download_estimate">Szacowany czas pobrania:</string>
     <string name="map_start_download">Rozpocznij pobieranie</string>
@@ -266,8 +266,8 @@
     <string name="alert_bell_text">Znak ostrzegawczy!</string>
     <string name="critical_alert">Krytyczny alert!</string>
     <string name="favorite">Ulubiony</string>
-    <string name="favorite_add">Dodać węzeł \'%1$s\' do ulubionych?</string>
-    <string name="favorite_remove">Usunąć węzeł \'%1$s\' z ulubionych?</string>
+    <string name="favorite_add">Dodać węzeł '%1$s' do ulubionych?</string>
+    <string name="favorite_remove">Usunąć węzeł '%1$s' z ulubionych?</string>
     <string name="power_metrics_log">Historia zasilania</string>
     <string name="channel_1">Kanał 1</string>
     <string name="channel_2">Kanał 2</string>

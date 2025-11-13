@@ -116,10 +116,10 @@
     <string name="provide_location_to_mesh">Soláthra suíomh na fón do do líonra</string>
     <plurals name="delete_messages">
         <item quantity="one">Ar mhaith leat teachtaireacht a scriosadh?</item>
-        <item quantity="two">Ar mhaith leat %s teachtaireachtaí a scriosadh?</item>
-        <item quantity="few">Ar mhaith leat %s teachtaireachtaí a scriosadh?</item>
-        <item quantity="many">Ar mhaith leat %s teachtaireachtaí a scriosadh?</item>
-        <item quantity="other">Ar mhaith leat %s teachtaireachtaí a scriosadh?</item>
+        <item quantity="two">Ar mhaith leat %1$s teachtaireachtaí a scriosadh?</item>
+        <item quantity="few">Ar mhaith leat %1$s teachtaireachtaí a scriosadh?</item>
+        <item quantity="many">Ar mhaith leat %1$s teachtaireachtaí a scriosadh?</item>
+        <item quantity="other">Ar mhaith leat %1$s teachtaireachtaí a scriosadh?</item>
     </plurals>
     <string name="delete">Scrios</string>
     <string name="delete_for_everyone">Scrios do gach duine</string>

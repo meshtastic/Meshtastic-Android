@@ -70,7 +70,7 @@
     <string name="provide_location_to_mesh">Áframsenda staðsetningu á möskvanet</string>
     <plurals name="delete_messages">
         <item quantity="one">Eyða skilaboðum?</item>
-        <item quantity="other">Eyða %s skilaboðum?</item>
+        <item quantity="other">Eyða %1$s skilaboðum?</item>
     </plurals>
     <string name="delete">Eyða</string>
     <string name="delete_for_everyone">Eyða fyrir öllum</string>
@@ -99,8 +99,8 @@
     <string name="direct_message">Bein skilaboð</string>
     <string name="nodedb_reset">Endurræsa NodeDB</string>
     <string name="ignore">Hunsa</string>
-    <string name="ignore_add">Bæta \'%1$s\' við Ignore lista?</string>
-    <string name="ignore_remove">Fjarlægja \'%1$s\' frá hunsa lista?</string>
+    <string name="ignore_add">Bæta '%1$s' við Ignore lista?</string>
+    <string name="ignore_remove">Fjarlægja '%1$s' frá hunsa lista?</string>
     <string name="map_select_download_region">Veldu svæði til að niðurhala</string>
     <string name="map_tile_download_estimate">Áætlaður niðurhalstími reits:</string>
     <string name="map_start_download">Hefja niðurhal</string>

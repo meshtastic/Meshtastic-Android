@@ -123,7 +123,7 @@
     <plurals name="delete_messages">
         <item quantity="one">Izbriši sporočilo?</item>
         <item quantity="two">Izbrišem sporočili?</item>
-        <item quantity="few">Izbrišem %s sporočila?</item>
+        <item quantity="few">Izbrišem %1$s sporočila?</item>
         <item quantity="other">Izbrišem sporočila: %1$s?</item>
     </plurals>
     <string name="delete">Izbriši</string>
@@ -156,8 +156,8 @@
     <string name="delivery_confirmed">Prejem potrjen</string>
     <string name="error">Napaka</string>
     <string name="ignore">Prezri</string>
-    <string name="ignore_add">Dodaj \'%1$s\' na prezrto listo?</string>
-    <string name="ignore_remove">Odstrani \'%1$s\' iz prezrte liste?</string>
+    <string name="ignore_add">Dodaj '%1$s' na prezrto listo?</string>
+    <string name="ignore_remove">Odstrani '%1$s' iz prezrte liste?</string>
     <string name="map_select_download_region">Prenesi izbrano regijo</string>
     <string name="map_tile_download_estimate">Ocena prenosa plošče:</string>
     <string name="map_start_download">Začni prenos</string>

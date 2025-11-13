@@ -193,7 +193,7 @@
     <string name="provide_location_to_mesh">Изпращане на местоположение в мрежата</string>
     <plurals name="delete_messages">
         <item quantity="one">Изтриване на съобщението?</item>
-        <item quantity="other">Изтриване на %s съобщения?</item>
+        <item quantity="other">Изтриване на %1$s съобщения?</item>
     </plurals>
     <string name="delete">Изтриване</string>
     <string name="delete_for_everyone">Изтриване за всички</string>
@@ -234,8 +234,8 @@
     <string name="error">Грешка</string>
     <string name="ignore">Игнорирай</string>
     <string name="remove_ignored">Премахване от игнорирани</string>
-    <string name="ignore_add">Добави \'%1$s\' към списъка с игнорирани?</string>
-    <string name="ignore_remove">Изтрий \'%1$s\' от списъка с игнорирани?</string>
+    <string name="ignore_add">Добави '%1$s' към списъка с игнорирани?</string>
+    <string name="ignore_remove">Изтрий '%1$s' от списъка с игнорирани?</string>
     <string name="map_select_download_region">Избор на регион за сваляне</string>
     <string name="map_tile_download_estimate">Прогноза за изтегляне на картинки:</string>
     <string name="map_start_download">Започни свалянето</string>
@@ -336,8 +336,8 @@
     <string name="favorite">Любим</string>
     <string name="add_favorite">Добавяне към любими</string>
     <string name="remove_favorite">Премахване от любими</string>
-    <string name="favorite_add">Добавяне на \'%1$s\' като любим възел?</string>
-    <string name="favorite_remove">Премахване на \'%1$s\' като любим възел?</string>
+    <string name="favorite_add">Добавяне на '%1$s' като любим възел?</string>
+    <string name="favorite_remove">Премахване на '%1$s' като любим възел?</string>
     <string name="power_metrics_log">Журнал на показателите на захранването</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
