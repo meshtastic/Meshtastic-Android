@@ -126,8 +126,8 @@
     <string name="provide_location_to_mesh">Poskytnúť polohu telefónu do siete</string>
     <plurals name="delete_messages">
         <item quantity="one">Vymazať správu?</item>
-        <item quantity="few">Vymazať %s správy?</item>
-        <item quantity="many">Vymazať %s správ?</item>
+        <item quantity="few">Vymazať %1$s správy?</item>
+        <item quantity="many">Vymazať %1$s správ?</item>
         <item quantity="other">Vymazať správy?</item>
     </plurals>
     <string name="delete">Vymazať</string>
