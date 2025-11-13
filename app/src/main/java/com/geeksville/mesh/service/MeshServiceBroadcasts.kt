@@ -24,6 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
+import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.service.ServiceRepository
 import timber.log.Timber
 import javax.inject.Inject
@@ -50,7 +51,7 @@ constructor(
     }
 
     fun broadcastNodeChange(info: NodeInfo) {
-        Timber.d("Broadcasting node change $info")
+        Timber.d("Broadcasting node change ${info.user?.toPIIString()}")
         val intent = Intent(MeshService.ACTION_NODE_CHANGE).putExtra(EXTRA_NODEINFO, info)
         explicitBroadcast(intent)
     }

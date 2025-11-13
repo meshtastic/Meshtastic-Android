@@ -115,7 +115,7 @@ constructor(
     }
 
     fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
-        Timber.d("queueStatus ${queueStatus.toOneLineString()}")
+        Timber.d("[queueStatus] ${queueStatus.toOneLineString()}")
         val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, meshPacketId) }
         if (success && isFull) return // Queue is full, wait for free != 0
         if (requestId != 0) {
@@ -184,7 +184,7 @@ constructor(
             if (connectionStateHolder.getState() != ConnectionState.CONNECTED) throw RadioNotConnectedException()
             sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
         } catch (ex: Exception) {
-            Timber.e("sendToRadio error:", ex)
+            Timber.e(ex, "sendToRadio error: ${ex.message}")
             future.complete(false)
         }
         return future

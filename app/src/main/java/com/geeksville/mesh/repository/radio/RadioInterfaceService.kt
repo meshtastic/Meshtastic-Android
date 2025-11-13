@@ -83,6 +83,9 @@ constructor(
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
+    private val _connectionError = MutableSharedFlow<BleError>()
+    val connectionError: SharedFlow<BleError> = _connectionError.asSharedFlow()
+
     // Thread-safe StateFlow for tracking device address changes
     private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr)
     val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
@@ -221,15 +224,6 @@ constructor(
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     fun handleFromRadio(p: ByteArray) {
-        Timber.d(
-            "RadioInterfaceService.handleFromRadio called with ${p.size} bytes: ${p.joinToString(
-                prefix = "[",
-                postfix = "]",
-            ) { b ->
-                String.format("0x%02x", b)
-            }}",
-        )
-
         if (logReceives) {
             try {
                 receivedPacketsLog.write(p)
@@ -248,7 +242,6 @@ constructor(
         try {
             processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
             emitReceiveActivity()
-            Timber.d("RadioInterfaceService.handleFromRadio dispatched successfully")
         } catch (t: Throwable) {
             Timber.e(t, "RadioInterfaceService.handleFromRadio failed while emitting data")
         }
@@ -265,6 +258,11 @@ constructor(
         if (_connectionState.value != newTargetState) {
             broadcastConnectionChanged(newTargetState)
         }
+    }
+
+    fun onDisconnect(error: BleError) {
+        processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(error) }
+        onDisconnect(!error.shouldReconnect)
     }
 
     /** Start our configured interface (if it isn't already running) */

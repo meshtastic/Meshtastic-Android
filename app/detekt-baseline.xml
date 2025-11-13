@@ -10,6 +10,7 @@
     <ID>ComposableParamOrder:ConnectionsNavIcon.kt$ConnectionsNavIcon</ID>
     <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
     <ID>ComposableParamOrder:Share.kt$ShareScreen</ID>
+    <ID>CyclomaticComplexMethod:BleError.kt$BleError.Companion$fun from(exception: Throwable): BleError</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>CyclomaticComplexMethod:SettingsNavigation.kt$@Suppress("LongMethod") fun NavGraphBuilder.settingsGraph(navController: NavHostController)</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
@@ -17,7 +18,6 @@
     <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided&gt;${ }</ID>
     <ID>EmptyFunctionBlock:TrustAllX509TrustManager.kt$TrustAllX509TrustManager${}</ID>
     <ID>FinalNewline:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
-    <ID>FinalNewline:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
     <ID>FinalNewline:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>FinalNewline:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>FinalNewline:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
@@ -33,9 +33,7 @@
     <ID>FinalNewline:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
     <ID>FinalNewline:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
-    <ID>ImplicitDefaultLocale:MeshService.kt$MeshService$String.format("0x%02x", b)</ID>
-    <ID>ImplicitDefaultLocale:NordicBleInterface.kt$NordicBleInterface$String.format("0x%02x", b)</ID>
-    <ID>ImplicitDefaultLocale:RadioInterfaceService.kt$RadioInterfaceService$String.format("0x%02x", b)</ID>
+    <ID>ImplicitDefaultLocale:MeshService.kt$MeshService$String.format("0x%02x", byte)</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
@@ -69,14 +67,13 @@
     <ID>MagicNumber:UIState.kt$4</ID>
     <ID>MatchingDeclarationName:MeshServiceStarter.kt$ServiceStarter : Worker</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$"Config complete id mismatch: received=$configCompleteId expected one of [$configOnlyNonce,$nodeInfoNonce]"</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService$"handleConfigComplete called with id=$configCompleteId, configOnly=$configOnlyNonce, nodeInfo=$nodeInfoNonce"</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService$"Failed to parse radio packet (len=${bytes.size} contents=$packet). Not a valid FromRadio or LogRecord."</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$"setOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed isUnmessagable: $isUnmessagable"</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService.&lt;no name provided&gt;$"sendData dest=${p.to}, id=${p.id} &lt;- ${bytes.size} bytes (connectionState=${connectionStateHolder.getState()})"</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"Peripheral not ready, cannot send data. Peripheral is ${if (peripheral == null) "null" else "not null"}. Characteristic is ${if (characteristic == null) "null" else "not null"}."</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"fromNumCharacteristic discovered: uuid=${fromNumCharacteristic?.uuid} instanceId=${fromNumCharacteristic?.instanceId}"</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"fromRadioCharacteristic discovered (packet queue): uuid=${fromRadioCharacteristic?.uuid} instanceId=${fromRadioCharacteristic?.instanceId}"</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"service.serviceScope not active while dispatching from packet queue (source=$source); using localScope as fallback"</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"toRadioCharacteristic discovered: uuid=${toRadioCharacteristic?.uuid} instanceId=${toRadioCharacteristic?.instanceId}"</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found fromNum: ${fromNumCharacteristic?.uuid}, ${fromNumCharacteristic?.instanceId}"</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found fromRadio: ${fromRadioCharacteristic?.uuid}, ${fromRadioCharacteristic?.instanceId}"</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found logRadio: ${logRadioCharacteristic?.uuid}, ${logRadioCharacteristic?.instanceId}"</ID>
+    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found toRadio: ${toRadioCharacteristic?.uuid}, ${toRadioCharacteristic?.instanceId}"</ID>
     <ID>ModifierClickableOrder:Channel.kt$clickable(onClick = onClick)</ID>
     <ID>ModifierMissing:BLEDevices.kt$BLEDevices</ID>
     <ID>ModifierMissing:Channel.kt$ChannelScreen</ID>
@@ -91,7 +88,6 @@
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>NewLineAtEndOfFile:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
-    <ID>NewLineAtEndOfFile:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
     <ID>NewLineAtEndOfFile:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>NewLineAtEndOfFile:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>NewLineAtEndOfFile:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
@@ -131,7 +127,6 @@
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService.&lt;no name provided&gt;$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshServiceStarter.kt$ServiceStarter$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:RadioInterfaceService.kt$RadioInterfaceService$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:SyncContinuation.kt$Continuation$ex: Throwable</ID>

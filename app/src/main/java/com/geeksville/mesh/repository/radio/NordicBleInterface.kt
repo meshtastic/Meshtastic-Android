@@ -20,6 +20,7 @@ package com.geeksville.mesh.repository.radio
 import android.annotation.SuppressLint
 import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_FROMNUM_CHARACTER
 import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_FROMRADIO_CHARACTER
+import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_LOGRADIO_CHARACTER
 import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_SERVICE_UUID
 import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_TORADIO_CHARACTER
 import com.geeksville.mesh.service.RadioNotConnectedException
@@ -32,10 +33,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -45,6 +46,8 @@ import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
+import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
 import timber.log.Timber
 import java.util.UUID
@@ -80,6 +83,7 @@ constructor(
     private var toRadioCharacteristic: RemoteCharacteristic? = null
     private var fromNumCharacteristic: RemoteCharacteristic? = null
     private var fromRadioCharacteristic: RemoteCharacteristic? = null
+    private var logRadioCharacteristic: RemoteCharacteristic? = null
 
     init {
         connect()
@@ -87,42 +91,43 @@ constructor(
 
     // --- Packet Flow Management ---
 
-    private fun packetQueueFlow(): Flow<ByteArray> = channelFlow {
+    private fun fromRadioPacketFlow(): Flow<ByteArray> = channelFlow {
         while (isActive) {
             // Use safe call and Elvis operator for cleaner loop termination if read fails or returns empty
             val packet =
                 fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() }
                     ?: run {
-                        Timber.d("Packet queue drain complete (empty or null read)")
+                        Timber.d("[$address] fromRadio queue drain complete (read empty/null)")
                         break
                     }
             send(packet)
         }
     }
 
-    private fun dispatchPacket(packet: ByteArray, source: String) {
+    private fun dispatchPacket(packet: ByteArray) {
+        Timber.d("[$address] Dispatching packet to service.handleFromRadio()")
         connectionScope.launch {
             try {
                 service.handleFromRadio(p = packet)
             } catch (t: Throwable) {
-                Timber.e(t, "Failed to schedule service.handleFromRadio (source=$source)")
+                Timber.e(t, "[$address] Failed to schedule service.handleFromRadio)")
             }
         }
     }
 
-    private suspend fun drainPacketQueueAndDispatch(source: String) {
+    private suspend fun drainPacketQueueAndDispatch() {
         drainMutex.withLock {
             var drainedCount = 0
-            packetQueueFlow()
+            fromRadioPacketFlow()
                 .onEach { packet ->
                     drainedCount++
-                    logPacketRead(source, packet)
-                    dispatchPacket(packet, source)
+                    Timber.d("[$address] Read packet from queue (${packet.size} bytes)")
+                    dispatchPacket(packet)
                 }
-                .catch { ex -> Timber.w(ex, "Exception while draining packet queue (source=$source)") }
+                .catch { ex -> Timber.w(ex, "[$address] Exception while draining packet queue") }
                 .onCompletion {
                     if (drainedCount > 0) {
-                        Timber.d("[$source] Drained $drainedCount packets from packet queue")
+                        Timber.d("[$address] Drained $drainedCount packets from packet queue")
                     }
                 }
                 .collect()
@@ -145,8 +150,8 @@ constructor(
                     discoverServicesAndSetupCharacteristics(it)
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Failed to connect to peripheral $address")
-                service.onDisconnect(false)
+                Timber.e(e, "[$address] Failed to connect to peripheral")
+                service.onDisconnect(BleError.from(e))
             }
         }
     }
@@ -165,27 +170,27 @@ constructor(
         try {
             peripheral?.let { p ->
                 val rssi = p.readRssi()
-                Timber.d("Peripheral $address: RSSI: $rssi dBm")
+                Timber.d("[$address] Connection established. RSSI: $rssi dBm")
 
                 val phyInUse = p.readPhy()
-                Timber.d("Peripheral $address: PHY in use: $phyInUse")
+                Timber.d("[$address] PHY in use: $phyInUse")
             }
         } catch (e: Exception) {
-            Timber.w(e, "Failed to read initial connection properties for $address")
+            Timber.w(e, "[$address] Failed to read initial connection properties")
         }
     }
 
     private fun observePeripheralChanges() {
         peripheral?.let { p ->
-            p.phy.onEach { phy -> Timber.d("Peripheral $address: PHY changed to $phy") }.launchIn(connectionScope)
+            p.phy.onEach { phy -> Timber.d("[$address] PHY changed to $phy") }.launchIn(connectionScope)
             p.connectionParameters
-                .onEach { Timber.d("Peripheral $address: Connection parameters changed to $it") }
+                .onEach { Timber.d("[$address] Connection parameters changed to $it") }
                 .launchIn(connectionScope)
             p.state
                 .onEach { state ->
-                    Timber.d("Peripheral $address: State changed to $state")
-                    if (!state.isConnected) {
-                        service.onDisconnect(false)
+                    Timber.d("[$address] State changed to $state")
+                    if (state is ConnectionState.Disconnected) {
+                        service.onDisconnect(BleError.Disconnected(reason = state.reason))
                     }
                 }
                 .launchIn(connectionScope)
@@ -210,22 +215,35 @@ constructor(
                             meshtasticService.characteristics.find { it.uuid == BTM_FROMNUM_CHARACTER.toKotlinUuid() }
                         fromRadioCharacteristic =
                             meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIO_CHARACTER.toKotlinUuid() }
+                        logRadioCharacteristic =
+                            meshtasticService.characteristics.find { it.uuid == BTM_LOGRADIO_CHARACTER.toKotlinUuid() }
 
                         if (
                             listOf(toRadioCharacteristic, fromNumCharacteristic, fromRadioCharacteristic).all {
                                 it != null
                             }
                         ) {
-                            logCharacteristicInfo()
+                            Timber.d(
+                                "[$address] Found toRadio: ${toRadioCharacteristic?.uuid}, ${toRadioCharacteristic?.instanceId}",
+                            )
+                            Timber.d(
+                                "[$address] Found fromNum: ${fromNumCharacteristic?.uuid}, ${fromNumCharacteristic?.instanceId}",
+                            )
+                            Timber.d(
+                                "[$address] Found fromRadio: ${fromRadioCharacteristic?.uuid}, ${fromRadioCharacteristic?.instanceId}",
+                            )
+                            Timber.d(
+                                "[$address] Found logRadio: ${logRadioCharacteristic?.uuid}, ${logRadioCharacteristic?.instanceId}",
+                            )
                             setupNotifications()
                             service.onConnect()
                         } else {
-                            Timber.w("One or more characteristics not found on peripheral $address")
-                            service.onDisconnect(false)
+                            Timber.w("[$address] Discovery failed: missing required characteristics")
+                            service.onDisconnect(BleError.DiscoveryFailed("One or more characteristics not found"))
                         }
                     } else {
-                        Timber.w("Meshtastic service not found on peripheral $address")
-                        service.onDisconnect(false)
+                        Timber.w("[$address] Discovery failed: Meshtastic service not found")
+                        service.onDisconnect(BleError.DiscoveryFailed("Meshtastic service not found"))
                     }
                 }
                 .launchIn(connectionScope)
@@ -238,12 +256,30 @@ constructor(
     private suspend fun setupNotifications() {
         fromNumCharacteristic
             ?.subscribe()
+            ?.onStart { Timber.d("[$address] Subscribing to fromNumCharacteristic") }
             ?.onEach { notifyBytes ->
-                logFromNumNotification(notifyBytes)
-                connectionScope.launch { drainPacketQueueAndDispatch("notify") }
+                Timber.d("[$address] FromNum Notification (${notifyBytes.size} bytes), draining queue")
+                connectionScope.launch { drainPacketQueueAndDispatch() }
             }
-            ?.catch { e -> Timber.e(e, "Error in subscribe flow for fromNumCharacteristic") }
-            ?.onCompletion { cause -> Timber.d("fromNum subscribe flow completed, cause=$cause") }
+            ?.catch { e ->
+                Timber.e(e, "[$address] Error subscribing to fromNumCharacteristic")
+                service.onDisconnect(BleError.from(e))
+            }
+            ?.onCompletion { cause -> Timber.d("[$address] fromNum sub flow completed, cause=$cause") }
+            ?.launchIn(scope = connectionScope)
+
+        logRadioCharacteristic
+            ?.subscribe()
+            ?.onStart { Timber.d("[$address] Subscribing to logRadioCharacteristic") }
+            ?.onEach { notifyBytes ->
+                Timber.d("[$address] LogRadio Notification (${notifyBytes.size} bytes), dispatching packet")
+                dispatchPacket(notifyBytes)
+            }
+            ?.catch { e ->
+                Timber.e(e, "[$address] Error subscribing to logRadioCharacteristic")
+                service.onDisconnect(BleError.from(e))
+            }
+            ?.onCompletion { cause -> Timber.d("[$address] logRadio sub flow completed, cause=$cause") }
             ?.launchIn(scope = connectionScope)
     }
 
@@ -257,17 +293,23 @@ constructor(
     override fun handleSendToRadio(p: ByteArray) {
         toRadioCharacteristic?.let { characteristic ->
             if (peripheral == null) return@let
-
             connectionScope.launch {
                 try {
-                    characteristic.write(p, writeType = WriteType.WITHOUT_RESPONSE)
-                    // Post-write action initiation
-                    drainPacketQueueAndDispatch("post-write")
+                    val writeType =
+                        if (characteristic.properties.contains(CharacteristicProperty.WRITE_WITHOUT_RESPONSE)) {
+                            WriteType.WITHOUT_RESPONSE
+                        } else {
+                            WriteType.WITH_RESPONSE
+                        }
+                    Timber.d("[$address] Writing packet to toRadioCharacteristic with $writeType")
+                    characteristic.write(p, writeType = writeType)
+                    drainPacketQueueAndDispatch()
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to write packet to $address")
+                    Timber.e(e, "[$address] Failed to write packet to toRadioCharacteristic")
+                    service.onDisconnect(BleError.from(e))
                 }
             }
-        } ?: Timber.w("toRadioCharacteristic not available when attempting to send data to $address")
+        } ?: Timber.w("[$address] toRadio unavailable, can't send data")
     }
 
     /** Closes the connection to the device. */
@@ -278,34 +320,6 @@ constructor(
             service.onDisconnect(true)
         }
     }
-
-    // --- Logging Helpers ---
-
-    @OptIn(ExperimentalUuidApi::class)
-    private fun logCharacteristicInfo() {
-        Timber.d(
-            "toRadioCharacteristic discovered: uuid=${toRadioCharacteristic?.uuid} instanceId=${toRadioCharacteristic?.instanceId}",
-        )
-        Timber.d(
-            "fromNumCharacteristic discovered: uuid=${fromNumCharacteristic?.uuid} instanceId=${fromNumCharacteristic?.instanceId}",
-        )
-        Timber.d(
-            "fromRadioCharacteristic discovered (packet queue): uuid=${fromRadioCharacteristic?.uuid} instanceId=${fromRadioCharacteristic?.instanceId}",
-        )
-    }
-
-    private fun logPacketRead(source: String, packet: ByteArray) {
-        val hexString = packet.joinToString(prefix = "[", postfix = "]") { b -> String.format("0x%02x", b) }
-        Timber.d(
-            "[$source] Read packet queue returned ${packet.size}" +
-                " bytes: $hexString - dispatching to service.handleFromRadio()",
-        )
-    }
-
-    private fun logFromNumNotification(notifyBytes: ByteArray) {
-        val hexString = notifyBytes.joinToString(prefix = "[", postfix = "]") { b -> String.format("0x%02x", b) }
-        Timber.d("FROMNUM notify, ${notifyBytes.size} bytes: $hexString - reading packet queue")
-    }
 }
 
 object BleUuidConstants {
@@ -313,4 +327,5 @@ object BleUuidConstants {
     val BTM_TORADIO_CHARACTER: UUID = UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
     val BTM_FROMNUM_CHARACTER: UUID = UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
     val BTM_FROMRADIO_CHARACTER: UUID = UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
+    val BTM_LOGRADIO_CHARACTER: UUID = UUID.fromString("5a3d6e49-06e6-4423-9944-e9de8cdf9547")
 }
