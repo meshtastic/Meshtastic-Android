@@ -70,7 +70,7 @@
     <string name="provide_location_to_mesh">Áframsenda staðsetningu á möskvanet</string>
     <plurals name="delete_messages">
         <item quantity="one">Eyða skilaboðum?</item>
-        <item quantity="other">Eyða %s skilaboðum?</item>
+        <item quantity="other">Eyða %1$s skilaboðum?</item>
     </plurals>
     <string name="delete">Eyða</string>
     <string name="delete_for_everyone">Eyða fyrir öllum</string>
