@@ -122,7 +122,7 @@
     <string name="provide_location_to_mesh">Oppgi plassering til nett</string>
     <plurals name="delete_messages">
         <item quantity="one">Slett meldingen?</item>
-        <item quantity="other">Slette %s meldinger?</item>
+        <item quantity="other">Slette %1$s meldinger?</item>
     </plurals>
     <string name="delete">Slett</string>
     <string name="delete_for_everyone">Slett for alle brukere</string>
