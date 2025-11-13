@@ -171,8 +171,6 @@
     <string name="map_purge_fail">Teip ar ghlanadh Cásla SQL, féach logcat le haghaidh sonraí</string>
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_download_complete">Íoslódáil críochnaithe!</string>
-    <string name="map_download_errors">Íoslódáil críochnaithe le %d earráidí</string>
-    <string name="map_cache_tiles">%d tíleanna</string>
     <string name="map_subDescription">comhthéacs: %1$d° achar: %2$s</string>
     <string name="waypoint_edit">Cuir in eagar an pointe bealach</string>
     <string name="waypoint_delete">Scrios an pointe bealach?</string>

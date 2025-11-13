@@ -192,8 +192,8 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Erro</string>
     <string name="ignore">Ignorar</string>
-    <string name="ignore_add">Adicionar '%1$s' na lista de ignorados?</string>
-    <string name="ignore_remove">Remover '%1$s' da lista de ignorados?</string>
+    <string name="ignore_add">Adicionar \'%1$s\' na lista de ignorados?</string>
+    <string name="ignore_remove">Remover \'%1$s\' da lista de ignorados?</string>
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
@@ -213,8 +213,6 @@
     <string name="map_purge_fail">Falha na remoção do cache SQL, consulte logcat para obter detalhes</string>
     <string name="map_cache_manager">Gerenciador de cache</string>
     <string name="map_download_complete">Download concluído!</string>
-    <string name="map_download_errors">Download concluído com %d erros</string>
-    <string name="map_cache_tiles">%d blocos</string>
     <string name="map_subDescription">direção: %1$d° distância: %2$s</string>
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_delete">Excluir ponto de referência?</string>
@@ -290,8 +288,8 @@
     <string name="alert_bell_text">Caractere de Alerta!</string>
     <string name="critical_alert">Alerta Crítico!</string>
     <string name="favorite">Favorito</string>
-    <string name="favorite_add">Adicionar '%1$s' como um nó favorito?</string>
-    <string name="favorite_remove">Remover '%1$s' como um nó favorito?</string>
+    <string name="favorite_add">Adicionar \'%1$s\' como um nó favorito?</string>
+    <string name="favorite_remove">Remover \'%1$s\' como um nó favorito?</string>
     <string name="power_metrics_log">Log de Métricas de Energia</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
@@ -697,7 +695,6 @@
     <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <string name="next">Avançar</string>
     <string name="grant_permissions">Conceder Permissões</string>
-    <string name="nodes_queued_for_deletion">%d nós na fila para exclusão:</string>
     <string name="clean_node_database_description">Cuidado: Isso irá remover nós dos bancos de dados do aplicativo e do dispositivo.\nSeleções são somadas.</string>
     <string name="connecting_to_device">Conectando ao dispositivo</string>
     <string name="map_type_normal">Normal</string>

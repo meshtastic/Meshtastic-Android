@@ -98,7 +98,7 @@
     <string name="direct_message">رسالة مباشره</string>
     <string name="error">غلط</string>
     <string name="ignore">تجاهل</string>
-    <string name="ignore_add">أضف '%1$s' إلى قائمة التجاهل؟</string>
+    <string name="ignore_add">أضف \'%1$s\' إلى قائمة التجاهل؟</string>
     <string name="map_select_download_region">حدد جهة التحميل</string>
     <string name="map_start_download">ابدأ التحميل</string>
     <string name="close">أغلق</string>
@@ -148,8 +148,8 @@
     <string name="copy">نسخ</string>
     <string name="critical_alert">تنبيه حرج!</string>
     <string name="favorite">المفضلة</string>
-    <string name="favorite_add">إضافة '%1$s' كعقدة مفضلة؟</string>
-    <string name="favorite_remove">إزالة '%1$s' كعقدة مفضلة؟</string>
+    <string name="favorite_add">إضافة \'%1$s\' كعقدة مفضلة؟</string>
+    <string name="favorite_remove">إزالة \'%1$s\' كعقدة مفضلة؟</string>
     <string name="channel_1">القناة 1</string>
     <string name="channel_2">القناة 2</string>
     <string name="channel_3">القناة 3</string>

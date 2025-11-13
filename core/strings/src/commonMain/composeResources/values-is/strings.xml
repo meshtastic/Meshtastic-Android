@@ -99,8 +99,8 @@
     <string name="direct_message">Bein skilaboð</string>
     <string name="nodedb_reset">Endurræsa NodeDB</string>
     <string name="ignore">Hunsa</string>
-    <string name="ignore_add">Bæta '%1$s' við Ignore lista?</string>
-    <string name="ignore_remove">Fjarlægja '%1$s' frá hunsa lista?</string>
+    <string name="ignore_add">Bæta \'%1$s\' við Ignore lista?</string>
+    <string name="ignore_remove">Fjarlægja \'%1$s\' frá hunsa lista?</string>
     <string name="map_select_download_region">Veldu svæði til að niðurhala</string>
     <string name="map_tile_download_estimate">Áætlaður niðurhalstími reits:</string>
     <string name="map_start_download">Hefja niðurhal</string>
@@ -118,8 +118,6 @@
     <string name="map_purge_fail">Hreinsun SQL skyndiminnis mistókts, sjá upplýsingar í logcat</string>
     <string name="map_cache_manager">Sýsla með skyndiminni</string>
     <string name="map_download_complete">Niðurhali lokið!</string>
-    <string name="map_download_errors">Niðurhali lauk með %d villum</string>
-    <string name="map_cache_tiles">%d reitar</string>
     <string name="map_subDescription">miðun: %1$d° fjarlægð: %2$s</string>
     <string name="waypoint_edit">Breyta leiðarpunkti</string>
     <string name="waypoint_delete">Eyða leiðarpunkti?</string>
