@@ -228,14 +228,13 @@ fun MessageScreen(
             return@LaunchedEffect
         }
         val currentUuid = initialUnreadUuidState.value
+        val fallbackUuid = earliestUnreadIndex?.let { idx -> messages.getOrNull(idx)?.uuid }
         if (currentUuid != null) {
             val uuidStillPresent = messages.any { it.uuid == currentUuid }
             if (!uuidStillPresent) {
-                val fallbackUuid = earliestUnreadIndex?.let { idx -> messages.getOrNull(idx)?.uuid }
                 initialUnreadUuidState.value = fallbackUuid
             }
         } else {
-            val fallbackUuid = earliestUnreadIndex?.let { idx -> messages.getOrNull(idx)?.uuid }
             initialUnreadUuidState.value = fallbackUuid
         }
     }

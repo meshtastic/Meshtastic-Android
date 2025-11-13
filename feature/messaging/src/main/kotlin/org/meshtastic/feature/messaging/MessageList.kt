@@ -225,7 +225,10 @@ internal fun MessageList(
                 is MessageListRow.ChatMessage -> {
                     if (state.ourNode != null) {
                         val msg = row.message
-                        val selected = state.selectedIds.value.contains(msg.uuid)
+                        val selected by
+                            remember(msg.uuid, state.selectedIds.value) {
+                                derivedStateOf { state.selectedIds.value.contains(msg.uuid) }
+                            }
                         val node by
                             remember(msg.node.num, state.nodes) {
                                 derivedStateOf { state.nodes.find { it.num == msg.node.num } ?: msg.node }
@@ -280,7 +283,7 @@ private fun rememberMessageRows(
     buildList<MessageListRow> {
         messages.forEachIndexed { index, message ->
             add(MessageListRow.ChatMessage(index = index, message = message))
-            if (showUnreadDivider && unreadDividerIndex == index && !message.fromLocal) {
+            if (showUnreadDivider && unreadDividerIndex == index) {
                 val key = initialUnreadMessageUuid?.let { "unread-divider-$it" } ?: "unread-divider-index-$index"
                 add(MessageListRow.UnreadDivider(key = key))
             }
@@ -288,6 +291,15 @@ private fun rememberMessageRows(
     }
 }
 
+/**
+ * Calculates the index of the first unread remote message.
+ *
+ * We track unread state with two sources: the persisted timestamp of the last read message and the in-memory
+ * `Message.read` flag. The timestamp helps when the local flag state is stale (e.g. after app restarts), while the flag
+ * catches messages that are already marked read locally. We take the maximum of the two indices to target the oldest
+ * unread entry that still needs attention. The message list is newest-first, so we deliberately use `lastOrNull` for
+ * the timestamp branch to land on the oldest unread item after the stored mark.
+ */
 internal fun findEarliestUnreadIndex(messages: List<Message>, lastReadMessageTimestamp: Long?): Int? {
     val remoteMessages = messages.withIndex().filter { !it.value.fromLocal }
     if (remoteMessages.isEmpty()) {

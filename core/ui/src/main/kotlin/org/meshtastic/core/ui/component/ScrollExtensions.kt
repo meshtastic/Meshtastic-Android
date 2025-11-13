@@ -35,6 +35,15 @@ fun LazyListState.smartScrollToTop(coroutineScope: CoroutineScope) {
     smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = SCROLL_TO_TOP_INDEX)
 }
 
+/**
+ * Scrolls to the [targetIndex] while applying the same fast-scroll optimisation used by [smartScrollToTop].
+ *
+ * If the destination is far away, the list first jumps closer to the goal (within [FAST_SCROLL_THRESHOLD] items) to
+ * avoid long smooth animations and then animates the final segment.
+ *
+ * @param coroutineScope Scope used to perform the scroll operations.
+ * @param targetIndex Absolute index that should end up at the top of the viewport.
+ */
 fun LazyListState.smartScrollToIndex(coroutineScope: CoroutineScope, targetIndex: Int) {
     if (targetIndex < 0 || firstVisibleItemIndex == targetIndex) {
         return

@@ -61,6 +61,10 @@ constructor(
         withContext(dispatchers.io) {
             val dao = dbManager.currentDb.value.packetDao()
             val current = dao.getContactSettings(contact)
+            val existingTimestamp = current?.lastReadMessageTimestamp ?: Long.MIN_VALUE
+            if (lastReadTimestamp <= existingTimestamp) {
+                return@withContext
+            }
             val updated =
                 (current ?: ContactSettings(contact_key = contact)).copy(
                     lastReadMessageUuid = messageUuid,
