@@ -23,6 +23,8 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log.DEBUG
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
@@ -30,6 +32,7 @@ import com.datadog.android.compose.ExperimentalTrackingApi
 import com.datadog.android.compose.NavigationViewTrackingEffect
 import com.datadog.android.compose.enableComposeActionTracking
 import com.datadog.android.core.configuration.Configuration
+import com.datadog.android.log.Logger
 import com.datadog.android.log.Logs
 import com.datadog.android.log.LogsConfiguration
 import com.datadog.android.privacy.TrackingConsent
@@ -40,6 +43,7 @@ import com.datadog.android.rum.tracking.AcceptAllNavDestinations
 import com.datadog.android.sessionreplay.SessionReplay
 import com.datadog.android.sessionreplay.SessionReplayConfiguration
 import com.datadog.android.sessionreplay.compose.ComposeExtensionSupport
+import com.datadog.android.timber.DatadogTree
 import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
 import com.datadog.android.trace.opentelemetry.DatadogOpenTelemetry
@@ -52,6 +56,8 @@ import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.opentelemetry.api.GlobalOpenTelemetry
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.BuildConfig
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
@@ -85,27 +91,26 @@ constructor(
     }
 
     init {
-        //        initDatadog(context as Application, analyticsPrefs)
-        //        initCrashlytics(context, analyticsPrefs)
+        initDatadog(context as Application, analyticsPrefs)
+        initCrashlytics(context, analyticsPrefs)
 
-        //        val datadogLogger =
-        //            Logger.Builder()
-        //                .setService(SERVICE_NAME)
-        //                .setNetworkInfoEnabled(true)
-        //                .setRemoteSampleRate(sampleRate)
-        //                .setBundleWithTraceEnabled(true)
-        //                .setBundleWithRumEnabled(true)
-        //                .build()
-        //        Timber.plant(DatadogTree(datadogLogger), CrashlyticsTree(), DebugTree())
-        Timber.plant(DebugTree())
+        val datadogLogger =
+            Logger.Builder()
+                .setService(SERVICE_NAME)
+                .setNetworkInfoEnabled(true)
+                .setRemoteSampleRate(sampleRate)
+                .setBundleWithTraceEnabled(true)
+                .setBundleWithRumEnabled(true)
+                .build()
+        Timber.plant(DatadogTree(datadogLogger), CrashlyticsTree(), DebugTree())
         // Initial consent state
-        //        updateAnalyticsConsent(analyticsPrefs.analyticsAllowed)
+        updateAnalyticsConsent(analyticsPrefs.analyticsAllowed)
 
         // Subscribe to analytics preference changes
-        //        analyticsPrefs
-        //            .getAnalyticsAllowedChangesFlow()
-        //            .onEach { allowed -> updateAnalyticsConsent(allowed) }
-        //            .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
+        analyticsPrefs
+            .getAnalyticsAllowedChangesFlow()
+            .onEach { allowed -> updateAnalyticsConsent(allowed) }
+            .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
     }
 
     private fun initDatadog(application: Application, analyticsPrefs: AnalyticsPrefs) {

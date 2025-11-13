@@ -1085,7 +1085,7 @@ class MeshService : Service() {
 
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
-        Timber.d("[packet]: $packet")
+        Timber.d("[packet]: ${packet.toOneLineString()}")
         if (haveNodeDB) {
             processReceivedMeshPacket(
                 packet

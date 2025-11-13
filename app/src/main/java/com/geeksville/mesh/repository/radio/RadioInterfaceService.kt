@@ -107,8 +107,7 @@ constructor(
     /** We recreate this scope each time we stop an interface */
     var serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
-    var radioIf: IRadioInterface = NopInterface("")
-        private set
+    private var radioIf: IRadioInterface = NopInterface("")
 
     /**
      * true if we have started our interface
