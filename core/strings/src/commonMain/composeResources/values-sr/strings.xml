@@ -210,8 +210,8 @@
     <string name="error">Грешка</string>
     <string name="ignore">Игнориши</string>
     <string name="remove_ignored">Уклони из игнорисаних</string>
-    <string name="ignore_add">Додати \'%1$s\' на листу игнорисаних?</string>
-    <string name="ignore_remove">Уклнити \'%1$s\' на листу игнорисаних?</string>
+    <string name="ignore_add">Додати '%1$s' на листу игнорисаних?</string>
+    <string name="ignore_remove">Уклнити '%1$s' на листу игнорисаних?</string>
     <string name="map_select_download_region">Изаберите регион за преузимање</string>
     <string name="map_tile_download_estimate">Процена преузимања плочица:</string>
     <string name="map_start_download">Започни преузимање</string>

@@ -102,8 +102,8 @@
     <string name="direct_message">Mesaj direct</string>
     <string name="nodedb_reset">Resetare NodeDB</string>
     <string name="ignore">Ignoră</string>
-    <string name="ignore_add">Adaugă \'%1$s\' in lista de ignor? Radioul tău va reporni după ce această modificare.</string>
-    <string name="ignore_remove">Elimină \'%1$s\' din lista de ignor? Radioul tău va reporni după această modificare.</string>
+    <string name="ignore_add">Adaugă '%1$s' in lista de ignor? Radioul tău va reporni după ce această modificare.</string>
+    <string name="ignore_remove">Elimină '%1$s' din lista de ignor? Radioul tău va reporni după această modificare.</string>
     <string name="map_select_download_region">Selectați regiunea pentru descărcare</string>
     <string name="map_tile_download_estimate">Estimare descărcare secțiuni:</string>
     <string name="map_start_download">Pornește descărcarea</string>
