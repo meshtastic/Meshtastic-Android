@@ -236,7 +236,7 @@
     <string name="choose_theme">選擇主題</string>
     <string name="provide_location_to_mesh">將手機位置提供給Mesh網路</string>
     <plurals name="delete_messages">
-        <item quantity="other">刪除 %s 訊息?</item>
+        <item quantity="other">刪除 %1$s 訊息?</item>
     </plurals>
     <string name="delete">刪除</string>
     <string name="delete_for_everyone">也從所有人的聊天紀錄中刪除</string>
