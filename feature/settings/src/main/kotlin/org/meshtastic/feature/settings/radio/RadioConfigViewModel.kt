@@ -366,7 +366,14 @@ constructor(
             "Request factory reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { nodeRepository.clearNodeDB() }
+            viewModelScope.launch {
+                // Clear the service's in-memory node cache first so screens refresh immediately.
+                val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
+                meshService?.let { service ->
+                    existingNodeNums.forEach { service.removeByNodenum(service.packetId, it) }
+                }
+                nodeRepository.clearNodeDB()
+            }
         }
     }
 
@@ -377,7 +384,14 @@ constructor(
             "Request NodeDB reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { nodeRepository.clearNodeDB(preserveFavorites) }
+            viewModelScope.launch {
+                // Clear the service's in-memory node cache as well so UI updates immediately.
+                val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
+                meshService?.let { service ->
+                    existingNodeNums.forEach { service.removeByNodenum(service.packetId, it) }
+                }
+                nodeRepository.clearNodeDB(preserveFavorites)
+            }
         }
     }
 
