@@ -176,7 +176,7 @@
     <plurals name="delete_messages">
         <item quantity="other">删除消息?
 
-删除 %s 条消息？</item>
+删除 %1$s 条消息？</item>
     </plurals>
     <string name="delete">删除</string>
     <string name="delete_for_everyone">也从所有人的聊天纪录中删除</string>
