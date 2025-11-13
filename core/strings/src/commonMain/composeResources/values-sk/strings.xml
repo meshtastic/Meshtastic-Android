@@ -160,8 +160,8 @@
     <string name="delivery_confirmed">Doručenie potvrdené</string>
     <string name="error">Chyba</string>
     <string name="ignore">Ignorovať</string>
-    <string name="ignore_add">Pridať '%1$s' do zoznamu ignorovaných?</string>
-    <string name="ignore_remove">Odstrániť '%1$s' zo zoznamu ignorovaných?</string>
+    <string name="ignore_add">Pridať \'%1$s\' do zoznamu ignorovaných?</string>
+    <string name="ignore_remove">Odstrániť \'%1$s\' zo zoznamu ignorovaných?</string>
     <string name="map_select_download_region">Vybrať oblasť na stiahnutie</string>
     <string name="map_tile_download_estimate">Odhad sťahovania dlaždíc:</string>
     <string name="map_start_download">Spustiť sťahovanie</string>
@@ -256,8 +256,8 @@
     <string name="alert_bell_text">Znak zvončeku upozornení!</string>
     <string name="critical_alert">Kritická výstraha!</string>
     <string name="favorite">Obľúbený</string>
-    <string name="favorite_add">Pridať '%1$s', ako obľúbený uzol?</string>
-    <string name="favorite_remove">Odstrániť '%1$s' obľúbený uzol?</string>
+    <string name="favorite_add">Pridať \'%1$s\', ako obľúbený uzol?</string>
+    <string name="favorite_remove">Odstrániť \'%1$s\' obľúbený uzol?</string>
     <string name="power_metrics_log">Záznamník výkonu</string>
     <string name="channel_1">Kanál 1</string>
     <string name="channel_2">Kanál 2</string>
