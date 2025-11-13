@@ -233,7 +233,7 @@
     <string name="provide_location_to_mesh">Fournir l\'emplacement au maillage</string>
     <plurals name="delete_messages">
         <item quantity="one">Supprimer le message ?</item>
-        <item quantity="other">Supprimer %s messages ?</item>
+        <item quantity="other">Supprimer %1$s messages ?</item>
     </plurals>
     <string name="delete">Supprimer</string>
     <string name="delete_for_everyone">Supprimer pour tout le monde</string>
@@ -385,7 +385,7 @@
     <string name="current">Actif</string>
     <string name="voltage">Tension</string>
     <string name="are_you_sure">Êtes-vous sûr ?</string>
-    <string name="router_role_confirmation_text"><![CDATA[J\'ai lu la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentation du rôle de l\'appareil</a> et le message de blog sur <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choisir le rôle de l\'appareil approprié</a>.]]></string>
+    <string name="router_role_confirmation_text"><![CDATA[J'ai lu la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentation du rôle de l'appareil</a> et le message de blog sur <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choisir le rôle de l'appareil approprié</a>.]]></string>
     <string name="i_know_what_i_m_doing">Je sais ce que je fais</string>
     <string name="low_battery_message">La batterie du nœud %1$s est faible (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notifications de batterie faible</string>
