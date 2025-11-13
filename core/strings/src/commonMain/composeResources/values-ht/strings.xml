@@ -148,8 +148,8 @@
     <string name="delivery_confirmed">Livrezon konfime</string>
     <string name="error">Erè</string>
     <string name="ignore">Ignoré</string>
-    <string name="ignore_add">Ajoute '%1$s' nan lis ignòre?</string>
-    <string name="ignore_remove">Retire '%1$s' nan lis ignòre?</string>
+    <string name="ignore_add">Ajoute \'%1$s\' nan lis ignòre?</string>
+    <string name="ignore_remove">Retire \'%1$s\' nan lis ignòre?</string>
     <string name="map_select_download_region">Chwazi rejyon telechajman</string>
     <string name="map_tile_download_estimate">Estimasyon telechajman tèk</string>
     <string name="map_start_download">Kòmanse telechajman</string>
