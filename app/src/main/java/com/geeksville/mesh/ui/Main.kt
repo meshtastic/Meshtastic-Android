@@ -252,27 +252,25 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     // Handle pending deep links (e.g., from notifications) once NavHost is ready
     LaunchedEffect(pendingDeepLink) {
         pendingDeepLink?.let { uri ->
-            val handled =
-                runCatching {
-                    if (uri.scheme == "meshtastic" && uri.host == "meshtastic") {
-                        val segments = uri.pathSegments
-                        if (segments.isNotEmpty() && segments[0] == "node") {
-                            val destNum = segments.getOrNull(1)?.toIntOrNull()
-                            navController.navigate(NodesRoutes.NodeDetailGraph(destNum))
-                            true
-                        } else {
-                            false
-                        }
-                    } else {
-                        false
+            // Prefer explicit route for node details to ensure correct navigation
+            if (uri.scheme == "meshtastic" && uri.host == "meshtastic") {
+                val segments = uri.pathSegments
+                if (segments.isNotEmpty() && segments[0] == "node") {
+                    val destNum = segments.getOrNull(1)?.toIntOrNull()
+                    val routed =
+                        runCatching { navController.navigate(NodesRoutes.NodeDetailGraph(destNum)) }
+                            .onFailure { ex -> Timber.w(ex, "Failed to navigate via NodeDetailGraph for: $uri") }
+                            .isSuccess
+                    if (!routed) {
+                        runCatching { navController.navigate(uri) }
+                            .onFailure { ex -> Timber.w(ex, "Failed to navigate to deep link: $uri") }
                     }
+                    uIViewModel.clearDeepLinkRequested()
+                    return@let
                 }
-                    .getOrElse { false }
-
-            if (!handled) {
-                runCatching { navController.navigate(uri) }
-                    .onFailure { ex -> Timber.w(ex, "Failed to navigate to deep link: $uri") }
             }
+            runCatching { navController.navigate(uri) }
+                .onFailure { ex -> Timber.w(ex, "Failed to navigate to deep link: $uri") }
             uIViewModel.clearDeepLinkRequested()
         }
     }
