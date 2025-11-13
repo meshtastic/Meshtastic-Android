@@ -239,6 +239,7 @@
     <string name="debug_clear_logs_confirm">This will remove all log packets and database entries from your device - It is a full reset, and is permanent.</string>
     <string name="clear">Clear</string>
     <string name="message_delivery_status">Message delivery status</string>
+    <string name="new_messages_below">New messages below</string>
     <string name="meshtastic_messages_notifications">Direct message notifications</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>

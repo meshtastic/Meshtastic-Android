@@ -57,6 +57,18 @@ constructor(
     suspend fun clearUnreadCount(contact: String, timestamp: Long) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp) }
 
+    suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
+        withContext(dispatchers.io) {
+            val dao = dbManager.currentDb.value.packetDao()
+            val current = dao.getContactSettings(contact)
+            val updated =
+                (current ?: ContactSettings(contact_key = contact)).copy(
+                    lastReadMessageUuid = messageUuid,
+                    lastReadMessageTimestamp = lastReadTimestamp,
+                )
+            dao.upsertContactSettings(listOf(updated))
+        }
+
     suspend fun getQueuedPackets(): List<DataPacket>? =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getQueuedPackets() }
 

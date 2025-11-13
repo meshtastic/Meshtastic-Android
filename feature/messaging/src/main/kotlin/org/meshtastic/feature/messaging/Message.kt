@@ -73,6 +73,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -127,6 +128,7 @@ import org.meshtastic.core.strings.unknown_channel
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
 import java.nio.charset.StandardCharsets
@@ -165,6 +167,7 @@ fun MessageScreen(
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
+    val contactSettings by viewModel.contactSettings.collectAsStateWithLifecycle(initialValue = emptyMap())
 
     // UI State managed within this Composable
     var replyingToPacketId by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -201,10 +204,63 @@ fun MessageScreen(
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
 
-    val listState =
-        rememberLazyListState(
-            initialFirstVisibleItemIndex = remember(messages) { messages.indexOfLast { !it.read }.coerceAtLeast(0) },
-        )
+    val listState = rememberLazyListState()
+
+    val lastReadMessageTimestamp by
+        remember(contactKey, contactSettings) {
+            derivedStateOf { contactSettings[contactKey]?.lastReadMessageTimestamp }
+        }
+
+    var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
+
+    val hasUnreadMessages = messages.any { !it.read && !it.fromLocal }
+
+    val earliestUnreadIndex by
+        remember(messages, lastReadMessageTimestamp) {
+            derivedStateOf { findEarliestUnreadIndex(messages, lastReadMessageTimestamp) }
+        }
+
+    val initialUnreadUuidState = rememberSaveable(contactKey) { mutableStateOf<Long?>(null) }
+
+    LaunchedEffect(messages, earliestUnreadIndex, hasUnreadMessages) {
+        if (!hasUnreadMessages) {
+            initialUnreadUuidState.value = null
+            return@LaunchedEffect
+        }
+        val currentUuid = initialUnreadUuidState.value
+        if (currentUuid != null) {
+            val uuidStillPresent = messages.any { it.uuid == currentUuid }
+            if (!uuidStillPresent) {
+                val fallbackUuid = earliestUnreadIndex?.let { idx -> messages.getOrNull(idx)?.uuid }
+                initialUnreadUuidState.value = fallbackUuid
+            }
+        } else {
+            val fallbackUuid = earliestUnreadIndex?.let { idx -> messages.getOrNull(idx)?.uuid }
+            initialUnreadUuidState.value = fallbackUuid
+        }
+    }
+
+    val initialUnreadMessageUuid = initialUnreadUuidState.value
+
+    val initialUnreadIndex by
+        remember(messages, initialUnreadMessageUuid) {
+            derivedStateOf {
+                initialUnreadMessageUuid
+                    ?.let { uuid -> messages.indexOfFirst { it.uuid == uuid } }
+                    ?.takeIf { it >= 0 }
+            }
+        }
+
+    LaunchedEffect(messages, initialUnreadIndex, earliestUnreadIndex) {
+        if (!hasPerformedInitialScroll && messages.isNotEmpty()) {
+            val targetIndex =
+                (initialUnreadIndex ?: earliestUnreadIndex ?: 0).coerceIn(0, messages.lastIndex)
+            if (listState.firstVisibleItemIndex != targetIndex) {
+                listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
+            }
+            hasPerformedInitialScroll = true
+        }
+    }
 
     val onEvent: (MessageScreenEvent) -> Unit =
         remember(viewModel, contactKey, messageInputState, ourNode) {
@@ -226,7 +282,7 @@ fun MessageScreen(
                     }
 
                     is MessageScreenEvent.ClearUnreadCount ->
-                        viewModel.clearUnreadCount(contactKey, event.lastReadMessageId)
+                        viewModel.clearUnreadCount(contactKey, event.messageUuid, event.lastReadTimestamp)
 
                     is MessageScreenEvent.NodeDetails -> navigateToNodeDetails(event.node.num)
 
@@ -305,7 +361,12 @@ fun MessageScreen(
                     listState = listState,
                     messages = messages,
                     selectedIds = selectedMessageIds,
-                    onUnreadChanged = { messageId -> onEvent(MessageScreenEvent.ClearUnreadCount(messageId)) },
+                    hasUnreadMessages = hasUnreadMessages,
+                    initialUnreadMessageUuid = initialUnreadMessageUuid,
+                    fallbackUnreadIndex = earliestUnreadIndex,
+                    onUnreadChanged = { messageUuid, timestamp ->
+                        onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
+                    },
                     onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
                     onDeleteMessages = { viewModel.deleteMessages(it) },
                     onSendMessage = { text, contactKey -> viewModel.sendMessage(text, contactKey) },

@@ -97,7 +97,12 @@ data class Packet(
 
 @Suppress("ConstructorParameterNaming")
 @Entity(tableName = "contact_settings")
-data class ContactSettings(@PrimaryKey val contact_key: String, val muteUntil: Long = 0L) {
+data class ContactSettings(
+    @PrimaryKey val contact_key: String,
+    val muteUntil: Long = 0L,
+    @ColumnInfo(name = "last_read_message_uuid") val lastReadMessageUuid: Long? = null,
+    @ColumnInfo(name = "last_read_message_timestamp") val lastReadMessageTimestamp: Long? = null,
+) {
     val isMuted
         get() = System.currentTimeMillis() <= muteUntil
 }
