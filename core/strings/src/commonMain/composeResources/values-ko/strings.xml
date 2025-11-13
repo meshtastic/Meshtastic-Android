@@ -191,8 +191,6 @@
     <string name="map_purge_fail">SQL 캐시 제거 실패, 자세한 내용은 logcat 참조</string>
     <string name="map_cache_manager">캐시 관리자</string>
     <string name="map_download_complete">다운로드 완료!</string>
-    <string name="map_download_errors">%d 에러로 다운로드 완료되지 않았습니다.</string>
-    <string name="map_cache_tiles">%d 타일</string>
     <string name="map_subDescription">방위: %1$d° 거리: %2$s</string>
     <string name="waypoint_edit">웨이포인트 편집</string>
     <string name="waypoint_delete">웨이포인트 삭제?</string>
@@ -265,8 +263,8 @@
     <string name="alert_bell_text">알람 종 문자!</string>
     <string name="critical_alert">중요 경고!</string>
     <string name="favorite">즐겨찾기</string>
-    <string name="favorite_add">'%1$s'를 즐겨찾기 하시겠습니까?</string>
-    <string name="favorite_remove">'%1$s'를 즐겨찾기 취소하시겠습니까?</string>
+    <string name="favorite_add">\'%1$s\'를 즐겨찾기 하시겠습니까?</string>
+    <string name="favorite_remove">\'%1$s\'를 즐겨찾기 취소하시겠습니까?</string>
     <string name="power_metrics_log">전원 메트릭 로그</string>
     <string name="channel_1">채널 1</string>
     <string name="channel_2">채널 2</string>
