@@ -153,7 +153,7 @@
     <string name="provide_location_to_mesh">Fornecer localização para mesh</string>
     <plurals name="delete_messages">
         <item quantity="one">Excluir mensagem?</item>
-        <item quantity="other">Excluir %s mensagens?</item>
+        <item quantity="other">Excluir %1$s mensagens?</item>
     </plurals>
     <string name="delete">Excluir</string>
     <string name="delete_for_everyone">Apagar para todos</string>
