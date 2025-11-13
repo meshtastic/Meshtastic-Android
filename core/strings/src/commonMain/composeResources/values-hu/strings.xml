@@ -296,8 +296,6 @@
     <string name="map_purge_fail">SQL gyorsítótár kiürítése sikertelen, a részleteket lásd a logcat-ben</string>
     <string name="map_cache_manager">Gyorsítótár kezelő</string>
     <string name="map_download_complete">A letöltés befejeződött!</string>
-    <string name="map_download_errors">A letöltés %d hibával fejeződött be</string>
-    <string name="map_cache_tiles">%d csempe</string>
     <string name="map_subDescription">irányszög: %1$d° távolság: %2$s</string>
     <string name="waypoint_edit">Útpont szerkesztés</string>
     <string name="waypoint_delete">Útpont törlés?</string>
@@ -838,7 +836,6 @@
     <string name="notification_permissions_description">A Meshtastic értesítésekkel tájékoztat az új üzenetekről és más fontos eseményekről. Az értesítési engedélyeket bármikor módosíthatod a beállításokban.</string>
     <string name="next">Tovább</string>
     <string name="grant_permissions">Engedély megadása</string>
-    <string name="nodes_queued_for_deletion">%d csomópont vár törlésre:</string>
     <string name="clean_node_database_description">Figyelem: Ez eltávolítja a csomópontokat az alkalmazás és az eszköz adatbázisából.\nA kijelölések összeadódnak.</string>
     <string name="connecting_to_device">Csatlakozás az eszközhöz</string>
     <string name="map_type_normal">Normál</string>
