@@ -237,7 +237,7 @@
     <string name="provide_location_to_mesh">Jaga telefoni asukohta mesh-võrku</string>
     <plurals name="delete_messages">
         <item quantity="one">Kustuta sõnum?</item>
-        <item quantity="other">Kustuta %s sõnumit?</item>
+        <item quantity="other">Kustuta %1$s sõnumit?</item>
     </plurals>
     <string name="delete">Eemalda</string>
     <string name="delete_for_everyone">Eemalda kõigi jaoks</string>
