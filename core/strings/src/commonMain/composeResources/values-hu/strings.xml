@@ -234,7 +234,7 @@
     <string name="provide_location_to_mesh">Pozíció hozzáférés a mesh számára</string>
     <plurals name="delete_messages">
         <item quantity="one">Töröljem az üzenetet?</item>
-        <item quantity="other">Töröljek %s üzenetet?</item>
+        <item quantity="other">Töröljek %1$s üzenetet?</item>
     </plurals>
     <string name="delete">Törlés</string>
     <string name="delete_for_everyone">Törlés mindenki számára</string>
