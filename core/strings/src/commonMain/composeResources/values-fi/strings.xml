@@ -237,7 +237,7 @@
     <string name="provide_location_to_mesh">Jaa puhelimen sijaintitietoa mesh-verkkoon</string>
     <plurals name="delete_messages">
         <item quantity="one">Poistetaanko viesti?</item>
-        <item quantity="other">Poistetaanko %s viestiä?</item>
+        <item quantity="other">Poistetaanko %1$s viestiä?</item>
     </plurals>
     <string name="delete">Poista</string>
     <string name="delete_for_everyone">Poista kaikilta</string>
