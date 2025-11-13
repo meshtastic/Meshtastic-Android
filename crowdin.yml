@@ -8,3 +8,4 @@ files:
     content_segmentation: 0
     escape_quotes: 0
     escape_special_characters: 0
+    type: android
