@@ -123,7 +123,7 @@
     <plurals name="delete_messages">
         <item quantity="one">Izbriši sporočilo?</item>
         <item quantity="two">Izbrišem sporočili?</item>
-        <item quantity="few">Izbrišem %s sporočila?</item>
+        <item quantity="few">Izbrišem %1$s sporočila?</item>
         <item quantity="other">Izbrišem sporočila: %1$s?</item>
     </plurals>
     <string name="delete">Izbriši</string>
