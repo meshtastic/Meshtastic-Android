@@ -37,6 +37,7 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
+import org.meshtastic.core.strings.message
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
@@ -267,6 +268,7 @@ constructor(
 
     /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
     private fun annotateMeshLogMessage(meshLog: MeshLog): String = when (meshLog.message_type) {
+        "LogRecord" -> meshLog.fromRadio.logRecord.toString().replace("\\n\"", "\"")
         "Packet" -> meshLog.meshPacket?.let { packet -> annotatePacketLog(packet) } ?: meshLog.raw_message
         "NodeInfo" ->
             meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }

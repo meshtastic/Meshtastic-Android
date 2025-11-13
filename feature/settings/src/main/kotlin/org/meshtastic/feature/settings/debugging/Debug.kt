@@ -238,7 +238,6 @@ internal fun DebugItem(
                 val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchText)
                 Text(
                     text = messageAnnotatedString,
-                    softWrap = false,
                     style =
                     TextStyle(
                         fontSize = if (isSelected) 12.sp else 9.sp,
