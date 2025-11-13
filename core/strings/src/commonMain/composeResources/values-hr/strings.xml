@@ -112,8 +112,8 @@
     <string name="delivery_confirmed">Isporučeno</string>
     <string name="error">Pogreška</string>
     <string name="ignore">Ignoriraj</string>
-    <string name="ignore_add">Dodati '%1$s' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
-    <string name="ignore_remove">Ukloniti '%1$s' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
+    <string name="ignore_add">Dodati \'%1$s\' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
+    <string name="ignore_remove">Ukloniti \'%1$s\' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
     <string name="map_select_download_region">Označite regiju za preuzimanje</string>
     <string name="map_tile_download_estimate">Procjena preuzimanja:</string>
     <string name="map_start_download">Pokreni Preuzimanje</string>
@@ -132,8 +132,6 @@
     <string name="map_purge_fail">Čišćenje SQL predmemorije nije uspjelo, pogledajte logcat za detalje</string>
     <string name="map_cache_manager">Upravitelj predmemorije</string>
     <string name="map_download_complete">Preuzimanje je završeno!</string>
-    <string name="map_download_errors">Preuzimanje je završeno s %d pogrešaka</string>
-    <string name="map_cache_tiles">%d dijelova karte</string>
     <string name="map_subDescription">smjer: %1$d° udaljenost: %2$s</string>
     <string name="waypoint_edit">Uredi putnu točku</string>
     <string name="waypoint_delete">Obriši putnu točku?</string>
