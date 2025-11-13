@@ -191,8 +191,8 @@
     <plurals name="delete_messages">
         <item quantity="one">Smazat zprávu?</item>
         <item quantity="few">Smazat zprávy?</item>
-        <item quantity="many">Smazat %s zpráv?</item>
-        <item quantity="other">Smazat %s zpráv?</item>
+        <item quantity="many">Smazat %1$s zpráv?</item>
+        <item quantity="other">Smazat %1$s zpráv?</item>
     </plurals>
     <string name="delete">Smazat</string>
     <string name="delete_for_everyone">Smazat pro všechny</string>
