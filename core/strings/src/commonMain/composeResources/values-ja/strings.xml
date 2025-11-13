@@ -127,7 +127,7 @@
     <string name="choose_theme">テーマを選択</string>
     <string name="provide_location_to_mesh">メッシュネットワークにスマホの位置情報を提供</string>
     <plurals name="delete_messages">
-        <item quantity="other">%s 件のメッセージを削除しますか？</item>
+        <item quantity="other">%1$s 件のメッセージを削除しますか？</item>
     </plurals>
     <string name="delete">削除</string>
     <string name="delete_for_everyone">全員のデバイスから削除</string>
