@@ -172,7 +172,7 @@
     <string name="provide_location_to_mesh">Fornire la posizione alla mesh</string>
     <plurals name="delete_messages">
         <item quantity="one">Eliminare il messaggio?</item>
-        <item quantity="other">Eliminare %s messaggi?</item>
+        <item quantity="other">Eliminare %1$s messaggi?</item>
     </plurals>
     <string name="delete">Elimina</string>
     <string name="delete_for_everyone">Elimina per tutti</string>
@@ -328,7 +328,7 @@
     <string name="baro_pressure">Pressione barometrica</string>
     <string name="udp_enabled">Abilitato</string>
     <string name="udp_config">Configurazione UDP</string>
-    <string name="map_node_popup_details"><![CDATA[%1$s<br>Ricevuto l\'ultima volta: %2$s<br>Posizione più recente: %3$s<br>Batteria: %4$s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Ricevuto l'ultima volta: %2$s<br>Posizione più recente: %3$s<br>Batteria: %4$s]]></string>
     <string name="toggle_my_position">Attiva/disattiva posizione</string>
     <string name="orient_north">Orientamento nord</string>
     <string name="user">Utente</string>
