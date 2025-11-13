@@ -80,8 +80,8 @@
     <string name="provide_location_to_mesh">Navedi lokaciju telefona na mesh mreži</string>
     <plurals name="delete_messages">
         <item quantity="one">Obriši poruku?</item>
-        <item quantity="few">Obriši %s poruke?</item>
-        <item quantity="other">Obriši %s poruke?</item>
+        <item quantity="few">Obriši %1$s poruke?</item>
+        <item quantity="other">Obriši %1$s poruke?</item>
     </plurals>
     <string name="delete">Obriši</string>
     <string name="delete_for_everyone">Izbriši za sve</string>
