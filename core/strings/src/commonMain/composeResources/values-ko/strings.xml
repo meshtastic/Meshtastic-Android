@@ -138,7 +138,7 @@
     <string name="choose_theme">테마 선택</string>
     <string name="provide_location_to_mesh">메쉬에 현재 위치 공유</string>
     <plurals name="delete_messages">
-        <item quantity="other">%s개의 메세지를 삭제하시겠습니까?</item>
+        <item quantity="other">%1$s개의 메세지를 삭제하시겠습니까?</item>
     </plurals>
     <string name="delete">삭제</string>
     <string name="delete_for_everyone">모두에게서 삭제</string>
