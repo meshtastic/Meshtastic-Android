@@ -201,8 +201,8 @@
     <string name="delivery_confirmed">Envío confirmado</string>
     <string name="error">Error</string>
     <string name="ignore">Ignorar</string>
-    <string name="ignore_add">¿Añadir '%1$s' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
-    <string name="ignore_remove">¿Eliminar '%1$s' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
+    <string name="ignore_add">¿Añadir \'%1$s\' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
+    <string name="ignore_remove">¿Eliminar \'%1$s\' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
     <string name="map_select_download_region">Seleccionar región de descarga</string>
     <string name="map_tile_download_estimate">Estimación de descarga de ficha:</string>
     <string name="map_start_download">Comenzar Descarga</string>
@@ -300,8 +300,8 @@ Rango de Valores 0 - 500.</string>
     <string name="alert_bell_text">¡Carácter Campana de Alerta!</string>
     <string name="critical_alert">¡Alerta Crítica!</string>
     <string name="favorite">Favorito</string>
-    <string name="favorite_add">¿Añadir '%1$s' como un nodo favorito?</string>
-    <string name="favorite_remove">¿Eliminar '%1$s' como un nodo favorito?</string>
+    <string name="favorite_add">¿Añadir \'%1$s\' como un nodo favorito?</string>
+    <string name="favorite_remove">¿Eliminar \'%1$s\' como un nodo favorito?</string>
     <string name="power_metrics_log">Registro de métricas de energía</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
