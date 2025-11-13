@@ -176,8 +176,8 @@
     <string name="provide_location_to_mesh">Обезбедите локацију телефона меш мрежи</string>
     <plurals name="delete_messages">
         <item quantity="one">Обриши поруку?</item>
-        <item quantity="few">Обриши %s порука?</item>
-        <item quantity="other">Обриши %s порука?</item>
+        <item quantity="few">Обриши %1$s порука?</item>
+        <item quantity="other">Обриши %1$s порука?</item>
     </plurals>
     <string name="delete">Обриши</string>
     <string name="delete_for_everyone">Обриши за све</string>
