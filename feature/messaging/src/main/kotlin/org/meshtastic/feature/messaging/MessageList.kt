@@ -19,6 +19,7 @@ package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,8 +30,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -68,6 +68,26 @@ import org.meshtastic.core.strings.resend
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
 import kotlin.collections.buildList
+
+internal data class MessageListState(
+    val nodes: List<Node>,
+    val ourNode: Node?,
+    val messages: List<Message>,
+    val selectedIds: MutableState<Set<Long>>,
+    val hasUnreadMessages: Boolean,
+    val initialUnreadMessageUuid: Long?,
+    val fallbackUnreadIndex: Int?,
+    val contactKey: String,
+)
+
+internal data class MessageListHandlers(
+    val onUnreadChanged: (Long, Long) -> Unit,
+    val onSendReaction: (String, Int) -> Unit,
+    val onClickChip: (Node) -> Unit,
+    val onDeleteMessages: (List<Long>) -> Unit,
+    val onSendMessage: (String, String) -> Unit,
+    val onReply: (Message?) -> Unit,
+)
 
 @Composable
 fun DeliveryInfo(
@@ -122,49 +142,36 @@ fun DeliveryInfo(
     containerColor = MaterialTheme.colorScheme.surface,
 )
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 internal fun MessageList(
-    nodes: List<Node>,
-    ourNode: Node?,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    messages: List<Message>,
-    selectedIds: MutableState<Set<Long>>,
-    hasUnreadMessages: Boolean,
-    initialUnreadMessageUuid: Long?,
-    fallbackUnreadIndex: Int?,
-    onUnreadChanged: (Long, Long) -> Unit,
-    onSendReaction: (String, Int) -> Unit,
-    onClickChip: (Node) -> Unit,
-    onDeleteMessages: (List<Long>) -> Unit,
-    onSendMessage: (messageText: String, contactKey: String) -> Unit,
-    contactKey: String,
-    onReply: (Message?) -> Unit,
+    state: MessageListState,
+    handlers: MessageListHandlers,
 ) {
     val haptics = LocalHapticFeedback.current
-    val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
+    val inSelectionMode by remember { derivedStateOf { state.selectedIds.value.isNotEmpty() } }
     val unreadDividerIndex by
-        remember(messages, initialUnreadMessageUuid, fallbackUnreadIndex) {
+        remember(state.messages, state.initialUnreadMessageUuid, state.fallbackUnreadIndex) {
             derivedStateOf {
-                initialUnreadMessageUuid
-                    ?.let { uuid ->
-                        messages.indexOfFirst { it.uuid == uuid }.takeIf { it >= 0 }
-                    } ?: fallbackUnreadIndex
+                state.initialUnreadMessageUuid?.let { uuid ->
+                    state.messages.indexOfFirst { it.uuid == uuid }.takeIf { it >= 0 }
+                } ?: state.fallbackUnreadIndex
             }
         }
-    val showUnreadDivider = hasUnreadMessages && unreadDividerIndex != null
-    AutoScrollToBottom(listState, messages, hasUnreadMessages)
-    UpdateUnreadCount(listState, messages, onUnreadChanged)
+    val showUnreadDivider = state.hasUnreadMessages && unreadDividerIndex != null
+    AutoScrollToBottom(listState, state.messages, state.hasUnreadMessages)
+    UpdateUnreadCount(listState, state.messages, handlers.onUnreadChanged)
 
     var showStatusDialog by remember { mutableStateOf<Message?>(null) }
     if (showStatusDialog != null) {
         val msg = showStatusDialog ?: return
         val (title, text) = msg.getStatusStringRes()
         val relayNodeName by
-            remember(msg.relayNode, nodes) {
+            remember(msg.relayNode, state.nodes) {
                 derivedStateOf {
-                    msg.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
+                    msg.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, state.nodes)?.user?.longName }
                 }
             }
         DeliveryInfo(
@@ -173,9 +180,9 @@ internal fun MessageList(
             relayNodeName = relayNodeName,
             onConfirm = {
                 val deleteList: List<Long> = listOf(msg.uuid)
-                onDeleteMessages(deleteList)
+                handlers.onDeleteMessages(deleteList)
                 showStatusDialog = null
-                onSendMessage(msg.text, contactKey)
+                handlers.onSendMessage(msg.text, state.contactKey)
             },
             onDismiss = { showStatusDialog = null },
             resendOption = msg.status?.equals(MessageStatus.ERROR) ?: false,
@@ -196,21 +203,12 @@ internal fun MessageList(
 
     val coroutineScope = rememberCoroutineScope()
     val messageRows by
-        remember(messages, showUnreadDivider, unreadDividerIndex, initialUnreadMessageUuid) {
-            derivedStateOf {
-                buildList<MessageListRow> {
-                    messages.forEachIndexed { index, message ->
-                        if (showUnreadDivider && unreadDividerIndex == index) {
-                            val key =
-                                initialUnreadMessageUuid?.let { "unread-divider-$it" }
-                                    ?: "unread-divider-index-$index"
-                            add(MessageListRow.UnreadDivider(key = key))
-                        }
-                        add(MessageListRow.ChatMessage(index = index, message = message))
-                    }
-                }
-            }
-        }
+        rememberMessageRows(
+            messages = state.messages,
+            showUnreadDivider = showUnreadDivider,
+            unreadDividerIndex = unreadDividerIndex,
+            initialUnreadMessageUuid = state.initialUnreadMessageUuid,
+        )
 
     LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
         items(
@@ -225,34 +223,34 @@ internal fun MessageList(
             when (row) {
                 is MessageListRow.UnreadDivider -> UnreadMessagesDivider(modifier = Modifier.animateItem())
                 is MessageListRow.ChatMessage -> {
-                    if (ourNode != null) {
+                    if (state.ourNode != null) {
                         val msg = row.message
-                        val selected = selectedIds.value.contains(msg.uuid)
+                        val selected = state.selectedIds.value.contains(msg.uuid)
                         val node by
-                            remember(msg.node.num, nodes) {
-                                derivedStateOf { nodes.find { it.num == msg.node.num } ?: msg.node }
+                            remember(msg.node.num, state.nodes) {
+                                derivedStateOf { state.nodes.find { it.num == msg.node.num } ?: msg.node }
                             }
 
                         MessageItem(
                             modifier = Modifier.animateItem(),
                             node = node,
-                            ourNode = ourNode,
+                            ourNode = state.ourNode,
                             message = msg,
                             selected = selected,
-                            onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
+                            onClick = { if (inSelectionMode) state.selectedIds.toggle(msg.uuid) },
                             onLongClick = {
-                                selectedIds.toggle(msg.uuid)
+                                state.selectedIds.toggle(msg.uuid)
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             },
-                            onClickChip = onClickChip,
+                            onClickChip = handlers.onClickChip,
                             onStatusClick = { showStatusDialog = msg },
-                            onReply = { onReply(msg) },
+                            onReply = { handlers.onReply(msg) },
                             emojis = msg.emojis,
-                            sendReaction = { onSendReaction(it, msg.packetId) },
+                            sendReaction = { handlers.onSendReaction(it, msg.packetId) },
                             onShowReactions = { showReactionDialog = msg.emojis },
                             onNavigateToOriginalMessage = {
                                 coroutineScope.launch {
-                                    val targetIndex = messages.indexOfFirst { it.packetId == msg.replyId }
+                                    val targetIndex = state.messages.indexOfFirst { it.packetId == msg.replyId }
                                     if (targetIndex != -1) {
                                         listState.animateScrollToItem(index = targetIndex)
                                     }
@@ -268,13 +266,29 @@ internal fun MessageList(
 
 private sealed interface MessageListRow {
     data class ChatMessage(val index: Int, val message: Message) : MessageListRow
+
     data class UnreadDivider(val key: String) : MessageListRow
 }
 
-internal fun findEarliestUnreadIndex(messages: List<Message>, lastReadMessageTimestamp: Long?): Int? {
-    if (messages.isEmpty()) {
-        return null
+@Composable
+private fun rememberMessageRows(
+    messages: List<Message>,
+    showUnreadDivider: Boolean,
+    unreadDividerIndex: Int?,
+    initialUnreadMessageUuid: Long?,
+) = remember(messages, showUnreadDivider, unreadDividerIndex, initialUnreadMessageUuid) {
+    buildList<MessageListRow> {
+        messages.forEachIndexed { index, message ->
+            add(MessageListRow.ChatMessage(index = index, message = message))
+            if (showUnreadDivider && unreadDividerIndex == index && !message.fromLocal) {
+                val key = initialUnreadMessageUuid?.let { "unread-divider-$it" } ?: "unread-divider-index-$index"
+                add(MessageListRow.UnreadDivider(key = key))
+            }
+        }
     }
+}
+
+internal fun findEarliestUnreadIndex(messages: List<Message>, lastReadMessageTimestamp: Long?): Int? {
     val remoteMessages = messages.withIndex().filter { !it.value.fromLocal }
     if (remoteMessages.isEmpty()) {
         return null
@@ -290,9 +304,7 @@ internal fun findEarliestUnreadIndex(messages: List<Message>, lastReadMessageTim
 @Composable
 private fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -313,9 +325,10 @@ private fun <T> AutoScrollToBottom(
     hasUnreadMessages: Boolean,
     itemThreshold: Int = 3,
 ) = with(listState) {
-    val shouldAutoScroll by remember(hasUnreadMessages) {
-        derivedStateOf { !hasUnreadMessages && firstVisibleItemIndex < itemThreshold }
-    }
+    val shouldAutoScroll by
+        remember(hasUnreadMessages) {
+            derivedStateOf { !hasUnreadMessages && firstVisibleItemIndex < itemThreshold }
+        }
     if (shouldAutoScroll) {
         LaunchedEffect(list) {
             if (!isScrollInProgress) {

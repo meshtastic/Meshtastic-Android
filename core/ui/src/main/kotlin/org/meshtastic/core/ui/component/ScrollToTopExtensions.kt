@@ -48,7 +48,8 @@ fun LazyListState.smartScrollToIndex(coroutineScope: CoroutineScope, targetIndex
         val difference = firstVisibleItemIndex - clampedTarget
         val jumpIndex =
             when {
-                difference > FAST_SCROLL_THRESHOLD -> (clampedTarget + FAST_SCROLL_THRESHOLD).coerceAtMost(totalItems - 1)
+                difference > FAST_SCROLL_THRESHOLD ->
+                    (clampedTarget + FAST_SCROLL_THRESHOLD).coerceAtMost(totalItems - 1)
                 difference < -FAST_SCROLL_THRESHOLD -> (clampedTarget - FAST_SCROLL_THRESHOLD).coerceAtLeast(0)
                 else -> null
             }

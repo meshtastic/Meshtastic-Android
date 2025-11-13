@@ -245,16 +245,13 @@ fun MessageScreen(
     val initialUnreadIndex by
         remember(messages, initialUnreadMessageUuid) {
             derivedStateOf {
-                initialUnreadMessageUuid
-                    ?.let { uuid -> messages.indexOfFirst { it.uuid == uuid } }
-                    ?.takeIf { it >= 0 }
+                initialUnreadMessageUuid?.let { uuid -> messages.indexOfFirst { it.uuid == uuid } }?.takeIf { it >= 0 }
             }
         }
 
     LaunchedEffect(messages, initialUnreadIndex, earliestUnreadIndex) {
         if (!hasPerformedInitialScroll && messages.isNotEmpty()) {
-            val targetIndex =
-                (initialUnreadIndex ?: earliestUnreadIndex ?: 0).coerceIn(0, messages.lastIndex)
+            val targetIndex = (initialUnreadIndex ?: earliestUnreadIndex ?: 0).coerceIn(0, messages.lastIndex)
             if (listState.firstVisibleItemIndex != targetIndex) {
                 listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
             }
@@ -264,7 +261,7 @@ fun MessageScreen(
 
     val onEvent: (MessageScreenEvent) -> Unit =
         remember(viewModel, contactKey, messageInputState, ourNode) {
-            { event ->
+            fun handle(event: MessageScreenEvent) {
                 when (event) {
                     is MessageScreenEvent.SendMessage -> {
                         viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
@@ -296,6 +293,8 @@ fun MessageScreen(
                     }
                 }
             }
+
+            ::handle
         }
 
     if (showDeleteDialog) {
@@ -355,24 +354,30 @@ fun MessageScreen(
         Column(Modifier.padding(paddingValues)) {
             Box(modifier = Modifier.weight(1f)) {
                 MessageList(
-                    nodes = nodes,
-                    ourNode = ourNode,
                     modifier = Modifier.fillMaxSize(),
                     listState = listState,
-                    messages = messages,
-                    selectedIds = selectedMessageIds,
-                    hasUnreadMessages = hasUnreadMessages,
-                    initialUnreadMessageUuid = initialUnreadMessageUuid,
-                    fallbackUnreadIndex = earliestUnreadIndex,
-                    onUnreadChanged = { messageUuid, timestamp ->
-                        onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
-                    },
-                    onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
-                    onDeleteMessages = { viewModel.deleteMessages(it) },
-                    onSendMessage = { text, contactKey -> viewModel.sendMessage(text, contactKey) },
-                    contactKey = contactKey,
-                    onReply = { message -> replyingToPacketId = message?.packetId },
-                    onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
+                    state =
+                    MessageListState(
+                        nodes = nodes,
+                        ourNode = ourNode,
+                        messages = messages,
+                        selectedIds = selectedMessageIds,
+                        hasUnreadMessages = hasUnreadMessages,
+                        initialUnreadMessageUuid = initialUnreadMessageUuid,
+                        fallbackUnreadIndex = earliestUnreadIndex,
+                        contactKey = contactKey,
+                    ),
+                    handlers =
+                    MessageListHandlers(
+                        onUnreadChanged = { messageUuid, timestamp ->
+                            onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
+                        },
+                        onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
+                        onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
+                        onDeleteMessages = { viewModel.deleteMessages(it) },
+                        onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
+                        onReply = { message -> replyingToPacketId = message?.packetId },
+                    ),
                 )
                 // Show FAB if we can scroll towards the newest messages (index 0).
                 if (listState.canScrollBackward) {
