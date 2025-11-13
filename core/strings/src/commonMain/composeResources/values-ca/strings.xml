@@ -125,7 +125,7 @@
     <string name="provide_location_to_mesh">Proveir la posició del telèfon a la xarxa</string>
     <plurals name="delete_messages">
         <item quantity="one">Esborrar missatge?</item>
-        <item quantity="other">Esborrar %s missatges?</item>
+        <item quantity="other">Esborrar %1$s missatges?</item>
     </plurals>
     <string name="delete">Esborrar</string>
     <string name="delete_for_everyone">Esborrar per a tothom</string>
