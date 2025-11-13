@@ -263,8 +263,8 @@
     <string name="error">Ошибка</string>
     <string name="ignore">Игнорировать</string>
     <string name="remove_ignored">Удалить из игнорируемых</string>
-    <string name="ignore_add">Добавить \'%1$s\' в список игнорируемых?</string>
-    <string name="ignore_remove">Удалить \'%1$s\' из списка игнорируемых?</string>
+    <string name="ignore_add">Добавить '%1$s' в список игнорируемых?</string>
+    <string name="ignore_remove">Удалить '%1$s' из списка игнорируемых?</string>
     <string name="map_select_download_region">Выберите регион загрузки</string>
     <string name="map_tile_download_estimate">Предполагаемое время загрузки файла:</string>
     <string name="map_start_download">Начать скачивание</string>
@@ -363,8 +363,8 @@
     <string name="favorite">Избранное</string>
     <string name="add_favorite">Добавить в избранные</string>
     <string name="remove_favorite">Убрать из избранных</string>
-    <string name="favorite_add">Добавить \'%1$s\' как избранный узел?</string>
-    <string name="favorite_remove">Удалить \'%1$s\' как избранный узел?</string>
+    <string name="favorite_add">Добавить '%1$s' как избранный узел?</string>
+    <string name="favorite_remove">Удалить '%1$s' как избранный узел?</string>
     <string name="power_metrics_log">Журнал энергопотребления</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>

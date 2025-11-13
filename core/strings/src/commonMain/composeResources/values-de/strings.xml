@@ -278,8 +278,8 @@
     <string name="error">Fehler</string>
     <string name="ignore">Ignorieren</string>
     <string name="remove_ignored">Aus Ignorierliste entfernen</string>
-    <string name="ignore_add">\'%1$s\' zur Ignorieren-Liste hinzufügen?</string>
-    <string name="ignore_remove">\'%1$s\' von der Ignorieren-Liste entfernen?</string>
+    <string name="ignore_add">'%1$s' zur Ignorieren-Liste hinzufügen?</string>
+    <string name="ignore_remove">'%1$s' von der Ignorieren-Liste entfernen?</string>
     <string name="map_select_download_region">Region zum Herunterladen auswählen</string>
     <string name="map_tile_download_estimate">Herunterladen der Kacheln (Schätzung):</string>
     <string name="map_start_download">Herunterladen starten</string>
@@ -384,8 +384,8 @@
     <string name="favorite">Favorit</string>
     <string name="add_favorite">Zu Favoriten hinzufügen</string>
     <string name="remove_favorite">Von Favoriten entfernen</string>
-    <string name="favorite_add">\'%1$s\' als Favorit hinzufügen?</string>
-    <string name="favorite_remove">\'%1$s\' als Favorit entfernen?</string>
+    <string name="favorite_add">'%1$s' als Favorit hinzufügen?</string>
+    <string name="favorite_remove">'%1$s' als Favorit entfernen?</string>
     <string name="power_metrics_log">Energiedatenprotokoll</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
