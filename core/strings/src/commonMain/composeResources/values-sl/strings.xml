@@ -156,8 +156,8 @@
     <string name="delivery_confirmed">Prejem potrjen</string>
     <string name="error">Napaka</string>
     <string name="ignore">Prezri</string>
-    <string name="ignore_add">Dodaj '%1$s' na prezrto listo?</string>
-    <string name="ignore_remove">Odstrani '%1$s' iz prezrte liste?</string>
+    <string name="ignore_add">Dodaj \'%1$s\' na prezrto listo?</string>
+    <string name="ignore_remove">Odstrani \'%1$s\' iz prezrte liste?</string>
     <string name="map_select_download_region">Prenesi izbrano regijo</string>
     <string name="map_tile_download_estimate">Ocena prenosa plošče:</string>
     <string name="map_start_download">Začni prenos</string>
@@ -176,8 +176,6 @@
     <string name="map_purge_fail">Čiščenje predpomnilnika SQL Cache ni uspelo, za podrobnosti glejte logcat</string>
     <string name="map_cache_manager">Upravitelj predpomnilnika</string>
     <string name="map_download_complete">Prenos končan!</string>
-    <string name="map_download_errors">Prenos končan z %d napakami</string>
-    <string name="map_cache_tiles">%d plošče</string>
     <string name="map_subDescription">lega: %1$d° oddaljenost: %2$s</string>
     <string name="waypoint_edit">Uredi točko poti</string>
     <string name="waypoint_delete">Izbriši točko poti?</string>
