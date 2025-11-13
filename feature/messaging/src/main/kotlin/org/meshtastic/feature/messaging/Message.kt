@@ -20,6 +20,7 @@
 package org.meshtastic.feature.messaging
 
 import android.content.ClipData
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -436,12 +437,14 @@ private fun handleQuickChatAction(
     ourNode: Node?,
     onSendMessage: (String) -> Unit,
 ) {
-    val processedMessage =
-        if (
-            action.message.contains("%LAT", ignoreCase = true) ||
+    val hasVariables =
+        action.message.contains("%LAT", ignoreCase = true) ||
             action.message.contains("%LON", ignoreCase = true) ||
-            action.message.contains("%SNAME", ignoreCase = true)
-        ) {
+            action.message.contains("%SNAME", ignoreCase = true) ||
+            action.message.contains("%LNAME", ignoreCase = true)
+
+    val processedMessage =
+        if (hasVariables) {
             var result = action.message
             userPosition?.let {
                 val latitude = "%.7f".format(it.latitudeI * 1e-7)
@@ -450,7 +453,10 @@ private fun handleQuickChatAction(
                     result.replace("%LAT", latitude, ignoreCase = true).replace("%LON", longitude, ignoreCase = true)
             }
             ourNode?.user?.shortName?.let { shortName ->
-                result = result.replace("%SNAME", shortName, ignoreCase = true)
+                result = result.replace("%SNAME", Uri.encode(shortName), ignoreCase = true)
+            }
+            ourNode?.user?.longName?.let { longName ->
+                result = result.replace("%LNAME", Uri.encode(longName), ignoreCase = true)
             }
             result
         } else {
@@ -469,6 +475,7 @@ private fun handleQuickChatAction(
                             append(' ')
                         }
                         append(processedMessage)
+                        append(' ') // Always add trailing space for link separation
                     }
                         .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
                 messageInputState.setTextAndPlaceCursorAtEnd(newText)
