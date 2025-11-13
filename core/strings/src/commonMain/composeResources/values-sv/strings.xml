@@ -274,8 +274,8 @@
     <string name="error">Fel</string>
     <string name="ignore">Ignorera</string>
     <string name="remove_ignored">Ta bort från ignorerade</string>
-    <string name="ignore_add">Lägg till \'%1$s\' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
-    <string name="ignore_remove">Ta bort \'%1$s\' från ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
+    <string name="ignore_add">Lägg till '%1$s' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
+    <string name="ignore_remove">Ta bort '%1$s' från ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
     <string name="map_select_download_region">Välj nedladdningsområde</string>
     <string name="map_tile_download_estimate">Kartdelar estimat:</string>
     <string name="map_start_download">Starta Hämtning</string>
@@ -382,8 +382,8 @@
     <string name="favorite">Favorit</string>
     <string name="add_favorite">Lägg till i favoriter</string>
     <string name="remove_favorite">Ta bort från Favoriter</string>
-    <string name="favorite_add">Lägg till \'%1$s\' som en favoritnod?</string>
-    <string name="favorite_remove">Ta bort \'%1$s\' som en favoritnod?</string>
+    <string name="favorite_add">Lägg till '%1$s' som en favoritnod?</string>
+    <string name="favorite_remove">Ta bort '%1$s' som en favoritnod?</string>
     <string name="power_metrics_log">Logg över strömvärden</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>

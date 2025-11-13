@@ -277,8 +277,8 @@
     <string name="error">錯誤</string>
     <string name="ignore">忽略</string>
     <string name="remove_ignored">從忽略清單中移除</string>
-    <string name="ignore_add">將 \'%1$s\' 加入忽略清單嗎？</string>
-    <string name="ignore_remove">從忽略清單中移除 \'%1$s\' 嗎？</string>
+    <string name="ignore_add">將 '%1$s' 加入忽略清單嗎？</string>
+    <string name="ignore_remove">從忽略清單中移除 '%1$s' 嗎？</string>
     <string name="map_select_download_region">選擇下載地區</string>
     <string name="map_tile_download_estimate">圖磚下載估計:</string>
     <string name="map_start_download">開始下載</string>
