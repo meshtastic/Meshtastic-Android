@@ -257,8 +257,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     if (uri.scheme == "meshtastic" && uri.host == "meshtastic") {
                         val segments = uri.pathSegments
                         if (segments.isNotEmpty() && segments[0] == "node") {
-                            val destNum =
-                                segments.getOrNull(1)?.toIntOrNull()
+                            val destNum = segments.getOrNull(1)?.toIntOrNull()
                             navController.navigate(NodesRoutes.NodeDetailGraph(destNum))
                             true
                         } else {
@@ -267,7 +266,8 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     } else {
                         false
                     }
-                }.getOrElse { false }
+                }
+                    .getOrElse { false }
 
             if (!handled) {
                 runCatching { navController.navigate(uri) }
