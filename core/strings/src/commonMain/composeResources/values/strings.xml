@@ -325,8 +325,8 @@
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
     <string name="map_cache_manager">Cache Manager</string>
     <string name="map_download_complete">Download complete!</string>
-    <string name="map_download_errors">Download complete with %d errors</string>
-    <string name="map_cache_tiles">%d tiles</string>
+    <string name="map_download_errors">Download complete with %1$d errors</string>
+    <string name="map_cache_tiles">%1$d tiles</string>
     <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_delete">Delete waypoint?</string>
@@ -396,7 +396,7 @@
     <string name="traceroute_direct">Direct</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hop</item>
-        <item quantity="other">%d hops</item>
+        <item quantity="other">%1$d hops</item>
     </plurals>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
     <string name="twenty_four_hours">24H</string>
@@ -887,7 +887,7 @@
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
     <string name="next">Next</string>
     <string name="grant_permissions">Grant Permissions</string>
-    <string name="nodes_queued_for_deletion">%d nodes queued for deletion:</string>
+    <string name="nodes_queued_for_deletion">%1$d nodes queued for deletion:</string>
     <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
     <string name="connecting_to_device">Connecting to device</string>
     <string name="map_type_normal">Normal</string>
