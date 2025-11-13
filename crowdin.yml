@@ -6,4 +6,5 @@ files:
     translation: /%original_path%-%two_letters_code%/strings.xml
     translate_attributes: 0
     content_segmentation: 0
+    escape_quotes: 0
     escape_special_characters: 0
