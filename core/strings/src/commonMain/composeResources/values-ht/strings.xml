@@ -117,7 +117,7 @@
     <string name="provide_location_to_mesh">Bay lokasyon telefòn ou bay mesh la</string>
     <plurals name="delete_messages">
         <item quantity="one">Efase mesaj la?</item>
-        <item quantity="other">Efase %s mesaj?</item>
+        <item quantity="other">Efase %1$s mesaj?</item>
     </plurals>
     <string name="delete">Efase</string>
     <string name="delete_for_everyone">Efase pou tout moun</string>
