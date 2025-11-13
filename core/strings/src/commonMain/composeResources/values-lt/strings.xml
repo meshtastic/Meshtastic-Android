@@ -169,8 +169,6 @@
     <string name="map_purge_fail">SQL talpyklos išvalymas nepavyko, detales žiūrėkite logcat</string>
     <string name="map_cache_manager">Talpyklos valdymas</string>
     <string name="map_download_complete">Atsiuntimas baigtas!</string>
-    <string name="map_download_errors">Atsiuntimas baigtas su %d klaidomis</string>
-    <string name="map_cache_tiles">%d plytelės</string>
     <string name="map_subDescription">kryptis: %1$d° atstumas: %2$s</string>
     <string name="waypoint_edit">Redaguoti kelio tašką</string>
     <string name="waypoint_delete">Ištrinti orientyrą?</string>
