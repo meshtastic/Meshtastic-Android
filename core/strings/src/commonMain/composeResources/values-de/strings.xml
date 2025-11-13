@@ -237,7 +237,7 @@
     <string name="provide_location_to_mesh">Standort zum Mesh angeben</string>
     <plurals name="delete_messages">
         <item quantity="one">Nachricht löschen?</item>
-        <item quantity="other">%s Nachrichten löschen?</item>
+        <item quantity="other">%1$s Nachrichten löschen?</item>
     </plurals>
     <string name="delete">Löschen</string>
     <string name="delete_for_everyone">Für jeden löschen</string>
