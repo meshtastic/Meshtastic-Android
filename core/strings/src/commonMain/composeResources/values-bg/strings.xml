@@ -193,7 +193,7 @@
     <string name="provide_location_to_mesh">Изпращане на местоположение в мрежата</string>
     <plurals name="delete_messages">
         <item quantity="one">Изтриване на съобщението?</item>
-        <item quantity="other">Изтриване на %s съобщения?</item>
+        <item quantity="other">Изтриване на %1$s съобщения?</item>
     </plurals>
     <string name="delete">Изтриване</string>
     <string name="delete_for_everyone">Изтриване за всички</string>
