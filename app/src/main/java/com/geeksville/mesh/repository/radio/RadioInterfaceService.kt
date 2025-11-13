@@ -83,6 +83,9 @@ constructor(
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
+    private val _connectionError = MutableSharedFlow<BleError>()
+    val connectionError: SharedFlow<BleError> = _connectionError.asSharedFlow()
+
     // Thread-safe StateFlow for tracking device address changes
     private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr)
     val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
@@ -104,7 +107,8 @@ constructor(
     /** We recreate this scope each time we stop an interface */
     var serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
-    private var radioIf: IRadioInterface = NopInterface("")
+    var radioIf: IRadioInterface = NopInterface("")
+        private set
 
     /**
      * true if we have started our interface
@@ -255,6 +259,11 @@ constructor(
         if (_connectionState.value != newTargetState) {
             broadcastConnectionChanged(newTargetState)
         }
+    }
+
+    fun onDisconnect(error: BleError) {
+        processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(error) }
+        onDisconnect(!error.shouldReconnect)
     }
 
     /** Start our configured interface (if it isn't already running) */
