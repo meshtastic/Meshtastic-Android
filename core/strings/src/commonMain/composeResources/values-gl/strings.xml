@@ -82,7 +82,7 @@
     <string name="provide_location_to_mesh">Proporcionar a ubicación do teléfono á malla</string>
     <plurals name="delete_messages">
         <item quantity="one">Eliminar mensaxe?</item>
-        <item quantity="other">Eliminar %s mensaxes?</item>
+        <item quantity="other">Eliminar %1$s mensaxes?</item>
     </plurals>
     <string name="delete">Eliminar</string>
     <string name="delete_for_everyone">Eliminar para todos</string>
