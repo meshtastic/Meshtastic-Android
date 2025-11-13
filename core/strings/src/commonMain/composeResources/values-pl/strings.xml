@@ -136,9 +136,9 @@
     <string name="provide_location_to_mesh">Podaj lokalizację telefonu do sieci</string>
     <plurals name="delete_messages">
         <item quantity="one">Usunąć wiadomość?</item>
-        <item quantity="few">Usunąć %s wiadomości?</item>
-        <item quantity="many">Usunąć %s wiadomości?</item>
-        <item quantity="other">Usunąć %s wiadomości?</item>
+        <item quantity="few">Usunąć %1$s wiadomości?</item>
+        <item quantity="many">Usunąć %1$s wiadomości?</item>
+        <item quantity="other">Usunąć %1$s wiadomości?</item>
     </plurals>
     <string name="delete">Usuń</string>
     <string name="delete_for_everyone">Usuń dla wszystkich</string>
