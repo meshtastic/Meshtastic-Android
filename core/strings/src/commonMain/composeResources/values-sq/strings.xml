@@ -117,7 +117,7 @@
     <string name="provide_location_to_mesh">Ofroni vendndodhjen e telefonit për rrjetin mesh</string>
     <plurals name="delete_messages">
         <item quantity="one">Fshini mesazhin?</item>
-        <item quantity="other">Fshini %s mesazhe?</item>
+        <item quantity="other">Fshini %1$s mesazhe?</item>
     </plurals>
     <string name="delete">Fshi</string>
     <string name="delete_for_everyone">Fshi për të gjithë</string>
