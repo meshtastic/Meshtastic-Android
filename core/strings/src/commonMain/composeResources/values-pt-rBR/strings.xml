@@ -192,8 +192,8 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Erro</string>
     <string name="ignore">Ignorar</string>
-    <string name="ignore_add">Adicionar '%1$s' na lista de ignorados?</string>
-    <string name="ignore_remove">Remover '%1$s' da lista de ignorados?</string>
+    <string name="ignore_add">Adicionar \'%1$s\' na lista de ignorados?</string>
+    <string name="ignore_remove">Remover \'%1$s\' da lista de ignorados?</string>
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
@@ -288,8 +288,8 @@
     <string name="alert_bell_text">Caractere de Alerta!</string>
     <string name="critical_alert">Alerta Crítico!</string>
     <string name="favorite">Favorito</string>
-    <string name="favorite_add">Adicionar '%1$s' como um nó favorito?</string>
-    <string name="favorite_remove">Remover '%1$s' como um nó favorito?</string>
+    <string name="favorite_add">Adicionar \'%1$s\' como um nó favorito?</string>
+    <string name="favorite_remove">Remover \'%1$s\' como um nó favorito?</string>
     <string name="power_metrics_log">Log de Métricas de Energia</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
