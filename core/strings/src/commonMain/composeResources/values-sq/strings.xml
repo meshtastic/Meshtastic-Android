@@ -168,6 +168,8 @@
     <string name="map_purge_fail">Pastrimi i Cache SQL ka dështuar, shihni logcat për detaje</string>
     <string name="map_cache_manager">Menaxheri i Cache</string>
     <string name="map_download_complete">Shkarkimi përfundoi!</string>
+    <string name="map_download_errors">Shkarkimi përfundoi me %1$d gabime</string>
+    <string name="map_cache_tiles">%1$d pllaka</string>
     <string name="map_subDescription">drejtimi: %1$d° distanca: %2$s</string>
     <string name="waypoint_edit">Redakto pikën e rreshtit</string>
     <string name="waypoint_delete">Të fshihet pika e rreshtit?</string>
