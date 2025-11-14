@@ -278,8 +278,8 @@
     <string name="error">Virhe</string>
     <string name="ignore">Jätä huomiotta</string>
     <string name="remove_ignored">Poista huomioimattomista</string>
-    <string name="ignore_add">Lisää '%1$s' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
-    <string name="ignore_remove">Poistetaanko '%1$s' jätä huomiotta listalta? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
+    <string name="ignore_add">Lisää \'%1$s\' jätä huomiotta listalle? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
+    <string name="ignore_remove">Poistetaanko \'%1$s\' jätä huomiotta listalta? Laite käynnistyy uudelleen muutoksen tekemisen jälkeen.</string>
     <string name="map_select_download_region">Valitse ladattava kartta-alue</string>
     <string name="map_tile_download_estimate">Laattojen latauksessa kuluva aika-arvio:</string>
     <string name="map_start_download">Aloita Lataus</string>
@@ -299,6 +299,8 @@
     <string name="map_purge_fail">SQL-välimuistin tyhjennys epäonnistui, katso logcat saadaksesi lisätietoja</string>
     <string name="map_cache_manager">Välimuistin Hallinta</string>
     <string name="map_download_complete">Lataus on valmis!</string>
+    <string name="map_download_errors">Lataus valmis %1$d virheellä</string>
+    <string name="map_cache_tiles">%1$d Laattaa</string>
     <string name="map_subDescription">suunta: %1$d° etäisyys: %2$s</string>
     <string name="waypoint_edit">Muokkaa reittipistettä</string>
     <string name="waypoint_delete">Poista reittipiste?</string>
@@ -384,8 +386,8 @@
     <string name="favorite">Suosikki</string>
     <string name="add_favorite">Lisää suosikkeihin</string>
     <string name="remove_favorite">Poista suosikeista</string>
-    <string name="favorite_add">Lisää '%1$s' radio suosikkeihin?</string>
-    <string name="favorite_remove">Poista '%1$s' radio suosikeista?</string>
+    <string name="favorite_add">Lisää \'%1$s\' radio suosikkeihin?</string>
+    <string name="favorite_remove">Poista \'%1$s\' radio suosikeista?</string>
     <string name="power_metrics_log">Tehomittausdata</string>
     <string name="channel_1">Kanava 1</string>
     <string name="channel_2">Kanava 2</string>
@@ -842,13 +844,14 @@
     <string name="settings">asetukset</string>
     <string name="critical_alerts">Kriittiset hälytykset</string>
     <string name="critical_alerts_dnd_request_text">Varmistaaksesi, että saat kriittiset hälytykset, kuten
-        SOS-viestit, vaikka laitteesi olisi 'älä häiritse' -tilassa, vaativat erityisen
+        SOS-viestit, vaikka laitteesi olisi \'älä häiritse\' -tilassa, vaativat erityisen
         käyttöoikeuden. Ota se käyttöön ilmoitusasetuksissa.
     </string>
     <string name="configure_critical_alerts">Määritä kriittiset hälytykset</string>
     <string name="notification_permissions_description">Meshtastic käyttää ilmoituksia tiedottaakseen uusista viesteistä ja muista tärkeistä tapahtumista. Voit muuttaa ilmoitusasetuksia milloin tahansa.</string>
     <string name="next">Seuraava</string>
     <string name="grant_permissions">Myönnä oikeudet</string>
+    <string name="nodes_queued_for_deletion">%1$d laitetta jonossa poistettavaksi:</string>
     <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
     <string name="connecting_to_device">Yhdistetään laitteeseen</string>
     <string name="map_type_normal">Normaali</string>
