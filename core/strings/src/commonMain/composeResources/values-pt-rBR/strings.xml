@@ -213,6 +213,8 @@
     <string name="map_purge_fail">Falha na remoção do cache SQL, consulte logcat para obter detalhes</string>
     <string name="map_cache_manager">Gerenciador de cache</string>
     <string name="map_download_complete">Download concluído!</string>
+    <string name="map_download_errors">Download concluído com %1$d erros</string>
+    <string name="map_cache_tiles">%1$d blocos</string>
     <string name="map_subDescription">direção: %1$d° distância: %2$s</string>
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_delete">Excluir ponto de referência?</string>
@@ -695,6 +697,7 @@
     <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <string name="next">Avançar</string>
     <string name="grant_permissions">Conceder Permissões</string>
+    <string name="nodes_queued_for_deletion">%1$d nós na fila para exclusão:</string>
     <string name="clean_node_database_description">Cuidado: Isso irá remover nós dos bancos de dados do aplicativo e do dispositivo.\nSeleções são somadas.</string>
     <string name="connecting_to_device">Conectando ao dispositivo</string>
     <string name="map_type_normal">Normal</string>
