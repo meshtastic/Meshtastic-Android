@@ -229,8 +229,8 @@
     <string name="delivery_confirmed">Doručeno</string>
     <string name="error">Chyba</string>
     <string name="ignore">Ignorovat</string>
-    <string name="ignore_add">Přidat '%1$s' do seznamu ignorovaných?</string>
-    <string name="ignore_remove">Odstranit '%1$s' ze seznamu ignorování?</string>
+    <string name="ignore_add">Přidat \'%1$s\' do seznamu ignorovaných?</string>
+    <string name="ignore_remove">Odstranit \'%1$s\' ze seznamu ignorování?</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
     <string name="map_start_download">Zahájit stahování</string>
@@ -250,6 +250,8 @@
     <string name="map_purge_fail">Vyčištění mezipaměti SQL selhalo, podrobnosti naleznete v logcat</string>
     <string name="map_cache_manager">Správce mezipaměti</string>
     <string name="map_download_complete">Stahování dokončeno!</string>
+    <string name="map_download_errors">Stahování dokončeno s %1$d chybami</string>
+    <string name="map_cache_tiles">%1$d dlaždic</string>
     <string name="map_subDescription">směr: %1$d° vzdálenost: %2$s</string>
     <string name="waypoint_edit">Upravit waypoint</string>
     <string name="waypoint_delete">Smazat waypoint?</string>
@@ -326,8 +328,8 @@
     <string name="critical_alert">Kritické varování!</string>
     <string name="favorite">Oblíbené</string>
     <string name="add_favorite">Přidat do oblíbených</string>
-    <string name="favorite_add">Přidat '%1$s' jako oblíbený uzel?</string>
-    <string name="favorite_remove">Odstranit '%1$s' z oblíbených uzlů?</string>
+    <string name="favorite_add">Přidat \'%1$s\' jako oblíbený uzel?</string>
+    <string name="favorite_remove">Odstranit \'%1$s\' z oblíbených uzlů?</string>
     <string name="power_metrics_log">Protokol metrik napájení</string>
     <string name="channel_1">Kanál 1</string>
     <string name="channel_2">Kanál 2</string>
@@ -734,6 +736,7 @@
     <string name="notification_permissions_description">Meshtastic vás pomocí oznámení upozorní na nové zprávy a důležité události. Nastavení oznámení si můžete kdykoli upravit.</string>
     <string name="next">Další</string>
     <string name="grant_permissions">Povolit oprávnění</string>
+    <string name="nodes_queued_for_deletion">%1$d uzlů zařazeno k odstranění:</string>
     <string name="clean_node_database_description">Varování: Tímto odstraníte uzly z databází v aplikaci i v zařízení.\nVybrané položky se sčítají (kombinují).</string>
     <string name="map_type_normal">Normální</string>
     <string name="map_type_satellite">Satelitní</string>
