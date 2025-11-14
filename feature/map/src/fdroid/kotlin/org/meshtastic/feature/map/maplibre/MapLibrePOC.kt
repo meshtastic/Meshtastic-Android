@@ -113,18 +113,26 @@ import org.meshtastic.feature.map.component.MapButton
 import org.maplibre.android.style.layers.BackgroundLayer
 import org.maplibre.android.style.layers.PropertyFactory.textMaxWidth
 import org.maplibre.geojson.Point
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
 
 private const val DEG_D = 1e-7
 
 private const val STYLE_URL = "https://demotiles.maplibre.org/style.json"
 
 private const val NODES_SOURCE_ID = "meshtastic-nodes-source"
+private const val NODES_CLUSTER_SOURCE_ID = "meshtastic-nodes-source-clustered"
 private const val WAYPOINTS_SOURCE_ID = "meshtastic-waypoints-source"
 private const val TRACKS_SOURCE_ID = "meshtastic-tracks-source"
 private const val OSM_SOURCE_ID = "osm-tiles"
 
 private const val NODES_LAYER_ID = "meshtastic-nodes-layer"
 private const val NODE_TEXT_LAYER_ID = "meshtastic-node-text-layer"
+private const val NODE_TEXT_BG_LAYER_ID = "meshtastic-node-text-bg-layer"
+private const val NODES_LAYER_CLUSTERED_ID = "meshtastic-nodes-layer-clustered"
+private const val NODE_TEXT_LAYER_CLUSTERED_ID = "meshtastic-node-text-layer-clustered"
 private const val CLUSTER_CIRCLE_LAYER_ID = "meshtastic-cluster-circle-layer"
 private const val CLUSTER_COUNT_LAYER_ID = "meshtastic-cluster-count-layer"
 private const val WAYPOINTS_LAYER_ID = "meshtastic-waypoints-layer"
@@ -154,6 +162,8 @@ fun MapLibrePOC(
     var mapRef by remember { mutableStateOf<MapLibreMap?>(null) }
     var didInitialCenter by remember { mutableStateOf(false) }
     var showLegend by remember { mutableStateOf(false) }
+    var enabledRoles by remember { mutableStateOf<Set<ConfigProtos.Config.DeviceConfig.Role>>(emptySet()) }
+    var clusteringEnabled by remember { mutableStateOf(true) }
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle()
@@ -178,7 +188,7 @@ fun MapLibrePOC(
                                 val labelSet =
                                     run {
                                         val visible =
-                                            applyNodeFilters(nodes, mapFilterState).filter { n ->
+                                            applyFilters(nodes, mapFilterState, enabledRoles).filter { n ->
                                                 val p = n.validPosition ?: return@filter false
                                                 bounds.contains(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
                                             }
@@ -204,11 +214,13 @@ fun MapLibrePOC(
                                         chosen
                                     }
                                 (style.getSource(NODES_SOURCE_ID) as? GeoJsonSource)
-                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(applyNodeFilters(nodes, mapFilterState), labelSet))
+                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(applyFilters(nodes, mapFilterState, enabledRoles), labelSet))
                                 (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
                                     ?.setGeoJson(waypointsToFeatureCollectionJson(waypoints.values))
-                                (style.getSource(TRACKS_SOURCE_ID) as? GeoJsonSource)
-                                    ?.setGeoJson(oneTrackFromNodesJson(applyNodeFilters(nodes, mapFilterState)))
+                                // Removed test track line rendering
+                                // Update clustered source too
+                                (style.getSource(NODES_CLUSTER_SOURCE_ID) as? GeoJsonSource)
+                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(applyFilters(nodes, mapFilterState, enabledRoles), labelSet))
                                 Timber.tag("MapLibrePOC").d(
                                     "Initial data set after style load. nodes=%d waypoints=%d",
                                     nodes.size,
@@ -273,14 +285,21 @@ fun MapLibrePOC(
                                     (screenPoint.x + r).toFloat(),
                                     (screenPoint.y + r).toFloat(),
                                 )
-                                val features = map.queryRenderedFeatures(rect, CLUSTER_CIRCLE_LAYER_ID, NODES_LAYER_ID, WAYPOINTS_LAYER_ID)
+                                val features =
+                                    map.queryRenderedFeatures(
+                                        rect,
+                                        CLUSTER_CIRCLE_LAYER_ID,
+                                        NODES_LAYER_ID,
+                                        NODES_LAYER_CLUSTERED_ID,
+                                        WAYPOINTS_LAYER_ID,
+                                    )
                                 Timber.tag("MapLibrePOC").d("Map click at (%.5f, %.5f) -> %d features", latLng.latitude, latLng.longitude, features.size)
                                 val f = features.firstOrNull()
                                 // If cluster tapped, expand using true cluster leaves from the source
                                 if (f != null && f.hasProperty("point_count")) {
                                     val pointCount = f.getNumberProperty("point_count")?.toInt() ?: 0
                                     val limit = kotlin.math.min(CLUSTER_LIST_FETCH_MAX, pointCount.toLong())
-                                    val src = (map.style?.getSource(NODES_SOURCE_ID) as? GeoJsonSource)
+                                    val src = (map.style?.getSource(NODES_CLUSTER_SOURCE_ID) as? GeoJsonSource)
                                     if (src != null) {
                                         val fc = src.getClusterLeaves(f, limit, 0L)
                                         val nums =
@@ -334,30 +353,12 @@ fun MapLibrePOC(
                             }
                             // Update clustering visibility on camera idle (zoom changes)
                             map.addOnCameraIdleListener {
-                                val zoomNow = map.cameraPosition.zoom
-                                val bounds = map.projection.visibleRegion.latLngBounds
-                                val visibleCount =
-                                    nodes.count { n ->
-                                        val p = n.validPosition ?: return@count false
-                                        val lat = p.latitudeI * DEG_D
-                                        val lon = p.longitudeI * DEG_D
-                                        bounds.contains(LatLng(lat, lon))
-                                    }
-                                // Cluster only when zoom <= 10 and viewport density is high
-                                val showClustersNow = zoomNow <= 10.0 && visibleCount > 50
-                                style.getLayer(CLUSTER_CIRCLE_LAYER_ID)?.setProperties(visibility(if (showClustersNow) "visible" else "none"))
-                                style.getLayer(CLUSTER_COUNT_LAYER_ID)?.setProperties(visibility(if (showClustersNow) "visible" else "none"))
-                                Timber.tag("MapLibrePOC").d(
-                                    "Camera idle; cluster visibility=%s (visible=%d, zoom=%.2f)",
-                                    showClustersNow,
-                                    visibleCount,
-                                    zoomNow,
-                                )
+                                setClusterVisibility(map, style, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled)
                                 // Compute which nodes get labels in viewport and update source
                                 val density = context.resources.displayMetrics.density
-                                val labelSet = selectLabelsForViewport(map, applyNodeFilters(nodes, mapFilterState), density)
+                                val labelSet = selectLabelsForViewport(map, applyFilters(nodes, mapFilterState, enabledRoles), density)
                                 (style.getSource(NODES_SOURCE_ID) as? GeoJsonSource)
-                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(applyNodeFilters(nodes, mapFilterState), labelSet))
+                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(applyFilters(nodes, mapFilterState, enabledRoles), labelSet))
                             }
                             // Hide expanded cluster overlay whenever camera moves to avoid stale screen positions
                             map.addOnCameraMoveListener {
@@ -428,27 +429,11 @@ fun MapLibrePOC(
                         ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(nodes, labelSet))
                     (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
                         ?.setGeoJson(waypointsToFeatureCollectionJson(waypoints.values))
-                    (style.getSource(TRACKS_SOURCE_ID) as? GeoJsonSource)
-                        ?.setGeoJson(oneTrackFromNodesJson(nodes))
-                    // Toggle clustering visibility based on zoom and VISIBLE node count (viewport density)
-                    val zoom = map.cameraPosition.zoom
-                    val bounds = map.projection.visibleRegion.latLngBounds
-                    val visibleCount =
-                        nodes.count { n ->
-                            val p = n.validPosition ?: return@count false
-                            val lat = p.latitudeI * DEG_D
-                            val lon = p.longitudeI * DEG_D
-                            bounds.contains(LatLng(lat, lon))
-                        }
-                    val showClusters = zoom <= 10.0 && visibleCount > 50
-                    style.getLayer(CLUSTER_CIRCLE_LAYER_ID)?.setProperties(visibility(if (showClusters) "visible" else "none"))
-                    style.getLayer(CLUSTER_COUNT_LAYER_ID)?.setProperties(visibility(if (showClusters) "visible" else "none"))
-                    Timber.tag("MapLibrePOC").d(
-                        "Sources updated; cluster visibility=%s (visible=%d, zoom=%.2f)",
-                        showClusters,
-                        visibleCount,
-                        zoom,
-                    )
+                    // Removed test track line rendering
+                    (style.getSource(NODES_CLUSTER_SOURCE_ID) as? GeoJsonSource)
+                        ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(applyFilters(nodes, mapFilterState, enabledRoles), labelSet))
+                    // Toggle clustering visibility now (no need to wait for camera move)
+                    setClusterVisibility(map, style, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled)
                 }
             },
         )
@@ -526,6 +511,49 @@ fun MapLibrePOC(
                         onClick = { mapViewModel.toggleShowPrecisionCircleOnMap(); mapFilterExpanded = false },
                         trailingIcon = { Checkbox(checked = mapFilterState.showPrecisionCircle, onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() }) },
                     )
+                    androidx.compose.material3.Divider()
+                    Text(text = "Roles", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+                    val roles = nodes.map { it.user.role }.distinct().sortedBy { it.name }
+                    roles.forEach { role ->
+                        val checked = if (enabledRoles.isEmpty()) true else enabledRoles.contains(role)
+                        DropdownMenuItem(
+                            text = { Text(role.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                            onClick = {
+                                enabledRoles =
+                                    if (enabledRoles.isEmpty()) setOf(role)
+                                    else if (enabledRoles.contains(role)) enabledRoles - role else enabledRoles + role
+                                mapRef?.style?.let { st -> mapRef?.let { setClusterVisibility(it, st, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled) } }
+                            },
+                            trailingIcon = {
+                                Checkbox(
+                                    checked = checked,
+                                    onCheckedChange = {
+                                        enabledRoles =
+                                            if (enabledRoles.isEmpty()) setOf(role)
+                                            else if (enabledRoles.contains(role)) enabledRoles - role else enabledRoles + role
+                                        mapRef?.style?.let { st -> mapRef?.let { setClusterVisibility(it, st, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled) } }
+                                    },
+                                )
+                            },
+                        )
+                    }
+                    androidx.compose.material3.Divider()
+                    DropdownMenuItem(
+                        text = { Text("Enable clustering") },
+                        onClick = {
+                            clusteringEnabled = !clusteringEnabled
+                            mapRef?.style?.let { st -> mapRef?.let { setClusterVisibility(it, st, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled) } }
+                        },
+                        trailingIcon = {
+                            Checkbox(
+                                checked = clusteringEnabled,
+                                onCheckedChange = {
+                                    clusteringEnabled = it
+                                    mapRef?.style?.let { st -> mapRef?.let { setClusterVisibility(it, st, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled) } }
+                                },
+                            )
+                        },
+                    )
                 }
             }
             MapButton(
@@ -549,11 +577,14 @@ fun MapLibrePOC(
                 val y = (ec.centerPx.y + (radiusPx * kotlin.math.sin(theta))).toFloat()
                 val xDp = (x / d).dp
                 val yDp = (y / d).dp
+                val label = (protoShortName(node) ?: shortNameFallback(node)).take(4)
+                val itemHeight = 36.dp
+                val itemWidth = (40 + label.length * 10).dp
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .offset(x = xDp - itemSize / 2, y = yDp - itemSize / 2)
-                        .size(itemSize)
+                        .offset(x = xDp - itemWidth / 2, y = yDp - itemHeight / 2)
+                        .size(width = itemWidth, height = itemHeight)
                         .clickable {
                             selectedNodeNum = node.num
                             expandedCluster = null
@@ -571,7 +602,7 @@ fun MapLibrePOC(
                     shadowElevation = 6.dp,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(text = (protoShortName(node) ?: shortNameFallback(node)).take(4), color = Color.White, maxLines = 1)
+                        Text(text = label, color = Color.White, maxLines = 1)
                     }
                 }
             }
@@ -694,22 +725,21 @@ private fun ensureSourcesAndLayers(style: Style) {
         Timber.tag("MapLibrePOC").d("Added OSM Standard RasterSource")
     }
     if (style.getSource(NODES_SOURCE_ID) == null) {
-        // Enable clustering only for lower zooms; stop clustering once zoom > 10
-        val options = GeoJsonOptions()
-            .withCluster(true)
-            .withClusterRadius(36)
-            .withClusterMaxZoom(10)
-        style.addSource(GeoJsonSource(NODES_SOURCE_ID, emptyFeatureCollectionJson(), options))
-        Timber.tag("MapLibrePOC").d("Added nodes GeoJsonSource")
+        // Plain (non-clustered) source for nodes and labels
+        style.addSource(GeoJsonSource(NODES_SOURCE_ID, emptyFeatureCollectionJson()))
+        Timber.tag("MapLibrePOC").d("Added nodes plain GeoJsonSource")
+    }
+    if (style.getSource(NODES_CLUSTER_SOURCE_ID) == null) {
+        // Clustered source for cluster layers
+        val options = GeoJsonOptions().withCluster(true).withClusterRadius(36).withClusterMaxZoom(10)
+        style.addSource(GeoJsonSource(NODES_CLUSTER_SOURCE_ID, emptyFeatureCollectionJson(), options))
+        Timber.tag("MapLibrePOC").d("Added nodes clustered GeoJsonSource")
     }
     if (style.getSource(WAYPOINTS_SOURCE_ID) == null) {
         style.addSource(GeoJsonSource(WAYPOINTS_SOURCE_ID, emptyFeatureCollectionJson()))
         Timber.tag("MapLibrePOC").d("Added waypoints GeoJsonSource")
     }
-    if (style.getSource(TRACKS_SOURCE_ID) == null) {
-        style.addSource(GeoJsonSource(TRACKS_SOURCE_ID, emptyFeatureCollectionJson()))
-        Timber.tag("MapLibrePOC").d("Added tracks GeoJsonSource")
-    }
+    // Removed test track GeoJsonSource
 
     if (style.getLayer(OSM_LAYER_ID) == null) {
         // Put OSM tiles on TOP so labels/roads are visible during POC
@@ -720,7 +750,7 @@ private fun ensureSourcesAndLayers(style: Style) {
     }
     if (style.getLayer(CLUSTER_CIRCLE_LAYER_ID) == null) {
         val clusterLayer =
-            CircleLayer(CLUSTER_CIRCLE_LAYER_ID, NODES_SOURCE_ID)
+            CircleLayer(CLUSTER_CIRCLE_LAYER_ID, NODES_CLUSTER_SOURCE_ID)
                 .withProperties(circleColor("#6D4C41"), circleRadius(14f))
                 .withFilter(has("point_count"))
         style.addLayer(clusterLayer)
@@ -728,7 +758,7 @@ private fun ensureSourcesAndLayers(style: Style) {
     }
     if (style.getLayer(CLUSTER_COUNT_LAYER_ID) == null) {
         val countLayer =
-            SymbolLayer(CLUSTER_COUNT_LAYER_ID, NODES_SOURCE_ID)
+            SymbolLayer(CLUSTER_COUNT_LAYER_ID, NODES_CLUSTER_SOURCE_ID)
                 .withProperties(
                     textField(toString(get("point_count"))),
                     textColor("#FFFFFF"),
@@ -746,20 +776,28 @@ private fun ensureSourcesAndLayers(style: Style) {
     if (style.getLayer(NODES_LAYER_ID) == null) {
         val layer =
             CircleLayer(NODES_LAYER_ID, NODES_SOURCE_ID)
-                .withProperties(circleColor(get("color")), circleRadius(6f))
+                .withProperties(circleColor(get("color")), circleRadius(7f))
                 .withFilter(not(has("point_count")))
         style.addLayer(layer)
         Timber.tag("MapLibrePOC").d("Added nodes CircleLayer")
+    }
+    if (style.getLayer(NODES_LAYER_CLUSTERED_ID) == null) {
+        val layer =
+            CircleLayer(NODES_LAYER_CLUSTERED_ID, NODES_CLUSTER_SOURCE_ID)
+                .withProperties(circleColor(get("color")), circleRadius(7f), visibility("none"))
+                .withFilter(not(has("point_count")))
+        style.addLayer(layer)
+        Timber.tag("MapLibrePOC").d("Added clustered nodes CircleLayer")
     }
     if (style.getLayer(NODE_TEXT_LAYER_ID) == null) {
         val textLayer =
             SymbolLayer(NODE_TEXT_LAYER_ID, NODES_SOURCE_ID)
                 .withProperties(
                     textField(get("short")),
-                    textColor("#FFFFFF"),
-                    textHaloColor("#000000"),
-                    textHaloWidth(1.5f),
-                    textHaloBlur(0.5f),
+                    textColor("#1B1B1B"),
+                    textHaloColor("#FFFFFF"),
+                    textHaloWidth(3.0f),
+                    textHaloBlur(0.7f),
                     // Scale label size with zoom to reduce clutter
                     textSize(
                         interpolate(
@@ -772,19 +810,19 @@ private fun ensureSourcesAndLayers(style: Style) {
                         ),
                     ),
                     textMaxWidth(4f),
-                    // At close zooms, prefer showing all labels even if they overlap
+                    // At close zooms, prefer showing all labels even if they overlap a bit
                     textAllowOverlap(
                         step(
                             zoom(),
                             literal(false), // default for low zooms
-                            stop(12, literal(true)), // enable overlap >= 12
+                            stop(11, literal(true)), // enable overlap >= 11
                         ),
                     ),
                     textIgnorePlacement(
                         step(
                             zoom(),
                             literal(false),
-                            stop(12, literal(true)),
+                            stop(11, literal(true)),
                         ),
                     ),
                     // place label above the circle
@@ -800,21 +838,71 @@ private fun ensureSourcesAndLayers(style: Style) {
         style.addLayer(textLayer)
         Timber.tag("MapLibrePOC").d("Added node text SymbolLayer")
     }
+    if (style.getLayer(NODE_TEXT_LAYER_CLUSTERED_ID) == null) {
+        val textLayer =
+            SymbolLayer(NODE_TEXT_LAYER_CLUSTERED_ID, NODES_CLUSTER_SOURCE_ID)
+                .withProperties(
+                    textField(get("short")),
+                    textColor("#1B1B1B"),
+                    textHaloColor("#FFFFFF"),
+                    textHaloWidth(3.0f),
+                    textHaloBlur(0.7f),
+                    textSize(
+                        interpolate(
+                            linear(),
+                            zoom(),
+                            stop(8, 9f),
+                            stop(12, 11f),
+                            stop(15, 13f),
+                            stop(18, 16f),
+                        ),
+                    ),
+                    textMaxWidth(4f),
+                    textAllowOverlap(
+                        step(
+                            zoom(),
+                            literal(false),
+                            stop(11, literal(true)),
+                        ),
+                    ),
+                    textIgnorePlacement(
+                        step(
+                            zoom(),
+                            literal(false),
+                            stop(11, literal(true)),
+                        ),
+                    ),
+                    textOffset(arrayOf(0f, -1.4f)),
+                    textAnchor("bottom"),
+                    visibility("none"),
+                )
+                .withFilter(
+                    all(
+                        not(has("point_count")),
+                        eq(get("showLabel"), literal(1)),
+                    ),
+                )
+        style.addLayer(textLayer)
+        Timber.tag("MapLibrePOC").d("Added clustered node text SymbolLayer")
+    }
     if (style.getLayer(WAYPOINTS_LAYER_ID) == null) {
         val layer = CircleLayer(WAYPOINTS_LAYER_ID, WAYPOINTS_SOURCE_ID).withProperties(circleColor("#2E7D32"), circleRadius(5f))
         style.addLayer(layer)
         Timber.tag("MapLibrePOC").d("Added waypoints CircleLayer")
     }
-    if (style.getLayer(TRACKS_LAYER_ID) == null) {
-        val layer = LineLayer(TRACKS_LAYER_ID, TRACKS_SOURCE_ID).withProperties(lineColor("#FF6D00"), lineWidth(3f))
-        style.addLayer(layer)
-        Timber.tag("MapLibrePOC").d("Added tracks LineLayer")
-    }
+    // Removed test track LineLayer
     Timber.tag("MapLibrePOC").d("ensureSourcesAndLayers() end. Layers=%d, Sources=%d", style.layers.size, style.sources.size)
 }
 
-private fun applyNodeFilters(all: List<Node>, filter: BaseMapViewModel.MapFilterState): List<Node> {
-    return if (filter.onlyFavorites) all.filter { it.isFavorite } else all
+private fun applyFilters(
+    all: List<Node>,
+    filter: BaseMapViewModel.MapFilterState,
+    enabledRoles: Set<ConfigProtos.Config.DeviceConfig.Role>,
+): List<Node> {
+    var out = all
+    if (filter.onlyFavorites) out = out.filter { it.isFavorite }
+    if (enabledRoles.isNotEmpty()) out = out.filter { enabledRoles.contains(it.user.role) }
+    return out
 }
 
 private fun nodesToFeatureCollectionJson(nodes: List<Node>): String {
@@ -916,7 +1004,20 @@ private fun selectLabelsForViewport(map: MapLibreMap, nodes: List<Node>, density
             compareByDescending<Node> { it.isFavorite }
                 .thenByDescending { it.lastHeard },
         )
-    val cellSizePx = (80f * density).toInt().coerceAtLeast(48)
+    // Dynamic cell size by zoom so more labels appear as you zoom in
+    val zoom = map.cameraPosition.zoom
+    val baseCellDp =
+        when {
+            zoom < 10 -> 96f
+            zoom < 11 -> 88f
+            zoom < 12 -> 80f
+            zoom < 13 -> 72f
+            zoom < 14 -> 64f
+            zoom < 15 -> 56f
+            zoom < 16 -> 48f
+            else -> 36f
+        }
+    val cellSizePx = (baseCellDp * density).toInt().coerceAtLeast(32)
     val occupied = HashSet<Long>()
     val chosen = LinkedHashSet<Int>()
     for (n in sorted) {
@@ -986,5 +1087,26 @@ private fun roleColorHex(node: Node): String {
 }
 
 private fun roleColor(node: Node): Color = Color(android.graphics.Color.parseColor(roleColorHex(node)))
+
+// Show/hide cluster layers vs plain nodes based on zoom, density, and toggle
+private fun setClusterVisibility(map: MapLibreMap, style: Style, filteredNodes: List<Node>, enableClusters: Boolean) {
+    val zoom = map.cameraPosition.zoom
+    val bounds = map.projection.visibleRegion.latLngBounds
+    val visibleCount =
+        filteredNodes.count { n ->
+            val p = n.validPosition ?: return@count false
+            bounds.contains(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
+        }
+    val showClustersNow = enableClusters && (zoom <= 10.0 && visibleCount > 50)
+    style.getLayer(CLUSTER_CIRCLE_LAYER_ID)?.setProperties(visibility(if (showClustersNow) "visible" else "none"))
+    style.getLayer(CLUSTER_COUNT_LAYER_ID)?.setProperties(visibility(if (showClustersNow) "visible" else "none"))
+    // Plain nodes visible when clusters hidden
+    style.getLayer(NODES_LAYER_ID)?.setProperties(visibility(if (showClustersNow) "none" else "visible"))
+    style.getLayer(NODE_TEXT_LAYER_ID)?.setProperties(visibility(if (showClustersNow) "none" else "visible"))
+    // Clustered unclustered-points layers visible when clusters shown
+    style.getLayer(NODES_LAYER_CLUSTERED_ID)?.setProperties(visibility(if (showClustersNow) "visible" else "none"))
+    style.getLayer(NODE_TEXT_LAYER_CLUSTERED_ID)?.setProperties(visibility(if (showClustersNow) "visible" else "none"))
+    Timber.tag("MapLibrePOC").d("Cluster visibility=%s (visible=%d, zoom=%.2f)", showClustersNow, visibleCount, zoom)
+}
 
 
