@@ -168,6 +168,8 @@
     <string name="map_purge_fail">Echèk efase Kach SQL, tcheke logcat pou detay</string>
     <string name="map_cache_manager">Manadjè Kach</string>
     <string name="map_download_complete">Telechajman konplè!</string>
+    <string name="map_download_errors">Telechajman konplè avèk %1$d erè</string>
+    <string name="map_cache_tiles">%1$d tèk</string>
     <string name="map_subDescription">ang: %1$d° distans: %2$s</string>
     <string name="waypoint_edit">Modifye pwen</string>
     <string name="waypoint_delete">Efase pwen?</string>
