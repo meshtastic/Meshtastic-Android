@@ -69,7 +69,7 @@
     <string name="rebroadcast_mode_none_desc">Alleen toegestaan voor SENSOR, TRACKER en TAK_TRACKER rollen, dit zal alle heruitzendingen beperken, niet in tegenstelling tot CLIENT_MUTE rol.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Negeert pakketten van niet-standaard portnums, zoals: TAK, RangeTest, PaxCounter, etc. Herzendt alleen pakketten met standaard portnummers: NodeInfo, Text, Positie, Telemetry, en Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Behandel een dubbele tik op ondersteunde versnellingsmeters als een knopindruk door de gebruiker.</string>
-    <string name="config_device_ledHeartbeatEnabled_summary">Regelt de knipperende LED op het apparaat. Voor de meeste apparaten betreft dit een van de maximaal 4 LEDs; de LED's van de lader en GPS zijn niet regelbaar.</string>
+    <string name="config_device_ledHeartbeatEnabled_summary">Regelt de knipperende LED op het apparaat. Voor de meeste apparaten betreft dit een van de maximaal 4 LEDs; de LED\'s van de lader en GPS zijn niet regelbaar.</string>
     <!-- Position Config -->
     <string name="debug">Debug</string>
     <string name="channel_name">Kanaalnaam</string>
@@ -161,8 +161,8 @@
     <string name="delivery_confirmed">Aflevering bevestigd</string>
     <string name="error">Fout</string>
     <string name="ignore">Negeer</string>
-    <string name="ignore_add">Voeg '%1$s' toe aan negeerlijst?</string>
-    <string name="ignore_remove">Verwijder '%1$s' uit negeerlijst?</string>
+    <string name="ignore_add">Voeg \'%1$s\' toe aan negeerlijst?</string>
+    <string name="ignore_remove">Verwijder \'%1$s\' uit negeerlijst?</string>
     <string name="map_select_download_region">Selecteer regio om te downloaden</string>
     <string name="map_tile_download_estimate">Geschatte download tegels:</string>
     <string name="map_start_download">Download starten</string>
@@ -182,6 +182,8 @@
     <string name="map_purge_fail">SQL cache verwijderen mislukt, zie logcat voor details</string>
     <string name="map_cache_manager">Cachemanager</string>
     <string name="map_download_complete">Download voltooid!</string>
+    <string name="map_download_errors">Download voltooid met %1$d fouten</string>
+    <string name="map_cache_tiles">%1$d tegels</string>
     <string name="map_subDescription">richting: %1$d° afstand: %2$s</string>
     <string name="waypoint_edit">Wijzig waypoint</string>
     <string name="waypoint_delete">Waypoint verwijderen?</string>
@@ -253,8 +255,8 @@
     <string name="alert_bell_text">Melding Bell teken!</string>
     <string name="critical_alert">Kritieke Waarschuwing!</string>
     <string name="favorite">Favoriet</string>
-    <string name="favorite_add">'%1$s' aan favorieten toevoegen?</string>
-    <string name="favorite_remove">'%1$s' uit favorieten verwijderen?</string>
+    <string name="favorite_add">\'%1$s\' aan favorieten toevoegen?</string>
+    <string name="favorite_remove">\'%1$s\' uit favorieten verwijderen?</string>
     <string name="power_metrics_log">Energiegegevenslogboek</string>
     <string name="channel_1">Kanaal 1</string>
     <string name="channel_2">Kanaal 2</string>
