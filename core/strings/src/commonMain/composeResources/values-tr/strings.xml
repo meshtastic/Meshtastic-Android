@@ -52,7 +52,7 @@
     <string name="role_client_desc">Uygulamaya bağlı veya bağımsız mesajlaşma cihazı.</string>
     <string name="role_client_mute_desc">Diğer cihazlardan gelen paketleri tekrarlamayan cihaz.</string>
     <string name="role_router_desc">Mesajları tekrarlayarak ağ kapsamını genişletmek için altyapı düğümü. Düğümler listesinde görünür.</string>
-    <string name="role_router_client_desc">Hem ROUTER hem de CLIENT'ın bir kombinasyonu. Mobil cihazlar için değildir.</string>
+    <string name="role_router_client_desc">Hem ROUTER hem de CLIENT\'ın bir kombinasyonu. Mobil cihazlar için değildir.</string>
     <string name="role_repeater_desc">Mesajları minimum ek yük ile tekrarlayarak ağ kapsamını genişletmek için altyapı düğümü. Düğümler listesinde görünmez.</string>
     <string name="role_tracker_desc">Öncelikli olarak konum paketlerini yayınlar.</string>
     <string name="role_sensor_desc">Öncelikli olarak telemetri paketlerini yayınlar.</string>
@@ -68,10 +68,10 @@
     <string name="rebroadcast_mode_known_only_desc">LOCAL ONLY gibi yabancı ağlardan geldiği tespit edilen mesajları yok sayar, ancak düğümün bilinen listesinde bulunmayan düğümlerden gelen mesajları da yok sayarak bir adım daha ileri gider.</string>
     <string name="rebroadcast_mode_none">Yok</string>
     <string name="rebroadcast_mode_none_desc">Yalnızca SENSOR, TRACKER ve TAK_TRACKER rolleri için izin verilir, CLIENT_MUTE rolünden farklı olarak tüm yeniden yayınları engeller.</string>
-    <string name="rebroadcast_mode_core_portnums_only_desc">TAK, RangeTest, PaxCounter gibi standart olmayan portnum'ları yok sayarken sadece standart portnum'lar olan NodeInfo, Text, Position, Telemetry ve Routing'i yeniden yayınlar.</string>
+    <string name="rebroadcast_mode_core_portnums_only_desc">TAK, RangeTest, PaxCounter gibi standart olmayan portnum\'ları yok sayarken sadece standart portnum\'lar olan NodeInfo, Text, Position, Telemetry ve Routing\'i yeniden yayınlar.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Desteklenen ivmeölçerlere çift dokunmayı kullanıcı düğmesine basma olarak değerlendirir.</string>
-    <string name="config_device_ledHeartbeatEnabled_summary">Cihaz üzerindeki yanıp sönen LED'i kontrol eder. Çoğu cihaz için bu, en fazla 4 LED'den birini kontrol edecektir, şarj ve GPS LED'leri kontrol edilemez.</string>
-    <string name="config_device_transmitOverLora_summary">MQTT ve PhoneAPI'ye göndermenin yanı sıra, NeighborInfo'muzun LoRa üzerinden iletilip iletilmeyeceğidir. Varsayılan anahtar ve ada sahip bir kanalda kullanılamaz.</string>
+    <string name="config_device_ledHeartbeatEnabled_summary">Cihaz üzerindeki yanıp sönen LED\'i kontrol eder. Çoğu cihaz için bu, en fazla 4 LED\'den birini kontrol edecektir, şarj ve GPS LED\'leri kontrol edilemez.</string>
+    <string name="config_device_transmitOverLora_summary">MQTT ve PhoneAPI\'ye göndermenin yanı sıra, NeighborInfo\'muzun LoRa üzerinden iletilip iletilmeyeceğidir. Varsayılan anahtar ve ada sahip bir kanalda kullanılamaz.</string>
     <!-- Position Config -->
     <string name="altitude">Rakım</string>
     <string name="debug">Hata Ayıklama</string>
@@ -104,11 +104,11 @@
     <string name="not_connected">Bağlı değil</string>
     <string name="connected_sleeping">Cihaza bağlandı, ancak uyku durumunda</string>
     <string name="app_too_old">Uygulama güncellemesi gerekli</string>
-    <string name="must_update">Uygulamayı Google Play store (ya da GitHub)'dan güncelleyin. Bu cihaz ile haberleşmek için uygulama çok eski. İlgili <a href="https://meshtastic.org/docs/software/android/installation"> Dokümantasyon</a>.</string>
+    <string name="must_update">Uygulamayı Google Play store (ya da GitHub)\'dan güncelleyin. Bu cihaz ile haberleşmek için uygulama çok eski. İlgili <a href="https://meshtastic.org/docs/software/android/installation"> Dokümantasyon</a>.</string>
     <string name="none">Hiçbiri (kapat)</string>
     <string name="meshtastic_service_notifications">Servis bildirimleri</string>
     <string name="about">Hakkında</string>
-    <string name="channel_invalid">Bu Kanal URL' si geçersiz ve kullanılamaz</string>
+    <string name="channel_invalid">Bu Kanal URL\' si geçersiz ve kullanılamaz</string>
     <string name="debug_panel">Hata Ayıklama Paneli</string>
     <string name="debug_filters">Filtreler</string>
     <string name="debug_active_filters">Aktif Filtreler</string>
@@ -171,8 +171,8 @@
     <string name="delivery_confirmed">Teslim Edildi</string>
     <string name="error">Hata</string>
     <string name="ignore">Yok say</string>
-    <string name="ignore_add">Yoksay listesine '%1$s' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
-    <string name="ignore_remove">Yoksay listesinden '%1$s' çıkarılsın mı? Değişiklikten sonra cihazınız yeniden başlar.</string>
+    <string name="ignore_add">Yoksay listesine \'%1$s\' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
+    <string name="ignore_remove">Yoksay listesinden \'%1$s\' çıkarılsın mı? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="map_select_download_region">İndirilecek bölgeyi seçin</string>
     <string name="map_tile_download_estimate">Tahmini indirme boyutu:</string>
     <string name="map_start_download">İndirmeye başla</string>
@@ -189,9 +189,11 @@
     <string name="map_clear_tiles">Harita Parçalarını Sil</string>
     <string name="map_tile_source">Harita Kaynağı</string>
     <string name="map_purge_success">%1$s için SQL önbelleği temizlendi</string>
-    <string name="map_purge_fail">SQL Önbellek temizleme başarısız, ayrıntılar için logcat' e bakın</string>
+    <string name="map_purge_fail">SQL Önbellek temizleme başarısız, ayrıntılar için logcat\' e bakın</string>
     <string name="map_cache_manager">Önbellek Yöneticisi</string>
     <string name="map_download_complete">İndirme tamamlandı!</string>
+    <string name="map_download_errors">İndirme %1$d hata ile tamamlandı</string>
+    <string name="map_cache_tiles">%1$d harita parçası</string>
     <string name="map_subDescription">yön: %1$d° mesafe: %2$s</string>
     <string name="waypoint_edit">Yer işareti düzenle</string>
     <string name="waypoint_delete">Yer işaretini sil?</string>
@@ -263,8 +265,8 @@
     <string name="alert_bell_text">Zili Çaldır!</string>
     <string name="critical_alert">Kritik Uyarı!</string>
     <string name="favorite">Favori</string>
-    <string name="favorite_add">'%1$s' düğümünü favorilere eklemek istiyor musunuz?</string>
-    <string name="favorite_remove">'%1$s' düğümünü favorilerden silmek istiyor musunuz?</string>
+    <string name="favorite_add">\'%1$s\' düğümünü favorilere eklemek istiyor musunuz?</string>
+    <string name="favorite_remove">\'%1$s\' düğümünü favorilerden silmek istiyor musunuz?</string>
     <string name="power_metrics_log">Güç Ölçüm Kayıtları</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -381,7 +383,7 @@
     <string name="output_duration_milliseconds">Çıktı süresi (milisaniye)</string>
     <string name="nag_timeout_seconds">Nag zaman aşımı (saniye)</string>
     <string name="ringtone">Zil tipi</string>
-    <string name="use_i2s_as_buzzer">I2S'yi zırnı olarak kullan</string>
+    <string name="use_i2s_as_buzzer">I2S\'yi zırnı olarak kullan</string>
     <string name="lora_config">LoRa</string>
     <string name="advanced">Gelişmiş</string>
     <string name="bandwidth">Bant genişliği</string>
@@ -390,7 +392,7 @@
     <string name="override_duty_cycle">Görev Döngüsünü Geçersiz Kıl</string>
     <string name="ignore_incoming">Gelenleri Yoksay</string>
     <string name="pa_fan_disabled">PA fanı devre dışı</string>
-    <string name="ignore_mqtt">MQTT'yi Yoksay</string>
+    <string name="ignore_mqtt">MQTT\'yi Yoksay</string>
     <string name="mqtt_config">MQTT Yapılandırması</string>
     <string name="mqtt_enabled">MQTT etkin</string>
     <string name="address">Adres</string>
@@ -444,7 +446,7 @@
     <string name="range_test_config">Menzi Test Ayarı</string>
     <string name="range_test_enabled">Menzi testi etkin</string>
     <string name="sender_message_interval_seconds">Gönderen mesaj aralığı (saniye)</string>
-    <string name="save_csv_in_storage_esp32_only">.CSV'yi depolamada kaydet (sadece ESP32)</string>
+    <string name="save_csv_in_storage_esp32_only">.CSV\'yi depolamada kaydet (sadece ESP32)</string>
     <string name="remote_hardware_config">Uzak Donanım Ayarı</string>
     <string name="remote_hardware_enabled">Uzak Donanım etkin</string>
     <string name="allow_undefined_pin_access">Tanımlanmamış pin erişimine izin ver</string>
@@ -455,7 +457,7 @@
     <string name="admin_key">Yönetici Anahtarı</string>
     <string name="managed_mode">Yönetilen Mod</string>
     <string name="serial_console">Seri konsol</string>
-    <string name="debug_log_api_enabled">Hata ayıklama kaydı API'si etkin</string>
+    <string name="debug_log_api_enabled">Hata ayıklama kaydı API\'si etkin</string>
     <string name="legacy_admin_channel">Eski Yönetici kanalı</string>
     <string name="serial_config">Seri Ayarı</string>
     <string name="serial_enabled">Seri etkin</string>
