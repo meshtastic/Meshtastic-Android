@@ -299,6 +299,8 @@
     <string name="map_purge_fail">SQL-i vahemälu tühjendamine ebaõnnestus, vaata üksikasju logcat\'ist</string>
     <string name="map_cache_manager">Vahemälu haldamine</string>
     <string name="map_download_complete">Allalaadimine on lõppenud!</string>
+    <string name="map_download_errors">Allalaadimine lõpetati %1$d veaga</string>
+    <string name="map_cache_tiles">%1$d paani</string>
     <string name="map_subDescription">suund: %1$d° kaugus: %2$s</string>
     <string name="waypoint_edit">Muuda teekonnapunkti</string>
     <string name="waypoint_delete">Eemalda teekonnapunkt?</string>
@@ -849,6 +851,7 @@
     <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <string name="next">Järgmine</string>
     <string name="grant_permissions">Anna luba</string>
+    <string name="nodes_queued_for_deletion">%1$d eemaldatavat sõlme nimekirjas:</string>
     <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
     <string name="connecting_to_device">Ühendan seadet</string>
     <string name="map_type_normal">Normaalne</string>
