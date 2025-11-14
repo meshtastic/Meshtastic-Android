@@ -121,6 +121,8 @@
     <string name="map_purge_fail">Ștergerea cache-ului SQL a eșuat, vedeți logcat pentru detalii</string>
     <string name="map_cache_manager">Manager cache</string>
     <string name="map_download_complete">Descărcare finalizată!</string>
+    <string name="map_download_errors">Descărcare finalizată cu %1$d erori</string>
+    <string name="map_cache_tiles">%1$d secțiuni</string>
     <string name="map_subDescription">compas: %1$d° distanță: %2$s</string>
     <string name="waypoint_edit">Editează waypoint</string>
     <string name="waypoint_delete">Şterge waypointul?</string>
