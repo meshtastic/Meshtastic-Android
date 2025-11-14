@@ -238,6 +238,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showPurgeTileSourceDialog by remember { mutableStateOf(false) }
     var showMapStyleDialog by remember { mutableStateOf(false) }
+    var showMapLibrePOC by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -610,6 +611,11 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                         icon = Icons.Outlined.Layers,
                         contentDescription = Res.string.map_style_selection,
                     )
+                    MapButton(
+                        onClick = { showMapLibrePOC = true },
+                        icon = Icons.Outlined.Layers,
+                        contentDescription = Res.string.map_style_selection,
+                    )
                     Box(modifier = Modifier) {
                         MapButton(
                             onClick = { mapFilterExpanded = true },
@@ -757,6 +763,14 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     if (showPurgeTileSourceDialog) {
         PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
+    }
+
+    if (showMapLibrePOC) {
+        androidx.compose.ui.window.Dialog(onDismissRequest = { showMapLibrePOC = false }) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                org.meshtastic.feature.map.maplibre.MapLibrePOC()
+            }
+        }
     }
 
     if (showEditWaypointDialog != null) {
