@@ -1610,6 +1610,12 @@ class MeshService : Service() {
         packetHandlers[this.payloadVariantCase]?.invoke(this)
     }
 
+    /**
+     * Parses and routes incoming data from the radio.
+     *
+     * This function first attempts to parse the data as a `FromRadio` protobuf message. If that fails, it then tries to
+     * parse it as a `LogRecord` for debugging purposes.
+     */
     private fun onReceiveFromRadio(bytes: ByteArray) {
         runCatching { MeshProtos.FromRadio.parseFrom(bytes) }
             .onSuccess { proto ->
