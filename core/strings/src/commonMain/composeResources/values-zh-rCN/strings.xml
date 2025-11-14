@@ -234,6 +234,8 @@
     <string name="map_purge_fail">清除 SQL 缓存失败，请查看 logcat 纪录</string>
     <string name="map_cache_manager">缓存管理员</string>
     <string name="map_download_complete">下载已完成！</string>
+    <string name="map_download_errors">下载完成，但有 %1$d 个错误</string>
+    <string name="map_cache_tiles">%1$d 图砖</string>
     <string name="map_subDescription">方位：%1$d° 距离：%2$s</string>
     <string name="waypoint_edit">编辑航点</string>
     <string name="waypoint_delete">删除航点?</string>
@@ -724,6 +726,7 @@
     <string name="configure_critical_alerts">配置关键警报</string>
     <string name="notification_permissions_description">Meshtastic 使用通知来随时更新新消息和其他重要事件。您可以随时从设置中更新您的通知权限。</string>
     <string name="next">下一步</string>
+    <string name="nodes_queued_for_deletion">%1$d 节点待删除：</string>
     <string name="clean_node_database_description">注意：这将从应用内和设备上的数据库中移除节点。\n选择是附加性的。</string>
     <string name="connecting_to_device">正在连接设备</string>
     <string name="map_type_normal">普通</string>
