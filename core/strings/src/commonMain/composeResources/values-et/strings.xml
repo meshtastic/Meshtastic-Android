@@ -120,7 +120,7 @@
     <string name="label_short_fast">Lühike ulatus - kiire</string>
     <string name="label_short_slow">Lühike ulatus - aeglane</string>
     <string name="config_network_wifi_enabled_summary">WiFi lubamine keelab rakenduses Bluetooth-ühenduse.</string>
-    <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab Bluetooth-ühenduse rakendusega. TCP-sõlmede ühendused pole Apple'i seadmetes saadaval.</string>
+    <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab Bluetooth-ühenduse rakendusega. TCP-sõlmede ühendused pole Apple\'i seadmetes saadaval.</string>
     <string name="config_network_udp_enabled_summary">Luba kohalikus võrgus pakettide edastamine UDP kaudu.</string>
     <string name="config_position_broadcast_secs_summary">Maksimaalne intervall, mille jooksul sõlm ei edasta oma asukohta.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Asukohavärskendused saadetakse kiiremini, kui minimaalne vahemaa on saavutatud.</string>
@@ -278,8 +278,8 @@
     <string name="error">Viga</string>
     <string name="ignore">Eira</string>
     <string name="remove_ignored">Eemalda ignoreeritute hulgast</string>
-    <string name="ignore_add">Lisa '%1$s' eiramis loendisse?</string>
-    <string name="ignore_remove">Eemaldada '%1$s' eiramis loendist?</string>
+    <string name="ignore_add">Lisa \'%1$s\' eiramis loendisse?</string>
+    <string name="ignore_remove">Eemaldada \'%1$s\' eiramis loendist?</string>
     <string name="map_select_download_region">Vali allalaetav piirkond</string>
     <string name="map_tile_download_estimate">Paanide allalaadimise prognoos:</string>
     <string name="map_start_download">Alusta allalaadimist</string>
@@ -296,9 +296,11 @@
     <string name="map_clear_tiles">Tühjenda allalaetud paanid</string>
     <string name="map_tile_source">Paani allikas</string>
     <string name="map_purge_success">SQL-i vahemälu puhastatud %1$s jaoks</string>
-    <string name="map_purge_fail">SQL-i vahemälu tühjendamine ebaõnnestus, vaata üksikasju logcat'ist</string>
+    <string name="map_purge_fail">SQL-i vahemälu tühjendamine ebaõnnestus, vaata üksikasju logcat\'ist</string>
     <string name="map_cache_manager">Vahemälu haldamine</string>
     <string name="map_download_complete">Allalaadimine on lõppenud!</string>
+    <string name="map_download_errors">Allalaadimine lõpetati %1$d veaga</string>
+    <string name="map_cache_tiles">%1$d paani</string>
     <string name="map_subDescription">suund: %1$d° kaugus: %2$s</string>
     <string name="waypoint_edit">Muuda teekonnapunkti</string>
     <string name="waypoint_delete">Eemalda teekonnapunkt?</string>
@@ -384,8 +386,8 @@
     <string name="favorite">Lemmik</string>
     <string name="add_favorite">Lisa lemmikutesse</string>
     <string name="remove_favorite">Eemalda lemmikutest</string>
-    <string name="favorite_add">Lisa '%1$s' lemmik sõlmede hulka?</string>
-    <string name="favorite_remove">Eemalda '%1$s' lemmik sõlmede hulgast?</string>
+    <string name="favorite_add">Lisa \'%1$s\' lemmik sõlmede hulka?</string>
+    <string name="favorite_remove">Eemalda \'%1$s\' lemmik sõlmede hulgast?</string>
     <string name="power_metrics_log">Toitepinge andurite logi</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -849,6 +851,7 @@
     <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <string name="next">Järgmine</string>
     <string name="grant_permissions">Anna luba</string>
+    <string name="nodes_queued_for_deletion">%1$d eemaldatavat sõlme nimekirjas:</string>
     <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
     <string name="connecting_to_device">Ühendan seadet</string>
     <string name="map_type_normal">Normaalne</string>
