@@ -176,6 +176,8 @@
     <string name="map_purge_fail">Error en la purga de la memòria cau SQL, veure logcat per a detalls</string>
     <string name="map_cache_manager">Director de la memòria cau</string>
     <string name="map_download_complete">Descarrega completa!</string>
+    <string name="map_download_errors">Descarrega completa amb %1$d errors</string>
+    <string name="map_cache_tiles">%1$d tessel·les</string>
     <string name="map_subDescription">rumb: %1$d° distància: %2$s</string>
     <string name="waypoint_edit">Editar punt de pas</string>
     <string name="waypoint_delete">Esborrar punt de pas?</string>
