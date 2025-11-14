@@ -121,6 +121,7 @@
     <string name="map_purge_success">Η προσωρινή μνήμη SQL καθαρίστηκε για %1$s</string>
     <string name="map_cache_manager">Διαχείριση Προσωρινής Αποθήκευσης</string>
     <string name="map_download_complete">Η λήψη ολοκληρώθηκε!</string>
+    <string name="map_download_errors">Λήψη ολοκληρώθηκε με %1$d σφάλματα</string>
     <string name="waypoint_edit">Επεξεργασία σημείου διαδρομής</string>
     <string name="waypoint_delete">Διαγραφή σημείου πορείας;</string>
     <string name="waypoint_new">Νέο σημείο πορείας</string>
