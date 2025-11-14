@@ -17,7 +17,8 @@
 
 package org.meshtastic.feature.messaging
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,9 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,15 +41,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.Reaction
@@ -58,165 +57,318 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.relayed_by
-import org.meshtastic.core.strings.resend
+import org.meshtastic.core.strings.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
+import kotlin.collections.buildList
 
-@Composable
-fun DeliveryInfo(
-    title: StringResource,
-    text: StringResource? = null,
-    relayNodeName: String? = null,
-    onConfirm: (() -> Unit) = {},
-    onDismiss: () -> Unit = {},
-    resendOption: Boolean,
-) = AlertDialog(
-    onDismissRequest = onDismiss,
-    dismissButton = {
-        FilledTonalButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = stringResource(Res.string.close))
-        }
-    },
-    confirmButton = {
-        if (resendOption) {
-            FilledTonalButton(onClick = onConfirm, modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(text = stringResource(Res.string.resend))
-            }
-        }
-    },
-    title = {
-        Text(
-            text = stringResource(title),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.headlineSmall,
-        )
-    },
-    text = {
-        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            text?.let {
-                Text(
-                    text = stringResource(it),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-            relayNodeName?.let {
-                Text(
-                    text = stringResource(Res.string.relayed_by, it),
-                    modifier = Modifier.padding(top = 8.dp),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
-    },
-    shape = RoundedCornerShape(16.dp),
-    containerColor = MaterialTheme.colorScheme.surface,
+internal data class MessageListState(
+    val nodes: List<Node>,
+    val ourNode: Node?,
+    val messages: List<Message>,
+    val selectedIds: MutableState<Set<Long>>,
+    val hasUnreadMessages: Boolean,
+    val initialUnreadMessageUuid: Long?,
+    val fallbackUnreadIndex: Int?,
+    val contactKey: String,
 )
 
-@Suppress("LongMethod")
+internal data class MessageListHandlers(
+    val onUnreadChanged: (Long, Long) -> Unit,
+    val onSendReaction: (String, Int) -> Unit,
+    val onClickChip: (Node) -> Unit,
+    val onDeleteMessages: (List<Long>) -> Unit,
+    val onSendMessage: (String, String) -> Unit,
+    val onReply: (Message?) -> Unit,
+)
+
 @Composable
 internal fun MessageList(
-    nodes: List<Node>,
-    ourNode: Node?,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    messages: List<Message>,
-    selectedIds: MutableState<Set<Long>>,
-    onUnreadChanged: (Long) -> Unit,
-    onSendReaction: (String, Int) -> Unit,
-    onClickChip: (Node) -> Unit,
-    onDeleteMessages: (List<Long>) -> Unit,
-    onSendMessage: (messageText: String, contactKey: String) -> Unit,
-    contactKey: String,
-    onReply: (Message?) -> Unit,
+    state: MessageListState,
+    handlers: MessageListHandlers,
 ) {
     val haptics = LocalHapticFeedback.current
-    val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
-    AutoScrollToBottom(listState, messages)
-    UpdateUnreadCount(listState, messages, onUnreadChanged)
+    val inSelectionMode by remember { derivedStateOf { state.selectedIds.value.isNotEmpty() } }
+    val unreadDividerIndex by
+        remember(state.messages, state.initialUnreadMessageUuid, state.fallbackUnreadIndex) {
+            derivedStateOf {
+                state.initialUnreadMessageUuid?.let { uuid ->
+                    state.messages.indexOfFirst { it.uuid == uuid }.takeIf { it >= 0 }
+                } ?: state.fallbackUnreadIndex
+            }
+        }
+    val showUnreadDivider = state.hasUnreadMessages && unreadDividerIndex != null
+    AutoScrollToBottom(listState, state.messages, state.hasUnreadMessages)
+    UpdateUnreadCount(listState, state.messages, handlers.onUnreadChanged)
 
     var showStatusDialog by remember { mutableStateOf<Message?>(null) }
-    if (showStatusDialog != null) {
-        val msg = showStatusDialog ?: return
-        val (title, text) = msg.getStatusStringRes()
-        val relayNodeName by
-            remember(msg.relayNode, nodes) {
-                derivedStateOf {
-                    msg.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
-                }
-            }
-        DeliveryInfo(
-            title = title,
-            text = text,
-            relayNodeName = relayNodeName,
-            onConfirm = {
-                val deleteList: List<Long> = listOf(msg.uuid)
-                onDeleteMessages(deleteList)
+    showStatusDialog?.let { message ->
+        MessageStatusDialog(
+            message = message,
+            nodes = state.nodes,
+            resendOption = message.status?.equals(MessageStatus.ERROR) ?: false,
+            onResend = {
+                handlers.onDeleteMessages(listOf(message.uuid))
+                handlers.onSendMessage(message.text, state.contactKey)
                 showStatusDialog = null
-                onSendMessage(msg.text, contactKey)
             },
             onDismiss = { showStatusDialog = null },
-            resendOption = msg.status?.equals(MessageStatus.ERROR) ?: false,
         )
     }
 
     var showReactionDialog by remember { mutableStateOf<List<Reaction>?>(null) }
-    if (showReactionDialog != null) {
-        val reactions = showReactionDialog ?: return
-        ReactionDialog(reactions) { showReactionDialog = null }
-    }
-
-    fun MutableState<Set<Long>>.toggle(uuid: Long) = if (value.contains(uuid)) {
-        value -= uuid
-    } else {
-        value += uuid
-    }
+    showReactionDialog?.let { reactions -> ReactionDialog(reactions) { showReactionDialog = null } }
 
     val coroutineScope = rememberCoroutineScope()
-    LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
-        items(messages, key = { it.uuid }) { msg ->
-            if (ourNode != null) {
-                val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
-                val node by remember { derivedStateOf { nodes.find { it.num == msg.node.num } ?: msg.node } }
+    val messageRows =
+        rememberMessageRows(
+            messages = state.messages,
+            showUnreadDivider = showUnreadDivider,
+            unreadDividerIndex = unreadDividerIndex,
+            initialUnreadMessageUuid = state.initialUnreadMessageUuid,
+        )
 
-                MessageItem(
-                    modifier = Modifier.animateItem(),
-                    node = node,
+    MessageListContent(
+        listState = listState,
+        messageRows = messageRows,
+        state = state,
+        handlers = handlers,
+        inSelectionMode = inSelectionMode,
+        onShowStatusDialog = { showStatusDialog = it },
+        onShowReactions = { showReactionDialog = it },
+        coroutineScope = coroutineScope,
+        haptics = haptics,
+        modifier = modifier,
+    )
+}
+
+private sealed interface MessageListRow {
+    data class ChatMessage(val index: Int, val message: Message) : MessageListRow
+
+    data class UnreadDivider(val key: String) : MessageListRow
+}
+
+@Composable
+private fun MessageRowContent(
+    row: MessageListRow,
+    state: MessageListState,
+    handlers: MessageListHandlers,
+    inSelectionMode: Boolean,
+    listState: LazyListState,
+    coroutineScope: CoroutineScope,
+    haptics: HapticFeedback,
+    onShowStatusDialog: (Message) -> Unit,
+    onShowReactions: (List<Reaction>) -> Unit,
+) {
+    when (row) {
+        is MessageListRow.UnreadDivider -> UnreadMessagesDivider()
+        is MessageListRow.ChatMessage ->
+            state.ourNode?.let { ourNode ->
+                ChatMessageRow(
+                    row = row,
+                    state = state,
+                    handlers = handlers,
+                    inSelectionMode = inSelectionMode,
+                    listState = listState,
+                    coroutineScope = coroutineScope,
+                    haptics = haptics,
+                    onShowStatusDialog = onShowStatusDialog,
+                    onShowReactions = onShowReactions,
                     ourNode = ourNode,
-                    message = msg,
-                    selected = selected,
-                    onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
-                    onLongClick = {
-                        selectedIds.toggle(msg.uuid)
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    },
-                    onClickChip = onClickChip,
-                    onStatusClick = { showStatusDialog = msg },
-                    onReply = { onReply(msg) },
-                    emojis = msg.emojis,
-                    sendReaction = { onSendReaction(it, msg.packetId) },
-                    onShowReactions = { showReactionDialog = msg.emojis },
-                    onNavigateToOriginalMessage = {
-                        coroutineScope.launch {
-                            val targetIndex = messages.indexOfFirst { it.packetId == msg.replyId }
-                            if (targetIndex != -1) {
-                                listState.animateScrollToItem(index = targetIndex)
-                            }
-                        }
-                    },
                 )
             }
+    }
+}
+
+@Composable
+private fun ChatMessageRow(
+    row: MessageListRow.ChatMessage,
+    state: MessageListState,
+    handlers: MessageListHandlers,
+    inSelectionMode: Boolean,
+    listState: LazyListState,
+    coroutineScope: CoroutineScope,
+    haptics: HapticFeedback,
+    onShowStatusDialog: (Message) -> Unit,
+    onShowReactions: (List<Reaction>) -> Unit,
+    ourNode: Node,
+) {
+    val message = row.message
+    val selected by
+        remember(message.uuid, state.selectedIds.value) {
+            derivedStateOf { state.selectedIds.value.contains(message.uuid) }
+        }
+    val node by
+        remember(message.node.num, state.nodes) {
+            derivedStateOf { state.nodes.find { it.num == message.node.num } ?: message.node }
+        }
+
+    MessageItem(
+        node = node,
+        ourNode = ourNode,
+        message = message,
+        selected = selected,
+        onClick = {
+            if (inSelectionMode) {
+                state.selectedIds.value =
+                    if (selected) state.selectedIds.value - message.uuid else state.selectedIds.value + message.uuid
+            }
+        },
+        onLongClick = {
+            state.selectedIds.value =
+                if (selected) state.selectedIds.value - message.uuid else state.selectedIds.value + message.uuid
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        },
+        onClickChip = handlers.onClickChip,
+        onStatusClick = { onShowStatusDialog(message) },
+        onReply = { handlers.onReply(message) },
+        emojis = message.emojis,
+        sendReaction = { handlers.onSendReaction(it, message.packetId) },
+        onShowReactions = { onShowReactions(message.emojis) },
+        onNavigateToOriginalMessage = {
+            coroutineScope.launch {
+                val targetIndex = state.messages.indexOfFirst { it.packetId == message.replyId }
+                if (targetIndex != -1) {
+                    listState.animateScrollToItem(index = targetIndex)
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun MessageListContent(
+    listState: LazyListState,
+    messageRows: List<MessageListRow>,
+    state: MessageListState,
+    handlers: MessageListHandlers,
+    inSelectionMode: Boolean,
+    onShowStatusDialog: (Message) -> Unit,
+    onShowReactions: (List<Reaction>) -> Unit,
+    coroutineScope: CoroutineScope,
+    haptics: HapticFeedback,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
+        items(
+            items = messageRows,
+            key = { row ->
+                when (row) {
+                    is MessageListRow.ChatMessage -> row.message.uuid
+                    is MessageListRow.UnreadDivider -> row.key
+                }
+            },
+        ) { row ->
+            MessageRowContent(
+                row = row,
+                state = state,
+                handlers = handlers,
+                inSelectionMode = inSelectionMode,
+                listState = listState,
+                coroutineScope = coroutineScope,
+                haptics = haptics,
+                onShowStatusDialog = onShowStatusDialog,
+                onShowReactions = onShowReactions,
+            )
         }
     }
 }
 
 @Composable
-private fun <T> AutoScrollToBottom(listState: LazyListState, list: List<T>, itemThreshold: Int = 3) = with(listState) {
-    val shouldAutoScroll by remember { derivedStateOf { firstVisibleItemIndex < itemThreshold } }
+private fun MessageStatusDialog(
+    message: Message,
+    nodes: List<Node>,
+    resendOption: Boolean,
+    onResend: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val (title, text) = message.getStatusStringRes()
+    val relayNodeName by
+        remember(message.relayNode, nodes) {
+            derivedStateOf {
+                message.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
+            }
+        }
+    DeliveryInfo(
+        title = title,
+        resendOption = resendOption,
+        text = text,
+        relayNodeName = relayNodeName,
+        onConfirm = onResend,
+        onDismiss = onDismiss,
+    )
+}
+
+@Composable
+private fun rememberMessageRows(
+    messages: List<Message>,
+    showUnreadDivider: Boolean,
+    unreadDividerIndex: Int?,
+    initialUnreadMessageUuid: Long?,
+) = remember(messages, showUnreadDivider, unreadDividerIndex, initialUnreadMessageUuid) {
+    buildList<MessageListRow> {
+        messages.forEachIndexed { index, message ->
+            add(MessageListRow.ChatMessage(index = index, message = message))
+            if (showUnreadDivider && unreadDividerIndex == index) {
+                val key = initialUnreadMessageUuid?.let { "unread-divider-$it" } ?: "unread-divider-index-$index"
+                add(MessageListRow.UnreadDivider(key = key))
+            }
+        }
+    }
+}
+
+/**
+ * Calculates the index of the first unread remote message.
+ *
+ * We track unread state with two sources: the persisted timestamp of the last read message and the in-memory
+ * `Message.read` flag. The timestamp helps when the local flag state is stale (e.g. after app restarts), while the flag
+ * catches messages that are already marked read locally. We take the maximum of the two indices to target the oldest
+ * unread entry that still needs attention. The message list is newest-first, so we deliberately use `lastOrNull` for
+ * the timestamp branch to land on the oldest unread item after the stored mark.
+ */
+internal fun findEarliestUnreadIndex(messages: List<Message>, lastReadMessageTimestamp: Long?): Int? {
+    val remoteMessages = messages.withIndex().filter { !it.value.fromLocal }
+    if (remoteMessages.isEmpty()) {
+        return null
+    }
+    val timestampIndex =
+        lastReadMessageTimestamp?.let { timestamp ->
+            remoteMessages.lastOrNull { it.value.receivedTime > timestamp }?.index
+        }
+    val readFlagIndex = messages.indexOfLast { !it.read && !it.fromLocal }.takeIf { it != -1 }
+    return listOfNotNull(timestampIndex, readFlagIndex).maxOrNull()
+}
+
+@Composable
+private fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        HorizontalDivider(modifier = Modifier.weight(1f))
+        Text(
+            text = stringResource(Res.string.new_messages_below),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        HorizontalDivider(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun <T> AutoScrollToBottom(
+    listState: LazyListState,
+    list: List<T>,
+    hasUnreadMessages: Boolean,
+    itemThreshold: Int = 3,
+) = with(listState) {
+    val shouldAutoScroll by
+        remember(hasUnreadMessages) {
+            derivedStateOf { !hasUnreadMessages && firstVisibleItemIndex < itemThreshold }
+        }
     if (shouldAutoScroll) {
         LaunchedEffect(list) {
             if (!isScrollInProgress) {
@@ -228,15 +380,21 @@ private fun <T> AutoScrollToBottom(listState: LazyListState, list: List<T>, item
 
 @OptIn(FlowPreview::class)
 @Composable
-private fun UpdateUnreadCount(listState: LazyListState, messages: List<Message>, onUnreadChanged: (Long) -> Unit) {
+private fun UpdateUnreadCount(
+    listState: LazyListState,
+    messages: List<Message>,
+    onUnreadChanged: (Long, Long) -> Unit,
+) {
     LaunchedEffect(messages) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .debounce(timeoutMillis = 500L)
             .collectLatest { index ->
-                val lastUnreadIndex = messages.indexOfLast { !it.read }
+                val lastUnreadIndex = messages.indexOfLast { !it.read && !it.fromLocal }
                 if (lastUnreadIndex != -1 && index <= lastUnreadIndex && index < messages.size) {
                     val visibleMessage = messages[index]
-                    onUnreadChanged(visibleMessage.receivedTime)
+                    if (!visibleMessage.read && !visibleMessage.fromLocal) {
+                        onUnreadChanged(visibleMessage.uuid, visibleMessage.receivedTime)
+                    }
                 }
             }
     }
