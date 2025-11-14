@@ -192,6 +192,8 @@
     <string name="map_purge_fail">SQL Önbellek temizleme başarısız, ayrıntılar için logcat\' e bakın</string>
     <string name="map_cache_manager">Önbellek Yöneticisi</string>
     <string name="map_download_complete">İndirme tamamlandı!</string>
+    <string name="map_download_errors">İndirme %1$d hata ile tamamlandı</string>
+    <string name="map_cache_tiles">%1$d harita parçası</string>
     <string name="map_subDescription">yön: %1$d° mesafe: %2$s</string>
     <string name="waypoint_edit">Yer işareti düzenle</string>
     <string name="waypoint_delete">Yer işaretini sil?</string>
