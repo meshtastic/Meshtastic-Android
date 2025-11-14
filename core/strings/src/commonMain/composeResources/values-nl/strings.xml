@@ -182,6 +182,8 @@
     <string name="map_purge_fail">SQL cache verwijderen mislukt, zie logcat voor details</string>
     <string name="map_cache_manager">Cachemanager</string>
     <string name="map_download_complete">Download voltooid!</string>
+    <string name="map_download_errors">Download voltooid met %1$d fouten</string>
+    <string name="map_cache_tiles">%1$d tegels</string>
     <string name="map_subDescription">richting: %1$d° afstand: %2$s</string>
     <string name="waypoint_edit">Wijzig waypoint</string>
     <string name="waypoint_delete">Waypoint verwijderen?</string>
