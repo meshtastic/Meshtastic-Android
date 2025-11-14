@@ -274,8 +274,8 @@
     <string name="error">Fel</string>
     <string name="ignore">Ignorera</string>
     <string name="remove_ignored">Ta bort från ignorerade</string>
-    <string name="ignore_add">Lägg till '%1$s' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
-    <string name="ignore_remove">Ta bort '%1$s' från ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
+    <string name="ignore_add">Lägg till \'%1$s\' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
+    <string name="ignore_remove">Ta bort \'%1$s\' från ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
     <string name="map_select_download_region">Välj nedladdningsområde</string>
     <string name="map_tile_download_estimate">Kartdelar estimat:</string>
     <string name="map_start_download">Starta Hämtning</string>
@@ -295,6 +295,8 @@
     <string name="map_purge_fail">SQL-cache rensning misslyckades, se logcat för detaljer</string>
     <string name="map_cache_manager">Cache-hanterare</string>
     <string name="map_download_complete">Nedladdningen slutförd!</string>
+    <string name="map_download_errors">Nedladdning slutförd med %1$d fel</string>
+    <string name="map_cache_tiles">%1$d kartdelar</string>
     <string name="map_subDescription">bäring: %1$d° distans: %2$s</string>
     <string name="waypoint_edit">Redigera vägpunkt</string>
     <string name="waypoint_delete">Radera vägpunkt?</string>
@@ -380,8 +382,8 @@
     <string name="favorite">Favorit</string>
     <string name="add_favorite">Lägg till i favoriter</string>
     <string name="remove_favorite">Ta bort från Favoriter</string>
-    <string name="favorite_add">Lägg till '%1$s' som en favoritnod?</string>
-    <string name="favorite_remove">Ta bort '%1$s' som en favoritnod?</string>
+    <string name="favorite_add">Lägg till \'%1$s\' som en favoritnod?</string>
+    <string name="favorite_remove">Ta bort \'%1$s\' som en favoritnod?</string>
     <string name="power_metrics_log">Logg över strömvärden</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -819,6 +821,7 @@
     <string name="notification_permissions_description">Meshtastic använder aviseringar för att hålla dig uppdaterad om nya meddelanden och andra viktiga händelser. Du kan uppdatera dina aviseringsbehörigheter när som helst från inställningar.</string>
     <string name="next">Nästa</string>
     <string name="grant_permissions">Ge behörigheter</string>
+    <string name="nodes_queued_for_deletion">%1$d noder köade för radering:</string>
     <string name="clean_node_database_description">Varning: Detta tar bort noder från både appen och enhetens databaser.\nMarkeringar är inklusive.</string>
     <string name="connecting_to_device">Ansluter till enhet</string>
     <string name="map_type_normal">Normal</string>
@@ -864,6 +867,7 @@
     <string name="eight_hours">8 timmar</string>
     <string name="one_day">24 timmar</string>
     <string name="two_days">48 timmar</string>
+    <string name="last_heard_filter_label">Filtrera på senaste kontakt: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Saknar applikation för att hantera länken.</string>
     <string name="system_settings">Systeminställningar</string>
@@ -872,4 +876,5 @@
     <string name="analytics_platforms">"Analysplattformar: "</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
+    <string name="relayed_by">Vidaresänt av: %1$s</string>
 </resources>
