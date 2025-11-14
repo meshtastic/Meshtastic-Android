@@ -263,8 +263,8 @@
     <string name="error">Ошибка</string>
     <string name="ignore">Игнорировать</string>
     <string name="remove_ignored">Удалить из игнорируемых</string>
-    <string name="ignore_add">Добавить '%1$s' в список игнорируемых?</string>
-    <string name="ignore_remove">Удалить '%1$s' из списка игнорируемых?</string>
+    <string name="ignore_add">Добавить \'%1$s\' в список игнорируемых?</string>
+    <string name="ignore_remove">Удалить \'%1$s\' из списка игнорируемых?</string>
     <string name="map_select_download_region">Выберите регион загрузки</string>
     <string name="map_tile_download_estimate">Предполагаемое время загрузки файла:</string>
     <string name="map_start_download">Начать скачивание</string>
@@ -284,6 +284,8 @@
     <string name="map_purge_fail">Ошибка очистки кэша SQL, подробности в logcat</string>
     <string name="map_cache_manager">Менеджер кэша</string>
     <string name="map_download_complete">Скачивание завершено!</string>
+    <string name="map_download_errors">Скачивание завершено с %1$d ошибок</string>
+    <string name="map_cache_tiles">%1$d файла</string>
     <string name="map_subDescription">курс: %1$d° расстояние: %2$s</string>
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_delete">Удалить путевую точку?</string>
@@ -363,8 +365,8 @@
     <string name="favorite">Избранное</string>
     <string name="add_favorite">Добавить в избранные</string>
     <string name="remove_favorite">Убрать из избранных</string>
-    <string name="favorite_add">Добавить '%1$s' как избранный узел?</string>
-    <string name="favorite_remove">Удалить '%1$s' как избранный узел?</string>
+    <string name="favorite_add">Добавить \'%1$s\' как избранный узел?</string>
+    <string name="favorite_remove">Удалить \'%1$s\' как избранный узел?</string>
     <string name="power_metrics_log">Журнал энергопотребления</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
@@ -816,6 +818,7 @@
     <string name="notification_permissions_description">Meshtastic использует уведомления, чтобы держать вас в курсе новых сообщений и других важных событий. Вы можете обновить разрешения уведомлений в любое время из настроек.</string>
     <string name="next">Далее</string>
     <string name="grant_permissions">Предоставить разрешения</string>
+    <string name="nodes_queued_for_deletion">%1$d узлов в очереди для удаления:</string>
     <string name="clean_node_database_description">Осторожно: Это удаляет узлы из базы данных в приложении и устройства.\nВыбор является совокупным</string>
     <string name="connecting_to_device">Подключение к устройству</string>
     <string name="map_type_normal">Обычный</string>
