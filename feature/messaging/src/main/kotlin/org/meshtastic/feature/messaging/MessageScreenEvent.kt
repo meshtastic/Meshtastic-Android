@@ -30,8 +30,8 @@ internal sealed interface MessageScreenEvent {
     /** Delete one or more selected messages. */
     data class DeleteMessages(val ids: List<Long>) : MessageScreenEvent
 
-    /** Mark messages up to a certain ID as read. */
-    data class ClearUnreadCount(val lastReadMessageId: Long) : MessageScreenEvent
+    /** Mark messages up to a certain message as read. */
+    data class ClearUnreadCount(val messageUuid: Long, val lastReadTimestamp: Long) : MessageScreenEvent
 
     /** Handle an action from a node's context menu. */
     data class NodeDetails(val node: Node) : MessageScreenEvent
