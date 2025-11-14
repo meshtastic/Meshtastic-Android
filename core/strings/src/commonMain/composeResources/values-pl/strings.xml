@@ -191,6 +191,8 @@
     <string name="map_purge_fail">Usuwanie pamięci podręcznej SQL nie powiodło się, zobacz logcat</string>
     <string name="map_cache_manager">Zarządzanie pamięcią podręczną</string>
     <string name="map_download_complete">Pobieranie ukończone!</string>
+    <string name="map_download_errors">Pobieranie zakończone z %1$d błędami</string>
+    <string name="map_cache_tiles">%1$d mapy</string>
     <string name="map_subDescription">kierunek: %1$d° odległość: %2$s</string>
     <string name="waypoint_edit">Edytuj punkt nawigacji</string>
     <string name="waypoint_delete">Usuń punkt nawigacji?</string>
