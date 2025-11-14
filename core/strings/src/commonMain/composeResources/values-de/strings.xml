@@ -278,8 +278,8 @@
     <string name="error">Fehler</string>
     <string name="ignore">Ignorieren</string>
     <string name="remove_ignored">Aus Ignorierliste entfernen</string>
-    <string name="ignore_add">'%1$s' zur Ignorieren-Liste hinzufügen?</string>
-    <string name="ignore_remove">'%1$s' von der Ignorieren-Liste entfernen?</string>
+    <string name="ignore_add">\'%1$s\' zur Ignorieren-Liste hinzufügen?</string>
+    <string name="ignore_remove">\'%1$s\' von der Ignorieren-Liste entfernen?</string>
     <string name="map_select_download_region">Region zum Herunterladen auswählen</string>
     <string name="map_tile_download_estimate">Herunterladen der Kacheln (Schätzung):</string>
     <string name="map_start_download">Herunterladen starten</string>
@@ -299,6 +299,8 @@
     <string name="map_purge_fail">Das Säubern des SQL-Zwischenspeichers ist fehlgeschlagen, siehe Logcat für Details</string>
     <string name="map_cache_manager">Zwischenspeicher-Verwaltung</string>
     <string name="map_download_complete">Herunterladen abgeschlossen!</string>
+    <string name="map_download_errors">Herunterladen abgeschlossen mit %1$d Fehlern</string>
+    <string name="map_cache_tiles">%1$d Kacheln</string>
     <string name="map_subDescription">Richtung: %1$d° Entfernung: %2$s</string>
     <string name="waypoint_edit">Wegpunkt bearbeiten</string>
     <string name="waypoint_delete">Wegpunkt löschen?</string>
@@ -384,8 +386,8 @@
     <string name="favorite">Favorit</string>
     <string name="add_favorite">Zu Favoriten hinzufügen</string>
     <string name="remove_favorite">Von Favoriten entfernen</string>
-    <string name="favorite_add">'%1$s' als Favorit hinzufügen?</string>
-    <string name="favorite_remove">'%1$s' als Favorit entfernen?</string>
+    <string name="favorite_add">\'%1$s\' als Favorit hinzufügen?</string>
+    <string name="favorite_remove">\'%1$s\' als Favorit entfernen?</string>
     <string name="power_metrics_log">Energiedatenprotokoll</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -849,6 +851,7 @@
     <string name="notification_permissions_description">Meshtastic nutzt Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
     <string name="grant_permissions">Berechtigungen erteilen</string>
+    <string name="nodes_queued_for_deletion">%1$d Knoten in der Warteschlange zum Löschen:</string>
     <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
     <string name="connecting_to_device">Verbinde mit Gerät</string>
     <string name="map_type_normal">Normal</string>
