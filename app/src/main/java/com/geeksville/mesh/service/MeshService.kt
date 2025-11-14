@@ -830,6 +830,7 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
+                        Timber.d("Received WAYPOINT_APP from $fromId")
                         val u = MeshProtos.Waypoint.parseFrom(data.payload)
                         // Validate locked Waypoints from the original sender
                         if (u.lockedTo != 0 && u.lockedTo != packet.from) return
@@ -837,6 +838,7 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.POSITION_APP_VALUE -> {
+                        Timber.d("Received POSITION_APP from $fromId")
                         val u = MeshProtos.Position.parseFrom(data.payload)
                         // Timber.d("position_app ${packet.from} ${u.toOneLineString()}")
                         if (data.wantResponse && u.latitudeI == 0 && u.longitudeI == 0) {
@@ -848,6 +850,7 @@ class MeshService : Service() {
 
                     Portnums.PortNum.NODEINFO_APP_VALUE ->
                         if (!fromUs) {
+                            Timber.d("Received NODEINFO_APP from $fromId")
                             val u =
                                 MeshProtos.User.parseFrom(data.payload).copy {
                                     if (isLicensed) clearPublicKey()
@@ -858,6 +861,7 @@ class MeshService : Service() {
 
                     // Handle new telemetry info
                     Portnums.PortNum.TELEMETRY_APP_VALUE -> {
+                        Timber.d("Received TELEMETRY_APP from $fromId")
                         val u =
                             TelemetryProtos.Telemetry.parseFrom(data.payload).copy {
                                 if (time == 0) time = (dataPacket.time / 1000L).toInt()
@@ -1466,6 +1470,7 @@ class MeshService : Service() {
         }
 
         fun startDisconnect() {
+            Timber.d("Starting disconnect")
             packetHandler.stopPacketQueue()
             stopLocationRequests()
             stopMqttClientProxy()
@@ -1478,6 +1483,7 @@ class MeshService : Service() {
         }
 
         fun startConnect() {
+            Timber.d("Starting connect")
             historyLog {
                 val address = meshPrefs.deviceAddress ?: "null"
                 "onReconnect transport=${currentTransport()} node=$address"
@@ -1585,7 +1591,7 @@ class MeshService : Service() {
                     handleClientNotification(proto.clientNotification)
                 }
 
-                PayloadVariantCase.LOG_RECORD -> { proto: MeshProtos.FromRadio -> handleLogReord(proto.logRecord) }
+                PayloadVariantCase.LOG_RECORD -> { proto: MeshProtos.FromRadio -> handleLogRecord(proto.logRecord) }
 
                 PayloadVariantCase.REBOOTED -> { proto: MeshProtos.FromRadio -> handleRebooted(proto.rebooted) }
                 PayloadVariantCase.XMODEMPACKET -> { proto: MeshProtos.FromRadio ->
@@ -1594,9 +1600,7 @@ class MeshService : Service() {
 
                 // Explicitly handle default/unwanted cases to satisfy the exhaustive `when`
                 PayloadVariantCase.PAYLOADVARIANT_NOT_SET -> { proto ->
-                    Timber.e("Unexpected or unrecognized FromRadio variant: ${proto.payloadVariantCase}")
-                    // Additional debug: log raw bytes if possible (can't access bytes here) and full proto
-                    Timber.d("Full FromRadio proto: $proto")
+                    Timber.d("Received variant PayloadVariantUnset: Full FromRadio proto: ${proto.toPIIString()}")
                 }
             }
         }
@@ -1607,17 +1611,32 @@ class MeshService : Service() {
     }
 
     private fun onReceiveFromRadio(bytes: ByteArray) {
-        try {
-            val proto = MeshProtos.FromRadio.parseFrom(bytes)
-            if (proto.payloadVariantCase == PayloadVariantCase.PAYLOADVARIANT_NOT_SET) {
-                val formattedBytes = bytes.joinToString(",") { byte -> String.format(Locale.US, "0x%02x", byte) }
-                Timber.w("Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=$formattedBytes proto=$proto")
+        runCatching { MeshProtos.FromRadio.parseFrom(bytes) }
+            .onSuccess { proto ->
+                if (proto.payloadVariantCase == PayloadVariantCase.PAYLOADVARIANT_NOT_SET) {
+                    Timber.w(
+                        "Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=${bytes.toHexString()} proto=$proto",
+                    )
+                }
+                proto.route()
             }
-            proto.route()
-        } catch (ex: InvalidProtocolBufferException) {
-            Timber.e("Invalid Protobuf from radio, len=${bytes.size}", ex)
-        }
+            .onFailure { primaryException ->
+                runCatching {
+                    val logRecord = MeshProtos.LogRecord.parseFrom(bytes)
+                    handleLogRecord(logRecord)
+                }
+                    .onFailure { _ ->
+                        Timber.e(
+                            primaryException,
+                            "Failed to parse radio packet (len=${bytes.size} contents=${bytes.toHexString()}). " +
+                                "Not a valid FromRadio or LogRecord.",
+                        )
+                    }
+            }
     }
+
+    /** Extension function to convert a ByteArray to a hex string for logging. Example output: "0x0a,0x1f,0x..." */
+    private fun ByteArray.toHexString(): String = this.joinToString(",") { byte -> String.format(Locale.US, "0x%02x", byte) }
 
     // A provisional MyNodeInfo that we will install if all of our node config downloads go okay
     private var newMyNodeInfo: MyNodeEntity? = null
@@ -1852,6 +1871,15 @@ class MeshService : Service() {
         // if the future for the originating request is still in the queue, complete as unsuccessful
         // for now
         packetHandler.removeResponse(notification.replyId, complete = false)
+        val packetToSave =
+            MeshLog(
+                uuid = UUID.randomUUID().toString(),
+                message_type = "ClientNotification",
+                received_date = System.currentTimeMillis(),
+                raw_message = notification.toString(),
+                fromRadio = fromRadio { this.clientNotification = notification },
+            )
+        insertMeshLog(packetToSave)
     }
 
     private fun handleFileInfo(fileInfo: MeshProtos.FileInfo) {
@@ -1867,7 +1895,7 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
     }
 
-    private fun handleLogReord(logRecord: MeshProtos.LogRecord) {
+    private fun handleLogRecord(logRecord: MeshProtos.LogRecord) {
         Timber.d("Received logRecord ${logRecord.toOneLineString()}")
         val packetToSave =
             MeshLog(
