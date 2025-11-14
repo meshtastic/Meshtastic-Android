@@ -20,6 +20,16 @@ package org.meshtastic.feature.map.maplibre
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,6 +57,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FloatingActionButton
 import org.maplibre.android.MapLibre
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapView
@@ -79,14 +98,21 @@ import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.expressions.Expression.*
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import kotlin.math.cos
+import kotlin.math.sin
  
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.proto.MeshProtos.Waypoint
 import timber.log.Timber
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.feature.map.component.MapButton
+ 
 import org.maplibre.android.style.layers.BackgroundLayer
+import org.maplibre.android.style.layers.PropertyFactory.textMaxWidth
+import org.maplibre.geojson.Point
 
 private const val DEG_D = 1e-7
 
@@ -104,6 +130,8 @@ private const val CLUSTER_COUNT_LAYER_ID = "meshtastic-cluster-count-layer"
 private const val WAYPOINTS_LAYER_ID = "meshtastic-waypoints-layer"
 private const val TRACKS_LAYER_ID = "meshtastic-tracks-layer"
 private const val OSM_LAYER_ID = "osm-layer"
+private const val CLUSTER_RADIAL_MAX = 8
+private const val CLUSTER_LIST_FETCH_MAX = 200L
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -117,6 +145,15 @@ fun MapLibrePOC(
     var selectedInfo by remember { mutableStateOf<String?>(null) }
     var selectedNodeNum by remember { mutableStateOf<Int?>(null) }
     val ourNode by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
+    var recenterRequest by remember { mutableStateOf(false) }
+    var followBearing by remember { mutableStateOf(false) }
+    data class ExpandedCluster(val centerPx: android.graphics.PointF, val members: List<Node>)
+    var expandedCluster by remember { mutableStateOf<ExpandedCluster?>(null) }
+    var clusterListMembers by remember { mutableStateOf<List<Node>?>(null) }
+    var mapRef by remember { mutableStateOf<MapLibreMap?>(null) }
+    var didInitialCenter by remember { mutableStateOf(false) }
+    var showLegend by remember { mutableStateOf(false) }
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle()
@@ -129,6 +166,7 @@ fun MapLibrePOC(
                 Timber.tag("MapLibrePOC").d("Creating MapView + initializing MapLibre")
                 MapView(context).apply {
                     getMapAsync { map ->
+                        mapRef = map
                         Timber.tag("MapLibrePOC").d("getMapAsync() map acquired, setting style...")
                         map.setStyle(STYLE_URL) { style ->
                             Timber.tag("MapLibrePOC").d("Style loaded: %s", STYLE_URL)
@@ -140,7 +178,7 @@ fun MapLibrePOC(
                                 val labelSet =
                                     run {
                                         val visible =
-                                            nodes.filter { n ->
+                                            applyNodeFilters(nodes, mapFilterState).filter { n ->
                                                 val p = n.validPosition ?: return@filter false
                                                 bounds.contains(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
                                             }
@@ -166,11 +204,11 @@ fun MapLibrePOC(
                                         chosen
                                     }
                                 (style.getSource(NODES_SOURCE_ID) as? GeoJsonSource)
-                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(nodes, labelSet))
+                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(applyNodeFilters(nodes, mapFilterState), labelSet))
                                 (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
                                     ?.setGeoJson(waypointsToFeatureCollectionJson(waypoints.values))
                                 (style.getSource(TRACKS_SOURCE_ID) as? GeoJsonSource)
-                                    ?.setGeoJson(oneTrackFromNodesJson(nodes))
+                                    ?.setGeoJson(oneTrackFromNodesJson(applyNodeFilters(nodes, mapFilterState)))
                                 Timber.tag("MapLibrePOC").d(
                                     "Initial data set after style load. nodes=%d waypoints=%d",
                                     nodes.size,
@@ -196,7 +234,36 @@ fun MapLibrePOC(
                                 // ignore
                                 Timber.tag("MapLibrePOC").w("Location component not enabled (likely missing permissions)")
                             }
+                            // Initial center on user's device location if available, else our node
+                            if (!didInitialCenter) {
+                                try {
+                                    val loc = map.locationComponent.lastKnownLocation
+                                    if (loc != null) {
+                                        map.animateCamera(
+                                            CameraUpdateFactory.newLatLngZoom(
+                                                LatLng(loc.latitude, loc.longitude),
+                                                12.0,
+                                            ),
+                                        )
+                                        didInitialCenter = true
+                                    } else {
+                                        ourNode?.validPosition?.let { p ->
+                                            map.animateCamera(
+                                                CameraUpdateFactory.newLatLngZoom(
+                                                    LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                                    12.0,
+                                                ),
+                                            )
+                                            didInitialCenter = true
+                                        }
+                                    }
+                                } catch (_: Throwable) {
+                                }
+                            }
                             map.addOnMapClickListener { latLng ->
+                                // Any tap on the map clears overlays unless replaced below
+                                expandedCluster = null
+                                clusterListMembers = null
                                 val screenPoint = map.projection.toScreenLocation(latLng)
                                 // Use a small hitbox to improve taps on small circles
                                 val r = (24 * context.resources.displayMetrics.density)
@@ -209,10 +276,41 @@ fun MapLibrePOC(
                                 val features = map.queryRenderedFeatures(rect, CLUSTER_CIRCLE_LAYER_ID, NODES_LAYER_ID, WAYPOINTS_LAYER_ID)
                                 Timber.tag("MapLibrePOC").d("Map click at (%.5f, %.5f) -> %d features", latLng.latitude, latLng.longitude, features.size)
                                 val f = features.firstOrNull()
-                                // If cluster tapped, zoom in a bit
+                                // If cluster tapped, expand using true cluster leaves from the source
                                 if (f != null && f.hasProperty("point_count")) {
-                                    map.animateCamera(CameraUpdateFactory.zoomIn())
-                                    return@addOnMapClickListener true
+                                    val pointCount = f.getNumberProperty("point_count")?.toInt() ?: 0
+                                    val limit = kotlin.math.min(CLUSTER_LIST_FETCH_MAX, pointCount.toLong())
+                                    val src = (map.style?.getSource(NODES_SOURCE_ID) as? GeoJsonSource)
+                                    if (src != null) {
+                                        val fc = src.getClusterLeaves(f, limit, 0L)
+                                        val nums =
+                                            fc.features()?.mapNotNull { feat ->
+                                                try {
+                                                    feat.getNumberProperty("num")?.toInt()
+                                                } catch (_: Throwable) {
+                                                    null
+                                                }
+                                            } ?: emptyList()
+                                        val members = nodes.filter { nums.contains(it.num) }
+                                        if (members.isNotEmpty()) {
+                                            // Center the radial overlay on the actual cluster point (not the raw click)
+                                            val clusterCenter =
+                                                (f.geometry() as? Point)?.let { p ->
+                                                    map.projection.toScreenLocation(LatLng(p.latitude(), p.longitude()))
+                                                } ?: screenPoint
+                                            if (pointCount > CLUSTER_RADIAL_MAX) {
+                                                // Show list for large clusters
+                                                clusterListMembers = members
+                                            } else {
+                                                // Show radial overlay for small clusters
+                                                expandedCluster = ExpandedCluster(clusterCenter, members.take(CLUSTER_RADIAL_MAX))
+                                            }
+                                        }
+                                        return@addOnMapClickListener true
+                                    } else {
+                                        map.animateCamera(CameraUpdateFactory.zoomIn())
+                                        return@addOnMapClickListener true
+                                    }
                                 }
                                 selectedInfo =
                                     f?.let {
@@ -257,9 +355,16 @@ fun MapLibrePOC(
                                 )
                                 // Compute which nodes get labels in viewport and update source
                                 val density = context.resources.displayMetrics.density
-                                val labelSet = selectLabelsForViewport(map, nodes, density)
+                                val labelSet = selectLabelsForViewport(map, applyNodeFilters(nodes, mapFilterState), density)
                                 (style.getSource(NODES_SOURCE_ID) as? GeoJsonSource)
-                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(nodes, labelSet))
+                                    ?.setGeoJson(nodesToFeatureCollectionJsonWithSelection(applyNodeFilters(nodes, mapFilterState), labelSet))
+                            }
+                            // Hide expanded cluster overlay whenever camera moves to avoid stale screen positions
+                            map.addOnCameraMoveListener {
+                                if (expandedCluster != null || clusterListMembers != null) {
+                                    expandedCluster = null
+                                    clusterListMembers = null
+                                }
                             }
                         }
                     }
@@ -271,6 +376,18 @@ fun MapLibrePOC(
                     if (style == null) {
                         Timber.tag("MapLibrePOC").w("Style not yet available in update()")
                         return@getMapAsync
+                    }
+                    // Apply bearing render mode toggle
+                    try {
+                        map.locationComponent.renderMode = if (followBearing) RenderMode.COMPASS else RenderMode.NORMAL
+                    } catch (_: Throwable) { /* ignore */ }
+                    // Handle recenter requests
+                    if (recenterRequest) {
+                        recenterRequest = false
+                        ourNode?.validPosition?.let { p ->
+                            val ll = LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D)
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(ll, 14.5))
+                        }
                     }
                     Timber.tag("MapLibrePOC").d(
                         "Updating sources. nodes=%d, waypoints=%d",
@@ -349,9 +466,172 @@ fun MapLibrePOC(
             }
         }
 
+        // Role legend (based on roles present in current nodes)
+        val rolesPresent = remember(nodes) { nodes.map { it.user.role }.toSet() }
+        if (showLegend && rolesPresent.isNotEmpty()) {
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(12.dp),
+                tonalElevation = 4.dp,
+                shadowElevation = 4.dp,
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    rolesPresent.take(6).forEach { role ->
+                        val fakeNode = Node(num = 0, user = org.meshtastic.proto.MeshProtos.User.newBuilder().setRole(role).build())
+                        Row(
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Surface(shape = CircleShape, color = roleColor(fakeNode), modifier = Modifier.size(12.dp)) {}
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = role.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Map controls: recenter/follow and filter menu
+        var mapFilterExpanded by remember { mutableStateOf(false) }
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 16.dp, end = 16.dp),
+        ) {
+            MapButton(
+                onClick = { recenterRequest = true },
+                icon = Icons.Outlined.MyLocation,
+                contentDescription = null,
+            )
+            MapButton(
+                onClick = { followBearing = !followBearing },
+                icon = Icons.Outlined.Explore,
+                contentDescription = null,
+            )
+            Box {
+                MapButton(
+                    onClick = { mapFilterExpanded = true },
+                    icon = Icons.Outlined.Tune,
+                    contentDescription = null,
+                )
+                DropdownMenu(expanded = mapFilterExpanded, onDismissRequest = { mapFilterExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Only favorites") },
+                        onClick = { mapViewModel.toggleOnlyFavorites(); mapFilterExpanded = false },
+                        trailingIcon = { Checkbox(checked = mapFilterState.onlyFavorites, onCheckedChange = { mapViewModel.toggleOnlyFavorites() }) },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Show precision circle") },
+                        onClick = { mapViewModel.toggleShowPrecisionCircleOnMap(); mapFilterExpanded = false },
+                        trailingIcon = { Checkbox(checked = mapFilterState.showPrecisionCircle, onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() }) },
+                    )
+                }
+            }
+            MapButton(
+                onClick = { showLegend = !showLegend },
+                icon = Icons.Outlined.Info,
+                contentDescription = null,
+            )
+        }
+
+        // Expanded cluster radial overlay
+        expandedCluster?.let { ec ->
+            val d = context.resources.displayMetrics.density
+            val centerX = (ec.centerPx.x / d).dp
+            val centerY = (ec.centerPx.y / d).dp
+            val radiusPx = 72f * d
+            val itemSize = 40.dp
+            val n = ec.members.size.coerceAtLeast(1)
+            ec.members.forEachIndexed { idx, node ->
+                val theta = (2.0 * Math.PI * idx / n)
+                val x = (ec.centerPx.x + (radiusPx * kotlin.math.cos(theta))).toFloat()
+                val y = (ec.centerPx.y + (radiusPx * kotlin.math.sin(theta))).toFloat()
+                val xDp = (x / d).dp
+                val yDp = (y / d).dp
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .offset(x = xDp - itemSize / 2, y = yDp - itemSize / 2)
+                        .size(itemSize)
+                        .clickable {
+                            selectedNodeNum = node.num
+                            expandedCluster = null
+                            node.validPosition?.let { p ->
+                                mapRef?.animateCamera(
+                                    CameraUpdateFactory.newLatLngZoom(
+                                        LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                        15.0,
+                                    ),
+                                )
+                            }
+                        },
+                    shape = CircleShape,
+                    color = roleColor(node),
+                    shadowElevation = 6.dp,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(text = (protoShortName(node) ?: shortNameFallback(node)).take(4), color = Color.White, maxLines = 1)
+                    }
+                }
+            }
+        }
+
         // Bottom sheet with node details and actions
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val selectedNode = selectedNodeNum?.let { num -> nodes.firstOrNull { it.num == num } }
+        // Cluster list bottom sheet (for large clusters)
+        clusterListMembers?.let { members ->
+            ModalBottomSheet(
+                onDismissRequest = { clusterListMembers = null },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(text = "Cluster items (${members.size})", style = MaterialTheme.typography.titleMedium)
+                    LazyColumn {
+                        items(members) { node ->
+                            Row(
+                                modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp)
+                                    .clickable {
+                                        selectedNodeNum = node.num
+                                        clusterListMembers = null
+                                        node.validPosition?.let { p ->
+                                            mapRef?.animateCamera(
+                                                CameraUpdateFactory.newLatLngZoom(
+                                                    LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                                    15.0,
+                                                ),
+                                            )
+                                        }
+                                    },
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                NodeChip(node = node, onClick = {
+                                    selectedNodeNum = node.num
+                                    clusterListMembers = null
+                                    node.validPosition?.let { p ->
+                                        mapRef?.animateCamera(
+                                            CameraUpdateFactory.newLatLngZoom(
+                                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                                15.0,
+                                            ),
+                                        )
+                                    }
+                                })
+                                Spacer(modifier = Modifier.width(12.dp))
+                                val longName = node.user.longName
+                                if (!longName.isNullOrBlank()) {
+                                    Text(text = longName, style = MaterialTheme.typography.bodyLarge)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if (selectedNode != null) {
             ModalBottomSheet(
                 onDismissRequest = { selectedNodeNum = null },
@@ -359,19 +639,27 @@ fun MapLibrePOC(
             ) {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     NodeChip(node = selectedNode)
-                    val lastHeard = selectedNode.lastHeard
+                    val longName = selectedNode.user.longName
+                    if (!longName.isNullOrBlank()) {
+                        Text(
+                            text = longName,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
+                    val lastHeardAgo = formatSecondsAgo(selectedNode.lastHeard)
                     val coords = selectedNode.gpsString()
-                    Text(text = "Last heard: $lastHeard s ago")
+                    Text(text = "Last heard: $lastHeardAgo", modifier = Modifier.padding(top = 8.dp))
                     Text(text = "Coordinates: $coords")
-                    // Quick actions (placeholder)
-                    Button(
-                        onClick = {
+                    val km = ourNode?.let { me -> distanceKmBetween(me, selectedNode) }
+                    if (km != null) Text(text = "Distance: ${"%.1f".format(km)} km")
+                    Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+                        Button(onClick = {
                             onNavigateToNodeDetails(selectedNode.num)
                             selectedNodeNum = null
-                        },
-                        modifier = Modifier.padding(top = 12.dp),
-                    ) {
-                        Text("View full node")
+                        }) {
+                            Text("View full node")
+                        }
                     }
                 }
             }
@@ -458,7 +746,7 @@ private fun ensureSourcesAndLayers(style: Style) {
     if (style.getLayer(NODES_LAYER_ID) == null) {
         val layer =
             CircleLayer(NODES_LAYER_ID, NODES_SOURCE_ID)
-                .withProperties(circleColor("#1565C0"), circleRadius(6f))
+                .withProperties(circleColor(get("color")), circleRadius(6f))
                 .withFilter(not(has("point_count")))
         style.addLayer(layer)
         Timber.tag("MapLibrePOC").d("Added nodes CircleLayer")
@@ -477,12 +765,13 @@ private fun ensureSourcesAndLayers(style: Style) {
                         interpolate(
                             linear(),
                             zoom(),
-                            stop(8, 10f),
-                            stop(12, 12f),
-                            stop(15, 14f),
+                            stop(8, 9f),
+                            stop(12, 11f),
+                            stop(15, 13f),
                             stop(18, 16f),
                         ),
                     ),
+                    textMaxWidth(4f),
                     // At close zooms, prefer showing all labels even if they overlap
                     textAllowOverlap(
                         step(
@@ -524,15 +813,21 @@ private fun ensureSourcesAndLayers(style: Style) {
     Timber.tag("MapLibrePOC").d("ensureSourcesAndLayers() end. Layers=%d, Sources=%d", style.layers.size, style.sources.size)
 }
 
+private fun applyNodeFilters(all: List<Node>, filter: BaseMapViewModel.MapFilterState): List<Node> {
+    return if (filter.onlyFavorites) all.filter { it.isFavorite } else all
+}
+
 private fun nodesToFeatureCollectionJson(nodes: List<Node>): String {
     val features =
         nodes.mapNotNull { node ->
             val pos = node.validPosition ?: return@mapNotNull null
             val lat = pos.latitudeI * DEG_D
             val lon = pos.longitudeI * DEG_D
-            val short = protoShortName(node) ?: shortNameFallback(node)
+            val short = (protoShortName(node) ?: shortNameFallback(node)).take(4)
+            val role = node.user.role.name
+            val color = roleColorHex(node)
             // Default showLabel=0; it will be turned on for selected nodes by viewport selection
-            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"${node.user.longName}","short":"$short","showLabel":0}}"""
+            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"${node.user.longName}","short":"$short","role":"$role","color":"$color","showLabel":0}}"""
         }
     return """{"type":"FeatureCollection","features":[${features.joinToString(",")}]}"""
 }
@@ -543,9 +838,11 @@ private fun nodesToFeatureCollectionJsonWithSelection(nodes: List<Node>, labelNu
             val pos = node.validPosition ?: return@mapNotNull null
             val lat = pos.latitudeI * DEG_D
             val lon = pos.longitudeI * DEG_D
-            val short = protoShortName(node) ?: shortNameFallback(node)
+            val short = (protoShortName(node) ?: shortNameFallback(node)).take(4)
             val show = if (labelNums.contains(node.num)) 1 else 0
-            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"${node.user.longName}","short":"$short","showLabel":$show}}"""
+            val role = node.user.role.name
+            val color = roleColorHex(node)
+            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"${node.user.longName}","short":"$short","role":"$role","color":"$color","showLabel":$show}}"""
         }
     return """{"type":"FeatureCollection","features":[${features.joinToString(",")}]}"""
 }
@@ -634,5 +931,60 @@ private fun selectLabelsForViewport(map: MapLibreMap, nodes: List<Node>, density
     }
     return chosen
 }
+
+// Human friendly "x min ago" from epoch seconds
+private fun formatSecondsAgo(lastHeardEpochSeconds: Int): String {
+    val now = System.currentTimeMillis() / 1000
+    val delta = (now - lastHeardEpochSeconds).coerceAtLeast(0)
+    val minutes = delta / 60
+    val hours = minutes / 60
+    val days = hours / 24
+    return when {
+        delta < 60 -> "$delta s ago"
+        minutes < 60 -> "$minutes min ago"
+        hours < 24 -> "$hours h ago"
+        else -> "$days d ago"
+    }
+}
+
+// Simple haversine distance between two nodes in kilometers
+private fun distanceKmBetween(a: Node, b: Node): Double? {
+    val pa = a.validPosition ?: return null
+    val pb = b.validPosition ?: return null
+    val lat1 = pa.latitudeI * DEG_D
+    val lon1 = pa.longitudeI * DEG_D
+    val lat2 = pb.latitudeI * DEG_D
+    val lon2 = pb.longitudeI * DEG_D
+    val R = 6371.0 // km
+    val dLat = Math.toRadians(lat2 - lat1)
+    val dLon = Math.toRadians(lon2 - lon1)
+    val s1 = kotlin.math.sin(dLat / 2)
+    val s2 = kotlin.math.sin(dLon / 2)
+    val aTerm = s1 * s1 + kotlin.math.cos(Math.toRadians(lat1)) * kotlin.math.cos(Math.toRadians(lat2)) * s2 * s2
+    val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(aTerm), kotlin.math.sqrt(1 - aTerm))
+    return R * c
+}
+
+// Role -> hex color used for map dots and radial overlay
+private fun roleColorHex(node: Node): String {
+    return when (node.user.role) {
+        ConfigProtos.Config.DeviceConfig.Role.ROUTER -> "#616161" // gray
+        ConfigProtos.Config.DeviceConfig.Role.ROUTER_CLIENT -> "#00897B" // teal
+        ConfigProtos.Config.DeviceConfig.Role.REPEATER -> "#EF6C00" // orange
+        ConfigProtos.Config.DeviceConfig.Role.TRACKER -> "#8E24AA" // purple
+        ConfigProtos.Config.DeviceConfig.Role.SENSOR -> "#1E88E5" // blue
+        ConfigProtos.Config.DeviceConfig.Role.TAK, ConfigProtos.Config.DeviceConfig.Role.TAK_TRACKER -> "#C62828" // red
+        ConfigProtos.Config.DeviceConfig.Role.CLIENT -> "#2E7D32" // green
+        ConfigProtos.Config.DeviceConfig.Role.CLIENT_BASE -> "#43A047" // green (lighter)
+        ConfigProtos.Config.DeviceConfig.Role.CLIENT_MUTE -> "#9E9D24" // olive
+        ConfigProtos.Config.DeviceConfig.Role.CLIENT_HIDDEN -> "#546E7A" // blue-grey
+        ConfigProtos.Config.DeviceConfig.Role.LOST_AND_FOUND -> "#AD1457" // magenta
+        ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE -> "#757575" // mid-grey
+        null,
+        ConfigProtos.Config.DeviceConfig.Role.UNRECOGNIZED -> "#2E7D32" // default green
+    }
+}
+
+private fun roleColor(node: Node): Color = Color(android.graphics.Color.parseColor(roleColorHex(node)))
 
 
