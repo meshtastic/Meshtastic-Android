@@ -124,6 +124,7 @@ import org.meshtastic.proto.telemetry
 import org.meshtastic.proto.user
 import timber.log.Timber
 import java.util.ArrayDeque
+import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -865,6 +866,7 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.ROUTING_APP_VALUE -> {
+                        Timber.d("Received ROUTING_APP from $fromId")
                         // We always send ACKs to other apps, because they might care about the
                         // messages they sent
                         shouldBroadcast = true
@@ -879,24 +881,28 @@ class MeshService : Service() {
                     }
 
                     Portnums.PortNum.ADMIN_APP_VALUE -> {
+                        Timber.d("Received ADMIN_APP from $fromId")
                         val u = AdminProtos.AdminMessage.parseFrom(data.payload)
                         handleReceivedAdmin(packet.from, u)
                         shouldBroadcast = false
                     }
 
                     Portnums.PortNum.PAXCOUNTER_APP_VALUE -> {
+                        Timber.d("Received PAXCOUNTER_APP from $fromId")
                         val p = PaxcountProtos.Paxcount.parseFrom(data.payload)
                         handleReceivedPaxcounter(packet.from, p)
                         shouldBroadcast = false
                     }
 
                     Portnums.PortNum.STORE_FORWARD_APP_VALUE -> {
+                        Timber.d("Received STORE_FORWARD_APP from $fromId")
                         val u = StoreAndForwardProtos.StoreAndForward.parseFrom(data.payload)
                         handleReceivedStoreAndForward(dataPacket, u)
                         shouldBroadcast = false
                     }
 
                     Portnums.PortNum.RANGE_TEST_APP_VALUE -> {
+                        Timber.d("Received RANGE_TEST_APP from $fromId")
                         if (!moduleConfig.rangeTest.enabled) return
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
                         rememberDataPacket(u)
@@ -927,7 +933,7 @@ class MeshService : Service() {
                         }
                     }
 
-                    else -> Timber.d("No custom processing needed for ${data.portnumValue}")
+                    else -> Timber.d("No custom processing needed for ${data.portnumValue} from $fromId")
                 }
 
                 // We always tell other apps when new data packets arrive
@@ -1604,11 +1610,8 @@ class MeshService : Service() {
         try {
             val proto = MeshProtos.FromRadio.parseFrom(bytes)
             if (proto.payloadVariantCase == PayloadVariantCase.PAYLOADVARIANT_NOT_SET) {
-                Timber.w(
-                    "Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=${bytes.joinToString(",") { b ->
-                        String.format("0x%02x", b)
-                    }} proto=$proto",
-                )
+                val formattedBytes = bytes.joinToString(",") { byte -> String.format(Locale.US, "0x%02x", byte) }
+                Timber.w("Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=$formattedBytes proto=$proto")
             }
             proto.route()
         } catch (ex: InvalidProtocolBufferException) {
@@ -1955,7 +1958,10 @@ class MeshService : Service() {
 
     private fun handleConfigComplete(configCompleteId: Int) {
         Timber.d(
-            "handleConfigComplete called with id=$configCompleteId, configOnly=$configOnlyNonce, nodeInfo=$nodeInfoNonce",
+            "handleConfigComplete id=%d configOnly=%d nodeInfo=%d",
+            configCompleteId,
+            configOnlyNonce,
+            nodeInfoNonce,
         )
         when (configCompleteId) {
             configOnlyNonce -> handleConfigOnlyComplete()
