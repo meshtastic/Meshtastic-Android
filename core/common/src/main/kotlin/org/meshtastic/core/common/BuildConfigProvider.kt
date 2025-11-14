@@ -26,3 +26,5 @@ interface BuildConfigProvider {
     val absoluteMinFwVersion: String
     val minFwVersion: String
 }
+
+const val DEFAULT_MAP_URL = "geo:0,0?q=%LAT,%LON(%SNAME)"

@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.DEFAULT_MAP_URL
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.QuickChatActionRepository
@@ -51,12 +52,13 @@ import javax.inject.Inject
 private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
 
 @HiltViewModel
+@Suppress("LongParameterList")
 class MessageViewModel
 @Inject
 constructor(
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
-    quickChatActionRepository: QuickChatActionRepository,
+    private val quickChatActionRepository: QuickChatActionRepository,
     private val serviceRepository: ServiceRepository,
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
@@ -77,6 +79,27 @@ constructor(
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
     val quickChatActions = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            val actions = quickChatActionRepository.getAllActions()
+            var isEmpty = true
+            actions.collect { list ->
+                if (isEmpty && list.isEmpty()) {
+                    // No actions exist, create default location pin with label
+                    quickChatActionRepository.upsert(
+                        org.meshtastic.core.database.entity.QuickChatAction(
+                            name = "📍",
+                            message = DEFAULT_MAP_URL,
+                            mode = org.meshtastic.core.database.entity.QuickChatAction.Mode.Append,
+                            position = 0,
+                        ),
+                    )
+                }
+                isEmpty = false
+            }
+        }
+    }
 
     private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val messagesForContactKey: StateFlow<List<Message>> =

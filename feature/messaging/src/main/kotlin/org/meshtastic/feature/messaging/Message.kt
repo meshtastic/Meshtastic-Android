@@ -20,6 +20,7 @@
 package org.meshtastic.feature.messaging
 
 import android.content.ClipData
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -129,6 +130,7 @@ import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.MeshProtos
 import java.nio.charset.StandardCharsets
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
@@ -322,10 +324,13 @@ fun MessageScreen(
                 QuickChatRow(
                     enabled = connectionState.isConnected(),
                     actions = quickChatActions,
+                    userPosition = ourNode?.validPosition,
                     onClick = { action ->
                         handleQuickChatAction(
                             action = action,
                             messageInputState = messageInputState,
+                            userPosition = ourNode?.validPosition,
+                            ourNode = ourNode,
                             onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
                         )
                     },
@@ -445,25 +450,55 @@ private fun String.ellipsize(maxLength: Int): String = if (length > maxLength) "
  *
  * @param action The [QuickChatAction] to handle.
  * @param messageInputState The [TextFieldState] of the message input field.
+ * @param userPosition Current user position (lat/lng), if available.
  * @param onSendMessage Lambda to call when a message needs to be sent.
  */
 private fun handleQuickChatAction(
     action: QuickChatAction,
     messageInputState: TextFieldState,
+    userPosition: MeshProtos.Position?,
+    ourNode: Node?,
     onSendMessage: (String) -> Unit,
 ) {
+    val hasVariables =
+        action.message.contains("%LAT", ignoreCase = true) ||
+            action.message.contains("%LON", ignoreCase = true) ||
+            action.message.contains("%SNAME", ignoreCase = true) ||
+            action.message.contains("%LNAME", ignoreCase = true)
+
+    val processedMessage =
+        if (hasVariables) {
+            var result = action.message
+            userPosition?.let {
+                val latitude = "%.7f".format(it.latitudeI * 1e-7)
+                val longitude = "%.7f".format(it.longitudeI * 1e-7)
+                result =
+                    result.replace("%LAT", latitude, ignoreCase = true).replace("%LON", longitude, ignoreCase = true)
+            }
+            ourNode?.user?.shortName?.let { shortName ->
+                result = result.replace("%SNAME", Uri.encode(shortName), ignoreCase = true)
+            }
+            ourNode?.user?.longName?.let { longName ->
+                result = result.replace("%LNAME", Uri.encode(longName), ignoreCase = true)
+            }
+            result
+        } else {
+            action.message
+        }
+
     when (action.mode) {
         QuickChatAction.Mode.Append -> {
             val originalText = messageInputState.text.toString()
             // Avoid appending if the exact message is already present (simple check)
-            if (!originalText.contains(action.message)) {
+            if (!originalText.contains(processedMessage)) {
                 val newText =
                     buildString {
                         append(originalText)
                         if (originalText.isNotEmpty() && !originalText.endsWith(' ')) {
                             append(' ')
                         }
-                        append(action.message)
+                        append(processedMessage)
+                        append(' ') // Always add trailing space for link separation
                     }
                         .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
                 messageInputState.setTextAndPlaceCursorAtEnd(newText)
@@ -472,7 +507,7 @@ private fun handleQuickChatAction(
 
         QuickChatAction.Mode.Instant -> {
             // Byte limit for 'Send' mode messages is handled by the backend/transport layer.
-            onSendMessage(action.message)
+            onSendMessage(processedMessage)
         }
     }
 }
@@ -703,6 +738,7 @@ private fun OverFlowMenu(
  *
  * @param enabled Whether the buttons should be enabled.
  * @param actions The list of [QuickChatAction]s to display.
+ * @param userPosition Current user position, used to determine if location-based actions can be enabled.
  * @param onClick Callback when a quick chat button is clicked.
  */
 @Composable
@@ -710,6 +746,7 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
+    userPosition: MeshProtos.Position?,
     onClick: (QuickChatAction) -> Unit,
 ) {
     val alertActionMessage = stringResource(Res.string.alert_bell_text)
@@ -727,8 +764,11 @@ private fun QuickChatRow(
     val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
 
     LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(allActions, key = { it.uuid }) { action ->
-            Button(onClick = { onClick(action) }, enabled = enabled) { Text(text = action.name) }
+        items(allActions, key = { it.position }) { action ->
+            val requiresPosition =
+                action.message.contains("%LAT", ignoreCase = true) || action.message.contains("%LON", ignoreCase = true)
+            val isEnabled = enabled && (!requiresPosition || userPosition != null)
+            Button(onClick = { onClick(action) }, enabled = isEnabled) { Text(text = action.name) }
         }
     }
 }
