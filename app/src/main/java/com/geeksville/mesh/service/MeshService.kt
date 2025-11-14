@@ -1642,7 +1642,8 @@ class MeshService : Service() {
     }
 
     /** Extension function to convert a ByteArray to a hex string for logging. Example output: "0x0a,0x1f,0x..." */
-    private fun ByteArray.toHexString(): String = this.joinToString(",") { byte -> String.format(Locale.US, "0x%02x", byte) }
+    private fun ByteArray.toHexString(): String =
+        this.joinToString(",") { byte -> String.format(Locale.US, "0x%02x", byte) }
 
     // A provisional MyNodeInfo that we will install if all of our node config downloads go okay
     private var newMyNodeInfo: MyNodeEntity? = null
