@@ -118,6 +118,8 @@
     <string name="map_purge_fail">Hreinsun SQL skyndiminnis mistókts, sjá upplýsingar í logcat</string>
     <string name="map_cache_manager">Sýsla með skyndiminni</string>
     <string name="map_download_complete">Niðurhali lokið!</string>
+    <string name="map_download_errors">Niðurhali lauk með %1$d villum</string>
+    <string name="map_cache_tiles">%1$d reitar</string>
     <string name="map_subDescription">miðun: %1$d° fjarlægð: %2$s</string>
     <string name="waypoint_edit">Breyta leiðarpunkti</string>
     <string name="waypoint_delete">Eyða leiðarpunkti?</string>
