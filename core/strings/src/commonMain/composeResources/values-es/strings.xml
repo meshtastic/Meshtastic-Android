@@ -222,6 +222,8 @@
     <string name="map_purge_fail">Error en la purga del caché SQL, consulte logcat para obtener más detalles</string>
     <string name="map_cache_manager">Gestor de Caché</string>
     <string name="map_download_complete">¡Descarga completa!</string>
+    <string name="map_download_errors">Descarga completa con %1$d errores</string>
+    <string name="map_cache_tiles">%1$d Fichas</string>
     <string name="map_subDescription">rumbo: %1$d° distancia: %2$s</string>
     <string name="waypoint_edit">Editar punto de referencia</string>
     <string name="waypoint_delete">¿Eliminar punto de referencia?</string>
