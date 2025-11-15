@@ -31,7 +31,10 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -44,6 +47,8 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
@@ -70,6 +75,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
@@ -243,6 +250,91 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             },
             dismissText = stringResource(Res.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
+        )
+    }
+
+    val neighborInfoResponse by uIViewModel.neighborInfoResponse.observeAsState()
+    neighborInfoResponse?.let { response ->
+        SimpleAlertDialog(
+            title = R.string.neighbor_info,
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    fun tryParseNeighborInfo(input: String): MeshProtos.NeighborInfo? {
+                        // First, try parsing directly from raw bytes of the string
+                        runCatching { MeshProtos.NeighborInfo.parseFrom(input.toByteArray()) }.getOrNull()?.let { return it }
+                        // Next, try to decode a hex dump embedded as text (e.g., "AA BB CC ...")
+                        val hexPairs = Regex("""\b[0-9A-Fa-f]{2}\b""").findAll(input).map { it.value }.toList()
+                        if (hexPairs.size >= 4) {
+                            val bytes = hexPairs.map { it.toInt(16).toByte() }.toByteArray()
+                            runCatching { MeshProtos.NeighborInfo.parseFrom(bytes) }.getOrNull()?.let { return it }
+                        }
+                        return null
+                    }
+
+                    val parsed = tryParseNeighborInfo(response)
+                    if (parsed != null) {
+                        fun fmtNode(nodeNum: Int): String = "!%08x".format(nodeNum)
+                        Text(text = "NeighborInfo:", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            text = "node_id: ${fmtNode(parsed.nodeId)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        Text(
+                            text = "last_sent_by_id: ${fmtNode(parsed.lastSentById)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                        Text(
+                            text = "node_broadcast_interval_secs: ${parsed.nodeBroadcastIntervalSecs}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 2.dp)
+                        )
+                        if (parsed.neighborsCount > 0) {
+                            Text(
+                                text = "neighbors:",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                            parsed.neighborsList.forEach { n ->
+                                Text(
+                                    text = "  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        val rawBytes = response.toByteArray()
+                        val isBinary = response.any { it.code < 32 && it != '\n' && it != '\r' && it != '\t' }
+                        if (isBinary) {
+                            val hexString = rawBytes.joinToString(" ") { "%02X".format(it) }
+                            Text(
+                                text = "Binary data (hex view):",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            Text(
+                                text = hexString,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                                    .fillMaxWidth()
+                            )
+                        } else {
+                            Text(
+                                text = response,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            },
+            dismissText = stringResource(id = R.string.okay),
+            onDismiss = { uIViewModel.clearNeighborInfoResponse() },
         )
     }
     val navSuiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
