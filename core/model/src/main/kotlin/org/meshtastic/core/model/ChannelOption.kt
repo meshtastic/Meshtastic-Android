@@ -187,6 +187,15 @@ enum class RegionInfo(
      */
     RU(RegionCode.RU, "Russia", 868.7f, 869.2f),
 
+    /**
+     * Belarus:
+     *   - Allowed: 433.075 MHz - 434.775 MHz (power: 10 milliwatts)
+     *   - Disallowed: 868 MHz
+     *
+     * @see [www.mpt.gov.by](https://www.mpt.gov.by/ru/o-poryadke-ispolzovaniya-radiochastotnogo-spektra-radioelektronnykh-sredstv-radiostanciy)
+     */
+    BY(RegionCode.BY, "Belarus", 433.075f, 434.775f),
+
     /** India */
     IN(RegionCode.IN, "India", 865.0f, 867.0f),
 
