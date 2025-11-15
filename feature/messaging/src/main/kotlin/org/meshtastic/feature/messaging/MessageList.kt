@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -82,6 +83,17 @@ internal data class MessageListHandlers(
     val onReply: (Message?) -> Unit,
 )
 
+private const val AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE = 8
+
+private fun MutableState<Set<Long>>.toggle(uuid: Long) {
+    value =
+        if (value.contains(uuid)) {
+            value - uuid
+        } else {
+            value + uuid
+        }
+}
+
 @Composable
 internal fun MessageList(
     modifier: Modifier = Modifier,
@@ -136,10 +148,10 @@ internal fun MessageList(
         state = state,
         handlers = handlers,
         inSelectionMode = inSelectionMode,
-        onShowStatusDialog = { showStatusDialog = it },
-        onShowReactions = { showReactionDialog = it },
         coroutineScope = coroutineScope,
         haptics = haptics,
+        onShowStatusDialog = { showStatusDialog = it },
+        onShowReactions = { showReactionDialog = it },
         modifier = modifier,
     )
 }
@@ -151,50 +163,59 @@ private sealed interface MessageListRow {
 }
 
 @Composable
-private fun MessageRowContent(
-    row: MessageListRow,
+private fun MessageListContent(
+    listState: LazyListState,
+    messageRows: List<MessageListRow>,
     state: MessageListState,
     handlers: MessageListHandlers,
     inSelectionMode: Boolean,
-    listState: LazyListState,
     coroutineScope: CoroutineScope,
     haptics: HapticFeedback,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    when (row) {
-        is MessageListRow.UnreadDivider -> UnreadMessagesDivider()
-        is MessageListRow.ChatMessage ->
-            state.ourNode?.let { ourNode ->
-                ChatMessageRow(
+    LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
+        items(
+            items = messageRows,
+            key = { row ->
+                when (row) {
+                    is MessageListRow.ChatMessage -> row.message.uuid
+                    is MessageListRow.UnreadDivider -> row.key
+                }
+            },
+        ) { row ->
+            when (row) {
+                is MessageListRow.UnreadDivider -> UnreadMessagesDivider(modifier = Modifier.animateItem())
+                is MessageListRow.ChatMessage -> renderChatMessageRow(
                     row = row,
                     state = state,
                     handlers = handlers,
                     inSelectionMode = inSelectionMode,
-                    listState = listState,
                     coroutineScope = coroutineScope,
                     haptics = haptics,
+                    listState = listState,
                     onShowStatusDialog = onShowStatusDialog,
                     onShowReactions = onShowReactions,
-                    ourNode = ourNode,
                 )
             }
+        }
     }
 }
 
 @Composable
-private fun ChatMessageRow(
+private fun LazyItemScope.renderChatMessageRow(
     row: MessageListRow.ChatMessage,
     state: MessageListState,
     handlers: MessageListHandlers,
     inSelectionMode: Boolean,
-    listState: LazyListState,
     coroutineScope: CoroutineScope,
     haptics: HapticFeedback,
+    listState: LazyListState,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
-    ourNode: Node,
 ) {
+    val ourNode = state.ourNode ?: return
     val message = row.message
     val selected by
         remember(message.uuid, state.selectedIds.value) {
@@ -206,19 +227,14 @@ private fun ChatMessageRow(
         }
 
     MessageItem(
+        modifier = Modifier.animateItem(),
         node = node,
         ourNode = ourNode,
         message = message,
         selected = selected,
-        onClick = {
-            if (inSelectionMode) {
-                state.selectedIds.value =
-                    if (selected) state.selectedIds.value - message.uuid else state.selectedIds.value + message.uuid
-            }
-        },
+        onClick = { if (inSelectionMode) state.selectedIds.toggle(message.uuid) },
         onLongClick = {
-            state.selectedIds.value =
-                if (selected) state.selectedIds.value - message.uuid else state.selectedIds.value + message.uuid
+            state.selectedIds.toggle(message.uuid)
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         },
         onClickChip = handlers.onClickChip,
@@ -236,44 +252,6 @@ private fun ChatMessageRow(
             }
         },
     )
-}
-
-@Composable
-private fun MessageListContent(
-    listState: LazyListState,
-    messageRows: List<MessageListRow>,
-    state: MessageListState,
-    handlers: MessageListHandlers,
-    inSelectionMode: Boolean,
-    onShowStatusDialog: (Message) -> Unit,
-    onShowReactions: (List<Reaction>) -> Unit,
-    coroutineScope: CoroutineScope,
-    haptics: HapticFeedback,
-    modifier: Modifier = Modifier,
-) {
-    LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
-        items(
-            items = messageRows,
-            key = { row ->
-                when (row) {
-                    is MessageListRow.ChatMessage -> row.message.uuid
-                    is MessageListRow.UnreadDivider -> row.key
-                }
-            },
-        ) { row ->
-            MessageRowContent(
-                row = row,
-                state = state,
-                handlers = handlers,
-                inSelectionMode = inSelectionMode,
-                listState = listState,
-                coroutineScope = coroutineScope,
-                haptics = haptics,
-                onShowStatusDialog = onShowStatusDialog,
-                onShowReactions = onShowReactions,
-            )
-        }
-    }
 }
 
 @Composable
@@ -310,11 +288,11 @@ private fun rememberMessageRows(
 ) = remember(messages, showUnreadDivider, unreadDividerIndex, initialUnreadMessageUuid) {
     buildList<MessageListRow> {
         messages.forEachIndexed { index, message ->
-            add(MessageListRow.ChatMessage(index = index, message = message))
             if (showUnreadDivider && unreadDividerIndex == index) {
                 val key = initialUnreadMessageUuid?.let { "unread-divider-$it" } ?: "unread-divider-index-$index"
                 add(MessageListRow.UnreadDivider(key = key))
             }
+            add(MessageListRow.ChatMessage(index = index, message = message))
         }
     }
 }
@@ -367,7 +345,13 @@ private fun <T> AutoScrollToBottom(
 ) = with(listState) {
     val shouldAutoScroll by
         remember(hasUnreadMessages) {
-            derivedStateOf { !hasUnreadMessages && firstVisibleItemIndex < itemThreshold }
+            derivedStateOf {
+                val isAtBottom =
+                    firstVisibleItemIndex == 0 &&
+                        firstVisibleItemScrollOffset <= AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
+                val isNearBottom = firstVisibleItemIndex <= itemThreshold
+                isAtBottom || (!hasUnreadMessages && isNearBottom)
+            }
         }
     if (shouldAutoScroll) {
         LaunchedEffect(list) {
@@ -387,7 +371,7 @@ private fun UpdateUnreadCount(
 ) {
     LaunchedEffect(messages) {
         snapshotFlow { listState.firstVisibleItemIndex }
-            .debounce(timeoutMillis = 500L)
+            .debounce(timeoutMillis = 1500L)
             .collectLatest { index ->
                 val lastUnreadIndex = messages.indexOfLast { !it.read && !it.fromLocal }
                 if (lastUnreadIndex != -1 && index <= lastUnreadIndex && index < messages.size) {
