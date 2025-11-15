@@ -39,13 +39,19 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.channel_invalid
+import org.meshtastic.core.strings.contact_invalid
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import timber.log.Timber
 import javax.inject.Inject
@@ -115,10 +121,16 @@ class MainActivity : AppCompatActivity() {
                     Timber.d("App link data: $it")
                     if (it.path?.startsWith("/e/") == true || it.path?.startsWith("/E/") == true) {
                         Timber.d("App link data is a channel set")
-                        model.requestChannelUrl(it)
+                        model.requestChannelUrl(
+                            url = it,
+                            onFailure = { lifecycleScope.launch { showToast(Res.string.channel_invalid) } },
+                        )
                     } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
                         Timber.d("App link data is a shared contact")
-                        model.setSharedContactRequested(it)
+                        model.setSharedContactRequested(
+                            url = it,
+                            onFailure = { lifecycleScope.launch { showToast(Res.string.contact_invalid) } },
+                        )
                     } else {
                         Timber.d("App link data is not a channel set")
                     }

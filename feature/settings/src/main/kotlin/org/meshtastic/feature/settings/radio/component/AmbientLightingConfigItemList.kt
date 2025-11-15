@@ -23,10 +23,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.ambient_lighting
+import org.meshtastic.core.strings.ambient_lighting_config
+import org.meshtastic.core.strings.blue
+import org.meshtastic.core.strings.current
+import org.meshtastic.core.strings.green
+import org.meshtastic.core.strings.led_state
+import org.meshtastic.core.strings.red
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -42,7 +49,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.ambient_lighting),
+        title = stringResource(Res.string.ambient_lighting),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -54,9 +61,9 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.ambient_lighting_config)) {
+            TitledCard(title = stringResource(Res.string.ambient_lighting_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.led_state),
+                    title = stringResource(Res.string.led_state),
                     checked = formState.value.ledState,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { ledState = it } },
@@ -64,21 +71,21 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.current),
+                    title = stringResource(Res.string.current),
                     value = formState.value.current,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { current = it } },
                 )
                 EditTextPreference(
-                    title = stringResource(R.string.red),
+                    title = stringResource(Res.string.red),
                     value = formState.value.red,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { red = it } },
                 )
                 EditTextPreference(
-                    title = stringResource(R.string.green),
+                    title = stringResource(Res.string.green),
                     value = formState.value.green,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -86,7 +93,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
                 )
 
                 EditTextPreference(
-                    title = stringResource(R.string.blue),
+                    title = stringResource(Res.string.blue),
                     value = formState.value.blue,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

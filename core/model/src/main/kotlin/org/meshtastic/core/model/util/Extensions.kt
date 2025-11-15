@@ -44,6 +44,13 @@ fun ConfigProtos.Config.toOneLineString(): String {
         .replace('\n', ' ')
 }
 
+fun MeshProtos.MeshPacket.toOneLineString(): String {
+    val redactedFields = """(public_key:|private_key:|admin_key:)\s*".*""" // Redact keys
+    return this.toString()
+        .replace(redactedFields.toRegex()) { "${it.groupValues[1]} \"[REDACTED]\"" }
+        .replace('\n', ' ')
+}
+
 fun MeshProtos.toOneLineString(): String {
     val redactedFields = """(public_key:|private_key:|admin_key:)\s*".*""" // Redact keys
     return this.toString()

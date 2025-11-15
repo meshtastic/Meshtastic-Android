@@ -22,8 +22,11 @@ import android.net.Uri
 import androidx.core.net.toFile
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.kml.KmlLayer
@@ -89,6 +92,24 @@ constructor(
     private val customTileProviderRepository: CustomTileProviderRepository,
     uiPreferencesDataSource: UiPreferencesDataSource,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
+
+    private val targetLatLng =
+        googleMapsPrefs.cameraTargetLat
+            .takeIf { it != 0.0 }
+            ?.let { lat -> googleMapsPrefs.cameraTargetLng.takeIf { it != 0.0 }?.let { lng -> LatLng(lat, lng) } }
+            ?: ourNodeInfo.value?.position?.toLatLng()
+            ?: LatLng(0.0, 0.0)
+
+    val cameraPositionState =
+        CameraPositionState(
+            position =
+            CameraPosition(
+                targetLatLng,
+                googleMapsPrefs.cameraZoom,
+                googleMapsPrefs.cameraTilt,
+                googleMapsPrefs.cameraBearing,
+            ),
+        )
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme
 
@@ -236,6 +257,16 @@ constructor(
             loadPersistedMapType()
         }
         loadPersistedLayers()
+    }
+
+    fun saveCameraPosition(cameraPosition: CameraPosition) {
+        viewModelScope.launch {
+            googleMapsPrefs.cameraTargetLat = cameraPosition.target.latitude
+            googleMapsPrefs.cameraTargetLng = cameraPosition.target.longitude
+            googleMapsPrefs.cameraZoom = cameraPosition.zoom
+            googleMapsPrefs.cameraTilt = cameraPosition.tilt
+            googleMapsPrefs.cameraBearing = cameraPosition.bearing
+        }
     }
 
     private fun loadPersistedMapType() {

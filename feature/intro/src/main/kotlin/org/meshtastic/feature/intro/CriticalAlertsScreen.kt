@@ -30,11 +30,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.configure_critical_alerts
+import org.meshtastic.core.strings.critical_alerts
+import org.meshtastic.core.strings.critical_alerts_dnd_request_text
+import org.meshtastic.core.strings.skip
 
 /**
  * Screen for explaining and guiding the user to configure critical alert settings. This screen is part of the app
@@ -50,8 +54,8 @@ internal fun CriticalAlertsScreen(onSkip: () -> Unit, onConfigure: () -> Unit) {
             IntroBottomBar(
                 onSkip = onSkip,
                 onConfigure = onConfigure,
-                configureButtonText = stringResource(id = R.string.configure_critical_alerts),
-                skipButtonText = stringResource(id = R.string.skip),
+                configureButtonText = stringResource(Res.string.configure_critical_alerts),
+                skipButtonText = stringResource(Res.string.skip),
             )
         },
     ) { innerPadding ->
@@ -61,13 +65,13 @@ internal fun CriticalAlertsScreen(onSkip: () -> Unit, onConfigure: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(R.string.critical_alerts),
+                text = stringResource(Res.string.critical_alerts),
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = stringResource(R.string.critical_alerts_dnd_request_text),
+                text = stringResource(Res.string.critical_alerts_dnd_request_text),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )

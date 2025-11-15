@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="fallback_node_name">Meshtastic</string>
+    <string name="node_filter_placeholder">Filtre</string>
+    <string name="desc_node_filter_clear">netejar filtre de node</string>
+    <string name="node_filter_include_unknown">Incloure desconegut</string>
+    <string name="node_filter_only_online">Oculta nodes offline</string>
+    <string name="node_filter_only_direct">Només veure nodes directes</string>
+    <string name="node_filter_ignored">Estàs veient nodes ignorats, \n Prem per tornar al llistat de nodes</string>
+    <string name="node_filter_show_details">Veure detalls</string>
+    <string name="node_sort_button">Opcions per ordenar nodes</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Canal</string>
+    <string name="node_sort_distance">Distància</string>
+    <string name="node_sort_hops_away">Salts</string>
+    <string name="node_sort_last_heard">Última notícia</string>
+    <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
+    <string name="node_sort_via_favorite">via Favorits</string>
+    <string name="node_filter_show_ignored">Nodes Ignorats</string>
+    <string name="unrecognized">No reconeguts</string>
+    <string name="message_status_enroute">Esperant confirmació</string>
+    <string name="message_status_queued">En cua per enviar</string>
+    <string name="routing_error_none">Confirmat</string>
+    <string name="routing_error_no_route">Sense ruta</string>
+    <string name="routing_error_got_nak">Rebuda confirmació negativa</string>
+    <string name="routing_error_timeout">Temps esgotat</string>
+    <string name="routing_error_no_interface">Sense Interfície</string>
+    <string name="routing_error_max_retransmit">Màx. retransmissions assolides</string>
+    <string name="routing_error_no_channel">Sense canal</string>
+    <string name="routing_error_too_large">Packet massa llarg</string>
+    <string name="routing_error_no_response">Sense resposta</string>
+    <string name="routing_error_bad_request">Sol·licitud errònia.</string>
+    <string name="routing_error_duty_cycle_limit">Límit regional de cicle de servei assolit</string>
+    <string name="routing_error_not_authorized">No Autoritzat</string>
+    <string name="routing_error_pki_failed">Falla d'encriptació</string>
+    <string name="routing_error_pki_unknown_pubkey">Clau Pública Desconeguda</string>
+    <string name="routing_error_admin_bad_session_key">Clau de sessió incorrecta</string>
+    <string name="routing_error_admin_public_key_unauthorized">Clau Pública no autoritzada</string>
+    <string name="role_client_desc">Dispositiu de missatgeria, connectat o autònom.</string>
+    <string name="role_client_mute_desc">Dispositiu sense reenviament de paquets.</string>
+    <string name="role_router_desc">Node d’infraestructura per ampliar cobertura. Apareix a la llista de nodes.</string>
+    <string name="role_router_client_desc">Combinació ROUTER + CLIENT. No mòbils.</string>
+    <string name="role_repeater_desc">Node d’infraestructura per ampliar cobertura amb mínima càrrega. Ocult a la llista de nodes.</string>
+    <string name="role_tracker_desc">Difon paquets de posició GPS com a prioritat</string>
+    <string name="role_sensor_desc">Difon telemetria com a prioritat</string>
+    <string name="role_tak_desc">Optimitzat per sistema ATAK, redueix les rutines de difusió.</string>
+    <string name="role_client_hidden_desc">Dispositiu que només difon quan cal, per discreció o estalvi d’energia.</string>
+    <string name="role_lost_and_found_desc">Difon regularment la ubicació com a missatge al canal per defecte per ajudar a recuperar el dispositiu.</string>
+    <string name="role_tak_tracker_desc">Activa les difusions automàtiques TAK PLI i redueix les difusions rutinàries.</string>
+    <string name="role_router_late_desc">Node d’infraestructura que sempre reenvia els paquets una vegada però només després de tots els altres modes, assegurant cobertura addicional per a clusters locals. Visible a la llista de nodes.</string>
+    <string name="rebroadcast_mode_all_desc">Reenvia qualsevol missatge observat si era al nostre canal privat o d’una altra malla.</string>
+    <string name="rebroadcast_mode_all_skip_decoding_desc">.Mateix comportament que ALL, però sense decodificar paquets, només els reenvia. Només disponible en rol de Repeater. Configurar-ho en qualsevol altre rol resultarà en el comportament ALL.</string>
+    <string name="rebroadcast_mode_local_only_desc">Ignora els missatges observats de malles externes obertes o que no pot desxifrar. Només reenvia missatges als canals primari/secundari locals del node.</string>
+    <string name="rebroadcast_mode_known_only_desc">Ignora els missatges observats de malles externes com LOCAL ONLY, però va més enllà i també ignora missatges de nodes que no figuren a la llista de nodes coneguts del node.</string>
+    <string name="rebroadcast_mode_none_desc">Només permès per als rols SENSOR, TRACKER i TAK_TRACKER; això inhibirà tots els reenviaments, de manera similar al rol CLIENT_MUTE.</string>
+    <string name="rebroadcast_mode_core_portnums_only_desc">Ignora paquets amb ports no estàndard com: TAK, RangeTest, PaxCounter, etc. Només reenvia paquets amb ports estàndard: NodeInfo, Text, Position, Telemetry i Routing.</string>
+    <!-- Position Config -->
+    <string name="channel_name">Nom del canal</string>
+    <string name="qr_code">Codi QR</string>
+    <string name="application_icon">icona de l'aplicació</string>
+    <string name="unknown_username">Nom d'usuari desconegut</string>
+    <string name="send">Enviar</string>
+    <string name="warning_not_paired">Encara no has emparellat una ràdio compatible amb Meshtastic amb aquest telèfon. Si us plau emparella un dispositiu i configura el teu nom d'usuari. \n\nAquesta aplicació de codi obert està en desenvolupament. Si hi trobes problemes publica-ho en el nostre fòrum https://github.com/orgs/meshtastic/discussions\n\nPer a més informació visita la nostra pàgina web - www.meshtastic.org.</string>
+    <string name="you">Tu</string>
+    <string name="accept">Acceptar</string>
+    <string name="cancel">Cancel·lar</string>
+    <string name="save_changes">Desar</string>
+    <string name="new_channel_rcvd">Nova URL de canal rebuda</string>
+    <string name="report_bug">Informar d'error</string>
+    <string name="report_a_bug">Informar d'un error</string>
+    <string name="report_bug_text">Estàs segur que vols informar d'un error? Després d'informar-ne, si us plau publica en https://github.com/orgs/meshtastic/discussions de tal manera que puguem emparellar l'informe amb allò que has trobat.</string>
+    <string name="report">Informe</string>
+    <string name="pairing_completed">Emparellament completat, iniciar servei</string>
+    <string name="pairing_failed_try_again">Emparellament fallit, si us plau selecciona un altre cop</string>
+    <string name="location_disabled">Accés al posicionament deshabilitat, no es pot proveir la posició a la xarxa.</string>
+    <string name="share">Compartir</string>
+    <string name="disconnected">Desconnectat</string>
+    <string name="device_sleeping">Dispositiu hivernant</string>
+    <string name="ip_address">Adreça IP:</string>
+    <string name="connected_to">Connectat a ràdio (%1$s)</string>
+    <string name="not_connected">No connectat</string>
+    <string name="connected_sleeping">Connectat a ràdio, però està hivernant</string>
+    <string name="app_too_old">Actualització de l'aplicació necessària</string>
+    <string name="must_update">Has d'actualitzar aquesta aplicació a la app store (o Github). És massa antiga per comunicar-se amb aquest firmware de la ràdio. Si us plau llegeix el nostre <a href="https://meshtastic.org/docs/software/android/installation">docs</a> sobre aquesta temàtica.</string>
+    <string name="none">Cap (desactivat)</string>
+    <string name="meshtastic_service_notifications">Notificacions de servei</string>
+    <string name="about">Sobre</string>
+    <string name="channel_invalid">La URL d'aquest canal és invàlida i no es pot fer servir</string>
+    <string name="debug_panel">Panell de depuració</string>
+    <string name="clear">Netejar</string>
+    <string name="message_delivery_status">Estat d'entrega del missatge</string>
+    <string name="firmware_too_old">Actualització de firmware necessària.</string>
+    <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació. Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
+    <string name="okay">Acceptar</string>
+    <string name="must_set_region">Has de configurar la regió!</string>
+    <string name="cant_change_no_radio">No s'ha pogut canviar el canal perquè la ràdio no està configurada correctament. Si us plau torna-ho a provar.</string>
+    <string name="reset">Restablir</string>
+    <string name="scan">Escanejar</string>
+    <string name="add_network_device">Afegir</string>
+    <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
+    <string name="reset_to_defaults">Restablir els defectes</string>
+    <string name="apply">Aplicar</string>
+    <string name="theme">Tema</string>
+    <string name="theme_light">Clar</string>
+    <string name="theme_dark">Fosc</string>
+    <string name="theme_system">Defecte del sistema</string>
+    <string name="choose_theme">Escollir tema</string>
+    <string name="provide_location_to_mesh">Proveir la posició del telèfon a la xarxa</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Esborrar missatge?</item>
+        <item quantity="other">Esborrar %1$s missatges?</item>
+    </plurals>
+    <string name="delete">Esborrar</string>
+    <string name="delete_for_everyone">Esborrar per a tothom</string>
+    <string name="delete_for_me">Esborrar per a mi</string>
+    <string name="select_all">Seleccionar tot</string>
+    <string name="map_style_selection">Selecció d'estil</string>
+    <string name="map_download_region">Descarregar regió</string>
+    <string name="name">Nom</string>
+    <string name="description">Descripció</string>
+    <string name="locked">Bloquejat</string>
+    <string name="save">Desar</string>
+    <string name="preferences_language">Idioma</string>
+    <string name="preferences_system_default">Defecte del sistema</string>
+    <string name="resend">Reenviar</string>
+    <string name="shutdown">Apagar</string>
+    <string name="reboot">Reiniciar</string>
+    <string name="traceroute">Traçar ruta</string>
+    <string name="intro_show">Mostrar Introducció</string>
+    <string name="message">Missatge</string>
+    <string name="quick_chat">Opcions de conversa ràpida</string>
+    <string name="quick_chat_new">Nova conversa ràpida</string>
+    <string name="quick_chat_edit">Editar conversa ràpida</string>
+    <string name="quick_chat_append">Afegir a missatge</string>
+    <string name="quick_chat_instant">Enviar instantàniament</string>
+    <string name="factory_reset">Restauració dels paràmetres de fàbrica</string>
+    <string name="direct_message">Missatge directe</string>
+    <string name="nodedb_reset">Restablir NodeDB</string>
+    <string name="delivery_confirmed">Entrega confirmada</string>
+    <string name="error">Error</string>
+    <string name="ignore">Ignorar</string>
+    <string name="ignore_add">Afegir '%1$s' a la llista d'ignorats?</string>
+    <string name="ignore_remove">Treure '%1$s' de la llista d'ignorats?</string>
+    <string name="map_select_download_region">Seleccionar regió a descarregar</string>
+    <string name="map_tile_download_estimate">Estimació de descàrrega de tessel·les:</string>
+    <string name="map_start_download">Iniciar descarrega</string>
+    <string name="close">Tancar</string>
+    <string name="radio_configuration">Configuració de ràdio</string>
+    <string name="module_settings">Configuració de mòdul</string>
+    <string name="add">Afegir</string>
+    <string name="edit">Editar</string>
+    <string name="calculating">Calculant…</string>
+    <string name="map_offline_manager">Director fora de línia</string>
+    <string name="map_cache_size">Mida actual de la memòria cau</string>
+    <string name="map_cache_info">Mida total de la memòria cau: %1$d MB\nMemoria cau feta servir: %2$d MB</string>
+    <string name="map_clear_tiles">Netejar tessel·les descarregades</string>
+    <string name="map_tile_source">Font de tessel·la</string>
+    <string name="map_purge_success">Memòria cau SQL %1$s purgada</string>
+    <string name="map_purge_fail">Error en la purga de la memòria cau SQL, veure logcat per a detalls</string>
+    <string name="map_cache_manager">Director de la memòria cau</string>
+    <string name="map_download_complete">Descarrega completa!</string>
+    <string name="map_subDescription">rumb: %1$d° distància: %2$s</string>
+    <string name="waypoint_edit">Editar punt de pas</string>
+    <string name="waypoint_delete">Esborrar punt de pas?</string>
+    <string name="waypoint_new">Nou punt de pas</string>
+    <string name="waypoint_received">Punt de pas rebut: %1$s</string>
+    <string name="error_duty_cycle">Límit del cicle de treball assolit. No es podran enviar més missatges, intenta-ho més tard.</string>
+    <string name="remove">Eliminar</string>
+    <string name="remove_node_text">Aquest node serà eliminat de la teva llista fins que rebi dades un altre cop.</string>
+    <string name="mute_notifications">Silenciar notificacions</string>
+    <string name="mute_8_hours">8 hores</string>
+    <string name="mute_1_week">1 setmana</string>
+    <string name="mute_always">Sempre</string>
+    <string name="region_frequency_plan">Regió</string>
+    <string name="timeout">Temps esgotat</string>
+    <string name="distance">Distància</string>
+    <string name="meshtastic">Meshtastic</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Missatge</string>
+    <string name="eight_hours">8 Hores</string>
+    <string name="one_day">24 Hores</string>
+    <string name="two_days">48 Hores</string>
+</resources>

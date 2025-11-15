@@ -53,6 +53,7 @@ data class PacketEntity(
             emojis = reactions.toReaction(getNode),
             replyId = data.replyId,
             viaMqtt = node.viaMqtt,
+            relayNode = data.relayNode,
         )
     }
 }
@@ -76,7 +77,23 @@ data class Packet(
     @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
     @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
-)
+) {
+    companion object {
+        const val RELAY_NODE_SUFFIX_MASK = 0xFF
+
+        fun getRelayNode(relayNodeId: Int, nodes: List<Node>): Node? {
+            val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
+            val candidateRelayNodes = nodes.filter { (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix }
+            val closestRelayNode =
+                if (candidateRelayNodes.size == 1) {
+                    candidateRelayNodes.first()
+                } else {
+                    candidateRelayNodes.minByOrNull { it.hopsAway }
+                }
+            return closestRelayNode
+        }
+    }
+}
 
 @Suppress("ConstructorParameterNaming")
 @Entity(tableName = "contact_settings")

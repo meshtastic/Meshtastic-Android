@@ -18,17 +18,20 @@
 package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
-import android.content.Context
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.LocationDisabled
@@ -37,19 +40,29 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +70,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -65,13 +77,50 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.hasGps
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatAgo
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.calculating
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.clear
+import org.meshtastic.core.strings.close
+import org.meshtastic.core.strings.delete_for_everyone
+import org.meshtastic.core.strings.delete_for_me
+import org.meshtastic.core.strings.expires
+import org.meshtastic.core.strings.location_disabled
+import org.meshtastic.core.strings.map_cache_info
+import org.meshtastic.core.strings.map_cache_manager
+import org.meshtastic.core.strings.map_cache_size
+import org.meshtastic.core.strings.map_cache_tiles
+import org.meshtastic.core.strings.map_clear_tiles
+import org.meshtastic.core.strings.map_download_complete
+import org.meshtastic.core.strings.map_download_errors
+import org.meshtastic.core.strings.map_download_region
+import org.meshtastic.core.strings.map_filter
+import org.meshtastic.core.strings.map_node_popup_details
+import org.meshtastic.core.strings.map_offline_manager
+import org.meshtastic.core.strings.map_purge_fail
+import org.meshtastic.core.strings.map_purge_success
+import org.meshtastic.core.strings.map_style_selection
+import org.meshtastic.core.strings.map_subDescription
+import org.meshtastic.core.strings.map_tile_source
+import org.meshtastic.core.strings.only_favorites
+import org.meshtastic.core.strings.show_precision_circle
+import org.meshtastic.core.strings.show_waypoints
+import org.meshtastic.core.strings.toggle_my_position
+import org.meshtastic.core.strings.waypoint_delete
+import org.meshtastic.core.strings.you
+import org.meshtastic.core.ui.component.BasicListItem
+import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
@@ -159,41 +208,6 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
         }
     }
 
-private fun Context.purgeTileSource(onResult: (String) -> Unit) {
-    val cache = SqlTileWriterExt()
-    val builder = MaterialAlertDialogBuilder(this)
-    builder.setTitle(R.string.map_tile_source)
-    val sources = cache.sources
-    val sourceList = mutableListOf<String>()
-    for (i in sources.indices) {
-        sourceList.add(sources[i].source as String)
-    }
-    val selected: BooleanArray? = null
-    val selectedList = mutableListOf<Int>()
-    builder.setMultiChoiceItems(sourceList.toTypedArray(), selected) { _, i, b ->
-        if (b) {
-            selectedList.add(i)
-        } else {
-            selectedList.remove(i)
-        }
-    }
-    builder.setPositiveButton(R.string.clear) { _, _ ->
-        for (x in selectedList) {
-            val item = sources[x]
-            val b = cache.purgeCache(item.source)
-            onResult(
-                if (b) {
-                    getString(R.string.map_purge_success, item.source)
-                } else {
-                    getString(R.string.map_purge_fail)
-                },
-            )
-        }
-    }
-    builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
-    builder.show()
-}
-
 /**
  * Main composable for displaying the map view, including nodes, waypoints, and user location. It handles user
  * interactions for map manipulation, filtering, and offline caching.
@@ -220,8 +234,12 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
+    var showCacheManagerDialog by remember { mutableStateOf(false) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
+    var showPurgeTileSourceDialog by remember { mutableStateOf(false) }
+    var showMapStyleDialog by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val density = LocalDensity.current
 
@@ -262,7 +280,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
             Timber.d("Telling user we need location turned on for MyLocationNewOverlay")
-            Toast.makeText(context, R.string.location_disabled, Toast.LENGTH_SHORT).show()
+            scope.launch { context.showToast(Res.string.location_disabled) }
             return
         }
         Timber.d("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
@@ -323,15 +341,20 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 id = u.id
                 title = u.longName
                 snippet =
-                    context.getString(
-                        R.string.map_node_popup_details,
+                    com.meshtastic.core.strings.getString(
+                        Res.string.map_node_popup_details,
                         node.gpsString(),
                         formatAgo(node.lastHeard),
                         formatAgo(p.time),
                         if (node.batteryStr != "") node.batteryStr else "?",
                     )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription = context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
+                    subDescription =
+                        com.meshtastic.core.strings.getString(
+                            Res.string.map_subDescription,
+                            ourNode.bearing(node).toString(),
+                            dist,
+                        )
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
@@ -352,14 +375,16 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle(R.string.waypoint_delete)
-        builder.setNeutralButton(R.string.cancel) { _, _ -> Timber.d("User canceled marker delete dialog") }
-        builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
+        builder.setTitle(com.meshtastic.core.strings.getString(Res.string.waypoint_delete))
+        builder.setNeutralButton(com.meshtastic.core.strings.getString(Res.string.cancel)) { _, _ ->
+            Timber.d("User canceled marker delete dialog")
+        }
+        builder.setNegativeButton(com.meshtastic.core.strings.getString(Res.string.delete_for_me)) { _, _ ->
             Timber.d("User deleted waypoint ${waypoint.id} for me")
             mapViewModel.deleteWaypoint(waypoint.id)
         }
         if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
-            builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
+            builder.setPositiveButton(com.meshtastic.core.strings.getString(Res.string.delete_for_everyone)) { _, _ ->
                 Timber.d("User deleted waypoint ${waypoint.id} for everyone")
                 mapViewModel.sendWaypoint(waypoint.copy { expire = 1 })
                 mapViewModel.deleteWaypoint(waypoint.id)
@@ -394,7 +419,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     }
 
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
-        context.getString(R.string.you)
+        com.meshtastic.core.strings.getString(Res.string.you)
     } else {
         mapViewModel.getUser(id).longName
     }
@@ -434,7 +459,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                snippet = "[$time] ${pt.description}  " + stringResource(R.string.expires) + ": $expireTimeStr"
+                snippet = "[$time] ${pt.description}  " + stringResource(Res.string.expires) + ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
                 setVisible(false) // This seems to be always false, was this intended?
                 setOnLongClickListener {
@@ -443,30 +468,6 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 }
             }
         }
-    }
-
-    LaunchedEffect(showCurrentCacheInfo) {
-        if (!showCurrentCacheInfo) return@LaunchedEffect
-        Toast.makeText(context, R.string.calculating, Toast.LENGTH_SHORT).show()
-        val cacheManager = CacheManager(map)
-        val cacheCapacity = cacheManager.cacheCapacity()
-        val currentCacheUsage = cacheManager.currentCacheUsage()
-
-        val mapCacheInfoText =
-            context.getString(
-                R.string.map_cache_info,
-                cacheCapacity / (1024.0 * 1024.0),
-                currentCacheUsage / (1024.0 * 1024.0),
-            )
-
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.map_cache_manager)
-            .setMessage(mapCacheInfoText)
-            .setPositiveButton(R.string.close) { dialog, _ ->
-                showCurrentCacheInfo = false
-                dialog.dismiss()
-            }
-            .show()
     }
 
     val mapEventsReceiver =
@@ -524,7 +525,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         val tileCount: Int =
             CacheManager(this)
                 .possibleTilesInArea(downloadRegionBoundingBox, zoomLevelMin.toInt(), zoomLevelMax.toInt())
-        cacheEstimate = context.getString(R.string.map_cache_tiles, tileCount)
+        cacheEstimate = com.meshtastic.core.strings.getString(Res.string.map_cache_tiles, tileCount)
     }
 
     val boxOverlayListener =
@@ -556,16 +557,11 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        Toast.makeText(context, R.string.map_download_complete, Toast.LENGTH_SHORT).show()
+                        scope.launch { context.showToast(Res.string.map_download_complete) }
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.map_download_errors, errors),
-                            Toast.LENGTH_SHORT,
-                        )
-                            .show()
+                        scope.launch { context.showToast(Res.string.map_download_errors, errors) }
                         writer.onDetach()
                     },
                 ),
@@ -577,49 +573,9 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         }
     }
 
-    fun showMapStyleDialog() {
-        val builder = MaterialAlertDialogBuilder(context)
-        val mapStyles: Array<CharSequence> = CustomTileSource.mTileSources.values.toTypedArray()
-
-        val mapStyleInt = mapViewModel.mapStyleId
-        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
-            Timber.d("Set mapStyleId pref to $which")
-            mapViewModel.mapStyleId = which
-            dialog.dismiss()
-            map.setTileSource(loadOnlineTileSourceBase())
-        }
-        val dialog = builder.create()
-        dialog.show()
-    }
-
-    fun Context.showCacheManagerDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.map_offline_manager)
-            .setItems(
-                arrayOf<CharSequence>(
-                    getString(R.string.map_cache_size),
-                    getString(R.string.map_download_region),
-                    getString(R.string.map_clear_tiles),
-                    getString(R.string.cancel),
-                ),
-            ) { dialog, which ->
-                when (which) {
-                    0 -> showCurrentCacheInfo = true
-                    1 -> {
-                        map.generateBoxOverlay()
-                        dialog.dismiss()
-                    }
-
-                    2 -> purgeTileSource { Toast.makeText(this, it, Toast.LENGTH_SHORT).show() }
-                    else -> dialog.dismiss()
-                }
-            }
-            .show()
-    }
-
     Scaffold(
         floatingActionButton = {
-            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { context.showCacheManagerDialog() }
+            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog = true }
         },
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
@@ -650,15 +606,15 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     MapButton(
-                        onClick = ::showMapStyleDialog,
+                        onClick = { showMapStyleDialog = true },
                         icon = Icons.Outlined.Layers,
-                        contentDescription = R.string.map_style_selection,
+                        contentDescription = Res.string.map_style_selection,
                     )
                     Box(modifier = Modifier) {
                         MapButton(
                             onClick = { mapFilterExpanded = true },
                             icon = Icons.Outlined.Tune,
-                            contentDescription = R.string.map_filter,
+                            contentDescription = Res.string.map_filter,
                         )
                         DropdownMenu(
                             expanded = mapFilterExpanded,
@@ -678,7 +634,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                                             tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
-                                            text = stringResource(R.string.only_favorites),
+                                            text = stringResource(Res.string.only_favorites),
                                             modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
@@ -703,7 +659,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                                             tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
-                                            text = stringResource(R.string.show_waypoints),
+                                            text = stringResource(Res.string.show_waypoints),
                                             modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
@@ -728,7 +684,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                                             tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
-                                            text = stringResource(R.string.show_precision_circle),
+                                            text = stringResource(Res.string.show_precision_circle),
                                             modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
@@ -750,7 +706,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                             } else {
                                 Icons.Default.LocationDisabled
                             },
-                            contentDescription = stringResource(R.string.toggle_my_position),
+                            contentDescription = stringResource(Res.string.toggle_my_position),
                         ) {
                             if (locationPermissionsState.allPermissionsGranted) {
                                 map.toggleMyLocation()
@@ -763,6 +719,44 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 }
             }
         }
+    }
+
+    if (showMapStyleDialog) {
+        MapStyleDialog(
+            selectedMapStyle = mapViewModel.mapStyleId,
+            onDismiss = { showMapStyleDialog = false },
+            onSelectMapStyle = {
+                mapViewModel.mapStyleId = it
+                map.setTileSource(loadOnlineTileSourceBase())
+            },
+        )
+    }
+
+    if (showCacheManagerDialog) {
+        CacheManagerDialog(
+            onClickOption = { option ->
+                when (option) {
+                    CacheManagerOption.CurrentCacheSize -> {
+                        scope.launch { context.showToast(Res.string.calculating) }
+                        showCurrentCacheInfo = true
+                    }
+                    CacheManagerOption.DownloadRegion -> map.generateBoxOverlay()
+
+                    CacheManagerOption.ClearTiles -> showPurgeTileSourceDialog = true
+                    CacheManagerOption.Cancel -> Unit
+                }
+                showCacheManagerDialog = false
+            },
+            onDismiss = { showCacheManagerDialog = false },
+        )
+    }
+
+    if (showCurrentCacheInfo) {
+        CacheInfoDialog(mapView = map, onDismiss = { showCurrentCacheInfo = false })
+    }
+
+    if (showPurgeTileSourceDialog) {
+        PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
     }
 
     if (showEditWaypointDialog != null) {
@@ -791,5 +785,161 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 showEditWaypointDialog = null
             },
         )
+    }
+}
+
+@Composable
+private fun MapStyleDialog(selectedMapStyle: Int, onDismiss: () -> Unit, onSelectMapStyle: (Int) -> Unit) {
+    val selected = remember { mutableStateOf(selectedMapStyle) }
+
+    MapsDialog(onDismiss = onDismiss) {
+        CustomTileSource.mTileSources.values.forEachIndexed { index, style ->
+            ListItem(
+                text = style,
+                trailingIcon = if (index == selected.value) Icons.Rounded.Check else null,
+                onClick = {
+                    selected.value = index
+                    onSelectMapStyle(index)
+                    onDismiss()
+                },
+            )
+        }
+    }
+}
+
+private enum class CacheManagerOption(val label: StringResource) {
+    CurrentCacheSize(label = Res.string.map_cache_size),
+    DownloadRegion(label = Res.string.map_download_region),
+    ClearTiles(label = Res.string.map_clear_tiles),
+    Cancel(label = Res.string.cancel),
+}
+
+@Composable
+private fun CacheManagerDialog(onClickOption: (CacheManagerOption) -> Unit, onDismiss: () -> Unit) {
+    MapsDialog(title = stringResource(Res.string.map_offline_manager), onDismiss = onDismiss) {
+        CacheManagerOption.entries.forEach { option ->
+            ListItem(text = stringResource(option.label), trailingIcon = null) {
+                onClickOption(option)
+                onDismiss()
+            }
+        }
+    }
+}
+
+@Composable
+private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
+    val (cacheCapacity, currentCacheUsage) =
+        remember(mapView) {
+            val cacheManager = CacheManager(mapView)
+            cacheManager.cacheCapacity() to cacheManager.currentCacheUsage()
+        }
+
+    MapsDialog(
+        title = stringResource(Res.string.map_cache_manager),
+        onDismiss = onDismiss,
+        negativeButton = { TextButton(onClick = { onDismiss() }) { Text(text = stringResource(Res.string.close)) } },
+    ) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text =
+            stringResource(
+                Res.string.map_cache_info,
+                cacheCapacity / (1024.0 * 1024.0),
+                currentCacheUsage / (1024.0 * 1024.0),
+            ),
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val cache = SqlTileWriterExt()
+
+    val sourceList by derivedStateOf { cache.sources.map { it.source as String } }
+
+    val selected = remember { mutableStateListOf<Int>() }
+
+    MapsDialog(
+        title = stringResource(Res.string.map_tile_source),
+        positiveButton = {
+            TextButton(
+                enabled = selected.isNotEmpty(),
+                onClick = {
+                    selected.forEach { selectedIndex ->
+                        val source = sourceList[selectedIndex]
+                        scope.launch {
+                            context.showToast(
+                                if (cache.purgeCache(source)) {
+                                    getString(Res.string.map_purge_success, source)
+                                } else {
+                                    getString(Res.string.map_purge_fail)
+                                },
+                            )
+                        }
+                    }
+
+                    onDismiss()
+                },
+            ) {
+                Text(text = stringResource(Res.string.clear))
+            }
+        },
+        negativeButton = { TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.cancel)) } },
+        onDismiss = onDismiss,
+    ) {
+        sourceList.forEachIndexed { index, source ->
+            val isSelected = selected.contains(index)
+            BasicListItem(
+                text = source,
+                trailingContent = { Checkbox(checked = isSelected, onCheckedChange = {}) },
+                onClick = {
+                    if (isSelected) {
+                        selected.remove(index)
+                    } else {
+                        selected.add(index)
+                    }
+                },
+            ) {}
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MapsDialog(
+    title: String? = null,
+    onDismiss: () -> Unit,
+    positiveButton: (@Composable () -> Unit)? = null,
+    negativeButton: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.wrapContentWidth().wrapContentHeight(),
+            shape = MaterialTheme.shapes.large,
+            color = AlertDialogDefaults.containerColor,
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+        ) {
+            Column {
+                title?.let {
+                    Text(
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
+                        text = it,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
+
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) { content() }
+                if (positiveButton != null || negativeButton != null) {
+                    Row(Modifier.align(Alignment.End)) {
+                        positiveButton?.invoke()
+                        negativeButton?.invoke()
+                    }
+                }
+            }
+        }
     }
 }

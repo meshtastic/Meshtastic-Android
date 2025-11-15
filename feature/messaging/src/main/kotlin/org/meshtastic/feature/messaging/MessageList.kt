@@ -17,7 +17,7 @@
 
 package org.meshtastic.feature.messaging
 
-import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,28 +40,35 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.close
+import org.meshtastic.core.strings.relayed_by
+import org.meshtastic.core.strings.resend
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
 
 @Composable
 fun DeliveryInfo(
-    @StringRes title: Int,
-    @StringRes text: Int? = null,
+    title: StringResource,
+    text: StringResource? = null,
+    relayNodeName: String? = null,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
     resendOption: Boolean,
@@ -69,32 +76,41 @@ fun DeliveryInfo(
     onDismissRequest = onDismiss,
     dismissButton = {
         FilledTonalButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = stringResource(id = R.string.close))
+            Text(text = stringResource(Res.string.close))
         }
     },
     confirmButton = {
         if (resendOption) {
             FilledTonalButton(onClick = onConfirm, modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(text = stringResource(id = R.string.resend))
+                Text(text = stringResource(Res.string.resend))
             }
         }
     },
     title = {
         Text(
-            text = stringResource(id = title),
+            text = stringResource(title),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall,
         )
     },
     text = {
-        text?.let {
-            Text(
-                text = stringResource(id = it),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium,
-            )
+        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            text?.let {
+                Text(
+                    text = stringResource(it),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            relayNodeName?.let {
+                Text(
+                    text = stringResource(Res.string.relayed_by, it),
+                    modifier = Modifier.padding(top = 8.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
     },
     shape = RoundedCornerShape(16.dp),
@@ -127,9 +143,16 @@ internal fun MessageList(
     if (showStatusDialog != null) {
         val msg = showStatusDialog ?: return
         val (title, text) = msg.getStatusStringRes()
+        val relayNodeName by
+            remember(msg.relayNode, nodes) {
+                derivedStateOf {
+                    msg.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
+                }
+            }
         DeliveryInfo(
             title = title,
             text = text,
+            relayNodeName = relayNodeName,
             onConfirm = {
                 val deleteList: List<Long> = listOf(msg.uuid)
                 onDeleteMessages(deleteList)

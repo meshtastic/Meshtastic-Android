@@ -28,13 +28,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.channel_air_util
+import org.meshtastic.core.strings.hops_away
+import org.meshtastic.core.strings.signal
+import org.meshtastic.core.strings.signal_quality
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 
@@ -51,14 +55,14 @@ fun SignalInfo(
 ) {
     val text =
         if (isThisNode) {
-            stringResource(R.string.channel_air_util)
+            stringResource(Res.string.channel_air_util)
                 .format(node.deviceMetrics.channelUtilization, node.deviceMetrics.airUtilTx)
         } else {
             buildList {
                 val hopsString =
                     "%s: %s"
                         .format(
-                            stringResource(R.string.hops_away),
+                            stringResource(Res.string.hops_away),
                             if (node.hopsAway == -1) {
                                 "?"
                             } else {
@@ -98,11 +102,11 @@ fun SignalInfo(
                     Icon(
                         modifier = Modifier.size(20.dp),
                         imageVector = quality.imageVector,
-                        contentDescription = stringResource(R.string.signal_quality),
+                        contentDescription = stringResource(Res.string.signal_quality),
                         tint = quality.color.invoke(),
                     )
                     Text(
-                        text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
+                        text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
                         style = MaterialTheme.typography.labelSmall,
                         color = contentColor,
                         maxLines = 1,

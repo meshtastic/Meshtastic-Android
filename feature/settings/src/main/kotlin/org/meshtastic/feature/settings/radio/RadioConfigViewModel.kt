@@ -25,7 +25,6 @@ import android.net.Uri
 import android.os.RemoteException
 import android.util.Base64
 import androidx.annotation.RequiresPermission
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
@@ -46,9 +45,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.StringResource
 import org.json.JSONObject
 import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
@@ -58,11 +59,12 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
-import org.meshtastic.core.proto.getChannelList
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cant_shutdown
+import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.util.UiText
@@ -71,6 +73,7 @@ import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.ConfigProtos.Config.SecurityConfig
+import org.meshtastic.proto.ConnStatusProtos
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.ModuleConfigProtos
 import org.meshtastic.proto.Portnums
@@ -93,9 +96,11 @@ data class RadioConfigState(
     val moduleConfig: ModuleConfigProtos.ModuleConfig = moduleConfig {},
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
+    val deviceConnectionStatus: ConnStatusProtos.DeviceConnectionStatus? = null,
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = false,
+    val nodeDbResetPreserveFavorites: Boolean = false,
 )
 
 @Suppress("LongParameterList")
@@ -106,6 +111,7 @@ constructor(
     savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
+    private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val locationRepository: LocationRepository,
@@ -129,6 +135,10 @@ constructor(
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
+
+    fun setPreserveFavorites(preserveFavorites: Boolean) {
+        viewModelScope.launch { _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) } }
+    }
 
     private val _currentDeviceProfile = MutableStateFlow(deviceProfile {})
     val currentDeviceProfile
@@ -245,7 +255,12 @@ constructor(
         val destNum = destNode.value?.num ?: return
         getChannelList(new, old).forEach { setRemoteChannel(destNum, it) }
 
-        if (destNum == myNodeNum) viewModelScope.launch { radioConfigRepository.replaceAllSettings(new) }
+        if (destNum == myNodeNum) {
+            viewModelScope.launch {
+                packetRepository.migrateChannelsByPSK(old, new)
+                radioConfigRepository.replaceAllSettings(new)
+            }
+        }
         _radioConfigState.update { it.copy(channelList = new) }
     }
 
@@ -329,6 +344,12 @@ constructor(
         "Request getCannedMessages error",
     )
 
+    private fun getDeviceConnectionStatus(destNum: Int) = request(
+        destNum,
+        { service, packetId, dest -> service.getDeviceConnectionStatus(packetId, dest) },
+        "Request getDeviceConnectionStatus error",
+    )
+
     private fun requestShutdown(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.requestShutdown(packetId, dest) },
@@ -345,18 +366,32 @@ constructor(
             "Request factory reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { nodeRepository.clearNodeDB() }
+            viewModelScope.launch {
+                // Clear the service's in-memory node cache first so screens refresh immediately.
+                val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
+                meshService?.let { service ->
+                    existingNodeNums.forEach { service.removeByNodenum(service.packetId, it) }
+                }
+                nodeRepository.clearNodeDB()
+            }
         }
     }
 
-    private fun requestNodedbReset(destNum: Int) {
+    private fun requestNodedbReset(destNum: Int, preserveFavorites: Boolean) {
         request(
             destNum,
-            { service, packetId, dest -> service.requestNodedbReset(packetId, dest) },
+            { service, packetId, dest -> service.requestNodedbReset(packetId, dest, preserveFavorites) },
             "Request NodeDB reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { nodeRepository.clearNodeDB() }
+            viewModelScope.launch {
+                // Clear the service's in-memory node cache as well so UI updates immediately.
+                val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
+                meshService?.let { service ->
+                    existingNodeNums.forEach { service.removeByNodenum(service.packetId, it) }
+                }
+                nodeRepository.clearNodeDB(preserveFavorites)
+            }
         }
     }
 
@@ -364,19 +399,21 @@ constructor(
         val route = radioConfigState.value.route
         _radioConfigState.update { it.copy(route = "") } // setter (response is PortNum.ROUTING_APP)
 
+        val preserveFavorites = radioConfigState.value.nodeDbResetPreserveFavorites
+
         when (route) {
             AdminRoute.REBOOT.name -> requestReboot(destNum)
             AdminRoute.SHUTDOWN.name ->
                 with(radioConfigState.value) {
                     if (metadata != null && !metadata.canShutdown) {
-                        sendError(R.string.cant_shutdown)
+                        sendError(Res.string.cant_shutdown)
                     } else {
                         requestShutdown(destNum)
                     }
                 }
 
             AdminRoute.FACTORY_RESET.name -> requestFactoryReset(destNum)
-            AdminRoute.NODEDB_RESET.name -> requestNodedbReset(destNum)
+            AdminRoute.NODEDB_RESET.name -> requestNodedbReset(destNum, preserveFavorites)
         }
     }
 
@@ -519,6 +556,7 @@ constructor(
                 connected = it.connected,
                 route = route.name,
                 metadata = it.metadata,
+                nodeDbResetPreserveFavorites = it.nodeDbResetPreserveFavorites,
                 responseState = ResponseState.Loading(),
             )
         }
@@ -541,6 +579,9 @@ constructor(
             is ConfigRoute -> {
                 if (route == ConfigRoute.LORA) {
                     getChannel(destNum, 0)
+                }
+                if (route == ConfigRoute.NETWORK) {
+                    getDeviceConnectionStatus(destNum)
                 }
                 getConfig(destNum, route.type)
             }
@@ -588,7 +629,7 @@ constructor(
 
     private fun sendError(error: String) = setResponseStateError(UiText.DynamicString(error))
 
-    private fun sendError(@StringRes id: Int) = setResponseStateError(UiText.StringResource(id))
+    private fun sendError(id: StringResource) = setResponseStateError(UiText.StringResource(id))
 
     private fun setResponseStateError(error: UiText) {
         _radioConfigState.update { it.copy(responseState = ResponseState.Error(error)) }
@@ -693,6 +734,13 @@ constructor(
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_RINGTONE_RESPONSE -> {
                     _radioConfigState.update { it.copy(ringtone = parsed.getRingtoneResponse) }
+                    incrementCompleted()
+                }
+
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_DEVICE_CONNECTION_STATUS_RESPONSE -> {
+                    _radioConfigState.update {
+                        it.copy(deviceConnectionStatus = parsed.getDeviceConnectionStatusResponse)
+                    }
                     incrementCompleted()
                 }
 

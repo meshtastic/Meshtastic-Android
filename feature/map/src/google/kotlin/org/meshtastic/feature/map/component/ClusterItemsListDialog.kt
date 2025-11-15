@@ -29,9 +29,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.nodes_at_this_location
+import org.meshtastic.core.strings.okay
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.model.NodeClusterItem
 
@@ -43,7 +45,7 @@ fun ClusterItemsListDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.nodes_at_this_location)) },
+        title = { Text(text = stringResource(Res.string.nodes_at_this_location)) },
         text = {
             // Use a LazyColumn for potentially long lists of items
             LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
@@ -52,7 +54,7 @@ fun ClusterItemsListDialog(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.okay)) } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.okay)) } },
     )
 }
 

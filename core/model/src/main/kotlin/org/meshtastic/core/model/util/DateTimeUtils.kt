@@ -21,6 +21,8 @@ import java.text.DateFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
+private const val ONLINE_WINDOW_HOURS = 2
+
 // return time if within 24 hours, otherwise date
 fun getShortDate(time: Long): String? {
     val date = if (time != 0L) Date(time) else return null
@@ -62,5 +64,21 @@ private fun formatUptime(seconds: Long): String {
         .joinToString(" ")
 }
 
-@Suppress("MagicNumber")
-fun onlineTimeThreshold() = (System.currentTimeMillis() / 1000 - 2 * 60 * 60).toInt()
+fun onlineTimeThreshold(): Int {
+    val currentSeconds = System.currentTimeMillis() / TimeUnit.SECONDS.toMillis(1)
+    return (currentSeconds - TimeUnit.HOURS.toSeconds(ONLINE_WINDOW_HOURS.toLong())).toInt()
+}
+
+/**
+ * Calculates the remaining mute time in days and hours.
+ *
+ * @param remainingMillis The remaining time in milliseconds
+ * @return Pair of (days, hours), where days is Int and hours is Double
+ */
+fun formatMuteRemainingTime(remainingMillis: Long): Pair<Int, Double> {
+    if (remainingMillis <= 0) return Pair(0, 0.0)
+    val totalHours = remainingMillis.toDouble() / TimeUnit.HOURS.toMillis(1)
+    val days = (totalHours / TimeUnit.DAYS.toHours(1)).toInt()
+    val hours = totalHours % TimeUnit.DAYS.toHours(1)
+    return Pair(days, hours)
+}

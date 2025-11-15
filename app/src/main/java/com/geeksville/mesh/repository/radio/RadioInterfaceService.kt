@@ -83,6 +83,9 @@ constructor(
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
+    private val _connectionError = MutableSharedFlow<BleError>()
+    val connectionError: SharedFlow<BleError> = _connectionError.asSharedFlow()
+
     // Thread-safe StateFlow for tracking device address changes
     private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr)
     val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
@@ -118,7 +121,7 @@ constructor(
             .onEach { state ->
                 if (state.enabled) {
                     startInterface()
-                } else if (radioIf is BluetoothInterface) {
+                } else if (radioIf is NordicBleInterface) {
                     stopInterface()
                 }
             }
@@ -222,8 +225,12 @@ constructor(
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     fun handleFromRadio(p: ByteArray) {
         if (logReceives) {
-            receivedPacketsLog.write(p)
-            receivedPacketsLog.flush()
+            try {
+                receivedPacketsLog.write(p)
+                receivedPacketsLog.flush()
+            } catch (t: Throwable) {
+                Timber.w(t, "Failed to write receive log in handleFromRadio")
+            }
         }
 
         if (radioIf is SerialInterface) {
@@ -232,8 +239,12 @@ constructor(
 
         // ignoreException { Timber.d("FromRadio: ${MeshProtos.FromRadio.parseFrom(p)}") }
 
-        processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
-        emitReceiveActivity()
+        try {
+            processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
+            emitReceiveActivity()
+        } catch (t: Throwable) {
+            Timber.e(t, "RadioInterfaceService.handleFromRadio failed while emitting data")
+        }
     }
 
     fun onConnect() {
@@ -247,6 +258,11 @@ constructor(
         if (_connectionState.value != newTargetState) {
             broadcastConnectionChanged(newTargetState)
         }
+    }
+
+    fun onDisconnect(error: BleError) {
+        processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(error) }
+        onDisconnect(!error.shouldReconnect)
     }
 
     /** Start our configured interface (if it isn't already running) */

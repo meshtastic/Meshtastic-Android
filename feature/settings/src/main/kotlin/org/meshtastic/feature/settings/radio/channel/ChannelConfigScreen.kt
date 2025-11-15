@@ -48,14 +48,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.channel_name
+import org.meshtastic.core.strings.channels
+import org.meshtastic.core.strings.press_and_drag
+import org.meshtastic.core.strings.send
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
@@ -81,7 +87,7 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     }
 
     ChannelConfigScreen(
-        title = stringResource(id = R.string.channels),
+        title = stringResource(Res.string.channels),
         onBack = onBack,
         settingsList = state.channelList,
         loraConfig = state.radioConfig.lora,
@@ -164,7 +170,7 @@ private fun ChannelConfigScreen(
                     },
                     modifier = Modifier.padding(16.dp),
                 ) {
-                    Icon(Icons.TwoTone.Add, stringResource(R.string.add))
+                    Icon(Icons.TwoTone.Add, stringResource(Res.string.add))
                 }
             }
         },
@@ -186,7 +192,7 @@ private fun ChannelConfigScreen(
                     },
                 )
                 Text(
-                    text = stringResource(R.string.press_and_drag),
+                    text = stringResource(Res.string.press_and_drag),
                     fontSize = 11.sp,
                     modifier = Modifier.padding(start = 16.dp),
                 )
@@ -221,13 +227,13 @@ private fun ChannelConfigScreen(
                     item {
                         PreferenceFooter(
                             enabled = enabled && isEditing,
-                            negativeText = stringResource(R.string.cancel),
+                            negativeText = stringResource(Res.string.cancel),
                             onNegativeClicked = {
                                 focusManager.clearFocus()
                                 settingsListInput.clear()
                                 settingsListInput.addAll(settingsList)
                             },
-                            positiveText = stringResource(R.string.send),
+                            positiveText = stringResource(Res.string.send),
                             onPositiveClicked = {
                                 focusManager.clearFocus()
                                 onPositiveClicked(settingsListInput)
@@ -294,7 +300,7 @@ private fun ChannelConfigScreenPreview() {
                 psk = Channel.default.settings.psk
                 name = Channel.default.name
             },
-            channelSettings { name = stringResource(R.string.channel_name) },
+            channelSettings { name = stringResource(Res.string.channel_name) },
         ),
         loraConfig = Channel.default.loraConfig,
         firmwareVersion = "1.3.2",

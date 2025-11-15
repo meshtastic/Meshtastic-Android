@@ -15,6 +15,5 @@
      along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 <resources>
-    <color name="ic_launcher_background">#67ea94</color>
     <color name="ic_splash">#000000</color>
 </resources>

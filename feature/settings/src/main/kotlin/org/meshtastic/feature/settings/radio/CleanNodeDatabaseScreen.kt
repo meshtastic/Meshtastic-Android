@@ -43,11 +43,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.are_you_sure
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.clean_node_database_confirmation
+import org.meshtastic.core.strings.clean_node_database_description
+import org.meshtastic.core.strings.clean_node_database_title
+import org.meshtastic.core.strings.clean_nodes_older_than
+import org.meshtastic.core.strings.clean_now
+import org.meshtastic.core.strings.clean_unknown_nodes
+import org.meshtastic.core.strings.nodes_queued_for_deletion
 import org.meshtastic.core.ui.component.NodeChip
 
 /**
@@ -75,8 +84,8 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
     }
 
     Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
-        Text(stringResource(R.string.clean_node_database_title))
-        Text(stringResource(R.string.clean_node_database_description), style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(Res.string.clean_node_database_title))
+        Text(stringResource(Res.string.clean_node_database_description), style = MaterialTheme.typography.bodySmall)
         Spacer(modifier = Modifier.height(16.dp))
 
         DaysThresholdFilter(
@@ -100,7 +109,7 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
             modifier = Modifier.fillMaxWidth(),
             enabled = nodesToDelete.isNotEmpty(),
         ) {
-            Text(stringResource(R.string.clean_now))
+            Text(stringResource(Res.string.clean_now))
         }
     }
 }
@@ -129,7 +138,7 @@ private fun DaysThresholdFilter(olderThanDays: Float, onlyUnknownNodes: Boolean,
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             modifier = Modifier.padding(bottom = 8.dp),
-            text = stringResource(R.string.clean_nodes_older_than, olderThanDays.toInt()),
+            text = stringResource(Res.string.clean_nodes_older_than, olderThanDays.toInt()),
         )
         Slider(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -150,7 +159,7 @@ private fun DaysThresholdFilter(olderThanDays: Float, onlyUnknownNodes: Boolean,
 @Composable
 private fun UnknownNodesFilter(onlyUnknownNodes: Boolean, onCheckedChanged: (Boolean) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(stringResource(R.string.clean_unknown_nodes))
+        Text(stringResource(Res.string.clean_unknown_nodes))
         Spacer(Modifier.weight(1f))
         Switch(checked = onlyUnknownNodes, onCheckedChange = onCheckedChanged)
     }
@@ -164,7 +173,7 @@ private fun UnknownNodesFilter(onlyUnknownNodes: Boolean, onCheckedChanged: (Boo
 @Composable
 private fun NodesDeletionPreview(nodesToDelete: List<NodeEntity>) {
     Text(
-        stringResource(R.string.nodes_queued_for_deletion, nodesToDelete.size),
+        stringResource(Res.string.nodes_queued_for_deletion, nodesToDelete.size),
         modifier = Modifier.padding(bottom = 16.dp),
     )
     FlowRow(
@@ -189,9 +198,9 @@ private fun NodesDeletionPreview(nodesToDelete: List<NodeEntity>) {
 private fun ConfirmationDialog(nodesToDeleteCount: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.are_you_sure)) },
-        text = { Text(stringResource(R.string.clean_node_database_confirmation, nodesToDeleteCount)) },
-        confirmButton = { Button(onClick = onConfirm) { Text(stringResource(R.string.clean_now)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        title = { Text(stringResource(Res.string.are_you_sure)) },
+        text = { Text(stringResource(Res.string.clean_node_database_confirmation, nodesToDeleteCount)) },
+        confirmButton = { Button(onClick = onConfirm) { Text(stringResource(Res.string.clean_now)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }

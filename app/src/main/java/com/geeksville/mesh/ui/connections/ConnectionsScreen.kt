@@ -46,8 +46,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,10 +60,20 @@ import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.connected
+import org.meshtastic.core.strings.connected_device
+import org.meshtastic.core.strings.connected_sleeping
+import org.meshtastic.core.strings.connections
+import org.meshtastic.core.strings.must_set_region
+import org.meshtastic.core.strings.not_connected
+import org.meshtastic.core.strings.set_your_region
+import org.meshtastic.core.strings.warning_not_paired
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.TitledCard
@@ -104,7 +112,6 @@ fun ConnectionsScreen(
     val connectionState by
         connectionsViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
-    val context = LocalContext.current
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
@@ -153,18 +160,18 @@ fun ConnectionsScreen(
     LaunchedEffect(connectionState, regionUnset) {
         when (connectionState) {
             ConnectionState.CONNECTED -> {
-                if (regionUnset) R.string.must_set_region else R.string.connected
+                if (regionUnset) Res.string.must_set_region else Res.string.connected
             }
 
-            ConnectionState.DISCONNECTED -> R.string.not_connected
-            ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
-        }.let { scanModel.setErrorText(context.getString(it)) }
+            ConnectionState.DISCONNECTED -> Res.string.not_connected
+            ConnectionState.DEVICE_SLEEP -> Res.string.connected_sleeping
+        }.let { scanModel.setErrorText(getString(it)) }
     }
 
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(R.string.connections),
+                title = stringResource(Res.string.connections),
                 ourNode = ourNode,
                 showNodeChip = ourNode != null && connectionState.isConnected(),
                 canNavigateUp = false,
@@ -190,7 +197,7 @@ fun ConnectionsScreen(
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                             ourNode?.let { node ->
-                                TitledCard(title = stringResource(R.string.connected_device)) {
+                                TitledCard(title = stringResource(Res.string.connected_device)) {
                                     CurrentlyConnectedInfo(
                                         node = node,
                                         onNavigateToNodeDetails = onNavigateToNodeDetails,
@@ -203,7 +210,7 @@ fun ConnectionsScreen(
                                 TitledCard(title = null) {
                                     ListItem(
                                         leadingIcon = Icons.Rounded.Language,
-                                        text = stringResource(id = R.string.set_your_region),
+                                        text = stringResource(Res.string.set_your_region),
                                     ) {
                                         isWaiting = true
                                         radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
@@ -272,7 +279,7 @@ fun ConnectionsScreen(
                                 bondedBleDevices.none { it is DeviceListEntry.Ble && it.bonded }
                         if (showWarningNotPaired) {
                             Text(
-                                text = stringResource(R.string.warning_not_paired),
+                                text = stringResource(Res.string.warning_not_paired),
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(horizontal = 16.dp),

@@ -34,17 +34,40 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.core.location.LocationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.advanced_device_gps
+import org.meshtastic.core.strings.altitude
+import org.meshtastic.core.strings.broadcast_interval
+import org.meshtastic.core.strings.config_position_broadcast_secs_summary
+import org.meshtastic.core.strings.config_position_broadcast_smart_minimum_distance_summary
+import org.meshtastic.core.strings.config_position_broadcast_smart_minimum_interval_secs_summary
+import org.meshtastic.core.strings.config_position_flags_summary
+import org.meshtastic.core.strings.config_position_gps_update_interval_summary
+import org.meshtastic.core.strings.device_gps
+import org.meshtastic.core.strings.fixed_position
+import org.meshtastic.core.strings.gps_en_gpio
+import org.meshtastic.core.strings.gps_mode
+import org.meshtastic.core.strings.gps_receive_gpio
+import org.meshtastic.core.strings.gps_transmit_gpio
+import org.meshtastic.core.strings.latitude
+import org.meshtastic.core.strings.longitude
+import org.meshtastic.core.strings.minimum_distance
+import org.meshtastic.core.strings.minimum_interval
+import org.meshtastic.core.strings.position
+import org.meshtastic.core.strings.position_config_set_fixed_from_phone
+import org.meshtastic.core.strings.position_flags
+import org.meshtastic.core.strings.position_packet
+import org.meshtastic.core.strings.smart_position
+import org.meshtastic.core.strings.update_interval
 import org.meshtastic.core.ui.component.BitwisePreference
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -119,9 +142,8 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         }
     }
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
     RadioConfigScreenList(
-        title = stringResource(id = R.string.position),
+        title = stringResource(Res.string.position),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -143,13 +165,13 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.position_packet)) {
+            TitledCard(title = stringResource(Res.string.position_packet)) {
                 val items = remember { IntervalConfiguration.POSITION_BROADCAST.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.broadcast_interval),
-                    summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
+                    title = stringResource(Res.string.broadcast_interval),
+                    summary = stringResource(Res.string.config_position_broadcast_secs_summary),
                     enabled = state.connected,
-                    items = items.map { it to it.toDisplayString(context = context) },
+                    items = items.map { it to it.toDisplayString() },
                     selectedItem =
                     FixedUpdateIntervals.fromValue(formState.value.positionBroadcastSecs.toLong()) ?: items.first(),
                     onItemSelected = {
@@ -158,7 +180,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.smart_position),
+                    title = stringResource(Res.string.smart_position),
                     checked = formState.value.positionBroadcastSmartEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { positionBroadcastSmartEnabled = it } },
@@ -168,11 +190,11 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     HorizontalDivider()
                     val smartItems = remember { IntervalConfiguration.SMART_BROADCAST_MINIMUM.allowedIntervals }
                     DropDownPreference(
-                        title = stringResource(R.string.minimum_interval),
+                        title = stringResource(Res.string.minimum_interval),
                         summary =
-                        stringResource(id = R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
+                        stringResource(Res.string.config_position_broadcast_smart_minimum_interval_secs_summary),
                         enabled = state.connected,
-                        items = smartItems.map { it to it.toDisplayString(context = context) },
+                        items = smartItems.map { it to it.toDisplayString() },
                         selectedItem =
                         FixedUpdateIntervals.fromValue(formState.value.broadcastSmartMinimumIntervalSecs.toLong())
                             ?: smartItems.first(),
@@ -183,9 +205,8 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     )
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(R.string.minimum_distance),
-                        summary =
-                        stringResource(id = R.string.config_position_broadcast_smart_minimum_distance_summary),
+                        title = stringResource(Res.string.minimum_distance),
+                        summary = stringResource(Res.string.config_position_broadcast_smart_minimum_distance_summary),
                         value = formState.value.broadcastSmartMinimumDistance,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -197,9 +218,9 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.device_gps)) {
+            TitledCard(title = stringResource(Res.string.device_gps)) {
                 SwitchPreference(
-                    title = stringResource(R.string.fixed_position),
+                    title = stringResource(Res.string.fixed_position),
                     checked = formState.value.fixedPosition,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { fixedPosition = it } },
@@ -208,7 +229,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 if (formState.value.fixedPosition) {
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(R.string.latitude),
+                        title = stringResource(Res.string.latitude),
                         value = locationInput.latitude,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -220,7 +241,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     )
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(R.string.longitude),
+                        title = stringResource(Res.string.longitude),
                         value = locationInput.longitude,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -232,7 +253,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     )
                     HorizontalDivider()
                     EditTextPreference(
-                        title = stringResource(R.string.altitude),
+                        title = stringResource(Res.string.altitude),
                         value = locationInput.altitude,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -243,12 +264,12 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         enabled = state.connected,
                         onClick = { coroutineScope.launch { locationPermissionState.launchPermissionRequest() } },
                     ) {
-                        Text(text = stringResource(R.string.position_config_set_fixed_from_phone))
+                        Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
                     }
                 } else {
                     HorizontalDivider()
                     DropDownPreference(
-                        title = stringResource(R.string.gps_mode),
+                        title = stringResource(Res.string.gps_mode),
                         enabled = state.connected,
                         items =
                         PositionConfig.GpsMode.entries
@@ -260,10 +281,10 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     HorizontalDivider()
                     val items = remember { IntervalConfiguration.GPS_UPDATE.allowedIntervals }
                     DropDownPreference(
-                        title = stringResource(R.string.update_interval),
-                        summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
+                        title = stringResource(Res.string.update_interval),
+                        summary = stringResource(Res.string.config_position_gps_update_interval_summary),
                         enabled = state.connected,
-                        items = items.map { it to it.toDisplayString(context = context) },
+                        items = items.map { it to it.toDisplayString() },
                         selectedItem =
                         FixedUpdateIntervals.fromValue(formState.value.gpsUpdateInterval.toLong()) ?: items.first(),
                         onItemSelected = {
@@ -274,10 +295,10 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.position_flags)) {
+            TitledCard(title = stringResource(Res.string.position_flags)) {
                 BitwisePreference(
-                    title = stringResource(R.string.position_flags),
-                    summary = stringResource(id = R.string.config_position_flags_summary),
+                    title = stringResource(Res.string.position_flags),
+                    summary = stringResource(Res.string.config_position_flags_summary),
                     value = formState.value.positionFlags,
                     enabled = state.connected,
                     items =
@@ -292,10 +313,10 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.advanced_device_gps)) {
+            TitledCard(title = stringResource(Res.string.advanced_device_gps)) {
                 val pins = remember { gpioPins }
                 DropDownPreference(
-                    title = stringResource(R.string.gps_receive_gpio),
+                    title = stringResource(Res.string.gps_receive_gpio),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.rxGpio,
@@ -303,7 +324,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.gps_transmit_gpio),
+                    title = stringResource(Res.string.gps_transmit_gpio),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.txGpio,
@@ -311,7 +332,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.gps_en_gpio),
+                    title = stringResource(Res.string.gps_en_gpio),
                     enabled = state.connected,
                     items = pins,
                     selectedItem = formState.value.gpsEnGpio,

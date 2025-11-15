@@ -37,6 +37,8 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.database.DatabaseConstants
+import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
@@ -71,6 +73,7 @@ constructor(
     private val uiPrefs: UiPrefs,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val buildConfigProvider: BuildConfigProvider,
+    private val databaseManager: DatabaseManager,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
@@ -105,6 +108,14 @@ constructor(
 
     val appVersionName
         get() = buildConfigProvider.versionName
+
+    // Device DB cache limit (bounded by DatabaseConstants)
+    val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
+
+    fun setDbCacheLimit(limit: Int) {
+        val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
+        databaseManager.setCacheLimit(clamped)
+    }
 
     fun setProvideLocation(value: Boolean) {
         myNodeNum?.let { uiPrefs.setShouldProvideNodeLocation(it, value) }
@@ -142,8 +153,10 @@ constructor(
             // Capture the current node value while we're still on main thread
             val nodes = nodeRepository.nodeDBbyNum.value
 
+            // Converts a MeshProtos.Position (nullable) to a Position, but only if it's valid, otherwise returns null.
+            // The returned Position is guaranteed to be non-null and valid, or null if the input was null or invalid.
             val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
-                meshPosition?.let { Position(it) }.takeIf { it?.isValid() == true }
+                meshPosition?.let { Position(it) }?.takeIf { it.isValid() }
             }
 
             writeToUri(uri) { writer ->
@@ -151,7 +164,7 @@ constructor(
 
                 @Suppress("MaxLineLength")
                 writer.appendLine(
-                    "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"",
+                    "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance(m)\",\"hop limit\",\"payload\"",
                 )
 
                 // Packets are ordered by time, we keep most recent position of

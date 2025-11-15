@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="node_filter_placeholder">Φίλτρο</string>
+    <string name="node_sort_alpha">A-Ω</string>
+    <string name="node_sort_channel">Κανάλι</string>
+    <string name="node_sort_distance">Απόσταση</string>
+    <string name="node_sort_via_mqtt">μέσω MQTT</string>
+    <string name="via_mqtt">μέσω MQTT</string>
+    <string name="routing_error_timeout">Λήξη χρονικού ορίου</string>
+    <string name="routing_error_bad_request">Εσφαλμένο Αίτημα</string>
+    <string name="routing_error_pki_unknown_pubkey">Άγνωστο Δημόσιο Κλειδί</string>
+    <!-- Position Config -->
+    <string name="channel_name">Όνομα Καναλιού</string>
+    <string name="qr_code">Κώδικας QR</string>
+    <string name="application_icon">εικονίδιο εφαρμογής</string>
+    <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
+    <string name="send">Αποστολή</string>
+    <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: https://github.com/orgs/meshtastic/discussions\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
+    <string name="you">Εσύ</string>
+    <string name="accept">Αποδοχή</string>
+    <string name="cancel">Ακύρωση</string>
+    <string name="save_changes">Αποθήκευση</string>
+    <string name="new_channel_rcvd">Λήψη URL νέου καναλιού</string>
+    <string name="report_bug">Αναφορά Σφάλματος</string>
+    <string name="report_a_bug">Αναφέρετε ένα σφάλμα</string>
+    <string name="report_bug_text">Είστε σίγουροι ότι θέλετε να αναφέρετε ένα σφαλμα? Μετά την αναφορά δημοσιεύστε στο https://github.com/orgs/meshtastic/discussions ώστε να συνδέσουμε την αναφορά με το συμβάν.</string>
+    <string name="report">Αναφορά</string>
+    <string name="pairing_completed">Η διαδικασία pairing ολοκληρώθηκε, εκκίνηση υπηρεσίας</string>
+    <string name="pairing_failed_try_again">Η διαδικασία ζευγοποιησης απέτυχε, παρακαλώ επιλέξτε πάλι</string>
+    <string name="location_disabled">Η πρόσβαση στην τοποθεσία είναι απενεργοποιημένη, δεν μπορεί να παρέχει θέση στο πλέγμα.</string>
+    <string name="share">Κοινοποίηση</string>
+    <string name="disconnected">Αποσυνδεδεμένο</string>
+    <string name="device_sleeping">Συσκευή σε ύπνωση</string>
+    <string name="ip_address">IP διεύθυνση:</string>
+    <string name="ip_port">Θύρα:</string>
+    <string name="connected_to">Συνδεδεμένο στο radio (%1$s)</string>
+    <string name="not_connected">Αποσυνδεδεμένο</string>
+    <string name="connected_sleeping">Συνδεδεμένο στο radio, αλλά βρίσκεται σε ύπνωση</string>
+    <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>
+    <string name="must_update">Πρέπει να ενημερώσετε την εφαρμογή μέσω Google Play store (ή Github). Είναι πολύ παλαιά ώστε να συνδεθεί με το radio.</string>
+    <string name="none">Κανένα (απενεργοποιημένο)</string>
+    <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας</string>
+    <string name="about">Σχετικά</string>
+    <string name="channel_invalid">Αυτό το κανάλι URL δεν είναι ορθό και δεν μπορεί να χρησιμοποιηθεί</string>
+    <string name="debug_panel">Πίνακας αποσφαλμάτωσης</string>
+    <string name="clear">Καθαρό, Εκκαθάριση,</string>
+    <string name="message_delivery_status">Κατάσταση παράδοσης μηνύματος</string>
+    <string name="firmware_too_old">Απαιτείται ενημέρωση υλικολογισμικού.</string>
+    <string name="firmware_old">Το λογισμικό του πομποδεκτη είναι πολύ παλιό για να μιλήσει σε αυτήν την εφαρμογή. Για περισσότερες πληροφορίες σχετικά με αυτό ανατρέξτε στον <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">οδηγό εγκατάστασης του Firmware</a>.</string>
+    <string name="okay">Εντάξει</string>
+    <string name="must_set_region">Πρέπει να ορίσετε μια περιοχή!</string>
+    <string name="reset">Επαναφορά</string>
+    <string name="scan">Σάρωση</string>
+    <string name="add_network_device">Προσθήκη</string>
+    <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>
+    <string name="reset_to_defaults">Επαναφορά προεπιλογών</string>
+    <string name="apply">Εφαρμογή</string>
+    <string name="theme">Θέμα</string>
+    <string name="theme_light">Φωτεινό</string>
+    <string name="theme_dark">Σκούρο</string>
+    <string name="theme_system">Προκαθορισμένο του συστήματος</string>
+    <string name="choose_theme">Επέλεξε θέμα</string>
+    <string name="provide_location_to_mesh">Παρέχετε τοποθεσία στο πλέγμα</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Διαγραφή μηνύματος;</item>
+        <item quantity="other">Διαγραφή %1$s μηνυμάτων;</item>
+    </plurals>
+    <string name="delete">Διαγραφή</string>
+    <string name="delete_for_everyone">Διαγραφή για όλους</string>
+    <string name="delete_for_me">Διαγραφή από μένα</string>
+    <string name="select_all">Επιλογή όλων</string>
+    <string name="map_style_selection">Επιλογή Ύφους</string>
+    <string name="map_download_region">Λήψη Περιοχής</string>
+    <string name="name">Ονομα</string>
+    <string name="description">Περιγραφή</string>
+    <string name="locked">Κλειδωμένο</string>
+    <string name="save">Αποθήκευση</string>
+    <string name="preferences_language">Γλώσσα</string>
+    <string name="preferences_system_default">Προκαθορισμένο του συστήματος</string>
+    <string name="resend">Αποστολή ξανά</string>
+    <string name="shutdown">Τερματισμός λειτουργίας</string>
+    <string name="reboot">Επανεκκίνηση</string>
+    <string name="traceroute">Traceroute</string>
+    <string name="intro_show">Προβολή Εισαγωγής</string>
+    <string name="message">Μήνυμα</string>
+    <string name="quick_chat">Γρήγορες επιλογές συνομιλίας</string>
+    <string name="quick_chat_new">Νέα γρήγορη συνομιλία</string>
+    <string name="quick_chat_edit">Επεξεργασία ταχείας συνομιλίας</string>
+    <string name="quick_chat_instant">Άμεση αποστολή</string>
+    <string name="factory_reset">Επαναφορά εργοστασιακών ρυθμίσεων</string>
+    <string name="direct_message">Άμεσο Μήνυμα</string>
+    <string name="error">Σφάλμα</string>
+    <string name="ignore">Παράβλεψη</string>
+    <string name="map_select_download_region">Επιλογή περιοχής λήψης</string>
+    <string name="map_start_download">Εκκίνηση Λήψης</string>
+    <string name="close">Κλείσιμο</string>
+    <string name="radio_configuration">Ρυθμίσεις συσκευής</string>
+    <string name="module_settings">Ρυθμίσεις πρόσθετου</string>
+    <string name="add">Προσθήκη</string>
+    <string name="edit">Επεξεργασία</string>
+    <string name="calculating">Υπολογισμός…</string>
+    <string name="map_offline_manager">Διαχειριστής Εκτός Δικτύου</string>
+    <string name="map_cache_size">Μέγεθος τρέχουσας προσωρινής μνήμης</string>
+    <string name="map_cache_info">Χωρητικότητα προσωρινής μνήμης: %1$d MB\nΧρήση προσωρινής μνήμης: %2$d MB</string>
+    <string name="map_purge_success">Η προσωρινή μνήμη SQL καθαρίστηκε για %1$s</string>
+    <string name="map_cache_manager">Διαχείριση Προσωρινής Αποθήκευσης</string>
+    <string name="map_download_complete">Η λήψη ολοκληρώθηκε!</string>
+    <string name="waypoint_edit">Επεξεργασία σημείου διαδρομής</string>
+    <string name="waypoint_delete">Διαγραφή σημείου πορείας;</string>
+    <string name="waypoint_new">Νέο σημείο πορείας</string>
+    <string name="remove">Διαγραφή</string>
+    <string name="remove_node_text">Αυτός ο κόμβος θα αφαιρεθεί από τη λίστα σας έως ότου ο κόμβος σας λάβει εκ νέου δεδομένα από αυτόν.</string>
+    <string name="mute_notifications">Σίγαση ειδοποιήσεων</string>
+    <string name="mute_8_hours">8 ώρες</string>
+    <string name="mute_1_week">1 εβδομάδα</string>
+    <string name="mute_always">Πάντα</string>
+    <string name="replace">Αντικατάσταση</string>
+    <string name="wifi_qr_code_scan">Σάρωση QR κωδικού WiFi</string>
+    <string name="wifi_qr_code_error">Μη έγκυρη μορφή QR διαπιστευτηρίων WiFi</string>
+    <string name="battery">Μπαταρία</string>
+    <string name="temperature">Θερμοκρασία</string>
+    <string name="humidity">Υγρασία</string>
+    <string name="logs">Αρχεία καταγραφής</string>
+    <string name="info">Πληροφορίες</string>
+    <string name="encryption_psk">Κοινόχρηστο Κλειδί</string>
+    <string name="encryption_pkc">Κρυπτογράφηση Δημόσιου Κλειδιού</string>
+    <string name="encryption_error">Ασυμφωνία δημόσιου κλειδιού</string>
+    <string name="position_log">Αρχείο Καταγραφής Τοποθεσίας</string>
+    <string name="administration">Διαχείριση</string>
+    <string name="remote_admin">Απομακρυσμένη Διαχείριση</string>
+    <string name="copy">Αντιγραφή</string>
+    <string name="favorite">Αγαπημένο</string>
+    <string name="channel_1">Κανάλι 1</string>
+    <string name="channel_2">Κανάλι 2</string>
+    <string name="channel_3">Κανάλι 3</string>
+    <string name="voltage">Τάση</string>
+    <string name="i_know_what_i_m_doing">Ξέρω τι κάνω.</string>
+    <string name="baro_pressure">Βαρομετρική Πίεση</string>
+    <string name="user">Χρήστης</string>
+    <string name="channels">Κανάλια</string>
+    <string name="device">Συσκευή</string>
+    <string name="position">Τοποθεσία</string>
+    <string name="network">Δίκτυο</string>
+    <string name="display">Οθόνη</string>
+    <string name="lora">LoRa</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="security">Ασφάλεια</string>
+    <string name="mqtt">MQTT</string>
+    <string name="telemetry">Τηλεμετρία</string>
+    <string name="audio">Ήχος</string>
+    <string name="bluetooth_config">Ρυθμίσεις Bluetooth</string>
+    <string name="details">Λεπτομέρειες</string>
+    <string name="red">Κόκκινο</string>
+    <string name="green">Πράσινο</string>
+    <string name="blue">Μπλε</string>
+    <string name="messages">Μηνύματα</string>
+    <string name="device_config">Συσκευή</string>
+    <string name="display_config">Οθόνη</string>
+    <string name="lora_config">LoRa</string>
+    <string name="region_frequency_plan">Περιφέρεια</string>
+    <string name="address">Διεύθυνση</string>
+    <string name="username">Όνομα χρήστη</string>
+    <string name="password">Κωδικός πρόσβασης</string>
+    <string name="network_config">Δίκτυο</string>
+    <string name="ssid">SSID</string>
+    <string name="psk">PSK</string>
+    <string name="ip">IP</string>
+    <string name="position_config">Τοποθεσία</string>
+    <string name="latitude">Γεωγραφικό Πλάτος</string>
+    <string name="longitude">Γεωγραφικό Μήκος</string>
+    <string name="altitude_meters">Υψόμετρο (μέτρα)</string>
+    <string name="security_config">Ασφάλεια</string>
+    <string name="public_key">Δημόσιο Κλειδί</string>
+    <string name="private_key">Ιδιωτικό Κλειδί</string>
+    <string name="timeout">Λήξη χρονικού ορίου</string>
+    <string name="dew_point">Σημείο Δρόσου</string>
+    <string name="distance">Απόσταση</string>
+    <string name="weight">Βάρος</string>
+    <string name="url">URL</string>
+    <string name="bottom_nav_settings">Ρυθμίσεις</string>
+    <string name="reply">Απάντηση</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Μήνυμα</string>
+    <string name="settings">ρυθμίσεις</string>
+    <string name="eight_hours">8 Ώρες</string>
+    <string name="one_day">24 Ώρες</string>
+    <string name="two_days">48 Ώρες</string>
+</resources>

@@ -35,12 +35,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.dbm_value
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SignalCellular0Bar
 import org.meshtastic.core.ui.icon.SignalCellular1Bar
@@ -116,7 +117,7 @@ fun MaterialBluetoothSignalInfo(rssi: Int, modifier: Modifier = Modifier) {
     MaterialSignalInfo(
         modifier = modifier,
         signalBars = getBluetoothSignalBars(rssi = rssi),
-        signalStrengthValue = stringResource(R.string.dbm_value, rssi),
+        signalStrengthValue = stringResource(Res.string.dbm_value, rssi),
         typeIcon = Icons.Rounded.Bluetooth,
     )
 }

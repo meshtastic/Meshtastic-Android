@@ -34,17 +34,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add_a_note
+import org.meshtastic.core.strings.notes
+import org.meshtastic.core.strings.save
 import org.meshtastic.core.ui.component.TitledCard
 
 @Composable
 fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modifier = Modifier) {
     if (node.isFavorite) {
-        TitledCard(title = stringResource(R.string.notes), modifier = modifier) {
+        TitledCard(title = stringResource(Res.string.notes), modifier = modifier) {
             val originalNotes = node.notes
             var notes by remember(node.notes) { mutableStateOf(node.notes) }
             val edited = notes.trim() != originalNotes.trim()
@@ -54,7 +57,7 @@ fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modif
                 value = notes,
                 onValueChange = { notes = it },
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
-                placeholder = { Text(stringResource(id = R.string.add_a_note)) },
+                placeholder = { Text(stringResource(Res.string.add_a_note)) },
                 trailingIcon = {
                     IconButton(
                         onClick = {
@@ -63,7 +66,7 @@ fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modif
                         },
                         enabled = edited,
                     ) {
-                        Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(id = R.string.save))
+                        Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(Res.string.save))
                     }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

@@ -35,13 +35,19 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.ByteString
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.gpio_pin
+import org.meshtastic.core.strings.ignore_incoming
+import org.meshtastic.core.strings.name
+import org.meshtastic.core.strings.type
 import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePin
 import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePinType
 import org.meshtastic.proto.copy
@@ -84,7 +90,7 @@ inline fun <reified T> EditListPreference(
                     ) {
                         Icon(
                             imageVector = Icons.TwoTone.Close,
-                            contentDescription = stringResource(R.string.delete),
+                            contentDescription = stringResource(Res.string.delete),
                             modifier = Modifier.wrapContentSize(),
                         )
                     }
@@ -119,7 +125,7 @@ inline fun <reified T> EditListPreference(
                 }
                 is RemoteHardwarePin -> {
                     EditTextPreference(
-                        title = stringResource(R.string.gpio_pin),
+                        title = stringResource(Res.string.gpio_pin),
                         value = value.gpioPin,
                         enabled = enabled,
                         keyboardActions = keyboardActions,
@@ -131,7 +137,7 @@ inline fun <reified T> EditListPreference(
                         },
                     )
                     EditTextPreference(
-                        title = stringResource(R.string.name),
+                        title = stringResource(Res.string.name),
                         value = value.name,
                         maxSize = 14, // name max_size:15
                         enabled = enabled,
@@ -146,7 +152,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                     DropDownPreference(
-                        title = stringResource(R.string.type),
+                        title = stringResource(Res.string.type),
                         enabled = enabled,
                         items =
                         RemoteHardwarePinType.entries
@@ -176,7 +182,7 @@ inline fun <reified T> EditListPreference(
             },
             enabled = maxCount > listState.size,
         ) {
-            Text(text = stringResource(R.string.add))
+            Text(text = stringResource(Res.string.add))
         }
     }
 }
@@ -186,7 +192,7 @@ inline fun <reified T> EditListPreference(
 private fun EditListPreferencePreview() {
     Column {
         EditListPreference(
-            title = stringResource(R.string.ignore_incoming),
+            title = stringResource(Res.string.ignore_incoming),
             summary = "This is a summary",
             list = listOf(12345, 67890),
             maxCount = 4,

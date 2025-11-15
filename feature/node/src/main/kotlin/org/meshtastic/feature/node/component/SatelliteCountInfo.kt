@@ -23,8 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.sats
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
@@ -36,7 +38,7 @@ fun SatelliteCountInfo(
     IconInfo(
         modifier = modifier,
         icon = Icons.TwoTone.SatelliteAlt,
-        contentDescription = stringResource(org.meshtastic.core.strings.R.string.sats),
+        contentDescription = stringResource(Res.string.sats),
         text = "$satCount",
         contentColor = contentColor,
     )

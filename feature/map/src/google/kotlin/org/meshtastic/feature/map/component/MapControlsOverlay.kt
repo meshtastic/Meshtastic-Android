@@ -32,8 +32,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.res.stringResource
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.manage_map_layers
+import org.meshtastic.core.strings.map_filter
+import org.meshtastic.core.strings.map_tile_source
+import org.meshtastic.core.strings.orient_north
+import org.meshtastic.core.strings.toggle_my_position
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.MapViewModel
 
@@ -69,7 +74,7 @@ fun MapControlsOverlay(
             if (isNodeMap) {
                 MapButton(
                     icon = Icons.Outlined.Tune,
-                    contentDescription = stringResource(id = R.string.map_filter),
+                    contentDescription = stringResource(Res.string.map_filter),
                     onClick = onToggleMapFilterMenu,
                 )
                 NodeMapFilterDropdown(
@@ -81,7 +86,7 @@ fun MapControlsOverlay(
                 Box {
                     MapButton(
                         icon = Icons.Outlined.Tune,
-                        contentDescription = stringResource(id = R.string.map_filter),
+                        contentDescription = stringResource(Res.string.map_filter),
                         onClick = onToggleMapFilterMenu,
                     )
                     MapFilterDropdown(
@@ -95,7 +100,7 @@ fun MapControlsOverlay(
             Box {
                 MapButton(
                     icon = Icons.Outlined.Map,
-                    contentDescription = stringResource(id = R.string.map_tile_source),
+                    contentDescription = stringResource(Res.string.map_tile_source),
                     onClick = onToggleMapTypeMenu,
                 )
                 MapTypeDropdown(
@@ -108,7 +113,7 @@ fun MapControlsOverlay(
 
             MapButton(
                 icon = Icons.Outlined.Layers,
-                contentDescription = stringResource(id = R.string.manage_map_layers),
+                contentDescription = stringResource(Res.string.manage_map_layers),
                 onClick = onManageLayersClicked,
             )
 
@@ -121,7 +126,7 @@ fun MapControlsOverlay(
                     } else {
                         Icons.Outlined.MyLocation
                     },
-                    contentDescription = stringResource(id = R.string.toggle_my_position),
+                    contentDescription = stringResource(Res.string.toggle_my_position),
                     onClick = onToggleLocationTracking,
                 )
             }
@@ -137,7 +142,7 @@ private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Bool
         modifier = Modifier.rotate(-bearing),
         icon = icon,
         iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { bearing == 0f },
-        contentDescription = stringResource(id = R.string.orient_north),
+        contentDescription = stringResource(Res.string.orient_north),
         onClick = onClick,
     )
 }

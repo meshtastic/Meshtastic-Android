@@ -50,13 +50,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.debug_active_filters
+import org.meshtastic.core.strings.debug_filter_add
+import org.meshtastic.core.strings.debug_filter_clear
+import org.meshtastic.core.strings.debug_filter_included
+import org.meshtastic.core.strings.debug_filters
+import org.meshtastic.core.strings.match_all
+import org.meshtastic.core.strings.match_any
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 
 @Composable
@@ -95,7 +102,7 @@ fun DebugCustomFilterInput(
             },
             enabled = customFilterText.isNotBlank(),
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.debug_filter_add))
+            Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(Res.string.debug_filter_add))
         }
     }
 }
@@ -144,7 +151,7 @@ internal fun DebugPresetFilters(
                         if (filter in filterTexts) {
                             Icon(
                                 imageVector = Icons.Filled.Done,
-                                contentDescription = stringResource(id = R.string.debug_filter_included),
+                                contentDescription = stringResource(Res.string.debug_filter_included),
                             )
                         }
                     },
@@ -173,7 +180,10 @@ internal fun DebugFilterBar(
         Box {
             TextButton(onClick = { showFilterMenu = !showFilterMenu }) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = stringResource(R.string.debug_filters), style = TextStyle(fontWeight = FontWeight.Bold))
+                    Text(
+                        text = stringResource(Res.string.debug_filters),
+                        style = TextStyle(fontWeight = FontWeight.Bold),
+                    )
                     Icon(
                         imageVector =
                         if (filterTexts.isNotEmpty()) {
@@ -181,7 +191,7 @@ internal fun DebugFilterBar(
                         } else {
                             Icons.TwoTone.FilterAltOff
                         },
-                        contentDescription = stringResource(id = R.string.debug_filters),
+                        contentDescription = stringResource(Res.string.debug_filters),
                     )
                 }
             }
@@ -231,7 +241,7 @@ internal fun DebugActiveFilters(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = stringResource(R.string.debug_active_filters),
+                    text = stringResource(Res.string.debug_active_filters),
                     style = TextStyle(fontWeight = FontWeight.Bold),
                 )
                 TextButton(
@@ -247,16 +257,16 @@ internal fun DebugActiveFilters(
                 ) {
                     Text(
                         if (filterMode == FilterMode.OR) {
-                            stringResource(R.string.match_any)
+                            stringResource(Res.string.match_any)
                         } else {
-                            stringResource(R.string.match_all)
+                            stringResource(Res.string.match_all)
                         },
                     )
                 }
                 IconButton(onClick = { onFilterTextsChange(emptyList()) }) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(id = R.string.debug_filter_clear),
+                        contentDescription = stringResource(Res.string.debug_filter_clear),
                     )
                 }
             }

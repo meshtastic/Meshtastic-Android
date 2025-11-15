@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -43,7 +42,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.contact.ContactItem
 import com.geeksville.mesh.ui.contact.ContactsViewModel
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.sample_message
+import org.meshtastic.core.strings.share
+import org.meshtastic.core.strings.share_to
+import org.meshtastic.core.strings.some_username
+import org.meshtastic.core.strings.unknown_username
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 
@@ -61,7 +66,7 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(id = R.string.share_to),
+                title = stringResource(Res.string.share_to),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -94,7 +99,7 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(id = R.string.share),
+                    contentDescription = stringResource(Res.string.share),
                 )
             }
         }
@@ -110,10 +115,10 @@ private fun ShareScreenPreview() {
             listOf(
                 Contact(
                     contactKey = "0^all",
-                    shortName = stringResource(R.string.some_username),
-                    longName = stringResource(R.string.unknown_username),
+                    shortName = stringResource(Res.string.some_username),
+                    longName = stringResource(Res.string.unknown_username),
                     lastMessageTime = "3 minutes ago",
-                    lastMessageText = stringResource(R.string.sample_message),
+                    lastMessageText = stringResource(Res.string.sample_message),
                     unreadCount = 2,
                     messageCount = 10,
                     isMuted = true,

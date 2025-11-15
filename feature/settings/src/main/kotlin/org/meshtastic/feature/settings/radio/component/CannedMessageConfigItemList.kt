@@ -27,12 +27,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.allow_input_source
+import org.meshtastic.core.strings.canned_message
+import org.meshtastic.core.strings.canned_message_config
+import org.meshtastic.core.strings.canned_message_enabled
+import org.meshtastic.core.strings.generate_input_event_on_ccw
+import org.meshtastic.core.strings.generate_input_event_on_cw
+import org.meshtastic.core.strings.generate_input_event_on_press
+import org.meshtastic.core.strings.gpio_pin_for_rotary_encoder_a_port
+import org.meshtastic.core.strings.gpio_pin_for_rotary_encoder_b_port
+import org.meshtastic.core.strings.gpio_pin_for_rotary_encoder_press_port
+import org.meshtastic.core.strings.messages
+import org.meshtastic.core.strings.rotary_encoder_1_enabled
+import org.meshtastic.core.strings.send_bell
+import org.meshtastic.core.strings.up_down_select_input_enabled
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -52,7 +66,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.canned_message),
+        title = stringResource(Res.string.canned_message),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -69,9 +83,9 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.canned_message_config)) {
+            TitledCard(title = stringResource(Res.string.canned_message_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.canned_message_enabled),
+                    title = stringResource(Res.string.canned_message_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
@@ -79,7 +93,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.rotary_encoder_1_enabled),
+                    title = stringResource(Res.string.rotary_encoder_1_enabled),
                     checked = formState.value.rotary1Enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { rotary1Enabled = it } },
@@ -87,28 +101,28 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.gpio_pin_for_rotary_encoder_a_port),
+                    title = stringResource(Res.string.gpio_pin_for_rotary_encoder_a_port),
                     value = formState.value.inputbrokerPinA,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { inputbrokerPinA = it } },
                 )
                 EditTextPreference(
-                    title = stringResource(R.string.gpio_pin_for_rotary_encoder_b_port),
+                    title = stringResource(Res.string.gpio_pin_for_rotary_encoder_b_port),
                     value = formState.value.inputbrokerPinB,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { inputbrokerPinB = it } },
                 )
                 EditTextPreference(
-                    title = stringResource(R.string.gpio_pin_for_rotary_encoder_press_port),
+                    title = stringResource(Res.string.gpio_pin_for_rotary_encoder_press_port),
                     value = formState.value.inputbrokerPinPress,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { inputbrokerPinPress = it } },
                 )
                 DropDownPreference(
-                    title = stringResource(R.string.generate_input_event_on_press),
+                    title = stringResource(Res.string.generate_input_event_on_press),
                     enabled = state.connected,
                     items =
                     CannedMessageConfig.InputEventChar.entries
@@ -119,7 +133,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.generate_input_event_on_cw),
+                    title = stringResource(Res.string.generate_input_event_on_cw),
                     enabled = state.connected,
                     items =
                     CannedMessageConfig.InputEventChar.entries
@@ -130,7 +144,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                 )
                 HorizontalDivider()
                 DropDownPreference(
-                    title = stringResource(R.string.generate_input_event_on_ccw),
+                    title = stringResource(Res.string.generate_input_event_on_ccw),
                     enabled = state.connected,
                     items =
                     CannedMessageConfig.InputEventChar.entries
@@ -141,7 +155,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.up_down_select_input_enabled),
+                    title = stringResource(Res.string.up_down_select_input_enabled),
                     checked = formState.value.updown1Enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { updown1Enabled = it } },
@@ -149,7 +163,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.allow_input_source),
+                    title = stringResource(Res.string.allow_input_source),
                     value = formState.value.allowInputSource,
                     maxSize = 63, // allow_input_source max_size:16
                     enabled = state.connected,
@@ -160,7 +174,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                     onValueChanged = { formState.value = formState.value.copy { allowInputSource = it } },
                 )
                 SwitchPreference(
-                    title = stringResource(R.string.send_bell),
+                    title = stringResource(Res.string.send_bell),
                     checked = formState.value.sendBell,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { sendBell = it } },
@@ -168,7 +182,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.messages),
+                    title = stringResource(Res.string.messages),
                     value = messagesInput,
                     maxSize = 200, // messages max_size:201
                     enabled = state.connected,

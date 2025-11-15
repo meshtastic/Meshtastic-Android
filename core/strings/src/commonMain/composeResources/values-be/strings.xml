@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="fallback_node_name">Meshtastic</string>
+    <string name="node_filter_placeholder">Фільтраваць</string>
+    <string name="desc_node_filter_clear">скінуць фільтр</string>
+    <string name="node_filter_title">Фільтраваць па</string>
+    <string name="node_filter_include_unknown">Паказаць невядомыя</string>
+    <string name="node_filter_only_online">Схаваць вузлы па-за сеткай</string>
+    <string name="node_filter_only_direct">Паказваць толькі прамыя вузлы</string>
+    <string name="node_filter_ignored">Вы праглядаеце ігнараваныя вузлы,\nНацісніце, каб вярнуцца да спісу вузлоў.</string>
+    <string name="node_filter_show_details">Паказаць падрабязнасці</string>
+    <string name="node_sort_title">Сартаваць па</string>
+    <string name="node_sort_button">Параметры сартавання вузлоў</string>
+    <string name="node_sort_alpha">Па алфавіце</string>
+    <string name="node_sort_channel">Канал</string>
+    <string name="node_sort_distance">Адлегласць</string>
+    <string name="node_sort_last_heard">Апошні раз пачуты</string>
+    <string name="node_sort_via_mqtt">праз MQTT</string>
+    <string name="via_mqtt">праз MQTT</string>
+    <string name="node_sort_via_favorite">Абраныя</string>
+    <string name="node_filter_show_ignored">Ігнараваныя вузлы</string>
+    <string name="unrecognized">Нераспазнанае</string>
+    <string name="message_status_enroute">Чакае пацвярджэння</string>
+    <string name="message_status_queued">У чарзе на адпраўку</string>
+    <string name="routing_error_none">Пацверджана</string>
+    <string name="routing_error_no_route">Няма маршруту</string>
+    <string name="routing_error_got_nak">Атрымана адмоўнае пацвярджэнне</string>
+    <string name="routing_error_timeout">Скончыўся час чакання</string>
+    <string name="routing_error_no_interface">Няма інтэрфейсу</string>
+    <string name="routing_error_max_retransmit">Дасягнута максімальная колькасць паўторных перадач</string>
+    <string name="routing_error_no_channel">Няма канала</string>
+    <string name="routing_error_too_large">Пакет занадта вялікі</string>
+    <string name="routing_error_no_response">Няма адказу</string>
+    <string name="routing_error_bad_request">Няправільны запыт</string>
+    <string name="routing_error_duty_cycle_limit">Дасягнута рэгіянальнае абмежаванне каэфіцыента працы</string>
+    <string name="routing_error_not_authorized">Не аўтарызавана</string>
+    <string name="routing_error_pki_failed">Зашыфраваная адпраўка не атрымалася</string>
+    <string name="routing_error_pki_unknown_pubkey">Невядомы адкрыты ключ</string>
+    <string name="routing_error_admin_bad_session_key">Няправільны ключ сесіі</string>
+    <string name="routing_error_admin_public_key_unauthorized">Адкрыты ключ не аўтарызаваны</string>
+    <string name="role_client">CLIENT</string>
+    <string name="role_client_desc">Прылада для паведамленняў, што працуе з прыкладаннем або самастойна.</string>
+    <string name="role_client_mute">CLIENT MUTE</string>
+    <string name="role_client_mute_desc">Прылада, якая не перасылае пакеты ад іншых прылад.</string>
+    <string name="role_router">ROUTER</string>
+    <string name="role_router_desc">Інфраструктурны вузел для пашырэння пакрыцця сеткі праз перасылку паведамленняў. Бачны ў спісе вузлоў.</string>
+    <string name="role_router_client">ROUTER CLIENT</string>
+    <string name="role_repeater">REPEATER</string>
+    <string name="role_repeater_desc">Інфраструктурны вузел для пашырэння пакрыцця сеткі праз перасылку паведамленняў з мінімальнымі накладнымі выдаткамі. Не бачны ў спісе вузлоў.</string>
+    <string name="role_tracker">TRACKER</string>
+    <string name="role_tracker_desc">Транслюе пакеты з GPS-каардынатамі з высокім прыярытэтам.</string>
+    <string name="role_sensor">SENSOR</string>
+    <string name="role_tak">TAK</string>
+    <string name="role_tak_desc">Аптымізавана для сувязі з сістэмай ATAK, змяншае руцінныя трансляцыі.</string>
+    <string name="role_client_hidden">CLIENT HIDDEN</string>
+    <string name="role_lost_and_found">LOST AND FOUND</string>
+    <string name="role_tak_tracker">TAK TRACKER</string>
+    <string name="role_router_late">ROUTER LATE</string>
+    <string name="rebroadcast_mode_all">Усе</string>
+    <string name="rebroadcast_mode_all_skip_decoding">Усе, і не разбіраць</string>
+    <string name="rebroadcast_mode_local_only">Толькі мясцовыя</string>
+    <string name="rebroadcast_mode_known_only">Толькі знаёмыя</string>
+    <string name="rebroadcast_mode_none">Нічога</string>
+    <string name="rebroadcast_mode_core_portnums_only">Толькі асноўныя нумары партоў</string>
+    <string name="config_device_tripleClickAsAdHocPing_summary">Адсылае месцазнаходжанне на асноўным канале калі націснуць кнопку тройчы.</string>
+    <!-- Position Config -->
+    <string name="position_packet">Пакет месцазнаходжання</string>
+    <string name="device_gps">GPS на прыладзе</string>
+    <string name="gpio">GPIO</string>
+    <string name="channel_name">Назва канала</string>
+    <string name="qr_code">QR-код</string>
+    <string name="you">Вы</string>
+    <string name="accept">Прыняць</string>
+    <string name="cancel">Скасаваць</string>
+    <string name="save_changes">Запісаць</string>
+    <string name="report_bug">Паведаміць пра памылку</string>
+    <string name="report_a_bug">Паведаміць пра памылку</string>
+    <string name="share">Падзяліцца</string>
+    <string name="new_node_seen">Убачылі новы вузел: %1$s</string>
+    <string name="disconnected">Адлучана</string>
+    <string name="ip_address">IP-адрас:</string>
+    <string name="ip_port">Порт:</string>
+    <string name="connected">Злучаны</string>
+    <string name="not_connected">Не злучана</string>
+    <string name="debug_panel">Панэль адладкі</string>
+    <string name="debug_filters">Фільтры</string>
+    <string name="debug_active_filters">Уключаныя фільтры</string>
+    <string name="debug_filter_add">Дадаць фільтр</string>
+    <string name="okay">Добра</string>
+    <string name="must_set_region">Трэба наладзіць рэгіён!</string>
+    <string name="reset">Скінуць</string>
+    <string name="scan">Шукаць</string>
+    <string name="add_network_device">Дадаць</string>
+    <string name="apply">Прымяніць</string>
+    <string name="theme">Тэма</string>
+    <string name="delete">Прыбраць</string>
+    <string name="delete_for_everyone">Прыбраць для ўсіх</string>
+    <string name="delete_for_me">Прыбраць для мяне</string>
+    <string name="select_all">Вылучыць усе</string>
+    <string name="name">Назва</string>
+    <string name="description">Апісанне</string>
+    <string name="save">Запісаць</string>
+    <string name="preferences_language">Мова</string>
+    <string name="reboot">Перазагрузіць</string>
+    <string name="message">Паведамленне</string>
+    <string name="error">Памылка</string>
+    <string name="ignore">Ігнараваць</string>
+    <string name="add">Дадаць</string>
+    <string name="edit">Змяніць</string>
+    <string name="remove">Прыбраць</string>
+    <string name="mute_8_hours">8 гадзін</string>
+    <string name="mute_1_week">1 тыдзень</string>
+    <string name="mute_always">Назаўсёды</string>
+    <string name="replace">Замяніць</string>
+    <string name="battery">Батарэя</string>
+    <string name="temperature">Тэмпература</string>
+    <string name="humidity">Вільготнасць</string>
+    <string name="logs">Журнал</string>
+    <string name="info">Звесткі</string>
+    <string name="more_details">Больш звестак</string>
+    <string name="position_log">Гісторыя месцазнаходжання</string>
+    <string name="none_quality">Нічога</string>
+    <string name="twenty_four_hours">24г</string>
+    <string name="forty_eight_hours">48г</string>
+    <string name="one_week">1тыд</string>
+    <string name="two_weeks">2тыд</string>
+    <string name="four_weeks">4тыд</string>
+    <string name="channel_1">Канал 1</string>
+    <string name="channel_2">Канал 2</string>
+    <string name="channel_3">Канал 3</string>
+    <string name="i_know_what_i_m_doing">Я ведаю, што я раблю.</string>
+    <string name="udp_enabled">Уключана</string>
+    <string name="user">Карыстальнік</string>
+    <string name="channels">Каналы</string>
+    <string name="device">Прылада</string>
+    <string name="position">Месцазнаходжанне</string>
+    <string name="network">Сетка</string>
+    <string name="display">Экран</string>
+    <string name="lora">LoRa</string>
+    <string name="security">Бяспека</string>
+    <string name="mqtt">MQTT</string>
+    <string name="hide_password">Схаваць пароль</string>
+    <string name="show_password">Паказаць пароль</string>
+    <string name="environment">Асяроддзе</string>
+    <string name="red">Чырвоны</string>
+    <string name="green">Зялёны</string>
+    <string name="blue">Сіні</string>
+    <string name="messages">Паведамленні</string>
+    <string name="device_config">Прылада</string>
+    <string name="display_config">Экран</string>
+    <string name="lora_config">LoRa</string>
+    <string name="region_frequency_plan">Рэгіён</string>
+    <string name="network_config">Сетка</string>
+    <string name="enabled">Уключана</string>
+    <string name="ip">IP</string>
+    <string name="position_config">Месцазнаходжанне</string>
+    <string name="security_config">Бяспека</string>
+    <string name="timeout">Скончыўся час чакання</string>
+    <string name="server">Сервер</string>
+    <string name="distance">Адлегласць</string>
+    <string name="lux">Люкс</string>
+    <string name="meshtastic">Meshtastic</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Паведамленне</string>
+    <string name="intro_welcome">Вітаем у</string>
+    <string name="skip">Прапусціць</string>
+    <string name="map_type_normal">Звычайная</string>
+    <string name="map_type_satellite">Спадарожнік</string>
+    <string name="map_type_terrain">Рэльеф</string>
+    <string name="map_type_hybrid">Гібрыд</string>
+    <string name="eight_hours">8 Гадзін</string>
+    <string name="one_day">24 Гадзін</string>
+    <string name="two_days">48 Гадзін</string>
+</resources>

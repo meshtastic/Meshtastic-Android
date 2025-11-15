@@ -39,14 +39,38 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.protobuf.ByteString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.model.util.toByteString
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.admin_key
+import org.meshtastic.core.strings.admin_keys
+import org.meshtastic.core.strings.administration
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.config_security_admin_key
+import org.meshtastic.core.strings.config_security_debug_log_api_enabled
+import org.meshtastic.core.strings.config_security_is_managed
+import org.meshtastic.core.strings.config_security_private_key
+import org.meshtastic.core.strings.config_security_public_key
+import org.meshtastic.core.strings.config_security_serial_enabled
+import org.meshtastic.core.strings.debug_log_api_enabled
+import org.meshtastic.core.strings.direct_message_key
+import org.meshtastic.core.strings.export_keys
+import org.meshtastic.core.strings.export_keys_confirmation
+import org.meshtastic.core.strings.legacy_admin_channel
+import org.meshtastic.core.strings.logs
+import org.meshtastic.core.strings.managed_mode
+import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.private_key
+import org.meshtastic.core.strings.public_key
+import org.meshtastic.core.strings.regenerate_keys_confirmation
+import org.meshtastic.core.strings.regenerate_private_key
+import org.meshtastic.core.strings.security
+import org.meshtastic.core.strings.serial_console
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditListPreference
@@ -96,8 +120,8 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
     var showEditSecurityConfigDialog by rememberSaveable { mutableStateOf(false) }
     if (showEditSecurityConfigDialog) {
         AlertDialog(
-            title = { Text(text = stringResource(R.string.export_keys)) },
-            text = { Text(text = stringResource(R.string.export_keys_confirmation)) },
+            title = { Text(text = stringResource(Res.string.export_keys)) },
+            text = { Text(text = stringResource(Res.string.export_keys_confirmation)) },
             onDismissRequest = { showEditSecurityConfigDialog = false },
             confirmButton = {
                 TextButton(
@@ -115,7 +139,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         exportConfigLauncher.launch(intent)
                     },
                 ) {
-                    Text(stringResource(R.string.okay))
+                    Text(stringResource(Res.string.okay))
                 }
             },
         )
@@ -123,7 +147,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
 
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
-        title = stringResource(id = R.string.security),
+        title = stringResource(Res.string.security),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -135,10 +159,10 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.direct_message_key)) {
+            TitledCard(title = stringResource(Res.string.direct_message_key)) {
                 EditBase64Preference(
-                    title = stringResource(R.string.public_key),
-                    summary = stringResource(id = R.string.config_security_public_key),
+                    title = stringResource(Res.string.public_key),
+                    summary = stringResource(Res.string.config_security_public_key),
                     value = publicKey,
                     enabled = state.connected,
                     readOnly = true,
@@ -152,8 +176,8 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 )
                 HorizontalDivider()
                 EditBase64Preference(
-                    title = stringResource(R.string.private_key),
-                    summary = stringResource(id = R.string.config_security_private_key),
+                    title = stringResource(Res.string.private_key),
+                    summary = stringResource(Res.string.config_security_private_key),
                     value = formState.value.privateKey,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -167,7 +191,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 HorizontalDivider()
                 NodeActionButton(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    title = stringResource(R.string.regenerate_private_key),
+                    title = stringResource(Res.string.regenerate_private_key),
                     enabled = state.connected,
                     icon = Icons.TwoTone.Warning,
                     onClick = { showKeyGenerationDialog = true },
@@ -175,7 +199,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 HorizontalDivider()
                 NodeActionButton(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    title = stringResource(R.string.export_keys),
+                    title = stringResource(Res.string.export_keys),
                     enabled = state.connected,
                     icon = Icons.TwoTone.Warning,
                     onClick = { showEditSecurityConfigDialog = true },
@@ -183,10 +207,10 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.admin_keys)) {
+            TitledCard(title = stringResource(Res.string.admin_keys)) {
                 EditListPreference(
-                    title = stringResource(R.string.admin_key),
-                    summary = stringResource(id = R.string.config_security_admin_key),
+                    title = stringResource(Res.string.admin_key),
+                    summary = stringResource(Res.string.config_security_admin_key),
                     list = formState.value.adminKeyList,
                     maxCount = 3,
                     enabled = state.connected,
@@ -202,10 +226,10 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.logs)) {
+            TitledCard(title = stringResource(Res.string.logs)) {
                 SwitchPreference(
-                    title = stringResource(R.string.serial_console),
-                    summary = stringResource(id = R.string.config_security_serial_enabled),
+                    title = stringResource(Res.string.serial_console),
+                    summary = stringResource(Res.string.config_security_serial_enabled),
                     checked = formState.value.serialEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { serialEnabled = it } },
@@ -213,8 +237,8 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.debug_log_api_enabled),
-                    summary = stringResource(id = R.string.config_security_debug_log_api_enabled),
+                    title = stringResource(Res.string.debug_log_api_enabled),
+                    summary = stringResource(Res.string.config_security_debug_log_api_enabled),
                     checked = formState.value.debugLogApiEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { debugLogApiEnabled = it } },
@@ -223,10 +247,10 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.administration)) {
+            TitledCard(title = stringResource(Res.string.administration)) {
                 SwitchPreference(
-                    title = stringResource(R.string.managed_mode),
-                    summary = stringResource(id = R.string.config_security_is_managed),
+                    title = stringResource(Res.string.managed_mode),
+                    summary = stringResource(Res.string.config_security_is_managed),
                     checked = formState.value.isManaged,
                     enabled = state.connected && formState.value.adminKeyCount > 0,
                     onCheckedChange = { formState.value = formState.value.copy { isManaged = it } },
@@ -234,7 +258,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.legacy_admin_channel),
+                    title = stringResource(Res.string.legacy_admin_channel),
                     checked = formState.value.adminChannelEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { adminChannelEnabled = it } },
@@ -255,8 +279,8 @@ fun PrivateKeyRegenerateDialog(
     if (showKeyGenerationDialog) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text(text = stringResource(R.string.regenerate_private_key)) },
-            text = { Text(text = stringResource(R.string.regenerate_keys_confirmation)) },
+            title = { Text(text = stringResource(Res.string.regenerate_private_key)) },
+            text = { Text(text = stringResource(Res.string.regenerate_keys_confirmation)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -279,10 +303,10 @@ fun PrivateKeyRegenerateDialog(
                         onConfirm(securityInput)
                     },
                 ) {
-                    Text(stringResource(R.string.okay))
+                    Text(stringResource(Res.string.okay))
                 }
             },
-            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
         )
     }
 }

@@ -24,11 +24,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.analytics_notice
+import org.meshtastic.core.strings.analytics_platforms
+import org.meshtastic.core.strings.datadog_link
+import org.meshtastic.core.strings.firebase_link
+import org.meshtastic.core.strings.for_more_information_see_our_privacy_policy
+import org.meshtastic.core.strings.privacy_url
 import org.meshtastic.core.ui.component.AutoLinkText
 
 @Composable
@@ -39,17 +45,21 @@ fun AnalyticsIntro(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         val textModifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
-        Text(modifier = textModifier, textAlign = TextAlign.Center, text = stringResource(R.string.analytics_notice))
-        Text(modifier = textModifier, textAlign = TextAlign.Center, text = stringResource(R.string.analytics_platforms))
-        AutoLinkText(stringResource(R.string.firebase_link))
-        AutoLinkText(stringResource(R.string.datadog_link))
+        Text(modifier = textModifier, textAlign = TextAlign.Center, text = stringResource(Res.string.analytics_notice))
+        Text(
+            modifier = textModifier,
+            textAlign = TextAlign.Center,
+            text = stringResource(Res.string.analytics_platforms),
+        )
+        AutoLinkText(stringResource(Res.string.firebase_link))
+        AutoLinkText(stringResource(Res.string.datadog_link))
 
         Text(
             modifier = textModifier,
             textAlign = TextAlign.Center,
-            text = stringResource(R.string.for_more_information_see_our_privacy_policy),
+            text = stringResource(Res.string.for_more_information_see_our_privacy_policy),
         )
-        AutoLinkText(text = stringResource(R.string.privacy_url))
+        AutoLinkText(text = stringResource(Res.string.privacy_url))
     }
 }
 

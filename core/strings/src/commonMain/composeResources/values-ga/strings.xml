@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="node_filter_placeholder">Scagaire</string>
+    <string name="desc_node_filter_clear">Cuir scagaire na nóid in áirithe</string>
+    <string name="node_filter_include_unknown">Cuir Anaithnid san áireamh</string>
+    <string name="node_filter_show_details">Taispeáin sonraí</string>
+    <string name="node_sort_channel">Cainéal</string>
+    <string name="node_sort_distance">Sáth</string>
+    <string name="node_sort_hops_away">Cúlaithe</string>
+    <string name="node_sort_last_heard">Deiridh chluinmhu</string>
+    <string name="node_sort_via_mqtt">trí MQTT</string>
+    <string name="via_mqtt">trí MQTT</string>
+    <string name="unrecognized">Neamh-aithnidiúil</string>
+    <string name="message_status_enroute">Ag fanacht le ceadú</string>
+    <string name="message_status_queued">Cur síos ar sheoladh</string>
+    <string name="routing_error_none">Faighte</string>
+    <string name="routing_error_no_route">Gan route</string>
+    <string name="routing_error_got_nak">Fáilte atá faighte le haghaidh niúúáil</string>
+    <string name="routing_error_timeout">Am tráth</string>
+    <string name="routing_error_no_interface">Gan anicéir</string>
+    <string name="routing_error_max_retransmit">Ceannaire Máx Dúnadh</string>
+    <string name="routing_error_no_channel">Gan cainéal</string>
+    <string name="routing_error_too_large">Pacáiste ró-mhór</string>
+    <string name="routing_error_no_response">Gan freagra</string>
+    <string name="routing_error_bad_request">Iarratas Mícheart</string>
+    <string name="routing_error_duty_cycle_limit">Ceangail cileáil tráth</string>
+    <string name="routing_error_not_authorized">Gan aithne</string>
+    <string name="routing_error_pki_failed">Ní raibh níos saora phósach fadhach</string>
+    <string name="routing_error_pki_unknown_pubkey">Pre-set den x-teirí code</string>
+    <string name="routing_error_admin_bad_session_key">Earráid i eochair sesún an riarthóra</string>
+    <string name="routing_error_admin_public_key_unauthorized">Eochair phoiblí riarthóra neamhúdaraithe</string>
+    <string name="role_client_desc">Feiste nascaithe nó feiste teachtaireachtaí standálaí.</string>
+    <string name="role_client_mute_desc">Feiste nach dtarchuir pacáistí ó ghléasanna eile.</string>
+    <string name="role_router_desc">Ceannaire infreastruchtúrtha chun clúdach líonra a leathnú trí theachtaireachtaí a athsheoladh. Infheicthe i liosta na nóid.</string>
+    <string name="role_router_client_desc">Comhcheangail de dhá ról ROUTER agus CLIENT. Ní do ghléasanna soghluaiste.</string>
+    <string name="role_repeater_desc">Ceannaire infreastruchtúrtha chun clúdach líonra a leathnú trí theachtaireachtaí a athsheoladh le níos lú romha.</string>
+    <string name="role_tracker_desc">Bíonn sé ag seoladh pacáistí suíomh GPS mar thosaíocht.</string>
+    <string name="role_sensor_desc">Bíonn sé ag seoladh pacáistí teiliméadair mar thosaíocht.</string>
+    <string name="role_tak_desc">Optamaithe le haghaidh cumarsáide ATAK, laghdaíonn sé cainéil seirbhíse beacht.</string>
+    <string name="role_client_hidden_desc">Feiste a seolann ach nuair is gá, chun éalú nó do chumas cothromóige.</string>
+    <string name="role_lost_and_found_desc">Pacáiste leis an suíomh agus é seolta chuig an cainéal réamhshocraithe gach lá.</string>
+    <string name="role_tak_tracker_desc">Ceadaíonn fadhb beathú do bhoganna PLI i sórtú  PLI i feidhm reatha.</string>
+    <string name="rebroadcast_mode_all_desc">Athsheoladh aon teachtaireacht i ndáiríre má bhí sí oiriúnach le do cheist go léannais foghlamhrúcháin.</string>
+    <string name="rebroadcast_mode_all_skip_decoding_desc">Ceim misniúla thosaí go lucht shnaithte!</string>
+    <string name="rebroadcast_mode_known_only_desc">Cuireann sé bac ar theachtaireachtaí a fhaightear ó mhóilíní seachtracha cosúil le LOCAL ONLY, ach téann sé céim níos faide trí theachtaireachtaí ó nóid nach bhfuil sa liosta aitheanta ag an nóid a chosc freisin.</string>
+    <string name="rebroadcast_mode_none">Ní dhéanfaidh sé</string>
+    <string name="rebroadcast_mode_none_desc">Ceadaítear é seo ach amháin do na róil SENSOR, TRACKER agus TAK_TRACKER, agus cuirfidh sé bac ar gach athdháileadh, cosúil leis an róil CLIENT_MUTE.</string>
+    <string name="rebroadcast_mode_core_portnums_only_desc">Cuireann sé bac ar phacáistí ó phortníomhaíochtaí neamhchaighdeánacha mar: TAK, RangeTest, PaxCounter, srl. Ní athdháileann ach pacáistí le portníomhaíochtaí caighdeánacha: NodeInfo, Text, Position, Telemetry, agus Routing.</string>
+    <!-- Position Config -->
+    <string name="channel_name">Ainm Cainéal</string>
+    <string name="qr_code">Cód QR</string>
+    <string name="application_icon">deilbhín feidhmchláir</string>
+    <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
+    <string name="send">Seol</string>
+    <string name="warning_not_paired">Níl raidió comhoiriúnach Meshtastic péireáilte leis an bhfón seo agat fós. Péireáil gléas le do thoil agus socraigh d’ainm úsáideora.\n\nTá an feidhmchlár foinse oscailte seo faoi alfa-thástáil, má aimsíonn tú fadhbanna cuir iad ar ár bhfóram: https://github.com/orgs/meshtastic/discussions\n\nLe haghaidh tuilleadh faisnéise féach ar ár leathanach gréasáin - www.meshtastic.org.</string>
+    <string name="you">Tú</string>
+    <string name="accept">Glac</string>
+    <string name="cancel">Cealaigh</string>
+    <string name="save_changes">Sábháil</string>
+    <string name="new_channel_rcvd">URL Cainéal nua faighte</string>
+    <string name="report_bug">Tuairiscigh fabht</string>
+    <string name="report_a_bug">Tuairiscigh fabht</string>
+    <string name="report_bug_text">An bhfuil tú cinnte gur mhaith leat fabht a thuairisciú? Tar éis tuairisciú a dhéanamh, cuir sa phost é le do thoil in https://github.com/orgs/meshtastic/discussions ionas gur féidir linn an tuarascáil a mheaitseáil leis an méid a d’aimsigh tú.</string>
+    <string name="report">Tuairiscigh</string>
+    <string name="pairing_completed">Péireáil críochnaithe, ag tosú seirbhís</string>
+    <string name="pairing_failed_try_again">Péireáil neadaithe, le do thoil roghnaigh arís</string>
+    <string name="location_disabled">Cead iontrála áit dúnta, ní féidir an suíomh a chur ar fáil chuig an mesh.</string>
+    <string name="share">Roinn</string>
+    <string name="disconnected">Na ceangailte</string>
+    <string name="device_sleeping">Gléas ina chodladh</string>
+    <string name="ip_address">Seoladh IP:</string>
+    <string name="connected_to">Ceangailte le raidió (%1$s)</string>
+    <string name="not_connected">Ní ceangailte</string>
+    <string name="connected_sleeping">Ceangailte le raidió, ach tá sé ina chodladh</string>
+    <string name="app_too_old">Nuashonrú feidhmchláir riachtanach</string>
+    <string name="must_update">Caithfidh tú an feidhmchlár seo a nuashonrú ón siopa feidhmchláir (nó Github). Tá sé ró-aois chun cumarsáid a dhéanamh leis an firmware raidió seo. Le do thoil, léigh ár <a href="https://meshtastic.org/docs/software/android/installation">doiciméid</a> ar an ábhar seo.</string>
+    <string name="none">Ní aon (diúscairt)</string>
+    <string name="meshtastic_service_notifications">Fógraí seirbhíse</string>
+    <string name="about">Maidir le</string>
+    <string name="channel_invalid">Tá an URL Cainéil seo neamhdhleathach agus ní féidir é a úsáid</string>
+    <string name="debug_panel">Painéal Laige</string>
+    <string name="clear">Glan</string>
+    <string name="message_delivery_status">Stádas seachadta teachtaireachta</string>
+    <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais.</string>
+    <string name="firmware_old">Tá an firmware raidió ró-aoiseach chun cumarsáid a dhéanamh leis an aip seo. Chun tuilleadh eolais a fháil, féach <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ár gCúnamh Suiteála Firmware</a>.</string>
+    <string name="okay">Ceadaigh</string>
+    <string name="must_set_region">Caithfidh tú réigiún a shocrú!</string>
+    <string name="cant_change_no_radio">Ní féidir an cainéal a athrú, toisc nach bhfuil an raidió nasctha fós. Déan iarracht arís.</string>
+    <string name="reset">Athshocraigh</string>
+    <string name="scan">Scanadh</string>
+    <string name="add_network_device">Cuir leis</string>
+    <string name="are_you_sure_change_default">An bhfuil tú cinnte gur mhaith leat an cainéal réamhshocraithe a athrú?</string>
+    <string name="reset_to_defaults">Athshocrú go dtí na réamhshocruithe</string>
+    <string name="apply">Cuir i bhfeidhm</string>
+    <string name="theme">Téama</string>
+    <string name="theme_light">Solas</string>
+    <string name="theme_dark">Dorcha</string>
+    <string name="theme_system">Réamhshocrú córas</string>
+    <string name="choose_theme">Roghnaigh téama</string>
+    <string name="provide_location_to_mesh">Soláthra suíomh na fón do do líonra</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Ar mhaith leat teachtaireacht a scriosadh?</item>
+        <item quantity="two">Ar mhaith leat %1$s teachtaireachtaí a scriosadh?</item>
+        <item quantity="few">Ar mhaith leat %1$s teachtaireachtaí a scriosadh?</item>
+        <item quantity="many">Ar mhaith leat %1$s teachtaireachtaí a scriosadh?</item>
+        <item quantity="other">Ar mhaith leat %1$s teachtaireachtaí a scriosadh?</item>
+    </plurals>
+    <string name="delete">Scrios</string>
+    <string name="delete_for_everyone">Scrios do gach duine</string>
+    <string name="delete_for_me">Scrios dom</string>
+    <string name="select_all">Roghnaigh go léir</string>
+    <string name="map_style_selection">Roghnaigh stíl</string>
+    <string name="map_download_region">Íoslódáil réigiún</string>
+    <string name="name">Ainm</string>
+    <string name="description">Cur síos</string>
+    <string name="locked">Ceangailte</string>
+    <string name="save">Sábháil</string>
+    <string name="preferences_language">Teanga</string>
+    <string name="preferences_system_default">Réamhshocrú córas</string>
+    <string name="resend">Seol arís</string>
+    <string name="shutdown">Dún</string>
+    <string name="cant_shutdown">Ní tacaítear le dúnadh ar an ngléas seo</string>
+    <string name="reboot">Athmhaoinigh</string>
+    <string name="traceroute">Céim rianadóireachta</string>
+    <string name="intro_show">Taispeáin Úvod</string>
+    <string name="message">Teachtaireacht</string>
+    <string name="quick_chat">Roghanna comhrá tapa</string>
+    <string name="quick_chat_new">Comhrá tapa nua</string>
+    <string name="quick_chat_edit">Cuir comhrá tapa in eagar</string>
+    <string name="quick_chat_append">Cuir leis an teachtaireacht</string>
+    <string name="quick_chat_instant">Seol láithreach</string>
+    <string name="factory_reset">Athshocraigh an fhactaraí</string>
+    <string name="direct_message">Teachtaireacht dhíreach</string>
+    <string name="nodedb_reset">Athshocraigh NodeDB</string>
+    <string name="delivery_confirmed">Seachadadh deimhnithe</string>
+    <string name="error">Earráid</string>
+    <string name="ignore">Ignóra</string>
+    <string name="ignore_add">Cuir ‘%1$s’ leis an liosta ignorálacha?</string>
+    <string name="ignore_remove">Bain ‘%1$s’ ón liosta ignorálacha?</string>
+    <string name="map_select_download_region">Roghnaigh réigiún íoslódála</string>
+    <string name="map_tile_download_estimate">Meastachán íoslódála tile:</string>
+    <string name="map_start_download">Tosaigh íoslódáil</string>
+    <string name="close">Dún</string>
+    <string name="radio_configuration">Cumraíocht raidió</string>
+    <string name="module_settings">Cumraíocht an mhódule</string>
+    <string name="add">Cuir leis</string>
+    <string name="edit">Cuir in eagar</string>
+    <string name="calculating">Á ríomh…</string>
+    <string name="map_offline_manager">Bainisteoir as líne</string>
+    <string name="map_cache_size">Méid na Cásla Reatha</string>
+    <string name="map_cache_info">Cumas an Cásla: %1$d MB\nÚsáid an Cásla: %2$d MB</string>
+    <string name="map_clear_tiles">Glan na Tíleanna Íoslódáilte</string>
+    <string name="map_tile_source">Foinse Tíle</string>
+    <string name="map_purge_success">Cásla SQL glanta do %1$s</string>
+    <string name="map_purge_fail">Teip ar ghlanadh Cásla SQL, féach logcat le haghaidh sonraí</string>
+    <string name="map_cache_manager">Bainisteoir Cásla</string>
+    <string name="map_download_complete">Íoslódáil críochnaithe!</string>
+    <string name="map_subDescription">comhthéacs: %1$d° achar: %2$s</string>
+    <string name="waypoint_edit">Cuir in eagar an pointe bealach</string>
+    <string name="waypoint_delete">Scrios an pointe bealach?</string>
+    <string name="waypoint_new">Pointe bealach nua</string>
+    <string name="waypoint_received">Pointe bealach faighte: %1$s</string>
+    <string name="error_duty_cycle">Teorainn na Ciorcad Oibre bainte. Ní féidir teachtaireachtaí a sheoladh faoi láthair, déan iarracht arís níos déanaí.</string>
+    <string name="remove">Bain</string>
+    <string name="remove_node_text">Bainfear an nod seo ón liosta go dtí go bhfaighidh do nod sonraí uaidh arís.</string>
+    <string name="mute_notifications">Cuir foláirimh i gcíocha</string>
+    <string name="mute_8_hours">8 uair an chloig</string>
+    <string name="mute_1_week">1 seachtain</string>
+    <string name="mute_always">I gcónaí</string>
+    <string name="replace">Ionad</string>
+    <string name="wifi_qr_code_scan">Scan QR cód WiFi</string>
+    <string name="wifi_qr_code_error">Formáid QR cód Creidiúnachtaí WiFi neamhbhailí</string>
+    <string name="navigate_back">Súil Siar</string>
+    <string name="battery">Cúis leictreachais</string>
+    <string name="channel_utilization">Úsáid cainéil</string>
+    <string name="air_utilization">Úsáid aeir</string>
+    <string name="temperature">Teocht</string>
+    <string name="humidity">Laige</string>
+    <string name="logs">Lógáil</string>
+    <string name="hops_away">Céimeanna uaidh</string>
+    <string name="info">Eolas</string>
+    <string name="ch_util_definition">Úsáid na cainéil reatha, lena n-áirítear TX ceartaithe, RX agus RX mícheart (anáilís ar na fuaimeanna).</string>
+    <string name="air_util_definition">Céatadán de na hamaitear úsáideach atá in úsáid laistigh de uair an chloig atá caite.</string>
+    <string name="iaq">QAÍ (Cáilíocht Aeir Inmheánach)</string>
+    <string name="encryption_psk">Eochair roinnte</string>
+    <string name="encryption_pkc">Cóid Poiblí Eochair</string>
+    <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
+    <string name="encryption_error_text">Ní chomhoireann an eochair phoiblí leis an eochair atá cláraithe. Féachfaidh tú le hiarraidh na nod agus athmhaoin na heochrach ach seo féadfaidh a léiriú fadhb níos tromchúisí i gcúrsaí slándála. Téigh i dteagmháil leis an úsáideoir tríd an gcainéal eile atá ar fáil chun a fháil amach an bhfuil athrú eochrach de réir athshocrú monarcha nó aidhm eile ar do chuid.</string>
+    <string name="meshtastic_new_nodes_notifications">Fógartha faoi na nodes nua</string>
+    <string name="more_details">Tuilleadh sonraí</string>
+    <string name="snr_definition">Ráta Sigineal go Torann, tomhas a úsáidtear i gcomhfhreagras chun an leibhéal de shígnéil inmhianaithe agus torann cúlra a mheas. I Meshtastic agus i gcórais gan sreang eile, ciallaíonn SNR níos airde go bhfuil sígneál níos soiléire ann agus ábalta méadú ar chreideamh agus cáilíocht an tarchur sonraí.</string>
+    <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
+    <string name="iaq_definition">(Cáilíocht Aeir Inmheánach) scála ábhartha den luach QAÍ a thomhas ag Bosch BME680. Scála Luach 0–500.</string>
+    <string name="device_metrics_log">Lógáil Táscairí Feiste</string>
+    <string name="node_map">Léarscáil an Node</string>
+    <string name="position_log">Lógáil Seirbhís</string>
+    <string name="env_metrics_log">Lógáil Táscairí Comhshaoil</string>
+    <string name="sig_metrics_log">Lógáil Táscairí Sigineal</string>
+    <string name="administration">Rialachas</string>
+    <string name="remote_admin">Rialú iargúlta</string>
+    <string name="bad">Go dona</string>
+    <string name="fair">Ceart go leor</string>
+    <string name="good">Maith</string>
+    <string name="none_quality">Ní dhéanfaidh sé</string>
+    <string name="signal">Sígneal</string>
+    <string name="signal_quality">Cáilíocht na Sígneal</string>
+    <string name="traceroute_log">Lógáil Traceroute</string>
+    <string name="traceroute_direct">Direach</string>
+    <plurals name="traceroute_hops">
+        <item quantity="one">1 céim</item>
+        <item quantity="two">%d céimeanna</item>
+        <item quantity="few">%d céimeanna</item>
+        <item quantity="many">%d céimeanna</item>
+        <item quantity="other">%d céimeanna</item>
+    </plurals>
+    <string name="traceroute_diff">Céimeanna i dtreo %1$d Céimeanna ar ais %2$d</string>
+    <string name="region_frequency_plan">Réigiún</string>
+    <string name="timeout">Am tráth</string>
+    <string name="distance">Sáth</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Teachtaireacht</string>
+    <string name="eight_hours">8 Uair an chloig</string>
+    <string name="one_day">24 Uair an chloig</string>
+    <string name="two_days">48 Uair an chloig</string>
+</resources>

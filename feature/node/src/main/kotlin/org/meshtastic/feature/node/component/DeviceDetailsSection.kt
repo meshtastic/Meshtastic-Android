@@ -38,13 +38,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.device
+import org.meshtastic.core.strings.hardware
+import org.meshtastic.core.strings.supported
+import org.meshtastic.core.strings.supported_by_community
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
@@ -58,7 +63,7 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
-    TitledCard(stringResource(R.string.device), modifier = modifier) {
+    TitledCard(stringResource(Res.string.device), modifier = modifier) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Box(
@@ -77,7 +82,7 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
         InsetDivider()
 
         ListItem(
-            text = stringResource(R.string.hardware),
+            text = stringResource(Res.string.hardware),
             leadingIcon = Icons.Default.Router,
             supportingText = hwModelName,
             copyable = true,
@@ -89,9 +94,9 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
         ListItem(
             text =
             if (isSupported) {
-                stringResource(R.string.supported)
+                stringResource(Res.string.supported)
             } else {
-                stringResource(R.string.supported_by_community)
+                stringResource(Res.string.supported_by_community)
             },
             leadingIcon =
             if (isSupported) {

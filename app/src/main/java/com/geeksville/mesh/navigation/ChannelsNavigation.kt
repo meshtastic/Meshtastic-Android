@@ -27,7 +27,7 @@ import androidx.navigation.navigation
 import com.geeksville.mesh.ui.sharing.ChannelScreen
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.feature.settings.radio.channel.ChannelConfigScreen
 import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
 
@@ -44,19 +44,13 @@ fun NavGraphBuilder.channelsGraph(navController: NavHostController) {
                 onNavigateUp = { navController.navigateUp() },
             )
         }
-        configRoutes(navController)
-    }
-}
 
-private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
-    ConfigRoute.entries.forEach { configRoute ->
-        composable(configRoute.route::class) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
-            when (configRoute) {
-                ConfigRoute.CHANNELS -> ChannelConfigScreen(hiltViewModel(parentEntry), navController::popBackStack)
-                ConfigRoute.LORA -> LoRaConfigScreen(hiltViewModel(parentEntry), navController::popBackStack)
-                else -> Unit // Should not happen if ConfigRoute enum is exhaustive for this context
-            }
+        navController.configComposable<SettingsRoutes.ChannelConfig, ChannelsRoutes.ChannelsGraph> {
+            ChannelConfigScreen(viewModel = it, onBack = navController::popBackStack)
+        }
+
+        navController.configComposable<SettingsRoutes.LoRa, ChannelsRoutes.ChannelsGraph> {
+            LoRaConfigScreen(viewModel = it, onBack = navController::popBackStack)
         }
     }
 }

@@ -37,13 +37,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.channel_name
+import org.meshtastic.core.strings.default_
+import org.meshtastic.core.strings.downlink_enabled
+import org.meshtastic.core.strings.save
+import org.meshtastic.core.strings.uplink_enabled
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.PositionPrecisionPreference
@@ -59,7 +65,7 @@ fun EditChannelDialog(
     onAddClick: (ChannelProtos.ChannelSettings) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    modemPresetName: String = stringResource(R.string.default_),
+    modemPresetName: String = stringResource(Res.string.default_),
 ) {
     val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
@@ -72,7 +78,7 @@ fun EditChannelDialog(
         text = {
             Column(modifier.fillMaxWidth()) {
                 EditTextPreference(
-                    title = stringResource(R.string.channel_name),
+                    title = stringResource(Res.string.channel_name),
                     value = if (isFocused) channelInput.name else channelInput.name.ifEmpty { modemPresetName },
                     maxSize = 11, // name max_size:12
                     enabled = true,
@@ -105,7 +111,7 @@ fun EditChannelDialog(
                 )
 
                 SwitchPreference(
-                    title = stringResource(R.string.uplink_enabled),
+                    title = stringResource(Res.string.uplink_enabled),
                     checked = channelInput.uplinkEnabled,
                     enabled = true,
                     onCheckedChange = { channelInput = channelInput.copy { uplinkEnabled = it } },
@@ -113,7 +119,7 @@ fun EditChannelDialog(
                 )
 
                 SwitchPreference(
-                    title = stringResource(R.string.downlink_enabled),
+                    title = stringResource(Res.string.downlink_enabled),
                     checked = channelInput.downlinkEnabled,
                     enabled = true,
                     onCheckedChange = { channelInput = channelInput.copy { downlinkEnabled = it } },
@@ -136,10 +142,10 @@ fun EditChannelDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TextButton(modifier = modifier.weight(1f), onClick = onDismissRequest) {
-                    Text(stringResource(R.string.cancel))
+                    Text(stringResource(Res.string.cancel))
                 }
                 Button(modifier = modifier.weight(1f), onClick = { onAddClick(channelInput) }, enabled = true) {
-                    Text(stringResource(R.string.save))
+                    Text(stringResource(Res.string.save))
                 }
             }
         },

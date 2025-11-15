@@ -57,6 +57,10 @@ constructor(
     private val connectionStateHolder: MeshServiceConnectionStateHolder,
 ) {
 
+    companion object {
+        private const val TIMEOUT_MS = 250L
+    }
+
     private var queueJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -111,7 +115,7 @@ constructor(
     }
 
     fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
-        Timber.d("queueStatus ${queueStatus.toOneLineString()}")
+        Timber.d("[queueStatus] ${queueStatus.toOneLineString()}")
         val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, meshPacketId) }
         if (success && isFull) return // Queue is full, wait for free != 0
         if (requestId != 0) {
@@ -138,7 +142,7 @@ constructor(
                         // send packet to the radio and wait for response
                         val response = sendPacket(packet)
                         Timber.d("queueJob packet id=${packet.id.toUInt()} waiting")
-                        val success = response.get(2, TimeUnit.MINUTES)
+                        val success = response.get(TIMEOUT_MS, TimeUnit.MILLISECONDS)
                         Timber.d("queueJob packet id=${packet.id.toUInt()} success $success")
                     } catch (e: TimeoutException) {
                         Timber.d("queueJob packet id=${packet.id.toUInt()} timeout")
@@ -180,7 +184,7 @@ constructor(
             if (connectionStateHolder.getState() != ConnectionState.CONNECTED) throw RadioNotConnectedException()
             sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
         } catch (ex: Exception) {
-            Timber.e("sendToRadio error:", ex)
+            Timber.e(ex, "sendToRadio error: ${ex.message}")
             future.complete(false)
         }
         return future

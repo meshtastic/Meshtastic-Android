@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -55,8 +54,13 @@ import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.qr_code
+import org.meshtastic.core.strings.scan_qr_code
+import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.proto.AdminProtos
@@ -127,17 +131,14 @@ fun AddContactFAB(
             }
         },
     ) {
-        Icon(
-            imageVector = Icons.TwoTone.QrCodeScanner,
-            contentDescription = stringResource(org.meshtastic.core.strings.R.string.scan_qr_code),
-        )
+        Icon(imageVector = Icons.TwoTone.QrCodeScanner, contentDescription = stringResource(Res.string.scan_qr_code))
     }
 }
 
 @Composable
 private fun QrCodeImage(uri: Uri, modifier: Modifier = Modifier) = Image(
     painter = uri.qrCode?.let { BitmapPainter(it.asImageBitmap()) } ?: painterResource(id = R.drawable.qrcode),
-    contentDescription = stringResource(org.meshtastic.core.strings.R.string.qr_code),
+    contentDescription = stringResource(Res.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
 )
@@ -165,7 +166,7 @@ fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     val sharedContact = AdminProtos.SharedContact.newBuilder().setUser(contact.user).setNodeNum(contact.num).build()
     val uri = sharedContact.getSharedContactUrl()
     SimpleAlertDialog(
-        title = org.meshtastic.core.strings.R.string.share_contact,
+        title = Res.string.share_contact,
         text = {
             Column {
                 Text(contact.user.longName)

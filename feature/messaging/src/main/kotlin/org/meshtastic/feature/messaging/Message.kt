@@ -85,7 +85,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -95,12 +94,36 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.alert_bell_text
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.cancel_reply
+import org.meshtastic.core.strings.clear_selection
+import org.meshtastic.core.strings.copy
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.delete_messages
+import org.meshtastic.core.strings.delete_messages_title
+import org.meshtastic.core.strings.message_input_label
+import org.meshtastic.core.strings.navigate_back
+import org.meshtastic.core.strings.overflow_menu
+import org.meshtastic.core.strings.quick_chat
+import org.meshtastic.core.strings.quick_chat_hide
+import org.meshtastic.core.strings.quick_chat_show
+import org.meshtastic.core.strings.reply
+import org.meshtastic.core.strings.replying_to
+import org.meshtastic.core.strings.scroll_to_bottom
+import org.meshtastic.core.strings.select_all
+import org.meshtastic.core.strings.send
+import org.meshtastic.core.strings.type_a_message
+import org.meshtastic.core.strings.unknown
+import org.meshtastic.core.strings.unknown_channel
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
@@ -160,7 +183,7 @@ fun MessageScreen(
             Triple(index, id, name)
         }
     val (channelIndex, nodeId, rawChannelName) = channelInfo
-    val unknownChannelText = stringResource(id = R.string.unknown_channel)
+    val unknownChannelText = stringResource(Res.string.unknown_channel)
     val channelName = rawChannelName ?: unknownChannelText
 
     val title =
@@ -352,7 +375,7 @@ private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState
     ) {
         Icon(
             imageVector = Icons.Default.ArrowDownward,
-            contentDescription = stringResource(id = R.string.scroll_to_bottom),
+            contentDescription = stringResource(Res.string.scroll_to_bottom),
         )
     }
 }
@@ -370,7 +393,7 @@ private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ou
         originalMessage?.let { message ->
             val isFromLocalUser = message.node.user.id == DataPacket.ID_LOCAL
             val replyingToNodeUser = if (isFromLocalUser) ourNode?.user else message.node.user
-            val unknownUserText = stringResource(R.string.unknown)
+            val unknownUserText = stringResource(Res.string.unknown)
 
             Row(
                 modifier =
@@ -383,11 +406,11 @@ private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ou
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Reply,
-                    contentDescription = stringResource(R.string.reply), // Decorative
+                    contentDescription = stringResource(Res.string.reply), // Decorative
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = stringResource(R.string.replying_to, replyingToNodeUser?.shortName ?: unknownUserText),
+                    text = stringResource(Res.string.replying_to, replyingToNodeUser?.shortName ?: unknownUserText),
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
@@ -400,7 +423,7 @@ private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ou
                 IconButton(onClick = onClearReply) {
                     Icon(
                         Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.cancel_reply), // Specific action
+                        contentDescription = stringResource(Res.string.cancel_reply), // Specific action
                     )
                 }
             }
@@ -492,15 +515,15 @@ private fun String.limitBytes(maxBytes: Int): String {
  */
 @Composable
 private fun DeleteMessageDialog(count: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    val deleteMessagesString = pluralStringResource(R.plurals.delete_messages, count, count)
+    val deleteMessagesString = pluralStringResource(Res.plurals.delete_messages, count, count)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(16.dp),
-        title = { Text(stringResource(R.string.delete_messages_title)) },
+        title = { Text(stringResource(Res.string.delete_messages_title)) },
         text = { Text(text = deleteMessagesString) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.delete)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(Res.string.delete)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
@@ -529,22 +552,19 @@ private fun ActionModeTopBar(selectedCount: Int, onAction: (MessageMenuAction) -
         IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.clear_selection),
+                contentDescription = stringResource(Res.string.clear_selection),
             )
         }
     },
     actions = {
         IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
-            Icon(imageVector = Icons.Default.ContentCopy, contentDescription = stringResource(id = R.string.copy))
+            Icon(imageVector = Icons.Default.ContentCopy, contentDescription = stringResource(Res.string.copy))
         }
         IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete))
+            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(Res.string.delete))
         }
         IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
-            Icon(
-                imageVector = Icons.Default.SelectAll,
-                contentDescription = stringResource(id = R.string.select_all),
-            )
+            Icon(imageVector = Icons.Default.SelectAll, contentDescription = stringResource(Res.string.select_all))
         }
     },
 )
@@ -586,7 +606,7 @@ private fun MessageTopBar(
         IconButton(onClick = onNavigateBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.navigate_back),
+                contentDescription = stringResource(Res.string.navigate_back),
             )
         }
     },
@@ -615,7 +635,7 @@ private fun MessageTopBarActions(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }, enabled = true) {
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.overflow_menu))
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(Res.string.overflow_menu))
         }
         OverFlowMenu(
             expanded = expanded,
@@ -639,9 +659,9 @@ private fun OverFlowMenu(
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
             val quickChatToggleTitle =
                 if (showQuickChat) {
-                    stringResource(R.string.quick_chat_hide)
+                    stringResource(Res.string.quick_chat_hide)
                 } else {
-                    stringResource(R.string.quick_chat_show)
+                    stringResource(Res.string.quick_chat_show)
                 }
             DropdownMenuItem(
                 text = { Text(quickChatToggleTitle) },
@@ -662,7 +682,7 @@ private fun OverFlowMenu(
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(id = R.string.quick_chat)) },
+                text = { Text(stringResource(Res.string.quick_chat)) },
                 onClick = {
                     onDismiss()
                     onNavigateToQuickChatOptions()
@@ -670,7 +690,7 @@ private fun OverFlowMenu(
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.ChatBubbleOutline,
-                        contentDescription = stringResource(id = R.string.quick_chat),
+                        contentDescription = stringResource(Res.string.quick_chat),
                     )
                 },
             )
@@ -692,7 +712,7 @@ private fun QuickChatRow(
     actions: List<QuickChatAction>,
     onClick: (QuickChatAction) -> Unit,
 ) {
-    val alertActionMessage = stringResource(R.string.alert_bell_text)
+    val alertActionMessage = stringResource(Res.string.alert_bell_text)
     val alertAction =
         remember(alertActionMessage) {
             // Memoize if content is static
@@ -747,11 +767,11 @@ private fun MessageInput(
         modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
         state = textFieldState,
         lineLimits = TextFieldLineLimits.MultiLine(1, MAX_LINES),
-        label = { Text(stringResource(R.string.message_input_label)) },
+        label = { Text(stringResource(Res.string.message_input_label)) },
         enabled = isEnabled,
         shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
         isError = isOverLimit,
-        placeholder = { Text(stringResource(R.string.type_a_message)) },
+        placeholder = { Text(stringResource(Res.string.type_a_message)) },
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         supportingText = {
             if (isEnabled) { // Only show supporting text if input is enabled
@@ -777,7 +797,7 @@ private fun MessageInput(
             IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(id = R.string.send),
+                    contentDescription = stringResource(Res.string.send),
                 )
             }
         },

@@ -26,12 +26,25 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.address
+import org.meshtastic.core.strings.default_mqtt_address
+import org.meshtastic.core.strings.encryption_enabled
+import org.meshtastic.core.strings.json_output_enabled
+import org.meshtastic.core.strings.map_reporting
+import org.meshtastic.core.strings.mqtt
+import org.meshtastic.core.strings.mqtt_config
+import org.meshtastic.core.strings.mqtt_enabled
+import org.meshtastic.core.strings.password
+import org.meshtastic.core.strings.proxy_to_client_enabled
+import org.meshtastic.core.strings.root_topic
+import org.meshtastic.core.strings.tls_enabled
+import org.meshtastic.core.strings.username
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -66,7 +79,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.mqtt),
+        title = stringResource(Res.string.mqtt),
         onBack = onBack,
         configState = formState,
         enabled = state.connected && consentValid,
@@ -78,9 +91,9 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.mqtt_config)) {
+            TitledCard(title = stringResource(Res.string.mqtt_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.mqtt_enabled),
+                    title = stringResource(Res.string.mqtt_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
@@ -88,7 +101,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.address),
+                    title = stringResource(Res.string.address),
                     value = formState.value.address,
                     maxSize = 63, // address max_size:64
                     enabled = state.connected,
@@ -100,7 +113,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.username),
+                    title = stringResource(Res.string.username),
                     value = formState.value.username,
                     maxSize = 63, // username max_size:64
                     enabled = state.connected,
@@ -112,7 +125,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                 )
                 HorizontalDivider()
                 EditPasswordPreference(
-                    title = stringResource(R.string.password),
+                    title = stringResource(Res.string.password),
                     value = formState.value.password,
                     maxSize = 63, // password max_size:64
                     enabled = state.connected,
@@ -121,7 +134,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.encryption_enabled),
+                    title = stringResource(Res.string.encryption_enabled),
                     checked = formState.value.encryptionEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { encryptionEnabled = it } },
@@ -129,18 +142,18 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.json_output_enabled),
+                    title = stringResource(Res.string.json_output_enabled),
                     checked = formState.value.jsonEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { jsonEnabled = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                val defaultAddress = stringResource(R.string.default_mqtt_address)
+                val defaultAddress = stringResource(Res.string.default_mqtt_address)
                 val isDefault = formState.value.address.isEmpty() || formState.value.address.contains(defaultAddress)
                 val enforceTls = isDefault && formState.value.proxyToClientEnabled
                 SwitchPreference(
-                    title = stringResource(R.string.tls_enabled),
+                    title = stringResource(Res.string.tls_enabled),
                     checked = formState.value.tlsEnabled || enforceTls,
                     enabled = state.connected && !enforceTls,
                     onCheckedChange = { formState.value = formState.value.copy { tlsEnabled = it } },
@@ -148,7 +161,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.root_topic),
+                    title = stringResource(Res.string.root_topic),
                     value = formState.value.root,
                     maxSize = 31, // root max_size:32
                     enabled = state.connected,
@@ -160,7 +173,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.proxy_to_client_enabled),
+                    title = stringResource(Res.string.proxy_to_client_enabled),
                     checked = formState.value.proxyToClientEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { proxyToClientEnabled = it } },
@@ -170,7 +183,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
         }
 
         item {
-            TitledCard(title = stringResource(R.string.map_reporting)) {
+            TitledCard(title = stringResource(Res.string.map_reporting)) {
                 MapReportingPreference(
                     mapReportingEnabled = formState.value.mapReportingEnabled,
                     onMapReportingEnabledChanged = {

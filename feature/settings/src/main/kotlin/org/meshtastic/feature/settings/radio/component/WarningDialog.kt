@@ -26,15 +26,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.send
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun WarningDialog(
     icon: ImageVector? = Icons.Rounded.Warning,
     title: String,
+    text: @Composable () -> Unit = {},
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
@@ -42,7 +45,8 @@ fun WarningDialog(
         onDismissRequest = {},
         icon = { icon?.let { Icon(imageVector = it, contentDescription = null) } },
         title = { Text(text = title) },
-        dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(R.string.cancel)) } },
+        text = text,
+        dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(Res.string.cancel)) } },
         confirmButton = {
             Button(
                 onClick = {
@@ -50,7 +54,7 @@ fun WarningDialog(
                     onConfirm()
                 },
             ) {
-                Text(stringResource(R.string.send))
+                Text(stringResource(Res.string.send))
             }
         },
     )

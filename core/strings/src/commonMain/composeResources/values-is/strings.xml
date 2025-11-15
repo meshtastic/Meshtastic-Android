@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <!-- Position Config -->
+    <string name="channel_name">Heiti rásar</string>
+    <string name="qr_code">QR kóði</string>
+    <string name="application_icon">tákn smáforrits</string>
+    <string name="unknown_username">Óþekkt notendanafn</string>
+    <string name="send">Senda</string>
+    <string name="warning_not_paired">Þú hefur ekki parað Meshtastic radíó við þennan síma. Vinsamlegast paraðu búnað og veldu notendnafn.\n\nÞessi opni hugbúnaður er enn í þróun, finnir þú vandamál vinsamlegast búðu til þráð á spjallborðinu okkar: https://github.com/orgs/meshtastic/discussions\n\nFyrir frekari upplýsingar sjá vefsíðu - www.meshtastic.org.</string>
+    <string name="you">Þú</string>
+    <string name="accept">Samþykkja</string>
+    <string name="cancel">Hætta við</string>
+    <string name="save_changes">Vista</string>
+    <string name="new_channel_rcvd">Ný slóð fyrir rás móttekin</string>
+    <string name="report_bug">Tilkynna villu</string>
+    <string name="report_a_bug">Tilkynna villu</string>
+    <string name="report_bug_text">Er þú viss um að vilja tilkynna villu? Eftir tilkynningu, settu vinsamlega inn þráð á https://github.com/orgs/meshtastic/discussions svo við getum tengt saman tilkynninguna við villuna sem þú fannst.</string>
+    <string name="report">Tilkynna</string>
+    <string name="pairing_completed">Pörun lokið, ræsir þjónustu</string>
+    <string name="pairing_failed_try_again">Pörun mistókst, vinsamlegast veljið aftur</string>
+    <string name="location_disabled">Aðgangur að staðsetningu ekki leyfður, staðsetning ekki send út á mesh.</string>
+    <string name="share">Deila</string>
+    <string name="disconnected">Aftengd</string>
+    <string name="device_sleeping">Radíó er í svefnham</string>
+    <string name="ip_address">IP Tala:</string>
+    <string name="connected_to">Tengdur við radíó (%1$s)</string>
+    <string name="not_connected">Ekki tengdur</string>
+    <string name="connected_sleeping">Tengdur við radíó, en það er í svefnham</string>
+    <string name="app_too_old">Uppfærsla á smáforriti nauðsynleg</string>
+    <string name="must_update">Þú verður að uppfæra þetta smáforrit í app store (eða Github). Það er of gamalt til að geta talað við fastbúnað þessa radíó. Vinsamlegast lestu <a href="https://meshtastic.org/docs/software/android/installation">leiðbeiningar </a> okkar um þetta mál.</string>
+    <string name="none">Ekkert (Afvirkjað)</string>
+    <string name="meshtastic_service_notifications">Tilkynningar um þjónustu</string>
+    <string name="about">Um smáforrit</string>
+    <string name="channel_invalid">Þetta rásar URL er ógilt og ónothæft</string>
+    <string name="debug_panel">Villuleitarborð</string>
+    <string name="clear">Hreinsa</string>
+    <string name="message_delivery_status">Staða sends skilaboðs</string>
+    <string name="firmware_too_old">Uppfærsla fastbúnaðar nauðsynleg.</string>
+    <string name="firmware_old">Fastbúnaður radíósins er of gamall til að tala við þetta smáforrit. Fyrir ítarlegri upplýsingar sjá <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Leiðbeiningar um uppfærslu fastbúnaðar</a>.</string>
+    <string name="okay">Í lagi</string>
+    <string name="must_set_region">Þú verður að velja svæði!</string>
+    <string name="cant_change_no_radio">Gat ekki skipt um rás vegna þess að radíó er ekki enn tengt. Vinsamlegast reyndu aftur.</string>
+    <string name="reset">Endurræsa</string>
+    <string name="scan">Leita</string>
+    <string name="add_network_device">Bæta við</string>
+    <string name="are_you_sure_change_default">Ert þú viss um að þú viljir skipta yfir á sjálfgefna rás?</string>
+    <string name="reset_to_defaults">Endursetja tæki</string>
+    <string name="apply">Virkja</string>
+    <string name="theme">Þema</string>
+    <string name="theme_light">Ljóst</string>
+    <string name="theme_dark">Dökkt</string>
+    <string name="theme_system">Grunnstilling kerfis</string>
+    <string name="choose_theme">Veldu þema</string>
+    <string name="provide_location_to_mesh">Áframsenda staðsetningu á möskvanet</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Eyða skilaboðum?</item>
+        <item quantity="other">Eyða %1$s skilaboðum?</item>
+    </plurals>
+    <string name="delete">Eyða</string>
+    <string name="delete_for_everyone">Eyða fyrir öllum</string>
+    <string name="delete_for_me">Eyða fyrir mér</string>
+    <string name="select_all">Velja allt</string>
+    <string name="map_style_selection">Valmöguleikar stíls</string>
+    <string name="map_download_region">Niðurhala svæði</string>
+    <string name="name">Heiti</string>
+    <string name="description">Lýsing</string>
+    <string name="locked">Læst</string>
+    <string name="save">Vista</string>
+    <string name="preferences_language">Tungumál</string>
+    <string name="preferences_system_default">Grunnstilling kerfis</string>
+    <string name="resend">Endursenda</string>
+    <string name="shutdown">Slökkva</string>
+    <string name="reboot">Endurræsa</string>
+    <string name="traceroute">Ferilkönnun</string>
+    <string name="intro_show">Sýna kynningu</string>
+    <string name="message">Skilaboð</string>
+    <string name="quick_chat">Flýtiskilaboð</string>
+    <string name="quick_chat_new">Ný flýtiskilaboð</string>
+    <string name="quick_chat_edit">Breyta flýtiskilaboðum</string>
+    <string name="quick_chat_append">Hengja aftan við skilaboð</string>
+    <string name="quick_chat_instant">Sent samtímis</string>
+    <string name="factory_reset">Grunnstilla</string>
+    <string name="direct_message">Bein skilaboð</string>
+    <string name="nodedb_reset">Endurræsa NodeDB</string>
+    <string name="ignore">Hunsa</string>
+    <string name="ignore_add">Bæta '%1$s' við Ignore lista?</string>
+    <string name="ignore_remove">Fjarlægja '%1$s' frá hunsa lista?</string>
+    <string name="map_select_download_region">Veldu svæði til að niðurhala</string>
+    <string name="map_tile_download_estimate">Áætlaður niðurhalstími reits:</string>
+    <string name="map_start_download">Hefja niðurhal</string>
+    <string name="close">Loka</string>
+    <string name="radio_configuration">Stillingar radíós</string>
+    <string name="module_settings">Stillingar aukaeininga</string>
+    <string name="add">Bæta við</string>
+    <string name="calculating">Reiknar…</string>
+    <string name="map_offline_manager">Sýsla með utankerfis kort</string>
+    <string name="map_cache_size">Núverandi stærð skyndiminnis</string>
+    <string name="map_cache_info">Stærð skyndiminnis: %1$d MB\nNýtt skyndiminni: %2$d MB</string>
+    <string name="map_clear_tiles">Hreinsa burt niðurhalaða reiti</string>
+    <string name="map_tile_source">Uppruni reits</string>
+    <string name="map_purge_success">SQL skyndiminni hreinsað fyrir %1$s</string>
+    <string name="map_purge_fail">Hreinsun SQL skyndiminnis mistókts, sjá upplýsingar í logcat</string>
+    <string name="map_cache_manager">Sýsla með skyndiminni</string>
+    <string name="map_download_complete">Niðurhali lokið!</string>
+    <string name="map_subDescription">miðun: %1$d° fjarlægð: %2$s</string>
+    <string name="waypoint_edit">Breyta leiðarpunkti</string>
+    <string name="waypoint_delete">Eyða leiðarpunkti?</string>
+    <string name="waypoint_new">Nýr leiðarpunktur</string>
+    <string name="waypoint_received">Móttekin leiðarpunktur: %1$s</string>
+    <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
+    <string name="region_frequency_plan">Svæði</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Skilaboð</string>
+</resources>

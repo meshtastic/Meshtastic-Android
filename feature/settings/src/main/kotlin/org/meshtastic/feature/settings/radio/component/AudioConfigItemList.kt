@@ -23,10 +23,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.audio
+import org.meshtastic.core.strings.audio_config
+import org.meshtastic.core.strings.codec2_sample_rate
+import org.meshtastic.core.strings.codec_2_enabled
+import org.meshtastic.core.strings.i2s_clock
+import org.meshtastic.core.strings.i2s_data_in
+import org.meshtastic.core.strings.i2s_data_out
+import org.meshtastic.core.strings.i2s_word_select
+import org.meshtastic.core.strings.ptt_pin
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
@@ -44,7 +53,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.audio),
+        title = stringResource(Res.string.audio),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -56,9 +65,9 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.audio_config)) {
+            TitledCard(title = stringResource(Res.string.audio_config)) {
                 SwitchPreference(
-                    title = stringResource(R.string.codec_2_enabled),
+                    title = stringResource(Res.string.codec_2_enabled),
                     checked = formState.value.codec2Enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { codec2Enabled = it } },
@@ -66,14 +75,14 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.ptt_pin),
+                    title = stringResource(Res.string.ptt_pin),
                     value = formState.value.pttPin,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { pttPin = it } },
                 )
                 DropDownPreference(
-                    title = stringResource(R.string.codec2_sample_rate),
+                    title = stringResource(Res.string.codec2_sample_rate),
                     enabled = state.connected,
                     items =
                     AudioConfig.Audio_Baud.entries
@@ -84,28 +93,28 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 )
                 HorizontalDivider()
                 EditTextPreference(
-                    title = stringResource(R.string.i2s_word_select),
+                    title = stringResource(Res.string.i2s_word_select),
                     value = formState.value.i2SWs,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { i2SWs = it } },
                 )
                 EditTextPreference(
-                    title = stringResource(R.string.i2s_data_in),
+                    title = stringResource(Res.string.i2s_data_in),
                     value = formState.value.i2SSd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { i2SSd = it } },
                 )
                 EditTextPreference(
-                    title = stringResource(R.string.i2s_data_out),
+                    title = stringResource(Res.string.i2s_data_out),
                     value = formState.value.i2SDin,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy { i2SDin = it } },
                 )
                 EditTextPreference(
-                    title = stringResource(R.string.i2s_clock),
+                    title = stringResource(Res.string.i2s_clock),
                     value = formState.value.i2SSck,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

@@ -36,6 +36,8 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
@@ -181,6 +183,7 @@ class LogFilterManager {
                             log.formattedReceivedDate.contains(filterText, ignoreCase = true) ||
                             (log.decodedPayload?.contains(filterText, ignoreCase = true) == true)
                     }
+
                 FilterMode.AND ->
                     filterTexts.all { filterText ->
                         log.logMessage.contains(filterText, ignoreCase = true) ||
@@ -265,6 +268,7 @@ constructor(
 
     /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
     private fun annotateMeshLogMessage(meshLog: MeshLog): String = when (meshLog.message_type) {
+        "LogRecord" -> meshLog.fromRadio.logRecord.toString().replace("\\n\"", "\"")
         "Packet" -> meshLog.meshPacket?.let { packet -> annotatePacketLog(packet) } ?: meshLog.raw_message
         "NodeInfo" ->
             meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }
@@ -281,14 +285,40 @@ constructor(
         val decoded = if (hasDecoded) builder.decoded else null
         if (hasDecoded) builder.clearDecoded()
         val baseText = builder.build().toString().trimEnd()
-        val result =
+        var result =
             if (hasDecoded && decoded != null) {
                 val decodedText = decoded.toString().trimEnd().prependIndent("  ")
                 "$baseText\ndecoded {\n$decodedText\n}"
             } else {
                 baseText
             }
-        return annotateRawMessage(result, packet.from, packet.to)
+
+        val relayNode = packet.relayNode
+        var relayNodeAnnotation: String? = null
+        val placeholder = "___RELAY_NODE___"
+
+        if (relayNode != 0) {
+            Packet.getRelayNode(relayNode, nodeRepository.nodeDBbyNum.value.values.toList())?.let { node ->
+                val relayId = node.user.id
+                val relayName = node.user.longName
+                val regex = Regex("""\brelay_node: ${relayNode.toUInt()}\b""")
+                if (regex.containsMatchIn(result)) {
+                    relayNodeAnnotation = "relay_node: $relayName ($relayId)"
+                    result = regex.replace(result, placeholder)
+                }
+            }
+        }
+
+        result = annotateRawMessage(result, packet.from, packet.to)
+
+        if (relayNodeAnnotation != null) {
+            result = result.replace(placeholder, relayNodeAnnotation)
+        } else {
+            // Not annotated with name, so use hex.
+            result = annotateRawMessage(result, relayNode)
+        }
+
+        return result
     }
 
     /** Annotate the raw message string with the node IDs provided, in hex, if they are present. */
@@ -367,6 +397,7 @@ constructor(
      * @return A human-readable string representation of the decoded payload, or an error message if decoding fails, or
      *   null if the log does not contain a decodable packet.
      */
+    @Suppress("detekt:CyclomaticComplexMethod") // large switch that detekt doesn't parse well.
     private fun decodePayloadFromMeshLog(log: MeshLog): String? {
         var result: String? = null
         val packet = log.meshPacket
@@ -390,38 +421,8 @@ constructor(
                         PortNum.PAXCOUNTER_APP_VALUE -> PaxcountProtos.Paxcount.parseFrom(payload).toString()
                         PortNum.STORE_FORWARD_APP_VALUE ->
                             StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
-                        PortNum.NEIGHBORINFO_APP_VALUE -> {
-                            val info = MeshProtos.NeighborInfo.parseFrom(payload)
-                            val formatNode: (Int) -> String = { nodeNum ->
-                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
-                                val nodeId = "!%08x".format(nodeNum)
-                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
-                            }
-                            buildString {
-                                appendLine("NeighborInfo:")
-                                appendLine("node_id: ${formatNode(info.nodeId)}")
-                                appendLine("last_sent_by_id: ${formatNode(info.lastSentById)}")
-                                appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
-                                if (info.neighborsCount > 0) {
-                                    appendLine("neighbors:")
-                                    info.neighborsList.forEach { n ->
-                                        appendLine("  - node_id: ${formatNode(n.nodeId)} snr: ${n.snr}")
-                                    }
-                                }
-                            }
-                        }
-                        PortNum.TRACEROUTE_APP_VALUE -> {
-                            val getUsername: (Int) -> String = { nodeNum ->
-                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
-                                val nodeId = "!%08x".format(nodeNum)
-                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
-                            }
-                            packet.getTracerouteResponse(getUsername)
-                                ?: runCatching { MeshProtos.RouteDiscovery.parseFrom(payload).toString() }.getOrNull()
-                                ?: payload.joinToString(" ") { HEX_FORMAT.format(it) }
-                        }
+                        PortNum.NEIGHBORINFO_APP_VALUE -> decodeNeighborInfo(payload)
+                        PortNum.TRACEROUTE_APP_VALUE -> decodeTraceroute(packet, payload)
                         else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
                     }
                 } catch (e: InvalidProtocolBufferException) {
@@ -429,5 +430,35 @@ constructor(
                 }
         }
         return result
+    }
+
+    private fun formatNodeWithShortName(nodeNum: Int): String {
+        val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+        val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+        val nodeId = "!%08x".format(nodeNum)
+        return if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+    }
+
+    private fun decodeNeighborInfo(payload: ByteArray): String {
+        val info = MeshProtos.NeighborInfo.parseFrom(payload)
+        return buildString {
+            appendLine("NeighborInfo:")
+            appendLine("  node_id: ${formatNodeWithShortName(info.nodeId)}")
+            appendLine("  last_sent_by_id: ${formatNodeWithShortName(info.lastSentById)}")
+            appendLine("  node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+            if (info.neighborsCount > 0) {
+                appendLine("  neighbors:")
+                info.neighborsList.forEach { n ->
+                    appendLine("    - node_id: ${formatNodeWithShortName(n.nodeId)} snr: ${n.snr}")
+                }
+            }
+        }
+    }
+
+    private fun decodeTraceroute(packet: MeshProtos.MeshPacket, payload: ByteArray): String {
+        val getUsername: (Int) -> String = { nodeNum -> formatNodeWithShortName(nodeNum) }
+        return packet.getTracerouteResponse(getUsername)
+            ?: runCatching { MeshProtos.RouteDiscovery.parseFrom(payload).toString() }.getOrNull()
+            ?: payload.joinToString(" ") { HEX_FORMAT.format(it) }
     }
 }

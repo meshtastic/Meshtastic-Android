@@ -46,14 +46,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.debug_default_search
+import org.meshtastic.core.strings.debug_logs_export
+import org.meshtastic.core.strings.debug_search_clear
+import org.meshtastic.core.strings.debug_search_next
+import org.meshtastic.core.strings.debug_search_prev
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchMatch
@@ -79,14 +84,14 @@ internal fun DebugSearchNavigation(
         IconButton(onClick = onPreviousMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = stringResource(R.string.debug_search_prev),
+                contentDescription = stringResource(Res.string.debug_search_prev),
                 modifier = Modifier.size(16.dp),
             )
         }
         IconButton(onClick = onNextMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = stringResource(R.string.debug_search_next),
+                contentDescription = stringResource(Res.string.debug_search_next),
                 modifier = Modifier.size(16.dp),
             )
         }
@@ -106,7 +111,7 @@ internal fun DebugSearchBar(
         value = searchState.searchText,
         onValueChange = onSearchTextChange,
         modifier = modifier.then(Modifier.padding(end = 8.dp)),
-        placeholder = { Text(stringResource(R.string.debug_default_search)) },
+        placeholder = { Text(stringResource(Res.string.debug_default_search)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions =
@@ -132,7 +137,7 @@ internal fun DebugSearchBar(
                     IconButton(onClick = onClearSearch, modifier = Modifier.size(32.dp)) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = stringResource(R.string.debug_search_clear),
+                            contentDescription = stringResource(Res.string.debug_search_clear),
                             modifier = Modifier.size(16.dp),
                         )
                     }
@@ -188,7 +193,7 @@ internal fun DebugSearchState(
                 IconButton(onClick = onExport, modifier = Modifier) {
                     Icon(
                         imageVector = Icons.Outlined.FileDownload,
-                        contentDescription = stringResource(id = R.string.debug_logs_export),
+                        contentDescription = stringResource(Res.string.debug_logs_export),
                         modifier = Modifier.size(24.dp),
                     )
                 }

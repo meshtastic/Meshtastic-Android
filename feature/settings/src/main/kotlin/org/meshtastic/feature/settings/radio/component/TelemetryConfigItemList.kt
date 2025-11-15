@@ -22,12 +22,25 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.air_quality_metrics_module_enabled
+import org.meshtastic.core.strings.air_quality_metrics_update_interval_seconds
+import org.meshtastic.core.strings.device_metrics_update_interval_seconds
+import org.meshtastic.core.strings.device_telemetry_enabled
+import org.meshtastic.core.strings.device_telemetry_enabled_summary
+import org.meshtastic.core.strings.environment_metrics_module_enabled
+import org.meshtastic.core.strings.environment_metrics_on_screen_enabled
+import org.meshtastic.core.strings.environment_metrics_update_interval_seconds
+import org.meshtastic.core.strings.environment_metrics_use_fahrenheit
+import org.meshtastic.core.strings.power_metrics_module_enabled
+import org.meshtastic.core.strings.power_metrics_on_screen_enabled
+import org.meshtastic.core.strings.power_metrics_update_interval_seconds
+import org.meshtastic.core.strings.telemetry
+import org.meshtastic.core.strings.telemetry_config
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
@@ -46,10 +59,9 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
     val formState = rememberConfigState(initialValue = telemetryConfig)
 
     val firmwareVersion = state.metadata?.firmwareVersion ?: "1"
-    val context = LocalContext.current
 
     RadioConfigScreenList(
-        title = stringResource(id = R.string.telemetry),
+        title = stringResource(Res.string.telemetry),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -61,11 +73,11 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.telemetry_config)) {
+            TitledCard(title = stringResource(Res.string.telemetry_config)) {
                 if (DeviceVersion(firmwareVersion) >= DeviceVersion(MIN_FW_FOR_TELEMETRY_TOGGLE)) {
                     SwitchPreference(
-                        title = stringResource(R.string.device_telemetry_enabled),
-                        summary = stringResource(R.string.device_telemetry_enabled_summary),
+                        title = stringResource(Res.string.device_telemetry_enabled),
+                        summary = stringResource(Res.string.device_telemetry_enabled_summary),
                         checked = formState.value.deviceTelemetryEnabled,
                         enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy { deviceTelemetryEnabled = it } },
@@ -75,15 +87,15 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 }
                 val items = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.device_metrics_update_interval_seconds),
+                    title = stringResource(Res.string.device_metrics_update_interval_seconds),
                     selectedItem = formState.value.deviceUpdateInterval.toLong(),
                     enabled = state.connected,
-                    items = items.map { it.value to it.toDisplayString(context = context) },
+                    items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { deviceUpdateInterval = it.toInt() } },
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.environment_metrics_module_enabled),
+                    title = stringResource(Res.string.environment_metrics_module_enabled),
                     checked = formState.value.environmentMeasurementEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { environmentMeasurementEnabled = it } },
@@ -92,17 +104,17 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 HorizontalDivider()
                 val envItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.environment_metrics_update_interval_seconds),
+                    title = stringResource(Res.string.environment_metrics_update_interval_seconds),
                     selectedItem = formState.value.environmentUpdateInterval.toLong(),
                     enabled = state.connected,
-                    items = envItems.map { it.value to it.toDisplayString(context = context) },
+                    items = envItems.map { it.value to it.toDisplayString() },
                     onItemSelected = {
                         formState.value = formState.value.copy { environmentUpdateInterval = it.toInt() }
                     },
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.environment_metrics_on_screen_enabled),
+                    title = stringResource(Res.string.environment_metrics_on_screen_enabled),
                     checked = formState.value.environmentScreenEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { environmentScreenEnabled = it } },
@@ -110,7 +122,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.environment_metrics_use_fahrenheit),
+                    title = stringResource(Res.string.environment_metrics_use_fahrenheit),
                     checked = formState.value.environmentDisplayFahrenheit,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { environmentDisplayFahrenheit = it } },
@@ -118,7 +130,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.air_quality_metrics_module_enabled),
+                    title = stringResource(Res.string.air_quality_metrics_module_enabled),
                     checked = formState.value.airQualityEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { airQualityEnabled = it } },
@@ -127,15 +139,15 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 HorizontalDivider()
                 val airItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.air_quality_metrics_update_interval_seconds),
+                    title = stringResource(Res.string.air_quality_metrics_update_interval_seconds),
                     selectedItem = formState.value.airQualityInterval.toLong(),
                     enabled = state.connected,
-                    items = airItems.map { it.value to it.toDisplayString(context = context) },
+                    items = airItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { airQualityInterval = it.toInt() } },
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.power_metrics_module_enabled),
+                    title = stringResource(Res.string.power_metrics_module_enabled),
                     checked = formState.value.powerMeasurementEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { powerMeasurementEnabled = it } },
@@ -144,15 +156,15 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 HorizontalDivider()
                 val powerItems = remember { IntervalConfiguration.BROADCAST_SHORT.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.power_metrics_update_interval_seconds),
+                    title = stringResource(Res.string.power_metrics_update_interval_seconds),
                     selectedItem = formState.value.powerUpdateInterval.toLong(),
                     enabled = state.connected,
-                    items = powerItems.map { it.value to it.toDisplayString(context = context) },
+                    items = powerItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { powerUpdateInterval = it.toInt() } },
                 )
                 HorizontalDivider()
                 SwitchPreference(
-                    title = stringResource(R.string.power_metrics_on_screen_enabled),
+                    title = stringResource(Res.string.power_metrics_on_screen_enabled),
                     checked = formState.value.powerScreenEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { powerScreenEnabled = it } },

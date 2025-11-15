@@ -17,8 +17,17 @@
 
 package org.meshtastic.core.model
 
-import androidx.annotation.StringRes
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.label_long_fast
+import org.meshtastic.core.strings.label_long_moderate
+import org.meshtastic.core.strings.label_long_slow
+import org.meshtastic.core.strings.label_medium_fast
+import org.meshtastic.core.strings.label_medium_slow
+import org.meshtastic.core.strings.label_short_fast
+import org.meshtastic.core.strings.label_short_slow
+import org.meshtastic.core.strings.label_short_turbo
+import org.meshtastic.core.strings.label_very_long_slow
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.RegionCode
@@ -296,14 +305,14 @@ enum class RegionInfo(
     }
 }
 
-enum class ChannelOption(val modemPreset: ModemPreset, @StringRes val labelRes: Int, val bandwidth: Float) {
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, R.string.label_very_long_slow, .0625f),
-    LONG_FAST(ModemPreset.LONG_FAST, R.string.label_long_fast, .250f),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, R.string.label_long_moderate, .125f),
-    LONG_SLOW(ModemPreset.LONG_SLOW, R.string.label_long_slow, .125f),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, R.string.label_medium_fast, .250f),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, R.string.label_medium_slow, .250f),
-    SHORT_TURBO(ModemPreset.SHORT_TURBO, R.string.label_short_turbo, bandwidth = .500f),
-    SHORT_FAST(ModemPreset.SHORT_FAST, R.string.label_short_fast, .250f),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, R.string.label_short_slow, .250f),
+enum class ChannelOption(val modemPreset: ModemPreset, val labelRes: StringResource, val bandwidth: Float) {
+    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, Res.string.label_very_long_slow, .0625f),
+    LONG_FAST(ModemPreset.LONG_FAST, Res.string.label_long_fast, .250f),
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, Res.string.label_long_moderate, .125f),
+    LONG_SLOW(ModemPreset.LONG_SLOW, Res.string.label_long_slow, .125f),
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, Res.string.label_medium_fast, .250f),
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, Res.string.label_medium_slow, .250f),
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, Res.string.label_short_turbo, bandwidth = .500f),
+    SHORT_FAST(ModemPreset.SHORT_FAST, Res.string.label_short_fast, .250f),
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, Res.string.label_short_slow, .250f),
 }

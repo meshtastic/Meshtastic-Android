@@ -21,7 +21,6 @@ package com.geeksville.mesh.ui
 
 import android.Manifest
 import android.os.Build
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -37,7 +36,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
@@ -53,8 +51,6 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -79,8 +75,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -100,16 +94,19 @@ import com.geeksville.mesh.navigation.connectionsGraph
 import com.geeksville.mesh.navigation.contactsGraph
 import com.geeksville.mesh.navigation.mapGraph
 import com.geeksville.mesh.navigation.nodesGraph
+import com.geeksville.mesh.navigation.settingsGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.ConnectionsNavIcon
-import com.geeksville.mesh.ui.metrics.annotateTraceroute
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
@@ -118,8 +115,27 @@ import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.app_too_old
+import org.meshtastic.core.strings.bottom_nav_settings
+import org.meshtastic.core.strings.client_notification
+import org.meshtastic.core.strings.compromised_keys
+import org.meshtastic.core.strings.connected
+import org.meshtastic.core.strings.connections
+import org.meshtastic.core.strings.conversations
+import org.meshtastic.core.strings.device_sleeping
+import org.meshtastic.core.strings.disconnected
+import org.meshtastic.core.strings.firmware_old
+import org.meshtastic.core.strings.firmware_too_old
+import org.meshtastic.core.strings.map
+import org.meshtastic.core.strings.must_update
+import org.meshtastic.core.strings.nodes
+import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.should_update
+import org.meshtastic.core.strings.should_update_firmware
+import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.Map
@@ -130,16 +146,16 @@ import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
-import org.meshtastic.feature.settings.navigation.settingsGraph
+import org.meshtastic.feature.node.metrics.annotateTraceroute
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 
-enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
-    Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
-    Nodes(R.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
-    Map(R.string.map, MeshtasticIcons.Map, MapRoutes.Map),
-    Settings(R.string.bottom_nav_settings, MeshtasticIcons.Settings, SettingsRoutes.SettingsGraph()),
-    Connections(R.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
+enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
+    Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
+    Nodes(Res.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
+    Map(Res.string.map, MeshtasticIcons.Map, MapRoutes.Map),
+    Settings(Res.string.bottom_nav_settings, MeshtasticIcons.Settings, SettingsRoutes.SettingsGraph()),
+    Connections(Res.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
     ;
 
     companion object {
@@ -205,13 +221,13 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         var message = notification.message
         val compromisedKeys =
             if (notification.hasLowEntropyKey() || notification.hasDuplicatedPublicKey()) {
-                message = stringResource(R.string.compromised_keys)
+                message = stringResource(Res.string.compromised_keys)
                 true
             } else {
                 false
             }
         SimpleAlertDialog(
-            title = R.string.client_notification,
+            title = Res.string.client_notification,
             text = { Text(text = message) },
             onConfirm = {
                 if (compromisedKeys) {
@@ -226,13 +242,13 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val traceRouteResponse by uIViewModel.tracerouteResponse.observeAsState()
     traceRouteResponse?.let { response ->
         SimpleAlertDialog(
-            title = R.string.traceroute,
+            title = Res.string.traceroute,
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     Text(text = annotateTraceroute(response))
                 }
             },
-            dismissText = stringResource(id = R.string.okay),
+            dismissText = stringResource(Res.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
         )
     }
@@ -373,12 +389,13 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                                     Text(
                                         if (isConnectionsRoute) {
                                             when (connectionState) {
-                                                ConnectionState.CONNECTED -> stringResource(R.string.connected)
-                                                ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
-                                                ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+                                                ConnectionState.CONNECTED -> stringResource(Res.string.connected)
+                                                ConnectionState.DEVICE_SLEEP ->
+                                                    stringResource(Res.string.device_sleeping)
+                                                ConnectionState.DISCONNECTED -> stringResource(Res.string.disconnected)
                                             }
                                         } else {
-                                            stringResource(id = destination.label)
+                                            stringResource(destination.label)
                                         },
                                     )
                                 }
@@ -442,7 +459,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                                 ) {
                                     Icon(
                                         imageVector = destination.icon,
-                                        contentDescription = stringResource(id = destination.label),
+                                        contentDescription = stringResource(destination.label),
                                         tint = LocalContentColor.current,
                                     )
                                 }
@@ -452,34 +469,58 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     selected = isSelected,
                     label = {
                         if (navSuiteType != NavigationSuiteType.ShortNavigationBarCompact) {
-                            Text(stringResource(id = destination.label))
+                            Text(stringResource(destination.label))
                         }
                     },
                     onClick = {
-                        navController.navigate(destination.route) {
-                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                            launchSingleTop = true
+                        val isRepress = destination == topLevelDestination
+                        if (isRepress) {
+                            when (destination) {
+                                TopLevelDestination.Nodes -> {
+                                    val onNodesList = currentDestination?.hasRoute(NodesRoutes.Nodes::class) == true
+                                    if (!onNodesList) {
+                                        navController.navigate(destination.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                    uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
+                                }
+                                TopLevelDestination.Conversations -> {
+                                    val onConversationsList =
+                                        currentDestination?.hasRoute(ContactsRoutes.Contacts::class) == true
+                                    if (!onConversationsList) {
+                                        navController.navigate(destination.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                    uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
+                                }
+                                else -> Unit
+                            }
+                        } else {
+                            navController.navigate(destination.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                            }
                         }
                     },
                 )
             }
         },
     ) {
-        Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { paddingValues ->
-            Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                NavHost(
-                    navController = navController,
-                    startDestination = NodesRoutes.NodesGraph,
-                    modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
-                ) {
-                    contactsGraph(navController)
-                    nodesGraph(navController)
-                    mapGraph(navController)
-                    channelsGraph(navController)
-                    connectionsGraph(navController)
-                    settingsGraph(navController)
-                }
-            }
+        NavHost(
+            navController = navController,
+            startDestination = NodesRoutes.NodesGraph,
+            modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
+        ) {
+            contactsGraph(navController, uIViewModel.scrollToTopEventFlow)
+            nodesGraph(navController, uIViewModel.scrollToTopEventFlow)
+            mapGraph(navController)
+            channelsGraph(navController)
+            connectionsGraph(navController)
+            settingsGraph(navController)
         }
     }
 }
@@ -490,7 +531,6 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val resources = LocalResources.current
 
     val myFirmwareVersion = myNodeInfo?.firmwareVersion
 
@@ -522,8 +562,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE && BuildConfig.DEBUG.not()
                 if (isOld) {
                     viewModel.showAlert(
-                        resources.getString(R.string.app_too_old),
-                        resources.getString(R.string.must_update),
+                        getString(Res.string.app_too_old),
+                        getString(Res.string.must_update),
                         dismissable = false,
                         onConfirm = {
                             val service = viewModel.meshService ?: return@showAlert
@@ -534,8 +574,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                     myFirmwareVersion?.let {
                         val curVer = DeviceVersion(it)
                         if (curVer < MeshService.absoluteMinDeviceVersion) {
-                            val title = resources.getString(R.string.firmware_too_old)
-                            val message = resources.getString(R.string.firmware_old)
+                            val title = getString(Res.string.firmware_too_old)
+                            val message = getString(Res.string.firmware_old)
                             viewModel.showAlert(
                                 title = title,
                                 html = message,
@@ -546,9 +586,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                                 },
                             )
                         } else if (curVer < MeshService.minDeviceVersion) {
-                            val title = resources.getString(R.string.should_update_firmware)
-                            val message =
-                                resources.getString(R.string.should_update, latestStableFirmwareRelease.asString)
+                            val title = getString(Res.string.should_update_firmware)
+                            val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
                             viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
                         }
                     }

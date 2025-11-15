@@ -22,9 +22,11 @@ import androidx.compose.material.icons.automirrored.twotone.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.twotone.Mediation
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.direct_message
+import org.meshtastic.core.strings.exchange_userinfo
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -34,7 +36,7 @@ import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction: (NodeDetailAction) -> Unit) {
     if (!node.isEffectivelyUnmessageable) {
         ListItem(
-            text = stringResource(id = R.string.direct_message),
+            text = stringResource(Res.string.direct_message),
             leadingIcon = Icons.AutoMirrored.TwoTone.Message,
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
@@ -44,7 +46,7 @@ internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction
     }
 
     ListItem(
-        text = stringResource(id = R.string.exchange_userinfo),
+        text = stringResource(Res.string.exchange_userinfo),
         leadingIcon = Icons.Default.Person,
         trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },

@@ -24,13 +24,15 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -43,18 +45,23 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
+import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -62,22 +69,51 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
+import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.analytics_okay
+import org.meshtastic.core.strings.app_settings
+import org.meshtastic.core.strings.app_version
+import org.meshtastic.core.strings.bottom_nav_settings
+import org.meshtastic.core.strings.choose_theme
+import org.meshtastic.core.strings.device_db_cache_limit
+import org.meshtastic.core.strings.device_db_cache_limit_summary
+import org.meshtastic.core.strings.dynamic
+import org.meshtastic.core.strings.export_configuration
+import org.meshtastic.core.strings.export_data_csv
+import org.meshtastic.core.strings.import_configuration
+import org.meshtastic.core.strings.intro_show
+import org.meshtastic.core.strings.location_disabled
+import org.meshtastic.core.strings.modules_already_unlocked
+import org.meshtastic.core.strings.modules_unlocked
+import org.meshtastic.core.strings.preferences_language
+import org.meshtastic.core.strings.provide_location_to_mesh
+import org.meshtastic.core.strings.remotely_administrating
+import org.meshtastic.core.strings.save_rangetest
+import org.meshtastic.core.strings.system_settings
+import org.meshtastic.core.strings.theme
+import org.meshtastic.core.strings.theme_dark
+import org.meshtastic.core.strings.theme_light
+import org.meshtastic.core.strings.theme_system
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
-import org.meshtastic.feature.settings.util.LanguageUtils.getLanguageMap
+import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -139,9 +175,9 @@ fun SettingsScreen(
         EditDeviceProfileDialog(
             title =
             if (deviceProfile != null) {
-                stringResource(R.string.import_configuration)
+                stringResource(Res.string.import_configuration)
             } else {
-                stringResource(R.string.export_configuration)
+                stringResource(Res.string.export_configuration)
             },
             deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
             onConfirm = {
@@ -186,13 +222,13 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(R.string.bottom_nav_settings),
+                title = stringResource(Res.string.bottom_nav_settings),
                 subtitle =
                 if (state.isLocal) {
                     ourNode?.user?.longName
                 } else {
                     val remoteName = viewModel.destNode.value?.user?.longName ?: ""
-                    stringResource(R.string.remotely_administrating, remoteName)
+                    stringResource(Res.string.remotely_administrating, remoteName)
                 },
                 ourNode = ourNode,
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
@@ -208,6 +244,7 @@ fun SettingsScreen(
                 state = state,
                 isManaged = localConfig.security.isManaged,
                 excludedModulesUnlocked = excludedModulesUnlocked,
+                onPreserveFavoritesToggle = { viewModel.setPreserveFavorites(it) },
                 onRouteClick = { route ->
                     isWaiting = true
                     viewModel.setResponseStateLoading(route)
@@ -231,13 +268,12 @@ fun SettingsScreen(
             )
 
             val context = LocalContext.current
-            val resources = LocalResources.current
 
-            TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
+            TitledCard(title = stringResource(Res.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
                 if (state.analyticsAvailable) {
                     val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
                     SwitchListItem(
-                        text = stringResource(R.string.analytics_okay),
+                        text = stringResource(Res.string.analytics_okay),
                         checked = allowed,
                         leadingIcon = Icons.Default.BugReport,
                         onClick = { viewModel.toggleAnalyticsAllowed() },
@@ -255,12 +291,7 @@ fun SettingsScreen(
                             if (!isGpsDisabled) {
                                 settingsViewModel.meshService?.startProvideLocation()
                             } else {
-                                Toast.makeText(
-                                    context,
-                                    resources.getString(R.string.location_disabled),
-                                    Toast.LENGTH_LONG,
-                                )
-                                    .show()
+                                context.showToast(Res.string.location_disabled)
                             }
                         } else {
                             // Request permissions if not granted and user wants to provide location
@@ -272,7 +303,7 @@ fun SettingsScreen(
                 }
 
                 SwitchListItem(
-                    text = stringResource(R.string.provide_location_to_mesh),
+                    text = stringResource(Res.string.provide_location_to_mesh),
                     leadingIcon = Icons.Rounded.LocationOn,
                     enabled = !isGpsDisabled,
                     checked = provideLocation,
@@ -286,7 +317,7 @@ fun SettingsScreen(
                 // picker for these devices.
                 val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
                 ListItem(
-                    text = stringResource(R.string.preferences_language),
+                    text = stringResource(Res.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
                     trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 ) {
@@ -304,13 +335,30 @@ fun SettingsScreen(
                 }
 
                 ListItem(
-                    text = stringResource(R.string.theme),
+                    text = stringResource(Res.string.theme),
                     leadingIcon = Icons.Rounded.FormatPaint,
                     trailingIcon = null,
                 ) {
                     showThemePickerDialog = true
                 }
+
+                // Node DB cache limit (App setting)
+                val cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value
+                val cacheItems = remember {
+                    (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map {
+                        it.toLong() to it.toString()
+                    }
+                }
+                DropDownPreference(
+                    title = stringResource(Res.string.device_db_cache_limit),
+                    enabled = true,
+                    items = cacheItems,
+                    selectedItem = cacheLimit.toLong(),
+                    onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
+                    summary = stringResource(Res.string.device_db_cache_limit_summary),
+                )
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                val nodeName = ourNode?.user?.shortName ?: ""
 
                 val exportRangeTestLauncher =
                     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -319,7 +367,7 @@ fun SettingsScreen(
                         }
                     }
                 ListItem(
-                    text = stringResource(R.string.save_rangetest),
+                    text = stringResource(Res.string.save_rangetest),
                     leadingIcon = Icons.Rounded.Output,
                     trailingIcon = null,
                 ) {
@@ -327,7 +375,7 @@ fun SettingsScreen(
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "application/csv"
-                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_$timestamp.csv")
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_${nodeName}_$timestamp.csv")
                         }
                     exportRangeTestLauncher.launch(intent)
                 }
@@ -339,7 +387,7 @@ fun SettingsScreen(
                         }
                     }
                 ListItem(
-                    text = stringResource(R.string.export_data_csv),
+                    text = stringResource(Res.string.export_data_csv),
                     leadingIcon = Icons.Rounded.Output,
                     trailingIcon = null,
                 ) {
@@ -347,13 +395,13 @@ fun SettingsScreen(
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "application/csv"
-                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_$timestamp.csv")
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_${nodeName}_$timestamp.csv")
                         }
                     exportDataLauncher.launch(intent)
                 }
 
                 ListItem(
-                    text = stringResource(R.string.intro_show),
+                    text = stringResource(Res.string.intro_show),
                     leadingIcon = Icons.Rounded.WavingHand,
                     trailingIcon = null,
                 ) {
@@ -361,7 +409,7 @@ fun SettingsScreen(
                 }
 
                 ListItem(
-                    text = stringResource(R.string.system_settings),
+                    text = stringResource(Res.string.system_settings),
                     leadingIcon = Icons.Rounded.AppSettingsAlt,
                     trailingIcon = null,
                 ) {
@@ -392,8 +440,8 @@ private fun AppVersionButton(
     appVersionName: String,
     onUnlockExcludedModules: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val resources = LocalResources.current
     var clickCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(clickCount) {
@@ -404,7 +452,7 @@ private fun AppVersionButton(
     }
 
     ListItem(
-        text = stringResource(R.string.app_version),
+        text = stringResource(Res.string.app_version),
         leadingIcon = Icons.Rounded.Memory,
         supportingText = appVersionName,
         trailingIcon = null,
@@ -414,14 +462,13 @@ private fun AppVersionButton(
         when {
             clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
                 clickCount = 0
-                Toast.makeText(context, resources.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG)
-                    .show()
+                scope.launch { context.showToast(Res.string.modules_already_unlocked) }
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
                 onUnlockExcludedModules()
-                Toast.makeText(context, resources.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
+                scope.launch { context.showToast(Res.string.modules_unlocked) }
             }
         }
     }
@@ -429,39 +476,54 @@ private fun AppVersionButton(
 
 @Composable
 private fun LanguagePickerDialog(onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    val choices = remember {
-        context
-            .getLanguageMap()
-            .map { (languageTag, languageName) -> languageName to { LanguageUtils.setAppLocale(languageTag) } }
-            .toMap()
+    SettingsDialog(title = stringResource(Res.string.preferences_language), onDismiss = onDismiss) {
+        languageMap().forEach { (languageTag, languageName) ->
+            ListItem(text = languageName, trailingIcon = null) {
+                LanguageUtils.setAppLocale(languageTag)
+                onDismiss()
+            }
+        }
     }
+}
 
-    MultipleChoiceAlertDialog(
-        title = stringResource(R.string.preferences_language),
-        message = "",
-        choices = choices,
-        onDismissRequest = onDismiss,
-    )
+private enum class ThemeOption(val label: StringResource, val mode: Int) {
+    DYNAMIC(label = Res.string.dynamic, mode = MODE_DYNAMIC),
+    LIGHT(label = Res.string.theme_light, mode = AppCompatDelegate.MODE_NIGHT_NO),
+    DARK(label = Res.string.theme_dark, mode = AppCompatDelegate.MODE_NIGHT_YES),
+    SYSTEM(label = Res.string.theme_system, mode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),
 }
 
 @Composable
 private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    val resources = LocalResources.current
-    val themeMap = remember {
-        mapOf(
-            resources.getString(R.string.dynamic) to MODE_DYNAMIC,
-            resources.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-            resources.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-            resources.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-        )
-            .mapValues { (_, value) -> { onClickTheme(value) } }
+    SettingsDialog(title = stringResource(Res.string.choose_theme), onDismiss = onDismiss) {
+        ThemeOption.entries.forEach { option ->
+            ListItem(text = stringResource(option.label), trailingIcon = null) {
+                onClickTheme(option.mode)
+                onDismiss()
+            }
+        }
     }
+}
 
-    MultipleChoiceAlertDialog(
-        title = stringResource(R.string.choose_theme),
-        message = "",
-        choices = themeMap,
-        onDismissRequest = onDismiss,
-    )
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsDialog(title: String, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.wrapContentWidth().wrapContentHeight(),
+            shape = MaterialTheme.shapes.large,
+            color = AlertDialogDefaults.containerColor,
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+        ) {
+            Column {
+                Text(
+                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) { content() }
+            }
+        }
+    }
 }

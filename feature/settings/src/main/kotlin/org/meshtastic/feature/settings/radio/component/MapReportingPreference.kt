@@ -34,14 +34,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.i_agree
+import org.meshtastic.core.strings.i_agree_to_share_my_location
+import org.meshtastic.core.strings.map_reporting
+import org.meshtastic.core.strings.map_reporting_consent_header
+import org.meshtastic.core.strings.map_reporting_consent_text
+import org.meshtastic.core.strings.map_reporting_interval_seconds
+import org.meshtastic.core.strings.map_reporting_summary
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.precisionBitsToMeters
@@ -65,13 +71,12 @@ fun MapReportingPreference(
     onPublishIntervalSecsChanged: (Int) -> Unit = {},
     enabled: Boolean,
 ) {
-    val context = LocalContext.current
     Column {
         var showMapReportingWarning by rememberSaveable { mutableStateOf(mapReportingEnabled) }
         LaunchedEffect(mapReportingEnabled) { showMapReportingWarning = mapReportingEnabled }
         SwitchPreference(
-            title = stringResource(R.string.map_reporting),
-            summary = stringResource(R.string.map_reporting_summary),
+            title = stringResource(Res.string.map_reporting),
+            summary = stringResource(Res.string.map_reporting_summary),
             checked = showMapReportingWarning,
             enabled = enabled,
             onCheckedChange = { checked ->
@@ -85,13 +90,13 @@ fun MapReportingPreference(
         )
         AnimatedVisibility(showMapReportingWarning) {
             Card(modifier = Modifier.padding(16.dp)) {
-                Text(text = stringResource(R.string.map_reporting_consent_header), modifier = Modifier.padding(16.dp))
+                Text(text = stringResource(Res.string.map_reporting_consent_header), modifier = Modifier.padding(16.dp))
                 HorizontalDivider()
-                Text(stringResource(R.string.map_reporting_consent_text), modifier = Modifier.padding(16.dp))
+                Text(stringResource(Res.string.map_reporting_consent_text), modifier = Modifier.padding(16.dp))
 
                 SwitchPreference(
-                    title = stringResource(R.string.i_agree),
-                    summary = stringResource(R.string.i_agree_to_share_my_location),
+                    title = stringResource(Res.string.i_agree),
+                    summary = stringResource(Res.string.i_agree_to_share_my_location),
                     checked = shouldReportLocation,
                     enabled = enabled,
                     onCheckedChange = { checked ->
@@ -125,8 +130,8 @@ fun MapReportingPreference(
                     val publishItems = remember { IntervalConfiguration.BROADCAST_MEDIUM.allowedIntervals }
                     DropDownPreference(
                         modifier = Modifier.padding(bottom = 16.dp),
-                        title = stringResource(R.string.map_reporting_interval_seconds),
-                        items = publishItems.map { it.value to it.toDisplayString(context = context) },
+                        title = stringResource(Res.string.map_reporting_interval_seconds),
+                        items = publishItems.map { it.value to it.toDisplayString() },
                         selectedItem = publishIntervalSecs,
                         enabled = enabled,
                         onItemSelected = { onPublishIntervalSecsChanged(it.toInt()) },

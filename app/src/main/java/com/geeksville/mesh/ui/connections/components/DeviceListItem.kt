@@ -33,9 +33,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.model.DeviceListEntry
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.bluetooth
+import org.meshtastic.core.strings.network
+import org.meshtastic.core.strings.serial
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -55,10 +59,10 @@ fun DeviceListItem(connected: Boolean, device: DeviceListEntry, onSelect: () -> 
 
     val contentDescription =
         when (device) {
-            is DeviceListEntry.Ble -> stringResource(R.string.bluetooth)
-            is DeviceListEntry.Usb -> stringResource(R.string.serial)
-            is DeviceListEntry.Tcp -> stringResource(R.string.network)
-            is DeviceListEntry.Mock -> stringResource(R.string.add)
+            is DeviceListEntry.Ble -> stringResource(Res.string.bluetooth)
+            is DeviceListEntry.Usb -> stringResource(Res.string.serial)
+            is DeviceListEntry.Tcp -> stringResource(Res.string.network)
+            is DeviceListEntry.Mock -> stringResource(Res.string.add)
         }
 
     val useSelectable = modifier == Modifier

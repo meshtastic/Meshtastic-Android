@@ -18,7 +18,16 @@
 package com.geeksville.mesh
 
 import android.app.Application
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.meshtastic.core.database.DatabaseManager
+import org.meshtastic.core.prefs.mesh.MeshPrefs
 import timber.log.Timber
 
 /**
@@ -28,7 +37,26 @@ import timber.log.Timber
  * application components, including analytics and platform-specific helpers, and manages analytics consent based on
  * user preferences.
  */
-@HiltAndroidApp class MeshUtilApplication : Application()
+@HiltAndroidApp
+class MeshUtilApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        initializeMaps(this)
+        // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
+        val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
+        CoroutineScope(Dispatchers.Default).launch {
+            entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress)
+        }
+    }
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface AppEntryPoint {
+    fun databaseManager(): DatabaseManager
+
+    fun meshPrefs(): MeshPrefs
+}
 
 fun logAssert(executeReliableWrite: Boolean) {
     if (!executeReliableWrite) {

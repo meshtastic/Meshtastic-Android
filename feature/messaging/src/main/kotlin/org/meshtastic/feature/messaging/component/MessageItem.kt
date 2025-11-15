@@ -44,16 +44,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.hops_away_template
+import org.meshtastic.core.strings.reply
+import org.meshtastic.core.strings.sample_message
+import org.meshtastic.core.strings.via_mqtt
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
@@ -144,7 +148,7 @@ internal fun MessageItem(
                     if (message.viaMqtt) {
                         Icon(
                             Icons.Default.Cloud,
-                            contentDescription = stringResource(R.string.via_mqtt),
+                            contentDescription = stringResource(Res.string.via_mqtt),
                             modifier = Modifier.size(16.dp),
                         )
                     }
@@ -179,7 +183,7 @@ internal fun MessageItem(
                                 }
                             } else {
                                 Text(
-                                    text = stringResource(R.string.hops_away_template, message.hopsAway),
+                                    text = stringResource(Res.string.hops_away_template, message.hopsAway),
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                             }
@@ -228,7 +232,7 @@ private fun OriginalMessageSnippet(
             ) {
                 Icon(
                     Icons.Default.FormatQuote,
-                    contentDescription = stringResource(R.string.reply), // Add to strings.xml
+                    contentDescription = stringResource(Res.string.reply), // Add to strings.xml
                 )
                 Text(
                     text = originalMessageNode.user.shortName,
@@ -254,7 +258,7 @@ private fun OriginalMessageSnippet(
 private fun MessageItemPreview() {
     val sent =
         Message(
-            text = stringResource(R.string.sample_message),
+            text = stringResource(Res.string.sample_message),
             time = "10:00",
             fromLocal = true,
             status = MessageStatus.DELIVERED,

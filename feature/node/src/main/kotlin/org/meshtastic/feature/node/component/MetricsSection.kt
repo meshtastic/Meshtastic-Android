@@ -21,10 +21,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.environment
+import org.meshtastic.core.strings.logs
+import org.meshtastic.core.strings.power
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.LogsType
@@ -41,13 +44,13 @@ fun MetricsSection(
     modifier: Modifier = Modifier,
 ) {
     if (node.hasEnvironmentMetrics) {
-        TitledCard(stringResource(R.string.environment), modifier = modifier) {}
+        TitledCard(stringResource(Res.string.environment), modifier = modifier) {}
         EnvironmentMetrics(node, isFahrenheit = metricsState.isFahrenheit, displayUnits = metricsState.displayUnits)
         Spacer(modifier = Modifier.height(8.dp))
     }
 
     if (node.hasPowerMetrics) {
-        TitledCard(stringResource(R.string.power), modifier = modifier) {}
+        TitledCard(stringResource(Res.string.power), modifier = modifier) {}
         PowerMetrics(node)
         Spacer(modifier = Modifier.height(8.dp))
     }
@@ -55,7 +58,7 @@ fun MetricsSection(
     val nonPositionLogs = availableLogs.filter { it != LogsType.NODE_MAP && it != LogsType.POSITIONS }
 
     if (nonPositionLogs.isNotEmpty()) {
-        TitledCard(title = stringResource(id = R.string.logs), modifier = modifier) {
+        TitledCard(title = stringResource(Res.string.logs), modifier = modifier) {
             nonPositionLogs.forEach { type ->
                 ListItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
                     onAction(NodeDetailAction.Navigate(type.route))

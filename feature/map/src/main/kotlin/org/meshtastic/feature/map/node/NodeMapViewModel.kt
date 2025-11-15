@@ -32,7 +32,7 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.prefs.map.MapPrefs
-import org.meshtastic.core.proto.toPosition
+import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.proto.MeshProtos.Position

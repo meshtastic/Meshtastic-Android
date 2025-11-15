@@ -24,11 +24,14 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.exchange_position
+import org.meshtastic.core.strings.node_sort_distance
+import org.meshtastic.core.strings.position
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
@@ -51,7 +54,7 @@ fun PositionSection(
 ) {
     val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(metricsState.displayUnits)
     val hasValidPosition = node.latitude != 0.0 || node.longitude != 0.0
-    TitledCard(title = stringResource(R.string.position), modifier = modifier) {
+    TitledCard(title = stringResource(Res.string.position), modifier = modifier) {
         // Current position coordinates (linked)
         if (hasValidPosition) {
             InlineMap(node = node, Modifier.fillMaxWidth().height(200.dp))
@@ -64,7 +67,7 @@ fun PositionSection(
             InsetDivider()
 
             ListItem(
-                text = stringResource(R.string.node_sort_distance),
+                text = stringResource(Res.string.node_sort_distance),
                 leadingIcon = Icons.Default.SocialDistance,
                 supportingText = distance,
                 copyable = true,
@@ -76,7 +79,7 @@ fun PositionSection(
 
         // Exchange position action
         ListItem(
-            text = stringResource(id = R.string.exchange_position),
+            text = stringResource(Res.string.exchange_position),
             leadingIcon = Icons.Default.LocationOn,
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },

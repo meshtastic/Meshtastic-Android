@@ -37,10 +37,14 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.last_heard_filter_label
+import org.meshtastic.core.strings.only_favorites
+import org.meshtastic.core.strings.show_precision_circle
+import org.meshtastic.core.strings.show_waypoints
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.MapViewModel
 import kotlin.math.roundToInt
@@ -50,10 +54,10 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.only_favorites)) },
+            text = { Text(stringResource(Res.string.only_favorites)) },
             onClick = { mapViewModel.toggleOnlyFavorites() },
             leadingIcon = {
-                Icon(imageVector = Icons.Filled.Star, contentDescription = stringResource(id = R.string.only_favorites))
+                Icon(imageVector = Icons.Filled.Star, contentDescription = stringResource(Res.string.only_favorites))
             },
             trailingIcon = {
                 Checkbox(
@@ -63,13 +67,10 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             },
         )
         DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.show_waypoints)) },
+            text = { Text(stringResource(Res.string.show_waypoints)) },
             onClick = { mapViewModel.toggleShowWaypointsOnMap() },
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Place,
-                    contentDescription = stringResource(id = R.string.show_waypoints),
-                )
+                Icon(imageVector = Icons.Filled.Place, contentDescription = stringResource(Res.string.show_waypoints))
             },
             trailingIcon = {
                 Checkbox(
@@ -79,12 +80,12 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             },
         )
         DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.show_precision_circle)) },
+            text = { Text(stringResource(Res.string.show_precision_circle)) },
             onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Outlined.RadioButtonUnchecked, // Placeholder icon
-                    contentDescription = stringResource(id = R.string.show_precision_circle),
+                    contentDescription = stringResource(Res.string.show_precision_circle),
                 )
             },
             trailingIcon = {
@@ -103,7 +104,7 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             Text(
                 text =
                 stringResource(
-                    R.string.last_heard_filter_label,
+                    Res.string.last_heard_filter_label,
                     stringResource(mapFilterState.lastHeardFilter.label),
                 ),
                 style = MaterialTheme.typography.labelLarge,
@@ -134,7 +135,7 @@ internal fun NodeMapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Un
             Text(
                 text =
                 stringResource(
-                    R.string.last_heard_filter_label,
+                    Res.string.last_heard_filter_label,
                     stringResource(mapFilterState.lastHeardTrackFilter.label),
                 ),
                 style = MaterialTheme.typography.labelLarge,

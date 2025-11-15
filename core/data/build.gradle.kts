@@ -34,6 +34,9 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
 
+    // Needed because core:data references MeshtasticDatabase (supertype RoomDatabase)
+    implementation(libs.androidx.room.runtime)
+
     implementation(libs.androidx.core.location.altitude)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)

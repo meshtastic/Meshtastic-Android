@@ -47,11 +47,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.meshtastic
+import org.meshtastic.core.strings.pairing_completed
+import org.meshtastic.core.strings.pairing_failed_try_again
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import timber.log.Timber
 import javax.inject.Inject
@@ -135,7 +139,7 @@ constructor(
                     val idBytes = txtRecords["id"]
 
                     val shortName =
-                        shortNameBytes?.let { String(it, Charsets.UTF_8) } ?: context.getString(R.string.meshtastic)
+                        shortNameBytes?.let { String(it, Charsets.UTF_8) } ?: getString(Res.string.meshtastic)
                     val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
                     var displayName = recentMap[address] ?: shortName
                     if (deviceId != null && !displayName.split("_").none { it == deviceId }) {
@@ -282,10 +286,10 @@ constructor(
                 if (state != BluetoothDevice.BOND_BONDING) {
                     Timber.d("Bonding completed, state=$state")
                     if (state == BluetoothDevice.BOND_BONDED) {
-                        setErrorText(context.getString(R.string.pairing_completed))
+                        setErrorText(getString(Res.string.pairing_completed))
                         changeDeviceAddress("x${device.address}")
                     } else {
-                        setErrorText(context.getString(R.string.pairing_failed_try_again))
+                        setErrorText(getString(Res.string.pairing_failed_try_again))
                     }
                 }
             }

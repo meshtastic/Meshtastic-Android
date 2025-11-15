@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="node_filter_placeholder">Filtro</string>
+    <string name="desc_node_filter_clear">quitar filtro de nodo</string>
+    <string name="node_filter_include_unknown">Incluír descoñecido</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Canle</string>
+    <string name="node_sort_distance">Distancia</string>
+    <string name="node_sort_hops_away">Brinca fóra</string>
+    <string name="node_sort_last_heard">Última escoita</string>
+    <string name="node_sort_via_mqtt">vía MQTT</string>
+    <string name="via_mqtt">vía MQTT</string>
+    <string name="routing_error_pki_failed">Fallou o envío cifrado</string>
+    <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
+    <!-- Position Config -->
+    <string name="channel_name">Nome de canle</string>
+    <string name="qr_code">Código QR</string>
+    <string name="application_icon">icona da aplicación</string>
+    <string name="unknown_username">Nome de usuario descoñecido</string>
+    <string name="send">Enviar</string>
+    <string name="warning_not_paired">Aínda non enlazaches unha radio compatible con Meshtástic neste teléfono. Por favor enlaza un dispositivo e coloca o teu nome de usuario. \n\n Esta aplicación de código aberto está en desenvolvemento. Se atopas problemas por favor publícaos no noso foro: https://github.com/orgs/meshtastic/discussions\n\nPara máis información visita a nosa páxina - www.meshtastic.org.</string>
+    <string name="you">Ti</string>
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="save_changes">Gardar</string>
+    <string name="new_channel_rcvd">Novo enlace de canle recibida</string>
+    <string name="report_bug">Reportar erro</string>
+    <string name="report_a_bug">Reporta un erro</string>
+    <string name="report_bug_text">Seguro que queres reportar un erro? Despois de reportar, por favor publica en https://github.com/orgs/meshtastic/discussions para poder unir o reporte co que atopaches.</string>
+    <string name="report">Reportar</string>
+    <string name="pairing_completed">Enlazado completado, comezando servizo</string>
+    <string name="pairing_failed_try_again">Enlazado fallou, por favor seleccione de novo</string>
+    <string name="location_disabled">Acceso á úbicación está apagado, non se pode prover posición na rede.</string>
+    <string name="share">Compartir</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="device_sleeping">Dispositivo durmindo</string>
+    <string name="ip_address">Enderezo IP:</string>
+    <string name="connected_to">Conectado á radio (%1$s)</string>
+    <string name="not_connected">Non conectado</string>
+    <string name="connected_sleeping">Conectado á radio, pero está durmindo</string>
+    <string name="app_too_old">Actualización da aplicación requerida</string>
+    <string name="must_update">Debe actualizar esta aplicación na tenda (ou Github).  É moi vella para falar con este firmware de radio. Por favor lea a nosa <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> neste tema.</string>
+    <string name="none">Ningún (desactivado)</string>
+    <string name="meshtastic_service_notifications">Notificacións de servizo</string>
+    <string name="about">Acerca de</string>
+    <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
+    <string name="debug_panel">Panel de depuración</string>
+    <string name="clear">Limpar</string>
+    <string name="message_delivery_status">Estado de envío de mensaxe</string>
+    <string name="firmware_too_old">Actualización de firmware necesaria.</string>
+    <string name="firmware_old">O firmware de radio é moi vello para falar con esta aplicación. Para máis información nisto visita <a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> a nosa guía de instalación de Firmware</a>.</string>
+    <string name="okay">OK</string>
+    <string name="must_set_region">Tes que seleccionar rexión!</string>
+    <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>
+    <string name="reset">Restablecer</string>
+    <string name="scan">Escanear</string>
+    <string name="add_network_device">Engadir</string>
+    <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
+    <string name="reset_to_defaults">Restablecer a por defecto</string>
+    <string name="apply">Aplicar</string>
+    <string name="theme">Tema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="theme_system">Por defecto do sistema</string>
+    <string name="choose_theme">Escoller tema</string>
+    <string name="provide_location_to_mesh">Proporcionar a ubicación do teléfono á malla</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Eliminar mensaxe?</item>
+        <item quantity="other">Eliminar %1$s mensaxes?</item>
+    </plurals>
+    <string name="delete">Eliminar</string>
+    <string name="delete_for_everyone">Eliminar para todos</string>
+    <string name="delete_for_me">Eliminar para min</string>
+    <string name="select_all">Seleccionar todo</string>
+    <string name="map_style_selection">Selección de Estilo</string>
+    <string name="map_download_region">Descargar Rexión</string>
+    <string name="name">Nome</string>
+    <string name="description">Descrición</string>
+    <string name="locked">Bloqueado</string>
+    <string name="save">Gardar</string>
+    <string name="preferences_language">Linguaxe</string>
+    <string name="preferences_system_default">Predeterminado do sistema</string>
+    <string name="resend">Reenviar</string>
+    <string name="shutdown">Apagar</string>
+    <string name="reboot">Reiniciar</string>
+    <string name="traceroute">Traza-ruta</string>
+    <string name="intro_show">Amosar introdución</string>
+    <string name="message">Mensaxe</string>
+    <string name="quick_chat">Opcións de conversa rápida</string>
+    <string name="quick_chat_new">Nova conversa rápida</string>
+    <string name="quick_chat_edit">Editar conversa rápida</string>
+    <string name="quick_chat_append">Anexar a mensaxe</string>
+    <string name="quick_chat_instant">Enviar instantaneamente</string>
+    <string name="factory_reset">Restablecemento de fábrica</string>
+    <string name="direct_message">Mensaxe directa</string>
+    <string name="nodedb_reset">Restablecer NodeDB</string>
+    <string name="delivery_confirmed">Entrega confirmada</string>
+    <string name="error">Erro</string>
+    <string name="ignore">Ignorar</string>
+    <string name="ignore_add">Engadir '%1$s' á lista de ignorar?</string>
+    <string name="ignore_remove">Quitar '%1$s' da lista de ignorar?</string>
+    <string name="map_select_download_region">Seleccionar a rexión de descarga</string>
+    <string name="map_tile_download_estimate">Descarga de 'tile' estimada:</string>
+    <string name="map_start_download">Comezar a descarga</string>
+    <string name="close">Pechar</string>
+    <string name="radio_configuration">Configuración de radio</string>
+    <string name="module_settings">Configuración de módulo</string>
+    <string name="add">Engadir</string>
+    <string name="edit">Editar</string>
+    <string name="calculating">Calculando…</string>
+    <string name="map_offline_manager">Xestor sen rede</string>
+    <string name="map_cache_size">Tamaño de caché actual</string>
+    <string name="map_cache_info">Capacidade de Caché: %1$d MB\nUso de Caché: %2$d MB</string>
+    <string name="map_clear_tiles">Limpar 'tiles' descargadas</string>
+    <string name="map_tile_source">Fonte de 'tile'</string>
+    <string name="map_purge_success">Caché SQL purgada para %1$s</string>
+    <string name="map_purge_fail">A purga de Caché SQL fallou, mira logcat para os detalles</string>
+    <string name="map_cache_manager">Xestor de caché</string>
+    <string name="map_download_complete">Descarga completada!</string>
+    <string name="map_subDescription">rumbo: %1$d distancia:%2$s</string>
+    <string name="waypoint_edit">Editar punto de ruta</string>
+    <string name="waypoint_delete">Eliminar punto de ruta?</string>
+    <string name="waypoint_new">Novo punto de ruta</string>
+    <string name="waypoint_received">Punto de ruta recibido:%1$s</string>
+    <string name="error_duty_cycle">O límite do Ciclo de Traballo de Sinal foi alcanzado. Non se pode enviar mensaxes agora, inténtao despois.</string>
+    <string name="remove">Eliminar</string>
+    <string name="remove_node_text">Este nodo será retirado da túa lista ata que o teu nodo reciba datos seus de novo.</string>
+    <string name="mute_notifications">Silenciar notificacións</string>
+    <string name="mute_8_hours">8 horas</string>
+    <string name="mute_1_week">1 semana</string>
+    <string name="mute_always">Sempre</string>
+    <string name="region_frequency_plan">Rexión</string>
+    <string name="distance">Distancia</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Mensaxe</string>
+    <string name="eight_hours">8 Horas</string>
+    <string name="one_day">24 Horas</string>
+    <string name="two_days">48 Horas</string>
+</resources>

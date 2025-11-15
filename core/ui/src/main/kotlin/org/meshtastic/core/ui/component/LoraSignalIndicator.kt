@@ -43,9 +43,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.bad
+import org.meshtastic.core.strings.fair
+import org.meshtastic.core.strings.good
+import org.meshtastic.core.strings.none_quality
+import org.meshtastic.core.strings.rssi
+import org.meshtastic.core.strings.signal
+import org.meshtastic.core.strings.signal_quality
+import org.meshtastic.core.strings.snr
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -59,14 +68,14 @@ const val RSSI_FAIR_THRESHOLD = -126
 
 @Stable
 enum class Quality(
-    @Stable val nameRes: Int,
+    @Stable val nameRes: StringResource,
     @Stable val imageVector: ImageVector,
     @Stable val color: @Composable () -> Color,
 ) {
-    NONE(R.string.none_quality, Icons.Default.SignalCellularAlt1Bar, { colorScheme.StatusRed }),
-    BAD(R.string.bad, Icons.Default.SignalCellularAlt2Bar, { colorScheme.StatusOrange }),
-    FAIR(R.string.fair, Icons.Default.SignalCellularAlt, { colorScheme.StatusYellow }),
-    GOOD(R.string.good, Icons.Default.SignalCellular4Bar, { colorScheme.StatusGreen }),
+    NONE(Res.string.none_quality, Icons.Default.SignalCellularAlt1Bar, { colorScheme.StatusRed }),
+    BAD(Res.string.bad, Icons.Default.SignalCellularAlt2Bar, { colorScheme.StatusOrange }),
+    FAIR(Res.string.fair, Icons.Default.SignalCellularAlt, { colorScheme.StatusYellow }),
+    GOOD(Res.string.good, Icons.Default.SignalCellular4Bar, { colorScheme.StatusGreen }),
 }
 
 /**
@@ -85,14 +94,14 @@ fun NodeSignalQuality(snr: Float, rssi: Int, modifier: Modifier = Modifier) {
         Snr(snr)
         Rssi(rssi)
         Text(
-            text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
+            text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
             style = MaterialTheme.typography.labelSmall,
             maxLines = 1,
         )
         Icon(
             modifier = Modifier.size(20.dp),
             imageVector = quality.imageVector,
-            contentDescription = stringResource(R.string.signal_quality),
+            contentDescription = stringResource(Res.string.signal_quality),
             tint = quality.color.invoke(),
         )
     }
@@ -119,11 +128,11 @@ fun LoraSignalIndicator(snr: Float, rssi: Int, contentColor: Color = MaterialThe
         Icon(
             modifier = Modifier.size(20.dp),
             imageVector = quality.imageVector,
-            contentDescription = stringResource(R.string.signal_quality),
+            contentDescription = stringResource(Res.string.signal_quality),
             tint = quality.color.invoke(),
         )
         Text(
-            text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
+            text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
         )
@@ -142,7 +151,7 @@ fun Snr(snr: Float) {
         }
 
     Text(
-        text = "%s %.2fdB".format(stringResource(id = R.string.snr), snr),
+        text = "%s %.2fdB".format(stringResource(Res.string.snr), snr),
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )
@@ -159,7 +168,7 @@ fun Rssi(rssi: Int) {
             Quality.BAD.color.invoke()
         }
     Text(
-        text = "%s %ddBm".format(stringResource(id = R.string.rssi), rssi),
+        text = "%s %ddBm".format(stringResource(Res.string.rssi), rssi),
         color = color,
         style = MaterialTheme.typography.labelSmall,
     )

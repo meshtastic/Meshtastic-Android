@@ -87,42 +87,42 @@ android {
         androidResources.localeFilters.addAll(
             listOf(
                 "en",
-                "ar-rSA",
-                "b+sr+Latn",
-                "bg-rBG",
-                "ca-rES",
-                "cs-rCZ",
-                "de-rDE",
-                "el-rGR",
-                "es-rES",
-                "et-rEE",
-                "fi-rFI",
-                "fr-rFR",
-                "ga-rIE",
-                "gl-rES",
-                "hr-rHR",
-                "ht-rHT",
-                "hu-rHU",
-                "is-rIS",
-                "it-rIT",
-                "iw-rIL",
-                "ja-rJP",
-                "ko-rKR",
-                "lt-rLT",
-                "nl-rNL",
-                "no-rNO",
-                "pl-rPL",
+                "ar",
+                "bg",
+                "ca",
+                "cs",
+                "de",
+                "el",
+                "es",
+                "et",
+                "fi",
+                "fr",
+                "ga",
+                "gl",
+                "hr",
+                "ht",
+                "hu",
+                "is",
+                "it",
+                "iw",
+                "ja",
+                "ko",
+                "lt",
+                "nl",
+                "no",
+                "pl",
+                "pt",
                 "pt-rBR",
-                "pt-rPT",
-                "ro-rRO",
-                "ru-rRU",
-                "sk-rSK",
-                "sl-rSI",
-                "sq-rAL",
+                "ro",
+                "ru",
+                "sk",
+                "sl",
+                "sq",
+                "sr",
                 "srp",
-                "sv-rSE",
-                "tr-rTR",
-                "uk-rUA",
+                "sv",
+                "tr",
+                "uk",
                 "zh-rCN",
                 "zh-rTW",
             ),
@@ -158,10 +158,9 @@ android {
             } else {
                 signingConfig = signingConfigs.getByName("debug")
             }
-            productFlavors.getByName("fdroid") {
-                isMinifyEnabled = false
-                isShrinkResources = false
-            }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
         }
     }
     bundle { language { enableSplit = false } }
@@ -174,6 +173,15 @@ secrets {
 
 // workaround for https://github.com/google/ksp/issues/1590
 androidComponents {
+    onVariants(selector().all()) { variant ->
+        if (variant.name == "fdroidDebug") {
+            variant.applicationId = "com.geeksville.mesh.fdroid.debug"
+        }
+
+        if (variant.name == "googleDebug") {
+            variant.applicationId = "com.geeksville.mesh.google.debug"
+        }
+    }
     onVariants(selector().withBuildType("release")) { variant ->
         if (variant.flavorName == "google") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
@@ -235,9 +243,12 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
 
+    implementation(libs.nordic)
+
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     googleImplementation(libs.location.services)
+    googleImplementation(libs.play.services.maps)
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }

@@ -17,14 +17,20 @@
 
 package org.meshtastic.feature.node.model
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.forty_eight_hours
+import org.meshtastic.core.strings.four_weeks
+import org.meshtastic.core.strings.max
+import org.meshtastic.core.strings.one_week
+import org.meshtastic.core.strings.twenty_four_hours
+import org.meshtastic.core.strings.two_weeks
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.TelemetryProtos
@@ -87,13 +93,13 @@ data class MetricsState(
 
 /** Supported time frames used to display data. */
 @Suppress("MagicNumber")
-enum class TimeFrame(val seconds: Long, @StringRes val strRes: Int) {
-    TWENTY_FOUR_HOURS(TimeUnit.DAYS.toSeconds(1), R.string.twenty_four_hours),
-    FORTY_EIGHT_HOURS(TimeUnit.DAYS.toSeconds(2), R.string.forty_eight_hours),
-    ONE_WEEK(TimeUnit.DAYS.toSeconds(7), R.string.one_week),
-    TWO_WEEKS(TimeUnit.DAYS.toSeconds(14), R.string.two_weeks),
-    FOUR_WEEKS(TimeUnit.DAYS.toSeconds(28), R.string.four_weeks),
-    MAX(0L, R.string.max),
+enum class TimeFrame(val seconds: Long, val strRes: StringResource) {
+    TWENTY_FOUR_HOURS(TimeUnit.DAYS.toSeconds(1), Res.string.twenty_four_hours),
+    FORTY_EIGHT_HOURS(TimeUnit.DAYS.toSeconds(2), Res.string.forty_eight_hours),
+    ONE_WEEK(TimeUnit.DAYS.toSeconds(7), Res.string.one_week),
+    TWO_WEEKS(TimeUnit.DAYS.toSeconds(14), Res.string.two_weeks),
+    FOUR_WEEKS(TimeUnit.DAYS.toSeconds(28), Res.string.four_weeks),
+    MAX(0L, Res.string.max),
     ;
 
     fun calculateOldestTime(): Long = if (this == MAX) {

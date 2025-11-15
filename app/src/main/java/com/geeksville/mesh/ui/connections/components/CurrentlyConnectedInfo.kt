@@ -32,12 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.disconnect
+import org.meshtastic.core.strings.firmware_version
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
@@ -75,7 +77,7 @@ fun CurrentlyConnectedInfo(
 
                 node.metadata?.firmwareVersion?.let { firmwareVersion ->
                     Text(
-                        text = stringResource(R.string.firmware_version, firmwareVersion),
+                        text = stringResource(Res.string.firmware_version, firmwareVersion),
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -94,7 +96,7 @@ fun CurrentlyConnectedInfo(
             ),
             onClick = onClickDisconnect,
         ) {
-            Text(stringResource(R.string.disconnect))
+            Text(stringResource(Res.string.disconnect))
         }
     }
 }

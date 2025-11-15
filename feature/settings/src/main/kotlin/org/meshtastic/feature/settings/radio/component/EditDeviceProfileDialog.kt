@@ -35,13 +35,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.protobuf.Descriptors
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.save
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 
@@ -102,7 +104,7 @@ fun EditDeviceProfileDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TextButton(modifier = modifier.weight(1f), onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel))
+                    Text(stringResource(Res.string.cancel))
                 }
                 Button(
                     modifier = modifier.weight(1f),
@@ -117,7 +119,7 @@ fun EditDeviceProfileDialog(
                     },
                     enabled = state.values.any { it },
                 ) {
-                    Text(stringResource(R.string.save))
+                    Text(stringResource(Res.string.save))
                 }
             }
         },

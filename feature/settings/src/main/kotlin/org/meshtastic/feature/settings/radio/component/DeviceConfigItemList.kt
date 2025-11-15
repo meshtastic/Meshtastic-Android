@@ -56,7 +56,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -66,7 +65,51 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.core.strings.R
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.accept
+import org.meshtastic.core.strings.are_you_sure
+import org.meshtastic.core.strings.button_gpio
+import org.meshtastic.core.strings.buzzer_gpio
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.config_device_doubleTapAsButtonPress_summary
+import org.meshtastic.core.strings.config_device_ledHeartbeatEnabled_summary
+import org.meshtastic.core.strings.config_device_tripleClickAsAdHocPing_summary
+import org.meshtastic.core.strings.config_device_tzdef_summary
+import org.meshtastic.core.strings.config_device_use_phone_tz
+import org.meshtastic.core.strings.device
+import org.meshtastic.core.strings.double_tap_as_button_press
+import org.meshtastic.core.strings.gpio
+import org.meshtastic.core.strings.hardware
+import org.meshtastic.core.strings.i_know_what_i_m_doing
+import org.meshtastic.core.strings.led_heartbeat
+import org.meshtastic.core.strings.nodeinfo_broadcast_interval
+import org.meshtastic.core.strings.options
+import org.meshtastic.core.strings.rebroadcast_mode
+import org.meshtastic.core.strings.rebroadcast_mode_all_desc
+import org.meshtastic.core.strings.rebroadcast_mode_all_skip_decoding_desc
+import org.meshtastic.core.strings.rebroadcast_mode_core_portnums_only_desc
+import org.meshtastic.core.strings.rebroadcast_mode_known_only_desc
+import org.meshtastic.core.strings.rebroadcast_mode_local_only_desc
+import org.meshtastic.core.strings.rebroadcast_mode_none_desc
+import org.meshtastic.core.strings.role
+import org.meshtastic.core.strings.role_client_desc
+import org.meshtastic.core.strings.role_client_hidden_desc
+import org.meshtastic.core.strings.role_client_mute_desc
+import org.meshtastic.core.strings.role_lost_and_found_desc
+import org.meshtastic.core.strings.role_repeater_desc
+import org.meshtastic.core.strings.role_router_client_desc
+import org.meshtastic.core.strings.role_router_desc
+import org.meshtastic.core.strings.role_router_late_desc
+import org.meshtastic.core.strings.role_sensor_desc
+import org.meshtastic.core.strings.role_tak_desc
+import org.meshtastic.core.strings.role_tak_tracker_desc
+import org.meshtastic.core.strings.role_tracker_desc
+import org.meshtastic.core.strings.router_role_confirmation_text
+import org.meshtastic.core.strings.time_zone
+import org.meshtastic.core.strings.triple_click_adhoc_ping
+import org.meshtastic.core.strings.unrecognized
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
@@ -81,34 +124,34 @@ import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
 import java.time.ZoneId
 
-private val DeviceConfig.Role.description: Int
+private val DeviceConfig.Role.description: StringResource
     get() =
         when (this) {
-            DeviceConfig.Role.CLIENT -> R.string.role_client_desc
-            DeviceConfig.Role.CLIENT_MUTE -> R.string.role_client_mute_desc
-            DeviceConfig.Role.ROUTER -> R.string.role_router_desc
-            DeviceConfig.Role.ROUTER_CLIENT -> R.string.role_router_client_desc
-            DeviceConfig.Role.REPEATER -> R.string.role_repeater_desc
-            DeviceConfig.Role.TRACKER -> R.string.role_tracker_desc
-            DeviceConfig.Role.SENSOR -> R.string.role_sensor_desc
-            DeviceConfig.Role.TAK -> R.string.role_tak_desc
-            DeviceConfig.Role.CLIENT_HIDDEN -> R.string.role_client_hidden_desc
-            DeviceConfig.Role.LOST_AND_FOUND -> R.string.role_lost_and_found_desc
-            DeviceConfig.Role.TAK_TRACKER -> R.string.role_tak_tracker_desc
-            DeviceConfig.Role.ROUTER_LATE -> R.string.role_router_late_desc
-            else -> R.string.unrecognized
+            DeviceConfig.Role.CLIENT -> Res.string.role_client_desc
+            DeviceConfig.Role.CLIENT_MUTE -> Res.string.role_client_mute_desc
+            DeviceConfig.Role.ROUTER -> Res.string.role_router_desc
+            DeviceConfig.Role.ROUTER_CLIENT -> Res.string.role_router_client_desc
+            DeviceConfig.Role.REPEATER -> Res.string.role_repeater_desc
+            DeviceConfig.Role.TRACKER -> Res.string.role_tracker_desc
+            DeviceConfig.Role.SENSOR -> Res.string.role_sensor_desc
+            DeviceConfig.Role.TAK -> Res.string.role_tak_desc
+            DeviceConfig.Role.CLIENT_HIDDEN -> Res.string.role_client_hidden_desc
+            DeviceConfig.Role.LOST_AND_FOUND -> Res.string.role_lost_and_found_desc
+            DeviceConfig.Role.TAK_TRACKER -> Res.string.role_tak_tracker_desc
+            DeviceConfig.Role.ROUTER_LATE -> Res.string.role_router_late_desc
+            else -> Res.string.unrecognized
         }
 
-private val DeviceConfig.RebroadcastMode.description: Int
+private val DeviceConfig.RebroadcastMode.description: StringResource
     get() =
         when (this) {
-            DeviceConfig.RebroadcastMode.ALL -> R.string.rebroadcast_mode_all_desc
-            DeviceConfig.RebroadcastMode.ALL_SKIP_DECODING -> R.string.rebroadcast_mode_all_skip_decoding_desc
-            DeviceConfig.RebroadcastMode.LOCAL_ONLY -> R.string.rebroadcast_mode_local_only_desc
-            DeviceConfig.RebroadcastMode.KNOWN_ONLY -> R.string.rebroadcast_mode_known_only_desc
-            DeviceConfig.RebroadcastMode.NONE -> R.string.rebroadcast_mode_none_desc
-            DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY -> R.string.rebroadcast_mode_core_portnums_only_desc
-            else -> R.string.unrecognized
+            DeviceConfig.RebroadcastMode.ALL -> Res.string.rebroadcast_mode_all_desc
+            DeviceConfig.RebroadcastMode.ALL_SKIP_DECODING -> Res.string.rebroadcast_mode_all_skip_decoding_desc
+            DeviceConfig.RebroadcastMode.LOCAL_ONLY -> Res.string.rebroadcast_mode_local_only_desc
+            DeviceConfig.RebroadcastMode.KNOWN_ONLY -> Res.string.rebroadcast_mode_known_only_desc
+            DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
+            DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY -> Res.string.rebroadcast_mode_core_portnums_only_desc
+            else -> Res.string.unrecognized
         }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -130,9 +173,8 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         }
     }
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
     RadioConfigScreenList(
-        title = stringResource(id = R.string.device),
+        title = stringResource(Res.string.device),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
@@ -144,43 +186,43 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         },
     ) {
         item {
-            TitledCard(title = stringResource(R.string.options)) {
+            TitledCard(title = stringResource(Res.string.options)) {
                 DropDownPreference(
-                    title = stringResource(R.string.role),
+                    title = stringResource(Res.string.role),
                     enabled = state.connected,
                     selectedItem = formState.value.role,
                     onItemSelected = { selectedRole = it },
-                    summary = stringResource(id = formState.value.role.description),
+                    summary = stringResource(formState.value.role.description),
                 )
 
                 HorizontalDivider()
 
                 DropDownPreference(
-                    title = stringResource(R.string.rebroadcast_mode),
+                    title = stringResource(Res.string.rebroadcast_mode),
                     enabled = state.connected,
                     selectedItem = formState.value.rebroadcastMode,
                     onItemSelected = { formState.value = formState.value.copy { rebroadcastMode = it } },
-                    summary = stringResource(id = formState.value.rebroadcastMode.description),
+                    summary = stringResource(formState.value.rebroadcastMode.description),
                 )
 
                 HorizontalDivider()
 
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
-                    title = stringResource(R.string.nodeinfo_broadcast_interval),
+                    title = stringResource(Res.string.nodeinfo_broadcast_interval),
                     selectedItem = formState.value.nodeInfoBroadcastSecs.toLong(),
                     enabled = state.connected,
-                    items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString(context = context) },
+                    items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it.toInt() } },
                 )
             }
         }
 
         item {
-            TitledCard(title = stringResource(R.string.hardware)) {
+            TitledCard(title = stringResource(Res.string.hardware)) {
                 SwitchPreference(
-                    title = stringResource(R.string.double_tap_as_button_press),
-                    summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
+                    title = stringResource(Res.string.double_tap_as_button_press),
+                    summary = stringResource(Res.string.config_device_doubleTapAsButtonPress_summary),
                     checked = formState.value.doubleTapAsButtonPress,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { doubleTapAsButtonPress = it } },
@@ -190,8 +232,8 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 InsetDivider()
 
                 SwitchPreference(
-                    title = stringResource(R.string.triple_click_adhoc_ping),
-                    summary = stringResource(id = R.string.config_device_tripleClickAsAdHocPing_summary),
+                    title = stringResource(Res.string.triple_click_adhoc_ping),
+                    summary = stringResource(Res.string.config_device_tripleClickAsAdHocPing_summary),
                     checked = !formState.value.disableTripleClick,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { disableTripleClick = !it } },
@@ -201,8 +243,8 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 InsetDivider()
 
                 SwitchPreference(
-                    title = stringResource(R.string.led_heartbeat),
-                    summary = stringResource(id = R.string.config_device_ledHeartbeatEnabled_summary),
+                    title = stringResource(Res.string.led_heartbeat),
+                    summary = stringResource(Res.string.config_device_ledHeartbeatEnabled_summary),
                     checked = !formState.value.ledHeartbeatDisabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { ledHeartbeatDisabled = !it } },
@@ -211,7 +253,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
             }
         }
         item {
-            TitledCard(title = stringResource(R.string.time_zone)) {
+            TitledCard(title = stringResource(Res.string.time_zone)) {
                 val context = LocalContext.current
                 val appTzPosixString by
                     produceState(initialValue = ZoneId.systemDefault().toPosixString()) {
@@ -230,7 +272,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 EditTextPreference(
                     title = "",
                     value = formState.value.tzdef,
-                    summary = stringResource(id = R.string.config_device_tzdef_summary),
+                    summary = stringResource(Res.string.config_device_tzdef_summary),
                     maxSize = 64, // tzdef max_size:65
                     enabled = state.connected,
                     isError = false,
@@ -257,15 +299,15 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(text = stringResource(R.string.config_device_use_phone_tz))
+                    Text(text = stringResource(Res.string.config_device_use_phone_tz))
                 }
             }
         }
 
         item {
-            TitledCard(title = stringResource(R.string.gpio)) {
+            TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
-                    title = stringResource(R.string.button_gpio),
+                    title = stringResource(Res.string.button_gpio),
                     value = formState.value.buttonGpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -275,7 +317,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 HorizontalDivider()
 
                 EditTextPreference(
-                    title = stringResource(R.string.buzzer_gpio),
+                    title = stringResource(Res.string.buzzer_gpio),
                     value = formState.value.buzzerGpio,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -288,10 +330,10 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
 
 @Composable
 fun RouterRoleConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    val dialogTitle = stringResource(R.string.are_you_sure)
+    val dialogTitle = stringResource(Res.string.are_you_sure)
     val annotatedDialogText =
         AnnotatedString.fromHtml(
-            htmlString = stringResource(R.string.router_role_confirmation_text),
+            htmlString = stringResource(Res.string.router_role_confirmation_text),
             linkStyles = TextLinkStyles(style = SpanStyle(color = Color.Blue)),
         )
 
@@ -307,14 +349,14 @@ fun RouterRoleConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Checkbox(checked = confirmed, onCheckedChange = { confirmed = it })
-                    Text(stringResource(R.string.i_know_what_i_m_doing))
+                    Text(stringResource(Res.string.i_know_what_i_m_doing))
                 }
             }
         },
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = onConfirm, enabled = confirmed) { Text(stringResource(R.string.accept)) }
+            TextButton(onClick = onConfirm, enabled = confirmed) { Text(stringResource(Res.string.accept)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
 }

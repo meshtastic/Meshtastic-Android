@@ -54,15 +54,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.NodeSortOption
-import org.meshtastic.core.strings.R
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.desc_node_filter_clear
+import org.meshtastic.core.strings.node_filter_ignored
+import org.meshtastic.core.strings.node_filter_include_unknown
+import org.meshtastic.core.strings.node_filter_only_direct
+import org.meshtastic.core.strings.node_filter_only_online
+import org.meshtastic.core.strings.node_filter_placeholder
+import org.meshtastic.core.strings.node_filter_show_ignored
+import org.meshtastic.core.strings.node_filter_title
+import org.meshtastic.core.strings.node_sort_button
+import org.meshtastic.core.strings.node_sort_title
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Suppress("LongParameterList")
@@ -114,7 +124,7 @@ fun NodeFilterTextField(
                     .padding(vertical = 16.dp, horizontal = 24.dp),
             ) {
                 Text(
-                    text = stringResource(id = R.string.node_filter_ignored),
+                    text = stringResource(Res.string.node_filter_ignored),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth(),
@@ -135,20 +145,20 @@ private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Un
         value = filterText,
         placeholder = {
             Text(
-                text = stringResource(id = R.string.node_filter_placeholder),
+                text = stringResource(Res.string.node_filter_placeholder),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35F),
             )
         },
         leadingIcon = {
-            Icon(Icons.Default.Search, contentDescription = stringResource(id = R.string.node_filter_placeholder))
+            Icon(Icons.Default.Search, contentDescription = stringResource(Res.string.node_filter_placeholder))
         },
         onValueChange = onTextChange,
         trailingIcon = {
             if (filterText.isNotEmpty() || isFocused) {
                 Icon(
                     Icons.Default.Clear,
-                    contentDescription = stringResource(id = R.string.desc_node_filter_clear),
+                    contentDescription = stringResource(Res.string.desc_node_filter_clear),
                     modifier =
                     Modifier.clickable {
                         onTextChange("")
@@ -177,7 +187,7 @@ private fun NodeSortButton(
     IconButton(onClick = { expanded = true }) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.Sort,
-            contentDescription = stringResource(R.string.node_sort_button),
+            contentDescription = stringResource(Res.string.node_sort_button),
             modifier = Modifier.heightIn(max = 48.dp),
             tint = MaterialTheme.colorScheme.onSurface,
         )
@@ -188,11 +198,11 @@ private fun NodeSortButton(
         onDismissRequest = { expanded = false },
         modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
     ) {
-        DropdownMenuTitle(text = stringResource(R.string.node_sort_title))
+        DropdownMenuTitle(text = stringResource(Res.string.node_sort_title))
 
         NodeSortOption.entries.forEach { sort ->
             DropdownMenuRadio(
-                text = stringResource(id = sort.stringRes),
+                text = stringResource(sort.stringRes),
                 selected = sort == currentSortOption,
                 onClick = { onSortSelect(sort) },
             )
@@ -200,28 +210,28 @@ private fun NodeSortButton(
 
         HorizontalDivider(modifier = Modifier.padding(MenuDefaults.DropdownMenuItemContentPadding))
 
-        DropdownMenuTitle(text = stringResource(R.string.node_filter_title))
+        DropdownMenuTitle(text = stringResource(Res.string.node_filter_title))
 
         DropdownMenuCheck(
-            text = stringResource(R.string.node_filter_include_unknown),
+            text = stringResource(Res.string.node_filter_include_unknown),
             checked = toggles.includeUnknown,
             onClick = toggles.onToggleIncludeUnknown,
         )
 
         DropdownMenuCheck(
-            text = stringResource(R.string.node_filter_only_online),
+            text = stringResource(Res.string.node_filter_only_online),
             checked = toggles.onlyOnline,
             onClick = toggles.onToggleOnlyOnline,
         )
 
         DropdownMenuCheck(
-            text = stringResource(R.string.node_filter_only_direct),
+            text = stringResource(Res.string.node_filter_only_direct),
             checked = toggles.onlyDirect,
             onClick = toggles.onToggleOnlyDirect,
         )
 
         DropdownMenuCheck(
-            text = stringResource(R.string.node_filter_show_ignored),
+            text = stringResource(Res.string.node_filter_show_ignored),
             checked = toggles.showIgnored,
             onClick = toggles.onToggleShowIgnored,
             trailing =
