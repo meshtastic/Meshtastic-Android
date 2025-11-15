@@ -288,11 +288,11 @@ private fun rememberMessageRows(
 ) = remember(messages, showUnreadDivider, unreadDividerIndex, initialUnreadMessageUuid) {
     buildList<MessageListRow> {
         messages.forEachIndexed { index, message ->
+            add(MessageListRow.ChatMessage(index = index, message = message))
             if (showUnreadDivider && unreadDividerIndex == index) {
                 val key = initialUnreadMessageUuid?.let { "unread-divider-$it" } ?: "unread-divider-index-$index"
                 add(MessageListRow.UnreadDivider(key = key))
             }
-            add(MessageListRow.ChatMessage(index = index, message = message))
         }
     }
 }
