@@ -239,7 +239,7 @@ class MeshService : Service() {
     private val batteryPercentCooldownSeconds = 1500
     private val batteryPercentCooldowns: HashMap<Int, Long> = HashMap()
 
-    private val one_hour = 3600
+    private val oneHour = 3600
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -881,17 +881,6 @@ class MeshService : Service() {
                         val info =
                             runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
 
-                        // Ignore dummy/interceptable packets: single neighbor with nodeId 0 and snr 0
-                        if (
-                            info != null &&
-                            info.neighborsCount == 1 &&
-                            info.neighborsList[0].nodeId == 0 &&
-                            info.neighborsList[0].snr == 0f
-                        ) {
-                            Timber.d("Ignoring dummy neighbor info packet (single neighbor with nodeId 0, snr 0)")
-                            return@let
-                        }
-
                         // Store the last neighbor info from our connected radio
                         if (info != null && packet.from == myInfo.myNodeNum) {
                             lastNeighborInfo = info
@@ -944,17 +933,6 @@ class MeshService : Service() {
 
                         val info =
                             runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
-
-                        // Ignore dummy/interceptable packets: single neighbor with nodeId 0 and snr 0
-                        if (
-                            info != null &&
-                            info.neighborsCount == 1 &&
-                            info.neighborsList[0].nodeId == 0 &&
-                            info.neighborsList[0].snr == 0f
-                        ) {
-                            Timber.d("Ignoring dummy neighbor info packet (single neighbor with nodeId 0, snr 0)")
-                            return@let
-                        }
 
                         // Store the last neighbor info from our connected radio
                         if (info != null && packet.from == myInfo.myNodeNum) {
@@ -2405,13 +2383,13 @@ class MeshService : Service() {
                                 MeshProtos.NeighborInfo.newBuilder()
                                     .setNodeId(myNodeNum)
                                     .setLastSentById(myNodeNum)
-                                    .setNodeBroadcastIntervalSecs(one_hour)
+                                    .setNodeBroadcastIntervalSecs(oneHour)
                                     .addNeighbors(
                                         MeshProtos.Neighbor.newBuilder()
                                             .setNodeId(0) // Dummy node ID that can be intercepted
                                             .setSnr(0f)
                                             .setLastRxTime(currentSecond())
-                                            .setNodeBroadcastIntervalSecs(one_hour)
+                                            .setNodeBroadcastIntervalSecs(oneHour)
                                             .build(),
                                     )
                                     .build()

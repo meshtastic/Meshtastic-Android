@@ -258,23 +258,20 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                 Column(modifier = Modifier.fillMaxWidth()) {
                     fun tryParseNeighborInfo(input: String): MeshProtos.NeighborInfo? {
                         // First, try parsing directly from raw bytes of the string
-                        runCatching { MeshProtos.NeighborInfo.parseFrom(input.toByteArray()) }
-                            .getOrNull()
-                            ?.let {
-                                return it
+                        var neighborInfo: MeshProtos.NeighborInfo? =
+                            runCatching { MeshProtos.NeighborInfo.parseFrom(input.toByteArray()) }.getOrNull()
+
+                        if (neighborInfo == null) {
+                            // Next, try to decode a hex dump embedded as text (e.g., "AA BB CC ...")
+                            val hexPairs = Regex("""\b[0-9A-Fa-f]{2}\b""").findAll(input).map { it.value }.toList()
+                            @Suppress("detekt:MagicNumber") // byte offsets
+                            if (hexPairs.size >= 4) {
+                                val bytes = hexPairs.map { it.toInt(16).toByte() }.toByteArray()
+                                neighborInfo = runCatching { MeshProtos.NeighborInfo.parseFrom(bytes) }.getOrNull()
                             }
-                        // Next, try to decode a hex dump embedded as text (e.g., "AA BB CC ...")
-                        val hexPairs = Regex("""\b[0-9A-Fa-f]{2}\b""").findAll(input).map { it.value }.toList()
-                        @Suppress("detekt:MagicNumber") // byte offsets
-                        if (hexPairs.size >= 4) {
-                            val bytes = hexPairs.map { it.toInt(16).toByte() }.toByteArray()
-                            runCatching { MeshProtos.NeighborInfo.parseFrom(bytes) }
-                                .getOrNull()
-                                ?.let {
-                                    return it
-                                }
                         }
-                        return null
+
+                        return neighborInfo
                     }
 
                     val parsed = tryParseNeighborInfo(response)
