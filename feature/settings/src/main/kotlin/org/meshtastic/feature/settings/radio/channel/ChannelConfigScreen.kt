@@ -62,6 +62,7 @@ import org.meshtastic.core.strings.channel_name
 import org.meshtastic.core.strings.channels
 import org.meshtastic.core.strings.press_and_drag
 import org.meshtastic.core.strings.send
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
@@ -159,6 +160,17 @@ private fun ChannelConfigScreen(
     }
 
     Scaffold(
+        topBar = {
+            MainAppBar(
+                title = title,
+                canNavigateUp = true,
+                onNavigateUp = onBack,
+                ourNode = null,
+                showNodeChip = false,
+                actions = {},
+                onClickChip = {},
+            )
+        },
         floatingActionButton = {
             if (maxChannels > settingsListInput.size) {
                 FloatingActionButton(
