@@ -72,7 +72,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
     val consentValid =
         if (formState.value.mapReportingEnabled) {
             formState.value.mapReportSettings.shouldReportLocation &&
-                mqttConfig.mapReportSettings.publishIntervalSecs >= MIN_INTERVAL_SECS
+                formState.value.mapReportSettings.publishIntervalSecs >= MIN_INTERVAL_SECS
         } else {
             true
         }
