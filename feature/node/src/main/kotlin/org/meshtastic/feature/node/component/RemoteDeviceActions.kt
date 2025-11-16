@@ -59,7 +59,7 @@ internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },
     )
     ListItem(
-        text = stringResource(id = R.string.request_neighbor_info),
+        text = stringResource(Res.string.request_neighbor_info),
         leadingIcon = Icons.TwoTone.Mediation,
         trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestNeighbourInfo(node))) },
