@@ -32,6 +32,7 @@
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_filter_include_infrastructure">Include infrastructure</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
     <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>

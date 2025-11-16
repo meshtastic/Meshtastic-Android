@@ -17,11 +17,9 @@
 
 package org.meshtastic.feature.node.list
 
-import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,11 +33,11 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
-import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.AdminProtos
-import timber.log.Timber
+import org.meshtastic.proto.ConfigProtos
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,6 +48,8 @@ constructor(
     radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
+    val nodeActions: NodeActions,
+    val nodeFilterPreferences: NodeFilterPreferences,
 ) : ViewModel() {
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
@@ -66,23 +66,24 @@ constructor(
     private val nodeSortOption =
         uiPreferencesDataSource.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
 
-    private val nodeFilterText = MutableStateFlow("")
-    private val includeUnknown = uiPreferencesDataSource.includeUnknown
-    private val onlyOnline = uiPreferencesDataSource.onlyOnline
-    private val onlyDirect = uiPreferencesDataSource.onlyDirect
-    private val showIgnored = uiPreferencesDataSource.showIgnored
+    private val _nodeFilterText = MutableStateFlow("")
+    private val includeUnknown = nodeFilterPreferences.includeUnknown
+    private val includeInfrastructure = nodeFilterPreferences.includeInfrastructure
+    private val onlyOnline = nodeFilterPreferences.onlyOnline
+    private val onlyDirect = nodeFilterPreferences.onlyDirect
+    private val showIgnored = nodeFilterPreferences.showIgnored
 
     private val nodeFilter: Flow<NodeFilterState> =
-        combine(nodeFilterText, includeUnknown, onlyOnline, onlyDirect, showIgnored) {
-                filterText,
-                includeUnknown,
-                onlyOnline,
-                onlyDirect,
-                showIgnored,
-            ->
-            NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
+        combine(_nodeFilterText, includeUnknown, includeInfrastructure, onlyOnline, onlyDirect, showIgnored) { values ->
+            NodeFilterState(
+                filterText = values[0] as String,
+                includeUnknown = values[1] as Boolean,
+                includeInfrastructure = values[2] as Boolean,
+                onlyOnline = values[3] as Boolean,
+                onlyDirect = values[4] as Boolean,
+                showIgnored = values[5] as Boolean,
+            )
         }
-
     val nodesUiState: StateFlow<NodesUiState> =
         combine(nodeSortOption, nodeFilter, radioConfigRepository.deviceProfileFlow) { sort, nodeFilter, profile ->
             NodesUiState(
@@ -105,32 +106,36 @@ constructor(
                         onlyOnline = filter.onlyOnline,
                         onlyDirect = filter.onlyDirect,
                     )
-                    .map { list -> list.filter { it.isIgnored == filter.showIgnored } }
+                    .map { list ->
+                        list
+                            .filter { it.isIgnored == filter.showIgnored }
+                            .filter { node ->
+                                if (!filter.includeInfrastructure) {
+                                    val role = node.user.role
+                                    val infrastructureRoles =
+                                        listOf(
+                                            ConfigProtos.Config.DeviceConfig.Role.ROUTER,
+                                            ConfigProtos.Config.DeviceConfig.Role.REPEATER,
+                                            ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE,
+                                            ConfigProtos.Config.DeviceConfig.Role.CLIENT_BASE,
+                                        )
+                                    role !in infrastructureRoles && !node.isEffectivelyUnmessageable
+                                } else {
+                                    true
+                                }
+                            }
+                    }
             }
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val unfilteredNodeList: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    fun setNodeFilterText(text: String) {
-        nodeFilterText.value = text
-    }
-
-    fun toggleIncludeUnknown() {
-        uiPreferencesDataSource.setIncludeUnknown(!includeUnknown.value)
-    }
-
-    fun toggleOnlyOnline() {
-        uiPreferencesDataSource.setOnlyOnline(!onlyOnline.value)
-    }
-
-    fun toggleOnlyDirect() {
-        uiPreferencesDataSource.setOnlyDirect(!onlyDirect.value)
-    }
-
-    fun toggleShowIgnored() {
-        uiPreferencesDataSource.setShowIgnored(!showIgnored.value)
-    }
+    var nodeFilterText: String
+        get() = _nodeFilterText.value
+        set(value) {
+            _nodeFilterText.value = value
+        }
 
     fun setSortOption(sort: NodeSortOption) {
         uiPreferencesDataSource.setNodeSort(sort.ordinal)
@@ -140,32 +145,11 @@ constructor(
         _sharedContactRequested.value = sharedContact
     }
 
-    fun favoriteNode(node: Node) = viewModelScope.launch {
-        try {
-            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
-        } catch (ex: RemoteException) {
-            Timber.e(ex, "Favorite node error")
-        }
-    }
+    fun favoriteNode(node: Node) = viewModelScope.launch { nodeActions.favoriteNode(node) }
 
-    fun ignoreNode(node: Node) = viewModelScope.launch {
-        try {
-            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
-        } catch (ex: RemoteException) {
-            Timber.e(ex, "Ignore node error")
-        }
-    }
+    fun ignoreNode(node: Node) = viewModelScope.launch { nodeActions.ignoreNode(node) }
 
-    fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
-        Timber.i("Removing node '$nodeNum'")
-        try {
-            val packetId = serviceRepository.meshService?.packetId ?: return@launch
-            serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
-            nodeRepository.deleteNode(nodeNum)
-        } catch (ex: RemoteException) {
-            Timber.e("Remove node error: ${ex.message}")
-        }
-    }
+    fun removeNode(nodeNum: Int) = viewModelScope.launch { nodeActions.removeNode(nodeNum) }
 }
 
 data class NodesUiState(
@@ -178,6 +162,7 @@ data class NodesUiState(
 data class NodeFilterState(
     val filterText: String = "",
     val includeUnknown: Boolean = false,
+    val includeInfrastructure: Boolean = true,
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
