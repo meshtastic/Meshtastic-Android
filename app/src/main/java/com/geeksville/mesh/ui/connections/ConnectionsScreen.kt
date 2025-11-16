@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.BTScanModel
-import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo
@@ -117,8 +116,7 @@ fun ConnectionsScreen(
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
     val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
 
-    val bondedBleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
-    val scannedBleDevices by scanModel.scanResult.observeAsState(emptyMap())
+    val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
     val recentTcpDevices by scanModel.recentTcpDevicesForUi.collectAsStateWithLifecycle()
     val usbDevices by scanModel.usbDevicesForUi.collectAsStateWithLifecycle()
@@ -235,13 +233,11 @@ fun ConnectionsScreen(
                     Column(modifier = Modifier.fillMaxSize()) {
                         when (selectedDeviceType) {
                             DeviceType.BLE -> {
+                                val (bonded, available) = bleDevices.partition { it.bonded }
                                 BLEDevices(
                                     connectionState = connectionState,
-                                    bondedDevices = bondedBleDevices,
-                                    availableDevices =
-                                    scannedBleDevices.values.toList().filterNot { available ->
-                                        bondedBleDevices.any { it.address == available.address }
-                                    },
+                                    bondedDevices = bonded,
+                                    availableDevices = available,
                                     selectedDevice = selectedDevice,
                                     scanModel = scanModel,
                                     bluetoothEnabled = bluetoothState.enabled,
@@ -273,10 +269,9 @@ fun ConnectionsScreen(
                         // Warning Not Paired
                         val hasShownNotPairedWarning by
                             connectionsViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
+                        val (bonded, _) = bleDevices.partition { it.bonded }
                         val showWarningNotPaired =
-                            !connectionState.isConnected() &&
-                                !hasShownNotPairedWarning &&
-                                bondedBleDevices.none { it is DeviceListEntry.Ble && it.bonded }
+                            !connectionState.isConnected() && !hasShownNotPairedWarning && bonded.isEmpty()
                         if (showWarningNotPaired) {
                             Text(
                                 text = stringResource(Res.string.warning_not_paired),

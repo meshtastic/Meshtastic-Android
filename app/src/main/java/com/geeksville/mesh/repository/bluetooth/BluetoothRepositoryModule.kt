@@ -17,9 +17,6 @@
 
 package com.geeksville.mesh.repository.bluetooth
 
-import android.app.Application
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Context
 import dagger.Module
 import dagger.Provides
@@ -35,23 +32,13 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface BluetoothRepositoryModule {
-    companion object {
-        @Provides
-        fun provideBluetoothManager(application: Application): BluetoothManager? =
-            application.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
+object BluetoothRepositoryModule {
+    @Provides
+    @Singleton
+    fun provideCentralManager(@ApplicationContext context: Context, coroutineScope: CoroutineScope): CentralManager =
+        CentralManager.native(context, coroutineScope)
 
-        @Provides fun provideBluetoothAdapter(service: BluetoothManager?): BluetoothAdapter? = service?.adapter
-
-        @Provides
-        @Singleton
-        fun provideCentralManager(
-            @ApplicationContext context: Context,
-            coroutineScope: CoroutineScope,
-        ): CentralManager = CentralManager.native(context, coroutineScope)
-
-        @Provides
-        @Singleton
-        fun provideSingletonCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    }
+    @Provides
+    @Singleton
+    fun provideSingletonCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 }
