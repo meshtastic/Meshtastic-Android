@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 class NodeFilterPreferences @Inject constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {
     val includeUnknown = uiPreferencesDataSource.includeUnknown
-    val includeInfrastructure = uiPreferencesDataSource.includeInfrastructure
+    val excludeInfrastructure = uiPreferencesDataSource.excludeInfrastructure
     val onlyOnline = uiPreferencesDataSource.onlyOnline
     val onlyDirect = uiPreferencesDataSource.onlyDirect
     val showIgnored = uiPreferencesDataSource.showIgnored
@@ -31,8 +31,8 @@ class NodeFilterPreferences @Inject constructor(private val uiPreferencesDataSou
         uiPreferencesDataSource.setIncludeUnknown(!includeUnknown.value)
     }
 
-    fun toggleIncludeInfrastructure() {
-        uiPreferencesDataSource.setIncludeInfrastructure(!includeInfrastructure.value)
+    fun toggleExcludeInfrastructure() {
+        uiPreferencesDataSource.setExcludeInfrastructure(!excludeInfrastructure.value)
     }
 
     fun toggleOnlyOnline() {

@@ -164,9 +164,9 @@ fun NodeListScreen(
                         onSortSelect = viewModel::setSortOption,
                         includeUnknown = state.filter.includeUnknown,
                         onToggleIncludeUnknown = { viewModel.nodeFilterPreferences.toggleIncludeUnknown() },
-                        includeInfrastructure = state.filter.includeInfrastructure,
-                        onToggleIncludeInfrastructure = {
-                            viewModel.nodeFilterPreferences.toggleIncludeInfrastructure()
+                        excludeInfrastructure = state.filter.excludeInfrastructure,
+                        onToggleExcludeInfrastructure = {
+                            viewModel.nodeFilterPreferences.toggleExcludeInfrastructure()
                         },
                         onlyOnline = state.filter.onlyOnline,
                         onToggleOnlyOnline = { viewModel.nodeFilterPreferences.toggleOnlyOnline() },

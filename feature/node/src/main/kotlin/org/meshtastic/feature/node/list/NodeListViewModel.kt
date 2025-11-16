@@ -68,17 +68,17 @@ constructor(
 
     private val _nodeFilterText = MutableStateFlow("")
     private val includeUnknown = nodeFilterPreferences.includeUnknown
-    private val includeInfrastructure = nodeFilterPreferences.includeInfrastructure
+    private val excludeInfrastructure = nodeFilterPreferences.excludeInfrastructure
     private val onlyOnline = nodeFilterPreferences.onlyOnline
     private val onlyDirect = nodeFilterPreferences.onlyDirect
     private val showIgnored = nodeFilterPreferences.showIgnored
 
     private val nodeFilter: Flow<NodeFilterState> =
-        combine(_nodeFilterText, includeUnknown, includeInfrastructure, onlyOnline, onlyDirect, showIgnored) { values ->
+        combine(_nodeFilterText, includeUnknown, excludeInfrastructure, onlyOnline, onlyDirect, showIgnored) { values ->
             NodeFilterState(
                 filterText = values[0] as String,
                 includeUnknown = values[1] as Boolean,
-                includeInfrastructure = values[2] as Boolean,
+                excludeInfrastructure = values[2] as Boolean,
                 onlyOnline = values[3] as Boolean,
                 onlyDirect = values[4] as Boolean,
                 showIgnored = values[5] as Boolean,
@@ -110,7 +110,7 @@ constructor(
                         list
                             .filter { it.isIgnored == filter.showIgnored }
                             .filter { node ->
-                                if (!filter.includeInfrastructure) {
+                                if (filter.excludeInfrastructure) {
                                     val role = node.user.role
                                     val infrastructureRoles =
                                         listOf(
@@ -162,7 +162,7 @@ data class NodesUiState(
 data class NodeFilterState(
     val filterText: String = "",
     val includeUnknown: Boolean = false,
-    val includeInfrastructure: Boolean = true,
+    val excludeInfrastructure: Boolean = false,
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
