@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse

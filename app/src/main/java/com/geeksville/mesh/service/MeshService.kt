@@ -167,6 +167,7 @@ class MeshService : Service() {
 
     private val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
     private val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
+
     @Volatile private var lastNeighborInfo: MeshProtos.NeighborInfo? = null
 
     companion object {
@@ -237,6 +238,8 @@ class MeshService : Service() {
     private val batteryPercentCriticalThreshold = 5
     private val batteryPercentCooldownSeconds = 1500
     private val batteryPercentCooldowns: HashMap<Int, Long> = HashMap()
+
+    private val one_hour = 3600
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -875,54 +878,61 @@ class MeshService : Service() {
                         val start = neighborInfoStartTimes.remove(requestId)
                         Timber.d("Found start time for requestId $requestId: $start")
 
-                        val info = runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
-                        
+                        val info =
+                            runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
+
                         // Ignore dummy/interceptable packets: single neighbor with nodeId 0 and snr 0
-                        if (info != null && info.neighborsCount == 1 && 
-                            info.neighborsList[0].nodeId == 0 && info.neighborsList[0].snr == 0f) {
+                        if (
+                            info != null &&
+                            info.neighborsCount == 1 &&
+                            info.neighborsList[0].nodeId == 0 &&
+                            info.neighborsList[0].snr == 0f
+                        ) {
                             Timber.d("Ignoring dummy neighbor info packet (single neighbor with nodeId 0, snr 0)")
                             return@let
                         }
-                        
+
                         // Store the last neighbor info from our connected radio
                         if (info != null && packet.from == myInfo.myNodeNum) {
                             lastNeighborInfo = info
                             Timber.d("Stored last neighbor info from connected radio")
                         }
-                        
-                        val formatted = if (info != null) {
-                            val fmtNode: (Int) -> String = { nodeNum ->
-                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
-                                val nodeId = "!%08x".format(nodeNum)
-                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
-                            }
-                            buildString {
-                                appendLine("NeighborInfo:")
-                                appendLine("node_id: ${fmtNode(info.nodeId)}")
-                                appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
-                                appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
-                                if (info.neighborsCount > 0) {
-                                    appendLine("neighbors:")
-                                    info.neighborsList.forEach { n ->
-                                        appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+
+                        val formatted =
+                            if (info != null) {
+                                val fmtNode: (Int) -> String = { nodeNum ->
+                                    val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                    val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                    val nodeId = "!%08x".format(nodeNum)
+                                    if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                                }
+                                buildString {
+                                    appendLine("NeighborInfo:")
+                                    appendLine("node_id: ${fmtNode(info.nodeId)}")
+                                    appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
+                                    appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+                                    if (info.neighborsCount > 0) {
+                                        appendLine("neighbors:")
+                                        info.neighborsList.forEach { n ->
+                                            appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                                        }
                                     }
                                 }
+                            } else {
+                                // Fallback to raw string if parsing fails
+                                String(data.payload.toByteArray())
                             }
-                        } else {
-                            // Fallback to raw string if parsing fails
-                            String(data.payload.toByteArray())
-                        }
 
-                        val response = if (start != null) {
-                            val elapsedMs = System.currentTimeMillis() - start
-                            val seconds = elapsedMs / 1000.0
-                            Timber.i("Neighbor info $requestId complete in $seconds s")
-                            "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
-                        } else {
-                            Timber.w("No start time found for neighbor info requestId: $requestId")
-                            formatted
-                        }
+                        val response =
+                            if (start != null) {
+                                val elapsedMs = System.currentTimeMillis() - start
+                                val seconds = elapsedMs / 1000.0
+                                Timber.i("Neighbor info $requestId complete in $seconds s")
+                                "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
+                            } else {
+                                Timber.w("No start time found for neighbor info requestId: $requestId")
+                                formatted
+                            }
                         serviceRepository.setNeighborInfoResponse(response)
                     }
 
@@ -932,54 +942,61 @@ class MeshService : Service() {
                         val start = neighborInfoStartTimes.remove(requestId)
                         Timber.d("Found start time for requestId $requestId: $start")
 
-                        val info = runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
-                        
+                        val info =
+                            runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
+
                         // Ignore dummy/interceptable packets: single neighbor with nodeId 0 and snr 0
-                        if (info != null && info.neighborsCount == 1 && 
-                            info.neighborsList[0].nodeId == 0 && info.neighborsList[0].snr == 0f) {
+                        if (
+                            info != null &&
+                            info.neighborsCount == 1 &&
+                            info.neighborsList[0].nodeId == 0 &&
+                            info.neighborsList[0].snr == 0f
+                        ) {
                             Timber.d("Ignoring dummy neighbor info packet (single neighbor with nodeId 0, snr 0)")
                             return@let
                         }
-                        
+
                         // Store the last neighbor info from our connected radio
                         if (info != null && packet.from == myInfo.myNodeNum) {
                             lastNeighborInfo = info
                             Timber.d("Stored last neighbor info from connected radio")
                         }
-                        
-                        val formatted = if (info != null) {
-                            val fmtNode: (Int) -> String = { nodeNum ->
-                                val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-                                val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
-                                val nodeId = "!%08x".format(nodeNum)
-                                if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
-                            }
-                            buildString {
-                                appendLine("NeighborInfo:")
-                                appendLine("node_id: ${fmtNode(info.nodeId)}")
-                                appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
-                                appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
-                                if (info.neighborsCount > 0) {
-                                    appendLine("neighbors:")
-                                    info.neighborsList.forEach { n ->
-                                        appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+
+                        val formatted =
+                            if (info != null) {
+                                val fmtNode: (Int) -> String = { nodeNum ->
+                                    val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                    val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                    val nodeId = "!%08x".format(nodeNum)
+                                    if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                                }
+                                buildString {
+                                    appendLine("NeighborInfo:")
+                                    appendLine("node_id: ${fmtNode(info.nodeId)}")
+                                    appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
+                                    appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+                                    if (info.neighborsCount > 0) {
+                                        appendLine("neighbors:")
+                                        info.neighborsList.forEach { n ->
+                                            appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                                        }
                                     }
                                 }
+                            } else {
+                                // Fallback to raw string if parsing fails
+                                String(data.payload.toByteArray())
                             }
-                        } else {
-                            // Fallback to raw string if parsing fails
-                            String(data.payload.toByteArray())
-                        }
 
-                        val response = if (start != null) {
-                            val elapsedMs = System.currentTimeMillis() - start
-                            val seconds = elapsedMs / 1000.0
-                            Timber.i("Neighbor info $requestId complete in $seconds s")
-                            "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
-                        } else {
-                            Timber.w("No start time found for neighbor info requestId: $requestId")
-                            formatted
-                        }
+                        val response =
+                            if (start != null) {
+                                val elapsedMs = System.currentTimeMillis() - start
+                                val seconds = elapsedMs / 1000.0
+                                Timber.i("Neighbor info $requestId complete in $seconds s")
+                                "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
+                            } else {
+                                Timber.w("No start time found for neighbor info requestId: $requestId")
+                                formatted
+                            }
                         serviceRepository.setNeighborInfoResponse(response)
                     }
 
@@ -2379,26 +2396,27 @@ class MeshService : Service() {
             override fun requestNeighbourInfo(requestId: Int, destNum: Int) = toRemoteExceptions {
                 if (destNum != myNodeNum) {
                     neighborInfoStartTimes[requestId] = System.currentTimeMillis()
-                    
                     // Always send the neighbor info from our connected radio (myNodeNum), not request from destNum
-                    val neighborInfoToSend = lastNeighborInfo ?: run {
-                        // If we don't have it, send dummy/interceptable data
-                        Timber.d("No stored neighbor info from connected radio, sending dummy data")
-                        MeshProtos.NeighborInfo.newBuilder()
-                            .setNodeId(myNodeNum)
-                            .setLastSentById(myNodeNum)
-                            .setNodeBroadcastIntervalSecs(3600)
-                            .addNeighbors(
-                                MeshProtos.Neighbor.newBuilder()
-                                    .setNodeId(0) // Dummy node ID that can be intercepted
-                                    .setSnr(0f)
-                                    .setLastRxTime(currentSecond())
-                                    .setNodeBroadcastIntervalSecs(3600)
-                                    .build(),
-                            )
-                            .build()
-                    }
-                    
+                    val neighborInfoToSend =
+                        lastNeighborInfo
+                            ?: run {
+                                // If we don't have it, send dummy/interceptable data
+                                Timber.d("No stored neighbor info from connected radio, sending dummy data")
+                                MeshProtos.NeighborInfo.newBuilder()
+                                    .setNodeId(myNodeNum)
+                                    .setLastSentById(myNodeNum)
+                                    .setNodeBroadcastIntervalSecs(one_hour)
+                                    .addNeighbors(
+                                        MeshProtos.Neighbor.newBuilder()
+                                            .setNodeId(0) // Dummy node ID that can be intercepted
+                                            .setSnr(0f)
+                                            .setLastRxTime(currentSecond())
+                                            .setNodeBroadcastIntervalSecs(one_hour)
+                                            .build(),
+                                    )
+                                    .build()
+                            }
+
                     // Send the neighbor info from our connected radio to the destination
                     packetHandler.sendToRadio(
                         newMeshPacketTo(destNum).buildMeshPacket(
