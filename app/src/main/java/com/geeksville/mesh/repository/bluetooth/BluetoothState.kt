@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh.repository.bluetooth
 
-import android.bluetooth.BluetoothDevice
+import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import org.meshtastic.core.model.util.anonymize
 
 /** A snapshot in time of the state of the bluetooth subsystem. */
@@ -27,7 +27,7 @@ data class BluetoothState(
     /** If we have adequate permissions and bluetooth is enabled */
     val enabled: Boolean = false,
     /** If enabled, a list of the currently bonded devices */
-    val bondedDevices: List<BluetoothDevice> = emptyList(),
+    val bondedDevices: List<Peripheral> = emptyList(),
 ) {
     override fun toString(): String =
         "BluetoothState(hasPermissions=$hasPermissions, enabled=$enabled, bondedDevices=${bondedDevices.map {

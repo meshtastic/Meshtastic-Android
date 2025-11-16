@@ -18,11 +18,11 @@
 package com.geeksville.mesh.repository.radio
 
 import android.annotation.SuppressLint
-import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_FROMNUM_CHARACTER
-import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_FROMRADIO_CHARACTER
-import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_LOGRADIO_CHARACTER
-import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_SERVICE_UUID
-import com.geeksville.mesh.repository.radio.BleUuidConstants.BTM_TORADIO_CHARACTER
+import com.geeksville.mesh.repository.radio.BleConstants.BTM_FROMNUM_CHARACTER
+import com.geeksville.mesh.repository.radio.BleConstants.BTM_FROMRADIO_CHARACTER
+import com.geeksville.mesh.repository.radio.BleConstants.BTM_LOGRADIO_CHARACTER
+import com.geeksville.mesh.repository.radio.BleConstants.BTM_SERVICE_UUID
+import com.geeksville.mesh.repository.radio.BleConstants.BTM_TORADIO_CHARACTER
 import com.geeksville.mesh.service.RadioNotConnectedException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -322,7 +322,8 @@ constructor(
     }
 }
 
-object BleUuidConstants {
+object BleConstants {
+    const val BLE_NAME_PATTERN = "^.*_([0-9a-fA-F]{4})$"
     val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
     val BTM_TORADIO_CHARACTER: UUID = UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
     val BTM_FROMNUM_CHARACTER: UUID = UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
