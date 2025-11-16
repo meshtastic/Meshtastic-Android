@@ -31,7 +31,7 @@ import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -105,7 +105,7 @@ constructor(
     val mockInterfaceAddress: String by lazy { toInterfaceAddress(InterfaceId.MOCK, "") }
 
     /** We recreate this scope each time we stop an interface */
-    var serviceScope = CoroutineScope(Dispatchers.IO + Job())
+    var serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private var radioIf: IRadioInterface = NopInterface("")
 
@@ -298,7 +298,7 @@ constructor(
 
         // cancel any old jobs and get ready for the new ones
         serviceScope.cancel("stopping interface")
-        serviceScope = CoroutineScope(Dispatchers.IO + Job())
+        serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
         if (logSends) {
             sentPacketsLog.close()
