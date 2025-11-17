@@ -28,6 +28,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,27 +40,40 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.model.DeviceListEntry
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.disconnect
 import org.meshtastic.core.strings.firmware_version
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
+import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.TelemetryProtos
+import kotlin.time.Duration.Companion.seconds
 
-/** Converts Bluetooth RSSI to a 0-4 bar signal strength level. */
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
     onNavigateToNodeDetails: (Int) -> Unit,
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
+    bleDevice: DeviceListEntry.Ble? = null,
 ) {
+    var rssi by remember { mutableIntStateOf(0) }
+    LaunchedEffect(bleDevice) {
+        if (bleDevice != null) {
+            while (bleDevice.peripheral.isConnected) {
+                rssi = bleDevice.peripheral.readRssi()
+                delay(10.seconds)
+            }
+        }
+    }
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp),
@@ -63,6 +81,9 @@ fun CurrentlyConnectedInfo(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             MaterialBatteryInfo(level = node.batteryLevel, voltage = node.voltage)
+            if (bleDevice is DeviceListEntry.Ble) {
+                MaterialBluetoothSignalInfo(rssi)
+            }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(
