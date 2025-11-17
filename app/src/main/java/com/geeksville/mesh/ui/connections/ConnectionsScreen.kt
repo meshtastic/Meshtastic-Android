@@ -42,7 +42,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -56,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.BTScanModel
+import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo
@@ -125,11 +125,6 @@ fun ConnectionsScreen(
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
     val recentTcpDevices by scanModel.recentTcpDevicesForUi.collectAsStateWithLifecycle()
     val usbDevices by scanModel.usbDevicesForUi.collectAsStateWithLifecycle()
-
-    DisposableEffect(Unit) {
-        connectionsViewModel.onStart()
-        onDispose { connectionsViewModel.onStop() }
-    }
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -209,6 +204,9 @@ fun ConnectionsScreen(
                                 TitledCard(title = stringResource(Res.string.connected_device)) {
                                     CurrentlyConnectedInfo(
                                         node = node,
+                                        bleDevice =
+                                        bleDevices.firstOrNull { it.fullAddress == selectedDevice }
+                                            as DeviceListEntry.Ble?,
                                         onNavigateToNodeDetails = onNavigateToNodeDetails,
                                         onClickDisconnect = { scanModel.disconnect() },
                                     )
