@@ -39,6 +39,7 @@ internal const val KEY_THEME = "theme"
 // Node list filters/sort
 internal const val KEY_NODE_SORT = "node-sort-option"
 internal const val KEY_INCLUDE_UNKNOWN = "include-unknown"
+internal const val KEY_EXCLUDE_INFRASTRUCTURE = "exclude-infrastructure"
 internal const val KEY_ONLY_ONLINE = "only-online"
 internal const val KEY_ONLY_DIRECT = "only-direct"
 internal const val KEY_SHOW_IGNORED = "show-ignored"
@@ -57,6 +58,8 @@ class UiPreferencesDataSource @Inject constructor(private val dataStore: DataSto
 
     val nodeSort: StateFlow<Int> = dataStore.prefStateFlow(key = NODE_SORT, default = -1)
     val includeUnknown: StateFlow<Boolean> = dataStore.prefStateFlow(key = INCLUDE_UNKNOWN, default = false)
+    val excludeInfrastructure: StateFlow<Boolean> =
+        dataStore.prefStateFlow(key = EXCLUDE_INFRASTRUCTURE, default = false)
     val onlyOnline: StateFlow<Boolean> = dataStore.prefStateFlow(key = ONLY_ONLINE, default = false)
     val onlyDirect: StateFlow<Boolean> = dataStore.prefStateFlow(key = ONLY_DIRECT, default = false)
     val showIgnored: StateFlow<Boolean> = dataStore.prefStateFlow(key = SHOW_IGNORED, default = false)
@@ -75,6 +78,10 @@ class UiPreferencesDataSource @Inject constructor(private val dataStore: DataSto
 
     fun setIncludeUnknown(value: Boolean) {
         dataStore.setPref(key = INCLUDE_UNKNOWN, value = value)
+    }
+
+    fun setExcludeInfrastructure(value: Boolean) {
+        dataStore.setPref(key = EXCLUDE_INFRASTRUCTURE, value = value)
     }
 
     fun setOnlyOnline(value: Boolean) {
@@ -104,6 +111,7 @@ class UiPreferencesDataSource @Inject constructor(private val dataStore: DataSto
         val THEME = intPreferencesKey(KEY_THEME)
         val NODE_SORT = intPreferencesKey(KEY_NODE_SORT)
         val INCLUDE_UNKNOWN = booleanPreferencesKey(KEY_INCLUDE_UNKNOWN)
+        val EXCLUDE_INFRASTRUCTURE = booleanPreferencesKey(KEY_EXCLUDE_INFRASTRUCTURE)
         val ONLY_ONLINE = booleanPreferencesKey(KEY_ONLY_ONLINE)
         val ONLY_DIRECT = booleanPreferencesKey(KEY_ONLY_DIRECT)
         val SHOW_IGNORED = booleanPreferencesKey(KEY_SHOW_IGNORED)
