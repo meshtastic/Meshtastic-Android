@@ -32,7 +32,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BluetoothDisabled
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,7 +65,6 @@ import org.meshtastic.core.strings.permission_missing
 import org.meshtastic.core.strings.permission_missing_31
 import org.meshtastic.core.strings.scan
 import org.meshtastic.core.strings.scanning_bluetooth
-import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.util.showToast
 
 /**
@@ -72,11 +72,13 @@ import org.meshtastic.core.ui.util.showToast
  * permissions using `accompanist-permissions`.
  *
  * @param connectionState The current connection state of the MeshService.
- * @param btDevices List of discovered BLE devices.
+ * @param bondedDevices List of discovered BLE devices.
+ * @param availableDevices
  * @param selectedDevice The full address of the currently selected device.
  * @param scanModel The ViewModel responsible for Bluetooth scanning logic.
+ * @param bluetoothEnabled
  */
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun BLEDevices(
@@ -159,7 +161,9 @@ fun BLEDevices(
                                 }
 
                                 if (isScanning) {
-                                    CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.Center))
+                                    CircularWavyProgressIndicator(
+                                        modifier = Modifier.size(24.dp).align(Alignment.Center),
+                                    )
                                 }
                             }
                         }
@@ -177,14 +181,14 @@ fun BLEDevices(
                             actionButton = scanButton,
                         )
                     } else {
-                        bondedDevices.Section(
+                        bondedDevices.DeviceListSection(
                             title = stringResource(Res.string.bluetooth_paired_devices),
                             connectionState = connectionState,
                             selectedDevice = selectedDevice,
                             onSelect = scanModel::onSelected,
                         )
 
-                        availableDevices.Section(
+                        availableDevices.DeviceListSection(
                             title = stringResource(Res.string.bluetooth_available_devices),
                             connectionState = connectionState,
                             selectedDevice = selectedDevice,
@@ -224,27 +228,5 @@ private fun checkPermissionsAndScan(
         scanModel.startScan()
     } else {
         permissionsState.launchMultiplePermissionRequest()
-    }
-}
-
-@Composable
-private fun List<DeviceListEntry>.Section(
-    title: String,
-    connectionState: ConnectionState,
-    selectedDevice: String,
-    onSelect: (DeviceListEntry) -> Unit,
-) {
-    if (isNotEmpty()) {
-        TitledCard(title = title) {
-            forEach { device ->
-                val connected = connectionState == ConnectionState.CONNECTED && device.fullAddress == selectedDevice
-                DeviceListItem(
-                    connected = connected,
-                    device = device,
-                    onSelect = { onSelect(device) },
-                    modifier = Modifier,
-                )
-            }
-        }
     }
 }

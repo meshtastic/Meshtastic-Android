@@ -41,7 +41,7 @@ class ServiceRepository @Inject constructor() {
     }
 
     // Connection state to our radio device
-    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    private val _connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState>
         get() = _connectionState
 
@@ -81,7 +81,7 @@ class ServiceRepository @Inject constructor() {
         get() = _statusMessage
 
     fun setStatusMessage(text: String) {
-        if (connectionState.value != ConnectionState.CONNECTED) {
+        if (connectionState.value != ConnectionState.Connected) {
             _statusMessage.value = text
         }
     }

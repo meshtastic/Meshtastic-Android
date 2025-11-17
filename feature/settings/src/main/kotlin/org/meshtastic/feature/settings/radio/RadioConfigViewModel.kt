@@ -169,7 +169,7 @@ constructor(
         serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
 
         combine(serviceRepository.connectionState, radioConfigState) { connState, configState ->
-            _radioConfigState.update { it.copy(connected = connState == ConnectionState.CONNECTED) }
+            _radioConfigState.update { it.copy(connected = connState == ConnectionState.Connected) }
         }
             .launchIn(viewModelScope)
 

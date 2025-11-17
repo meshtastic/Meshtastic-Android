@@ -17,17 +17,18 @@
 
 package com.geeksville.mesh.service
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.service.ConnectionState
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class MeshServiceConnectionStateHolder @Inject constructor() {
-    private var connectionState = ConnectionState.DISCONNECTED
+    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    val connectionState = _connectionState.asStateFlow()
 
     fun setState(state: ConnectionState) {
-        connectionState = state
+        _connectionState.value = state
     }
-
-    fun getState() = connectionState
 }

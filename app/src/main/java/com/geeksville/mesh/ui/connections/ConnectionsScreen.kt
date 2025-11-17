@@ -25,15 +25,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -68,6 +72,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.connected
 import org.meshtastic.core.strings.connected_device
 import org.meshtastic.core.strings.connected_sleeping
+import org.meshtastic.core.strings.connecting
 import org.meshtastic.core.strings.connections
 import org.meshtastic.core.strings.must_set_region
 import org.meshtastic.core.strings.not_connected
@@ -93,7 +98,7 @@ fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_C
  * Composable screen for managing device connections (BLE, TCP, USB). It handles permission requests for location and
  * displays connection status.
  */
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber", "ModifierMissing", "ComposableParamOrder")
 @Composable
 fun ConnectionsScreen(
@@ -109,7 +114,7 @@ fun ConnectionsScreen(
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
     val connectionState by
-        connectionsViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
+        connectionsViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.Disconnected)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
@@ -157,12 +162,13 @@ fun ConnectionsScreen(
 
     LaunchedEffect(connectionState, regionUnset) {
         when (connectionState) {
-            ConnectionState.CONNECTED -> {
+            ConnectionState.Connected -> {
                 if (regionUnset) Res.string.must_set_region else Res.string.connected
             }
+            ConnectionState.Connecting -> Res.string.connecting
 
-            ConnectionState.DISCONNECTED -> Res.string.not_connected
-            ConnectionState.DEVICE_SLEEP -> Res.string.connected_sleeping
+            ConnectionState.Disconnected -> Res.string.not_connected
+            ConnectionState.DeviceSleep -> Res.string.connected_sleeping
         }.let { scanModel.setErrorText(getString(it)) }
     }
 
@@ -189,6 +195,11 @@ fun ConnectionsScreen(
                         .padding(paddingValues)
                         .padding(16.dp),
                 ) {
+                    AnimatedVisibility(visible = connectionState == ConnectionState.Connecting) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                            CircularWavyProgressIndicator(modifier = Modifier.size(96.dp).padding(16.dp))
+                        }
+                    }
                     AnimatedVisibility(
                         visible = connectionState.isConnected(),
                         modifier = Modifier.padding(bottom = 16.dp),
@@ -288,12 +299,7 @@ fun ConnectionsScreen(
             }
 
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                Text(
-                    text = scanStatusText.orEmpty(),
-                    modifier = Modifier.fillMaxWidth(),
-                    fontSize = 10.sp,
-                    textAlign = TextAlign.End,
-                )
+                Text(text = scanStatusText.orEmpty(), fontSize = 10.sp, textAlign = TextAlign.End)
             }
         }
     }
