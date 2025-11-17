@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.connections.components
 
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,7 +66,6 @@ import org.meshtastic.core.strings.ip_address
 import org.meshtastic.core.strings.ip_port
 import org.meshtastic.core.strings.no_network_devices
 import org.meshtastic.core.strings.recent_network_devices
-import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,39 +128,21 @@ fun NetworkDevices(
 
             else -> {
                 if (recentNetworkDevices.isNotEmpty()) {
-                    TitledCard(title = stringResource(Res.string.recent_network_devices)) {
-                        recentNetworkDevices.forEach { device ->
-                            DeviceListItem(
-                                connected =
-                                connectionState == ConnectionState.CONNECTED &&
-                                    device.fullAddress == selectedDevice,
-                                device = device,
-                                onSelect = { scanModel.onSelected(device) },
-                                modifier =
-                                Modifier.combinedClickable(
-                                    onClick = { scanModel.onSelected(device) },
-                                    onLongClick = {
-                                        deviceToDelete = device
-                                        showDeleteDialog = true
-                                    },
-                                ),
-                            )
-                        }
-                    }
+                    recentNetworkDevices.DeviceListSection(
+                        title = stringResource(Res.string.recent_network_devices),
+                        connectionState = connectionState,
+                        selectedDevice = selectedDevice,
+                        onSelect = scanModel::onSelected,
+                    )
                 }
 
                 if (discoveredNetworkDevices.isNotEmpty()) {
-                    TitledCard(title = stringResource(Res.string.discovered_network_devices)) {
-                        discoveredNetworkDevices.forEach { device ->
-                            DeviceListItem(
-                                connected =
-                                connectionState == ConnectionState.CONNECTED &&
-                                    device.fullAddress == selectedDevice,
-                                device = device,
-                                onSelect = { scanModel.onSelected(device) },
-                            )
-                        }
-                    }
+                    discoveredNetworkDevices.DeviceListSection(
+                        title = stringResource(Res.string.discovered_network_devices),
+                        connectionState = connectionState,
+                        selectedDevice = selectedDevice,
+                        onSelect = scanModel::onSelected,
+                    )
                 }
 
                 addButton()

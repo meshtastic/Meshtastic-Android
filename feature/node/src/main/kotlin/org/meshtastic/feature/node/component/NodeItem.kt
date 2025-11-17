@@ -49,6 +49,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.strings.unknown_username
@@ -72,7 +73,7 @@ fun NodeItem(
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
     currentTimeMillis: Long,
-    isConnected: Boolean = false,
+    connectionState: ConnectionState,
 ) {
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isIgnored = thatNode.isIgnored
@@ -140,7 +141,7 @@ fun NodeItem(
                     isThisNode = isThisNode,
                     isFavorite = isFavorite,
                     isUnmessageable = unmessageable,
-                    isConnected = isConnected,
+                    connectionState = connectionState,
                 )
             }
 
@@ -221,7 +222,14 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, currentTimeMillis = System.currentTimeMillis())
+        NodeItem(
+            thisNode = thisNode,
+            thatNode = thatNode,
+            0,
+            true,
+            currentTimeMillis = System.currentTimeMillis(),
+            connectionState = ConnectionState.Connected,
+        )
     }
 }
 
@@ -236,6 +244,7 @@ fun NodeInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) thatN
             distanceUnits = 1,
             tempInFahrenheit = true,
             currentTimeMillis = System.currentTimeMillis(),
+            connectionState = ConnectionState.Connected,
         )
     }
 }

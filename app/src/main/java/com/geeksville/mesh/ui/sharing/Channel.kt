@@ -153,7 +153,7 @@ fun ChannelScreen(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
 
-    val enabled = connectionState == ConnectionState.CONNECTED && !viewModel.isManaged
+    val enabled = connectionState == ConnectionState.Connected && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
