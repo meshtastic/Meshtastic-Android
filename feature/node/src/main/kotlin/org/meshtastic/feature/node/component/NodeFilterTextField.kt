@@ -64,6 +64,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.desc_node_filter_clear
+import org.meshtastic.core.strings.node_filter_exclude_infrastructure
 import org.meshtastic.core.strings.node_filter_ignored
 import org.meshtastic.core.strings.node_filter_include_unknown
 import org.meshtastic.core.strings.node_filter_only_direct
@@ -85,6 +86,8 @@ fun NodeFilterTextField(
     onSortSelect: (NodeSortOption) -> Unit,
     includeUnknown: Boolean,
     onToggleIncludeUnknown: () -> Unit,
+    excludeInfrastructure: Boolean,
+    onToggleExcludeInfrastructure: () -> Unit,
     onlyOnline: Boolean,
     onToggleOnlyOnline: () -> Unit,
     onlyDirect: Boolean,
@@ -105,6 +108,8 @@ fun NodeFilterTextField(
                 NodeFilterToggles(
                     includeUnknown = includeUnknown,
                     onToggleIncludeUnknown = onToggleIncludeUnknown,
+                    excludeInfrastructure = excludeInfrastructure,
+                    onToggleExcludeInfrastructure = onToggleExcludeInfrastructure,
                     onlyOnline = onlyOnline,
                     onToggleOnlyOnline = onToggleOnlyOnline,
                     onlyDirect = onlyDirect,
@@ -213,6 +218,12 @@ private fun NodeSortButton(
         DropdownMenuTitle(text = stringResource(Res.string.node_filter_title))
 
         DropdownMenuCheck(
+            text = stringResource(Res.string.node_filter_exclude_infrastructure),
+            checked = toggles.excludeInfrastructure,
+            onClick = toggles.onToggleExcludeInfrastructure,
+        )
+
+        DropdownMenuCheck(
             text = stringResource(Res.string.node_filter_include_unknown),
             checked = toggles.includeUnknown,
             onClick = toggles.onToggleIncludeUnknown,
@@ -298,6 +309,8 @@ private fun NodeFilterTextFieldPreview() {
             onSortSelect = {},
             includeUnknown = false,
             onToggleIncludeUnknown = {},
+            excludeInfrastructure = false,
+            onToggleExcludeInfrastructure = {},
             onlyOnline = false,
             onToggleOnlyOnline = {},
             onlyDirect = false,
@@ -312,6 +325,8 @@ private fun NodeFilterTextFieldPreview() {
 data class NodeFilterToggles(
     val includeUnknown: Boolean,
     val onToggleIncludeUnknown: () -> Unit,
+    val excludeInfrastructure: Boolean,
+    val onToggleExcludeInfrastructure: () -> Unit,
     val onlyOnline: Boolean,
     val onToggleOnlyOnline: () -> Unit,
     val onlyDirect: Boolean,
