@@ -77,7 +77,7 @@ constructor(
     private val analytics: PlatformAnalytics,
 ) {
 
-    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
     private val _receivedData = MutableSharedFlow<ByteArray>()
@@ -248,13 +248,13 @@ constructor(
     }
 
     fun onConnect() {
-        if (_connectionState.value != ConnectionState.CONNECTED) {
-            broadcastConnectionChanged(ConnectionState.CONNECTED)
+        if (_connectionState.value != ConnectionState.Connected) {
+            broadcastConnectionChanged(ConnectionState.Connected)
         }
     }
 
     fun onDisconnect(isPermanent: Boolean) {
-        val newTargetState = if (isPermanent) ConnectionState.DISCONNECTED else ConnectionState.DEVICE_SLEEP
+        val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
         if (_connectionState.value != newTargetState) {
             broadcastConnectionChanged(newTargetState)
         }
@@ -319,7 +319,7 @@ constructor(
      * @return true if the device changed, false if no change
      */
     private fun setBondedDeviceAddress(address: String?): Boolean =
-        if (getBondedDeviceAddress() == address && isStarted && _connectionState.value == ConnectionState.CONNECTED) {
+        if (getBondedDeviceAddress() == address && isStarted && _connectionState.value == ConnectionState.Connected) {
             Timber.w("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
             false
         } else {

@@ -33,7 +33,6 @@
     <ID>FinalNewline:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
     <ID>FinalNewline:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
-    <ID>ImplicitDefaultLocale:MeshService.kt$MeshService$String.format("0x%02x", byte)</ID>
     <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
     <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
@@ -67,9 +66,8 @@
     <ID>MagicNumber:UIState.kt$4</ID>
     <ID>MatchingDeclarationName:MeshServiceStarter.kt$ServiceStarter : Worker</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$"Config complete id mismatch: received=$configCompleteId expected one of [$configOnlyNonce,$nodeInfoNonce]"</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService$"Failed to parse radio packet (len=${bytes.size} contents=$packet). Not a valid FromRadio or LogRecord."</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$"setOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed isUnmessagable: $isUnmessagable"</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService.&lt;no name provided&gt;$"sendData dest=${p.to}, id=${p.id} &lt;- ${bytes.size} bytes (connectionState=${connectionStateHolder.getState()})"</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService.&lt;no name provided&gt;$"sendData dest=${p.to}, id=${p.id} &lt;- ${bytes.size} bytes (connectionState=${connectionStateHolder.connectionState.value})"</ID>
     <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found fromNum: ${fromNumCharacteristic?.uuid}, ${fromNumCharacteristic?.instanceId}"</ID>
     <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found fromRadio: ${fromRadioCharacteristic?.uuid}, ${fromRadioCharacteristic?.instanceId}"</ID>
     <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found logRadio: ${logRadioCharacteristic?.uuid}, ${logRadioCharacteristic?.instanceId}"</ID>
@@ -120,7 +118,6 @@
     <ID>SwallowedException:NsdManager.kt$ex: IllegalArgumentException</ID>
     <ID>SwallowedException:ServiceClient.kt$ServiceClient$ex: IllegalArgumentException</ID>
     <ID>SwallowedException:TCPInterface.kt$TCPInterface$ex: SocketTimeoutException</ID>
-    <ID>TooGenericExceptionCaught:BTScanModel.kt$BTScanModel$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:Exceptions.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:MQTTRepository.kt$MQTTRepository$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService$ex: Exception</ID>

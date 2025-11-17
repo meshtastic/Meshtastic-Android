@@ -140,7 +140,7 @@ fun NodeListScreen(
                 sharedContact = sharedContact,
                 modifier =
                 Modifier.animateFloatingActionButton(
-                    visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
+                    visible = !isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
                 onSharedContactRequested = { contact -> viewModel.setSharedContactRequested(contact) },
@@ -217,7 +217,7 @@ fun NodeListScreen(
                             onClick = { navigateToNodeDetails(node.num) },
                             onLongClick = longClick,
                             currentTimeMillis = currentTimeMillis,
-                            isConnected = connectionState.isConnected(),
+                            connectionState = connectionState,
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {
