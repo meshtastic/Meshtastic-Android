@@ -19,7 +19,6 @@ package com.geeksville.mesh.ui.connections.components
 
 import android.Manifest
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -50,6 +50,7 @@ import com.geeksville.mesh.model.DeviceListEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
@@ -64,6 +65,7 @@ import org.meshtastic.core.strings.permission_missing_31
 import org.meshtastic.core.strings.scan
 import org.meshtastic.core.strings.scanning_bluetooth
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.util.showToast
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth
@@ -90,23 +92,22 @@ fun BLEDevices(
 
     // Define permissions needed for Bluetooth scanning based on Android version.
     val bluetoothPermissionsList = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
-        } else {
-            // ACCESS_FINE_LOCATION is required for Bluetooth scanning on pre-S devices.
-            listOf(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
+        listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
     }
+
+    val context = LocalContext.current
+    val permsMissing = stringResource(Res.string.permission_missing)
+    val coroutineScope = rememberCoroutineScope()
 
     val permissionsState =
         rememberMultiplePermissionsState(
             permissions = bluetoothPermissionsList,
             onPermissionsResult = {
                 if (it.values.all { granted -> granted } && bluetoothEnabled) {
-                    scanModel.startScan()
                     scanModel.refreshPermissions()
+                    scanModel.startScan()
                 } else {
-                    // If permissions are not granted, we can show a message or handle it accordingly.
+                    coroutineScope.launch { context.showToast(permsMissing) }
                 }
             },
         )
