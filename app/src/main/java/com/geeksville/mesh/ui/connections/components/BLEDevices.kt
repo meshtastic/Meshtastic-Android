@@ -19,6 +19,7 @@ package com.geeksville.mesh.ui.connections.components
 
 import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -94,7 +95,11 @@ fun BLEDevices(
 
     // Define permissions needed for Bluetooth scanning based on Android version.
     val bluetoothPermissionsList = remember {
-        listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            listOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
     }
 
     val context = LocalContext.current
