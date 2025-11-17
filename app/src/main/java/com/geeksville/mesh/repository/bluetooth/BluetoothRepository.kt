@@ -160,11 +160,13 @@ constructor(
         Timber.d("Detected our bluetooth access=$newState")
     }
 
-    private fun getBondedAppPeripherals(enabled: Boolean): List<Peripheral> = if (enabled) {
-        centralManager.getBondedPeripherals().filter(::isMatchingPeripheral)
-    } else {
-        emptyList()
-    }
+    @SuppressLint("MissingPermission")
+    private fun getBondedAppPeripherals(enabled: Boolean): List<Peripheral> =
+        if (enabled && application.hasBluetoothPermission()) {
+            centralManager.getBondedPeripherals().filter(::isMatchingPeripheral)
+        } else {
+            emptyList()
+        }
 
     /** Checks if a peripheral is one of ours, either by its advertised name or by the services it provides. */
     @OptIn(ExperimentalUuidApi::class)
