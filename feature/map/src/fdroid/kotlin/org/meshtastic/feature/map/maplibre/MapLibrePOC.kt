@@ -68,6 +68,8 @@ import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Checkbox
@@ -79,8 +81,11 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
+import org.maplibre.android.style.layers.HeatmapLayer
 import org.maplibre.android.style.layers.PropertyFactory.circleColor
 import org.maplibre.android.style.layers.PropertyFactory.circleRadius
+import org.maplibre.android.style.layers.PropertyFactory.circleStrokeColor
+import org.maplibre.android.style.layers.PropertyFactory.circleStrokeWidth
 import org.maplibre.android.style.layers.PropertyFactory.lineColor
 import org.maplibre.android.style.layers.PropertyFactory.lineWidth
 import org.maplibre.android.style.layers.PropertyFactory.textColor
@@ -95,6 +100,8 @@ import org.maplibre.android.style.layers.PropertyFactory.textOffset
 import org.maplibre.android.style.layers.PropertyFactory.textAnchor
 import org.maplibre.android.style.layers.PropertyFactory.visibility
 import org.maplibre.android.style.layers.PropertyFactory.rasterOpacity
+import org.maplibre.android.style.layers.PropertyFactory.circleOpacity
+import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.RasterSource
@@ -113,9 +120,13 @@ import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.proto.MeshProtos.Waypoint
+import org.meshtastic.proto.waypoint
+import org.meshtastic.proto.copy
 import timber.log.Timber
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.component.MapButton
+import org.meshtastic.feature.map.component.EditWaypointDialog
+import androidx.core.graphics.createBitmap
  
 import org.maplibre.android.style.layers.BackgroundLayer
 import org.maplibre.android.style.layers.PropertyFactory.textMaxWidth
@@ -137,8 +148,10 @@ private const val WAYPOINTS_SOURCE_ID = "meshtastic-waypoints-source"
 private const val TRACKS_SOURCE_ID = "meshtastic-tracks-source"
 private const val OSM_SOURCE_ID = "osm-tiles"
 
-private const val NODES_LAYER_ID = "meshtastic-nodes-layer"
-private const val NODE_TEXT_LAYER_ID = "meshtastic-node-text-layer"
+private const val NODES_LAYER_ID = "meshtastic-nodes-layer" // From clustered source, filtered
+private const val NODE_TEXT_LAYER_ID = "meshtastic-node-text-layer" // From clustered source, filtered
+private const val NODES_LAYER_NOCLUSTER_ID = "meshtastic-nodes-layer-nocluster" // From non-clustered source
+private const val NODE_TEXT_LAYER_NOCLUSTER_ID = "meshtastic-node-text-layer-nocluster" // From non-clustered source
 private const val NODE_TEXT_BG_LAYER_ID = "meshtastic-node-text-bg-layer"
 private const val NODES_LAYER_CLUSTERED_ID = "meshtastic-nodes-layer-clustered"
 private const val NODE_TEXT_LAYER_CLUSTERED_ID = "meshtastic-node-text-layer-clustered"
@@ -160,7 +173,6 @@ private const val DEBUG_SYMBOL_LAYER_ID = "meshtastic-debug-symbols"
 private const val DEBUG_RAW_SOURCE_ID = "meshtastic-debug-raw-source"
 private const val DEBUG_RAW_LAYER_ID = "meshtastic-debug-raw-layer"
 private const val DEBUG_RAW_SYMBOL_LAYER_ID = "meshtastic-debug-raw-symbols"
-
 // Base map style options (raster tiles; key-free)
 private enum class BaseMapStyle(val label: String, val urlTemplate: String) {
     OSM_STANDARD("OSM", "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
@@ -190,7 +202,13 @@ private fun buildMeshtasticStyle(base: BaseMapStyle): Style.Builder {
                 GeoJsonSource(
                     NODES_CLUSTER_SOURCE_ID,
                     emptyFeatureCollectionJson(),
-                    GeoJsonOptions().withCluster(true).withClusterRadius(50).withClusterMaxZoom(14).withClusterMinPoints(2),
+                    GeoJsonOptions()
+                        .withCluster(true)
+                        .withClusterRadius(50)
+                        .withClusterMaxZoom(14)
+                        .withClusterMinPoints(2)
+                        .withLineMetrics(false)
+                        .withTolerance(0.375f), // Smooth clustering transitions
                 ),
             )
             // Non-clustered debug copy of nodes to bypass clustering entirely
@@ -200,7 +218,13 @@ private fun buildMeshtasticStyle(base: BaseMapStyle): Style.Builder {
             .withSource(GeoJsonSource(TEST_POINT_SOURCE_ID, emptyFeatureCollectionJson()))
             // Layers - order ensures they are above raster
             .withLayer(
-                CircleLayer(CLUSTER_CIRCLE_LAYER_ID, NODES_CLUSTER_SOURCE_ID).withProperties(circleColor("#6D4C41"), circleRadius(14f)).withFilter(has("point_count")),
+                CircleLayer(CLUSTER_CIRCLE_LAYER_ID, NODES_CLUSTER_SOURCE_ID)
+                    .withProperties(
+                        circleColor("#6D4C41"),
+                        circleRadius(14f),
+                        circleOpacity(1.0f), // Needed for transitions
+                    )
+                    .withFilter(has("point_count")),
             )
             .withLayer(
                 SymbolLayer(CLUSTER_COUNT_LAYER_ID, NODES_CLUSTER_SOURCE_ID)
@@ -230,8 +254,20 @@ private fun buildMeshtasticStyle(base: BaseMapStyle): Style.Builder {
                                 stop(18, 9.5f),
                             ),
                         ),
+                        circleStrokeColor("#FFFFFF"), // White border
+                        circleStrokeWidth(
+                            interpolate(
+                                linear(),
+                                zoom(),
+                                stop(8, 1.5f),
+                                stop(12, 2f),
+                                stop(16, 2.5f),
+                                stop(18, 3f),
+                            ),
+                        ),
+                        circleOpacity(1.0f), // Needed for transitions
                     )
-                    .withFilter(not(has("point_count"))), // Only show unclustered points
+                    .withFilter(not(has("point_count"))),
             )
             .withLayer(
                 SymbolLayer(NODE_TEXT_LAYER_ID, NODES_CLUSTER_SOURCE_ID)
@@ -258,6 +294,63 @@ private fun buildMeshtasticStyle(base: BaseMapStyle): Style.Builder {
                         textAnchor("bottom"),
                     )
                     .withFilter(all(not(has("point_count")), eq(get("showLabel"), literal(1)))),
+            )
+            // Non-clustered node layers (shown when clustering is disabled)
+            .withLayer(
+                CircleLayer(NODES_LAYER_NOCLUSTER_ID, NODES_SOURCE_ID)
+                    .withProperties(
+                        circleColor(coalesce(toColor(get("color")), toColor(literal("#2E7D32")))),
+                        circleRadius(
+                            interpolate(
+                                linear(),
+                                zoom(),
+                                stop(8, 4f),
+                                stop(12, 6f),
+                                stop(16, 8f),
+                                stop(18, 9.5f),
+                            ),
+                        ),
+                        circleStrokeColor("#FFFFFF"), // White border
+                        circleStrokeWidth(
+                            interpolate(
+                                linear(),
+                                zoom(),
+                                stop(8, 1.5f),
+                                stop(12, 2f),
+                                stop(16, 2.5f),
+                                stop(18, 3f),
+                            ),
+                        ),
+                        circleOpacity(1.0f), // Needed for transitions
+                        visibility("none") // Hidden by default, shown when clustering disabled
+                    ),
+            )
+            .withLayer(
+                SymbolLayer(NODE_TEXT_LAYER_NOCLUSTER_ID, NODES_SOURCE_ID)
+                    .withProperties(
+                        textField(get("short")),
+                        textColor("#1B1B1B"),
+                        textHaloColor("#FFFFFF"),
+                        textHaloWidth(3.0f),
+                        textHaloBlur(0.7f),
+                        textSize(
+                            interpolate(
+                                linear(),
+                                zoom(),
+                                stop(8, 9f),
+                                stop(12, 11f),
+                                stop(15, 13f),
+                                stop(18, 16f),
+                            ),
+                        ),
+                        textMaxWidth(4f),
+                        textAllowOverlap(step(zoom(), literal(false), stop(11, literal(true)))),
+                        textIgnorePlacement(step(zoom(), literal(false), stop(11, literal(true)))),
+                        textOffset(arrayOf(0f, -1.4f)),
+                        textAnchor("bottom"),
+                        visibility("none") // Hidden by default, shown when clustering disabled
+                    )
+                    .withFilter(eq(get("showLabel"), literal(1))),
             )
             .withLayer(CircleLayer(WAYPOINTS_LAYER_ID, WAYPOINTS_SOURCE_ID).withProperties(circleColor("#2E7D32"), circleRadius(5f)))
             // Debug layers (hidden by default, can be toggled for diagnosis)
@@ -352,6 +445,8 @@ fun MapLibrePOC(
     var showLegend by remember { mutableStateOf(false) }
     var enabledRoles by remember { mutableStateOf<Set<ConfigProtos.Config.DeviceConfig.Role>>(emptySet()) }
     var clusteringEnabled by remember { mutableStateOf(true) }
+    var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
+    var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     // Base map style rotation
     val baseStyles = remember { enumValues<BaseMapStyle>().toList() }
     var baseStyleIndex by remember { mutableStateOf(0) }
@@ -362,6 +457,8 @@ fun MapLibrePOC(
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle()
+    val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
+    val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView<MapView>(
@@ -377,6 +474,7 @@ fun MapLibrePOC(
                         // Set initial base raster style using MapLibre test-app pattern
                         map.setStyle(buildMeshtasticStyle(baseStyle)) { style ->
                             Timber.tag("MapLibrePOC").d("Style loaded (base=%s)", baseStyle.label)
+                            style.setTransition(TransitionOptions(0, 0))
                             logStyleState("after-style-load(pre-ensure)", style)
                             ensureSourcesAndLayers(style)
                             // Push current data immediately after style load
@@ -414,8 +512,9 @@ fun MapLibrePOC(
                                 // Set clustered source only (like MapLibre example)
                                 val filteredNodes = applyFilters(nodes, mapFilterState, enabledRoles)
                                 val json = nodesToFeatureCollectionJsonWithSelection(filteredNodes, labelSet)
-                                Timber.tag("MapLibrePOC").d("Setting nodes clustered source: %d nodes, jsonBytes=%d", nodes.size, json.length)
+                                Timber.tag("MapLibrePOC").d("Setting nodes sources: %d nodes, jsonBytes=%d", nodes.size, json.length)
                                 safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, json)
+                                safeSetGeoJson(style, NODES_SOURCE_ID, json) // Also populate non-clustered source
                                 safeSetGeoJson(style, DEBUG_RAW_SOURCE_ID, json)
                                 // Place a known visible test point (San Jose area) to verify rendering
                                 val testFC = singlePointFC(-121.8893, 37.3349)
@@ -512,6 +611,7 @@ fun MapLibrePOC(
                                         rect,
                                         CLUSTER_CIRCLE_LAYER_ID,
                                         NODES_LAYER_ID,
+                                        NODES_LAYER_NOCLUSTER_ID,
                                         WAYPOINTS_LAYER_ID,
                                     )
                                 Timber.tag("MapLibrePOC").d("Map click at (%.5f, %.5f) -> %d features", latLng.latitude, latLng.longitude, features.size)
@@ -565,11 +665,27 @@ fun MapLibrePOC(
                                             }
                                             "waypoint" -> {
                                                 val id = it.getNumberProperty("id")?.toInt() ?: -1
-                                                "Waypoint $id"
+                                                // Open edit dialog for waypoint
+                                                waypoints.values.find { pkt -> pkt.data.waypoint?.id == id }?.let { pkt ->
+                                                    editingWaypoint = pkt.data.waypoint
+                                                }
+                                                "Waypoint: ${it.getStringProperty("name") ?: id}"
                                             }
                                             else -> null
                                         }
                                     }
+                                true
+                            }
+                            // Long-press to create waypoint
+                            map.addOnMapLongClickListener { latLng ->
+                                if (isConnected) {
+                                    val newWaypoint = waypoint {
+                                        latitudeI = (latLng.latitude / DEG_D).toInt()
+                                        longitudeI = (latLng.longitude / DEG_D).toInt()
+                                    }
+                                    editingWaypoint = newWaypoint
+                                    Timber.tag("MapLibrePOC").d("Long press created waypoint at ${latLng.latitude}, ${latLng.longitude}")
+                                }
                                 true
                             }
                             // Update clustering visibility on camera idle (zoom changes)
@@ -586,9 +702,10 @@ fun MapLibrePOC(
                                 val density = context.resources.displayMetrics.density
                                 val labelSet = selectLabelsForViewport(map, filtered, density)
                                 val jsonIdle = nodesToFeatureCollectionJsonWithSelection(filtered, labelSet)
-                                Timber.tag("MapLibrePOC").d("onCameraIdle: updating clustered source. labelSet=%d jsonBytes=%d", labelSet.size, jsonIdle.length)
-                                // Update only the clustered source (unclustered points are filtered by not has(\"point_count\"))
+                                Timber.tag("MapLibrePOC").d("onCameraIdle: updating sources. labelSet=%d (nums=%s) jsonBytes=%d", labelSet.size, labelSet.take(5).joinToString(","), jsonIdle.length)
+                                // Update both clustered and non-clustered sources
                                 safeSetGeoJson(st, NODES_CLUSTER_SOURCE_ID, jsonIdle)
+                                safeSetGeoJson(st, NODES_SOURCE_ID, jsonIdle)
                                 logStyleState("onCameraIdle(post-update)", st)
                                 try {
                                     val w = mapViewRef?.width ?: 0
@@ -674,6 +791,7 @@ fun MapLibrePOC(
                     val filteredNow = applyFilters(nodes, mapFilterState, enabledRoles)
                     val jsonNow = nodesToFeatureCollectionJsonWithSelection(filteredNow, labelSet)
                     safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, jsonNow)
+                    safeSetGeoJson(style, NODES_SOURCE_ID, jsonNow) // Also populate non-clustered source
                     safeSetGeoJson(style, DEBUG_RAW_SOURCE_ID, jsonNow)
                     // Apply visibility now
                     clustersShown = setClusterVisibilityHysteresis(map, style, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled, clustersShown)
@@ -736,6 +854,7 @@ fun MapLibrePOC(
                     mapRef?.let { map ->
                                 map.setStyle(buildMeshtasticStyle(next)) { style ->
                             Timber.tag("MapLibrePOC").d("Base map switched to: %s", next.label)
+                            style.setTransition(TransitionOptions(0, 0))
                             ensureSourcesAndLayers(style)
                             try {
                                 val density = context.resources.displayMetrics.density
@@ -743,6 +862,7 @@ fun MapLibrePOC(
                                         val filtered = applyFilters(nodes, mapFilterState, enabledRoles)
                                         val json = nodesToFeatureCollectionJsonWithSelection(filtered, labelSet)
                                         safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, json)
+                                        safeSetGeoJson(style, NODES_SOURCE_ID, json) // Also populate non-clustered source
                                         safeSetGeoJson(style, DEBUG_RAW_SOURCE_ID, json)
                                         (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
                                             ?.setGeoJson(waypointsToFeatureCollectionFC(waypoints.values))
@@ -869,6 +989,79 @@ fun MapLibrePOC(
                 icon = Icons.Outlined.Info,
                 contentDescription = null,
             )
+            // Map style selector
+            Box {
+                MapButton(
+                    onClick = { mapTypeMenuExpanded = true },
+                    icon = Icons.Outlined.Layers,
+                    contentDescription = null,
+                )
+                DropdownMenu(expanded = mapTypeMenuExpanded, onDismissRequest = { mapTypeMenuExpanded = false }) {
+                    Text(
+                        text = "Map Style",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    baseStyles.forEachIndexed { index, style ->
+                        DropdownMenuItem(
+                            text = { Text(style.label) },
+                            onClick = {
+                                baseStyleIndex = index
+                                mapTypeMenuExpanded = false
+                                val next = baseStyles[baseStyleIndex % baseStyles.size]
+                                mapRef?.let { map ->
+                                    Timber.tag("MapLibrePOC").d("Switching base style to: %s", next.label)
+                                    map.setStyle(buildMeshtasticStyle(next)) { st ->
+                                        Timber.tag("MapLibrePOC").d("Base map switched to: %s", next.label)
+                                        // Enable smooth transitions for clustering animations (1000ms = 1 second)
+                                        st.setTransition(TransitionOptions(1000, 0))
+                                        ensureSourcesAndLayers(st)
+                                        // Repopulate all sources after style switch
+                                        (st.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
+                                            ?.setGeoJson(waypointsToFeatureCollectionFC(waypoints.values))
+                                        // Re-arm test point after style switch
+                                        (st.getSource(TEST_POINT_SOURCE_ID) as? GeoJsonSource)
+                                            ?.setGeoJson(singlePointFC(-121.8893, 37.3349))
+                                        // Re-enable location component for new style
+                                        try {
+                                            if (hasAnyLocationPermission(context)) {
+                                                val locationComponent = map.locationComponent
+                                                locationComponent.activateLocationComponent(
+                                                    org.maplibre.android.location.LocationComponentActivationOptions.builder(
+                                                        context,
+                                                        st,
+                                                    ).useDefaultLocationEngine(true).build(),
+                                                )
+                                                locationComponent.isLocationComponentEnabled = true
+                                                locationComponent.renderMode = RenderMode.COMPASS
+                                            }
+                                        } catch (_: SecurityException) {
+                                            Timber.tag("MapLibrePOC").w("Location permissions not granted")
+                                        }
+                                        // Trigger data update
+                                        val filtered = applyFilters(nodes, mapFilterState, enabledRoles)
+                                        val density = context.resources.displayMetrics.density
+                                        val labelSet = selectLabelsForViewport(map, filtered, density)
+                                        val json = nodesToFeatureCollectionJsonWithSelection(filtered, labelSet)
+                                        safeSetGeoJson(st, NODES_CLUSTER_SOURCE_ID, json)
+                                        safeSetGeoJson(st, NODES_SOURCE_ID, json)
+                                        safeSetGeoJson(st, DEBUG_RAW_SOURCE_ID, json)
+                                        clustersShown = setClusterVisibilityHysteresis(map, st, filtered, clusteringEnabled, clustersShown)
+                                    }
+                                }
+                            },
+                            trailingIcon = {
+                                if (index == baseStyleIndex) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Check,
+                                        contentDescription = "Selected",
+                                    )
+                                }
+                            },
+                        )
+                    }
+                }
+            }
         }
 
         // Expanded cluster radial overlay
@@ -1002,6 +1195,32 @@ fun MapLibrePOC(
                     }
                 }
             }
+        }
+        // Waypoint editing dialog
+        editingWaypoint?.let { waypointToEdit ->
+            EditWaypointDialog(
+                waypoint = waypointToEdit,
+                onSendClicked = { updatedWp ->
+                    var finalWp = updatedWp
+                    if (updatedWp.id == 0) {
+                        finalWp = finalWp.copy { id = mapViewModel.generatePacketId() ?: 0 }
+                    }
+                    if (updatedWp.icon == 0) {
+                        finalWp = finalWp.copy { icon = 0x1F4CD }
+                    }
+                    mapViewModel.sendWaypoint(finalWp)
+                    editingWaypoint = null
+                },
+                onDeleteClicked = { wpToDelete ->
+                    if (wpToDelete.lockedTo == 0 && isConnected && wpToDelete.id != 0) {
+                        val deleteMarkerWp = wpToDelete.copy { expire = 1 }
+                        mapViewModel.sendWaypoint(deleteMarkerWp)
+                    }
+                    mapViewModel.deleteWaypoint(wpToDelete.id)
+                    editingWaypoint = null
+                },
+                onDismissRequest = { editingWaypoint = null },
+            )
         }
     }
 
@@ -1191,7 +1410,12 @@ private fun ensureSourcesAndLayers(style: Style) {
         Timber.tag("MapLibrePOC").d("Added node text SymbolLayer")
     }
     if (style.getLayer(WAYPOINTS_LAYER_ID) == null) {
-        val layer = CircleLayer(WAYPOINTS_LAYER_ID, WAYPOINTS_SOURCE_ID).withProperties(circleColor("#2E7D32"), circleRadius(5f))
+        val layer = CircleLayer(WAYPOINTS_LAYER_ID, WAYPOINTS_SOURCE_ID).withProperties(
+            circleColor("#FF5722"), // Orange-red color for visibility
+            circleRadius(8f),
+            circleStrokeColor("#FFFFFF"),
+            circleStrokeWidth(2f),
+        )
         if (style.getLayer(OSM_LAYER_ID) != null) style.addLayerAbove(layer, OSM_LAYER_ID) else style.addLayer(layer)
         Timber.tag("MapLibrePOC").d("Added waypoints CircleLayer")
     }
@@ -1219,12 +1443,18 @@ private fun nodesToFeatureCollectionJson(nodes: List<Node>): String {
             val pos = node.validPosition ?: return@mapNotNull null
             val lat = pos.latitudeI * DEG_D
             val lon = pos.longitudeI * DEG_D
-            val short = (protoShortName(node) ?: shortNameFallback(node)).take(4)
+            val short = safeSubstring(protoShortName(node) ?: shortNameFallback(node), 4)
+            // Strip emojis for MapLibre rendering; if emoji-only, fall back to hex ID
+            val shortForMap = stripEmojisForMapLabel(short) ?: run {
+                val hex = node.num.toString(16).uppercase()
+                if (hex.length >= 4) hex.takeLast(4) else hex
+            }
+            val shortEsc = escapeJson(shortForMap)
             val role = node.user.role.name
             val color = roleColorHex(node)
             val longEsc = escapeJson(node.user.longName ?: "")
             // Default showLabel=0; it will be turned on for selected nodes by viewport selection
-            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"$longEsc","short":"$short","role":"$role","color":"$color","showLabel":0}}"""
+            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"$longEsc","short":"$shortEsc","role":"$role","color":"$color","showLabel":0}}"""
         }
     return """{"type":"FeatureCollection","features":[${features.joinToString(",")}]}"""
 }
@@ -1235,12 +1465,18 @@ private fun nodesToFeatureCollectionJsonWithSelection(nodes: List<Node>, labelNu
             val pos = node.validPosition ?: return@mapNotNull null
             val lat = pos.latitudeI * DEG_D
             val lon = pos.longitudeI * DEG_D
-            val short = (protoShortName(node) ?: shortNameFallback(node)).take(4)
+            val short = safeSubstring(protoShortName(node) ?: shortNameFallback(node), 4)
+            // Strip emojis for MapLibre rendering; if emoji-only, fall back to hex ID
+            val shortForMap = stripEmojisForMapLabel(short) ?: run {
+                val hex = node.num.toString(16).uppercase()
+                if (hex.length >= 4) hex.takeLast(4) else hex
+            }
+            val shortEsc = escapeJson(shortForMap)
             val show = if (labelNums.contains(node.num)) 1 else 0
             val role = node.user.role.name
             val color = roleColorHex(node)
             val longEsc = escapeJson(node.user.longName ?: "")
-            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"$longEsc","short":"$short","role":"$role","color":"$color","showLabel":$show}}"""
+            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"$longEsc","short":"$shortEsc","role":"$role","color":"$color","showLabel":$show}}"""
         }
     return """{"type":"FeatureCollection","features":[${features.joinToString(",")}]}"""
 }
@@ -1265,8 +1501,13 @@ private fun nodesToFeatureCollectionWithSelectionFC(nodes: List<Node>, labelNums
             f.addStringProperty("kind", "node")
             f.addNumberProperty("num", node.num)
             f.addStringProperty("name", node.user.longName ?: "")
-            val short = (protoShortName(node) ?: shortNameFallback(node)).take(4)
-            f.addStringProperty("short", short)
+            val short = safeSubstring(protoShortName(node) ?: shortNameFallback(node), 4)
+            // Strip emojis for MapLibre rendering; if emoji-only, fall back to hex ID
+            val shortForMap = stripEmojisForMapLabel(short) ?: run {
+                val hex = node.num.toString(16).uppercase()
+                if (hex.length >= 4) hex.takeLast(4) else hex
+            }
+            f.addStringProperty("short", shortForMap)
             f.addStringProperty("role", node.user.role.name)
             f.addStringProperty("color", roleColorHex(node))
             f.addNumberProperty("showLabel", if (labelNums.contains(node.num)) 1 else 0)
@@ -1305,7 +1546,12 @@ private fun waypointsToFeatureCollectionFC(
             val lon = w.longitudeI * DEG_D
             if (lat == 0.0 && lon == 0.0) return@mapNotNull null
             if (lat !in -90.0..90.0 || lon !in -180.0..180.0) return@mapNotNull null
-            Feature.fromGeometry(Point.fromLngLat(lon, lat)).also { it.addNumberProperty("id", w.id) }
+            Feature.fromGeometry(Point.fromLngLat(lon, lat)).also { f ->
+                f.addStringProperty("kind", "waypoint")
+                f.addNumberProperty("id", w.id)
+                f.addStringProperty("name", w.name ?: "Waypoint ${w.id}")
+                f.addNumberProperty("icon", w.icon)
+            }
         }
     return FeatureCollection.fromFeatures(features)
 }
@@ -1426,9 +1672,50 @@ private fun protoShortName(node: Node): String? {
 
 private fun shortNameFallback(node: Node): String {
     val long = node.user.longName
-    if (!long.isNullOrBlank()) return long.take(4)
+    if (!long.isNullOrBlank()) return safeSubstring(long, 4)
     val hex = node.num.toString(16).uppercase()
     return if (hex.length >= 4) hex.takeLast(4) else hex
+}
+
+// Safely take up to maxLength characters, respecting emoji boundaries
+// Emojis can be composed of multiple code points, so we need to be careful not to split them
+private fun safeSubstring(text: String, maxLength: Int): String {
+    if (text.length <= maxLength) return text
+    
+    // Use grapheme cluster breaking to respect emoji boundaries
+    var count = 0
+    var lastSafeIndex = 0
+    
+    val breakIterator = java.text.BreakIterator.getCharacterInstance()
+    breakIterator.setText(text)
+    
+    var start = breakIterator.first()
+    var end = breakIterator.next()
+    
+    while (end != java.text.BreakIterator.DONE && count < maxLength) {
+        lastSafeIndex = end
+        count++
+        end = breakIterator.next()
+    }
+    
+    return if (lastSafeIndex > 0) text.substring(0, lastSafeIndex) else text.take(maxLength)
+}
+
+// Remove emojis from text for MapLibre rendering (MapLibre text rendering doesn't support emojis well)
+// Keep only ASCII alphanumeric and common punctuation
+// Returns null if the text is emoji-only (so caller can use fallback like hex ID)
+private fun stripEmojisForMapLabel(text: String): String? {
+    if (text.isEmpty()) return null
+    
+    // Filter to keep only characters that MapLibre can reliably render
+    // This includes ASCII letters, numbers, spaces, and basic punctuation
+    val filtered = text.filter { ch ->
+        ch.code in 0x20..0x7E || // Basic ASCII printable characters
+        ch.code in 0xA0..0xFF    // Latin-1 supplement (accented characters)
+    }.trim()
+    
+    // If filtering removed everything, return null (caller should use fallback)
+    return if (filtered.isEmpty()) null else filtered
 }
 
 // Select one label per grid cell in the current viewport, prioritizing favorites and recent nodes.
@@ -1556,12 +1843,19 @@ private fun setClusterVisibilityHysteresis(
         style.getLayer(CLUSTER_TIER1_LAYER_ID)?.setProperties(visibility("none"))
         style.getLayer(CLUSTER_TIER2_LAYER_ID)?.setProperties(visibility("none"))
         style.getLayer(CLUSTER_TEXT_TIER_LAYER_ID)?.setProperties(visibility("none"))
-        // Always show unclustered nodes and labels; label density still controlled by showLabel property
-        style.getLayer(NODES_LAYER_ID)?.setProperties(visibility("visible"))
-        style.getLayer(NODE_TEXT_LAYER_ID)?.setProperties(visibility("visible"))
+        
+        // When clustering is enabled: show clustered source layers (which filter out clusters)
+        // When clustering is disabled: show non-clustered source layers (which show ALL nodes)
+        style.getLayer(NODES_LAYER_ID)?.setProperties(visibility(if (showClusters) "visible" else "none"))
+        style.getLayer(NODE_TEXT_LAYER_ID)?.setProperties(visibility(if (showClusters) "visible" else "none"))
+        style.getLayer(NODES_LAYER_NOCLUSTER_ID)?.setProperties(visibility(if (showClusters) "none" else "visible"))
+        style.getLayer(NODE_TEXT_LAYER_NOCLUSTER_ID)?.setProperties(visibility(if (showClusters) "none" else "visible"))
+        
         // Legacy clustered node layers are not used
         style.getLayer(NODES_LAYER_CLUSTERED_ID)?.setProperties(visibility("none"))
         style.getLayer(NODE_TEXT_LAYER_CLUSTERED_ID)?.setProperties(visibility("none"))
+        
+        Timber.tag("MapLibrePOC").d("Node layer visibility: clustered=%s, nocluster=%s", showClusters, !showClusters)
         if (showClusters != currentlyShown) {
             Timber.tag("MapLibrePOC").d("Cluster visibility=%s (zoom=%.2f)", showClusters, zoom)
         }
@@ -1571,4 +1865,34 @@ private fun setClusterVisibilityHysteresis(
     }
 }
 
+/**
+ * Convert a Unicode code point (int) to an emoji string
+ */
+internal fun convertIntToEmoji(unicodeCodePoint: Int): String = try {
+    String(Character.toChars(unicodeCodePoint))
+} catch (e: IllegalArgumentException) {
+    Timber.tag("MapLibrePOC").w(e, "Invalid unicode code point: $unicodeCodePoint")
+    "\uD83D\uDCCD" // 📍 default pin emoji
+}
 
+/**
+ * Convert emoji to Bitmap for use as a MapLibre marker icon
+ */
+internal fun unicodeEmojiToBitmap(icon: Int): Bitmap {
+    val unicodeEmoji = convertIntToEmoji(icon)
+    val paint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            textSize = 64f
+            color = android.graphics.Color.BLACK
+            textAlign = Paint.Align.CENTER
+        }
+
+    val baseline = -paint.ascent()
+    val width = (paint.measureText(unicodeEmoji) + 0.5f).toInt()
+    val height = (baseline + paint.descent() + 0.5f).toInt()
+    val image = createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(image)
+    canvas.drawText(unicodeEmoji, width / 2f, baseline, paint)
+
+    return image
+}
