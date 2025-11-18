@@ -28,8 +28,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Clear
@@ -37,6 +39,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,7 +56,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -82,7 +84,6 @@ import org.meshtastic.feature.node.list.NodeFilterState
 fun NodeFilterTextField(
     modifier: Modifier = Modifier,
     filterState: NodeFilterState,
-    onTextChange: (String) -> Unit,
     currentSortOption: NodeSortOption,
     onSortSelect: (NodeSortOption) -> Unit,
     onToggleIncludeUnknown: () -> Unit,
@@ -94,11 +95,7 @@ fun NodeFilterTextField(
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
-            NodeFilterTextField(
-                filterText = filterState.filterText,
-                onTextChange = onTextChange,
-                modifier = Modifier.weight(1f),
-            )
+            NodeFilterTextField(textState = filterState.filterText, modifier = Modifier.weight(1f))
 
             NodeSortButton(
                 modifier = Modifier.align(Alignment.CenterVertically),
@@ -140,14 +137,14 @@ fun NodeFilterTextField(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Unit, modifier: Modifier = Modifier) {
-    val focusManager = LocalFocusManager.current
+private fun NodeFilterTextField(textState: TextFieldState, modifier: Modifier = Modifier) {
     var isFocused by remember { mutableStateOf(false) }
 
     OutlinedTextField(
         modifier = modifier.defaultMinSize(minHeight = 48.dp).onFocusEvent { isFocused = it.isFocused },
-        value = filterText,
+        state = textState,
         placeholder = {
             Text(
                 text = stringResource(Res.string.node_filter_placeholder),
@@ -158,24 +155,16 @@ private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Un
         leadingIcon = {
             Icon(Icons.Default.Search, contentDescription = stringResource(Res.string.node_filter_placeholder))
         },
-        onValueChange = onTextChange,
         trailingIcon = {
-            if (filterText.isNotEmpty() || isFocused) {
-                Icon(
-                    Icons.Default.Clear,
-                    contentDescription = stringResource(Res.string.desc_node_filter_clear),
-                    modifier =
-                    Modifier.clickable {
-                        onTextChange("")
-                        focusManager.clearFocus()
-                    },
-                )
+            if (textState.text.isNotEmpty() || isFocused) {
+                IconButton(onClick = { textState.clearText() }) {
+                    Icon(Icons.Default.Clear, contentDescription = stringResource(Res.string.desc_node_filter_clear))
+                }
             }
         },
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onBackground),
-        maxLines = 1,
+        lineLimits = TextFieldLineLimits.SingleLine,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
     )
 }
 
@@ -304,7 +293,6 @@ private fun NodeFilterTextFieldPreview() {
     AppTheme {
         NodeFilterTextField(
             filterState = NodeFilterState(),
-            onTextChange = {},
             currentSortOption = NodeSortOption.LAST_HEARD,
             onSortSelect = {},
             onToggleIncludeUnknown = {},
