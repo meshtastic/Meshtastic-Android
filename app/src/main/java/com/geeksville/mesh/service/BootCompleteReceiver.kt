@@ -21,13 +21,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 
+/** This receiver starts the MeshService on boot if a device was previously connected. */
 class BootCompleteReceiver : BroadcastReceiver() {
-    override fun onReceive(mContext: Context, intent: Intent) {
-        // Verify the intent action
+
+    override fun onReceive(context: Context, intent: Intent) {
         if (Intent.ACTION_BOOT_COMPLETED != intent.action) {
             return
         }
-        // start listening for bluetooth messages from our device
-        MeshService.startServiceLater(mContext)
+        val prefs = context.getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
+        if (!prefs.contains("device_address")) {
+            return
+        }
+
+        MeshService.startService(context)
     }
 }
