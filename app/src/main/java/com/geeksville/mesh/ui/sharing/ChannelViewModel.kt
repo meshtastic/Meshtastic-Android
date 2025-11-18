@@ -60,7 +60,7 @@ constructor(
 
     // managed mode disables all access to configuration
     val isManaged: Boolean
-        get() = localConfig.value.device.isManaged || localConfig.value.security.isManaged
+        get() = localConfig.value.security.isManaged
 
     var txEnabled: Boolean
         get() = localConfig.value.lora.txEnabled
