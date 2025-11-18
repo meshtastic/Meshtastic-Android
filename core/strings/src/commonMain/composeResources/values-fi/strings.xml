@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
     <string name="node_filter_title">Suodata otsikon mukaan</string>
     <string name="node_filter_include_unknown">Näytä tuntemattomat</string>
+    <string name="node_filter_exclude_infrastructure">Ohita infrastruktuurilaitteet</string>
     <string name="node_filter_only_online">Piilota ei yhteydessä olevat laitteet</string>
     <string name="node_filter_only_direct">Näytä vain suorat yhteydet</string>
     <string name="node_filter_ignored">Katselet tällä hetkellä huomioimattomia laitteita,\nPaina palataksesi laitelistaan.</string>
@@ -35,7 +36,7 @@
     <string name="node_sort_via_mqtt">MQTT:n kautta</string>
     <string name="via_mqtt">MQTT:n kautta</string>
     <string name="node_sort_via_favorite">Suosikkien kautta</string>
-    <string name="node_filter_show_ignored">Huomioimattomat laitteet</string>
+    <string name="node_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
     <string name="unrecognized">Tuntematon</string>
     <string name="message_status_enroute">Odottaa vahvistusta</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
@@ -183,6 +184,7 @@
     <string name="connection_status">Aktiiviset yhteydet:</string>
     <string name="wifi_ip">WiFi-verkon IP:</string>
     <string name="ethernet_ip">Ethernet-verkon IP:</string>
+    <string name="connecting">Yhdistetään</string>
     <string name="not_connected">Ei yhdistetty</string>
     <string name="connected_sleeping">Yhdistetty radioon, mutta se on lepotilassa</string>
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
@@ -213,6 +215,7 @@
     <string name="debug_clear_logs_confirm">Tämä poistaa kaikki lokipaketit ja tietokantamerkinnät laitteestasi – Kyseessä on täydellinen nollaus, ja se on pysyvä.</string>
     <string name="clear">Tyhjennä</string>
     <string name="message_delivery_status">Viestin toimitustila</string>
+    <string name="new_messages_below">Uudet viestit alla</string>
     <string name="meshtastic_messages_notifications">Suorien viestien ilmoitukset</string>
     <string name="meshtastic_broadcast_notifications">Yleislähetysviestien ilmoitukset</string>
     <string name="meshtastic_alerts_notifications">Hälytysilmoitukset</string>
@@ -299,6 +302,8 @@
     <string name="map_purge_fail">SQL-välimuistin tyhjennys epäonnistui, katso logcat saadaksesi lisätietoja</string>
     <string name="map_cache_manager">Välimuistin Hallinta</string>
     <string name="map_download_complete">Lataus on valmis!</string>
+    <string name="map_download_errors">Lataus valmis %1$d virheellä</string>
+    <string name="map_cache_tiles">%1$d Laattaa</string>
     <string name="map_subDescription">suunta: %1$d° etäisyys: %2$s</string>
     <string name="waypoint_edit">Muokkaa reittipistettä</string>
     <string name="waypoint_delete">Poista reittipiste?</string>
@@ -849,6 +854,7 @@
     <string name="notification_permissions_description">Meshtastic käyttää ilmoituksia tiedottaakseen uusista viesteistä ja muista tärkeistä tapahtumista. Voit muuttaa ilmoitusasetuksia milloin tahansa.</string>
     <string name="next">Seuraava</string>
     <string name="grant_permissions">Myönnä oikeudet</string>
+    <string name="nodes_queued_for_deletion">%1$d laitetta jonossa poistettavaksi:</string>
     <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
     <string name="connecting_to_device">Yhdistetään laitteeseen</string>
     <string name="map_type_normal">Normaali</string>
@@ -889,7 +895,7 @@
     <string name="device_configuration">Laitteen asetukset</string>
     <string name="remotely_administrating">"[Etälaite] %1$s"</string>
     <string name="device_telemetry_enabled">Lähetä laitteen telemetriatiedot</string>
-    <string name="device_telemetry_enabled_summary">Ota käyttöön/poista käytöstä telemetriamoduuli laitteen mittaustietojen lähettämiseksi mesh-verkkoon</string>
+    <string name="device_telemetry_enabled_summary">Ota käyttöön tai poista käytöstä laitteen telemetriamoduuli, joka lähettää mittaustietoja mesh-verkkoon. Arvot ovat nimellisiä. Ruuhkaisissa verkoissa lähetysväliä pidennetään automaattisesti verkossa olevien laitteiden määrän perusteella. Alle 10 laitteen verkoissa lähetysväliä lyhennetään automaattisesti.</string>
     <string name="any">Milloin tahansa</string>
     <string name="one_hour">1 tunti</string>
     <string name="eight_hours">8 tuntia</string>
@@ -906,4 +912,5 @@
     <string name="unset">Ei asetettu – 0</string>
     <string name="relayed_by">Välittänyt: %1$s</string>
     <string name="preserve_favorites">Säilytä suosikit?</string>
+    <string name="usb_devices">USB-laitteet</string>
 </resources>
