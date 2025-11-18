@@ -87,7 +87,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : I
 
     /** Print device serial debug output somewhere */
     private fun debugOut(b: Byte) {
-        when (val c = b.toChar()) {
+        when (val c = b.toInt().toChar()) {
             '\r' -> {} // ignore
             '\n' -> {
                 Timber.d("DeviceLog: $debugLineBuf")

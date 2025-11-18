@@ -52,6 +52,7 @@ import com.geeksville.mesh.model.DeviceListEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
@@ -98,19 +99,42 @@ fun BLEDevices(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
         } else {
-            listOf(Manifest.permission.ACCESS_FINE_LOCATION)
+            listOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            )
         }
     }
 
     val context = LocalContext.current
-    val permsMissing = stringResource(Res.string.permission_missing)
+    val permsMissing =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            stringResource(Res.string.permission_missing_31)
+        } else {
+            stringResource(Res.string.permission_missing)
+        }
     val coroutineScope = rememberCoroutineScope()
+
+    val singlePermissionState =
+        rememberPermissionState(
+            permission = Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            onPermissionResult = { granted ->
+                scanModel.refreshPermissions()
+                scanModel.startScan()
+            },
+        )
 
     val permissionsState =
         rememberMultiplePermissionsState(
             permissions = bluetoothPermissionsList,
-            onPermissionsResult = {
-                if (it.values.all { granted -> granted } && bluetoothEnabled) {
+            onPermissionsResult = { permissions ->
+                val granted = permissions.values.all { it }
+                if (permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
+                    coroutineScope.launch { context.showToast(permsMissing) }
+                    singlePermissionState.launchPermissionRequest()
+                }
+                if (granted) {
                     scanModel.refreshPermissions()
                     scanModel.startScan()
                 } else {
@@ -121,8 +145,8 @@ fun BLEDevices(
 
     val settingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-            // Eventually auto scan once bluetooth is available
-            // checkPermissionsAndScan(permissionsState, scanModel, bluetoothEnabled)
+            scanModel.refreshPermissions()
+            scanModel.startScan()
         }
 
     Column(

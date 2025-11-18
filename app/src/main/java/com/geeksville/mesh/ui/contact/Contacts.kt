@@ -155,11 +155,7 @@ fun ContactsScreen(
             // if it's a node, look up the nodeNum including the !
             val nodeKey = contact.contactKey.substring(1)
             val node = viewModel.getNode(nodeKey)
-
-            if (node != null) {
-                // navigate to node details.
-                onNavigateToNodeDetails(node.num)
-            }
+            onNavigateToNodeDetails(node.num)
         } else {
             // Channels
         }
