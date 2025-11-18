@@ -154,7 +154,6 @@ fun NodeListScreen(
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
                         filterState = state.filter,
-                        onTextChange = { viewModel.setFilterText(it) },
                         currentSortOption = state.sort,
                         onSortSelect = viewModel::setSortOption,
                         onToggleIncludeUnknown = { viewModel.nodeFilterPreferences.toggleIncludeUnknown() },

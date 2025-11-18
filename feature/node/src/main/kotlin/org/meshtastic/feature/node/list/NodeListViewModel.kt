@@ -17,6 +17,7 @@
 
 package org.meshtastic.feature.node.list
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +62,7 @@ constructor(
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested = _sharedContactRequested.asStateFlow()
 
-    private val filterText = savedStateHandle.getStateFlow(KEY_FILTER_TEXT, "")
+    private val filterText = mutableStateOf(TextFieldState())
 
     private val moleculeScope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
     val uiState: StateFlow<NodesUiState> by
@@ -71,7 +72,6 @@ constructor(
                 val onlineNodeCount by nodeRepository.onlineNodeCount.collectAsState(0)
                 val totalNodeCount by nodeRepository.totalNodeCount.collectAsState(0)
                 val connectionState by serviceRepository.connectionState.collectAsState()
-                val filterText by filterText
                 val includeUnknown by nodeFilterPreferences.includeUnknown.collectAsState()
                 val excludeInfrastructure by nodeFilterPreferences.excludeInfrastructure.collectAsState()
                 val onlyOnline by nodeFilterPreferences.onlyOnline.collectAsState()
@@ -81,7 +81,7 @@ constructor(
 
                 val filter =
                     NodeFilterState(
-                        filterText = filterText,
+                        filterText = filterText.value,
                         includeUnknown = includeUnknown,
                         excludeInfrastructure = excludeInfrastructure,
                         onlyOnline = onlyOnline,
@@ -97,7 +97,7 @@ constructor(
                     nodeRepository
                         .getNodes(
                             sort = sort,
-                            filter = filter.filterText,
+                            filter = filter.filterText.text.toString(),
                             includeUnknown = filter.includeUnknown,
                             onlyOnline = filter.onlyOnline,
                             onlyDirect = filter.onlyDirect,
@@ -138,10 +138,6 @@ constructor(
             }
         }
 
-    fun setFilterText(filterText: String) {
-        savedStateHandle[KEY_FILTER_TEXT] = value
-    }
-
     fun setSortOption(sort: NodeSortOption) {
         nodeFilterPreferences.setNodeSort(sort)
     }
@@ -175,7 +171,7 @@ data class NodesUiState(
 )
 
 data class NodeFilterState(
-    val filterText: String = "",
+    val filterText: TextFieldState = TextFieldState(),
     val includeUnknown: Boolean = false,
     val excludeInfrastructure: Boolean = false,
     val onlyOnline: Boolean = false,
