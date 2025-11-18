@@ -35,7 +35,6 @@
     <string name="node_sort_via_mqtt">有節點MQTT排序</string>
     <string name="via_mqtt">有節點MQTT排序</string>
     <string name="node_sort_via_favorite">通過喜好</string>
-    <string name="node_filter_show_ignored">已忽略節點</string>
     <string name="unrecognized">無法識別</string>
     <string name="message_status_enroute">正在等待確認</string>
     <string name="message_status_queued">發送佇列中</string>
@@ -183,6 +182,7 @@
     <string name="connection_status">目前連線：</string>
     <string name="wifi_ip">WIFI IP：</string>
     <string name="ethernet_ip">乙太網路 IP：</string>
+    <string name="connecting">正在連線</string>
     <string name="not_connected">未連線</string>
     <string name="connected_sleeping">已連接至無線電，但它正在休眠中</string>
     <string name="app_too_old">需要應用程式更新</string>
@@ -277,8 +277,8 @@
     <string name="error">錯誤</string>
     <string name="ignore">忽略</string>
     <string name="remove_ignored">從忽略清單中移除</string>
-    <string name="ignore_add">將 '%1$s' 加入忽略清單嗎？</string>
-    <string name="ignore_remove">從忽略清單中移除 '%1$s' 嗎？</string>
+    <string name="ignore_add">將 \'%1$s\' 加入忽略清單嗎？</string>
+    <string name="ignore_remove">從忽略清單中移除 \'%1$s\' 嗎？</string>
     <string name="map_select_download_region">選擇下載地區</string>
     <string name="map_tile_download_estimate">圖磚下載估計:</string>
     <string name="map_start_download">開始下載</string>
@@ -298,6 +298,8 @@
     <string name="map_purge_fail">SQL快取清除失敗，請查看logcat以獲取詳細資訊。</string>
     <string name="map_cache_manager">快取管理</string>
     <string name="map_download_complete">下載已完成！</string>
+    <string name="map_download_errors">下載完成，但有 %1$d 個錯誤</string>
+    <string name="map_cache_tiles">%1$d 圖磚</string>
     <string name="map_subDescription">方位：%1$d° 距離：%2$s</string>
     <string name="waypoint_edit">編輯航點</string>
     <string name="waypoint_delete">刪除航點?</string>
@@ -845,6 +847,7 @@
     <string name="notification_permissions_description">Meshtastic 使用通知功能讓您隨時了解新訊息和其他重要事件。您可以隨時在設定中更新通知權限。</string>
     <string name="next">繼續</string>
     <string name="grant_permissions">授予權限</string>
+    <string name="nodes_queued_for_deletion">%1$d 個節點已排定移除：</string>
     <string name="clean_node_database_description">注意：這會將節點從應用程式和裝置資料庫中移除。\n所選的項目將會加入待處理中。</string>
     <string name="connecting_to_device">正在連線至裝置</string>
     <string name="map_type_normal">標準</string>
@@ -885,7 +888,6 @@
     <string name="device_configuration">裝置設定</string>
     <string name="remotely_administrating">"[遠端] %1$s"</string>
     <string name="device_telemetry_enabled">傳送裝置遙測資料</string>
-    <string name="device_telemetry_enabled_summary">啟用/禁用裝置遙測模組</string>
     <string name="any">所有</string>
     <string name="one_hour">1 小時</string>
     <string name="eight_hours">8 小時</string>
@@ -900,4 +902,5 @@
     <string name="analytics_platforms">"分析平台: "</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
+    <string name="relayed_by">經由：%1$s</string>
 </resources>
