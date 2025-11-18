@@ -60,7 +60,7 @@
     <string name="role_router_late_desc">Infrastrukturnode som alltid sender pakker på nytt én gang, men bare etter alle andre moduser og sikrer ekstra dekning for lokale klynger. Synlig i nodelisten.</string>
     <string name="rebroadcast_mode_all_desc">Alle observerte meldinger sendes på nytt hvis den var på vår private kanal eller fra en annen mesh med samme lora-parametere.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Samme atferd som alle andre, men hopper over pakkedekoding og sender dem ganske enkelt på nytt. Kun tilgjengelig i Repeater-rollen. Å sette dette på andre roller vil resultere i ALL oppførsel.</string>
-    <string name="rebroadcast_mode_local_only_desc">Ignorerer observerte meldinger fra fremmede mesh'er som er åpne eller de som ikke kan dekrypteres. Sender kun meldingen på nytt på nodene lokale primære / sekundære kanaler.</string>
+    <string name="rebroadcast_mode_local_only_desc">Ignorerer observerte meldinger fra fremmede mesh\'er som er åpne eller de som ikke kan dekrypteres. Sender kun meldingen på nytt på nodene lokale primære / sekundære kanaler.</string>
     <string name="rebroadcast_mode_known_only_desc">Ignorer observerte meldinger fra utenlandske mesher som KUN LOKALE men tar det steget videre, ved å også ignorere meldinger fra noder som ikke allerede er i nodens kjente liste.</string>
     <string name="rebroadcast_mode_none">Ingen</string>
     <string name="rebroadcast_mode_none_desc">Bare tillatt for SENSOR, TRACKER og TAK_TRACKER roller, så vil dette hindre alle rekringkastinger, ikke i motsetning til CLIENT_MUTE rollen.</string>
@@ -154,8 +154,8 @@
     <string name="delivery_confirmed">Leveringen er bekreftet</string>
     <string name="error">Feil</string>
     <string name="ignore">Ignorer</string>
-    <string name="ignore_add">Legg til '%1$s' i ignorereringslisten?</string>
-    <string name="ignore_remove">Fjern '%1$s fra ignoreringslisten?</string>
+    <string name="ignore_add">Legg til \'%1$s\' i ignorereringslisten?</string>
+    <string name="ignore_remove">Fjern \'%1$s fra ignoreringslisten?</string>
     <string name="map_select_download_region">Velg nedlastingsregionen</string>
     <string name="map_tile_download_estimate">Tile nedlastingsestimat:</string>
     <string name="map_start_download">Start nedlasting</string>
@@ -174,6 +174,8 @@
     <string name="map_purge_fail">Tømming av SQL-mellomlager feilet, se logcat for detaljer</string>
     <string name="map_cache_manager">Mellomlagerbehandler</string>
     <string name="map_download_complete">Nedlastingen er fullført!</string>
+    <string name="map_download_errors">Nedlasting fullført med %1$d feil</string>
+    <string name="map_cache_tiles">%1$d fliser</string>
     <string name="map_subDescription">retning: %1$d° avstand: %2$s</string>
     <string name="waypoint_edit">Rediger veipunkt</string>
     <string name="waypoint_delete">Fjern veipunkt?</string>
