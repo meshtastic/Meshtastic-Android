@@ -33,11 +33,11 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.LocationDisabled
 import androidx.compose.material.icons.filled.PinDrop
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Tune
@@ -50,12 +50,12 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -774,13 +774,16 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
             properties = DialogProperties(usePlatformDefaultWidth = false),
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                org.meshtastic.feature.map.maplibre.MapLibrePOC(
+                org.meshtastic.feature.map.maplibre.ui.MapLibrePOC(
                     onNavigateToNodeDetails = { num ->
                         navigateToNodeDetails(num)
                         showMapLibrePOC = false
                     },
                 )
-                IconButton(modifier = Modifier.align(Alignment.TopEnd).padding(12.dp), onClick = { showMapLibrePOC = false }) {
+                IconButton(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
+                    onClick = { showMapLibrePOC = false },
+                ) {
                     Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(Res.string.close))
                 }
             }
