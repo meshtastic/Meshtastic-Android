@@ -250,7 +250,13 @@ fun MessageScreen(
 
     LaunchedEffect(messages, initialUnreadIndex, earliestUnreadIndex) {
         if (!hasPerformedInitialScroll && messages.isNotEmpty()) {
-            val targetIndex = (initialUnreadIndex ?: earliestUnreadIndex ?: 0).coerceIn(0, messages.lastIndex)
+            val unreadStart = initialUnreadIndex ?: earliestUnreadIndex
+            val targetIndex =
+                when {
+                    unreadStart == null -> 0
+                    unreadStart <= 0 -> 0
+                    else -> (unreadStart - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
+                }
             if (listState.firstVisibleItemIndex != targetIndex) {
                 listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
             }
