@@ -44,6 +44,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -62,6 +64,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Explore
@@ -142,6 +149,34 @@ private const val DEG_D = 1e-7
 
 private const val STYLE_URL = "https://demotiles.maplibre.org/style.json"
 
+// Convert precision bits to meters (radius of accuracy circle)
+private fun getPrecisionMeters(precisionBits: Int): Double? = when (precisionBits) {
+    10 -> 23345.484932
+    11 -> 11672.7369
+    12 -> 5836.36288
+    13 -> 2918.175876
+    14 -> 1459.0823719999053
+    15 -> 729.5370149076749
+    16 -> 364.76796802673495
+    17 -> 182.38363847854606
+    18 -> 91.19178201473192
+    19 -> 45.59587874512555
+    20 -> 22.797938919871483
+    21 -> 11.398969292955733
+    22 -> 5.699484588175269
+    23 -> 2.8497422889870207
+    24 -> 1.424871149078816
+    25 -> 0.7124355732781771
+    26 -> 0.3562177850463231
+    27 -> 0.17810889188369584
+    28 -> 0.08905444562935878
+    29 -> 0.04452722265708971
+    30 -> 0.022263611293647812
+    31 -> 0.011131805632411625
+    32 -> 0.005565902808395108
+    else -> null
+}
+
 private const val NODES_SOURCE_ID = "meshtastic-nodes-source"
 private const val NODES_CLUSTER_SOURCE_ID = "meshtastic-nodes-source-clustered"
 private const val WAYPOINTS_SOURCE_ID = "meshtastic-waypoints-source"
@@ -163,6 +198,7 @@ private const val CLUSTER_TIER2_LAYER_ID = "meshtastic-cluster-2"
 private const val CLUSTER_TEXT_TIER_LAYER_ID = "meshtastic-cluster-text"
 private const val WAYPOINTS_LAYER_ID = "meshtastic-waypoints-layer"
 private const val TRACKS_LAYER_ID = "meshtastic-tracks-layer"
+private const val PRECISION_CIRCLE_LAYER_ID = "meshtastic-precision-circle-layer"
 private const val OSM_LAYER_ID = "osm-layer"
 private const val CLUSTER_RADIAL_MAX = 8
 private const val CLUSTER_LIST_FETCH_MAX = 200L
@@ -181,14 +217,15 @@ private enum class BaseMapStyle(val label: String, val urlTemplate: String) {
     ESRI_SATELLITE("Satellite", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"),
 }
 
-private fun buildMeshtasticStyle(base: BaseMapStyle): Style.Builder {
+private fun buildMeshtasticStyle(base: BaseMapStyle, customTileUrl: String? = null): Style.Builder {
     // Load a complete vector style first (has fonts, glyphs, sprites MapLibre needs)
+    val tileUrl = customTileUrl ?: base.urlTemplate
     val builder = Style.Builder().fromUri("https://demotiles.maplibre.org/style.json")
             // Add our raster overlay on top
             .withSource(
                 RasterSource(
                     OSM_SOURCE_ID,
-                    TileSet("osm", base.urlTemplate).apply {
+                    TileSet("osm", tileUrl).apply {
                         minZoom = 0f
                         maxZoom = 22f
                     },
@@ -434,8 +471,9 @@ fun MapLibrePOC(
     var selectedNodeNum by remember { mutableStateOf<Int?>(null) }
     val ourNode by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
-    var recenterRequest by remember { mutableStateOf(false) }
+    var isLocationTrackingEnabled by remember { mutableStateOf(false) }
     var followBearing by remember { mutableStateOf(false) }
+    var hasLocationPermission by remember { mutableStateOf(false) }
     data class ExpandedCluster(val centerPx: android.graphics.PointF, val members: List<Node>)
     var expandedCluster by remember { mutableStateOf<ExpandedCluster?>(null) }
     var clusterListMembers by remember { mutableStateOf<List<Node>?>(null) }
@@ -447,6 +485,10 @@ fun MapLibrePOC(
     var clusteringEnabled by remember { mutableStateOf(true) }
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
+    var showCustomTileDialog by remember { mutableStateOf(false) }
+    var customTileUrl by remember { mutableStateOf("") }
+    var customTileUrlInput by remember { mutableStateOf("") }
+    var usingCustomTiles by remember { mutableStateOf(false) }
     // Base map style rotation
     val baseStyles = remember { enumValues<BaseMapStyle>().toList() }
     var baseStyleIndex by remember { mutableStateOf(0) }
@@ -459,6 +501,63 @@ fun MapLibrePOC(
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle()
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
+
+    // Check location permission
+    hasLocationPermission = hasAnyLocationPermission(context)
+
+    // Apply location tracking settings when state changes
+    LaunchedEffect(isLocationTrackingEnabled, followBearing, hasLocationPermission) {
+        mapRef?.let { map ->
+            map.style?.let { style ->
+                try {
+                    if (hasLocationPermission) {
+                        val locationComponent = map.locationComponent
+                        
+                        // Enable/disable location component based on tracking state
+                        if (isLocationTrackingEnabled) {
+                            // Enable and show location component
+                            if (!locationComponent.isLocationComponentEnabled) {
+                                locationComponent.activateLocationComponent(
+                                    org.maplibre.android.location.LocationComponentActivationOptions.builder(
+                                        context,
+                                        style,
+                                    ).useDefaultLocationEngine(true).build(),
+                                )
+                                locationComponent.isLocationComponentEnabled = true
+                            }
+                            
+                            // Set render mode
+                            locationComponent.renderMode = if (followBearing) {
+                                RenderMode.COMPASS
+                            } else {
+                                RenderMode.NORMAL
+                            }
+                            
+                            // Set camera mode
+                            locationComponent.cameraMode = if (followBearing) {
+                                org.maplibre.android.location.modes.CameraMode.TRACKING_COMPASS
+                            } else {
+                                org.maplibre.android.location.modes.CameraMode.TRACKING
+                            }
+                        } else {
+                            // Disable location component to hide the blue dot
+                            if (locationComponent.isLocationComponentEnabled) {
+                                locationComponent.isLocationComponentEnabled = false
+                            }
+                        }
+                        
+                        Timber.tag("MapLibrePOC").d(
+                            "Location component updated: enabled=%s, follow=%s",
+                            isLocationTrackingEnabled,
+                            followBearing
+                        )
+                    }
+                } catch (e: Exception) {
+                    Timber.tag("MapLibrePOC").w(e, "Failed to update location component")
+                }
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView<MapView>(
@@ -483,7 +582,7 @@ fun MapLibrePOC(
                                 val bounds = map.projection.visibleRegion.latLngBounds
                                 val labelSet =
                                     run {
-                                        val visible = applyFilters(nodes, mapFilterState, enabledRoles).filter { n ->
+                                        val visible = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled).filter { n ->
                                                 val p = n.validPosition ?: return@filter false
                                                 bounds.contains(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
                                             }
@@ -510,7 +609,7 @@ fun MapLibrePOC(
                                 (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
                                     ?.setGeoJson(waypointsToFeatureCollectionFC(waypoints.values))
                                 // Set clustered source only (like MapLibre example)
-                                val filteredNodes = applyFilters(nodes, mapFilterState, enabledRoles)
+                                val filteredNodes = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
                                 val json = nodesToFeatureCollectionJsonWithSelection(filteredNodes, labelSet)
                                 Timber.tag("MapLibrePOC").d("Setting nodes sources: %d nodes, jsonBytes=%d", nodes.size, json.length)
                                 safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, json)
@@ -572,7 +671,7 @@ fun MapLibrePOC(
                                             didInitialCenter = true
                                         } ?: run {
                                             // Fallback: center to bounds of current nodes if available
-                                            val filtered = applyFilters(nodes, mapFilterState, enabledRoles)
+                                            val filtered = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
                                             val boundsBuilder = org.maplibre.android.geometry.LatLngBounds.Builder()
                                             var any = false
                                             filtered.forEach { n ->
@@ -695,9 +794,9 @@ fun MapLibrePOC(
                                 val now = SystemClock.uptimeMillis()
                                 if (now - lastClusterEvalMs < 300) return@addOnCameraIdleListener
                                 lastClusterEvalMs = now
-                                val filtered = applyFilters(nodes, mapFilterState, enabledRoles)
+                                val filtered = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
                                 Timber.tag("MapLibrePOC").d("onCameraIdle: filtered nodes=%d (of %d)", filtered.size, nodes.size)
-                                clustersShown = setClusterVisibilityHysteresis(map, st, filtered, clusteringEnabled, clustersShown)
+                                clustersShown = setClusterVisibilityHysteresis(map, st, filtered, clusteringEnabled, clustersShown, mapFilterState.showPrecisionCircle)
                                 // Compute which nodes get labels in viewport and update source
                                 val density = context.resources.displayMetrics.density
                                 val labelSet = selectLabelsForViewport(map, filtered, density)
@@ -745,12 +844,30 @@ fun MapLibrePOC(
                     try {
                         map.locationComponent.renderMode = if (followBearing) RenderMode.COMPASS else RenderMode.NORMAL
                     } catch (_: Throwable) { /* ignore */ }
-                    // Handle recenter requests
-                    if (recenterRequest) {
-                        recenterRequest = false
-                        ourNode?.validPosition?.let { p ->
-                            val ll = LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D)
-                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(ll, 14.5))
+                    
+                    // Handle location tracking state changes
+                    if (isLocationTrackingEnabled && hasAnyLocationPermission(context)) {
+                        try {
+                            val locationComponent = map.locationComponent
+                            if (!locationComponent.isLocationComponentEnabled) {
+                                locationComponent.activateLocationComponent(
+                                    org.maplibre.android.location.LocationComponentActivationOptions.builder(
+                                        context,
+                                        map.style!!,
+                                    ).useDefaultLocationEngine(true).build(),
+                                )
+                                locationComponent.isLocationComponentEnabled = true
+                            }
+                            locationComponent.renderMode = if (followBearing) RenderMode.COMPASS else RenderMode.NORMAL
+                            locationComponent.cameraMode = if (isLocationTrackingEnabled) {
+                                if (followBearing) org.maplibre.android.location.modes.CameraMode.TRACKING_COMPASS
+                                else org.maplibre.android.location.modes.CameraMode.TRACKING
+                            } else {
+                                org.maplibre.android.location.modes.CameraMode.NONE
+                            }
+                            Timber.tag("MapLibrePOC").d("Location tracking: enabled=%s, follow=%s, mode=%s", isLocationTrackingEnabled, followBearing, locationComponent.cameraMode)
+                        } catch (e: Exception) {
+                            Timber.tag("MapLibrePOC").w(e, "Failed to update location component")
                         }
                     }
                     Timber.tag("MapLibrePOC").d(
@@ -788,13 +905,13 @@ fun MapLibrePOC(
                         }
                     (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
                         ?.setGeoJson(waypointsToFeatureCollectionFC(waypoints.values))
-                    val filteredNow = applyFilters(nodes, mapFilterState, enabledRoles)
+                    val filteredNow = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
                     val jsonNow = nodesToFeatureCollectionJsonWithSelection(filteredNow, labelSet)
                     safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, jsonNow)
                     safeSetGeoJson(style, NODES_SOURCE_ID, jsonNow) // Also populate non-clustered source
                     safeSetGeoJson(style, DEBUG_RAW_SOURCE_ID, jsonNow)
                     // Apply visibility now
-                    clustersShown = setClusterVisibilityHysteresis(map, style, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled, clustersShown)
+                    clustersShown = setClusterVisibilityHysteresis(map, style, applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled), clusteringEnabled, clustersShown, mapFilterState.showPrecisionCircle)
                     logStyleState("update(block)", style)
                 }
             },
@@ -844,66 +961,74 @@ fun MapLibrePOC(
         Column(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 16.dp, end = 16.dp),
+                .padding(top = 72.dp, end = 16.dp), // Increased top padding to avoid exit button
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
         ) {
-            MapButton(
+            // My Location button with visual feedback
+            FloatingActionButton(
                 onClick = {
-                    // Cycle base styles via setStyle(new Style.Builder(...))
-                    baseStyleIndex = (baseStyleIndex + 1) % baseStyles.size
-                    val next = baseStyles[baseStyleIndex]
-                    mapRef?.let { map ->
-                                map.setStyle(buildMeshtasticStyle(next)) { style ->
-                            Timber.tag("MapLibrePOC").d("Base map switched to: %s", next.label)
-                            style.setTransition(TransitionOptions(0, 0))
-                            ensureSourcesAndLayers(style)
-                            try {
-                                val density = context.resources.displayMetrics.density
-                                val labelSet = selectLabelsForViewport(map, applyFilters(nodes, mapFilterState, enabledRoles), density)
-                                        val filtered = applyFilters(nodes, mapFilterState, enabledRoles)
-                                        val json = nodesToFeatureCollectionJsonWithSelection(filtered, labelSet)
-                                        safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, json)
-                                        safeSetGeoJson(style, NODES_SOURCE_ID, json) // Also populate non-clustered source
-                                        safeSetGeoJson(style, DEBUG_RAW_SOURCE_ID, json)
-                                        (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
-                                            ?.setGeoJson(waypointsToFeatureCollectionFC(waypoints.values))
-                                        // Re-arm test point after style switch
-                                        (style.getSource(TEST_POINT_SOURCE_ID) as? GeoJsonSource)
-                                            ?.setGeoJson(singlePointFC(-121.8893, 37.3349))
-                                // Re-enable location component for new style
-                                try {
-                                            if (hasAnyLocationPermission(context)) {
-                                                val locationComponent = map.locationComponent
-                                                locationComponent.activateLocationComponent(
-                                                    org.maplibre.android.location.LocationComponentActivationOptions.builder(
-                                                        context,
-                                                        style,
-                                                    ).useDefaultLocationEngine(true).build(),
-                                                )
-                                                locationComponent.isLocationComponentEnabled = true
-                                                locationComponent.renderMode = RenderMode.COMPASS
-                                            } else {
-                                                Timber.tag("MapLibrePOC").w("Location permission missing on style switch; skipping location component")
-                                            }
-                                } catch (_: Throwable) {
-                                }
-                            } catch (_: Throwable) {
-                            }
+                    if (hasLocationPermission) {
+                        isLocationTrackingEnabled = !isLocationTrackingEnabled
+                        if (!isLocationTrackingEnabled) {
+                            followBearing = false
+                        }
+                        Timber.tag("MapLibrePOC").d("Location tracking toggled: %s", isLocationTrackingEnabled)
+                    } else {
+                        Timber.tag("MapLibrePOC").w("Location permission not granted")
+                    }
+                },
+                containerColor = if (isLocationTrackingEnabled) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.MyLocation,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = if (isLocationTrackingEnabled) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+            }
+            
+            // Compass button with visual feedback
+            FloatingActionButton(
+                onClick = {
+                    if (isLocationTrackingEnabled) {
+                        followBearing = !followBearing
+                        Timber.tag("MapLibrePOC").d("Follow bearing toggled: %s", followBearing)
+                    } else {
+                        // Enable tracking when compass is clicked
+                        if (hasLocationPermission) {
+                            isLocationTrackingEnabled = true
+                            followBearing = true
+                            Timber.tag("MapLibrePOC").d("Enabled tracking + bearing from compass button")
+                        } else {
+                            Timber.tag("MapLibrePOC").w("Location permission not granted")
                         }
                     }
                 },
-                icon = Icons.Outlined.Layers,
-                contentDescription = null,
-            )
-            MapButton(
-                onClick = { recenterRequest = true },
-                icon = Icons.Outlined.MyLocation,
-                contentDescription = null,
-            )
-            MapButton(
-                onClick = { followBearing = !followBearing },
-                icon = Icons.Outlined.Explore,
-                contentDescription = null,
-            )
+                containerColor = if (followBearing) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Explore,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = if (followBearing) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+            }
             Box {
                 MapButton(
                     onClick = { mapFilterExpanded = true },
@@ -943,7 +1068,7 @@ fun MapLibrePOC(
                                     if (enabledRoles.isEmpty()) setOf(role)
                                     else if (enabledRoles.contains(role)) enabledRoles - role else enabledRoles + role
                                 mapRef?.style?.let { st -> mapRef?.let { map ->
-                                    clustersShown = setClusterVisibilityHysteresis(map, st, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled, clustersShown)
+                                    clustersShown = setClusterVisibilityHysteresis(map, st, applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled), clusteringEnabled, clustersShown, mapFilterState.showPrecisionCircle)
                                 } }
                             },
                             trailingIcon = {
@@ -954,7 +1079,7 @@ fun MapLibrePOC(
                                             if (enabledRoles.isEmpty()) setOf(role)
                                             else if (enabledRoles.contains(role)) enabledRoles - role else enabledRoles + role
                                         mapRef?.style?.let { st -> mapRef?.let { map ->
-                                            clustersShown = setClusterVisibilityHysteresis(map, st, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled, clustersShown)
+                                            clustersShown = setClusterVisibilityHysteresis(map, st, applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled), clusteringEnabled, clustersShown, mapFilterState.showPrecisionCircle)
                                         } }
                                     },
                                 )
@@ -967,7 +1092,7 @@ fun MapLibrePOC(
                         onClick = {
                             clusteringEnabled = !clusteringEnabled
                             mapRef?.style?.let { st -> mapRef?.let { map ->
-                                clustersShown = setClusterVisibilityHysteresis(map, st, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled, clustersShown)
+                                clustersShown = setClusterVisibilityHysteresis(map, st, applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled), clusteringEnabled, clustersShown, mapFilterState.showPrecisionCircle)
                             } }
                         },
                         trailingIcon = {
@@ -976,7 +1101,7 @@ fun MapLibrePOC(
                                 onCheckedChange = {
                                     clusteringEnabled = it
                                     mapRef?.style?.let { st -> mapRef?.let { map ->
-                                        clustersShown = setClusterVisibilityHysteresis(map, st, applyFilters(nodes, mapFilterState, enabledRoles), clusteringEnabled, clustersShown)
+                                        clustersShown = setClusterVisibilityHysteresis(map, st, applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled), clusteringEnabled, clustersShown, mapFilterState.showPrecisionCircle)
                                     } }
                                 },
                             )
@@ -1007,6 +1132,7 @@ fun MapLibrePOC(
                             text = { Text(style.label) },
                             onClick = {
                                 baseStyleIndex = index
+                                usingCustomTiles = false
                                 mapTypeMenuExpanded = false
                                 val next = baseStyles[baseStyleIndex % baseStyles.size]
                                 mapRef?.let { map ->
@@ -1039,19 +1165,19 @@ fun MapLibrePOC(
                                             Timber.tag("MapLibrePOC").w("Location permissions not granted")
                                         }
                                         // Trigger data update
-                                        val filtered = applyFilters(nodes, mapFilterState, enabledRoles)
+                                        val filtered = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
                                         val density = context.resources.displayMetrics.density
                                         val labelSet = selectLabelsForViewport(map, filtered, density)
                                         val json = nodesToFeatureCollectionJsonWithSelection(filtered, labelSet)
                                         safeSetGeoJson(st, NODES_CLUSTER_SOURCE_ID, json)
                                         safeSetGeoJson(st, NODES_SOURCE_ID, json)
                                         safeSetGeoJson(st, DEBUG_RAW_SOURCE_ID, json)
-                                        clustersShown = setClusterVisibilityHysteresis(map, st, filtered, clusteringEnabled, clustersShown)
+                                        clustersShown = setClusterVisibilityHysteresis(map, st, filtered, clusteringEnabled, clustersShown, mapFilterState.showPrecisionCircle)
                                     }
                                 }
                             },
                             trailingIcon = {
-                                if (index == baseStyleIndex) {
+                                if (index == baseStyleIndex && !usingCustomTiles) {
                                     Icon(
                                         imageVector = Icons.Outlined.Check,
                                         contentDescription = "Selected",
@@ -1060,8 +1186,112 @@ fun MapLibrePOC(
                             },
                         )
                     }
+                    androidx.compose.material3.HorizontalDivider()
+                    DropdownMenuItem(
+                        text = { Text(if (customTileUrl.isEmpty()) "Custom Tile URL..." else "Custom: ${customTileUrl.take(30)}...") },
+                        onClick = {
+                            mapTypeMenuExpanded = false
+                            customTileUrlInput = customTileUrl
+                            showCustomTileDialog = true
+                        },
+                        trailingIcon = {
+                            if (usingCustomTiles && customTileUrl.isNotEmpty()) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Check,
+                                    contentDescription = "Selected",
+                                )
+                            }
+                        },
+                    )
                 }
             }
+        }
+        
+        // Custom tile URL dialog
+        if (showCustomTileDialog) {
+            AlertDialog(
+                onDismissRequest = { showCustomTileDialog = false },
+                title = { Text("Custom Tile URL") },
+                text = {
+                    Column {
+                        Text(
+                            text = "Enter tile URL with {z}/{x}/{y} placeholders:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Text(
+                            text = "Example: https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        OutlinedTextField(
+                            value = customTileUrlInput,
+                            onValueChange = { customTileUrlInput = it },
+                            label = { Text("Tile URL") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            customTileUrl = customTileUrlInput.trim()
+                            if (customTileUrl.isNotEmpty()) {
+                                usingCustomTiles = true
+                                // Apply custom tiles (use first base style as template but we'll override the raster source)
+                                mapRef?.let { map ->
+                                    Timber.tag("MapLibrePOC").d("Switching to custom tiles: %s", customTileUrl)
+                                    map.setStyle(buildMeshtasticStyle(baseStyles[0], customTileUrl)) { st ->
+                                        Timber.tag("MapLibrePOC").d("Custom tiles applied")
+                                        st.setTransition(TransitionOptions(1000, 0))
+                                        ensureSourcesAndLayers(st)
+                                        // Repopulate all sources after style switch
+                                        (st.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)
+                                            ?.setGeoJson(waypointsToFeatureCollectionFC(waypoints.values))
+                                        (st.getSource(TEST_POINT_SOURCE_ID) as? GeoJsonSource)
+                                            ?.setGeoJson(singlePointFC(-121.8893, 37.3349))
+                                        // Re-enable location component
+                                        try {
+                                            if (hasAnyLocationPermission(context)) {
+                                                val locationComponent = map.locationComponent
+                                                locationComponent.activateLocationComponent(
+                                                    org.maplibre.android.location.LocationComponentActivationOptions.builder(
+                                                        context,
+                                                        st,
+                                                    ).useDefaultLocationEngine(true).build(),
+                                                )
+                                                locationComponent.isLocationComponentEnabled = true
+                                                locationComponent.renderMode = RenderMode.COMPASS
+                                            }
+                                        } catch (_: SecurityException) {
+                                            Timber.tag("MapLibrePOC").w("Location permissions not granted")
+                                        }
+                                        // Trigger data update
+                                        val filtered = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
+                                        val density = context.resources.displayMetrics.density
+                                        val labelSet = selectLabelsForViewport(map, filtered, density)
+                                        val json = nodesToFeatureCollectionJsonWithSelection(filtered, labelSet)
+                                        safeSetGeoJson(st, NODES_CLUSTER_SOURCE_ID, json)
+                                        safeSetGeoJson(st, NODES_SOURCE_ID, json)
+                                        safeSetGeoJson(st, DEBUG_RAW_SOURCE_ID, json)
+                                        clustersShown = setClusterVisibilityHysteresis(map, st, filtered, clusteringEnabled, clustersShown, mapFilterState.showPrecisionCircle)
+                                    }
+                                }
+                            }
+                            showCustomTileDialog = false
+                        }
+                    ) {
+                        Text("Apply")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCustomTileDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
 
         // Expanded cluster radial overlay
@@ -1352,6 +1582,43 @@ private fun ensureSourcesAndLayers(style: Style) {
                 .withFilter(has("point_count"))
         if (style.getLayer(OSM_LAYER_ID) != null) style.addLayerAbove(textLayer, OSM_LAYER_ID) else style.addLayer(textLayer)
     }
+    // Precision circle layer (accuracy circles around nodes)
+    if (style.getLayer(PRECISION_CIRCLE_LAYER_ID) == null) {
+        val layer =
+            CircleLayer(PRECISION_CIRCLE_LAYER_ID, NODES_CLUSTER_SOURCE_ID)
+                .withProperties(
+                    circleRadius(
+                        interpolate(
+                            exponential(2.0),
+                            zoom(),
+                            // Convert meters to pixels at different zoom levels
+                            // At equator: metersPerPixel = 156543.03392 * cos(latitude) / 2^zoom
+                            // Approximation: pixels = meters * 2^zoom / 156543 (at equator)
+                            // For better visibility, we use empirical values
+                            stop(0, product(get("precisionMeters"), literal(0.0000025))),
+                            stop(5, product(get("precisionMeters"), literal(0.00008))),
+                            stop(10, product(get("precisionMeters"), literal(0.0025))),
+                            stop(15, product(get("precisionMeters"), literal(0.08))),
+                            stop(18, product(get("precisionMeters"), literal(0.64))),
+                            stop(20, product(get("precisionMeters"), literal(2.56))),
+                        )
+                    ),
+                    circleColor(coalesce(toColor(get("color")), toColor(literal("#2E7D32")))),
+                    circleOpacity(0.15f),
+                    circleStrokeColor(coalesce(toColor(get("color")), toColor(literal("#2E7D32")))),
+                    circleStrokeWidth(1.5f),
+                    visibility("none"), // Hidden by default
+                )
+                .withFilter(
+                    all(
+                        not(has("point_count")), // Only individual nodes, not clusters
+                        gt(get("precisionMeters"), literal(0)) // Only show if precision > 0
+                    )
+                )
+        if (style.getLayer(OSM_LAYER_ID) != null) style.addLayerAbove(layer, OSM_LAYER_ID) else style.addLayer(layer)
+        Timber.tag("MapLibrePOC").d("Added precision circle layer")
+    }
+    
     if (style.getLayer(NODES_LAYER_ID) == null) {
         val layer =
             CircleLayer(NODES_LAYER_ID, DEBUG_RAW_SOURCE_ID)
@@ -1430,10 +1697,14 @@ private fun applyFilters(
     all: List<Node>,
     filter: BaseMapViewModel.MapFilterState,
     enabledRoles: Set<ConfigProtos.Config.DeviceConfig.Role>,
+    ourNodeNum: Int? = null,
+    isLocationTrackingEnabled: Boolean = false,
 ): List<Node> {
     var out = all
     if (filter.onlyFavorites) out = out.filter { it.isFavorite }
     if (enabledRoles.isNotEmpty()) out = out.filter { enabledRoles.contains(it.user.role) }
+    // Note: We don't filter out the user's node - that should always be visible
+    // The location component (blue dot) is controlled separately
     return out
 }
 
@@ -1476,7 +1747,8 @@ private fun nodesToFeatureCollectionJsonWithSelection(nodes: List<Node>, labelNu
             val role = node.user.role.name
             val color = roleColorHex(node)
             val longEsc = escapeJson(node.user.longName ?: "")
-            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"$longEsc","short":"$shortEsc","role":"$role","color":"$color","showLabel":$show}}"""
+            val precisionMeters = getPrecisionMeters(pos.precisionBits) ?: 0.0
+            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"$longEsc","short":"$shortEsc","role":"$role","color":"$color","showLabel":$show,"precisionMeters":$precisionMeters}}"""
         }
     return """{"type":"FeatureCollection","features":[${features.joinToString(",")}]}"""
 }
@@ -1800,18 +2072,18 @@ private fun distanceKmBetween(a: Node, b: Node): Double? {
 // Role -> hex color used for map dots and radial overlay
 private fun roleColorHex(node: Node): String {
     return when (node.user.role) {
-        ConfigProtos.Config.DeviceConfig.Role.ROUTER -> "#616161" // gray
+        ConfigProtos.Config.DeviceConfig.Role.ROUTER -> "#D32F2F" // red (infrastructure)
         ConfigProtos.Config.DeviceConfig.Role.ROUTER_CLIENT -> "#00897B" // teal
-        ConfigProtos.Config.DeviceConfig.Role.REPEATER -> "#EF6C00" // orange
-        ConfigProtos.Config.DeviceConfig.Role.TRACKER -> "#8E24AA" // purple
+        ConfigProtos.Config.DeviceConfig.Role.REPEATER -> "#7B1FA2" // purple
+        ConfigProtos.Config.DeviceConfig.Role.TRACKER -> "#8E24AA" // purple (lighter)
         ConfigProtos.Config.DeviceConfig.Role.SENSOR -> "#1E88E5" // blue
-        ConfigProtos.Config.DeviceConfig.Role.TAK, ConfigProtos.Config.DeviceConfig.Role.TAK_TRACKER -> "#C62828" // red
+        ConfigProtos.Config.DeviceConfig.Role.TAK, ConfigProtos.Config.DeviceConfig.Role.TAK_TRACKER -> "#F57C00" // orange (TAK)
         ConfigProtos.Config.DeviceConfig.Role.CLIENT -> "#2E7D32" // green
-        ConfigProtos.Config.DeviceConfig.Role.CLIENT_BASE -> "#43A047" // green (lighter)
+        ConfigProtos.Config.DeviceConfig.Role.CLIENT_BASE -> "#1976D2" // blue (client base)
         ConfigProtos.Config.DeviceConfig.Role.CLIENT_MUTE -> "#9E9D24" // olive
         ConfigProtos.Config.DeviceConfig.Role.CLIENT_HIDDEN -> "#546E7A" // blue-grey
         ConfigProtos.Config.DeviceConfig.Role.LOST_AND_FOUND -> "#AD1457" // magenta
-        ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE -> "#757575" // mid-grey
+        ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE -> "#E57373" // light red (late router)
         null,
         ConfigProtos.Config.DeviceConfig.Role.UNRECOGNIZED -> "#2E7D32" // default green
     }
@@ -1826,6 +2098,7 @@ private fun setClusterVisibilityHysteresis(
     filteredNodes: List<Node>,
     enableClusters: Boolean,
     currentlyShown: Boolean,
+    showPrecisionCircle: Boolean = false,
 ): Boolean {
     try {
         val zoom = map.cameraPosition.zoom
@@ -1855,7 +2128,10 @@ private fun setClusterVisibilityHysteresis(
         style.getLayer(NODES_LAYER_CLUSTERED_ID)?.setProperties(visibility("none"))
         style.getLayer(NODE_TEXT_LAYER_CLUSTERED_ID)?.setProperties(visibility("none"))
         
-        Timber.tag("MapLibrePOC").d("Node layer visibility: clustered=%s, nocluster=%s", showClusters, !showClusters)
+        // Precision circle visibility (always controlled by toggle, independent of clustering)
+        style.getLayer(PRECISION_CIRCLE_LAYER_ID)?.setProperties(visibility(if (showPrecisionCircle) "visible" else "none"))
+        
+        Timber.tag("MapLibrePOC").d("Node layer visibility: clustered=%s, nocluster=%s, precision=%s", showClusters, !showClusters, showPrecisionCircle)
         if (showClusters != currentlyShown) {
             Timber.tag("MapLibrePOC").d("Cluster visibility=%s (zoom=%.2f)", showClusters, zoom)
         }
