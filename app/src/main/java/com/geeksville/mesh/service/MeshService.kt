@@ -2242,15 +2242,6 @@ class MeshService : Service() {
         rememberReaction(packet.copy { from = myNodeNum })
     }
 
-    fun clearDatabases() = serviceScope.handledLaunch {
-        Timber.d("Clearing nodeDB")
-        discardNodeDB()
-        nodeRepository.clearNodeDB()
-
-        Timber.d("Clearing packetDB")
-        packetRepository.get().clearPacketDB()
-    }
-
     private fun updateLastAddress(deviceAddr: String?) {
         val currentAddr = meshPrefs.deviceAddress
         Timber.d("setDeviceAddress: received request to change to: ${deviceAddr.anonymize}")

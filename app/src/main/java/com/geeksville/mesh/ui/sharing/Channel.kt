@@ -363,12 +363,12 @@ fun ChannelScreen(
             item {
                 PreferenceFooter(
                     enabled = enabled,
-                    negativeText = Res.string.reset,
+                    negativeText = stringResource(Res.string.reset),
                     onNegativeClicked = {
                         focusManager.clearFocus()
                         showResetDialog = true
                     },
-                    positiveText = Res.string.scan,
+                    positiveText = stringResource(Res.string.scan),
                     onPositiveClicked = {
                         focusManager.clearFocus()
                         if (cameraPermissionState.status.isGranted) {
