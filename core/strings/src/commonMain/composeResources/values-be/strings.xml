@@ -34,7 +34,6 @@
     <string name="node_sort_via_mqtt">праз MQTT</string>
     <string name="via_mqtt">праз MQTT</string>
     <string name="node_sort_via_favorite">Абраныя</string>
-    <string name="node_filter_show_ignored">Ігнараваныя вузлы</string>
     <string name="unrecognized">Нераспазнанае</string>
     <string name="message_status_enroute">Чакае пацвярджэння</string>
     <string name="message_status_queued">У чарзе на адпраўку</string>
