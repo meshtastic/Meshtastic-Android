@@ -75,30 +75,30 @@ import org.meshtastic.core.strings.node_filter_title
 import org.meshtastic.core.strings.node_sort_button
 import org.meshtastic.core.strings.node_sort_title
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.node.list.NodeFilterState
 
 @Suppress("LongParameterList")
 @Composable
 fun NodeFilterTextField(
     modifier: Modifier = Modifier,
-    filterText: String,
+    filterState: NodeFilterState,
     onTextChange: (String) -> Unit,
     currentSortOption: NodeSortOption,
     onSortSelect: (NodeSortOption) -> Unit,
-    includeUnknown: Boolean,
     onToggleIncludeUnknown: () -> Unit,
-    excludeInfrastructure: Boolean,
     onToggleExcludeInfrastructure: () -> Unit,
-    onlyOnline: Boolean,
     onToggleOnlyOnline: () -> Unit,
-    onlyDirect: Boolean,
     onToggleOnlyDirect: () -> Unit,
-    showIgnored: Boolean,
     onToggleShowIgnored: () -> Unit,
     ignoredNodeCount: Int,
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
-            NodeFilterTextField(filterText = filterText, onTextChange = onTextChange, modifier = Modifier.weight(1f))
+            NodeFilterTextField(
+                filterText = filterState.filterText,
+                onTextChange = onTextChange,
+                modifier = Modifier.weight(1f),
+            )
 
             NodeSortButton(
                 modifier = Modifier.align(Alignment.CenterVertically),
@@ -106,21 +106,21 @@ fun NodeFilterTextField(
                 onSortSelect = onSortSelect,
                 toggles =
                 NodeFilterToggles(
-                    includeUnknown = includeUnknown,
+                    includeUnknown = filterState.includeUnknown,
                     onToggleIncludeUnknown = onToggleIncludeUnknown,
-                    excludeInfrastructure = excludeInfrastructure,
+                    excludeInfrastructure = filterState.excludeInfrastructure,
                     onToggleExcludeInfrastructure = onToggleExcludeInfrastructure,
-                    onlyOnline = onlyOnline,
+                    onlyOnline = filterState.onlyOnline,
                     onToggleOnlyOnline = onToggleOnlyOnline,
-                    onlyDirect = onlyDirect,
+                    onlyDirect = filterState.onlyDirect,
                     onToggleOnlyDirect = onToggleOnlyDirect,
-                    showIgnored = showIgnored,
+                    showIgnored = filterState.showIgnored,
                     onToggleShowIgnored = onToggleShowIgnored,
                     ignoredNodeCount = ignoredNodeCount,
                 ),
             )
         }
-        if (showIgnored) {
+        if (filterState.showIgnored) {
             Box(
                 modifier =
                 Modifier.fillMaxWidth()
@@ -303,19 +303,14 @@ private fun DropdownMenuCheck(
 private fun NodeFilterTextFieldPreview() {
     AppTheme {
         NodeFilterTextField(
-            filterText = "Filter text",
+            filterState = NodeFilterState(),
             onTextChange = {},
             currentSortOption = NodeSortOption.LAST_HEARD,
             onSortSelect = {},
-            includeUnknown = false,
             onToggleIncludeUnknown = {},
-            excludeInfrastructure = false,
             onToggleExcludeInfrastructure = {},
-            onlyOnline = false,
             onToggleOnlyOnline = {},
-            onlyDirect = false,
             onToggleOnlyDirect = {},
-            showIgnored = false,
             onToggleShowIgnored = {},
             ignoredNodeCount = 0,
         )

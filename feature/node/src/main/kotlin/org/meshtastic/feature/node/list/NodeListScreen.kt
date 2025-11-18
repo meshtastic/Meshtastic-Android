@@ -153,21 +153,16 @@ fun NodeListScreen(
                             .graphicsLayer(alpha = animatedAlpha)
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
-                        filterText = state.filter.filterText,
+                        filterState = state.filter,
                         onTextChange = { viewModel.setFilterText(it) },
                         currentSortOption = state.sort,
                         onSortSelect = viewModel::setSortOption,
-                        includeUnknown = state.filter.includeUnknown,
                         onToggleIncludeUnknown = { viewModel.nodeFilterPreferences.toggleIncludeUnknown() },
-                        excludeInfrastructure = state.filter.excludeInfrastructure,
                         onToggleExcludeInfrastructure = {
                             viewModel.nodeFilterPreferences.toggleExcludeInfrastructure()
                         },
-                        onlyOnline = state.filter.onlyOnline,
                         onToggleOnlyOnline = { viewModel.nodeFilterPreferences.toggleOnlyOnline() },
-                        onlyDirect = state.filter.onlyDirect,
                         onToggleOnlyDirect = { viewModel.nodeFilterPreferences.toggleOnlyDirect() },
-                        showIgnored = state.filter.showIgnored,
                         onToggleShowIgnored = { viewModel.nodeFilterPreferences.toggleShowIgnored() },
                         ignoredNodeCount = state.ignoredNodeCount,
                     )
