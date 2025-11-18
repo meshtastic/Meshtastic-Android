@@ -83,8 +83,6 @@ internal data class MessageListHandlers(
     val onReply: (Message?) -> Unit,
 )
 
-private const val AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE = 8
-
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
     value =
         if (value.contains(uuid)) {
@@ -348,7 +346,7 @@ private fun <T> AutoScrollToBottom(
             derivedStateOf {
                 val isAtBottom =
                     firstVisibleItemIndex == 0 &&
-                        firstVisibleItemScrollOffset <= AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
+                        firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
                 val isNearBottom = firstVisibleItemIndex <= itemThreshold
                 isAtBottom || (!hasUnreadMessages && isNearBottom)
             }
@@ -371,7 +369,7 @@ private fun UpdateUnreadCount(
 ) {
     LaunchedEffect(messages) {
         snapshotFlow { listState.firstVisibleItemIndex }
-            .debounce(timeoutMillis = 1500L)
+            .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
                 val lastUnreadIndex = messages.indexOfLast { !it.read && !it.fromLocal }
                 if (lastUnreadIndex != -1 && index <= lastUnreadIndex && index < messages.size) {
