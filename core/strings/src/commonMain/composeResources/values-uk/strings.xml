@@ -34,7 +34,7 @@
     <string name="routing_error_no_response">Немає відповіді</string>
     <!-- Position Config -->
     <string name="altitude">Висота</string>
-    <string name="channel_name">Ім'я каналу</string>
+    <string name="channel_name">Ім\'я каналу</string>
     <string name="qr_code">QR код</string>
     <string name="application_icon">значок додатку</string>
     <string name="unknown_username">Невідомий користувач</string>
@@ -58,6 +58,7 @@
     <string name="ip_address">IP Адреса:</string>
     <string name="ip_port">Порт:</string>
     <string name="connected_to">Підключено до радіомодуля (%1$s)</string>
+    <string name="connecting">Підключення...</string>
     <string name="not_connected">Не підключено</string>
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
@@ -102,7 +103,7 @@
     <string name="select_all">Вибрати все</string>
     <string name="map_style_selection">Вибір стилю</string>
     <string name="map_download_region">Завантажити регіон</string>
-    <string name="name">Ім'я</string>
+    <string name="name">Ім\'я</string>
     <string name="description">Опис</string>
     <string name="locked">Блоковано</string>
     <string name="save">Зберегти</string>
@@ -125,8 +126,8 @@
     <string name="delivery_confirmed">Доставку підтверджено</string>
     <string name="error">Помилка</string>
     <string name="ignore">Ігнорувати</string>
-    <string name="ignore_add">Додати '%1$s' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
-    <string name="ignore_remove">Видалити '%1$s' з чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
+    <string name="ignore_add">Додати \'%1$s\' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
+    <string name="ignore_remove">Видалити \'%1$s\' з чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <string name="map_select_download_region">Оберіть регіон завантаження</string>
     <string name="map_tile_download_estimate">Час завантаження фрагментів:</string>
     <string name="map_start_download">Почати завантаження</string>
@@ -145,6 +146,8 @@
     <string name="map_purge_fail">Помилка очищення кешу SQL, перегляньте logcat для деталей</string>
     <string name="map_cache_manager">Керування кешем</string>
     <string name="map_download_complete">Звантаження завершено!</string>
+    <string name="map_download_errors">Завантаження завершено з %1$d помилками</string>
+    <string name="map_cache_tiles">%1$d плиток</string>
     <string name="map_subDescription">прийом: %1$d° відстань: %2$s</string>
     <string name="waypoint_edit">Редагувати точку</string>
     <string name="waypoint_delete">Видалити мітку?</string>
@@ -174,8 +177,8 @@
     <string name="max">Макс</string>
     <string name="copy">Копіювати</string>
     <string name="favorite">Обране</string>
-    <string name="favorite_add">Додати '%1$s' як обраний вузол?</string>
-    <string name="favorite_remove">Видалити '%1$s' з обраних вузлів?</string>
+    <string name="favorite_add">Додати \'%1$s\' як обраний вузол?</string>
+    <string name="favorite_remove">Видалити \'%1$s\' з обраних вузлів?</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>
@@ -227,7 +230,7 @@
     <string name="region_frequency_plan">Регіон</string>
     <string name="ignore_incoming">Ігнорувати вхідні</string>
     <string name="ignore_mqtt">Ігнорувати MQTT</string>
-    <string name="username">Ім'я користувача</string>
+    <string name="username">Ім\'я користувача</string>
     <string name="password">Пароль</string>
     <string name="network_config">Мережа</string>
     <string name="enabled">Увімкнено</string>
