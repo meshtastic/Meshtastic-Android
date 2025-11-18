@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
     <string name="node_filter_title">Filtreeri </string>
     <string name="node_filter_include_unknown">Kaasa tundmatud</string>
+    <string name="node_filter_exclude_infrastructure">Välista infrastruktuur</string>
     <string name="node_filter_only_online">Peida ühenduseta</string>
     <string name="node_filter_only_direct">Kuva ainult otseühendusega</string>
     <string name="node_filter_ignored">Sa vaatad eiratud sõlmi,\nVajuta tagasi minekuks sõlmede nimekirja.</string>
@@ -35,7 +36,7 @@
     <string name="node_sort_via_mqtt">läbi MQTT</string>
     <string name="via_mqtt">läbi MQTT</string>
     <string name="node_sort_via_favorite">läbi Lemmikud</string>
-    <string name="node_filter_show_ignored">Eiratud sõlmed</string>
+    <string name="node_filter_show_ignored">Näita ainult ignoreeritud sõlmi</string>
     <string name="unrecognized">Tundmatu</string>
     <string name="message_status_enroute">Ootab kinnitamist</string>
     <string name="message_status_queued">Saatmise järjekorras</string>
@@ -120,7 +121,7 @@
     <string name="label_short_fast">Lühike ulatus - kiire</string>
     <string name="label_short_slow">Lühike ulatus - aeglane</string>
     <string name="config_network_wifi_enabled_summary">WiFi lubamine keelab rakenduses Bluetooth-ühenduse.</string>
-    <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab Bluetooth-ühenduse rakendusega. TCP-sõlmede ühendused pole Apple'i seadmetes saadaval.</string>
+    <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab Bluetooth-ühenduse rakendusega. TCP-sõlmede ühendused pole Apple\'i seadmetes saadaval.</string>
     <string name="config_network_udp_enabled_summary">Luba kohalikus võrgus pakettide edastamine UDP kaudu.</string>
     <string name="config_position_broadcast_secs_summary">Maksimaalne intervall, mille jooksul sõlm ei edasta oma asukohta.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Asukohavärskendused saadetakse kiiremini, kui minimaalne vahemaa on saavutatud.</string>
@@ -183,6 +184,7 @@
     <string name="connection_status">Praegused ühendused:</string>
     <string name="wifi_ip">Wifi IP-aadress:</string>
     <string name="ethernet_ip">Etherneti IP-aadress:</string>
+    <string name="connecting">Ühendan</string>
     <string name="not_connected">Ei ole ühendatud</string>
     <string name="connected_sleeping">Ühendatud raadioga, aga see on unerežiimis</string>
     <string name="app_too_old">Vajalik on rakenduse värskendus</string>
@@ -213,6 +215,7 @@
     <string name="debug_clear_logs_confirm">See eemaldab teie seadmest kõik logipaketid ja andmebaasikirjed – see on täielik lähtestamine ja see on püsiv.</string>
     <string name="clear">Kustuta</string>
     <string name="message_delivery_status">Sõnumi edastamise olek</string>
+    <string name="new_messages_below">Uued sõnumid allpool</string>
     <string name="meshtastic_messages_notifications">Otsesõnumi teated</string>
     <string name="meshtastic_broadcast_notifications">Ringhäälingusõnumi teated</string>
     <string name="meshtastic_alerts_notifications">Märguteated</string>
@@ -278,8 +281,8 @@
     <string name="error">Viga</string>
     <string name="ignore">Eira</string>
     <string name="remove_ignored">Eemalda ignoreeritute hulgast</string>
-    <string name="ignore_add">Lisa '%1$s' eiramis loendisse?</string>
-    <string name="ignore_remove">Eemaldada '%1$s' eiramis loendist?</string>
+    <string name="ignore_add">Lisa \'%1$s\' eiramis loendisse?</string>
+    <string name="ignore_remove">Eemaldada \'%1$s\' eiramis loendist?</string>
     <string name="map_select_download_region">Vali allalaetav piirkond</string>
     <string name="map_tile_download_estimate">Paanide allalaadimise prognoos:</string>
     <string name="map_start_download">Alusta allalaadimist</string>
@@ -296,9 +299,11 @@
     <string name="map_clear_tiles">Tühjenda allalaetud paanid</string>
     <string name="map_tile_source">Paani allikas</string>
     <string name="map_purge_success">SQL-i vahemälu puhastatud %1$s jaoks</string>
-    <string name="map_purge_fail">SQL-i vahemälu tühjendamine ebaõnnestus, vaata üksikasju logcat'ist</string>
+    <string name="map_purge_fail">SQL-i vahemälu tühjendamine ebaõnnestus, vaata üksikasju logcat\'ist</string>
     <string name="map_cache_manager">Vahemälu haldamine</string>
     <string name="map_download_complete">Allalaadimine on lõppenud!</string>
+    <string name="map_download_errors">Allalaadimine lõpetati %1$d veaga</string>
+    <string name="map_cache_tiles">%1$d paani</string>
     <string name="map_subDescription">suund: %1$d° kaugus: %2$s</string>
     <string name="waypoint_edit">Muuda teekonnapunkti</string>
     <string name="waypoint_delete">Eemalda teekonnapunkt?</string>
@@ -384,8 +389,8 @@
     <string name="favorite">Lemmik</string>
     <string name="add_favorite">Lisa lemmikutesse</string>
     <string name="remove_favorite">Eemalda lemmikutest</string>
-    <string name="favorite_add">Lisa '%1$s' lemmik sõlmede hulka?</string>
-    <string name="favorite_remove">Eemalda '%1$s' lemmik sõlmede hulgast?</string>
+    <string name="favorite_add">Lisa \'%1$s\' lemmik sõlmede hulka?</string>
+    <string name="favorite_remove">Eemalda \'%1$s\' lemmik sõlmede hulgast?</string>
     <string name="power_metrics_log">Toitepinge andurite logi</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
@@ -849,6 +854,7 @@
     <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <string name="next">Järgmine</string>
     <string name="grant_permissions">Anna luba</string>
+    <string name="nodes_queued_for_deletion">%1$d eemaldatavat sõlme nimekirjas:</string>
     <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
     <string name="connecting_to_device">Ühendan seadet</string>
     <string name="map_type_normal">Normaalne</string>
@@ -889,7 +895,7 @@
     <string name="device_configuration">Seadme sätted</string>
     <string name="remotely_administrating">"[Kaugjuhtimine] %1$s"</string>
     <string name="device_telemetry_enabled">Saada seadme telemeetria</string>
-    <string name="device_telemetry_enabled_summary">Luba/keela seadme telemeetriamooduli mõõdikute saatmiseks kärgvõrgustiku</string>
+    <string name="device_telemetry_enabled_summary">Luba/keela seadme telemeetria andmete saatmine kärgvõrku. Need on nominaalväärtused. Ülekoormatud kärgvõrgu puhul skaleeritakse automaatselt pikemad intervallid võrgus olevate sõlmede arvu põhjal. Alla 10 sõlmega kärgvõrgu puhul skaleeritakse kiiremad intervallid.</string>
     <string name="any">Kõik</string>
     <string name="one_hour">1 tund</string>
     <string name="eight_hours">8 tundi</string>
@@ -906,4 +912,5 @@
     <string name="unset">Tühistatud - 0</string>
     <string name="relayed_by">Edastab: %1$s</string>
     <string name="preserve_favorites">Säilita lemmikud?</string>
+    <string name="usb_devices">USB seadmed</string>
 </resources>
