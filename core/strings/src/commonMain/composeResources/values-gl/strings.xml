@@ -19,6 +19,7 @@
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="node_filter_include_unknown">Incluír descoñecido</string>
+    <string name="node_filter_show_details">Amosar detalles</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canle</string>
     <string name="node_sort_distance">Distancia</string>
@@ -26,7 +27,12 @@
     <string name="node_sort_last_heard">Última escoita</string>
     <string name="node_sort_via_mqtt">vía MQTT</string>
     <string name="via_mqtt">vía MQTT</string>
+    <string name="unrecognized">Non recoñecido</string>
+    <string name="routing_error_no_response">Sen resposta</string>
+    <string name="routing_error_not_authorized">Non autorizado</string>
     <string name="routing_error_pki_failed">Fallou o envío cifrado</string>
+    <string name="routing_error_pki_unknown_pubkey">Chave pública descoñecida</string>
+    <string name="role_client">Cliente</string>
     <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
     <!-- Position Config -->
     <string name="channel_name">Nome de canle</string>
@@ -51,6 +57,7 @@
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo durmindo</string>
     <string name="ip_address">Enderezo IP:</string>
+    <string name="ip_port">Porto:</string>
     <string name="connected_to">Conectado á radio (%1$s)</string>
     <string name="not_connected">Non conectado</string>
     <string name="connected_sleeping">Conectado á radio, pero está durmindo</string>
@@ -61,6 +68,9 @@
     <string name="about">Acerca de</string>
     <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
     <string name="debug_panel">Panel de depuración</string>
+    <string name="debug_filters">Filtros</string>
+    <string name="debug_filter_add">Engadir filtro</string>
+    <string name="debug_filter_clear">Limpar todos os filtros</string>
     <string name="clear">Limpar</string>
     <string name="message_delivery_status">Estado de envío de mensaxe</string>
     <string name="firmware_too_old">Actualización de firmware necesaria.</string>
@@ -113,10 +123,10 @@
     <string name="delivery_confirmed">Entrega confirmada</string>
     <string name="error">Erro</string>
     <string name="ignore">Ignorar</string>
-    <string name="ignore_add">Engadir '%1$s' á lista de ignorar?</string>
-    <string name="ignore_remove">Quitar '%1$s' da lista de ignorar?</string>
+    <string name="ignore_add">Engadir \'%1$s\' á lista de ignorar?</string>
+    <string name="ignore_remove">Quitar \'%1$s\' da lista de ignorar?</string>
     <string name="map_select_download_region">Seleccionar a rexión de descarga</string>
-    <string name="map_tile_download_estimate">Descarga de 'tile' estimada:</string>
+    <string name="map_tile_download_estimate">Descarga de \'tile\' estimada:</string>
     <string name="map_start_download">Comezar a descarga</string>
     <string name="close">Pechar</string>
     <string name="radio_configuration">Configuración de radio</string>
@@ -127,12 +137,14 @@
     <string name="map_offline_manager">Xestor sen rede</string>
     <string name="map_cache_size">Tamaño de caché actual</string>
     <string name="map_cache_info">Capacidade de Caché: %1$d MB\nUso de Caché: %2$d MB</string>
-    <string name="map_clear_tiles">Limpar 'tiles' descargadas</string>
-    <string name="map_tile_source">Fonte de 'tile'</string>
+    <string name="map_clear_tiles">Limpar \'tiles\' descargadas</string>
+    <string name="map_tile_source">Fonte de \'tile\'</string>
     <string name="map_purge_success">Caché SQL purgada para %1$s</string>
     <string name="map_purge_fail">A purga de Caché SQL fallou, mira logcat para os detalles</string>
     <string name="map_cache_manager">Xestor de caché</string>
     <string name="map_download_complete">Descarga completada!</string>
+    <string name="map_download_errors">Descarga completada con %1$d errores</string>
+    <string name="map_cache_tiles">%1$d \'tiles\'</string>
     <string name="map_subDescription">rumbo: %1$d distancia:%2$s</string>
     <string name="waypoint_edit">Editar punto de ruta</string>
     <string name="waypoint_delete">Eliminar punto de ruta?</string>
