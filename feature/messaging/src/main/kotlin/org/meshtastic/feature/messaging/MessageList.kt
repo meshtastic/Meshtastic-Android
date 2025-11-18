@@ -185,17 +185,18 @@ private fun MessageListContent(
         ) { row ->
             when (row) {
                 is MessageListRow.UnreadDivider -> UnreadMessagesDivider(modifier = Modifier.animateItem())
-                is MessageListRow.ChatMessage -> renderChatMessageRow(
-                    row = row,
-                    state = state,
-                    handlers = handlers,
-                    inSelectionMode = inSelectionMode,
-                    coroutineScope = coroutineScope,
-                    haptics = haptics,
-                    listState = listState,
-                    onShowStatusDialog = onShowStatusDialog,
-                    onShowReactions = onShowReactions,
-                )
+                is MessageListRow.ChatMessage ->
+                    renderChatMessageRow(
+                        row = row,
+                        state = state,
+                        handlers = handlers,
+                        inSelectionMode = inSelectionMode,
+                        coroutineScope = coroutineScope,
+                        haptics = haptics,
+                        listState = listState,
+                        onShowStatusDialog = onShowStatusDialog,
+                        onShowReactions = onShowReactions,
+                    )
             }
         }
     }
