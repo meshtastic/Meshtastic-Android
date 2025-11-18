@@ -20,14 +20,25 @@ package com.geeksville.mesh.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.geeksville.mesh.model.NO_DEVICE_SELECTED
+import dagger.hilt.android.AndroidEntryPoint
+import org.meshtastic.core.prefs.mesh.MeshPrefs
+import javax.inject.Inject
 
+/** This receiver starts the MeshService on boot if a device was previously connected. */
+@AndroidEntryPoint
 class BootCompleteReceiver : BroadcastReceiver() {
-    override fun onReceive(mContext: Context, intent: Intent) {
-        // Verify the intent action
+
+    @Inject lateinit var meshPrefs: MeshPrefs
+
+    override fun onReceive(context: Context, intent: Intent) {
         if (Intent.ACTION_BOOT_COMPLETED != intent.action) {
             return
         }
-        // start listening for bluetooth messages from our device
-        MeshService.startServiceLater(mContext)
+
+        val deviceAddress = meshPrefs.deviceAddress
+        if (!deviceAddress.isNullOrBlank() && !deviceAddress.equals(NO_DEVICE_SELECTED, ignoreCase = true)) {
+            MeshService.startService(context)
+        }
     }
 }
