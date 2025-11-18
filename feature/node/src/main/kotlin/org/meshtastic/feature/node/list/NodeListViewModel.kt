@@ -17,16 +17,20 @@
 
 package org.meshtastic.feature.node.list
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.cash.molecule.RecompositionMode
+import app.cash.molecule.launchMolecule
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
@@ -38,6 +42,7 @@ import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.deviceProfile
 import javax.inject.Inject
 
 @HiltViewModel
@@ -63,78 +68,87 @@ constructor(
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested = _sharedContactRequested.asStateFlow()
 
-    private val nodeSortOption = nodeFilterPreferences.nodeSortOption
+    private val filterText = savedStateHandle.getStateFlow(KEY_FILTER_TEXT, "")
 
-    private val _nodeFilterText = savedStateHandle.getStateFlow(KEY_FILTER_TEXT, "")
-    private val includeUnknown = nodeFilterPreferences.includeUnknown
-    private val excludeInfrastructure = nodeFilterPreferences.excludeInfrastructure
-    private val onlyOnline = nodeFilterPreferences.onlyOnline
-    private val onlyDirect = nodeFilterPreferences.onlyDirect
-    private val showIgnored = nodeFilterPreferences.showIgnored
+    private val moleculeScope = CoroutineScope(viewModelScope.coroutineContext + AndroidUiDispatcher.Main)
+    val uiState: StateFlow<NodesUiState> by
+        lazy(LazyThreadSafetyMode.NONE) {
+            moleculeScope.launchMolecule(mode = RecompositionMode.ContextClock) {
+                val filterText by filterText
+                val includeUnknown by nodeFilterPreferences.includeUnknown.collectAsState()
+                val excludeInfrastructure by nodeFilterPreferences.excludeInfrastructure.collectAsState()
+                val onlyOnline by nodeFilterPreferences.onlyOnline.collectAsState()
+                val onlyDirect by nodeFilterPreferences.onlyDirect.collectAsState()
+                val showIgnored by nodeFilterPreferences.showIgnored.collectAsState()
 
-    private val nodeFilter: Flow<NodeFilterState> =
-        combine(_nodeFilterText, includeUnknown, excludeInfrastructure, onlyOnline, onlyDirect, showIgnored) { values ->
-            NodeFilterState(
-                filterText = values[0] as String,
-                includeUnknown = values[1] as Boolean,
-                excludeInfrastructure = values[2] as Boolean,
-                onlyOnline = values[3] as Boolean,
-                onlyDirect = values[4] as Boolean,
-                showIgnored = values[5] as Boolean,
-            )
-        }
-    val nodesUiState: StateFlow<NodesUiState> =
-        combine(nodeSortOption, nodeFilter, radioConfigRepository.deviceProfileFlow) { sort, nodeFilter, profile ->
-            NodesUiState(
-                sort = sort,
-                filter = nodeFilter,
-                distanceUnits = profile.config.display.units.number,
-                tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-            )
-        }
-            .stateInWhileSubscribed(initialValue = NodesUiState())
-
-    val nodeList: StateFlow<List<Node>> =
-        combine(nodeFilter, nodeSortOption, ::Pair)
-            .flatMapLatest { (filter, sort) ->
-                nodeRepository
-                    .getNodes(
-                        sort = sort,
-                        filter = filter.filterText,
-                        includeUnknown = filter.includeUnknown,
-                        onlyOnline = filter.onlyOnline,
-                        onlyDirect = filter.onlyDirect,
+                val filterState =
+                    NodeFilterState(
+                        filterText = filterText,
+                        includeUnknown = includeUnknown,
+                        excludeInfrastructure = excludeInfrastructure,
+                        onlyOnline = onlyOnline,
+                        onlyDirect = onlyDirect,
+                        showIgnored = showIgnored,
                     )
-                    .map { list ->
-                        list
-                            .filter { filter.showIgnored || !it.isIgnored }
-                            .filter { node ->
-                                if (filter.excludeInfrastructure) {
-                                    val role = node.user.role
-                                    val infrastructureRoles =
-                                        listOf(
-                                            ConfigProtos.Config.DeviceConfig.Role.ROUTER,
-                                            ConfigProtos.Config.DeviceConfig.Role.REPEATER,
-                                            ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE,
-                                            ConfigProtos.Config.DeviceConfig.Role.CLIENT_BASE,
-                                        )
-                                    role !in infrastructureRoles && !node.isEffectivelyUnmessageable
-                                } else {
-                                    true
-                                }
-                            }
-                    }
+                val sort by
+                nodeFilterPreferences.nodeSortOption
+                        .collectAsState(NodeSortOption.VIA_FAVORITE)
+                val profile by radioConfigRepository.deviceProfileFlow.collectAsState(deviceProfile {})
+                NodesUiState(
+                    sort = sort,
+                    filter = filterState,
+                    distanceUnits = profile.config.display.units.number,
+                    tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+                )
             }
-            .stateInWhileSubscribed(initialValue = emptyList())
+        }
+
+    val nodeList: StateFlow<List<Node>> by
+        lazy(LazyThreadSafetyMode.NONE) {
+            moleculeScope.launchMolecule(mode = RecompositionMode.ContextClock) {
+                val uiState by uiState.collectAsState()
+                val sort = uiState.sort
+                val filter = uiState.filter
+
+                val nodeList by
+                    nodeRepository
+                        .getNodes(
+                            sort = sort,
+                            filter = filter.filterText,
+                            includeUnknown = filter.includeUnknown,
+                            onlyOnline = filter.onlyOnline,
+                            onlyDirect = filter.onlyDirect,
+                        )
+                        .map { list ->
+                            list
+                            .filter { filter.showIgnored || !it.isIgnored }
+                                .filter { node ->
+                                    if (filter.excludeInfrastructure) {
+                                        val role = node.user.role
+                                        val infrastructureRoles =
+                                            listOf(
+                                                ConfigProtos.Config.DeviceConfig.Role.ROUTER,
+                                                ConfigProtos.Config.DeviceConfig.Role.REPEATER,
+                                                ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE,
+                                                ConfigProtos.Config.DeviceConfig.Role.CLIENT_BASE,
+                                            )
+                                        role !in infrastructureRoles && !node.isEffectivelyUnmessageable
+                                    } else {
+                                        true
+                                    }
+                                }
+                        }
+                        .collectAsState(emptyList())
+                nodeList
+            }
+        }
 
     val unfilteredNodeList: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    var nodeFilterText: String
-        get() = _nodeFilterText.value
-        set(value) {
-            savedStateHandle[KEY_FILTER_TEXT] = value
-        }
+    fun setFilterText(filterText: String) {
+        savedStateHandle[KEY_FILTER_TEXT] = value
+    }
 
     fun setSortOption(sort: NodeSortOption) {
         nodeFilterPreferences.setNodeSort(sort)

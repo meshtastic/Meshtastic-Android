@@ -94,7 +94,7 @@ fun NodeListScreen(
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
 ) {
-    val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
@@ -161,7 +161,7 @@ fun NodeListScreen(
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
                         filterText = state.filter.filterText,
-                        onTextChange = { viewModel.nodeFilterText = it },
+                        onTextChange = { viewModel.setFilterText(it) },
                         currentSortOption = state.sort,
                         onSortSelect = viewModel::setSortOption,
                         includeUnknown = state.filter.includeUnknown,
