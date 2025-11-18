@@ -66,6 +66,7 @@ fun MapLibreControlButtons(
     onFilterClick: () -> Unit,
     onLegendClick: () -> Unit,
     onStyleClick: () -> Unit,
+    onLayersClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.End) {
@@ -142,6 +143,10 @@ fun MapLibreControlButtons(
         Spacer(modifier = Modifier.size(8.dp))
 
         MapButton(onClick = onStyleClick, icon = Icons.Outlined.Layers, contentDescription = null)
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        MapButton(onClick = onLayersClick, icon = Icons.Outlined.Explore, contentDescription = null)
     }
 }
 

@@ -37,11 +37,18 @@ import org.maplibre.android.style.expressions.Expression.toColor
 import org.maplibre.android.style.expressions.Expression.toString
 import org.maplibre.android.style.expressions.Expression.zoom
 import org.maplibre.android.style.layers.CircleLayer
+import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory.circleColor
 import org.maplibre.android.style.layers.PropertyFactory.circleOpacity
 import org.maplibre.android.style.layers.PropertyFactory.circleRadius
 import org.maplibre.android.style.layers.PropertyFactory.circleStrokeColor
 import org.maplibre.android.style.layers.PropertyFactory.circleStrokeWidth
+import org.maplibre.android.style.layers.PropertyFactory.fillColor
+import org.maplibre.android.style.layers.PropertyFactory.fillOpacity
+import org.maplibre.android.style.layers.PropertyFactory.lineColor
+import org.maplibre.android.style.layers.PropertyFactory.lineOpacity
+import org.maplibre.android.style.layers.PropertyFactory.lineWidth
 import org.maplibre.android.style.layers.PropertyFactory.textAllowOverlap
 import org.maplibre.android.style.layers.PropertyFactory.textAnchor
 import org.maplibre.android.style.layers.PropertyFactory.textColor
@@ -57,6 +64,7 @@ import org.maplibre.android.style.layers.PropertyFactory.visibility
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
+import org.maplibre.geojson.FeatureCollection
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_CIRCLE_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_COUNT_LAYER_ID
@@ -222,6 +230,92 @@ fun ensureSourcesAndLayers(style: Style) {
         }
     Timber.tag("MapLibrePOC").d("Layer order: %s", order)
     logStyleState("ensureSourcesAndLayers(end)", style)
+}
+
+/** Ensures a GeoJSON source and layers exist for an imported map layer */
+fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: String?, isVisible: Boolean) {
+    val sourceId = "imported-layer-source-$layerId"
+    val pointLayerId = "imported-layer-points-$layerId"
+    val lineLayerId = "imported-layer-lines-$layerId"
+    val fillLayerId = "imported-layer-fills-$layerId"
+
+    try {
+        // Add or update source
+        val existingSource = style.getSource(sourceId)
+        if (existingSource == null) {
+            // Create new source
+            if (geoJson != null) {
+                style.addSource(GeoJsonSource(sourceId, geoJson))
+            } else {
+                style.addSource(GeoJsonSource(sourceId, FeatureCollection.fromFeatures(emptyList())))
+            }
+        } else if (geoJson != null && existingSource is GeoJsonSource) {
+            // Update existing source
+            existingSource.setGeoJson(geoJson)
+        }
+
+        // Add point layer (CircleLayer for points)
+        if (style.getLayer(pointLayerId) == null) {
+            val pointLayer = CircleLayer(pointLayerId, sourceId)
+            pointLayer.setProperties(
+                circleColor("#3388ff"),
+                circleRadius(5f),
+                circleOpacity(0.8f),
+                circleStrokeColor("#ffffff"),
+                circleStrokeWidth(1f),
+                visibility(if (isVisible) "visible" else "none"),
+            )
+            style.addLayerAbove(pointLayer, OSM_LAYER_ID)
+        } else {
+            style.getLayer(pointLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
+        }
+
+        // Add line layer (LineLayer for LineStrings)
+        if (style.getLayer(lineLayerId) == null) {
+            val lineLayer = LineLayer(lineLayerId, sourceId)
+            lineLayer.setProperties(
+                lineColor("#3388ff"),
+                lineWidth(2f),
+                lineOpacity(0.8f),
+                visibility(if (isVisible) "visible" else "none"),
+            )
+            style.addLayerAbove(lineLayer, OSM_LAYER_ID)
+        } else {
+            style.getLayer(lineLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
+        }
+
+        // Add fill layer (FillLayer for Polygons)
+        if (style.getLayer(fillLayerId) == null) {
+            val fillLayer = FillLayer(fillLayerId, sourceId)
+            fillLayer.setProperties(
+                fillColor("#3388ff"),
+                fillOpacity(0.3f),
+                visibility(if (isVisible) "visible" else "none"),
+            )
+            style.addLayerAbove(fillLayer, OSM_LAYER_ID)
+        } else {
+            style.getLayer(fillLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
+        }
+    } catch (e: Exception) {
+        Timber.tag("MapLibreLayerManager").e(e, "Error ensuring imported layer source and layers for $layerId")
+    }
+}
+
+/** Removes an imported layer's source and layers */
+fun removeImportedLayerSourceAndLayers(style: Style, layerId: String) {
+    val sourceId = "imported-layer-source-$layerId"
+    val pointLayerId = "imported-layer-points-$layerId"
+    val lineLayerId = "imported-layer-lines-$layerId"
+    val fillLayerId = "imported-layer-fills-$layerId"
+
+    try {
+        style.getLayer(pointLayerId)?.let { style.removeLayer(it) }
+        style.getLayer(lineLayerId)?.let { style.removeLayer(it) }
+        style.getLayer(fillLayerId)?.let { style.removeLayer(it) }
+        style.getSource(sourceId)?.let { style.removeSource(it) }
+    } catch (e: Exception) {
+        Timber.tag("MapLibreLayerManager").e(e, "Error removing imported layer source and layers for $layerId")
+    }
 }
 
 /** Show/hide cluster layers vs plain nodes based on zoom, density, and toggle */

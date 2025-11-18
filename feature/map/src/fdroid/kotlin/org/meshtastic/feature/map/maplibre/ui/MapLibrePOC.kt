@@ -22,6 +22,8 @@ package org.meshtastic.feature.map.maplibre.ui
 import android.annotation.SuppressLint
 import android.graphics.RectF
 import android.os.SystemClock
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +66,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,6 +79,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -88,7 +92,10 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Point
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.feature.map.LayerType
+import org.meshtastic.feature.map.MapLayerItem
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.maplibre.BaseMapStyle
@@ -104,17 +111,24 @@ import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.core.activateLocationComponentForStyle
 import org.meshtastic.feature.map.maplibre.core.buildMeshtasticStyle
+import org.meshtastic.feature.map.maplibre.core.ensureImportedLayerSourceAndLayers
 import org.meshtastic.feature.map.maplibre.core.ensureSourcesAndLayers
 import org.meshtastic.feature.map.maplibre.core.logStyleState
 import org.meshtastic.feature.map.maplibre.core.nodesToFeatureCollectionJsonWithSelection
 import org.meshtastic.feature.map.maplibre.core.reinitializeStyleAfterSwitch
+import org.meshtastic.feature.map.maplibre.core.removeImportedLayerSourceAndLayers
 import org.meshtastic.feature.map.maplibre.core.safeSetGeoJson
 import org.meshtastic.feature.map.maplibre.core.setClusterVisibilityHysteresis
 import org.meshtastic.feature.map.maplibre.core.waypointsToFeatureCollectionFC
 import org.meshtastic.feature.map.maplibre.utils.applyFilters
+import org.meshtastic.feature.map.maplibre.utils.copyFileToInternalStorage
+import org.meshtastic.feature.map.maplibre.utils.deleteFileFromInternalStorage
 import org.meshtastic.feature.map.maplibre.utils.distanceKmBetween
 import org.meshtastic.feature.map.maplibre.utils.formatSecondsAgo
+import org.meshtastic.feature.map.maplibre.utils.getFileName
 import org.meshtastic.feature.map.maplibre.utils.hasAnyLocationPermission
+import org.meshtastic.feature.map.maplibre.utils.loadLayerGeoJson
+import org.meshtastic.feature.map.maplibre.utils.loadPersistedLayers
 import org.meshtastic.feature.map.maplibre.utils.protoShortName
 import org.meshtastic.feature.map.maplibre.utils.roleColor
 import org.meshtastic.feature.map.maplibre.utils.selectLabelsForViewport
@@ -163,13 +177,127 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
     var clustersShown by remember { mutableStateOf(false) }
     var lastClusterEvalMs by remember { mutableStateOf(0L) }
 
+    // Map layer management
+    var mapLayers by remember { mutableStateOf<List<MapLayerItem>>(emptyList()) }
+    var showLayersBottomSheet by remember { mutableStateOf(false) }
+    var layerGeoJsonCache by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle()
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
+    val coroutineScope = rememberCoroutineScope()
 
     // Check location permission
     hasLocationPermission = hasAnyLocationPermission(context)
+
+    // Load persisted map layers on startup
+    LaunchedEffect(Unit) { mapLayers = loadPersistedLayers(context) }
+
+    // Helper functions for layer management
+    fun toggleLayerVisibility(layerId: String) {
+        mapLayers =
+            mapLayers.map {
+                if (it.id == layerId) {
+                    it.copy(isVisible = !it.isVisible)
+                } else {
+                    it
+                }
+            }
+    }
+
+    fun removeLayer(layerId: String) {
+        coroutineScope.launch {
+            val layerToRemove = mapLayers.find { it.id == layerId }
+            layerToRemove?.uri?.let { uri -> deleteFileFromInternalStorage(uri) }
+            mapLayers = mapLayers.filterNot { it.id == layerId }
+            layerGeoJsonCache = layerGeoJsonCache - layerId
+        }
+    }
+
+    // File picker launcher for adding map layers
+    val filePickerLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    val fileName = uri.getFileName(context)
+                    coroutineScope.launch {
+                        val layerName = fileName?.substringBeforeLast('.') ?: "Layer ${mapLayers.size + 1}"
+                        val extension =
+                            fileName?.substringAfterLast('.', "")?.lowercase()
+                                ?: context.contentResolver.getType(uri)?.split('/')?.last()
+                        val kmlExtensions = listOf("kml", "kmz", "vnd.google-earth.kml+xml", "vnd.google-earth.kmz")
+                        val geoJsonExtensions = listOf("geojson", "json")
+                        val layerType =
+                            when (extension) {
+                                in kmlExtensions -> LayerType.KML
+                                in geoJsonExtensions -> LayerType.GEOJSON
+                                else -> null
+                            }
+                        if (layerType != null) {
+                            val finalFileName = fileName ?: "layer_${java.util.UUID.randomUUID()}.$extension"
+                            val localFileUri = copyFileToInternalStorage(context, uri, finalFileName)
+                            if (localFileUri != null) {
+                                val newItem = MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType)
+                                mapLayers = mapLayers + newItem
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    fun openFilePicker() {
+        val intent =
+            android.content.Intent(android.content.Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                putExtra(
+                    android.content.Intent.EXTRA_MIME_TYPES,
+                    arrayOf(
+                        "application/vnd.google-earth.kml+xml",
+                        "application/vnd.google-earth.kmz",
+                        "application/geo+json",
+                        "application/json",
+                    ),
+                )
+            }
+        filePickerLauncher.launch(intent)
+    }
+
+    // Load and render imported map layers
+    LaunchedEffect(mapLayers, mapRef) {
+        mapRef?.let { map ->
+            map.style?.let { style ->
+                coroutineScope.launch {
+                    // Load GeoJSON for layers that don't have it cached
+                    mapLayers.forEach { layer ->
+                        if (!layerGeoJsonCache.containsKey(layer.id)) {
+                            val geoJson = loadLayerGeoJson(context, layer)
+                            if (geoJson != null) {
+                                layerGeoJsonCache = layerGeoJsonCache + (layer.id to geoJson)
+                            }
+                        }
+                    }
+
+                    // Ensure all layers are rendered
+                    mapLayers.forEach { layer ->
+                        val geoJson = layerGeoJsonCache[layer.id]
+                        ensureImportedLayerSourceAndLayers(style, layer.id, geoJson, layer.isVisible)
+                    }
+
+                    // Remove layers that are no longer in the list
+                    val currentLayerIds = mapLayers.map { it.id }.toSet()
+                    val cachedLayerIds = layerGeoJsonCache.keys.toSet()
+                    cachedLayerIds
+                        .filter { it !in currentLayerIds }
+                        .forEach { removedLayerId ->
+                            removeImportedLayerSourceAndLayers(style, removedLayerId)
+                            layerGeoJsonCache = layerGeoJsonCache - removedLayerId
+                        }
+                }
+            }
+        }
+    }
 
     // Apply location tracking settings when state changes
     LaunchedEffect(isLocationTrackingEnabled, followBearing, hasLocationPermission) {
@@ -938,6 +1066,17 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                 }
             }
             MapButton(onClick = { showLegend = !showLegend }, icon = Icons.Outlined.Info, contentDescription = null)
+
+            Spacer(modifier = Modifier.size(8.dp))
+
+            MapButton(
+                onClick = { showLayersBottomSheet = true },
+                icon = Icons.Outlined.Explore,
+                contentDescription = null,
+            )
+
+            Spacer(modifier = Modifier.size(8.dp))
+
             // Map style selector
             Box {
                 MapButton(
@@ -1123,6 +1262,24 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                 ) {
                     Box(contentAlignment = Alignment.Center) { Text(text = label, color = Color.White, maxLines = 1) }
                 }
+            }
+        }
+
+        // Layer management bottom sheet
+        if (showLayersBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showLayersBottomSheet = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            ) {
+                CustomMapLayersSheet(
+                    mapLayers = mapLayers,
+                    onToggleVisibility = ::toggleLayerVisibility,
+                    onRemoveLayer = ::removeLayer,
+                    onAddLayerClicked = {
+                        showLayersBottomSheet = false
+                        openFilePicker()
+                    },
+                )
             }
         }
 

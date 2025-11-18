@@ -59,29 +59,13 @@ enum class BaseMapStyle(val label: String, val urlTemplate: String) {
 }
 
 /** Converts precision bits to meters for accuracy circles */
-fun getPrecisionMeters(precisionBits: Int): Double? = when (precisionBits) {
-    10 -> 23345.484932
-    11 -> 11672.7369
-    12 -> 5836.36288
-    13 -> 2918.175876
-    14 -> 1459.0823719999053
-    15 -> 729.5370149076749
-    16 -> 364.76796802673495
-    17 -> 182.38363847854606
-    18 -> 91.19178201473192
-    19 -> 45.59587874512555
-    20 -> 22.797938919871483
-    21 -> 11.398969292955733
-    22 -> 5.699484588175269
-    23 -> 2.8497422889870207
-    24 -> 1.424871149078816
-    25 -> 0.7124355732781771
-    26 -> 0.3562177850463231
-    27 -> 0.17810889188369584
-    28 -> 0.08905444562935878
-    29 -> 0.04452722265708971
-    30 -> 0.022263611293647812
-    31 -> 0.011131805632411625
-    32 -> 0.005565902808395108
-    else -> null
+fun getPrecisionMeters(precisionBits: Int): Double? {
+    // Use the same formula as the core UI component for consistency
+    // Formula: 23905787.925008 * 0.5^bits
+    // Returns null for invalid precision bits (typically < 10 or > 32)
+    return if (precisionBits in 10..32) {
+        org.meshtastic.core.ui.component.precisionBitsToMeters(precisionBits)
+    } else {
+        null
+    }
 }

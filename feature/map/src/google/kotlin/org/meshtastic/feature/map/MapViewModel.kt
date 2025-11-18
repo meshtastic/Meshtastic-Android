@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -251,6 +250,9 @@ constructor(
     private val _mapLayers = MutableStateFlow<List<MapLayerItem>>(emptyList())
     val mapLayers: StateFlow<List<MapLayerItem>> = _mapLayers.asStateFlow()
 
+    // Store Google Maps specific layer data separately
+    private val layerDataMap = mutableMapOf<String, Pair<KmlLayer?, GeoJsonLayer?>>()
+
     init {
         viewModelScope.launch {
             customTileProviderRepository.getCustomTileProviders().first()
@@ -432,11 +434,13 @@ constructor(
     fun removeMapLayer(layerId: String) {
         viewModelScope.launch {
             val layerToRemove = _mapLayers.value.find { it.id == layerId }
+            val layerData = layerDataMap[layerId]
             when (layerToRemove?.layerType) {
-                LayerType.KML -> layerToRemove.kmlLayerData?.removeLayerFromMap()
-                LayerType.GEOJSON -> layerToRemove.geoJsonLayerData?.removeLayerFromMap()
+                LayerType.KML -> layerData?.first?.removeLayerFromMap()
+                LayerType.GEOJSON -> layerData?.second?.removeLayerFromMap()
                 null -> {}
             }
+            layerDataMap.remove(layerId)
             layerToRemove?.uri?.let { uri ->
                 deleteFileToInternalStorage(uri)
                 googleMapsPrefs.hiddenLayerUrls -= uri.toString()
@@ -471,8 +475,12 @@ constructor(
         }
     }
 
+    fun getKmlLayer(layerId: String): KmlLayer? = layerDataMap[layerId]?.first
+
+    fun getGeoJsonLayer(layerId: String): GeoJsonLayer? = layerDataMap[layerId]?.second
+
     suspend fun loadMapLayerIfNeeded(map: GoogleMap, layerItem: MapLayerItem) {
-        if (layerItem.kmlLayerData != null || layerItem.geoJsonLayerData != null) return
+        if (layerDataMap[layerItem.id] != null) return
         try {
             when (layerItem.layerType) {
                 LayerType.KML -> loadKmlLayerIfNeeded(layerItem, map)
@@ -491,15 +499,8 @@ constructor(
                     if (!layerItem.isVisible) removeLayerFromMap()
                 }
             }
-        _mapLayers.update { currentLayers ->
-            currentLayers.map {
-                if (it.id == layerItem.id) {
-                    it.copy(kmlLayerData = kmlLayer)
-                } else {
-                    it
-                }
-            }
-        }
+        val current = layerDataMap[layerItem.id] ?: Pair(null, null)
+        layerDataMap[layerItem.id] = Pair(kmlLayer, current.second)
     }
 
     private suspend fun loadGeoJsonLayerIfNeeded(layerItem: MapLayerItem, map: GoogleMap) {
@@ -508,35 +509,11 @@ constructor(
                 val jsonObject = JSONObject(inputStream.bufferedReader().use { it.readText() })
                 GeoJsonLayer(map, jsonObject).apply { if (!layerItem.isVisible) removeLayerFromMap() }
             }
-        _mapLayers.update { currentLayers ->
-            currentLayers.map {
-                if (it.id == layerItem.id) {
-                    it.copy(geoJsonLayerData = geoJsonLayer)
-                } else {
-                    it
-                }
-            }
-        }
+        val current = layerDataMap[layerItem.id] ?: Pair(null, null)
+        layerDataMap[layerItem.id] = Pair(current.first, geoJsonLayer)
     }
 
     fun clearLoadedLayerData() {
-        _mapLayers.update { currentLayers ->
-            currentLayers.map { it.copy(kmlLayerData = null, geoJsonLayerData = null) }
-        }
+        layerDataMap.clear()
     }
 }
-
-enum class LayerType {
-    KML,
-    GEOJSON,
-}
-
-data class MapLayerItem(
-    val id: String = UUID.randomUUID().toString(),
-    val name: String,
-    val uri: Uri? = null,
-    var isVisible: Boolean = true,
-    var kmlLayerData: KmlLayer? = null,
-    var geoJsonLayerData: GeoJsonLayer? = null,
-    val layerType: LayerType,
-)
