@@ -40,7 +40,6 @@ import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.ConfigProtos
@@ -78,6 +77,7 @@ constructor(
                 val onlyOnline by nodeFilterPreferences.onlyOnline.collectAsState()
                 val onlyDirect by nodeFilterPreferences.onlyDirect.collectAsState()
                 val showIgnored by nodeFilterPreferences.showIgnored.collectAsState()
+                val unfilteredNodes by nodeRepository.getNodes().collectAsState(emptyList())
 
                 val filter =
                     NodeFilterState(
@@ -93,7 +93,7 @@ constructor(
                         .collectAsState(NodeSortOption.VIA_FAVORITE)
                 val profile by radioConfigRepository.deviceProfileFlow.collectAsState(deviceProfile {})
 
-                val nodeList by
+                val filteredNodes by
                     nodeRepository
                         .getNodes(
                             sort = sort,
@@ -130,15 +130,13 @@ constructor(
                     connectionState = connectionState,
                     sort = sort,
                     filter = filter,
-                    nodes = nodeList,
+                    nodes = filteredNodes,
                     distanceUnits = profile.config.display.units.number,
                     tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+                    ignoredNodeCount = unfilteredNodes.count { it.isIgnored },
                 )
             }
         }
-
-    val unfilteredNodeList: StateFlow<List<Node>> =
-        nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
     fun setFilterText(filterText: String) {
         savedStateHandle[KEY_FILTER_TEXT] = value
@@ -173,6 +171,7 @@ data class NodesUiState(
     val nodes: List<Node> = emptyList(),
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
+    val ignoredNodeCount: Int = 0,
 )
 
 data class NodeFilterState(

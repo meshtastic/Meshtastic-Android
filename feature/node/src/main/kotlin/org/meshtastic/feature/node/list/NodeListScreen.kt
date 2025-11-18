@@ -96,9 +96,6 @@ fun NodeListScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
-    val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
-
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -172,7 +169,7 @@ fun NodeListScreen(
                         onToggleOnlyDirect = { viewModel.nodeFilterPreferences.toggleOnlyDirect() },
                         showIgnored = state.filter.showIgnored,
                         onToggleShowIgnored = { viewModel.nodeFilterPreferences.toggleShowIgnored() },
-                        ignoredNodeCount = ignoredNodeCount,
+                        ignoredNodeCount = state.ignoredNodeCount,
                     )
                 }
 
