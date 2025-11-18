@@ -36,6 +36,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +50,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -160,6 +164,7 @@ fun ConnectionsScreen(
             ConnectionState.Connected -> {
                 if (regionUnset) Res.string.must_set_region else Res.string.connected
             }
+
             ConnectionState.Connecting -> Res.string.connecting
 
             ConnectionState.Disconnected -> Res.string.not_connected
@@ -180,124 +185,131 @@ fun ConnectionsScreen(
             )
         },
     ) { paddingValues ->
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxSize().weight(1f)) {
-                Column(
-                    modifier =
-                    Modifier.fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .height(IntrinsicSize.Max)
-                        .padding(paddingValues)
-                        .padding(16.dp),
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier =
+                Modifier.fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .height(IntrinsicSize.Max)
+                    .padding(paddingValues)
+                    .padding(16.dp),
+            ) {
+                AnimatedVisibility(visible = connectionState == ConnectionState.Connecting) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        CircularWavyProgressIndicator(modifier = Modifier.size(96.dp).padding(16.dp))
+                    }
+                }
+                AnimatedVisibility(
+                    visible = connectionState.isConnected(),
+                    modifier = Modifier.padding(bottom = 16.dp),
                 ) {
-                    AnimatedVisibility(visible = connectionState == ConnectionState.Connecting) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                            CircularWavyProgressIndicator(modifier = Modifier.size(96.dp).padding(16.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        ourNode?.let { node ->
+                            TitledCard(title = stringResource(Res.string.connected_device)) {
+                                CurrentlyConnectedInfo(
+                                    node = node,
+                                    bleDevice =
+                                    bleDevices.firstOrNull { it.fullAddress == selectedDevice }
+                                        as DeviceListEntry.Ble?,
+                                    onNavigateToNodeDetails = onNavigateToNodeDetails,
+                                    onClickDisconnect = { scanModel.disconnect() },
+                                )
+                            }
                         }
-                    }
-                    AnimatedVisibility(
-                        visible = connectionState.isConnected(),
-                        modifier = Modifier.padding(bottom = 16.dp),
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            ourNode?.let { node ->
-                                TitledCard(title = stringResource(Res.string.connected_device)) {
-                                    CurrentlyConnectedInfo(
-                                        node = node,
-                                        bleDevice =
-                                        bleDevices.firstOrNull { it.fullAddress == selectedDevice }
-                                            as DeviceListEntry.Ble?,
-                                        onNavigateToNodeDetails = onNavigateToNodeDetails,
-                                        onClickDisconnect = { scanModel.disconnect() },
-                                    )
+
+                        if (regionUnset && selectedDevice != "m") {
+                            TitledCard(title = null) {
+                                ListItem(
+                                    leadingIcon = Icons.Rounded.Language,
+                                    text = stringResource(Res.string.set_your_region),
+                                ) {
+                                    isWaiting = true
+                                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
                                 }
                             }
-
-                            if (regionUnset && selectedDevice != "m") {
-                                TitledCard(title = null) {
-                                    ListItem(
-                                        leadingIcon = Icons.Rounded.Language,
-                                        text = stringResource(Res.string.set_your_region),
-                                    ) {
-                                        isWaiting = true
-                                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
-                    LaunchedEffect(Unit) { DeviceType.fromAddress(selectedDevice)?.let { selectedDeviceType = it } }
-
-                    ConnectionsSegmentedBar(
-                        selectedDeviceType = selectedDeviceType,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        selectedDeviceType = it
-                    }
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        when (selectedDeviceType) {
-                            DeviceType.BLE -> {
-                                val (bonded, available) = bleDevices.partition { it.bonded }
-                                BLEDevices(
-                                    connectionState = connectionState,
-                                    bondedDevices = bonded,
-                                    availableDevices = available,
-                                    selectedDevice = selectedDevice,
-                                    scanModel = scanModel,
-                                    bluetoothEnabled = bluetoothState.enabled,
-                                )
-                            }
-
-                            DeviceType.TCP -> {
-                                NetworkDevices(
-                                    connectionState = connectionState,
-                                    discoveredNetworkDevices = discoveredTcpDevices,
-                                    recentNetworkDevices = recentTcpDevices,
-                                    selectedDevice = selectedDevice,
-                                    scanModel = scanModel,
-                                )
-                            }
-
-                            DeviceType.USB -> {
-                                UsbDevices(
-                                    connectionState = connectionState,
-                                    usbDevices = usbDevices,
-                                    selectedDevice = selectedDevice,
-                                    scanModel = scanModel,
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Warning Not Paired
-                        val hasShownNotPairedWarning by
-                            connectionsViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
-                        val (bonded, _) = bleDevices.partition { it.bonded }
-                        val showWarningNotPaired =
-                            !connectionState.isConnected() && !hasShownNotPairedWarning && bonded.isEmpty()
-                        if (showWarningNotPaired) {
-                            Text(
-                                text = stringResource(Res.string.warning_not_paired),
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            LaunchedEffect(Unit) { connectionsViewModel.suppressNoPairedWarning() }
                         }
                     }
                 }
-            }
 
-            Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                Text(text = scanStatusText.orEmpty(), fontSize = 10.sp, textAlign = TextAlign.End)
+                var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
+                LaunchedEffect(Unit) { DeviceType.fromAddress(selectedDevice)?.let { selectedDeviceType = it } }
+
+                ConnectionsSegmentedBar(selectedDeviceType = selectedDeviceType, modifier = Modifier.fillMaxWidth()) {
+                    selectedDeviceType = it
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Column(modifier = Modifier.fillMaxSize()) {
+                    when (selectedDeviceType) {
+                        DeviceType.BLE -> {
+                            val (bonded, available) = bleDevices.partition { it.bonded }
+                            BLEDevices(
+                                connectionState = connectionState,
+                                bondedDevices = bonded,
+                                availableDevices = available,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                                bluetoothEnabled = bluetoothState.enabled,
+                            )
+                        }
+
+                        DeviceType.TCP -> {
+                            NetworkDevices(
+                                connectionState = connectionState,
+                                discoveredNetworkDevices = discoveredTcpDevices,
+                                recentNetworkDevices = recentTcpDevices,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                            )
+                        }
+
+                        DeviceType.USB -> {
+                            UsbDevices(
+                                connectionState = connectionState,
+                                usbDevices = usbDevices,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Warning Not Paired
+                    val hasShownNotPairedWarning by
+                        connectionsViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
+                    val (bonded, _) = bleDevices.partition { it.bonded }
+                    val showWarningNotPaired =
+                        !connectionState.isConnected() && !hasShownNotPairedWarning && bonded.isEmpty()
+                    if (showWarningNotPaired) {
+                        Text(
+                            text = stringResource(Res.string.warning_not_paired),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        LaunchedEffect(Unit) { connectionsViewModel.suppressNoPairedWarning() }
+                    }
+                }
+            }
+            scanStatusText?.let {
+                Card(
+                    modifier = Modifier.padding(8.dp).align(Alignment.BottomStart),
+                    colors =
+                    CardDefaults.cardColors()
+                        .copy(containerColor = CardDefaults.cardColors().containerColor.copy(alpha = 0.5f)),
+                ) {
+                    Text(
+                        text = it,
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                    )
+                }
             }
         }
     }
