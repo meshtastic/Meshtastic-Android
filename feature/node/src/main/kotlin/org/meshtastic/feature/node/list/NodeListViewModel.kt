@@ -37,6 +37,8 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
@@ -57,14 +59,6 @@ constructor(
     val nodeFilterPreferences: NodeFilterPreferences,
 ) : ViewModel() {
 
-    val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
-
-    val onlineNodeCount = nodeRepository.onlineNodeCount.stateInWhileSubscribed(initialValue = 0)
-
-    val totalNodeCount = nodeRepository.totalNodeCount.stateInWhileSubscribed(initialValue = 0)
-
-    val connectionState = serviceRepository.connectionState
-
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested = _sharedContactRequested.asStateFlow()
 
@@ -74,6 +68,10 @@ constructor(
     val uiState: StateFlow<NodesUiState> by
         lazy(LazyThreadSafetyMode.NONE) {
             moleculeScope.launchMolecule(mode = RecompositionMode.ContextClock) {
+                val ourNodeInfo by nodeRepository.ourNodeInfo.collectAsState()
+                val onlineNodeCount by nodeRepository.onlineNodeCount.collectAsState(0)
+                val totalNodeCount by nodeRepository.totalNodeCount.collectAsState(0)
+                val connectionState by serviceRepository.connectionState.collectAsState()
                 val filterText by filterText
                 val includeUnknown by nodeFilterPreferences.includeUnknown.collectAsState()
                 val excludeInfrastructure by nodeFilterPreferences.excludeInfrastructure.collectAsState()
@@ -81,7 +79,7 @@ constructor(
                 val onlyDirect by nodeFilterPreferences.onlyDirect.collectAsState()
                 val showIgnored by nodeFilterPreferences.showIgnored.collectAsState()
 
-                val filterState =
+                val filter =
                     NodeFilterState(
                         filterText = filterText,
                         includeUnknown = includeUnknown,
@@ -94,21 +92,6 @@ constructor(
                 nodeFilterPreferences.nodeSortOption
                         .collectAsState(NodeSortOption.VIA_FAVORITE)
                 val profile by radioConfigRepository.deviceProfileFlow.collectAsState(deviceProfile {})
-                NodesUiState(
-                    sort = sort,
-                    filter = filterState,
-                    distanceUnits = profile.config.display.units.number,
-                    tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-                )
-            }
-        }
-
-    val nodeList: StateFlow<List<Node>> by
-        lazy(LazyThreadSafetyMode.NONE) {
-            moleculeScope.launchMolecule(mode = RecompositionMode.ContextClock) {
-                val uiState by uiState.collectAsState()
-                val sort = uiState.sort
-                val filter = uiState.filter
 
                 val nodeList by
                     nodeRepository
@@ -139,7 +122,18 @@ constructor(
                                 }
                         }
                         .collectAsState(emptyList())
-                nodeList
+
+                NodesUiState(
+                    ourNodeInfo = ourNodeInfo,
+                    onlineNodeCount = onlineNodeCount,
+                    totalNodeCount = totalNodeCount,
+                    connectionState = connectionState,
+                    sort = sort,
+                    filter = filter,
+                    nodes = nodeList,
+                    distanceUnits = profile.config.display.units.number,
+                    tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+                )
             }
         }
 
@@ -170,8 +164,13 @@ constructor(
 }
 
 data class NodesUiState(
+    val ourNodeInfo: Node? = null,
+    val onlineNodeCount: Int = 0,
+    val totalNodeCount: Int = 0,
+    val connectionState: ConnectionState = ConnectionState.Connected,
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: NodeFilterState = NodeFilterState(),
+    val nodes: List<Node> = emptyList(),
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
 )
