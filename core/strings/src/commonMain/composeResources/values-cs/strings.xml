@@ -35,7 +35,6 @@
     <string name="node_sort_via_mqtt">přes MQTT</string>
     <string name="via_mqtt">přes MQTT</string>
     <string name="node_sort_via_favorite">Oblíbené</string>
-    <string name="node_filter_show_ignored">Ignorované uzly</string>
     <string name="unrecognized">Neznámý</string>
     <string name="message_status_enroute">Čeká na potvrzení</string>
     <string name="message_status_queued">Ve frontě k odeslání</string>
@@ -81,6 +80,7 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">Při trojím stisku tlačítka odeslat polohu na primární kanál.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Nastavuje blikání LED diody na zařízení. U většiny zařízení lze ovládat jednu ze čtyř LED diod, avšak LED diody nabíječky a GPS nelze ovládat.</string>
     <string name="config_device_tzdef_summary">Časové pásmo pro zobrazování dat na displeji a v záznamech (logu).</string>
+    <string name="config_device_use_phone_tz">Použít časové pásmo telefonu</string>
     <string name="config_device_transmitOverLora_summary">Umožní odesílat informace o sousedních uzlech (NeighborInfo) nejen do MQTT a PhoneAPI, ale také přes LoRa. Nedostupné na kanálech s výchozím klíčem a názvem.</string>
     <string name="config_display_screen_on_secs_summary">Doba, po kterou zůstane displej aktivní po stisku tlačítka nebo po přijetí zprávy.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Automaticky přepíná stránky na displeji v daném intervalu.</string>
@@ -147,6 +147,7 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Připojeno</string>
     <string name="connected_to">Připojeno k vysílači (%1$s)</string>
+    <string name="connecting">Připojování</string>
     <string name="not_connected">Nepřipojeno</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači</string>
     <string name="app_too_old">Aplikace je příliš stará</string>
@@ -166,6 +167,7 @@
     <string name="debug_clear">Vymazat protokoly</string>
     <string name="clear">Vymazat</string>
     <string name="message_delivery_status">Stav doručení zprávy</string>
+    <string name="new_messages_below">Nové zprávy</string>
     <string name="meshtastic_messages_notifications">Upozornění na přímou zprávu</string>
     <string name="meshtastic_broadcast_notifications">Upozornění na hromadné zprávy</string>
     <string name="meshtastic_alerts_notifications">Upozornění na varování</string>
@@ -229,8 +231,8 @@
     <string name="delivery_confirmed">Doručeno</string>
     <string name="error">Chyba</string>
     <string name="ignore">Ignorovat</string>
-    <string name="ignore_add">Přidat '%1$s' do seznamu ignorovaných?</string>
-    <string name="ignore_remove">Odstranit '%1$s' ze seznamu ignorování?</string>
+    <string name="ignore_add">Přidat \'%1$s\' do seznamu ignorovaných?</string>
+    <string name="ignore_remove">Odstranit \'%1$s\' ze seznamu ignorování?</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
     <string name="map_start_download">Zahájit stahování</string>
@@ -250,6 +252,8 @@
     <string name="map_purge_fail">Vyčištění mezipaměti SQL selhalo, podrobnosti naleznete v logcat</string>
     <string name="map_cache_manager">Správce mezipaměti</string>
     <string name="map_download_complete">Stahování dokončeno!</string>
+    <string name="map_download_errors">Stahování dokončeno s %1$d chybami</string>
+    <string name="map_cache_tiles">%1$d dlaždic</string>
     <string name="map_subDescription">směr: %1$d° vzdálenost: %2$s</string>
     <string name="waypoint_edit">Upravit waypoint</string>
     <string name="waypoint_delete">Smazat waypoint?</string>
@@ -326,8 +330,8 @@
     <string name="critical_alert">Kritické varování!</string>
     <string name="favorite">Oblíbené</string>
     <string name="add_favorite">Přidat do oblíbených</string>
-    <string name="favorite_add">Přidat '%1$s' jako oblíbený uzel?</string>
-    <string name="favorite_remove">Odstranit '%1$s' z oblíbených uzlů?</string>
+    <string name="favorite_add">Přidat \'%1$s\' jako oblíbený uzel?</string>
+    <string name="favorite_remove">Odstranit \'%1$s\' z oblíbených uzlů?</string>
     <string name="power_metrics_log">Protokol metrik napájení</string>
     <string name="channel_1">Kanál 1</string>
     <string name="channel_2">Kanál 2</string>
@@ -404,6 +408,8 @@
     <string name="up_down_select_input_enabled">Vstup Nahoru/Dolů/Výběr povolen</string>
     <string name="send_bell">Odeslat zvonek</string>
     <string name="messages">Zprávy</string>
+    <string name="device_db_cache_limit">Limit mezipaměti databáze zařízení</string>
+    <string name="device_db_cache_limit_summary">Maximální počet databází zařízení uchovávaných v tomto telefonu</string>
     <string name="detection_sensor_config">Konfigurace detekčního senzoru</string>
     <string name="detection_sensor_enabled">Detekční senzor povolen</string>
     <string name="minimum_broadcast_seconds">Minimální vysílání (sekundy)</string>
@@ -555,6 +561,7 @@
     <string name="number_of_records">Počet záznamů</string>
     <string name="server">Server</string>
     <string name="telemetry_config">Nastavení telemetrie</string>
+    <string name="device_metrics_update_interval_seconds">Interval aktualizace metrik zařízení</string>
     <string name="environment_metrics_module_enabled">Modul měření životního prostředí povolen</string>
     <string name="environment_metrics_on_screen_enabled">Zobrazení měření životního prostředí povoleno</string>
     <string name="environment_metrics_use_fahrenheit">Měření životního prostředí používá Fahrenheit</string>
@@ -689,6 +696,8 @@
     <string name="clear_selection">Zrušit výběr</string>
     <string name="message_input_label">Zpráva</string>
     <string name="type_a_message">Napište zprávu</string>
+    <string name="wifi_devices">WiFi zařízení</string>
+    <string name="ble_devices">BLE zařízení</string>
     <string name="bluetooth_paired_devices">Spárovaná zařízení</string>
     <string name="bluetooth_available_devices">Dostupná zařízení</string>
     <string name="connected_device">Připojená zařízení</string>
@@ -734,6 +743,7 @@
     <string name="notification_permissions_description">Meshtastic vás pomocí oznámení upozorní na nové zprávy a důležité události. Nastavení oznámení si můžete kdykoli upravit.</string>
     <string name="next">Další</string>
     <string name="grant_permissions">Povolit oprávnění</string>
+    <string name="nodes_queued_for_deletion">%1$d uzlů zařazeno k odstranění:</string>
     <string name="clean_node_database_description">Varování: Tímto odstraníte uzly z databází v aplikaci i v zařízení.\nVybrané položky se sčítají (kombinují).</string>
     <string name="map_type_normal">Normální</string>
     <string name="map_type_satellite">Satelitní</string>
@@ -760,13 +770,18 @@
     <string name="secondary_channel_position_feature">Vypnutí odesílání polohy na primárním kanálu umožní pravidelné vysílání polohy na prvním sekundárním kanálu, kde je odesílání polohy povoleno. V opačném případě je nutné polohu vyžádat ručně.</string>
     <string name="device_configuration">Nastavení zařízení</string>
     <string name="remotely_administrating">"[Vzdálený] %1$s"</string>
+    <string name="device_telemetry_enabled">Odesílat telemetrii zařízení</string>
+    <string name="device_telemetry_enabled_summary">Povolit/zakázat modul telemetrie zařízení pro odesílání metrik do mesh sítě. Jedná se o nominální hodnoty. Přetížené mesh sítě se automaticky přizpůsobí na delší intervaly podle počtu online uzlů. Mesh sítě s méně než 10 uzly budou přecházet na kratší intervaly.</string>
     <string name="any">Vše</string>
     <string name="one_hour">1 hodina</string>
     <string name="eight_hours">8 hodin</string>
     <string name="one_day">24 hodin</string>
     <string name="two_days">48 hodin</string>
     <string name="last_heard_filter_label">Filtrovat podle času posledního slyšení: %1$s</string>
+    <string name="dbm_value">%1$d dBm</string>
     <string name="system_settings">Nastavení systému</string>
     <string name="no_local_stats">Žádné statistiky k dispozici</string>
     <string name="analytics_notice">Shromažďujeme analytická data, která nám pomáhají vylepšovat aplikaci pro Android (děkujeme). Získáváme anonymizované informace o chování uživatelů, například hlášení o pádech aplikace, používání jednotlivých obrazovek apod.</string>
+    <string name="relayed_by">Přeposláno uzlem: %1$s</string>
+    <string name="preserve_favorites">Chcete zachovat oblíbené položky?</string>
 </resources>
