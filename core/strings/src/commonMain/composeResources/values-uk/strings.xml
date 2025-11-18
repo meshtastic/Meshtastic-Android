@@ -58,6 +58,7 @@
     <string name="ip_address">IP Адреса:</string>
     <string name="ip_port">Порт:</string>
     <string name="connected_to">Підключено до радіомодуля (%1$s)</string>
+    <string name="connecting">Підключення...</string>
     <string name="not_connected">Не підключено</string>
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
@@ -145,6 +146,8 @@
     <string name="map_purge_fail">Помилка очищення кешу SQL, перегляньте logcat для деталей</string>
     <string name="map_cache_manager">Керування кешем</string>
     <string name="map_download_complete">Звантаження завершено!</string>
+    <string name="map_download_errors">Завантаження завершено з %1$d помилками</string>
+    <string name="map_cache_tiles">%1$d плиток</string>
     <string name="map_subDescription">прийом: %1$d° відстань: %2$s</string>
     <string name="waypoint_edit">Редагувати точку</string>
     <string name="waypoint_delete">Видалити мітку?</string>

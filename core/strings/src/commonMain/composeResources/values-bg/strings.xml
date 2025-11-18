@@ -35,7 +35,6 @@
     <string name="node_sort_via_mqtt">с MQTT</string>
     <string name="via_mqtt">с MQTT</string>
     <string name="node_sort_via_favorite">Чрез любим</string>
-    <string name="node_filter_show_ignored">Игнорирани възли</string>
     <string name="unrecognized">Неразпознат</string>
     <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
@@ -146,6 +145,7 @@
     <string name="connection_status">Текущи връзки:</string>
     <string name="wifi_ip">Wifi IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="connecting">Свързване</string>
     <string name="not_connected">Няма връзка</string>
     <string name="connected_sleeping">Свързан е с радио, но рядиото е в режим на заспиване</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
@@ -255,6 +255,8 @@
     <string name="map_purge_fail">Изчистването на SQL кеша е неуспешно, вижте logcat за подробности</string>
     <string name="map_cache_manager">Мениджър на кеш</string>
     <string name="map_download_complete">Свалянето приключи!</string>
+    <string name="map_download_errors">Свалянето приключи с %1$d грешки</string>
+    <string name="map_cache_tiles">%1$d плочки</string>
     <string name="map_subDescription">посока: %1$d° разстояние: %2$s</string>
     <string name="waypoint_edit">Редактиране на пътна точка</string>
     <string name="waypoint_delete">Изтриване на пътна точка?</string>
@@ -678,6 +680,7 @@
     <string name="configure_critical_alerts">Конфигуриране на критични предупреждения</string>
     <string name="notification_permissions_description">Meshtastic използва известия, за да ви държи в течение за нови съобщения и други важни събития. Можете да актуализирате разрешенията си за известия по всяко време от настройките.</string>
     <string name="next">Напред</string>
+    <string name="nodes_queued_for_deletion">%1$d възела са на опашка за изтриване:</string>
     <string name="connecting_to_device">Свързване с устройство</string>
     <string name="map_type_normal">Нормален</string>
     <string name="map_type_satellite">Сателит</string>
@@ -707,7 +710,6 @@
     <string name="secondary_channel_position_feature">Деактивирането на позицията на първичния канал позволява периодично излъчване на позиция на първия вторичен канал с активирана позиция, в противен случай е необходимо ръчно заявяване на позиция.</string>
     <string name="device_configuration">Конфигурация на устройството</string>
     <string name="device_telemetry_enabled">Изпращане на телеметрия на устройството</string>
-    <string name="device_telemetry_enabled_summary">Активиране/дезактивиране на модула за телеметрия на устройството за изпращане на метрики към mesh</string>
     <string name="one_hour">1 час</string>
     <string name="eight_hours">8 часа</string>
     <string name="one_day">24 часа</string>

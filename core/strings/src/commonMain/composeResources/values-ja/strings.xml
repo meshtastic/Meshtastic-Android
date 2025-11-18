@@ -180,6 +180,8 @@
     <string name="map_purge_fail">SQL キャッシュの削除に失敗しました。詳細は logcat を参照してください。</string>
     <string name="map_cache_manager">キャッシュの管理</string>
     <string name="map_download_complete">ダウンロード完了！</string>
+    <string name="map_download_errors">ダウンロード完了、%1$dのエラーがあります。</string>
+    <string name="map_cache_tiles">%1$d タイル</string>
     <string name="map_subDescription">方位: %1$d°距離: %2$s</string>
     <string name="waypoint_edit">ウェイポイントを編集</string>
     <string name="waypoint_delete">ウェイポイントを削除しますか？</string>

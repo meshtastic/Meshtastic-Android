@@ -35,7 +35,6 @@
     <string name="node_sort_via_mqtt">über MQTT</string>
     <string name="via_mqtt">über MQTT</string>
     <string name="node_sort_via_favorite">über Favorit</string>
-    <string name="node_filter_show_ignored">Ignorierte Knoten</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
@@ -183,6 +182,7 @@
     <string name="connection_status">Aktuelle Verbindungen:</string>
     <string name="wifi_ip">WLAN IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="connecting">Wird verbunden</string>
     <string name="not_connected">Nicht verbunden</string>
     <string name="connected_sleeping">Mit Funkgerät verbunden, aber es ist im Schlafmodus</string>
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
@@ -299,6 +299,8 @@
     <string name="map_purge_fail">Das Säubern des SQL-Zwischenspeichers ist fehlgeschlagen, siehe Logcat für Details</string>
     <string name="map_cache_manager">Zwischenspeicher-Verwaltung</string>
     <string name="map_download_complete">Herunterladen abgeschlossen!</string>
+    <string name="map_download_errors">Herunterladen abgeschlossen mit %1$d Fehlern</string>
+    <string name="map_cache_tiles">%1$d Kacheln</string>
     <string name="map_subDescription">Richtung: %1$d° Entfernung: %2$s</string>
     <string name="waypoint_edit">Wegpunkt bearbeiten</string>
     <string name="waypoint_delete">Wegpunkt löschen?</string>
@@ -849,6 +851,7 @@
     <string name="notification_permissions_description">Meshtastic nutzt Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
     <string name="grant_permissions">Berechtigungen erteilen</string>
+    <string name="nodes_queued_for_deletion">%1$d Knoten in der Warteschlange zum Löschen:</string>
     <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
     <string name="connecting_to_device">Verbinde mit Gerät</string>
     <string name="map_type_normal">Normal</string>
@@ -889,7 +892,6 @@
     <string name="device_configuration">Geräteeinstellungen</string>
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <string name="device_telemetry_enabled">Gerätetelemetrie senden</string>
-    <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul Gerätetelemetrie, um Daten an das Netzwerk zu senden</string>
     <string name="any">Beliebig</string>
     <string name="one_hour">1 Stunde</string>
     <string name="eight_hours">8 Stunden</string>

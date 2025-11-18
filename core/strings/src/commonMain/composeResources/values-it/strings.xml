@@ -33,7 +33,6 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Preferiti</string>
-    <string name="node_filter_show_ignored">Nodi ignorati</string>
     <string name="unrecognized">Non riconosciuto</string>
     <string name="message_status_enroute">In attesa di conferma</string>
     <string name="message_status_queued">In coda per l'invio</string>
@@ -119,6 +118,7 @@
     <string name="ip_port">Porta:</string>
     <string name="connected">Connesso</string>
     <string name="connected_to">Connesso alla radio (%1$s)</string>
+    <string name="connecting">Connessione in corso</string>
     <string name="not_connected">Non connesso</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
     <string name="app_too_old">Aggiornamento dell'applicazione necessario</string>
@@ -233,6 +233,8 @@
     <string name="map_purge_fail">Eliminazione della cache SQL non riuscita, vedere logcat per i dettagli</string>
     <string name="map_cache_manager">Gestione della cache</string>
     <string name="map_download_complete">Scaricamento completato!</string>
+    <string name="map_download_errors">Download completo con %1$d errori</string>
+    <string name="map_cache_tiles">%1$d riquadri della mappa</string>
     <string name="map_subDescription">direzione: %1$d° distanza: %2$s</string>
     <string name="waypoint_edit">Modifica waypoint</string>
     <string name="waypoint_delete">Elimina waypoint?</string>
@@ -737,6 +739,7 @@
     <string name="notification_permissions_description">Meshtastic utilizza le notifiche per tenerti aggiornato su nuovi messaggi e altri eventi importanti. È possibile aggiornare i permessi di notifica in qualsiasi momento dalle impostazioni.</string>
     <string name="next">Avanti</string>
     <string name="grant_permissions">Concedi permessi</string>
+    <string name="nodes_queued_for_deletion">%1$d nodi in coda per l'eliminazione:</string>
     <string name="clean_node_database_description">Attenzione: questo rimuove i nodi dal database dell'app e sul dispositivo. Le selezioni\nsono additive.</string>
     <string name="connecting_to_device">Connessione al dispositivo in corso…</string>
     <string name="map_type_normal">Normale</string>
