@@ -35,7 +35,6 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">par Favoris</string>
-    <string name="node_filter_show_ignored">Nœuds ignorés</string>
     <string name="unrecognized">Non reconnu</string>
     <string name="message_status_enroute">En attente d'accusé de réception</string>
     <string name="message_status_queued">En file d'attente pour l'envoi</string>
@@ -179,6 +178,7 @@
     <string name="ip_port">Port :</string>
     <string name="connected">Connecté</string>
     <string name="connected_to">Connecté à la radio (%1$s)</string>
+    <string name="connecting">Connexion en cours</string>
     <string name="not_connected">Non connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="app_too_old">Mise à jour de l’application requise</string>
@@ -295,6 +295,8 @@
     <string name="map_purge_fail">La purge du cache SQL a échoué, consultez « logcat » pour plus de détails</string>
     <string name="map_cache_manager">Gestionnaire du cache</string>
     <string name="map_download_complete">Téléchargement terminé !</string>
+    <string name="map_download_errors">Téléchargement terminé avec %1$d erreurs</string>
+    <string name="map_cache_tiles">Vignettes de %1$d</string>
     <string name="map_subDescription">échelle : %1$d° distance : %2$s</string>
     <string name="waypoint_edit">Modifier le repère</string>
     <string name="waypoint_delete">Supprimer le repère ?</string>
@@ -826,6 +828,7 @@
     <string name="notification_permissions_description">Meshtastic utilise les notifications pour vous tenir à jour sur les nouveaux messages et autres événements importants. Vous pouvez mettre à jour vos autorisations de notification à tout moment à partir des paramètres.</string>
     <string name="next">Suivant</string>
     <string name="grant_permissions">Accorder les autorisations</string>
+    <string name="nodes_queued_for_deletion">%1$d nœuds en attente de suppression :</string>
     <string name="clean_node_database_description">Attention : Ceci supprime les nœuds des bases de données in-app et on-device.\nLes sélections sont additionnelles.</string>
     <string name="connecting_to_device">Connexion à l'appareil</string>
     <string name="map_type_normal">Normal</string>
@@ -866,7 +869,6 @@
     <string name="device_configuration">Configuration de l'appareil</string>
     <string name="remotely_administrating">"[Distant] %1$s"</string>
     <string name="device_telemetry_enabled">Envoyer la télémétrie de l'appareil</string>
-    <string name="device_telemetry_enabled_summary">Activer/Désactiver le module de télémétrie de l'appareil pour envoyer des métriques au maillage</string>
     <string name="any">N'importe laquelle</string>
     <string name="one_hour">1 Heure</string>
     <string name="eight_hours">8 Heures</string>
