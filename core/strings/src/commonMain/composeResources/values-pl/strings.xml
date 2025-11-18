@@ -105,6 +105,7 @@
     <string name="ip_address">Adres IP:</string>
     <string name="connected">Połączony</string>
     <string name="connected_to">Połączono z urządzeniem (%1$s)</string>
+    <string name="connecting">Łączenie</string>
     <string name="not_connected">Nie połączono</string>
     <string name="connected_sleeping">Połączono z urządzeniem, ale jest ono w stanie uśpienia</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
@@ -117,7 +118,7 @@
     <string name="clear">Czyść</string>
     <string name="message_delivery_status">Status doręczenia wiadomości</string>
     <string name="meshtastic_alerts_notifications">Powiadomienia alertowe</string>
-    <string name="firmware_too_old">Wymagana aktualizacja firmware'u.</string>
+    <string name="firmware_too_old">Wymagana aktualizacja firmware\'u.</string>
     <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nasz przewodnik instalacji oprogramowania układowego</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musisz ustawić region!</string>
@@ -170,8 +171,8 @@
     <string name="delivery_confirmed">Dostarczono</string>
     <string name="error">Błąd</string>
     <string name="ignore">Zignoruj</string>
-    <string name="ignore_add">Dodać '%1$s' do listy ignorowanych?</string>
-    <string name="ignore_remove">Usunąć '%1$s' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
+    <string name="ignore_add">Dodać \'%1$s\' do listy ignorowanych?</string>
+    <string name="ignore_remove">Usunąć \'%1$s\' z listy ignorowanych? Twoje urządzenie zostanie zrestartowane po tej zmianie.</string>
     <string name="map_select_download_region">Wybierz region do pobrania</string>
     <string name="map_tile_download_estimate">Szacowany czas pobrania:</string>
     <string name="map_start_download">Rozpocznij pobieranie</string>
@@ -191,6 +192,8 @@
     <string name="map_purge_fail">Usuwanie pamięci podręcznej SQL nie powiodło się, zobacz logcat</string>
     <string name="map_cache_manager">Zarządzanie pamięcią podręczną</string>
     <string name="map_download_complete">Pobieranie ukończone!</string>
+    <string name="map_download_errors">Pobieranie zakończone z %1$d błędami</string>
+    <string name="map_cache_tiles">%1$d mapy</string>
     <string name="map_subDescription">kierunek: %1$d° odległość: %2$s</string>
     <string name="waypoint_edit">Edytuj punkt nawigacji</string>
     <string name="waypoint_delete">Usuń punkt nawigacji?</string>
@@ -264,8 +267,8 @@
     <string name="alert_bell_text">Znak ostrzegawczy!</string>
     <string name="critical_alert">Krytyczny alert!</string>
     <string name="favorite">Ulubiony</string>
-    <string name="favorite_add">Dodać węzeł '%1$s' do ulubionych?</string>
-    <string name="favorite_remove">Usunąć węzeł '%1$s' z ulubionych?</string>
+    <string name="favorite_add">Dodać węzeł \'%1$s\' do ulubionych?</string>
+    <string name="favorite_remove">Usunąć węzeł \'%1$s\' z ulubionych?</string>
     <string name="power_metrics_log">Historia zasilania</string>
     <string name="channel_1">Kanał 1</string>
     <string name="channel_2">Kanał 2</string>
