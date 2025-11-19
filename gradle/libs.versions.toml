@@ -10,7 +10,7 @@ androidxTracing = "1.9.5"
 datastore = "1.1.7"
 lifecycle = "2.10.0"
 navigation = "2.9.6"
-navigation3 = "1.0.0-rc01"
+navigation3 = "1.0.0"
 room = "2.8.4"
 
 # Kotlin
