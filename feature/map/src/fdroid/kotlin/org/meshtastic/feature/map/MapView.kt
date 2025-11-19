@@ -990,27 +990,6 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
             }
         }
 
-        // Add a button to switch back to osmdroid when using MapLibre
-        // Note: This is placed outside the Crossfade so it's always accessible
-        if (useMapLibre) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(12.dp),
-                    onClick = {
-                        useMapLibre = false
-                        // Cleanup: osmdroid map will be recreated when switching back
-                    },
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "Switch back to osmdroid",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
-        }
 
         showEditWaypointDialog?.let { waypoint ->
             EditWaypointDialog(

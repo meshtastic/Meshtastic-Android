@@ -40,6 +40,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Explore
@@ -48,6 +49,8 @@ import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.AlertDialog
@@ -158,7 +161,6 @@ import kotlin.math.sin
 fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDetails: (Int) -> Unit = {}) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var selectedInfo by remember { mutableStateOf<String?>(null) }
     var selectedNodeNum by remember { mutableStateOf<Int?>(null) }
     val ourNode by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
@@ -536,14 +538,14 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                                     val loc = map.locationComponent.lastKnownLocation
                                     if (loc != null) {
                                         val target = LatLng(loc.latitude, loc.longitude)
-                                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(target, 12.0))
+                                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(target, 10.0))
                                         didInitialCenter = true
                                     } else {
                                         ourNode?.validPosition?.let { p ->
                                             map.animateCamera(
                                                 CameraUpdateFactory.newLatLngZoom(
                                                     LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
-                                                    12.0,
+                                                    10.0,
                                                 ),
                                             )
                                             didInitialCenter = true
@@ -648,31 +650,24 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                                         return@addOnMapClickListener true
                                     }
                                 }
-                                selectedInfo =
-                                    f?.let {
-                                        val kind = it.getStringProperty("kind")
-                                        when (kind) {
-                                            "node" -> {
-                                                val num = it.getNumberProperty("num")?.toInt() ?: -1
-                                                val n = nodes.firstOrNull { node -> node.num == num }
-                                                selectedNodeNum = num
-                                                n?.let { node ->
-                                                    "Node ${node.user.longName.ifBlank {
-                                                        node.num.toString()
-                                                    }} (${node.gpsString()})"
-                                                } ?: "Node $num"
-                                            }
-                                            "waypoint" -> {
-                                                val id = it.getNumberProperty("id")?.toInt() ?: -1
-                                                // Open edit dialog for waypoint
-                                                waypoints.values
-                                                    .find { pkt -> pkt.data.waypoint?.id == id }
-                                                    ?.let { pkt -> editingWaypoint = pkt.data.waypoint }
-                                                "Waypoint: ${it.getStringProperty("name") ?: id}"
-                                            }
-                                            else -> null
+                                // Handle node/waypoint selection
+                                f?.let {
+                                    val kind = it.getStringProperty("kind")
+                                    when (kind) {
+                                        "node" -> {
+                                            val num = it.getNumberProperty("num")?.toInt() ?: -1
+                                            selectedNodeNum = num
                                         }
+                                        "waypoint" -> {
+                                            val id = it.getNumberProperty("id")?.toInt() ?: -1
+                                            // Open edit dialog for waypoint
+                                            waypoints.values
+                                                .find { pkt -> pkt.data.waypoint?.id == id }
+                                                ?.let { pkt -> editingWaypoint = pkt.data.waypoint }
+                                        }
+                                        else -> {}
                                     }
+                                }
                                 true
                             }
                             // Long-press to create waypoint
@@ -865,18 +860,6 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
             },
         )
 
-        selectedInfo?.let { info ->
-            Surface(
-                modifier = Modifier.align(Alignment.TopCenter).fillMaxWidth().padding(12.dp),
-                tonalElevation = 6.dp,
-                shadowElevation = 6.dp,
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(text = info, style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
-
         // Role legend (based on roles present in current nodes)
         val rolesPresent = remember(nodes) { nodes.map { it.user.role }.toSet() }
         if (showLegend && rolesPresent.isNotEmpty()) {
@@ -916,33 +899,43 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
         var mapFilterExpanded by remember { mutableStateOf(false) }
         @OptIn(ExperimentalMaterial3ExpressiveApi::class)
         HorizontalFloatingToolbar(
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 72.dp), // Top padding to avoid exit button
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp), // Top padding to avoid exit button
             expanded = true,
             content = {
-                // Compass button (matches Google Maps style - appears first, rotates with map bearing)
-                val compassBearing = mapRef?.cameraPosition?.bearing?.toFloat() ?: 0f
-                val compassIcon = if (followBearing) Icons.Filled.Navigation else Icons.Outlined.Navigation
-                MapButton(
-                    onClick = {
-                        if (isLocationTrackingEnabled) {
-                            followBearing = !followBearing
-                            Timber.tag("MapLibrePOC").d("Follow bearing toggled: %s", followBearing)
-                        } else {
-                            // Enable tracking when compass is clicked
-                            if (hasLocationPermission) {
-                                isLocationTrackingEnabled = true
-                                followBearing = true
-                                Timber.tag("MapLibrePOC").d("Enabled tracking + bearing from compass button")
-                            } else {
-                                Timber.tag("MapLibrePOC").w("Location permission not granted")
+                // Consolidated GPS button (cycles through: Off -> On -> On with bearing)
+                if (hasLocationPermission) {
+                    val gpsIcon = when {
+                        isLocationTrackingEnabled && followBearing -> Icons.Filled.MyLocation
+                        isLocationTrackingEnabled -> Icons.Filled.MyLocation
+                        else -> Icons.Outlined.MyLocation
+                    }
+                    MapButton(
+                        onClick = {
+                            when {
+                                !isLocationTrackingEnabled -> {
+                                    // Off -> On
+                                    isLocationTrackingEnabled = true
+                                    followBearing = false
+                                    Timber.tag("MapLibrePOC").d("GPS tracking enabled")
+                                }
+                                isLocationTrackingEnabled && !followBearing -> {
+                                    // On -> On with bearing
+                                    followBearing = true
+                                    Timber.tag("MapLibrePOC").d("GPS tracking with bearing enabled")
+                                }
+                                else -> {
+                                    // On with bearing -> Off
+                                    isLocationTrackingEnabled = false
+                                    followBearing = false
+                                    Timber.tag("MapLibrePOC").d("GPS tracking disabled")
+                                }
                             }
-                        }
-                    },
-                    icon = compassIcon,
-                    contentDescription = null,
-                    iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { !followBearing },
-                    modifier = Modifier.rotate(-compassBearing),
-                )
+                        },
+                        icon = gpsIcon,
+                        contentDescription = null,
+                        iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { isLocationTrackingEnabled && !followBearing },
+                    )
+                }
                 Box {
                     MapButton(onClick = { mapFilterExpanded = true }, icon = Icons.Outlined.Tune, contentDescription = null)
                 DropdownMenu(expanded = mapFilterExpanded, onDismissRequest = { mapFilterExpanded = false }) {
@@ -1203,21 +1196,6 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                     contentDescription = null,
                 )
 
-                // Location tracking button (matches Google Maps style)
-                if (hasLocationPermission) {
-                    MapButton(
-                        onClick = {
-                            isLocationTrackingEnabled = !isLocationTrackingEnabled
-                            if (!isLocationTrackingEnabled) {
-                                followBearing = false
-                            }
-                            Timber.tag("MapLibrePOC").d("Location tracking toggled: %s", isLocationTrackingEnabled)
-                        },
-                        icon = if (isLocationTrackingEnabled) Icons.Filled.LocationDisabled else Icons.Outlined.MyLocation,
-                        contentDescription = null,
-                    )
-                }
-
                 // Cache management button
                 MapButton(
                     onClick = { showCacheBottomSheet = true },
@@ -1229,6 +1207,62 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                 MapButton(onClick = { showLegend = !showLegend }, icon = Icons.Outlined.Info, contentDescription = null)
             },
         )
+
+        // Zoom controls (bottom right) - Google Maps style
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 16.dp, end = 16.dp),
+        ) {
+            // Zoom in button
+            MapButton(
+                onClick = {
+                    mapRef?.let { map ->
+                        map.animateCamera(CameraUpdateFactory.zoomIn())
+                        Timber.tag("MapLibrePOC").d("Zoom in")
+                    }
+                },
+                icon = Icons.Outlined.Add,
+                contentDescription = "Zoom in",
+            )
+            
+            Spacer(modifier = Modifier.size(4.dp))
+            
+            // Zoom out button
+            MapButton(
+                onClick = {
+                    mapRef?.let { map ->
+                        map.animateCamera(CameraUpdateFactory.zoomOut())
+                        Timber.tag("MapLibrePOC").d("Zoom out")
+                    }
+                },
+                icon = Icons.Outlined.Remove,
+                contentDescription = "Zoom out",
+            )
+            
+            Spacer(modifier = Modifier.size(8.dp))
+            
+            // Compass reset button - resets map orientation to north (original top-right compass)
+            val currentBearing = mapRef?.cameraPosition?.bearing ?: 0.0
+            if (kotlin.math.abs(currentBearing) > 0.1) { // Only show if map is rotated
+                MapButton(
+                    onClick = {
+                        mapRef?.let { map ->
+                            map.animateCamera(
+                                CameraUpdateFactory.newCameraPosition(
+                                    org.maplibre.android.camera.CameraPosition.Builder(map.cameraPosition)
+                                        .bearing(0.0)
+                                        .build()
+                                )
+                            )
+                            Timber.tag("MapLibrePOC").d("Compass reset to north")
+                        }
+                    },
+                    icon = Icons.Outlined.Navigation,
+                    contentDescription = "Reset to north",
+                )
+            }
+        }
 
         // Custom tile URL dialog
         if (showCustomTileDialog) {
@@ -1437,7 +1471,7 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
         }
         if (selectedNode != null) {
             ModalBottomSheet(onDismissRequest = { selectedNodeNum = null }, sheetState = sheetState) {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)) {
                     NodeChip(node = selectedNode)
                     val longName = selectedNode.user.longName
                     if (!longName.isNullOrBlank()) {
