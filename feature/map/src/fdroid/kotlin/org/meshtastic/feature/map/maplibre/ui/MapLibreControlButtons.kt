@@ -22,27 +22,36 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.component.MapButton
@@ -70,40 +79,9 @@ fun MapLibreControlButtons(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.End) {
-        // Location tracking button with visual feedback
-        FloatingActionButton(
-            onClick = {
-                if (hasLocationPermission) {
-                    onLocationTrackingToggle()
-                    Timber.tag("MapLibrePOC").d("Location tracking toggled: %s", !isLocationTrackingEnabled)
-                } else {
-                    Timber.tag("MapLibrePOC").w("Location permission not granted")
-                }
-            },
-            containerColor =
-            if (isLocationTrackingEnabled) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surface
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.MyLocation,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint =
-                if (isLocationTrackingEnabled) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
-            )
-        }
-
-        Spacer(modifier = Modifier.size(8.dp))
-
-        // Compass button with visual feedback
-        FloatingActionButton(
+        // Compass button (matches Google Maps style - appears first, rotates with map bearing)
+        val compassIcon = if (followBearing) Icons.Filled.Navigation else Icons.Outlined.Navigation
+        MapButton(
             onClick = {
                 if (isLocationTrackingEnabled) {
                     onFollowBearingToggle()
@@ -112,25 +90,10 @@ fun MapLibreControlButtons(
                     onCompassClick()
                 }
             },
-            containerColor =
-            if (followBearing) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surface
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Explore,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint =
-                if (followBearing) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
-            )
-        }
+            icon = compassIcon,
+            contentDescription = null,
+            iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { !followBearing },
+        )
 
         Spacer(modifier = Modifier.size(8.dp))
 
@@ -138,15 +101,29 @@ fun MapLibreControlButtons(
 
         Spacer(modifier = Modifier.size(8.dp))
 
+        MapButton(onClick = onStyleClick, icon = Icons.Outlined.Map, contentDescription = null)
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        MapButton(onClick = onLayersClick, icon = Icons.Outlined.Layers, contentDescription = null)
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        // Location tracking button (matches Google Maps style)
+        if (hasLocationPermission) {
+            MapButton(
+                onClick = {
+                    onLocationTrackingToggle()
+                    Timber.tag("MapLibrePOC").d("Location tracking toggled: %s", !isLocationTrackingEnabled)
+                },
+                icon = if (isLocationTrackingEnabled) Icons.Filled.LocationDisabled else Icons.Outlined.MyLocation,
+                contentDescription = null,
+            )
+        }
+
+        Spacer(modifier = Modifier.size(8.dp))
+
         MapButton(onClick = onLegendClick, icon = Icons.Outlined.Info, contentDescription = null)
-
-        Spacer(modifier = Modifier.size(8.dp))
-
-        MapButton(onClick = onStyleClick, icon = Icons.Outlined.Layers, contentDescription = null)
-
-        Spacer(modifier = Modifier.size(8.dp))
-
-        MapButton(onClick = onLayersClick, icon = Icons.Outlined.Explore, contentDescription = null)
     }
 }
 

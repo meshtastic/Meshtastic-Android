@@ -36,6 +36,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.util.zip.ZipInputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
 /** Loads persisted map layers from internal storage */
@@ -125,18 +126,47 @@ suspend fun convertKmlToGeoJson(context: Context, layerItem: MapLayerItem): Stri
             // Handle KMZ (ZIP) files
             val content =
                 if (layerItem.layerType == LayerType.KML && uri.toString().endsWith(".kmz", ignoreCase = true)) {
-                    // TODO: Extract KML from KMZ ZIP file
-                    // For now, return empty GeoJSON
-                    Timber.tag("MapLibreLayerUtils").w("KMZ files not yet fully supported")
-                    return@withContext """{"type":"FeatureCollection","features":[]}"""
+                    extractKmlFromKmz(stream)
                 } else {
                     stream.bufferedReader().use { it.readText() }
                 }
+
+            if (content == null) {
+                Timber.tag("MapLibreLayerUtils").w("Failed to extract KML content")
+                return@withContext null
+            }
 
             parseKmlToGeoJson(content)
         }
     } catch (e: Exception) {
         Timber.tag("MapLibreLayerUtils").e(e, "Error converting KML to GeoJSON")
+        null
+    }
+}
+
+/** Extracts KML content from KMZ (ZIP) file */
+private fun extractKmlFromKmz(inputStream: InputStream): String? {
+    return try {
+        val zipInputStream = ZipInputStream(inputStream)
+        var entry = zipInputStream.nextEntry
+        
+        // Look for KML file in the ZIP (usually named "doc.kml" or similar)
+        while (entry != null) {
+            val fileName = entry.name.lowercase()
+            if (fileName.endsWith(".kml")) {
+                val kmlContent = zipInputStream.bufferedReader().use { it.readText() }
+                zipInputStream.closeEntry()
+                Timber.tag("MapLibreLayerUtils").d("Extracted KML from KMZ: ${entry.name}")
+                return kmlContent
+            }
+            zipInputStream.closeEntry()
+            entry = zipInputStream.nextEntry
+        }
+        
+        Timber.tag("MapLibreLayerUtils").w("No KML file found in KMZ archive")
+        null
+    } catch (e: Exception) {
+        Timber.tag("MapLibreLayerUtils").e(e, "Error extracting KML from KMZ")
         null
     }
 }

@@ -39,11 +39,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -51,9 +56,12 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.draw.rotate
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -98,7 +106,9 @@ import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
+import org.meshtastic.feature.map.component.TileCacheManagementSheet
 import org.meshtastic.feature.map.maplibre.BaseMapStyle
+import org.meshtastic.feature.map.maplibre.MapLibreConstants
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_CIRCLE_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_LIST_FETCH_MAX
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_RADIAL_MAX
@@ -129,6 +139,7 @@ import org.meshtastic.feature.map.maplibre.utils.getFileName
 import org.meshtastic.feature.map.maplibre.utils.hasAnyLocationPermission
 import org.meshtastic.feature.map.maplibre.utils.loadLayerGeoJson
 import org.meshtastic.feature.map.maplibre.utils.loadPersistedLayers
+import org.meshtastic.feature.map.maplibre.utils.MapLibreTileCacheManager
 import org.meshtastic.feature.map.maplibre.utils.protoShortName
 import org.meshtastic.feature.map.maplibre.utils.roleColor
 import org.meshtastic.feature.map.maplibre.utils.selectLabelsForViewport
@@ -182,6 +193,11 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
     var showLayersBottomSheet by remember { mutableStateOf(false) }
     var layerGeoJsonCache by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
 
+    // Tile cache management - initialize after MapLibre is initialized
+    var tileCacheManager by remember { mutableStateOf<MapLibreTileCacheManager?>(null) }
+    var showCacheBottomSheet by remember { mutableStateOf(false) }
+    var lastCacheUpdateTime by remember { mutableStateOf<Long?>(null) }
+
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle()
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
@@ -193,6 +209,76 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
 
     // Load persisted map layers on startup
     LaunchedEffect(Unit) { mapLayers = loadPersistedLayers(context) }
+
+    // Initialize tile cache manager after MapLibre is initialized
+    LaunchedEffect(Unit) {
+        try {
+            // Ensure MapLibre is initialized first
+            MapLibre.getInstance(context)
+            if (tileCacheManager == null) {
+                tileCacheManager = MapLibreTileCacheManager(context)
+                Timber.tag("MapLibrePOC").d("Tile cache manager initialized")
+            }
+        } catch (e: Exception) {
+            Timber.tag("MapLibrePOC").e(e, "Failed to initialize tile cache manager")
+        }
+    }
+
+    // Periodic cache updates
+    LaunchedEffect(tileCacheManager) {
+        tileCacheManager?.let { manager ->
+            while (true) {
+                val intervalMs = manager.getUpdateIntervalMs()
+                kotlinx.coroutines.delay(intervalMs)
+                try {
+                    manager.updateCachedRegions()
+                    lastCacheUpdateTime = System.currentTimeMillis()
+                    Timber.tag("MapLibrePOC").d("Cache update completed at ${lastCacheUpdateTime}")
+                } catch (e: Exception) {
+                    Timber.tag("MapLibrePOC").e(e, "Failed to update cached regions")
+                }
+            }
+        }
+    }
+
+    // Periodic hot area tracking - record viewport every 5 seconds even when camera is idle
+    LaunchedEffect(tileCacheManager, mapRef) {
+        if (tileCacheManager == null) {
+            Timber.tag("MapLibrePOC").d("Periodic hot area tracking: tileCacheManager is null, waiting...")
+            return@LaunchedEffect
+        }
+        if (mapRef == null) {
+            Timber.tag("MapLibrePOC").d("Periodic hot area tracking: mapRef is null, waiting...")
+            return@LaunchedEffect
+        }
+        
+        val manager = tileCacheManager!!
+        val map = mapRef!!
+        
+        Timber.tag("MapLibrePOC").d("Starting periodic hot area tracking (every 5 seconds)")
+        
+        while (true) {
+            kotlinx.coroutines.delay(5000) // Check every 5 seconds
+            try {
+                val style = map.style
+                if (style != null) {
+                    val bounds = map.projection.visibleRegion.latLngBounds
+                    val zoom = map.cameraPosition.zoom
+                    // Only cache if using a standard style URL (not custom raster tiles)
+                    val styleUrl = if (usingCustomTiles) null else MapLibreConstants.STYLE_URL
+                    Timber.tag("MapLibrePOC").d("Periodic hot area check: zoom=%.2f, bounds=[%.4f,%.4f,%.4f,%.4f], styleUrl=$styleUrl", 
+                        zoom, bounds.latitudeNorth, bounds.latitudeSouth, bounds.longitudeEast, bounds.longitudeWest)
+                    if (styleUrl != null) {
+                        manager.recordViewport(bounds, zoom, styleUrl)
+                    }
+                } else {
+                    Timber.tag("MapLibrePOC").d("Periodic hot area check: style is null, skipping")
+                }
+            } catch (e: Exception) {
+                Timber.tag("MapLibrePOC").e(e, "Failed to record viewport in periodic check")
+            }
+        }
+    }
 
     // Helper functions for layer management
     fun toggleLayerVisibility(layerId: String) {
@@ -652,6 +738,21 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                                     Timber.tag("MapLibrePOC")
                                         .d("onCameraIdle: rendered features in viewport=%d", rendered.size)
                                 } catch (_: Throwable) {}
+
+                                // Track viewport for tile caching (hot areas)
+                                tileCacheManager?.let { manager ->
+                                    try {
+                                        val bounds = map.projection.visibleRegion.latLngBounds
+                                        val zoom = map.cameraPosition.zoom
+                                        // Only cache if using a standard style URL (not custom raster tiles)
+                                        val styleUrl = if (usingCustomTiles) null else MapLibreConstants.STYLE_URL
+                                        if (styleUrl != null) {
+                                            manager.recordViewport(bounds, zoom, styleUrl)
+                                        }
+                                    } catch (e: Exception) {
+                                        Timber.tag("MapLibrePOC").e(e, "Failed to record viewport for tile caching")
+                                    }
+                                }
                             }
                             // Hide expanded cluster overlay whenever camera moves to avoid stale screen positions
                             map.addOnCameraMoveListener {
@@ -811,85 +912,39 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
             }
         }
 
-        // Map controls: recenter/follow and filter menu
+        // Map controls: horizontal toolbar at the top (matches Google Maps style)
         var mapFilterExpanded by remember { mutableStateOf(false) }
-        Column(
-            modifier =
-            Modifier.align(Alignment.TopEnd)
-                .padding(top = 72.dp, end = 16.dp), // Increased top padding to avoid exit button
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
-        ) {
-            // My Location button with visual feedback
-            FloatingActionButton(
-                onClick = {
-                    if (hasLocationPermission) {
-                        isLocationTrackingEnabled = !isLocationTrackingEnabled
-                        if (!isLocationTrackingEnabled) {
-                            followBearing = false
-                        }
-                        Timber.tag("MapLibrePOC").d("Location tracking toggled: %s", isLocationTrackingEnabled)
-                    } else {
-                        Timber.tag("MapLibrePOC").w("Location permission not granted")
-                    }
-                },
-                containerColor =
-                if (isLocationTrackingEnabled) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surface
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.MyLocation,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint =
-                    if (isLocationTrackingEnabled) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
-                )
-            }
-
-            // Compass button with visual feedback
-            FloatingActionButton(
-                onClick = {
-                    if (isLocationTrackingEnabled) {
-                        followBearing = !followBearing
-                        Timber.tag("MapLibrePOC").d("Follow bearing toggled: %s", followBearing)
-                    } else {
-                        // Enable tracking when compass is clicked
-                        if (hasLocationPermission) {
-                            isLocationTrackingEnabled = true
-                            followBearing = true
-                            Timber.tag("MapLibrePOC").d("Enabled tracking + bearing from compass button")
+        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+        HorizontalFloatingToolbar(
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 72.dp), // Top padding to avoid exit button
+            expanded = true,
+            content = {
+                // Compass button (matches Google Maps style - appears first, rotates with map bearing)
+                val compassBearing = mapRef?.cameraPosition?.bearing?.toFloat() ?: 0f
+                val compassIcon = if (followBearing) Icons.Filled.Navigation else Icons.Outlined.Navigation
+                MapButton(
+                    onClick = {
+                        if (isLocationTrackingEnabled) {
+                            followBearing = !followBearing
+                            Timber.tag("MapLibrePOC").d("Follow bearing toggled: %s", followBearing)
                         } else {
-                            Timber.tag("MapLibrePOC").w("Location permission not granted")
+                            // Enable tracking when compass is clicked
+                            if (hasLocationPermission) {
+                                isLocationTrackingEnabled = true
+                                followBearing = true
+                                Timber.tag("MapLibrePOC").d("Enabled tracking + bearing from compass button")
+                            } else {
+                                Timber.tag("MapLibrePOC").w("Location permission not granted")
+                            }
                         }
-                    }
-                },
-                containerColor =
-                if (followBearing) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.surface
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Explore,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint =
-                    if (followBearing) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
                     },
+                    icon = compassIcon,
+                    contentDescription = null,
+                    iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { !followBearing },
+                    modifier = Modifier.rotate(-compassBearing),
                 )
-            }
-            Box {
-                MapButton(onClick = { mapFilterExpanded = true }, icon = Icons.Outlined.Tune, contentDescription = null)
+                Box {
+                    MapButton(onClick = { mapFilterExpanded = true }, icon = Icons.Outlined.Tune, contentDescription = null)
                 DropdownMenu(expanded = mapFilterExpanded, onDismissRequest = { mapFilterExpanded = false }) {
                     DropdownMenuItem(
                         text = { Text("Only favorites") },
@@ -1064,27 +1119,15 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                         },
                     )
                 }
-            }
-            MapButton(onClick = { showLegend = !showLegend }, icon = Icons.Outlined.Info, contentDescription = null)
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            MapButton(
-                onClick = { showLayersBottomSheet = true },
-                icon = Icons.Outlined.Explore,
-                contentDescription = null,
-            )
-
-            Spacer(modifier = Modifier.size(8.dp))
-
-            // Map style selector
-            Box {
-                MapButton(
-                    onClick = { mapTypeMenuExpanded = true },
-                    icon = Icons.Outlined.Layers,
-                    contentDescription = null,
-                )
-                DropdownMenu(expanded = mapTypeMenuExpanded, onDismissRequest = { mapTypeMenuExpanded = false }) {
+                }
+                // Map style selector (matches Google Maps - Map icon)
+                Box {
+                    MapButton(
+                        onClick = { mapTypeMenuExpanded = true },
+                        icon = Icons.Outlined.Map,
+                        contentDescription = null,
+                    )
+                    DropdownMenu(expanded = mapTypeMenuExpanded, onDismissRequest = { mapTypeMenuExpanded = false }) {
                     Text(
                         text = "Map Style",
                         style = MaterialTheme.typography.titleMedium,
@@ -1151,8 +1194,41 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                         },
                     )
                 }
-            }
-        }
+                }
+
+                // Map layers button (matches Google Maps - Layers icon)
+                MapButton(
+                    onClick = { showLayersBottomSheet = true },
+                    icon = Icons.Outlined.Layers,
+                    contentDescription = null,
+                )
+
+                // Location tracking button (matches Google Maps style)
+                if (hasLocationPermission) {
+                    MapButton(
+                        onClick = {
+                            isLocationTrackingEnabled = !isLocationTrackingEnabled
+                            if (!isLocationTrackingEnabled) {
+                                followBearing = false
+                            }
+                            Timber.tag("MapLibrePOC").d("Location tracking toggled: %s", isLocationTrackingEnabled)
+                        },
+                        icon = if (isLocationTrackingEnabled) Icons.Filled.LocationDisabled else Icons.Outlined.MyLocation,
+                        contentDescription = null,
+                    )
+                }
+
+                // Cache management button
+                MapButton(
+                    onClick = { showCacheBottomSheet = true },
+                    icon = Icons.Outlined.Storage,
+                    contentDescription = null,
+                )
+
+                // Legend button
+                MapButton(onClick = { showLegend = !showLegend }, icon = Icons.Outlined.Info, contentDescription = null)
+            },
+        )
 
         // Custom tile URL dialog
         if (showCustomTileDialog) {
@@ -1279,6 +1355,27 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                         showLayersBottomSheet = false
                         openFilePicker()
                     },
+                )
+            }
+        }
+
+        // Tile cache management bottom sheet
+        if (showCacheBottomSheet && tileCacheManager != null) {
+            ModalBottomSheet(
+                onDismissRequest = { showCacheBottomSheet = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            ) {
+                val currentBounds = mapRef?.projection?.visibleRegion?.latLngBounds
+                val currentZoom = mapRef?.cameraPosition?.zoom
+                // Only allow caching if using a standard style URL (not custom raster tiles)
+                // Custom raster tiles are built programmatically and don't have a style URL
+                val currentStyleUrl = if (usingCustomTiles) null else MapLibreConstants.STYLE_URL
+                TileCacheManagementSheet(
+                    cacheManager = tileCacheManager!!,
+                    currentBounds = currentBounds,
+                    currentZoom = currentZoom,
+                    styleUrl = currentStyleUrl,
+                    onDismiss = { showCacheBottomSheet = false },
                 )
             }
         }
