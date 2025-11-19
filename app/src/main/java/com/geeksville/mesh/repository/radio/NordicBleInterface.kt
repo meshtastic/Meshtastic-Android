@@ -124,7 +124,7 @@ constructor(
         try {
             service.handleFromRadio(p = packet)
         } catch (t: Throwable) {
-            Timber.e(t, "[$address] Failed to execute service.handleFromRadio)")
+            Timber.e(t, "[$address] Failed to execute service.handleFromRadio()")
         }
     }
 
