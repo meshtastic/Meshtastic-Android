@@ -26,6 +26,7 @@ import com.geeksville.mesh.repository.radio.BleConstants.BTM_TORADIO_CHARACTER
 import com.geeksville.mesh.service.RadioNotConnectedException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -156,7 +157,7 @@ constructor(
     private fun connect() {
         connectionScope.launch {
             try {
-                peripheral = findAndConnectPeripheral()
+                peripheral = retryCall { findAndConnectPeripheral() }
                 peripheral?.let {
                     onConnected()
                     observePeripheralChanges()
@@ -182,10 +183,10 @@ constructor(
     private suspend fun onConnected() {
         try {
             peripheral?.let { p ->
-                val rssi = p.readRssi()
+                val rssi = retryCall { p.readRssi() }
                 Timber.d("[$address] Connection established. RSSI: $rssi dBm")
 
-                val phyInUse = p.readPhy()
+                val phyInUse = retryCall { p.readPhy() }
                 Timber.d("[$address] PHY in use: $phyInUse")
             }
         } catch (e: Exception) {
@@ -309,6 +310,8 @@ constructor(
         while (true) {
             try {
                 return block()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 currentAttempt++
                 if (currentAttempt >= RETRY_COUNT) throw e
