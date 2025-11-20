@@ -7,7 +7,7 @@ accompanist = "0.37.3"
 # androidx
 androidxComposeMaterial3Adaptive = "1.2.0"
 androidxTracing = "1.9.5"
-datastore = "1.1.7"
+datastore = "1.2.0"
 lifecycle = "2.10.0"
 navigation = "2.9.6"
 navigation3 = "1.0.0"
