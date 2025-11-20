@@ -55,22 +55,46 @@ jobs:
             fi
           fi
 
+      - name: Sync with Crowdin
+        uses: crowdin/github-action@v2
+        with:
+          base_url: 'https://meshtastic.crowdin.com/api/v2'
+          config: 'crowdin.yml'
+          crowdin_branch_name: 'main'
+          upload_sources: true
+          upload_translations: false
+          download_translations: true
+          create_pull_request: false
+          commit_message: 'chore(l10n): New Crowdin Translations from scheduled update'
+          push_translations: false
+          push_sources: false
+          export_only_approved: false
+          skip_untranslated_strings: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
       - name: Create Pull Request if changes occurred
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.AUTOMATION_PAT }}
           commit-message: |
-            chore: Scheduled updates (Firmware, Hardware)
+            chore: Scheduled updates (Firmware, Hardware, Translations)
 
             Automated updates for:
             - Firmware releases list
             - Device hardware list
-          title: 'chore: Scheduled updates (Firmware, Hardware)'
+            - Crowdin source string uploads
+            - Crowdin translation downloads
+          title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
           body: |
             This PR includes automated updates from the scheduled workflow:
 
             - Updated `firmware_releases.json` from the Meshtastic API (if changed).
             - Updated `device_hardware.json` from the Meshtastic API (if changed).
+            - Source strings were uploaded to Crowdin.
+            - Latest translations were downloaded from Crowdin (if available).
 
             Please review the changes.
           branch: 'scheduled-updates'
@@ -78,5 +102,6 @@ jobs:
           delete-branch: true
           labels: |
             automation
+            l10n
             firmware
             hardware
