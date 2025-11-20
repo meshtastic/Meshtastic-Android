@@ -581,7 +581,11 @@ constructor(
                     getChannel(destNum, 0)
                 }
                 if (route == ConfigRoute.NETWORK) {
-                    getDeviceConnectionStatus(destNum)
+                    // Only fetch device connection status if device has WiFi or Ethernet hardware
+                    val metadata = radioConfigState.value.metadata
+                    if (metadata?.hasWifi == true || metadata?.hasEthernet == true) {
+                        getDeviceConnectionStatus(destNum)
+                    }
                 }
                 getConfig(destNum, route.type)
             }
