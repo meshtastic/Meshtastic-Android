@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtriraj</string>
     <string name="desc_node_filter_clear">očisti filter čvorova</string>
     <string name="node_filter_include_unknown">Uključujući nepoznate</string>
@@ -26,6 +27,9 @@
     <string name="node_sort_last_heard">Posljednje čuo</string>
     <string name="node_sort_via_mqtt">putem MQTT</string>
     <string name="via_mqtt">putem MQTT</string>
+    <string name="routing_error_none">Potvrđeno</string>
+    <string name="routing_error_too_large">Paket je prevelik</string>
+    <string name="routing_error_no_response">Nema odgovora</string>
     <!-- Position Config -->
     <string name="channel_name">Naziv kanala</string>
     <string name="qr_code">QR kod</string>
