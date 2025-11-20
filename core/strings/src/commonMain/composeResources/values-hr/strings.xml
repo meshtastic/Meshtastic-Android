@@ -146,6 +146,12 @@
     <string name="mute_8_hours">8 sati</string>
     <string name="mute_1_week">1 tjedan</string>
     <string name="mute_always">Uvijek</string>
+    <string name="audio">Zvuk</string>
+    <string name="audio_config">Postavke Zvuka</string>
+    <string name="bluetooth_config">Postavke Bluetootha</string>
+    <string name="default_">Zadano</string>
+    <string name="details">Detalji</string>
+    <string name="red">Crveno</string>
     <string name="region_frequency_plan">Regija</string>
     <string name="distance">Udaljenost</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
