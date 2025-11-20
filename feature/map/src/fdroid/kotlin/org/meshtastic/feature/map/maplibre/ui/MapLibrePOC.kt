@@ -120,16 +120,22 @@ import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_CLUSTER_SOURC
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_NOCLUSTER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_SOURCE_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_LINE_SOURCE_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_POINTS_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.core.activateLocationComponentForStyle
 import org.meshtastic.feature.map.maplibre.core.buildMeshtasticStyle
 import org.meshtastic.feature.map.maplibre.core.ensureImportedLayerSourceAndLayers
 import org.meshtastic.feature.map.maplibre.core.ensureSourcesAndLayers
+import org.meshtastic.feature.map.maplibre.core.ensureTrackSourcesAndLayers
 import org.meshtastic.feature.map.maplibre.core.logStyleState
 import org.meshtastic.feature.map.maplibre.core.nodesToFeatureCollectionJsonWithSelection
+import org.meshtastic.feature.map.maplibre.core.positionsToLineStringFeature
+import org.meshtastic.feature.map.maplibre.core.positionsToPointFeatures
 import org.meshtastic.feature.map.maplibre.core.reinitializeStyleAfterSwitch
 import org.meshtastic.feature.map.maplibre.core.removeImportedLayerSourceAndLayers
+import org.meshtastic.feature.map.maplibre.core.removeTrackSourcesAndLayers
 import org.meshtastic.feature.map.maplibre.core.safeSetGeoJson
 import org.meshtastic.feature.map.maplibre.core.setClusterVisibilityHysteresis
 import org.meshtastic.feature.map.maplibre.core.waypointsToFeatureCollectionFC
@@ -158,7 +164,12 @@ import kotlin.math.sin
 @SuppressLint("MissingPermission")
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDetails: (Int) -> Unit = {}) {
+fun MapLibrePOC(
+    mapViewModel: MapViewModel = hiltViewModel(),
+    onNavigateToNodeDetails: (Int) -> Unit = {},
+    focusedNodeNum: Int? = null,
+    nodeTracks: List<org.meshtastic.proto.MeshProtos.Position>? = null,
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var selectedNodeNum by remember { mutableStateOf<Int?>(null) }
@@ -198,7 +209,6 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
     // Tile cache management - initialize after MapLibre is initialized
     var tileCacheManager by remember { mutableStateOf<MapLibreTileCacheManager?>(null) }
     var showCacheBottomSheet by remember { mutableStateOf(false) }
-    var lastCacheUpdateTime by remember { mutableStateOf<Long?>(null) }
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle()
@@ -226,61 +236,6 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
         }
     }
 
-    // Periodic cache updates
-    LaunchedEffect(tileCacheManager) {
-        tileCacheManager?.let { manager ->
-            while (true) {
-                val intervalMs = manager.getUpdateIntervalMs()
-                kotlinx.coroutines.delay(intervalMs)
-                try {
-                    manager.updateCachedRegions()
-                    lastCacheUpdateTime = System.currentTimeMillis()
-                    Timber.tag("MapLibrePOC").d("Cache update completed at ${lastCacheUpdateTime}")
-                } catch (e: Exception) {
-                    Timber.tag("MapLibrePOC").e(e, "Failed to update cached regions")
-                }
-            }
-        }
-    }
-
-    // Periodic hot area tracking - record viewport every 5 seconds even when camera is idle
-    LaunchedEffect(tileCacheManager, mapRef) {
-        if (tileCacheManager == null) {
-            Timber.tag("MapLibrePOC").d("Periodic hot area tracking: tileCacheManager is null, waiting...")
-            return@LaunchedEffect
-        }
-        if (mapRef == null) {
-            Timber.tag("MapLibrePOC").d("Periodic hot area tracking: mapRef is null, waiting...")
-            return@LaunchedEffect
-        }
-        
-        val manager = tileCacheManager!!
-        val map = mapRef!!
-        
-        Timber.tag("MapLibrePOC").d("Starting periodic hot area tracking (every 5 seconds)")
-        
-        while (true) {
-            kotlinx.coroutines.delay(5000) // Check every 5 seconds
-            try {
-                val style = map.style
-                if (style != null) {
-                    val bounds = map.projection.visibleRegion.latLngBounds
-                    val zoom = map.cameraPosition.zoom
-                    // Only cache if using a standard style URL (not custom raster tiles)
-                    val styleUrl = if (usingCustomTiles) null else MapLibreConstants.STYLE_URL
-                    Timber.tag("MapLibrePOC").d("Periodic hot area check: zoom=%.2f, bounds=[%.4f,%.4f,%.4f,%.4f], styleUrl=$styleUrl", 
-                        zoom, bounds.latitudeNorth, bounds.latitudeSouth, bounds.longitudeEast, bounds.longitudeWest)
-                    if (styleUrl != null) {
-                        manager.recordViewport(bounds, zoom, styleUrl)
-                    }
-                } else {
-                    Timber.tag("MapLibrePOC").d("Periodic hot area check: style is null, skipping")
-                }
-            } catch (e: Exception) {
-                Timber.tag("MapLibrePOC").e(e, "Failed to record viewport in periodic check")
-            }
-        }
-    }
 
     // Helper functions for layer management
     fun toggleLayerVisibility(layerId: String) {
@@ -463,6 +418,45 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                             style.setTransition(TransitionOptions(0, 0))
                             logStyleState("after-style-load(pre-ensure)", style)
                             ensureSourcesAndLayers(style)
+
+                            // Setup track sources and layers if rendering node tracks
+                            if (nodeTracks != null && focusedNodeNum != null) {
+                                // Get the focused node to use its color
+                                val focusedNode = nodes.firstOrNull { it.num == focusedNodeNum }
+                                val trackColor = focusedNode?.let {
+                                    String.format("#%06X", 0xFFFFFF and it.colors.second)
+                                } ?: "#FF5722" // Default orange color
+
+                                ensureTrackSourcesAndLayers(style, trackColor)
+
+                                // Filter tracks by time using lastHeardTrackFilter
+                                val filteredTracks = nodeTracks.filter {
+                                    mapFilterState.lastHeardTrackFilter == org.meshtastic.feature.map.LastHeardFilter.Any ||
+                                        it.time > System.currentTimeMillis() / 1000 - mapFilterState.lastHeardTrackFilter.seconds
+                                }.sortedBy { it.time }
+
+                                // Update track line
+                                if (filteredTracks.size >= 2) {
+                                    positionsToLineStringFeature(filteredTracks)?.let { lineFeature ->
+                                        (style.getSource(TRACK_LINE_SOURCE_ID) as? GeoJsonSource)
+                                            ?.setGeoJson(lineFeature)
+                                    }
+                                }
+
+                                // Update track points
+                                if (filteredTracks.isNotEmpty()) {
+                                    val pointsFC = positionsToPointFeatures(filteredTracks)
+                                    (style.getSource(TRACK_POINTS_SOURCE_ID) as? GeoJsonSource)
+                                        ?.setGeoJson(pointsFC)
+                                }
+
+                                Timber.tag("MapLibrePOC")
+                                    .d("Track data set: %d positions", filteredTracks.size)
+                            } else {
+                                // Remove track layers if no tracks to display
+                                removeTrackSourcesAndLayers(style)
+                            }
+
                             // Push current data immediately after style load
                             try {
                                 val density = context.resources.displayMetrics.density
@@ -733,21 +727,6 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                                     Timber.tag("MapLibrePOC")
                                         .d("onCameraIdle: rendered features in viewport=%d", rendered.size)
                                 } catch (_: Throwable) {}
-
-                                // Track viewport for tile caching (hot areas)
-                                tileCacheManager?.let { manager ->
-                                    try {
-                                        val bounds = map.projection.visibleRegion.latLngBounds
-                                        val zoom = map.cameraPosition.zoom
-                                        // Only cache if using a standard style URL (not custom raster tiles)
-                                        val styleUrl = if (usingCustomTiles) null else MapLibreConstants.STYLE_URL
-                                        if (styleUrl != null) {
-                                            manager.recordViewport(bounds, zoom, styleUrl)
-                                        }
-                                    } catch (e: Exception) {
-                                        Timber.tag("MapLibrePOC").e(e, "Failed to record viewport for tile caching")
-                                    }
-                                }
                             }
                             // Hide expanded cluster overlay whenever camera moves to avoid stale screen positions
                             map.addOnCameraMoveListener {
@@ -1399,16 +1378,8 @@ fun MapLibrePOC(mapViewModel: MapViewModel = hiltViewModel(), onNavigateToNodeDe
                 onDismissRequest = { showCacheBottomSheet = false },
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             ) {
-                val currentBounds = mapRef?.projection?.visibleRegion?.latLngBounds
-                val currentZoom = mapRef?.cameraPosition?.zoom
-                // Only allow caching if using a standard style URL (not custom raster tiles)
-                // Custom raster tiles are built programmatically and don't have a style URL
-                val currentStyleUrl = if (usingCustomTiles) null else MapLibreConstants.STYLE_URL
                 TileCacheManagementSheet(
                     cacheManager = tileCacheManager!!,
-                    currentBounds = currentBounds,
-                    currentZoom = currentZoom,
-                    styleUrl = currentStyleUrl,
                     onDismiss = { showCacheBottomSheet = false },
                 )
             }

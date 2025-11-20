@@ -21,6 +21,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.DEG_D
@@ -30,6 +31,7 @@ import org.meshtastic.feature.map.maplibre.utils.roleColorHex
 import org.meshtastic.feature.map.maplibre.utils.safeSubstring
 import org.meshtastic.feature.map.maplibre.utils.shortNameFallback
 import org.meshtastic.feature.map.maplibre.utils.stripEmojisForMapLabel
+import org.meshtastic.proto.MeshProtos.Position
 import org.meshtastic.proto.MeshProtos.Waypoint
 import timber.log.Timber
 
@@ -154,4 +156,41 @@ fun escapeJson(input: String): String {
         }
     }
     return sb.toString()
+}
+
+/** Converts a list of positions to a GeoJSON LineString for track rendering */
+fun positionsToLineStringFeature(positions: List<Position>): Feature? {
+    if (positions.size < 2) return null
+
+    val points = positions.map { pos ->
+        val lat = pos.latitudeI * DEG_D
+        val lon = pos.longitudeI * DEG_D
+        Point.fromLngLat(lon, lat)
+    }
+
+    return Feature.fromGeometry(LineString.fromLngLats(points))
+}
+
+/** Converts a list of positions to a GeoJSON FeatureCollection for track point markers */
+fun positionsToPointFeatures(positions: List<Position>): FeatureCollection {
+    val features = positions.mapIndexed { index, pos ->
+        val lat = pos.latitudeI * DEG_D
+        val lon = pos.longitudeI * DEG_D
+        val point = Point.fromLngLat(lon, lat)
+        val feature = Feature.fromGeometry(point)
+
+        feature.addStringProperty("kind", "track_point")
+        feature.addNumberProperty("index", index)
+        feature.addNumberProperty("time", pos.time)
+        feature.addNumberProperty("altitude", pos.altitude)
+        feature.addNumberProperty("groundSpeed", pos.groundSpeed)
+        feature.addNumberProperty("groundTrack", pos.groundTrack)
+        feature.addNumberProperty("satsInView", pos.satsInView)
+        feature.addNumberProperty("latitude", lat)
+        feature.addNumberProperty("longitude", lon)
+
+        feature
+    }
+
+    return FeatureCollection.fromFeatures(features)
 }

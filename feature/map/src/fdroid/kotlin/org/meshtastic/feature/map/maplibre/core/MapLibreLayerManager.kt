@@ -77,6 +77,10 @@ import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODE_TEXT_LAYER_NOC
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.OSM_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.OSM_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.PRECISION_CIRCLE_LAYER_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_LINE_LAYER_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_LINE_SOURCE_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_POINTS_LAYER_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_POINTS_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_SOURCE_ID
 import timber.log.Timber
@@ -390,4 +394,62 @@ fun logStyleState(whenTag: String, style: Style) {
     } catch (e: Throwable) {
         Timber.tag("MapLibrePOC").w(e, "Failed to log style state")
     }
+}
+
+/** Manages track line and point sources and layers for node track display */
+fun ensureTrackSourcesAndLayers(style: Style, trackColor: String = "#FF5722") {
+    // Add track line source if it doesn't exist
+    if (style.getSource(TRACK_LINE_SOURCE_ID) == null) {
+        style.addSource(GeoJsonSource(TRACK_LINE_SOURCE_ID, emptyFeatureCollectionJson()))
+        Timber.tag("MapLibrePOC").d("Added track line GeoJsonSource")
+    }
+
+    // Add track points source if it doesn't exist
+    if (style.getSource(TRACK_POINTS_SOURCE_ID) == null) {
+        style.addSource(GeoJsonSource(TRACK_POINTS_SOURCE_ID, emptyFeatureCollectionJson()))
+        Timber.tag("MapLibrePOC").d("Added track points GeoJsonSource")
+    }
+
+    // Add track line layer if it doesn't exist
+    if (style.getLayer(TRACK_LINE_LAYER_ID) == null) {
+        val lineLayer = LineLayer(TRACK_LINE_LAYER_ID, TRACK_LINE_SOURCE_ID)
+            .withProperties(
+                lineColor(trackColor),
+                lineWidth(3f),
+                lineOpacity(0.8f)
+            )
+
+        // Add above OSM layer if it exists
+        if (style.getLayer(OSM_LAYER_ID) != null) {
+            style.addLayerAbove(lineLayer, OSM_LAYER_ID)
+        } else {
+            style.addLayer(lineLayer)
+        }
+        Timber.tag("MapLibrePOC").d("Added track line LineLayer")
+    }
+
+    // Add track points layer if it doesn't exist
+    if (style.getLayer(TRACK_POINTS_LAYER_ID) == null) {
+        val pointsLayer = CircleLayer(TRACK_POINTS_LAYER_ID, TRACK_POINTS_SOURCE_ID)
+            .withProperties(
+                circleColor(trackColor),
+                circleRadius(5f),
+                circleStrokeColor("#FFFFFF"),
+                circleStrokeWidth(2f),
+                circleOpacity(0.7f)
+            )
+
+        // Add above track line layer
+        style.addLayerAbove(pointsLayer, TRACK_LINE_LAYER_ID)
+        Timber.tag("MapLibrePOC").d("Added track points CircleLayer")
+    }
+}
+
+/** Removes track sources and layers from the style */
+fun removeTrackSourcesAndLayers(style: Style) {
+    style.getLayer(TRACK_POINTS_LAYER_ID)?.let { style.removeLayer(it) }
+    style.getLayer(TRACK_LINE_LAYER_ID)?.let { style.removeLayer(it) }
+    style.getSource(TRACK_POINTS_SOURCE_ID)?.let { style.removeSource(it) }
+    style.getSource(TRACK_LINE_SOURCE_ID)?.let { style.removeSource(it) }
+    Timber.tag("MapLibrePOC").d("Removed track sources and layers")
 }

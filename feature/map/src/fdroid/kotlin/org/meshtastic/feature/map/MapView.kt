@@ -380,7 +380,12 @@ private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
 @OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
-fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
+fun MapView(
+    mapViewModel: MapViewModel = hiltViewModel(),
+    navigateToNodeDetails: (Int) -> Unit,
+    focusedNodeNum: Int? = null,
+    nodeTracks: List<org.meshtastic.proto.MeshProtos.Position>? = null,
+) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
@@ -790,6 +795,8 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                     org.meshtastic.feature.map.maplibre.ui.MapLibrePOC(
                         mapViewModel = mapViewModel,
                         onNavigateToNodeDetails = navigateToNodeDetails,
+                        focusedNodeNum = focusedNodeNum,
+                        nodeTracks = nodeTracks,
                     )
                 } else {
                     // osmdroid implementation

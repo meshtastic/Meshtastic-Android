@@ -29,6 +29,8 @@ object MapLibreConstants {
     const val NODES_SOURCE_ID = "meshtastic-nodes-source"
     const val NODES_CLUSTER_SOURCE_ID = "meshtastic-nodes-source-clustered"
     const val WAYPOINTS_SOURCE_ID = "meshtastic-waypoints-source"
+    const val TRACK_LINE_SOURCE_ID = "meshtastic-track-line-source"
+    const val TRACK_POINTS_SOURCE_ID = "meshtastic-track-points-source"
     const val OSM_SOURCE_ID = "osm-tiles"
 
     // Layer IDs
@@ -40,6 +42,8 @@ object MapLibreConstants {
     const val CLUSTER_COUNT_LAYER_ID = "meshtastic-cluster-count-layer"
     const val WAYPOINTS_LAYER_ID = "meshtastic-waypoints-layer"
     const val PRECISION_CIRCLE_LAYER_ID = "meshtastic-precision-circle-layer"
+    const val TRACK_LINE_LAYER_ID = "meshtastic-track-line-layer"
+    const val TRACK_POINTS_LAYER_ID = "meshtastic-track-points-layer"
     const val OSM_LAYER_ID = "osm-layer"
 
     // Cluster configuration

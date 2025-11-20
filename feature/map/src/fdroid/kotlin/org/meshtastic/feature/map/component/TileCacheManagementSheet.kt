@@ -45,44 +45,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.maplibre.android.geometry.LatLngBounds
 import org.meshtastic.feature.map.maplibre.utils.MapLibreTileCacheManager
 import timber.log.Timber
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-@Suppress("LongMethod")
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TileCacheManagementSheet(
     cacheManager: MapLibreTileCacheManager,
-    currentBounds: LatLngBounds?,
-    currentZoom: Double?,
-    styleUrl: String?,
     onDismiss: () -> Unit,
 ) {
-    var hotAreas by remember { mutableStateOf<List<MapLibreTileCacheManager.HotArea>>(emptyList()) }
-    var cacheSizeBytes by remember { mutableStateOf<Long?>(null) }
-    var lastUpdateTime by remember { mutableStateOf<Long?>(null) }
-    var isCaching by remember { mutableStateOf(false) }
-
-    fun refreshData() {
-        hotAreas = cacheManager.getHotAreas()
-        CoroutineScope(Dispatchers.IO).launch {
-            cacheSizeBytes = cacheManager.getCacheSizeBytes()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        refreshData()
-    }
+    var isClearing by remember { mutableStateOf(false) }
 
     LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text(
                 modifier = Modifier.padding(16.dp),
-                text = "Tile Cache Management",
+                text = "Map Cache",
                 style = MaterialTheme.typography.headlineSmall,
             )
             HorizontalDivider()
@@ -91,141 +69,38 @@ fun TileCacheManagementSheet(
         item {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Cache Statistics",
+                    text = "About Map Caching",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
                 Text(
-                    text = "Hot Areas: ${hotAreas.size}",
+                    text = "Map tiles are automatically cached by MapLibre as you view the map. " +
+                        "This improves performance and allows limited offline viewing of previously visited areas.",
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
-                cacheSizeBytes?.let { size ->
-                    val sizeMb = size / (1024.0 * 1024.0)
-                    Text(
-                        text = "Estimated Cache Size: ${String.format("%.2f", sizeMb)} MB",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                lastUpdateTime?.let { time ->
-                    val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
-                    Text(
-                        text = "Last Update: ${dateFormat.format(Date(time))}",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            }
-            HorizontalDivider()
-        }
-
-        // Cache current area button
-        item {
-            val canCache = currentBounds != null && currentZoom != null && styleUrl != null
-            Button(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                onClick = {
-                    if (canCache) {
-                        isCaching = true
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                cacheManager.cacheCurrentArea(currentBounds!!, currentZoom!!, styleUrl!!)
-                                refreshData()
-                            } catch (e: Exception) {
-                                Timber.tag("TileCacheManagementSheet").e(e, "Error caching area: ${e.message}")
-                            } finally {
-                                isCaching = false
-                            }
-                        }
-                    }
-                },
-                enabled = canCache && !isCaching,
-            ) {
                 Text(
-                    when {
-                        isCaching -> "Caching..."
-                        styleUrl == null -> "Caching unavailable (custom tiles)"
-                        else -> "Cache This Area Now"
-                    },
-                )
-            }
-        }
-        if (styleUrl == null) {
-            item {
-                Text(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    text = "Tile caching is only available when using standard map styles, not custom raster tiles.",
+                    text = "The cache is managed automatically and will be cleared if your device runs low on storage.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            HorizontalDivider()
         }
 
         item {
-            Text(
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp),
-                text = "Cached Areas",
-                style = MaterialTheme.typography.titleSmall,
-            )
-        }
-
-        if (hotAreas.isEmpty()) {
-            item {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "No cached areas yet. Areas you view frequently will be automatically cached.",
+                    text = "Cache Management",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+                Text(
+                    text = "If you're experiencing issues with outdated map tiles or want to free up storage space, you can clear the cache below.",
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            }
-        } else {
-            items(hotAreas, key = { it.id }) { area ->
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = "Area ${area.id.take(8)}",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    supportingContent = {
-                        Column {
-                            Text(
-                                text = "Visits: ${area.visitCount} | Time: ${area.totalTimeSec}s",
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                            Text(
-                                text = "Zoom: ${String.format("%.1f", area.zoom)} | " +
-                                    "Center: ${String.format("%.4f", area.centerLat)}, ${String.format("%.4f", area.centerLon)}",
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                            if (area.offlineRegionId != null) {
-                                Text(
-                                    text = "✓ Cached (Region ID: ${area.offlineRegionId})",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            } else {
-                                Text(
-                                    text = "⏳ Caching in progress...",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                )
-                            }
-                        }
-                    },
-                    trailingContent = {
-                        if (area.offlineRegionId != null) {
-                            IconButton(
-                                onClick = {
-                                    // TODO: Implement delete for individual region
-                                },
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Delete cached area",
-                                )
-                            }
-                        }
-                    },
-                )
-                HorizontalDivider()
             }
         }
 
@@ -233,16 +108,33 @@ fun TileCacheManagementSheet(
             Button(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 onClick = {
-                    // Clear all cache
+                    isClearing = true
                     CoroutineScope(Dispatchers.IO).launch {
-                        cacheManager.clearCache()
-                        hotAreas = cacheManager.getHotAreas()
-                        cacheSizeBytes = cacheManager.getCacheSizeBytes()
+                        try {
+                            cacheManager.clearCache()
+                            Timber.tag("TileCacheManagementSheet").d("Cache cleared successfully")
+                        } catch (e: Exception) {
+                            Timber.tag("TileCacheManagementSheet").e(e, "Error clearing cache: ${e.message}")
+                        } finally {
+                            withContext(Dispatchers.Main) {
+                                isClearing = false
+                            }
+                        }
                     }
                 },
+                enabled = !isClearing,
             ) {
-                Text("Clear All Cache")
+                Text(if (isClearing) "Clearing..." else "Clear Map Cache")
             }
+        }
+
+        item {
+            Text(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                text = "Note: Clearing the cache will require re-downloading tiles as you view the map again.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
