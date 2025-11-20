@@ -41,14 +41,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationDisabled
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
-import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Storage
@@ -1187,58 +1185,42 @@ fun MapLibrePOC(
             },
         )
 
-        // Zoom controls (bottom right) - Google Maps style
-        Column(
+        // Zoom controls (bottom right) - wrapped in Surface for consistent background
+        Surface(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 16.dp, end = 16.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shadowElevation = 3.dp,
         ) {
-            // Zoom in button
-            MapButton(
-                onClick = {
-                    mapRef?.let { map ->
-                        map.animateCamera(CameraUpdateFactory.zoomIn())
-                        Timber.tag("MapLibrePOC").d("Zoom in")
-                    }
-                },
-                icon = Icons.Outlined.Add,
-                contentDescription = "Zoom in",
-            )
-            
-            Spacer(modifier = Modifier.size(4.dp))
-            
-            // Zoom out button
-            MapButton(
-                onClick = {
-                    mapRef?.let { map ->
-                        map.animateCamera(CameraUpdateFactory.zoomOut())
-                        Timber.tag("MapLibrePOC").d("Zoom out")
-                    }
-                },
-                icon = Icons.Outlined.Remove,
-                contentDescription = "Zoom out",
-            )
-            
-            Spacer(modifier = Modifier.size(8.dp))
-            
-            // Compass reset button - resets map orientation to north (original top-right compass)
-            val currentBearing = mapRef?.cameraPosition?.bearing ?: 0.0
-            if (kotlin.math.abs(currentBearing) > 0.1) { // Only show if map is rotated
+            Column(
+                modifier = Modifier.padding(4.dp),
+            ) {
+                // Zoom in button
                 MapButton(
                     onClick = {
                         mapRef?.let { map ->
-                            map.animateCamera(
-                                CameraUpdateFactory.newCameraPosition(
-                                    org.maplibre.android.camera.CameraPosition.Builder(map.cameraPosition)
-                                        .bearing(0.0)
-                                        .build()
-                                )
-                            )
-                            Timber.tag("MapLibrePOC").d("Compass reset to north")
+                            map.animateCamera(CameraUpdateFactory.zoomIn())
+                            Timber.tag("MapLibrePOC").d("Zoom in")
                         }
                     },
-                    icon = Icons.Outlined.Navigation,
-                    contentDescription = "Reset to north",
+                    icon = Icons.Outlined.Add,
+                    contentDescription = "Zoom in",
+                )
+
+                Spacer(modifier = Modifier.size(4.dp))
+
+                // Zoom out button
+                MapButton(
+                    onClick = {
+                        mapRef?.let { map ->
+                            map.animateCamera(CameraUpdateFactory.zoomOut())
+                            Timber.tag("MapLibrePOC").d("Zoom out")
+                        }
+                    },
+                    icon = Icons.Outlined.Remove,
+                    contentDescription = "Zoom out",
                 )
             }
         }
