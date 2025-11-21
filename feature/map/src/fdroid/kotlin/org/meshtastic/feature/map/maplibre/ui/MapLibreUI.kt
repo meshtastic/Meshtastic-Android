@@ -153,6 +153,8 @@ fun MapToolbar(
     onShowLayersClicked: () -> Unit,
     onShowCacheClicked: () -> Unit,
     onShowLegendToggled: () -> Unit,
+    heatmapEnabled: Boolean,
+    onHeatmapToggled: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var mapFilterExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
@@ -257,6 +259,19 @@ fun MapToolbar(
                             Checkbox(
                                 checked = clusteringEnabled,
                                 onCheckedChange = { onClusteringToggled(it) },
+                            )
+                        },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Show heatmap") },
+                        onClick = {
+                            onHeatmapToggled()
+                            mapFilterExpanded = false
+                        },
+                        trailingIcon = {
+                            Checkbox(
+                                checked = heatmapEnabled,
+                                onCheckedChange = { onHeatmapToggled() },
                             )
                         },
                     )

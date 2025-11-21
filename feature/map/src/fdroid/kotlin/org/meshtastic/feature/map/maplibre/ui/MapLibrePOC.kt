@@ -96,6 +96,7 @@ import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.style.expressions.Expression.get
+import org.maplibre.android.style.layers.PropertyFactory.visibility
 import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Point
@@ -114,6 +115,8 @@ import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_CIRCLE_LAYE
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_LIST_FETCH_MAX
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_RADIAL_MAX
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.DEG_D
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.HEATMAP_LAYER_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.HEATMAP_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_CLUSTER_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_NOCLUSTER_ID
@@ -124,10 +127,13 @@ import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.core.activateLocationComponentForStyle
 import org.meshtastic.feature.map.maplibre.core.buildMeshtasticStyle
+import org.meshtastic.feature.map.maplibre.core.ensureHeatmapSourceAndLayer
 import org.meshtastic.feature.map.maplibre.core.ensureImportedLayerSourceAndLayers
 import org.meshtastic.feature.map.maplibre.core.ensureSourcesAndLayers
 import org.meshtastic.feature.map.maplibre.core.ensureTrackSourcesAndLayers
 import org.meshtastic.feature.map.maplibre.core.logStyleState
+import org.meshtastic.feature.map.maplibre.core.nodesToHeatmapFeatureCollection
+import org.meshtastic.feature.map.maplibre.core.setNodeLayersVisibility
 import org.meshtastic.feature.map.maplibre.core.nodesToFeatureCollectionJsonWithSelection
 import org.meshtastic.feature.map.maplibre.core.positionsToLineStringFeature
 import org.meshtastic.feature.map.maplibre.core.positionsToPointFeatures
@@ -205,6 +211,9 @@ fun MapLibrePOC(
     // Remember last applied cluster visibility to reduce flashing
     var clustersShown by remember { mutableStateOf(false) }
     var lastClusterEvalMs by remember { mutableStateOf(0L) }
+
+    // Heatmap mode
+    var heatmapEnabled by remember { mutableStateOf(false) }
 
     // Map layer management
     var mapLayers by remember { mutableStateOf<List<MapLayerItem>>(emptyList()) }
@@ -406,6 +415,46 @@ fun MapLibrePOC(
         }
     }
 
+    // Heatmap mode management
+    LaunchedEffect(heatmapEnabled, nodes, mapFilterState, enabledRoles, ourNode, isLocationTrackingEnabled, clusteringEnabled) {
+        mapRef?.let { map ->
+            map.style?.let { style ->
+                if (heatmapEnabled) {
+                    // Filter nodes same way as regular view
+                    val filteredNodes = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
+
+                    // Update heatmap source with filtered node positions
+                    val heatmapFC = nodesToHeatmapFeatureCollection(filteredNodes)
+                    (style.getSource(HEATMAP_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(heatmapFC)
+
+                    // Hide node/cluster/waypoint layers
+                    setNodeLayersVisibility(style, false)
+
+                    // Show heatmap layer
+                    style.getLayer(HEATMAP_LAYER_ID)?.setProperties(visibility("visible"))
+
+                    Timber.tag("MapLibrePOC").d("Heatmap enabled: %d nodes", filteredNodes.size)
+                } else {
+                    // Hide heatmap layer
+                    style.getLayer(HEATMAP_LAYER_ID)?.setProperties(visibility("none"))
+
+                    // Restore proper clustering visibility based on current state
+                    val filteredNodes = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
+                    clustersShown = setClusterVisibilityHysteresis(
+                        map,
+                        style,
+                        filteredNodes,
+                        clusteringEnabled,
+                        clustersShown,
+                        mapFilterState.showPrecisionCircle
+                    )
+
+                    Timber.tag("MapLibrePOC").d("Heatmap disabled, clustering=%b, clustersShown=%b", clusteringEnabled, clustersShown)
+                }
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView<MapView>(
             modifier = Modifier.fillMaxSize(),
@@ -423,6 +472,7 @@ fun MapLibrePOC(
                             style.setTransition(TransitionOptions(0, 0))
                             logStyleState("after-style-load(pre-ensure)", style)
                             ensureSourcesAndLayers(style)
+                            ensureHeatmapSourceAndLayer(style)
 
                             // Setup track sources and layers if rendering node tracks
                             Timber.tag("MapLibrePOC").d(
@@ -817,6 +867,8 @@ fun MapLibrePOC(
                             // Update clustering visibility on camera idle (zoom changes)
                             map.addOnCameraIdleListener {
                                 val st = map.style ?: return@addOnCameraIdleListener
+                                // Skip node updates when heatmap is enabled
+                                if (heatmapEnabled) return@addOnCameraIdleListener
                                 // Debounce to avoid rapid toggling during kinetic flings/tiles loading
                                 val now = SystemClock.uptimeMillis()
                                 if (now - lastClusterEvalMs < 300) return@addOnCameraIdleListener
@@ -927,50 +979,53 @@ fun MapLibrePOC(
                             Timber.tag("MapLibrePOC").w(e, "Failed to update location component")
                         }
                     }
-                    Timber.tag("MapLibrePOC").d("Updating sources. nodes=%d, waypoints=%d", nodes.size, waypoints.size)
-                    val density = context.resources.displayMetrics.density
-                    val bounds2 = map.projection.visibleRegion.latLngBounds
-                    val labelSet = run {
-                        val visible =
-                            nodes.filter { n ->
-                                val p = n.validPosition ?: return@filter false
-                                bounds2.contains(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
+                    // Skip node updates when heatmap is enabled
+                    if (!heatmapEnabled) {
+                        Timber.tag("MapLibrePOC").d("Updating sources. nodes=%d, waypoints=%d", nodes.size, waypoints.size)
+                        val density = context.resources.displayMetrics.density
+                        val bounds2 = map.projection.visibleRegion.latLngBounds
+                        val labelSet = run {
+                            val visible =
+                                nodes.filter { n ->
+                                    val p = n.validPosition ?: return@filter false
+                                    bounds2.contains(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
+                                }
+                            val sorted =
+                                visible.sortedWith(
+                                    compareByDescending<Node> { it.isFavorite }.thenByDescending { it.lastHeard },
+                                )
+                            val cell = (80f * density).toInt().coerceAtLeast(48)
+                            val occupied = HashSet<Long>()
+                            val chosen = LinkedHashSet<Int>()
+                            for (n in sorted) {
+                                val p = n.validPosition ?: continue
+                                val pt = map.projection.toScreenLocation(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
+                                val cx = (pt.x / cell).toInt()
+                                val cy = (pt.y / cell).toInt()
+                                val key = (cx.toLong() shl 32) or (cy.toLong() and 0xffffffff)
+                                if (occupied.add(key)) chosen.add(n.num)
                             }
-                        val sorted =
-                            visible.sortedWith(
-                                compareByDescending<Node> { it.isFavorite }.thenByDescending { it.lastHeard },
-                            )
-                        val cell = (80f * density).toInt().coerceAtLeast(48)
-                        val occupied = HashSet<Long>()
-                        val chosen = LinkedHashSet<Int>()
-                        for (n in sorted) {
-                            val p = n.validPosition ?: continue
-                            val pt = map.projection.toScreenLocation(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
-                            val cx = (pt.x / cell).toInt()
-                            val cy = (pt.y / cell).toInt()
-                            val key = (cx.toLong() shl 32) or (cy.toLong() and 0xffffffff)
-                            if (occupied.add(key)) chosen.add(n.num)
+                            chosen
                         }
-                        chosen
-                    }
-                    (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
-                        waypointsToFeatureCollectionFC(waypoints.values),
-                    )
-                    val filteredNow =
-                        applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
-                    val jsonNow = nodesToFeatureCollectionJsonWithSelection(filteredNow, labelSet)
-                    safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, jsonNow)
-                    safeSetGeoJson(style, NODES_SOURCE_ID, jsonNow) // Also populate non-clustered source
-                    // Apply visibility now
-                    clustersShown =
-                        setClusterVisibilityHysteresis(
-                            map,
-                            style,
-                            applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled),
+                        (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
+                            waypointsToFeatureCollectionFC(waypoints.values),
+                        )
+                        val filteredNow =
+                            applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
+                        val jsonNow = nodesToFeatureCollectionJsonWithSelection(filteredNow, labelSet)
+                        safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, jsonNow)
+                        safeSetGeoJson(style, NODES_SOURCE_ID, jsonNow) // Also populate non-clustered source
+                        // Apply visibility now
+                        clustersShown =
+                            setClusterVisibilityHysteresis(
+                                map,
+                                style,
+                                applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled),
                             clusteringEnabled,
                             clustersShown,
                             mapFilterState.showPrecisionCircle,
                         )
+                    }
                     logStyleState("update(block)", style)
                 }
             },
@@ -1105,6 +1160,8 @@ fun MapLibrePOC(
             onShowLayersClicked = { showLayersBottomSheet = true },
             onShowCacheClicked = { showCacheBottomSheet = true },
             onShowLegendToggled = { showLegend = !showLegend },
+            heatmapEnabled = heatmapEnabled,
+            onHeatmapToggled = { heatmapEnabled = !heatmapEnabled },
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp),
         )
 

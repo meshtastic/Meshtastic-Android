@@ -194,3 +194,15 @@ fun positionsToPointFeatures(positions: List<Position>): FeatureCollection {
 
     return FeatureCollection.fromFeatures(features)
 }
+
+/** Converts nodes to simple GeoJSON FeatureCollection for heatmap */
+fun nodesToHeatmapFeatureCollection(nodes: List<Node>): FeatureCollection {
+    val features = nodes.mapNotNull { node ->
+        val pos = node.validPosition ?: return@mapNotNull null
+        val lat = pos.latitudeI * DEG_D
+        val lon = pos.longitudeI * DEG_D
+        val point = Point.fromLngLat(lon, lat)
+        Feature.fromGeometry(point)
+    }
+    return FeatureCollection.fromFeatures(features)
+}

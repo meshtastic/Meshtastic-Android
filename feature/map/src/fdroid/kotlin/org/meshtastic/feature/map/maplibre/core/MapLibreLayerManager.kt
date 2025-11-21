@@ -38,6 +38,7 @@ import org.maplibre.android.style.expressions.Expression.toString
 import org.maplibre.android.style.expressions.Expression.zoom
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.HeatmapLayer
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory.circleColor
 import org.maplibre.android.style.layers.PropertyFactory.circleOpacity
@@ -46,6 +47,11 @@ import org.maplibre.android.style.layers.PropertyFactory.circleStrokeColor
 import org.maplibre.android.style.layers.PropertyFactory.circleStrokeWidth
 import org.maplibre.android.style.layers.PropertyFactory.fillColor
 import org.maplibre.android.style.layers.PropertyFactory.fillOpacity
+import org.maplibre.android.style.layers.PropertyFactory.heatmapColor
+import org.maplibre.android.style.layers.PropertyFactory.heatmapIntensity
+import org.maplibre.android.style.layers.PropertyFactory.heatmapOpacity
+import org.maplibre.android.style.layers.PropertyFactory.heatmapRadius
+import org.maplibre.android.style.layers.PropertyFactory.heatmapWeight
 import org.maplibre.android.style.layers.PropertyFactory.lineColor
 import org.maplibre.android.style.layers.PropertyFactory.lineOpacity
 import org.maplibre.android.style.layers.PropertyFactory.lineWidth
@@ -68,6 +74,8 @@ import org.maplibre.geojson.FeatureCollection
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_CIRCLE_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_COUNT_LAYER_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.HEATMAP_LAYER_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.HEATMAP_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_CLUSTER_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_NOCLUSTER_ID
@@ -452,4 +460,94 @@ fun removeTrackSourcesAndLayers(style: Style) {
     style.getSource(TRACK_POINTS_SOURCE_ID)?.let { style.removeSource(it) }
     style.getSource(TRACK_LINE_SOURCE_ID)?.let { style.removeSource(it) }
     Timber.tag("MapLibrePOC").d("Removed track sources and layers")
+}
+
+/** Ensures heatmap source and layer exist in the style */
+fun ensureHeatmapSourceAndLayer(style: Style) {
+    // Add heatmap source if it doesn't exist
+    if (style.getSource(HEATMAP_SOURCE_ID) == null) {
+        val emptyFeatureCollection = FeatureCollection.fromFeatures(emptyList())
+        val heatmapSource = GeoJsonSource(HEATMAP_SOURCE_ID, emptyFeatureCollection)
+        style.addSource(heatmapSource)
+        Timber.tag("MapLibrePOC").d("Added heatmap GeoJsonSource")
+    }
+
+    // Add heatmap layer if it doesn't exist
+    if (style.getLayer(HEATMAP_LAYER_ID) == null) {
+        val heatmapLayer = HeatmapLayer(HEATMAP_LAYER_ID, HEATMAP_SOURCE_ID)
+            .withProperties(
+                // Each node contributes equally to the heatmap
+                heatmapWeight(literal(1.0)),
+                // Increase the heatmap intensity by zoom level
+                // Higher intensity = more sensitive to node density
+                heatmapIntensity(
+                    interpolate(
+                        linear(), zoom(),
+                        stop(0, 0.3),
+                        stop(9, 0.8),
+                        stop(15, 1.5)
+                    )
+                ),
+                // Color ramp for heatmap - requires higher density to reach warmer colors
+                heatmapColor(
+                    interpolate(
+                        linear(), literal("heatmap-density"),
+                        stop(0.0, toColor(literal("rgba(33,102,172,0)"))),
+                        stop(0.1, toColor(literal("rgb(33,102,172)"))),
+                        stop(0.3, toColor(literal("rgb(103,169,207)"))),
+                        stop(0.5, toColor(literal("rgb(209,229,240)"))),
+                        stop(0.7, toColor(literal("rgb(253,219,199)"))),
+                        stop(0.85, toColor(literal("rgb(239,138,98)"))),
+                        stop(1.0, toColor(literal("rgb(178,24,43)")))
+                    )
+                ),
+                // Smaller radius = each node influences a smaller area
+                // More nodes needed in close proximity to create high density
+                heatmapRadius(
+                    interpolate(
+                        linear(), zoom(),
+                        stop(0, 2.0),
+                        stop(9, 6.0),
+                        stop(15, 10.0)
+                    )
+                ),
+                // Transition from heatmap to circle layer by zoom level
+                heatmapOpacity(
+                    interpolate(
+                        linear(), zoom(),
+                        stop(7, 1.0),
+                        stop(22, 1.0)
+                    )
+                )
+            )
+
+        // Add above OSM layer if it exists, otherwise add at bottom
+        if (style.getLayer(OSM_LAYER_ID) != null) {
+            style.addLayerAbove(heatmapLayer, OSM_LAYER_ID)
+        } else {
+            style.addLayerAt(heatmapLayer, 0) // Add at bottom
+        }
+        Timber.tag("MapLibrePOC").d("Added heatmap HeatmapLayer")
+    }
+}
+
+/** Removes heatmap source and layer from the style */
+fun removeHeatmapSourceAndLayer(style: Style) {
+    style.getLayer(HEATMAP_LAYER_ID)?.let { style.removeLayer(it) }
+    style.getSource(HEATMAP_SOURCE_ID)?.let { style.removeSource(it) }
+    Timber.tag("MapLibrePOC").d("Removed heatmap source and layer")
+}
+
+/** Toggle visibility of node/cluster/waypoint layers */
+fun setNodeLayersVisibility(style: Style, visible: Boolean) {
+    val visibilityValue = if (visible) "visible" else "none"
+    style.getLayer(NODES_LAYER_ID)?.setProperties(visibility(visibilityValue))
+    style.getLayer(NODE_TEXT_LAYER_ID)?.setProperties(visibility(visibilityValue))
+    style.getLayer(NODES_LAYER_NOCLUSTER_ID)?.setProperties(visibility(visibilityValue))
+    style.getLayer(NODE_TEXT_LAYER_NOCLUSTER_ID)?.setProperties(visibility(visibilityValue))
+    style.getLayer(CLUSTER_CIRCLE_LAYER_ID)?.setProperties(visibility(visibilityValue))
+    style.getLayer(CLUSTER_COUNT_LAYER_ID)?.setProperties(visibility(visibilityValue))
+    style.getLayer(WAYPOINTS_LAYER_ID)?.setProperties(visibility(visibilityValue))
+    style.getLayer(PRECISION_CIRCLE_LAYER_ID)?.setProperties(visibility(visibilityValue))
+    Timber.tag("MapLibrePOC").d("Set node layers visibility to: $visibilityValue")
 }
