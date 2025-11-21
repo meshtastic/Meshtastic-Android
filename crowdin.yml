@@ -1,6 +1,3 @@
-pull_request_labels:
-  - automation
-  - l10n
 files:
   - source: /**/src/commonMain/composeResources/values/strings.xml
     translation: /%original_path%-%two_letters_code%/strings.xml
@@ -9,3 +6,4 @@ files:
     escape_quotes: 0
     escape_special_characters: 0
     type: android
+    preserve_hierarchy: true
