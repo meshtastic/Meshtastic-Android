@@ -54,7 +54,7 @@ data class PacketEntity(
             replyId = data.replyId,
             viaMqtt = node.viaMqtt,
             relayNode = data.relayNode,
-            relays = data.relays
+            relays = data.relays,
         )
     }
 }
