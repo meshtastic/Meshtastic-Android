@@ -171,6 +171,13 @@ fun MapLibrePOC(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var selectedNodeNum by remember { mutableStateOf<Int?>(null) }
+
+    // Log track parameters on entry
+    Timber.tag("MapLibrePOC").d(
+        "MapLibrePOC called - focusedNodeNum=%s, nodeTracks count=%d",
+        focusedNodeNum ?: "null",
+        nodeTracks?.size ?: 0
+    )
     val ourNode by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     var isLocationTrackingEnabled by remember { mutableStateOf(false) }
@@ -418,39 +425,99 @@ fun MapLibrePOC(
                             ensureSourcesAndLayers(style)
 
                             // Setup track sources and layers if rendering node tracks
+                            Timber.tag("MapLibrePOC").d(
+                                "Track check: nodeTracks=%s (%d positions), focusedNodeNum=%s",
+                                if (nodeTracks != null) "NOT NULL" else "NULL",
+                                nodeTracks?.size ?: 0,
+                                focusedNodeNum ?: "NULL"
+                            )
+
                             if (nodeTracks != null && focusedNodeNum != null) {
+                                Timber.tag("MapLibrePOC").d(
+                                    "Loading tracks for node %d, total positions: %d",
+                                    focusedNodeNum,
+                                    nodeTracks.size
+                                )
+
                                 // Get the focused node to use its color
                                 val focusedNode = nodes.firstOrNull { it.num == focusedNodeNum }
+                                Timber.tag("MapLibrePOC").d(
+                                    "Focused node found: %s (searching in %d nodes)",
+                                    if (focusedNode != null) "YES" else "NO",
+                                    nodes.size
+                                )
+
                                 val trackColor = focusedNode?.let {
                                     String.format("#%06X", 0xFFFFFF and it.colors.second)
                                 } ?: "#FF5722" // Default orange color
 
+                                Timber.tag("MapLibrePOC").d("Track color: %s", trackColor)
+
                                 ensureTrackSourcesAndLayers(style, trackColor)
+                                Timber.tag("MapLibrePOC").d("Track sources and layers ensured")
 
                                 // Filter tracks by time using lastHeardTrackFilter
+                                val currentTimeSeconds = System.currentTimeMillis() / 1000
+                                val filterSeconds = mapFilterState.lastHeardTrackFilter.seconds
+                                Timber.tag("MapLibrePOC").d(
+                                    "Filtering tracks - filter: %s (seconds: %d), current time: %d",
+                                    mapFilterState.lastHeardTrackFilter,
+                                    filterSeconds,
+                                    currentTimeSeconds
+                                )
+
                                 val filteredTracks = nodeTracks.filter {
-                                    mapFilterState.lastHeardTrackFilter == org.meshtastic.feature.map.LastHeardFilter.Any ||
-                                        it.time > System.currentTimeMillis() / 1000 - mapFilterState.lastHeardTrackFilter.seconds
+                                    val keep = mapFilterState.lastHeardTrackFilter == org.meshtastic.feature.map.LastHeardFilter.Any ||
+                                        it.time > currentTimeSeconds - filterSeconds
+                                    if (!keep) {
+                                        Timber.tag("MapLibrePOC").v(
+                                            "Filtering out position at time %d (age: %d seconds)",
+                                            it.time,
+                                            currentTimeSeconds - it.time
+                                        )
+                                    }
+                                    keep
                                 }.sortedBy { it.time }
+
+                                Timber.tag("MapLibrePOC").d(
+                                    "Tracks filtered: %d positions remain (from %d total)",
+                                    filteredTracks.size,
+                                    nodeTracks.size
+                                )
 
                                 // Update track line
                                 if (filteredTracks.size >= 2) {
+                                    Timber.tag("MapLibrePOC").d("Creating line feature from %d points", filteredTracks.size)
                                     positionsToLineStringFeature(filteredTracks)?.let { lineFeature ->
+                                        Timber.tag("MapLibrePOC").d("Setting line feature on source")
                                         (style.getSource(TRACK_LINE_SOURCE_ID) as? GeoJsonSource)
                                             ?.setGeoJson(lineFeature)
+                                        Timber.tag("MapLibrePOC").d("Track line set successfully")
+                                    } ?: run {
+                                        Timber.tag("MapLibrePOC").w("Failed to create line feature - positionsToLineStringFeature returned null")
                                     }
+                                } else {
+                                    Timber.tag("MapLibrePOC").w("Not enough points for track line (need >=2, have %d)", filteredTracks.size)
                                 }
 
                                 // Update track points
                                 if (filteredTracks.isNotEmpty()) {
+                                    Timber.tag("MapLibrePOC").d("Creating point features from %d points", filteredTracks.size)
                                     val pointsFC = positionsToPointFeatures(filteredTracks)
                                     (style.getSource(TRACK_POINTS_SOURCE_ID) as? GeoJsonSource)
                                         ?.setGeoJson(pointsFC)
+                                    Timber.tag("MapLibrePOC").d("Track points set successfully")
+                                } else {
+                                    Timber.tag("MapLibrePOC").w("No filtered tracks to display as points")
                                 }
 
-                                Timber.tag("MapLibrePOC")
-                                    .d("Track data set: %d positions", filteredTracks.size)
+                                Timber.tag("MapLibrePOC").i(
+                                    "✓ Track rendering complete: %d positions displayed for node %d",
+                                    filteredTracks.size,
+                                    focusedNodeNum
+                                )
                             } else {
+                                Timber.tag("MapLibrePOC").d("No tracks to display - removing track layers")
                                 // Remove track layers if no tracks to display
                                 removeTrackSourcesAndLayers(style)
                             }
@@ -622,6 +689,24 @@ fun MapLibrePOC(
                                             } ?: emptyList()
                                         val members = nodes.filter { nums.contains(it.num) }
                                         if (members.isNotEmpty()) {
+                                            // Center camera on cluster with zoom in
+                                            val geom = f.geometry()
+                                            if (geom is Point) {
+                                                val clusterLat = geom.latitude()
+                                                val clusterLon = geom.longitude()
+                                                val clusterLatLng = LatLng(clusterLat, clusterLon)
+                                                map.animateCamera(
+                                                    CameraUpdateFactory.newLatLngZoom(clusterLatLng, map.cameraPosition.zoom + 1.5),
+                                                    300
+                                                )
+                                                Timber.tag("MapLibrePOC").d(
+                                                    "Centering on cluster at (%.5f, %.5f) with %d members",
+                                                    clusterLat,
+                                                    clusterLon,
+                                                    members.size
+                                                )
+                                            }
+
                                             // Center the radial overlay on the actual cluster point (not the raw click)
                                             val clusterCenter =
                                                 (f.geometry() as? Point)?.let { p ->
@@ -649,6 +734,24 @@ fun MapLibrePOC(
                                         "node" -> {
                                             val num = it.getNumberProperty("num")?.toInt() ?: -1
                                             selectedNodeNum = num
+
+                                            // Center camera on selected node
+                                            val geom = it.geometry()
+                                            if (geom is Point) {
+                                                val nodeLat = geom.latitude()
+                                                val nodeLon = geom.longitude()
+                                                val nodeLatLng = LatLng(nodeLat, nodeLon)
+                                                map.animateCamera(
+                                                    CameraUpdateFactory.newLatLng(nodeLatLng),
+                                                    300
+                                                )
+                                                Timber.tag("MapLibrePOC").d(
+                                                    "Centering on node %d at (%.5f, %.5f)",
+                                                    num,
+                                                    nodeLat,
+                                                    nodeLon
+                                                )
+                                            }
                                         }
                                         "waypoint" -> {
                                             val id = it.getNumberProperty("id")?.toInt() ?: -1
@@ -656,6 +759,24 @@ fun MapLibrePOC(
                                             waypoints.values
                                                 .find { pkt -> pkt.data.waypoint?.id == id }
                                                 ?.let { pkt -> editingWaypoint = pkt.data.waypoint }
+
+                                            // Center camera on waypoint
+                                            val geom = it.geometry()
+                                            if (geom is Point) {
+                                                val wpLat = geom.latitude()
+                                                val wpLon = geom.longitude()
+                                                val wpLatLng = LatLng(wpLat, wpLon)
+                                                map.animateCamera(
+                                                    CameraUpdateFactory.newLatLng(wpLatLng),
+                                                    300
+                                                )
+                                                Timber.tag("MapLibrePOC").d(
+                                                    "Centering on waypoint %d at (%.5f, %.5f)",
+                                                    id,
+                                                    wpLat,
+                                                    wpLon
+                                                )
+                                            }
                                         }
                                         else -> {}
                                     }

@@ -792,6 +792,11 @@ fun MapView(
             ) { isMapLibre ->
                 if (isMapLibre) {
                     // MapLibre implementation
+                    timber.log.Timber.tag("MapView").d(
+                        "Calling MapLibrePOC with focusedNodeNum=%s, nodeTracks count=%d",
+                        focusedNodeNum ?: "null",
+                        nodeTracks?.size ?: 0
+                    )
                     org.meshtastic.feature.map.maplibre.ui.MapLibrePOC(
                         mapViewModel = mapViewModel,
                         onNavigateToNodeDetails = navigateToNodeDetails,
