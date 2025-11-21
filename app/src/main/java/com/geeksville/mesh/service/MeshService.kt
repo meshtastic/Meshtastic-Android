@@ -1329,6 +1329,7 @@ class MeshService : Service() {
                 p.data.relays += 1
                 packetRepository.get().update(p)
             }
+            serviceBroadcasts.broadcastMessageStatus(requestId, m)
         }
     }
 
