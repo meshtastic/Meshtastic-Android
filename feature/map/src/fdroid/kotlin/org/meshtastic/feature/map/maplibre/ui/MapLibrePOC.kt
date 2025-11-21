@@ -689,15 +689,35 @@ fun MapLibrePOC(
                                             } ?: emptyList()
                                         val members = nodes.filter { nums.contains(it.num) }
                                         if (members.isNotEmpty()) {
-                                            // Center camera on cluster with zoom in
+                                            // Center camera on cluster (without zoom) to keep cluster intact
                                             val geom = f.geometry()
                                             if (geom is Point) {
                                                 val clusterLat = geom.latitude()
                                                 val clusterLon = geom.longitude()
                                                 val clusterLatLng = LatLng(clusterLat, clusterLon)
                                                 map.animateCamera(
-                                                    CameraUpdateFactory.newLatLngZoom(clusterLatLng, map.cameraPosition.zoom + 1.5),
-                                                    300
+                                                    CameraUpdateFactory.newLatLng(clusterLatLng),
+                                                    300,
+                                                    object : MapLibreMap.CancelableCallback {
+                                                        override fun onFinish() {
+                                                            // Calculate screen position AFTER camera animation completes
+                                                            val clusterCenter =
+                                                                map.projection.toScreenLocation(LatLng(clusterLat, clusterLon))
+
+                                                            // Set overlay state after camera animation completes
+                                                            if (pointCount > CLUSTER_RADIAL_MAX) {
+                                                                // Show list for large clusters
+                                                                clusterListMembers = members
+                                                            } else {
+                                                                // Show radial overlay for small clusters
+                                                                expandedCluster =
+                                                                    ExpandedCluster(clusterCenter, members.take(CLUSTER_RADIAL_MAX))
+                                                            }
+                                                        }
+                                                        override fun onCancel() {
+                                                            // Animation was cancelled, don't show overlay
+                                                        }
+                                                    }
                                                 )
                                                 Timber.tag("MapLibrePOC").d(
                                                     "Centering on cluster at (%.5f, %.5f) with %d members",
@@ -705,20 +725,18 @@ fun MapLibrePOC(
                                                     clusterLon,
                                                     members.size
                                                 )
-                                            }
-
-                                            // Center the radial overlay on the actual cluster point (not the raw click)
-                                            val clusterCenter =
-                                                (f.geometry() as? Point)?.let { p ->
-                                                    map.projection.toScreenLocation(LatLng(p.latitude(), p.longitude()))
-                                                } ?: screenPoint
-                                            if (pointCount > CLUSTER_RADIAL_MAX) {
-                                                // Show list for large clusters
-                                                clusterListMembers = members
                                             } else {
-                                                // Show radial overlay for small clusters
-                                                expandedCluster =
-                                                    ExpandedCluster(clusterCenter, members.take(CLUSTER_RADIAL_MAX))
+                                                // No geometry, show overlay immediately using current screen position
+                                                val clusterCenter =
+                                                    (f.geometry() as? Point)?.let { p ->
+                                                        map.projection.toScreenLocation(LatLng(p.latitude(), p.longitude()))
+                                                    } ?: screenPoint
+                                                if (pointCount > CLUSTER_RADIAL_MAX) {
+                                                    clusterListMembers = members
+                                                } else {
+                                                    expandedCluster =
+                                                        ExpandedCluster(clusterCenter, members.take(CLUSTER_RADIAL_MAX))
+                                                }
                                             }
                                         }
                                         return@addOnMapClickListener true
@@ -959,502 +977,205 @@ fun MapLibrePOC(
         )
 
         // Role legend (based on roles present in current nodes)
-        val rolesPresent = remember(nodes) { nodes.map { it.user.role }.toSet() }
-        if (showLegend && rolesPresent.isNotEmpty()) {
-            Surface(
+        if (showLegend) {
+            RoleLegend(
+                nodes = nodes,
                 modifier = Modifier.align(Alignment.BottomStart).padding(12.dp),
-                tonalElevation = 4.dp,
-                shadowElevation = 4.dp,
-            ) {
-                Column(modifier = Modifier.padding(8.dp)) {
-                    rolesPresent.take(6).forEach { role ->
-                        val fakeNode =
-                            Node(
-                                num = 0,
-                                user = org.meshtastic.proto.MeshProtos.User.newBuilder().setRole(role).build(),
-                            )
-                        Row(
-                            modifier = Modifier.padding(vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = roleColor(fakeNode),
-                                modifier = Modifier.size(12.dp),
-                            ) {}
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = role.name.lowercase().replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                        }
-                    }
-                }
-            }
+            )
         }
 
         // Map controls: horizontal toolbar at the top (matches Google Maps style)
-        var mapFilterExpanded by remember { mutableStateOf(false) }
-        @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-        HorizontalFloatingToolbar(
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp), // Top padding to avoid exit button
-            expanded = true,
-            content = {
-                // Consolidated GPS button (cycles through: Off -> On -> On with bearing)
-                if (hasLocationPermission) {
-                    val gpsIcon = when {
-                        isLocationTrackingEnabled && followBearing -> Icons.Filled.MyLocation
-                        isLocationTrackingEnabled -> Icons.Filled.MyLocation
-                        else -> Icons.Outlined.MyLocation
-                    }
-                    MapButton(
-                        onClick = {
-                            when {
-                                !isLocationTrackingEnabled -> {
-                                    // Off -> On
-                                    isLocationTrackingEnabled = true
-                                    followBearing = false
-                                    Timber.tag("MapLibrePOC").d("GPS tracking enabled")
-                                }
-                                isLocationTrackingEnabled && !followBearing -> {
-                                    // On -> On with bearing
-                                    followBearing = true
-                                    Timber.tag("MapLibrePOC").d("GPS tracking with bearing enabled")
-                                }
-                                else -> {
-                                    // On with bearing -> Off
-                                    isLocationTrackingEnabled = false
-                                    followBearing = false
-                                    Timber.tag("MapLibrePOC").d("GPS tracking disabled")
-                                }
-                            }
-                        },
-                        icon = gpsIcon,
-                        contentDescription = null,
-                        iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { isLocationTrackingEnabled && !followBearing },
-                    )
-                }
-                Box {
-                    MapButton(onClick = { mapFilterExpanded = true }, icon = Icons.Outlined.Tune, contentDescription = null)
-                DropdownMenu(expanded = mapFilterExpanded, onDismissRequest = { mapFilterExpanded = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Only favorites") },
-                        onClick = {
-                            mapViewModel.toggleOnlyFavorites()
-                            mapFilterExpanded = false
-                        },
-                        trailingIcon = {
-                            Checkbox(
-                                checked = mapFilterState.onlyFavorites,
-                                onCheckedChange = {
-                                    mapViewModel.toggleOnlyFavorites()
-                                    // Refresh both sources when filters change
-                                    mapRef?.style?.let { st ->
-                                        val filtered =
-                                            applyFilters(
-                                                nodes,
-                                                mapFilterState.copy(onlyFavorites = !mapFilterState.onlyFavorites),
-                                                enabledRoles,
-                                            )
-                                        (st.getSource(NODES_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
-                                            nodesToFeatureCollectionJsonWithSelection(filtered, emptySet()),
-                                        )
-                                        (st.getSource(NODES_CLUSTER_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
-                                            nodesToFeatureCollectionJsonWithSelection(filtered, emptySet()),
-                                        )
-                                    }
-                                },
-                            )
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Show precision circle") },
-                        onClick = {
-                            mapViewModel.toggleShowPrecisionCircleOnMap()
-                            mapFilterExpanded = false
-                        },
-                        trailingIcon = {
-                            Checkbox(
-                                checked = mapFilterState.showPrecisionCircle,
-                                onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
-                            )
-                        },
-                    )
-                    androidx.compose.material3.Divider()
-                    Text(
-                        text = "Roles",
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                    )
-                    val roles = nodes.map { it.user.role }.distinct().sortedBy { it.name }
-                    roles.forEach { role ->
-                        val checked = if (enabledRoles.isEmpty()) true else enabledRoles.contains(role)
-                        DropdownMenuItem(
-                            text = { Text(role.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                            onClick = {
-                                enabledRoles =
-                                    if (enabledRoles.isEmpty()) {
-                                        setOf(role)
-                                    } else if (enabledRoles.contains(role)) {
-                                        enabledRoles - role
-                                    } else {
-                                        enabledRoles + role
-                                    }
-                                mapRef?.style?.let { st ->
-                                    mapRef?.let { map ->
-                                        clustersShown =
-                                            setClusterVisibilityHysteresis(
-                                                map,
-                                                st,
-                                                applyFilters(
-                                                    nodes,
-                                                    mapFilterState,
-                                                    enabledRoles,
-                                                    ourNode?.num,
-                                                    isLocationTrackingEnabled,
-                                                ),
-                                                clusteringEnabled,
-                                                clustersShown,
-                                                mapFilterState.showPrecisionCircle,
-                                            )
-                                    }
-                                }
-                            },
-                            trailingIcon = {
-                                Checkbox(
-                                    checked = checked,
-                                    onCheckedChange = {
-                                        enabledRoles =
-                                            if (enabledRoles.isEmpty()) {
-                                                setOf(role)
-                                            } else if (enabledRoles.contains(role)) {
-                                                enabledRoles - role
-                                            } else {
-                                                enabledRoles + role
-                                            }
-                                        mapRef?.style?.let { st ->
-                                            mapRef?.let { map ->
-                                                clustersShown =
-                                                    setClusterVisibilityHysteresis(
-                                                        map,
-                                                        st,
-                                                        applyFilters(
-                                                            nodes,
-                                                            mapFilterState,
-                                                            enabledRoles,
-                                                            ourNode?.num,
-                                                            isLocationTrackingEnabled,
-                                                        ),
-                                                        clusteringEnabled,
-                                                        clustersShown,
-                                                        mapFilterState.showPrecisionCircle,
-                                                    )
-                                            }
-                                        }
-                                    },
-                                )
-                            },
-                        )
-                    }
-                    androidx.compose.material3.Divider()
-                    DropdownMenuItem(
-                        text = { Text("Enable clustering") },
-                        onClick = {
-                            clusteringEnabled = !clusteringEnabled
-                            mapRef?.style?.let { st ->
-                                mapRef?.let { map ->
-                                    clustersShown =
-                                        setClusterVisibilityHysteresis(
-                                            map,
-                                            st,
-                                            applyFilters(
-                                                nodes,
-                                                mapFilterState,
-                                                enabledRoles,
-                                                ourNode?.num,
-                                                isLocationTrackingEnabled,
-                                            ),
-                                            clusteringEnabled,
-                                            clustersShown,
-                                            mapFilterState.showPrecisionCircle,
-                                        )
-                                }
-                            }
-                        },
-                        trailingIcon = {
-                            Checkbox(
-                                checked = clusteringEnabled,
-                                onCheckedChange = {
-                                    clusteringEnabled = it
-                                    mapRef?.style?.let { st ->
-                                        mapRef?.let { map ->
-                                            clustersShown =
-                                                setClusterVisibilityHysteresis(
-                                                    map,
-                                                    st,
-                                                    applyFilters(
-                                                        nodes,
-                                                        mapFilterState,
-                                                        enabledRoles,
-                                                        ourNode?.num,
-                                                        isLocationTrackingEnabled,
-                                                    ),
-                                                    clusteringEnabled,
-                                                    clustersShown,
-                                                    mapFilterState.showPrecisionCircle,
-                                                )
-                                        }
-                                    }
-                                },
-                            )
-                        },
-                    )
-                }
-                }
-                // Map style selector (matches Google Maps - Map icon)
-                Box {
-                    MapButton(
-                        onClick = { mapTypeMenuExpanded = true },
-                        icon = Icons.Outlined.Map,
-                        contentDescription = null,
-                    )
-                    DropdownMenu(expanded = mapTypeMenuExpanded, onDismissRequest = { mapTypeMenuExpanded = false }) {
-                    Text(
-                        text = "Map Style",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    )
-                    baseStyles.forEachIndexed { index, style ->
-                        DropdownMenuItem(
-                            text = { Text(style.label) },
-                            onClick = {
-                                baseStyleIndex = index
-                                usingCustomTiles = false
-                                mapTypeMenuExpanded = false
-                                val next = baseStyles[baseStyleIndex % baseStyles.size]
-                                mapRef?.let { map ->
-                                    Timber.tag("MapLibrePOC").d("Switching base style to: %s", next.label)
-                                    map.setStyle(buildMeshtasticStyle(next)) { st ->
-                                        Timber.tag("MapLibrePOC").d("Base map switched to: %s", next.label)
-                                        val density = context.resources.displayMetrics.density
-                                        clustersShown =
-                                            reinitializeStyleAfterSwitch(
-                                                context,
-                                                map,
-                                                st,
-                                                waypoints,
-                                                nodes,
-                                                mapFilterState,
-                                                enabledRoles,
-                                                ourNode?.num,
-                                                isLocationTrackingEnabled,
-                                                clusteringEnabled,
-                                                clustersShown,
-                                                density,
-                                            )
-                                    }
-                                }
-                            },
-                            trailingIcon = {
-                                if (index == baseStyleIndex && !usingCustomTiles) {
-                                    Icon(imageVector = Icons.Outlined.Check, contentDescription = "Selected")
-                                }
-                            },
-                        )
-                    }
-                    androidx.compose.material3.HorizontalDivider()
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                if (customTileUrl.isEmpty()) {
-                                    "Custom Tile URL..."
-                                } else {
-                                    "Custom: ${customTileUrl.take(30)}..."
-                                },
-                            )
-                        },
-                        onClick = {
-                            mapTypeMenuExpanded = false
-                            customTileUrlInput = customTileUrl
-                            showCustomTileDialog = true
-                        },
-                        trailingIcon = {
-                            if (usingCustomTiles && customTileUrl.isNotEmpty()) {
-                                Icon(imageVector = Icons.Outlined.Check, contentDescription = "Selected")
-                            }
-                        },
-                    )
-                }
-                }
-
-                // Map layers button (matches Google Maps - Layers icon)
-                MapButton(
-                    onClick = { showLayersBottomSheet = true },
-                    icon = Icons.Outlined.Layers,
-                    contentDescription = null,
-                )
-
-                // Cache management button
-                MapButton(
-                    onClick = { showCacheBottomSheet = true },
-                    icon = Icons.Outlined.Storage,
-                    contentDescription = null,
-                )
-
-                // Legend button
-                MapButton(onClick = { showLegend = !showLegend }, icon = Icons.Outlined.Info, contentDescription = null)
+        MapToolbar(
+            hasLocationPermission = hasLocationPermission,
+            isLocationTrackingEnabled = isLocationTrackingEnabled,
+            followBearing = followBearing,
+            onLocationTrackingChanged = { enabled, follow ->
+                isLocationTrackingEnabled = enabled
+                followBearing = follow
             },
+            mapFilterState = mapFilterState,
+            onToggleOnlyFavorites = {
+                mapViewModel.toggleOnlyFavorites()
+                // Refresh both sources when filters change
+                mapRef?.style?.let { st ->
+                    val filtered =
+                        applyFilters(
+                            nodes,
+                            mapFilterState.copy(onlyFavorites = !mapFilterState.onlyFavorites),
+                            enabledRoles,
+                        )
+                    (st.getSource(NODES_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
+                        nodesToFeatureCollectionJsonWithSelection(filtered, emptySet()),
+                    )
+                    (st.getSource(NODES_CLUSTER_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
+                        nodesToFeatureCollectionJsonWithSelection(filtered, emptySet()),
+                    )
+                }
+            },
+            onToggleShowPrecisionCircle = { mapViewModel.toggleShowPrecisionCircleOnMap() },
+            nodes = nodes,
+            enabledRoles = enabledRoles,
+            onRoleToggled = { role ->
+                enabledRoles =
+                    if (enabledRoles.isEmpty()) {
+                        setOf(role)
+                    } else if (enabledRoles.contains(role)) {
+                        enabledRoles - role
+                    } else {
+                        enabledRoles + role
+                    }
+                mapRef?.style?.let { st ->
+                    mapRef?.let { map ->
+                        clustersShown =
+                            setClusterVisibilityHysteresis(
+                                map,
+                                st,
+                                applyFilters(
+                                    nodes,
+                                    mapFilterState,
+                                    enabledRoles,
+                                    ourNode?.num,
+                                    isLocationTrackingEnabled,
+                                ),
+                                clusteringEnabled,
+                                clustersShown,
+                                mapFilterState.showPrecisionCircle,
+                            )
+                    }
+                }
+            },
+            clusteringEnabled = clusteringEnabled,
+            onClusteringToggled = { enabled ->
+                clusteringEnabled = enabled
+                mapRef?.style?.let { st ->
+                    mapRef?.let { map ->
+                        clustersShown =
+                            setClusterVisibilityHysteresis(
+                                map,
+                                st,
+                                applyFilters(
+                                    nodes,
+                                    mapFilterState,
+                                    enabledRoles,
+                                    ourNode?.num,
+                                    isLocationTrackingEnabled,
+                                ),
+                                clusteringEnabled,
+                                clustersShown,
+                                mapFilterState.showPrecisionCircle,
+                            )
+                    }
+                }
+            },
+            baseStyles = baseStyles,
+            baseStyleIndex = baseStyleIndex,
+            usingCustomTiles = usingCustomTiles,
+            onStyleSelected = { index ->
+                baseStyleIndex = index
+                usingCustomTiles = false
+                val next = baseStyles[baseStyleIndex % baseStyles.size]
+                mapRef?.let { map ->
+                    Timber.tag("MapLibrePOC").d("Switching base style to: %s", next.label)
+                    map.setStyle(buildMeshtasticStyle(next)) { st ->
+                        Timber.tag("MapLibrePOC").d("Base map switched to: %s", next.label)
+                        val density = context.resources.displayMetrics.density
+                        clustersShown =
+                            reinitializeStyleAfterSwitch(
+                                context,
+                                map,
+                                st,
+                                waypoints,
+                                nodes,
+                                mapFilterState,
+                                enabledRoles,
+                                ourNode?.num,
+                                isLocationTrackingEnabled,
+                                clusteringEnabled,
+                                clustersShown,
+                                density,
+                            )
+                    }
+                }
+            },
+            customTileUrl = customTileUrl,
+            onCustomTileClicked = {
+                customTileUrlInput = customTileUrl
+                showCustomTileDialog = true
+            },
+            onShowLayersClicked = { showLayersBottomSheet = true },
+            onShowCacheClicked = { showCacheBottomSheet = true },
+            onShowLegendToggled = { showLegend = !showLegend },
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp),
         )
 
-        // Zoom controls (bottom right) - wrapped in Surface for consistent background
-        Surface(
+        // Zoom controls (bottom right)
+        ZoomControls(
+            mapRef = mapRef,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 16.dp, end = 16.dp),
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            shadowElevation = 3.dp,
-        ) {
-            Column(
-                modifier = Modifier.padding(4.dp),
-            ) {
-                // Zoom in button
-                MapButton(
-                    onClick = {
-                        mapRef?.let { map ->
-                            map.animateCamera(CameraUpdateFactory.zoomIn())
-                            Timber.tag("MapLibrePOC").d("Zoom in")
-                        }
-                    },
-                    icon = Icons.Outlined.Add,
-                    contentDescription = "Zoom in",
-                )
-
-                Spacer(modifier = Modifier.size(4.dp))
-
-                // Zoom out button
-                MapButton(
-                    onClick = {
-                        mapRef?.let { map ->
-                            map.animateCamera(CameraUpdateFactory.zoomOut())
-                            Timber.tag("MapLibrePOC").d("Zoom out")
-                        }
-                    },
-                    icon = Icons.Outlined.Remove,
-                    contentDescription = "Zoom out",
-                )
-            }
-        }
+        )
 
         // Custom tile URL dialog
         if (showCustomTileDialog) {
-            AlertDialog(
-                onDismissRequest = { showCustomTileDialog = false },
-                title = { Text("Custom Tile URL") },
-                text = {
-                    Column {
-                        Text(
-                            text = "Enter tile URL with {z}/{x}/{y} placeholders:",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 8.dp),
-                        )
-                        Text(
-                            text = "Example: https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 16.dp),
-                        )
-                        OutlinedTextField(
-                            value = customTileUrlInput,
-                            onValueChange = { customTileUrlInput = it },
-                            label = { Text("Tile URL") },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            customTileUrl = customTileUrlInput.trim()
-                            if (customTileUrl.isNotEmpty()) {
-                                usingCustomTiles = true
-                                // Apply custom tiles (use first base style as template but we'll override the raster
-                                // source)
-                                mapRef?.let { map ->
-                                    Timber.tag("MapLibrePOC").d("Switching to custom tiles: %s", customTileUrl)
-                                    map.setStyle(buildMeshtasticStyle(baseStyles[0], customTileUrl)) { st ->
-                                        Timber.tag("MapLibrePOC").d("Custom tiles applied")
-                                        val density = context.resources.displayMetrics.density
-                                        clustersShown =
-                                            reinitializeStyleAfterSwitch(
-                                                context,
-                                                map,
-                                                st,
-                                                waypoints,
-                                                nodes,
-                                                mapFilterState,
-                                                enabledRoles,
-                                                ourNode?.num,
-                                                isLocationTrackingEnabled,
-                                                clusteringEnabled,
-                                                clustersShown,
-                                                density,
-                                            )
-                                    }
-                                }
+            CustomTileDialog(
+                customTileUrlInput = customTileUrlInput,
+                onCustomTileUrlInputChanged = { customTileUrlInput = it },
+                onApply = {
+                    customTileUrl = customTileUrlInput.trim()
+                    if (customTileUrl.isNotEmpty()) {
+                        usingCustomTiles = true
+                        // Apply custom tiles (use first base style as template but we'll override the raster source)
+                        mapRef?.let { map ->
+                            Timber.tag("MapLibrePOC").d("Switching to custom tiles: %s", customTileUrl)
+                            map.setStyle(buildMeshtasticStyle(baseStyles[0], customTileUrl)) { st ->
+                                Timber.tag("MapLibrePOC").d("Custom tiles applied")
+                                val density = context.resources.displayMetrics.density
+                                clustersShown =
+                                    reinitializeStyleAfterSwitch(
+                                        context,
+                                        map,
+                                        st,
+                                        waypoints,
+                                        nodes,
+                                        mapFilterState,
+                                        enabledRoles,
+                                        ourNode?.num,
+                                        isLocationTrackingEnabled,
+                                        clusteringEnabled,
+                                        clustersShown,
+                                        density,
+                                    )
                             }
-                            showCustomTileDialog = false
-                        },
-                    ) {
-                        Text("Apply")
+                        }
                     }
+                    showCustomTileDialog = false
                 },
-                dismissButton = { TextButton(onClick = { showCustomTileDialog = false }) { Text("Cancel") } },
+                onDismiss = { showCustomTileDialog = false },
             )
         }
 
         // Expanded cluster radial overlay
         expandedCluster?.let { ec ->
             val d = context.resources.displayMetrics.density
-            val centerX = (ec.centerPx.x / d).dp
-            val centerY = (ec.centerPx.y / d).dp
-            val radiusPx = 72f * d
-            val itemSize = 40.dp
-            val n = ec.members.size.coerceAtLeast(1)
-            ec.members.forEachIndexed { idx, node ->
-                val theta = (2.0 * Math.PI * idx / n)
-                val x = (ec.centerPx.x + (radiusPx * kotlin.math.cos(theta))).toFloat()
-                val y = (ec.centerPx.y + (radiusPx * kotlin.math.sin(theta))).toFloat()
-                val xDp = (x / d).dp
-                val yDp = (y / d).dp
-                val label = (protoShortName(node) ?: shortNameFallback(node)).take(4)
-                val itemHeight = 36.dp
-                val itemWidth = (40 + label.length * 10).dp
-                Surface(
-                    modifier =
-                    Modifier.align(Alignment.TopStart)
-                        .offset(x = xDp - itemWidth / 2, y = yDp - itemHeight / 2)
-                        .size(width = itemWidth, height = itemHeight)
-                        .clickable {
-                            selectedNodeNum = node.num
-                            expandedCluster = null
-                            node.validPosition?.let { p ->
-                                mapRef?.animateCamera(
-                                    CameraUpdateFactory.newLatLngZoom(
-                                        LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
-                                        15.0,
-                                    ),
-                                )
-                            }
-                        },
-                    shape = CircleShape,
-                    color = roleColor(node),
-                    shadowElevation = 6.dp,
-                ) {
-                    Box(contentAlignment = Alignment.Center) { Text(text = label, color = Color.White, maxLines = 1) }
-                }
-            }
+            ClusterRadialOverlay(
+                centerPx = ec.centerPx,
+                members = ec.members,
+                density = d,
+                onNodeClicked = { node ->
+                    selectedNodeNum = node.num
+                    expandedCluster = null
+                    node.validPosition?.let { p ->
+                        mapRef?.animateCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                15.0,
+                            ),
+                        )
+                    }
+                },
+                modifier = Modifier.align(Alignment.TopStart),
+            )
         }
 
         // Layer management bottom sheet
@@ -1491,88 +1212,47 @@ fun MapLibrePOC(
         // Bottom sheet with node details and actions
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val selectedNode = selectedNodeNum?.let { num -> nodes.firstOrNull { it.num == num } }
+
         // Cluster list bottom sheet (for large clusters)
         clusterListMembers?.let { members ->
-            ModalBottomSheet(
-                onDismissRequest = { clusterListMembers = null },
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            ) {
-                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Text(text = "Cluster items (${members.size})", style = MaterialTheme.typography.titleMedium)
-                    LazyColumn {
-                        items(members) { node ->
-                            Row(
-                                modifier =
-                                Modifier.fillMaxWidth().padding(vertical = 6.dp).clickable {
-                                    selectedNodeNum = node.num
-                                    clusterListMembers = null
-                                    node.validPosition?.let { p ->
-                                        mapRef?.animateCamera(
-                                            CameraUpdateFactory.newLatLngZoom(
-                                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
-                                                15.0,
-                                            ),
-                                        )
-                                    }
-                                },
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                NodeChip(
-                                    node = node,
-                                    onClick = {
-                                        selectedNodeNum = node.num
-                                        clusterListMembers = null
-                                        node.validPosition?.let { p ->
-                                            mapRef?.animateCamera(
-                                                CameraUpdateFactory.newLatLngZoom(
-                                                    LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
-                                                    15.0,
-                                                ),
-                                            )
-                                        }
-                                    },
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                val longName = node.user.longName
-                                if (!longName.isNullOrBlank()) {
-                                    Text(text = longName, style = MaterialTheme.typography.bodyLarge)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (selectedNode != null) {
-            ModalBottomSheet(onDismissRequest = { selectedNodeNum = null }, sheetState = sheetState) {
-                Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-                    NodeChip(node = selectedNode)
-                    val longName = selectedNode.user.longName
-                    if (!longName.isNullOrBlank()) {
-                        Text(
-                            text = longName,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(top = 8.dp),
+            ClusterListBottomSheet(
+                members = members,
+                onNodeClicked = { node ->
+                    selectedNodeNum = node.num
+                    clusterListMembers = null
+                    node.validPosition?.let { p ->
+                        mapRef?.animateCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                15.0,
+                            ),
                         )
                     }
-                    val lastHeardAgo = formatSecondsAgo(selectedNode.lastHeard)
-                    val coords = selectedNode.gpsString()
-                    Text(text = "Last heard: $lastHeardAgo", modifier = Modifier.padding(top = 8.dp))
-                    Text(text = "Coordinates: $coords")
-                    val km = ourNode?.let { me -> distanceKmBetween(me, selectedNode) }
-                    if (km != null) Text(text = "Distance: ${"%.1f".format(km)} km")
-                    Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
-                        Button(
-                            onClick = {
-                                onNavigateToNodeDetails(selectedNode.num)
-                                selectedNodeNum = null
-                            },
-                        ) {
-                            Text("View full node")
-                        }
-                    }
-                }
-            }
+                },
+                onDismiss = { clusterListMembers = null },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            )
+        }
+
+        // Node details bottom sheet
+        if (selectedNode != null) {
+            val lastHeardAgo = formatSecondsAgo(selectedNode.lastHeard)
+            val coords = selectedNode.gpsString()
+            val km = ourNode?.let { me -> distanceKmBetween(me, selectedNode) }
+            val distanceKm = km?.let { "%.1f".format(it) }
+
+            NodeDetailsBottomSheet(
+                node = selectedNode,
+                lastHeardAgo = lastHeardAgo,
+                coords = coords,
+                distanceKm = distanceKm,
+                onViewFullNode = {
+                    onNavigateToNodeDetails(selectedNode.num)
+                    selectedNodeNum = null
+                },
+                onDismiss = { selectedNodeNum = null },
+                sheetState = sheetState,
+            )
         }
         // Waypoint editing dialog
         editingWaypoint?.let { waypointToEdit ->
