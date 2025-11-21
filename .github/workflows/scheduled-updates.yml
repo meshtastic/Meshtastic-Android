@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: 'true'
 
       - name: Update firmware releases list
         run: |
@@ -79,7 +81,7 @@ jobs:
       - name: Create Pull Request if changes occurred
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: |
             chore: Scheduled updates (Firmware, Hardware, Translations)
 
