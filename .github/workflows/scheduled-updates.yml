@@ -111,7 +111,7 @@ jobs:
     name: Check Workflow Status
     runs-on: ubuntu-latest
     needs:
-        - update_assets,
+        - update_assets
     if: always()
     steps:
       - name: Check Workflow Status
