@@ -37,6 +37,7 @@ import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.relays
 import org.meshtastic.core.strings.resend
 
+@Suppress("UnusedParameter")
 @Composable
 fun DeliveryInfo(
     title: StringResource,
