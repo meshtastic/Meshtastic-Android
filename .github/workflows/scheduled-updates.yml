@@ -78,7 +78,7 @@ jobs:
       - name: Create Pull Request if changes occurred
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.AUTOMATION_PAT }}
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           commit-message: |
             chore: Scheduled updates (Firmware, Hardware, Translations)
 
