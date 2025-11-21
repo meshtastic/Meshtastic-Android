@@ -6,4 +6,3 @@ files:
     escape_quotes: 0
     escape_special_characters: 0
     type: android
-    preserve_hierarchy: true
