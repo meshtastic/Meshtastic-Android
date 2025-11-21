@@ -67,13 +67,12 @@ jobs:
           upload_sources_args: '--preserve-hierarchy'
           upload_translations: false
           download_translations: true
+          download_translations_args: '--preserve-hierarchy'
           create_pull_request: false
           commit_message: 'chore(l10n): New Crowdin Translations from scheduled update'
           push_translations: false
           push_sources: false
           localization_branch_name: ${{ github.ref_name }}
-          export_only_approved: false
-          skip_untranslated_strings: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
