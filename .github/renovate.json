@@ -20,11 +20,32 @@
   },
   "packageRules": [
     {
+      "description": "Automerge non-major updates for stable versions",
       "matchUpdateTypes": [
         "minor",
-        "patch"
+        "patch",
+        "pin",
+        "digest"
       ],
       "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    },
+    {
+      "description": "Automerge patch updates for unstable (0.x) versions",
+      "matchUpdateTypes": [
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "matchCurrentVersion": "/^0/",
+      "automerge": true
+    },
+    {
+      "description": "Automerge pins and digests regardless of version",
+      "matchUpdateTypes": [
+        "pin",
+        "digest"
+      ],
       "automerge": true
     },
     {
@@ -33,7 +54,8 @@
       ],
       "changelogUrl": "https://github.com/meshtastic/protobufs/compare/{{currentDigest}}...{{newDigest}}",
       "groupName": "Meshtastic Protobufs",
-      "groupSlug": "meshtastic-protobufs"
+      "groupSlug": "meshtastic-protobufs",
+      "automerge": true
     },
     {
       "description": "Group all AndroidX dependencies (excluding more specific AndroidX groups)",
@@ -87,7 +109,8 @@
         "/^junit:junit$/",
         "/^org\\.mockito:/",
         "/^org\\.robolectric:robolectric$/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group AndroidX Testing libraries",
@@ -97,7 +120,19 @@
         "/^androidx\\.test\\.espresso/",
         "/^androidx\\.test\\.ext/",
         "/^androidx\\.compose\\.ui:ui-test-junit4$/"
-      ]
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Group Static Analysis tools (Detekt, Spotless)",
+      "groupName": "Static Analysis",
+      "groupSlug": "static-analysis",
+      "matchPackageNames": [
+        "/^io\\.gitlab\\.arturbosch\\.detekt/",
+        "/^io\\.nlopez\\.compose\\.rules/",
+        "/^com\\.diffplug\\.spotless/"
+      ],
+      "automerge": true
     },
     {
       "description": "Group Square networking libraries (OkHttp, Retrofit)",
@@ -106,7 +141,8 @@
       "matchPackageNames": [
         "/^com\\.squareup\\.okhttp3/",
         "/^com\\.squareup\\.retrofit2/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group Coil image loading library",
@@ -114,7 +150,8 @@
       "groupSlug": "coil",
       "matchPackageNames": [
         "/^io\\.coil-kt\\.coil3/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group ZXing barcode scanning libraries",
@@ -123,7 +160,8 @@
       "matchPackageNames": [
         "/^com\\.journeyapps:zxing-android-embedded/",
         "/^com\\.google\\.zxing:core/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group Eclipse Paho MQTT client libraries",
@@ -131,7 +169,8 @@
       "groupSlug": "mqtt-paho",
       "matchPackageNames": [
         "/^org\\.eclipse\\.paho/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group Mike Penz Markdown renderer libraries",
@@ -139,7 +178,8 @@
       "groupSlug": "markdown-renderer-mikepenz",
       "matchPackageNames": [
         "/^com\\.mikepenz/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group Firebase libraries",
@@ -147,7 +187,8 @@
       "groupSlug": "firebase",
       "matchPackageNames": [
         "/^com\\.google\\.firebase/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group Datadog libraries",
@@ -155,7 +196,8 @@
       "groupSlug": "datadog",
       "matchPackageNames": [
         "/^com\\.datadoghq/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group OpenStreetMap (OSM) libraries",
@@ -165,7 +207,8 @@
         "/^org\\.osmdroid/",
         "/^com\\.github\\.MKergall\\.osmbonuspack/",
         "/^mil\\.nga/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group Google Maps Compose libraries",
@@ -174,7 +217,8 @@
       "matchPackageNames": [
         "/^com\\.google\\.android\\.gms:play-services-location/",
         "/^com\\.google\\.maps\\.android/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group Google Protobuf runtime libraries",
@@ -191,7 +235,8 @@
       "groupSlug": "androidx-room",
       "matchPackageNames": [
         "/^androidx\\.room/"
-      ]
+      ],
+      "automerge": true
     },
     {
       "description": "Group AndroidX Lifecycle libraries",
@@ -225,6 +270,32 @@
         "/^androidx\\.compose\\.material3\\.adaptive/",
         "/^androidx\\.compose\\.material3:material3-adaptive-navigation-suite$/"
       ]
+    },
+    {
+      "description": "Restrict sensitive infrastructure to patch updates only (manual minor)",
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.kotlin/",
+        "/^org\\.jetbrains\\.kotlinx/",
+        "/^com\\.google\\.dagger/",
+        "/^androidx\\.hilt/",
+        "/^com\\.google\\.protobuf/",
+        "/^androidx\\.lifecycle/",
+        "/^androidx\\.navigation/",
+        "/^androidx\\.datastore/",
+        "/^androidx\\.compose\\.material3\\.adaptive/",
+        "/^androidx\\.compose\\.material3:material3-adaptive-navigation-suite$/"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Disable automerge for major updates (safety net)",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
     }
   ]
 }
