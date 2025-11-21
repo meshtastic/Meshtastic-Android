@@ -273,6 +273,7 @@ private fun MessageStatusDialog(
         resendOption = resendOption,
         text = text,
         relayNodeName = relayNodeName,
+        relays = message.relays,
         onConfirm = onResend,
         onDismiss = onDismiss,
     )

@@ -1326,9 +1326,9 @@ class MeshService : Service() {
                 p.data.status = m
                 p.routingError = routingError
                 p.data.relayNode = relayNode
+                p.data.relays += 1
                 packetRepository.get().update(p)
             }
-            serviceBroadcasts.broadcastMessageStatus(requestId, m)
         }
     }
 

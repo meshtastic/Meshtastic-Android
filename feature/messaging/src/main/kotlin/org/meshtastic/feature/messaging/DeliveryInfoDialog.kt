@@ -35,6 +35,8 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.relayed_by
 import org.meshtastic.core.strings.resend
+import org.jetbrains.compose.resources.pluralStringResource
+import org.meshtastic.core.strings.relays
 
 @Composable
 fun DeliveryInfo(
@@ -42,6 +44,7 @@ fun DeliveryInfo(
     resendOption: Boolean,
     text: StringResource? = null,
     relayNodeName: String? = null,
+    relays: Int = 0,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
 ) = AlertDialog(
@@ -75,9 +78,9 @@ fun DeliveryInfo(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            relayNodeName?.let {
+            if (relays != 0) {
                 Text(
-                    text = stringResource(Res.string.relayed_by, it),
+                    text = pluralStringResource(Res.plurals.relays, relays, relays),
                     modifier = Modifier.padding(top = 8.dp),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
