@@ -15,9 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: 'true'
+        uses: actions/checkout@v5
 
       - name: Update firmware releases list
         run: |
