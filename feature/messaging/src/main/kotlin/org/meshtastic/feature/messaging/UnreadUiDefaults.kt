@@ -45,5 +45,5 @@ internal object UnreadUiDefaults {
      * A longer debounce prevents thrashing the database during quick scrubs yet still feels responsive once the user
      * settles on a position.
      */
-    const val SCROLL_DEBOUNCE_MILLIS = 5_000L
+    const val SCROLL_DEBOUNCE_MILLIS = 3_000L
 }

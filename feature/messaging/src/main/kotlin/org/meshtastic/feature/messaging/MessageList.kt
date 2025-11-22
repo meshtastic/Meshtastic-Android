@@ -369,25 +369,23 @@ private fun UpdateUnreadCount(
     messages: List<Message>,
     onUnreadChanged: (Long, Long) -> Unit,
 ) {
-    LaunchedEffect(messages) {
-        Timber.d("UpdateUnreadCount LaunchedEffect started/restarted, messages.size=${messages.size}, fromLocal count=${messages.count { it.fromLocal }}, unread count=${messages.count { !it.read && !it.fromLocal }}")
+    val remoteMessageCount = remember(messages) { messages.count { !it.fromLocal } }
+
+    LaunchedEffect(remoteMessageCount, listState) {
+        Timber.d("UpdateUnreadCount LaunchedEffect started/restarted, remoteMessageCount=$remoteMessageCount")
         snapshotFlow { listState.firstVisibleItemIndex }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
-                Timber.d("Debounce triggered, index=$index")
+                Timber.d("Debounce triggered, index=$index, messages.size=${messages.size}")
                 val lastUnreadIndex = messages.indexOfLast { !it.read && !it.fromLocal }
-                Timber.d("lastUnreadIndex=$lastUnreadIndex, messages.size=${messages.size}")
-                if (lastUnreadIndex != -1 && index <= lastUnreadIndex && index < messages.size) {
-                    val visibleMessage = messages[index]
-                    Timber.d("visibleMessage read=${visibleMessage.read}, fromLocal=${visibleMessage.fromLocal}")
-                    if (!visibleMessage.read && !visibleMessage.fromLocal) {
-                        Timber.d("Calling onUnreadChanged for message ${visibleMessage.uuid}")
-                        onUnreadChanged(visibleMessage.uuid, visibleMessage.receivedTime)
-                    } else {
-                        Timber.d("Not calling onUnreadChanged - message already read or from local")
-                    }
+                Timber.d("lastUnreadIndex=$lastUnreadIndex")
+                // If user has scrolled past all unread messages, mark the last unread message as read
+                if (lastUnreadIndex != -1 && index <= lastUnreadIndex) {
+                    val lastUnreadMessage = messages[lastUnreadIndex]
+                    Timber.d("Marking last unread message as read: ${lastUnreadMessage.uuid}")
+                    onUnreadChanged(lastUnreadMessage.uuid, lastUnreadMessage.receivedTime)
                 } else {
-                    Timber.d("Not calling onUnreadChanged - condition not met")
+                    Timber.d("Not marking as read - no unread messages or user hasn't scrolled past them")
                 }
             }
     }

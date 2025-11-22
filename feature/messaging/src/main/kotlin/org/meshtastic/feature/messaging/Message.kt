@@ -168,9 +168,6 @@ fun MessageScreen(
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
-    LaunchedEffect(messages) {
-        Timber.d("Messages updated, count=${messages.size}, fromLocal=${messages.count { it.fromLocal }}, unread=${messages.count { !it.read && !it.fromLocal }}")
-    }
     val contactSettings by viewModel.contactSettings.collectAsStateWithLifecycle(initialValue = emptyMap())
 
     // UI State managed within this Composable
