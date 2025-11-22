@@ -524,26 +524,38 @@ fun MapLibrePOC(
                         Timber.tag("MapLibrePOC").d("LaunchedEffect: Track points updated")
 
                         // Center camera on the tracks
-                        val trackBounds = org.maplibre.android.geometry.LatLngBounds.Builder()
-                        filteredTracks.forEach { position ->
-                            trackBounds.include(
-                                org.maplibre.android.geometry.LatLng(
-                                    position.latitudeI * DEG_D,
-                                    position.longitudeI * DEG_D
+                        if (filteredTracks.size == 1) {
+                            // Single position - just center on it with a fixed zoom
+                            val position = filteredTracks.first()
+                            val latLng = org.maplibre.android.geometry.LatLng(
+                                position.latitudeI * DEG_D,
+                                position.longitudeI * DEG_D
+                            )
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0))
+                            Timber.tag("MapLibrePOC").d("LaunchedEffect: Camera centered on single track position")
+                        } else {
+                            // Multiple positions - fit bounds
+                            val trackBounds = org.maplibre.android.geometry.LatLngBounds.Builder()
+                            filteredTracks.forEach { position ->
+                                trackBounds.include(
+                                    org.maplibre.android.geometry.LatLng(
+                                        position.latitudeI * DEG_D,
+                                        position.longitudeI * DEG_D
+                                    )
+                                )
+                            }
+                            val padding = 100 // pixels
+                            map.animateCamera(
+                                CameraUpdateFactory.newLatLngBounds(
+                                    trackBounds.build(),
+                                    padding
                                 )
                             )
-                        }
-                        val padding = 100 // pixels
-                        map.animateCamera(
-                            CameraUpdateFactory.newLatLngBounds(
-                                trackBounds.build(),
-                                padding
+                            Timber.tag("MapLibrePOC").d(
+                                "LaunchedEffect: Camera centered on %d track positions",
+                                filteredTracks.size
                             )
-                        )
-                        Timber.tag("MapLibrePOC").d(
-                            "LaunchedEffect: Camera centered on %d track positions",
-                            filteredTracks.size
-                        )
+                        }
                     }
                 } else {
                     Timber.tag("MapLibrePOC").d("LaunchedEffect: No tracks to display - removing track layers")
