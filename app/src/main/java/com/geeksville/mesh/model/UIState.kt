@@ -253,6 +253,13 @@ constructor(
         serviceRepository.clearTracerouteResponse()
     }
 
+    val neighborInfoResponse: LiveData<String?>
+        get() = serviceRepository.neighborInfoResponse.asLiveData()
+
+    fun clearNeighborInfoResponse() {
+        serviceRepository.clearNeighborInfoResponse()
+    }
+
     val appIntroCompleted: StateFlow<Boolean> = uiPreferencesDataSource.appIntroCompleted
 
     fun onAppIntroCompleted() {
