@@ -270,13 +270,24 @@ private fun parseCoordinates(coordStr: String): List<Point> = coordStr.split(" "
 
 /** Loads GeoJSON from a layer item (converting KML if needed) */
 suspend fun loadLayerGeoJson(context: Context, layerItem: MapLayerItem): String? = withContext(Dispatchers.IO) {
-    when (layerItem.layerType) {
-        LayerType.KML -> convertKmlToGeoJson(context, layerItem)
+    Timber.tag("MapLibreLayerUtils").d("loadLayerGeoJson: name=%s, type=%s, uri=%s", layerItem.name, layerItem.layerType, layerItem.uri)
+    val result = when (layerItem.layerType) {
+        LayerType.KML -> {
+            Timber.tag("MapLibreLayerUtils").d("Converting KML to GeoJSON for: %s", layerItem.name)
+            convertKmlToGeoJson(context, layerItem)
+        }
         LayerType.GEOJSON -> {
+            Timber.tag("MapLibreLayerUtils").d("Loading GeoJSON directly for: %s", layerItem.name)
             val uri = layerItem.uri ?: return@withContext null
             getInputStreamFromUri(context, uri)?.use { stream -> stream.bufferedReader().use { it.readText() } }
         }
     }
+    if (result != null) {
+        Timber.tag("MapLibreLayerUtils").d("Successfully loaded GeoJSON for %s: %d bytes", layerItem.name, result.length)
+    } else {
+        Timber.tag("MapLibreLayerUtils").e("Failed to load GeoJSON for: %s", layerItem.name)
+    }
+    result
 }
 
 /** Extension function to get file name from URI */

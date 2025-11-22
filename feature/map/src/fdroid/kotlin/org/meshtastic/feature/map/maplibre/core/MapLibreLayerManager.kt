@@ -251,23 +251,34 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
     val lineLayerId = "imported-layer-lines-$layerId"
     val fillLayerId = "imported-layer-fills-$layerId"
 
+    Timber.tag("MapLibreLayerManager").d(
+        "ensureImportedLayerSourceAndLayers: layerId=%s, hasGeoJson=%s, isVisible=%s",
+        layerId, geoJson != null, isVisible
+    )
+
     try {
         // Add or update source
         val existingSource = style.getSource(sourceId)
         if (existingSource == null) {
             // Create new source
             if (geoJson != null) {
+                Timber.tag("MapLibreLayerManager").d("Creating new GeoJSON source: %s (%d bytes)", sourceId, geoJson.length)
                 style.addSource(GeoJsonSource(sourceId, geoJson))
             } else {
+                Timber.tag("MapLibreLayerManager").d("Creating empty GeoJSON source: %s", sourceId)
                 style.addSource(GeoJsonSource(sourceId, FeatureCollection.fromFeatures(emptyList())))
             }
         } else if (geoJson != null && existingSource is GeoJsonSource) {
             // Update existing source
+            Timber.tag("MapLibreLayerManager").d("Updating existing GeoJSON source: %s (%d bytes)", sourceId, geoJson.length)
             existingSource.setGeoJson(geoJson)
+        } else {
+            Timber.tag("MapLibreLayerManager").d("Source already exists: %s", sourceId)
         }
 
         // Add point layer (CircleLayer for points)
         if (style.getLayer(pointLayerId) == null) {
+            Timber.tag("MapLibreLayerManager").d("Creating point layer: %s", pointLayerId)
             val pointLayer = CircleLayer(pointLayerId, sourceId)
             pointLayer.setProperties(
                 circleColor("#3388ff"),
@@ -279,11 +290,13 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
             )
             style.addLayerAbove(pointLayer, OSM_LAYER_ID)
         } else {
+            Timber.tag("MapLibreLayerManager").d("Updating point layer visibility: %s -> %s", pointLayerId, if (isVisible) "visible" else "none")
             style.getLayer(pointLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
         }
 
         // Add line layer (LineLayer for LineStrings)
         if (style.getLayer(lineLayerId) == null) {
+            Timber.tag("MapLibreLayerManager").d("Creating line layer: %s", lineLayerId)
             val lineLayer = LineLayer(lineLayerId, sourceId)
             lineLayer.setProperties(
                 lineColor("#3388ff"),
@@ -293,11 +306,13 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
             )
             style.addLayerAbove(lineLayer, OSM_LAYER_ID)
         } else {
+            Timber.tag("MapLibreLayerManager").d("Updating line layer visibility: %s -> %s", lineLayerId, if (isVisible) "visible" else "none")
             style.getLayer(lineLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
         }
 
         // Add fill layer (FillLayer for Polygons)
         if (style.getLayer(fillLayerId) == null) {
+            Timber.tag("MapLibreLayerManager").d("Creating fill layer: %s", fillLayerId)
             val fillLayer = FillLayer(fillLayerId, sourceId)
             fillLayer.setProperties(
                 fillColor("#3388ff"),
@@ -306,8 +321,11 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
             )
             style.addLayerAbove(fillLayer, OSM_LAYER_ID)
         } else {
+            Timber.tag("MapLibreLayerManager").d("Updating fill layer visibility: %s -> %s", fillLayerId, if (isVisible) "visible" else "none")
             style.getLayer(fillLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
         }
+
+        Timber.tag("MapLibreLayerManager").d("Successfully ensured layers for: %s", layerId)
     } catch (e: Exception) {
         Timber.tag("MapLibreLayerManager").e(e, "Error ensuring imported layer source and layers for $layerId")
     }

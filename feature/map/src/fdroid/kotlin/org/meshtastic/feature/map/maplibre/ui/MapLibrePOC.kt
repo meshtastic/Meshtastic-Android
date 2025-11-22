@@ -282,11 +282,13 @@ fun MapLibrePOC(
             if (result.resultCode == android.app.Activity.RESULT_OK) {
                 result.data?.data?.let { uri ->
                     val fileName = uri.getFileName(context)
+                    Timber.tag("MapLibrePOC").d("File picker result: uri=%s, fileName=%s", uri, fileName)
                     coroutineScope.launch {
                         val layerName = fileName?.substringBeforeLast('.') ?: "Layer ${mapLayers.size + 1}"
                         val extension =
                             fileName?.substringAfterLast('.', "")?.lowercase()
                                 ?: context.contentResolver.getType(uri)?.split('/')?.last()
+                        Timber.tag("MapLibrePOC").d("Layer upload: name=%s, extension=%s", layerName, extension)
                         val kmlExtensions = listOf("kml", "kmz", "vnd.google-earth.kml+xml", "vnd.google-earth.kmz")
                         val geoJsonExtensions = listOf("geojson", "json")
                         val layerType =
@@ -296,15 +298,24 @@ fun MapLibrePOC(
                                 else -> null
                             }
                         if (layerType != null) {
+                            Timber.tag("MapLibrePOC").d("Detected layer type: %s", layerType)
                             val finalFileName = fileName ?: "layer_${java.util.UUID.randomUUID()}.$extension"
                             val localFileUri = copyFileToInternalStorage(context, uri, finalFileName)
                             if (localFileUri != null) {
+                                Timber.tag("MapLibrePOC").d("File copied to internal storage: %s", localFileUri)
                                 val newItem = MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType)
                                 mapLayers = mapLayers + newItem
+                                Timber.tag("MapLibrePOC").d("Layer added to list. Total layers: %d", mapLayers.size)
+                            } else {
+                                Timber.tag("MapLibrePOC").e("Failed to copy file to internal storage")
                             }
+                        } else {
+                            Timber.tag("MapLibrePOC").w("Unsupported file type: extension=%s", extension)
                         }
                     }
                 }
+            } else {
+                Timber.tag("MapLibrePOC").d("File picker cancelled or failed: resultCode=%d", result.resultCode)
             }
         }
 
@@ -329,20 +340,33 @@ fun MapLibrePOC(
     LaunchedEffect(mapLayers, mapRef) {
         mapRef?.let { map ->
             map.style?.let { style ->
+                Timber.tag("MapLibrePOC").d("Layer rendering LaunchedEffect triggered. Layers count: %d", mapLayers.size)
                 coroutineScope.launch {
                     // Load GeoJSON for layers that don't have it cached
                     mapLayers.forEach { layer ->
                         if (!layerGeoJsonCache.containsKey(layer.id)) {
+                            Timber.tag("MapLibrePOC").d("Loading GeoJSON for layer: id=%s, name=%s, type=%s", layer.id, layer.name, layer.layerType)
                             val geoJson = loadLayerGeoJson(context, layer)
                             if (geoJson != null) {
+                                val featureCount = try {
+                                    val jsonObj = org.json.JSONObject(geoJson)
+                                    jsonObj.optJSONArray("features")?.length() ?: 0
+                                } catch (e: Exception) { 0 }
+                                Timber.tag("MapLibrePOC").d("GeoJSON loaded for layer %s: %d features, %d bytes", layer.name, featureCount, geoJson.length)
                                 layerGeoJsonCache = layerGeoJsonCache + (layer.id to geoJson)
+                            } else {
+                                Timber.tag("MapLibrePOC").e("Failed to load GeoJSON for layer: %s", layer.name)
                             }
+                        } else {
+                            Timber.tag("MapLibrePOC").d("Using cached GeoJSON for layer: %s", layer.name)
                         }
                     }
 
                     // Ensure all layers are rendered
                     mapLayers.forEach { layer ->
                         val geoJson = layerGeoJsonCache[layer.id]
+                        Timber.tag("MapLibrePOC").d("Rendering layer: id=%s, name=%s, visible=%s, hasGeoJson=%s",
+                            layer.id, layer.name, layer.isVisible, geoJson != null)
                         ensureImportedLayerSourceAndLayers(style, layer.id, geoJson, layer.isVisible)
                     }
 
