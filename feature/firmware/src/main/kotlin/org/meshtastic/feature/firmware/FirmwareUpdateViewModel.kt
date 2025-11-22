@@ -273,7 +273,7 @@ constructor(
             .collect { dfuState ->
                 when (dfuState) {
                     is DfuInternalState.Progress -> {
-                        val msg = getString(Res.string.firmware_update_updating, "${dfuState.percent}%")
+                        val msg = getString(Res.string.firmware_update_updating, "${dfuState.percent}")
                         _state.value = FirmwareUpdateState.Updating(dfuState.percent / PERCENT_MAX_VALUE, msg)
                     }
                     is DfuInternalState.Error -> {
