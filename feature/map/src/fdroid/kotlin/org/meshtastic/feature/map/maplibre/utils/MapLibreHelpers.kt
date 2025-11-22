@@ -40,9 +40,6 @@ fun hasAnyLocationPermission(context: Context): Boolean {
     return fine || coarse
 }
 
-/** Get short name from node (deprecated, kept for compatibility) */
-fun shortName(node: Node): String = shortNameFallback(node)
-
 /** Get protocol-defined short name if present */
 fun protoShortName(node: Node): String? {
     val s = node.user.shortName
