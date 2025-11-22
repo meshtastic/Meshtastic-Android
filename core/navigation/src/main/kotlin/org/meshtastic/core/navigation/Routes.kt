@@ -150,3 +150,9 @@ object SettingsRoutes {
 
     // endregion
 }
+
+object FirmwareRoutes {
+    @Serializable data object FirmwareGraph : Graph
+
+    @Serializable data object FirmwareUpdate : Route
+}

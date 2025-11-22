@@ -1,0 +1,15 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+
+    <application>
+        <service android:name=".FirmwareDfuService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice">
+            <intent-filter>
+                <action android:name="no.nordicsemi.android.dfu.broadcast.BROADCAST_ACTION" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

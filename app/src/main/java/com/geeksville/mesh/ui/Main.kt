@@ -86,6 +86,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.channelsGraph
 import com.geeksville.mesh.navigation.connectionsGraph
 import com.geeksville.mesh.navigation.contactsGraph
+import com.geeksville.mesh.navigation.firmwareGraph
 import com.geeksville.mesh.navigation.mapGraph
 import com.geeksville.mesh.navigation.nodesGraph
 import com.geeksville.mesh.navigation.settingsGraph
@@ -433,6 +434,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             channelsGraph(navController)
             connectionsGraph(navController)
             settingsGraph(navController)
+            firmwareGraph(navController)
         }
     }
 }

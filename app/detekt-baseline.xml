@@ -15,7 +15,6 @@
     <ID>CyclomaticComplexMethod:SettingsNavigation.kt$@Suppress("LongMethod") fun NavGraphBuilder.settingsGraph(navController: NavHostController)</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
-    <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided&gt;${ }</ID>
     <ID>EmptyFunctionBlock:TrustAllX509TrustManager.kt$TrustAllX509TrustManager${}</ID>
     <ID>FinalNewline:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
     <ID>FinalNewline:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
@@ -64,7 +63,6 @@
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$180</ID>
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$500</ID>
     <ID>MagicNumber:UIState.kt$4</ID>
-    <ID>MatchingDeclarationName:MeshServiceStarter.kt$ServiceStarter : Worker</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$"Config complete id mismatch: received=$configCompleteId expected one of [$configOnlyNonce,$nodeInfoNonce]"</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$"setOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed isUnmessagable: $isUnmessagable"</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService.&lt;no name provided&gt;$"sendData dest=${p.to}, id=${p.id} &lt;- ${bytes.size} bytes (connectionState=${connectionStateHolder.connectionState.value})"</ID>
@@ -122,7 +120,6 @@
     <ID>TooGenericExceptionCaught:MQTTRepository.kt$MQTTRepository$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:MeshService.kt$MeshService.&lt;no name provided&gt;$ex: Exception</ID>
-    <ID>TooGenericExceptionCaught:MeshServiceStarter.kt$ServiceStarter$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$e: Exception</ID>
     <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:RadioInterfaceService.kt$RadioInterfaceService$t: Throwable</ID>
