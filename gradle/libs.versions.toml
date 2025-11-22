@@ -6,12 +6,12 @@ accompanist = "0.37.3"
 
 # androidx
 androidxComposeMaterial3Adaptive = "1.2.0"
-androidxTracing = "1.9.4"
-datastore = "1.1.7"
-lifecycle = "2.9.4"
+androidxTracing = "1.9.5"
+datastore = "1.2.0"
+lifecycle = "2.10.0"
 navigation = "2.9.6"
-navigation3 = "1.0.0-rc01"
-room = "2.8.3"
+navigation3 = "1.0.0"
+room = "2.8.4"
 
 # Kotlin
 kotlin = "2.2.21"
@@ -28,9 +28,9 @@ ktorfit = "2.6.4"
 
 # Other
 coil = "3.3.0"
-dd-sdk-android = "3.2.0"
+dd-sdk-android = "3.3.0"
 detekt = "1.23.8"
-devtools-ksp = "2.3.2"
+devtools-ksp = "2.3.3"
 markdownRenderer = "0.38.1"
 osmdroid-android = "6.1.20"
 protobuf = "4.33.1"
@@ -66,7 +66,7 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 
 # AndroidX Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.11.00" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.11.01" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
@@ -139,7 +139,7 @@ markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
 material = { module = "com.google.android.material:material", version = "1.13.0" }
 mgrs = { module = "mil.nga:mgrs", version = "2.1.3" }
-nordic = { module = "no.nordicsemi.kotlin.ble:client-android", version = "2.0.0-alpha10" }
+nordic = { module = "no.nordicsemi.kotlin.ble:client-android", version = "2.0.0-alpha11" }
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
@@ -164,7 +164,7 @@ hilt-gradlePlugin = { module = "com.google.dagger:hilt-android-gradle-plugin", v
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
 secrets-gradlePlugin = {module = "com.google.android.secrets-gradle-plugin:com.google.android.secrets-gradle-plugin.gradle.plugin", version = "1.1.0"}
 serialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
-spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "8.0.0" }
+spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "8.1.0" }
 
 [plugins]
 # Android
@@ -196,12 +196,12 @@ firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 
 # Other
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.21.0" }
-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.4.1" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.0" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
 room = { id = "androidx.room", version.ref = "room" }
-spotless = { id = "com.diffplug.spotless", version = "8.0.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
 
 # Meshtastic
 meshtastic-android-application = { id = "meshtastic.android.application" }
