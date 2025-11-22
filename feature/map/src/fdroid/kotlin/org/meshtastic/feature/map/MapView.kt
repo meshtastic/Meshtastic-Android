@@ -19,6 +19,8 @@ package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -208,6 +210,163 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
         }
     }
 
+// Dialog helper functions - defined before MapView so they can be called from within it
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MapsDialog(
+    title: String? = null,
+    onDismiss: () -> Unit,
+    positiveButton: (@Composable () -> Unit)? = null,
+    negativeButton: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+        Surface(
+            modifier = Modifier.wrapContentWidth().wrapContentHeight(),
+            shape = MaterialTheme.shapes.large,
+            color = AlertDialogDefaults.containerColor,
+            tonalElevation = AlertDialogDefaults.TonalElevation,
+        ) {
+            Column {
+                title?.let {
+                    Text(
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
+                        text = it,
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                }
+
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) { content() }
+                if (positiveButton != null || negativeButton != null) {
+                    Row(Modifier.align(Alignment.End)) {
+                        positiveButton?.invoke()
+                        negativeButton?.invoke()
+                    }
+                }
+            }
+        }
+    }
+}
+
+private enum class CacheManagerOption(val label: StringResource) {
+    CurrentCacheSize(label = Res.string.map_cache_size),
+    DownloadRegion(label = Res.string.map_download_region),
+    ClearTiles(label = Res.string.map_clear_tiles),
+    Cancel(label = Res.string.cancel),
+}
+
+@Composable
+private fun MapStyleDialog(selectedMapStyle: Int, onDismiss: () -> Unit, onSelectMapStyle: (Int) -> Unit) {
+    val selected = remember { mutableStateOf(selectedMapStyle) }
+
+    MapsDialog(onDismiss = onDismiss) {
+        CustomTileSource.mTileSources.values.forEachIndexed { index, style ->
+            ListItem(
+                text = style,
+                trailingIcon = if (index == selected.value) Icons.Rounded.Check else null,
+                onClick = {
+                    selected.value = index
+                    onSelectMapStyle(index)
+                    onDismiss()
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun CacheManagerDialog(onClickOption: (CacheManagerOption) -> Unit, onDismiss: () -> Unit) {
+    MapsDialog(title = stringResource(Res.string.map_offline_manager), onDismiss = onDismiss) {
+        CacheManagerOption.entries.forEach { option ->
+            ListItem(text = stringResource(option.label), trailingIcon = null) {
+                onClickOption(option)
+                onDismiss()
+            }
+        }
+    }
+}
+
+@Composable
+private fun CacheInfoDialog(mapView: org.osmdroid.views.MapView, onDismiss: () -> Unit) {
+    val (cacheCapacity, currentCacheUsage) =
+        remember(mapView) {
+            val cacheManager = CacheManager(mapView)
+            cacheManager.cacheCapacity() to cacheManager.currentCacheUsage()
+        }
+
+    MapsDialog(
+        title = stringResource(Res.string.map_cache_manager),
+        onDismiss = onDismiss,
+        negativeButton = { TextButton(onClick = { onDismiss() }) { Text(text = stringResource(Res.string.close)) } },
+    ) {
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text =
+            stringResource(
+                Res.string.map_cache_info,
+                cacheCapacity / (1024.0 * 1024.0),
+                currentCacheUsage / (1024.0 * 1024.0),
+            ),
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val cache = SqlTileWriterExt()
+
+    val sourceList by derivedStateOf { cache.sources.map { it.source as String } }
+
+    val selected = remember { mutableStateListOf<Int>() }
+
+    MapsDialog(
+        title = stringResource(Res.string.map_tile_source),
+        positiveButton = {
+            TextButton(
+                enabled = selected.isNotEmpty(),
+                onClick = {
+                    selected.forEach { selectedIndex ->
+                        val source = sourceList[selectedIndex]
+                        scope.launch {
+                            context.showToast(
+                                if (cache.purgeCache(source)) {
+                                    getString(Res.string.map_purge_success, source)
+                                } else {
+                                    getString(Res.string.map_purge_fail)
+                                },
+                            )
+                        }
+                    }
+
+                    onDismiss()
+                },
+            ) {
+                Text(text = stringResource(Res.string.clear))
+            }
+        },
+        negativeButton = { TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.cancel)) } },
+        onDismiss = onDismiss,
+    ) {
+        sourceList.forEachIndexed { index, source ->
+            val isSelected = selected.contains(index)
+            BasicListItem(
+                text = source,
+                trailingContent = { Checkbox(checked = isSelected, onCheckedChange = {}) },
+                onClick = {
+                    if (isSelected) {
+                        selected.remove(index)
+                    } else {
+                        selected.add(index)
+                    }
+                },
+            ) {}
+        }
+    }
+}
+
 /**
  * Main composable for displaying the map view, including nodes, waypoints, and user location. It handles user
  * interactions for map manipulation, filtering, and offline caching.
@@ -218,7 +377,12 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
 @OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
-fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
+fun MapView(
+    mapViewModel: MapViewModel = hiltViewModel(),
+    navigateToNodeDetails: (Int) -> Unit,
+    focusedNodeNum: Int? = null,
+    nodeTracks: List<org.meshtastic.proto.MeshProtos.Position>? = null,
+) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
@@ -238,6 +402,8 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showPurgeTileSourceDialog by remember { mutableStateOf(false) }
     var showMapStyleDialog by remember { mutableStateOf(false) }
+    // Map engine selection: false = osmdroid, true = MapLibre
+    var useMapLibre by remember { mutableStateOf(true) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -268,12 +434,17 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
     }
+    // Only create osmdroid map if not using MapLibre
     val map =
-        rememberMapViewWithLifecycle(
-            applicationId = mapViewModel.applicationId,
-            box = initialCameraView,
-            tileSource = loadOnlineTileSourceBase(),
-        )
+        if (!useMapLibre) {
+            rememberMapViewWithLifecycle(
+                applicationId = mapViewModel.applicationId,
+                box = initialCameraView,
+                tileSource = loadOnlineTileSourceBase(),
+            )
+        } else {
+            null
+        }
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -312,8 +483,8 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     // Effect to toggle MyLocation after permission is granted
     LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
-        if (locationPermissionsState.allPermissionsGranted && triggerLocationToggleAfterPermission) {
-            map.toggleMyLocation()
+        if (locationPermissionsState.allPermissionsGranted && triggerLocationToggleAfterPermission && !useMapLibre) {
+            map?.toggleMyLocation()
             triggerLocationToggleAfterPermission = false
         }
     }
@@ -509,7 +680,10 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         invalidate()
     }
 
-    with(map) { UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer) }
+    // Only update osmdroid markers when using osmdroid
+    if (!useMapLibre && map != null) {
+        with(map) { UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer) }
+    }
 
     fun MapView.generateBoxOverlay() {
         overlays.removeAll { it is Polygon }
@@ -542,6 +716,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     fun startDownload() {
         val boundingBox = downloadRegionBoundingBox ?: return
+        val osmdroidMap = map ?: return
         try {
             val outputName = buildString {
                 append(Configuration.getInstance().osmdroidBasePath.absolutePath)
@@ -549,7 +724,7 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                 append("mainFile.sqlite")
             }
             val writer = SqliteArchiveTileWriter(outputName)
-            val cacheManager = CacheManager(map, writer)
+            val cacheManager = CacheManager(osmdroidMap, writer)
             cacheManager.downloadAreaAsync(
                 context,
                 boundingBox,
@@ -575,371 +750,258 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     Scaffold(
         floatingActionButton = {
-            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog = true }
+            // Only show download button for osmdroid
+            if (!useMapLibre) {
+                DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) {
+                    showCacheManagerDialog = true
+                }
+            }
         },
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            AndroidView(
-                factory = {
-                    map.apply {
-                        setDestroyMode(false)
-                        addMapListener(boxOverlayListener)
-                    }
-                },
-                modifier = Modifier.fillMaxSize(),
-                update = { mapView -> mapView.drawOverlays() }, // Renamed map to mapView to avoid conflict
-            )
-            if (downloadRegionBoundingBox != null) {
-                CacheLayout(
-                    cacheEstimate = cacheEstimate,
-                    onExecuteJob = { startDownload() },
-                    onCancelDownload = {
-                        downloadRegionBoundingBox = null
-                        map.overlays.removeAll { it is Polygon }
-                        map.invalidate()
-                    },
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                )
-            } else {
-                Column(
-                    modifier = Modifier.padding(top = 16.dp, end = 16.dp).align(Alignment.TopEnd),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    MapButton(
-                        onClick = { showMapStyleDialog = true },
-                        icon = Icons.Outlined.Layers,
-                        contentDescription = Res.string.map_style_selection,
-                    )
-                    Box(modifier = Modifier) {
-                        MapButton(
-                            onClick = { mapFilterExpanded = true },
-                            icon = Icons.Outlined.Tune,
-                            contentDescription = Res.string.map_filter,
+            Crossfade(
+                targetState = useMapLibre,
+                animationSpec = tween(durationMillis = 300),
+                label = "MapEngineSwitch",
+            ) { isMapLibre ->
+                if (isMapLibre) {
+                    // MapLibre implementation
+                    timber.log.Timber.tag("MapView")
+                        .d(
+                            "Calling MapLibrePOC with focusedNodeNum=%s, nodeTracks count=%d",
+                            focusedNodeNum ?: "null",
+                            nodeTracks?.size ?: 0,
                         )
-                        DropdownMenu(
-                            expanded = mapFilterExpanded,
-                            onDismissRequest = { mapFilterExpanded = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
-                        ) {
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = null,
-                                            modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        Text(
-                                            text = stringResource(Res.string.only_favorites),
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        Checkbox(
-                                            checked = mapFilterState.onlyFavorites,
-                                            onCheckedChange = { mapViewModel.toggleOnlyFavorites() },
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
-                                },
-                                onClick = { mapViewModel.toggleOnlyFavorites() },
-                            )
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.PinDrop,
-                                            contentDescription = null,
-                                            modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        Text(
-                                            text = stringResource(Res.string.show_waypoints),
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        Checkbox(
-                                            checked = mapFilterState.showWaypoints,
-                                            onCheckedChange = { mapViewModel.toggleShowWaypointsOnMap() },
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
-                                },
-                                onClick = { mapViewModel.toggleShowWaypointsOnMap() },
-                            )
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Lens,
-                                            contentDescription = null,
-                                            modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                        )
-                                        Text(
-                                            text = stringResource(Res.string.show_precision_circle),
-                                            modifier = Modifier.weight(1f),
-                                        )
-                                        Checkbox(
-                                            checked = mapFilterState.showPrecisionCircle,
-                                            onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
-                                            modifier = Modifier.padding(start = 8.dp),
-                                        )
-                                    }
-                                },
-                                onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
-                            )
-                        }
-                    }
-                    if (hasGps) {
-                        MapButton(
-                            icon =
-                            if (myLocationOverlay == null) {
-                                Icons.Outlined.MyLocation
-                            } else {
-                                Icons.Default.LocationDisabled
+                    org.meshtastic.feature.map.maplibre.ui.MapLibrePOC(
+                        mapViewModel = mapViewModel,
+                        onNavigateToNodeDetails = navigateToNodeDetails,
+                        focusedNodeNum = focusedNodeNum,
+                        nodeTracks = nodeTracks,
+                    )
+                } else {
+                    // osmdroid implementation
+                    map?.let { osmdroidMap ->
+                        AndroidView(
+                            factory = {
+                                osmdroidMap.apply {
+                                    setDestroyMode(false)
+                                    addMapListener(boxOverlayListener)
+                                }
                             },
-                            contentDescription = stringResource(Res.string.toggle_my_position),
-                        ) {
-                            if (locationPermissionsState.allPermissionsGranted) {
-                                map.toggleMyLocation()
-                            } else {
-                                triggerLocationToggleAfterPermission = true
-                                locationPermissionsState.launchMultiplePermissionRequest()
+                            modifier = Modifier.fillMaxSize(),
+                            update = { mapView -> mapView.drawOverlays() },
+                        )
+                    } ?: Box(modifier = Modifier.fillMaxSize())
+                }
+            }
+            // Only show osmdroid-specific UI when using osmdroid
+            if (!useMapLibre) {
+                if (downloadRegionBoundingBox != null) {
+                    CacheLayout(
+                        cacheEstimate = cacheEstimate,
+                        onExecuteJob = { startDownload() },
+                        onCancelDownload = {
+                            downloadRegionBoundingBox = null
+                            map?.overlays?.removeAll { it is Polygon }
+                            map?.invalidate()
+                        },
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    )
+                } else {
+                    Column(
+                        modifier = Modifier.padding(top = 16.dp, end = 16.dp).align(Alignment.TopEnd),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        MapButton(
+                            onClick = { showMapStyleDialog = true },
+                            icon = Icons.Outlined.Layers,
+                            contentDescription = Res.string.map_style_selection,
+                        )
+                        MapButton(
+                            onClick = { useMapLibre = false },
+                            icon = Icons.Outlined.Layers,
+                            contentDescription = "Switch to osmdroid",
+                        )
+                        Box(modifier = Modifier) {
+                            MapButton(
+                                onClick = { mapFilterExpanded = true },
+                                icon = Icons.Outlined.Tune,
+                                contentDescription = Res.string.map_filter,
+                            )
+                            DropdownMenu(
+                                expanded = mapFilterExpanded,
+                                onDismissRequest = { mapFilterExpanded = false },
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Star,
+                                                contentDescription = null,
+                                                modifier = Modifier.padding(end = 8.dp),
+                                                tint = MaterialTheme.colorScheme.onSurface,
+                                            )
+                                            Text(
+                                                text = stringResource(Res.string.only_favorites),
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                            Checkbox(
+                                                checked = mapFilterState.onlyFavorites,
+                                                onCheckedChange = { mapViewModel.toggleOnlyFavorites() },
+                                                modifier = Modifier.padding(start = 8.dp),
+                                            )
+                                        }
+                                    },
+                                    onClick = { mapViewModel.toggleOnlyFavorites() },
+                                )
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.PinDrop,
+                                                contentDescription = null,
+                                                modifier = Modifier.padding(end = 8.dp),
+                                                tint = MaterialTheme.colorScheme.onSurface,
+                                            )
+                                            Text(
+                                                text = stringResource(Res.string.show_waypoints),
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                            Checkbox(
+                                                checked = mapFilterState.showWaypoints,
+                                                onCheckedChange = { mapViewModel.toggleShowWaypointsOnMap() },
+                                                modifier = Modifier.padding(start = 8.dp),
+                                            )
+                                        }
+                                    },
+                                    onClick = { mapViewModel.toggleShowWaypointsOnMap() },
+                                )
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Lens,
+                                                contentDescription = null,
+                                                modifier = Modifier.padding(end = 8.dp),
+                                                tint = MaterialTheme.colorScheme.onSurface,
+                                            )
+                                            Text(
+                                                text = stringResource(Res.string.show_precision_circle),
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                            Checkbox(
+                                                checked = mapFilterState.showPrecisionCircle,
+                                                onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
+                                                modifier = Modifier.padding(start = 8.dp),
+                                            )
+                                        }
+                                    },
+                                    onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
+                                )
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    if (showMapStyleDialog) {
-        MapStyleDialog(
-            selectedMapStyle = mapViewModel.mapStyleId,
-            onDismiss = { showMapStyleDialog = false },
-            onSelectMapStyle = {
-                mapViewModel.mapStyleId = it
-                map.setTileSource(loadOnlineTileSourceBase())
-            },
-        )
-    }
-
-    if (showCacheManagerDialog) {
-        CacheManagerDialog(
-            onClickOption = { option ->
-                when (option) {
-                    CacheManagerOption.CurrentCacheSize -> {
-                        scope.launch { context.showToast(Res.string.calculating) }
-                        showCurrentCacheInfo = true
-                    }
-                    CacheManagerOption.DownloadRegion -> map.generateBoxOverlay()
-
-                    CacheManagerOption.ClearTiles -> showPurgeTileSourceDialog = true
-                    CacheManagerOption.Cancel -> Unit
-                }
-                showCacheManagerDialog = false
-            },
-            onDismiss = { showCacheManagerDialog = false },
-        )
-    }
-
-    if (showCurrentCacheInfo) {
-        CacheInfoDialog(mapView = map, onDismiss = { showCurrentCacheInfo = false })
-    }
-
-    if (showPurgeTileSourceDialog) {
-        PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
-    }
-
-    if (showEditWaypointDialog != null) {
-        EditWaypointDialog(
-            waypoint = showEditWaypointDialog ?: return, // Safe call
-            onSendClicked = { waypoint ->
-                Timber.d("User clicked send waypoint ${waypoint.id}")
-                showEditWaypointDialog = null
-                mapViewModel.sendWaypoint(
-                    waypoint.copy {
-                        if (id == 0) id = mapViewModel.generatePacketId() ?: return@EditWaypointDialog
-                        if (name == "") name = "Dropped Pin"
-                        if (expire == 0) expire = Int.MAX_VALUE
-                        lockedTo = if (waypoint.lockedTo != 0) mapViewModel.myNodeNum ?: 0 else 0
-                        if (waypoint.icon == 0) icon = 128205
-                    },
-                )
-            },
-            onDeleteClicked = { waypoint ->
-                Timber.d("User clicked delete waypoint ${waypoint.id}")
-                showEditWaypointDialog = null
-                showDeleteMarkerDialog(waypoint)
-            },
-            onDismissRequest = {
-                Timber.d("User clicked cancel marker edit dialog")
-                showEditWaypointDialog = null
-            },
-        )
-    }
-}
-
-@Composable
-private fun MapStyleDialog(selectedMapStyle: Int, onDismiss: () -> Unit, onSelectMapStyle: (Int) -> Unit) {
-    val selected = remember { mutableStateOf(selectedMapStyle) }
-
-    MapsDialog(onDismiss = onDismiss) {
-        CustomTileSource.mTileSources.values.forEachIndexed { index, style ->
-            ListItem(
-                text = style,
-                trailingIcon = if (index == selected.value) Icons.Rounded.Check else null,
-                onClick = {
-                    selected.value = index
-                    onSelectMapStyle(index)
-                    onDismiss()
-                },
-            )
-        }
-    }
-}
-
-private enum class CacheManagerOption(val label: StringResource) {
-    CurrentCacheSize(label = Res.string.map_cache_size),
-    DownloadRegion(label = Res.string.map_download_region),
-    ClearTiles(label = Res.string.map_clear_tiles),
-    Cancel(label = Res.string.cancel),
-}
-
-@Composable
-private fun CacheManagerDialog(onClickOption: (CacheManagerOption) -> Unit, onDismiss: () -> Unit) {
-    MapsDialog(title = stringResource(Res.string.map_offline_manager), onDismiss = onDismiss) {
-        CacheManagerOption.entries.forEach { option ->
-            ListItem(text = stringResource(option.label), trailingIcon = null) {
-                onClickOption(option)
-                onDismiss()
-            }
-        }
-    }
-}
-
-@Composable
-private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
-    val (cacheCapacity, currentCacheUsage) =
-        remember(mapView) {
-            val cacheManager = CacheManager(mapView)
-            cacheManager.cacheCapacity() to cacheManager.currentCacheUsage()
-        }
-
-    MapsDialog(
-        title = stringResource(Res.string.map_cache_manager),
-        onDismiss = onDismiss,
-        negativeButton = { TextButton(onClick = { onDismiss() }) { Text(text = stringResource(Res.string.close)) } },
-    ) {
-        Text(
-            modifier = Modifier.padding(16.dp),
-            text =
-            stringResource(
-                Res.string.map_cache_info,
-                cacheCapacity / (1024.0 * 1024.0),
-                currentCacheUsage / (1024.0 * 1024.0),
-            ),
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val cache = SqlTileWriterExt()
-
-    val sourceList by derivedStateOf { cache.sources.map { it.source as String } }
-
-    val selected = remember { mutableStateListOf<Int>() }
-
-    MapsDialog(
-        title = stringResource(Res.string.map_tile_source),
-        positiveButton = {
-            TextButton(
-                enabled = selected.isNotEmpty(),
-                onClick = {
-                    selected.forEach { selectedIndex ->
-                        val source = sourceList[selectedIndex]
-                        scope.launch {
-                            context.showToast(
-                                if (cache.purgeCache(source)) {
-                                    getString(Res.string.map_purge_success, source)
+                        if (hasGps) {
+                            MapButton(
+                                icon =
+                                if (myLocationOverlay == null) {
+                                    Icons.Outlined.MyLocation
                                 } else {
-                                    getString(Res.string.map_purge_fail)
+                                    Icons.Default.LocationDisabled
+                                },
+                                contentDescription = stringResource(Res.string.toggle_my_position),
+                                onClick = {
+                                    if (locationPermissionsState.allPermissionsGranted) {
+                                        map?.toggleMyLocation()
+                                    } else {
+                                        triggerLocationToggleAfterPermission = true
+                                        locationPermissionsState.launchMultiplePermissionRequest()
+                                    }
                                 },
                             )
                         }
                     }
-
-                    onDismiss()
-                },
-            ) {
-                Text(text = stringResource(Res.string.clear))
+                }
             }
-        },
-        negativeButton = { TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.cancel)) } },
-        onDismiss = onDismiss,
-    ) {
-        sourceList.forEachIndexed { index, source ->
-            val isSelected = selected.contains(index)
-            BasicListItem(
-                text = source,
-                trailingContent = { Checkbox(checked = isSelected, onCheckedChange = {}) },
-                onClick = {
-                    if (isSelected) {
-                        selected.remove(index)
-                    } else {
-                        selected.add(index)
-                    }
-                },
-            ) {}
         }
-    }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MapsDialog(
-    title: String? = null,
-    onDismiss: () -> Unit,
-    positiveButton: (@Composable () -> Unit)? = null,
-    negativeButton: (@Composable () -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    BasicAlertDialog(onDismissRequest = onDismiss) {
-        Surface(
-            modifier = Modifier.wrapContentWidth().wrapContentHeight(),
-            shape = MaterialTheme.shapes.large,
-            color = AlertDialogDefaults.containerColor,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-        ) {
-            Column {
-                title?.let {
-                    Text(
-                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
-                        text = it,
-                        style = MaterialTheme.typography.titleLarge,
-                    )
-                }
-
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) { content() }
-                if (positiveButton != null || negativeButton != null) {
-                    Row(Modifier.align(Alignment.End)) {
-                        positiveButton?.invoke()
-                        negativeButton?.invoke()
-                    }
-                }
+        // Only show osmdroid-specific dialogs when using osmdroid
+        if (!useMapLibre) {
+            if (showMapStyleDialog) {
+                MapStyleDialog(
+                    selectedMapStyle = mapViewModel.mapStyleId,
+                    onDismiss = { showMapStyleDialog = false },
+                    onSelectMapStyle = { styleId: Int ->
+                        mapViewModel.mapStyleId = styleId
+                        map?.setTileSource(loadOnlineTileSourceBase())
+                    },
+                )
             }
+
+            if (showCacheManagerDialog) {
+                CacheManagerDialog(
+                    onClickOption = { option: CacheManagerOption ->
+                        when (option) {
+                            CacheManagerOption.CurrentCacheSize -> {
+                                scope.launch { context.showToast(Res.string.calculating) }
+                                showCurrentCacheInfo = true
+                            }
+
+                            CacheManagerOption.DownloadRegion -> map?.generateBoxOverlay()
+
+                            CacheManagerOption.ClearTiles -> showPurgeTileSourceDialog = true
+                            CacheManagerOption.Cancel -> Unit
+                        }
+                        showCacheManagerDialog = false
+                    },
+                    onDismiss = { showCacheManagerDialog = false },
+                )
+            }
+
+            if (showCurrentCacheInfo && map != null) {
+                CacheInfoDialog(mapView = map, onDismiss = { showCurrentCacheInfo = false })
+            }
+
+            if (showPurgeTileSourceDialog) {
+                PurgeTileSourceDialog(onDismiss = { showPurgeTileSourceDialog = false })
+            }
+        }
+
+        showEditWaypointDialog?.let { waypoint ->
+            EditWaypointDialog(
+                waypoint = waypoint,
+                onSendClicked = { waypoint ->
+                    Timber.d("User clicked send waypoint ${waypoint.id}")
+                    showEditWaypointDialog = null
+                    mapViewModel.sendWaypoint(
+                        waypoint.copy {
+                            if (id == 0) id = mapViewModel.generatePacketId() ?: return@EditWaypointDialog
+                            if (name == "") name = "Dropped Pin"
+                            if (expire == 0) expire = Int.MAX_VALUE
+                            lockedTo = if (waypoint.lockedTo != 0) mapViewModel.myNodeNum ?: 0 else 0
+                            if (waypoint.icon == 0) icon = 128205
+                        },
+                    )
+                },
+                onDeleteClicked = { waypoint ->
+                    Timber.d("User clicked delete waypoint ${waypoint.id}")
+                    showEditWaypointDialog = null
+                    showDeleteMarkerDialog(waypoint)
+                },
+                onDismissRequest = {
+                    Timber.d("User clicked cancel marker edit dialog")
+                    showEditWaypointDialog = null
+                },
+            )
         }
     }
 }
