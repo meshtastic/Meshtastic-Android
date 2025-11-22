@@ -52,7 +52,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import timber.log.Timber
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
@@ -62,6 +61,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
+import timber.log.Timber
 import kotlin.collections.buildList
 
 internal data class MessageListState(

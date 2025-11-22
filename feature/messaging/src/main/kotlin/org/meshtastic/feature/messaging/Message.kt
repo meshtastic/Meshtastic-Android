@@ -96,7 +96,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
-import timber.log.Timber
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.model.Message
