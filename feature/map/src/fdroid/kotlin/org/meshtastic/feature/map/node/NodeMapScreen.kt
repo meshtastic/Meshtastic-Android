@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.maplibre.ui.MapLibrePOC
 import timber.log.Timber
 
@@ -34,7 +34,7 @@ import timber.log.Timber
 fun NodeMapScreen(
     nodeMapViewModel: NodeMapViewModel,
     onNavigateUp: () -> Unit,
-    mapViewModel: BaseMapViewModel = hiltViewModel()
+    mapViewModel: MapViewModel = hiltViewModel()
 ) {
     val node by nodeMapViewModel.node.collectAsStateWithLifecycle()
     val positions by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
