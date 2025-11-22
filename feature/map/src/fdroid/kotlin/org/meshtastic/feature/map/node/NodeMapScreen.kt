@@ -23,13 +23,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.feature.map.MapView
+import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.maplibre.ui.MapLibrePOC
 import timber.log.Timber
 
 @Composable
-fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) {
+fun NodeMapScreen(
+    nodeMapViewModel: NodeMapViewModel,
+    onNavigateUp: () -> Unit,
+    mapViewModel: BaseMapViewModel = hiltViewModel()
+) {
     val node by nodeMapViewModel.node.collectAsStateWithLifecycle()
     val positions by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
     val destNum = node?.num
@@ -55,11 +61,16 @@ fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) 
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             Timber.tag("NodeMapScreen").d(
-                "Calling MapView with focusedNodeNum=%s, nodeTracks count=%d",
+                "Calling MapLibrePOC with focusedNodeNum=%s, nodeTracks count=%d",
                 destNum ?: "null",
                 positions.size
             )
-            MapView(focusedNodeNum = destNum, nodeTracks = positions, navigateToNodeDetails = {})
+            MapLibrePOC(
+                mapViewModel = mapViewModel,
+                onNavigateToNodeDetails = {},
+                focusedNodeNum = destNum,
+                nodeTracks = positions,
+            )
         }
     }
 }
