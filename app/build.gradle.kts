@@ -216,6 +216,7 @@ dependencies {
     implementation(projects.feature.map)
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
+    implementation(projects.feature.firmware)
 
     implementation(libs.androidx.compose.material3.adaptive)
     implementation(libs.androidx.compose.material3.navigationSuite)
