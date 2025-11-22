@@ -154,7 +154,8 @@ private fun extractKmlFromKmz(inputStream: InputStream): String? {
         while (entry != null) {
             val fileName = entry.name.lowercase()
             if (fileName.endsWith(".kml")) {
-                val kmlContent = zipInputStream.bufferedReader().use { it.readText() }
+                // Read content without closing the stream
+                val kmlContent = zipInputStream.bufferedReader().readText()
                 zipInputStream.closeEntry()
                 Timber.tag("MapLibreLayerUtils").d("Extracted KML from KMZ: ${entry.name}")
                 return kmlContent
