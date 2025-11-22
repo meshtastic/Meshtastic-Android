@@ -178,7 +178,7 @@ constructor(
                 try {
                     // 1. Download
                     _state.value = FirmwareUpdateState.Downloading(0f)
-                    val zipUrl = release.zipUrl.replace("esp32", "nrf52840")
+                    val zipUrl = getDeviceFirmwareUrl(release.zipUrl, hardware.architecture)
 
                     val downloadedZip =
                         fileHandler.downloadFirmware(zipUrl) { progress ->
@@ -348,6 +348,30 @@ constructor(
             null
         }
     }
+}
+
+private fun getDeviceFirmwareUrl(url: String, targetArch: String): String {
+    // Architectures ordered by length descending to handle substrings like esp32-s3 vs esp32
+    val knownArchs =
+        listOf(
+            "esp32-s3",
+            "esp32-c3",
+            "esp32-c6",
+            "nrf52840",
+            "rp2040",
+            "stm32",
+            "esp32",
+        )
+
+    for (arch in knownArchs) {
+        if (url.contains(arch, ignoreCase = true)) {
+            // Replace the found architecture with the target architecture
+            // We use replacement to preserve the rest of the URL structure (version, server, etc.)
+            return url.replace(arch, targetArch, ignoreCase = true)
+        }
+    }
+
+    return url
 }
 
 /** Internal state representation for the DFU process flow. */
