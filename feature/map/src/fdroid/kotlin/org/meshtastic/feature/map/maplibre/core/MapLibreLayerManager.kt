@@ -251,10 +251,13 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
     val lineLayerId = "imported-layer-lines-$layerId"
     val fillLayerId = "imported-layer-fills-$layerId"
 
-    Timber.tag("MapLibreLayerManager").d(
-        "ensureImportedLayerSourceAndLayers: layerId=%s, hasGeoJson=%s, isVisible=%s",
-        layerId, geoJson != null, isVisible
-    )
+    Timber.tag("MapLibreLayerManager")
+        .d(
+            "ensureImportedLayerSourceAndLayers: layerId=%s, hasGeoJson=%s, isVisible=%s",
+            layerId,
+            geoJson != null,
+            isVisible,
+        )
 
     try {
         // Add or update source
@@ -262,7 +265,8 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
         if (existingSource == null) {
             // Create new source
             if (geoJson != null) {
-                Timber.tag("MapLibreLayerManager").d("Creating new GeoJSON source: %s (%d bytes)", sourceId, geoJson.length)
+                Timber.tag("MapLibreLayerManager")
+                    .d("Creating new GeoJSON source: %s (%d bytes)", sourceId, geoJson.length)
                 style.addSource(GeoJsonSource(sourceId, geoJson))
             } else {
                 Timber.tag("MapLibreLayerManager").d("Creating empty GeoJSON source: %s", sourceId)
@@ -270,7 +274,8 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
             }
         } else if (geoJson != null && existingSource is GeoJsonSource) {
             // Update existing source
-            Timber.tag("MapLibreLayerManager").d("Updating existing GeoJSON source: %s (%d bytes)", sourceId, geoJson.length)
+            Timber.tag("MapLibreLayerManager")
+                .d("Updating existing GeoJSON source: %s (%d bytes)", sourceId, geoJson.length)
             existingSource.setGeoJson(geoJson)
         } else {
             Timber.tag("MapLibreLayerManager").d("Source already exists: %s", sourceId)
@@ -290,7 +295,8 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
             )
             style.addLayerAbove(pointLayer, OSM_LAYER_ID)
         } else {
-            Timber.tag("MapLibreLayerManager").d("Updating point layer visibility: %s -> %s", pointLayerId, if (isVisible) "visible" else "none")
+            Timber.tag("MapLibreLayerManager")
+                .d("Updating point layer visibility: %s -> %s", pointLayerId, if (isVisible) "visible" else "none")
             style.getLayer(pointLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
         }
 
@@ -306,7 +312,8 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
             )
             style.addLayerAbove(lineLayer, OSM_LAYER_ID)
         } else {
-            Timber.tag("MapLibreLayerManager").d("Updating line layer visibility: %s -> %s", lineLayerId, if (isVisible) "visible" else "none")
+            Timber.tag("MapLibreLayerManager")
+                .d("Updating line layer visibility: %s -> %s", lineLayerId, if (isVisible) "visible" else "none")
             style.getLayer(lineLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
         }
 
@@ -321,7 +328,8 @@ fun ensureImportedLayerSourceAndLayers(style: Style, layerId: String, geoJson: S
             )
             style.addLayerAbove(fillLayer, OSM_LAYER_ID)
         } else {
-            Timber.tag("MapLibreLayerManager").d("Updating fill layer visibility: %s -> %s", fillLayerId, if (isVisible) "visible" else "none")
+            Timber.tag("MapLibreLayerManager")
+                .d("Updating fill layer visibility: %s -> %s", fillLayerId, if (isVisible) "visible" else "none")
             style.getLayer(fillLayerId)?.setProperties(visibility(if (isVisible) "visible" else "none"))
         }
 
@@ -438,12 +446,9 @@ fun ensureTrackSourcesAndLayers(style: Style, trackColor: String = "#FF5722") {
 
     // Add track line layer if it doesn't exist
     if (style.getLayer(TRACK_LINE_LAYER_ID) == null) {
-        val lineLayer = LineLayer(TRACK_LINE_LAYER_ID, TRACK_LINE_SOURCE_ID)
-            .withProperties(
-                lineColor(trackColor),
-                lineWidth(3f),
-                lineOpacity(0.8f)
-            )
+        val lineLayer =
+            LineLayer(TRACK_LINE_LAYER_ID, TRACK_LINE_SOURCE_ID)
+                .withProperties(lineColor(trackColor), lineWidth(3f), lineOpacity(0.8f))
 
         // Add above OSM layer if it exists
         if (style.getLayer(OSM_LAYER_ID) != null) {
@@ -456,14 +461,15 @@ fun ensureTrackSourcesAndLayers(style: Style, trackColor: String = "#FF5722") {
 
     // Add track points layer if it doesn't exist
     if (style.getLayer(TRACK_POINTS_LAYER_ID) == null) {
-        val pointsLayer = CircleLayer(TRACK_POINTS_LAYER_ID, TRACK_POINTS_SOURCE_ID)
-            .withProperties(
-                circleColor(trackColor),
-                circleRadius(5f),
-                circleStrokeColor("#FFFFFF"),
-                circleStrokeWidth(2f),
-                circleOpacity(0.7f)
-            )
+        val pointsLayer =
+            CircleLayer(TRACK_POINTS_LAYER_ID, TRACK_POINTS_SOURCE_ID)
+                .withProperties(
+                    circleColor(trackColor),
+                    circleRadius(5f),
+                    circleStrokeColor("#FFFFFF"),
+                    circleStrokeWidth(2f),
+                    circleOpacity(0.7f),
+                )
 
         // Add above track line layer
         style.addLayerAbove(pointsLayer, TRACK_LINE_LAYER_ID)
@@ -492,52 +498,34 @@ fun ensureHeatmapSourceAndLayer(style: Style) {
 
     // Add heatmap layer if it doesn't exist
     if (style.getLayer(HEATMAP_LAYER_ID) == null) {
-        val heatmapLayer = HeatmapLayer(HEATMAP_LAYER_ID, HEATMAP_SOURCE_ID)
-            .withProperties(
-                // Each node contributes equally to the heatmap
-                heatmapWeight(literal(1.0)),
-                // Increase the heatmap intensity by zoom level
-                // Higher intensity = more sensitive to node density
-                heatmapIntensity(
-                    interpolate(
-                        linear(), zoom(),
-                        stop(0, 0.3),
-                        stop(9, 0.8),
-                        stop(15, 1.5)
-                    )
-                ),
-                // Color ramp for heatmap - requires higher density to reach warmer colors
-                heatmapColor(
-                    interpolate(
-                        linear(), literal("heatmap-density"),
-                        stop(0.0, toColor(literal("rgba(33,102,172,0)"))),
-                        stop(0.1, toColor(literal("rgb(33,102,172)"))),
-                        stop(0.3, toColor(literal("rgb(103,169,207)"))),
-                        stop(0.5, toColor(literal("rgb(209,229,240)"))),
-                        stop(0.7, toColor(literal("rgb(253,219,199)"))),
-                        stop(0.85, toColor(literal("rgb(239,138,98)"))),
-                        stop(1.0, toColor(literal("rgb(178,24,43)")))
-                    )
-                ),
-                // Smaller radius = each node influences a smaller area
-                // More nodes needed in close proximity to create high density
-                heatmapRadius(
-                    interpolate(
-                        linear(), zoom(),
-                        stop(0, 2.0),
-                        stop(9, 6.0),
-                        stop(15, 10.0)
-                    )
-                ),
-                // Transition from heatmap to circle layer by zoom level
-                heatmapOpacity(
-                    interpolate(
-                        linear(), zoom(),
-                        stop(7, 1.0),
-                        stop(22, 1.0)
-                    )
+        val heatmapLayer =
+            HeatmapLayer(HEATMAP_LAYER_ID, HEATMAP_SOURCE_ID)
+                .withProperties(
+                    // Each node contributes equally to the heatmap
+                    heatmapWeight(literal(1.0)),
+                    // Increase the heatmap intensity by zoom level
+                    // Higher intensity = more sensitive to node density
+                    heatmapIntensity(interpolate(linear(), zoom(), stop(0, 0.3), stop(9, 0.8), stop(15, 1.5))),
+                    // Color ramp for heatmap - requires higher density to reach warmer colors
+                    heatmapColor(
+                        interpolate(
+                            linear(),
+                            literal("heatmap-density"),
+                            stop(0.0, toColor(literal("rgba(33,102,172,0)"))),
+                            stop(0.1, toColor(literal("rgb(33,102,172)"))),
+                            stop(0.3, toColor(literal("rgb(103,169,207)"))),
+                            stop(0.5, toColor(literal("rgb(209,229,240)"))),
+                            stop(0.7, toColor(literal("rgb(253,219,199)"))),
+                            stop(0.85, toColor(literal("rgb(239,138,98)"))),
+                            stop(1.0, toColor(literal("rgb(178,24,43)"))),
+                        ),
+                    ),
+                    // Smaller radius = each node influences a smaller area
+                    // More nodes needed in close proximity to create high density
+                    heatmapRadius(interpolate(linear(), zoom(), stop(0, 2.0), stop(9, 6.0), stop(15, 10.0))),
+                    // Transition from heatmap to circle layer by zoom level
+                    heatmapOpacity(interpolate(linear(), zoom(), stop(7, 1.0), stop(22, 1.0))),
                 )
-            )
 
         // Add above OSM layer if it exists, otherwise add at bottom
         if (style.getLayer(OSM_LAYER_ID) != null) {

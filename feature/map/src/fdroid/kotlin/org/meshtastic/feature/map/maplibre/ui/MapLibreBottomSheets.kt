@@ -39,9 +39,7 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.ui.component.NodeChip
 
-/**
- * Bottom sheet showing details and actions for a selected node
- */
+/** Bottom sheet showing details and actions for a selected node */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NodeDetailsBottomSheet(
@@ -70,17 +68,13 @@ fun NodeDetailsBottomSheet(
                 Text(text = "Distance: $distanceKm km")
             }
             Row(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
-                Button(onClick = onViewFullNode) {
-                    Text("View full node")
-                }
+                Button(onClick = onViewFullNode) { Text("View full node") }
             }
         }
     }
 }
 
-/**
- * Bottom sheet showing a list of nodes in a large cluster
- */
+/** Bottom sheet showing a list of nodes in a large cluster */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClusterListBottomSheet(
@@ -89,24 +83,16 @@ fun ClusterListBottomSheet(
     onDismiss: () -> Unit,
     sheetState: SheetState,
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-    ) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(text = "Cluster items (${members.size})", style = MaterialTheme.typography.titleMedium)
             LazyColumn {
                 items(members) { node ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp).clickable {
-                            onNodeClicked(node)
-                        },
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp).clickable { onNodeClicked(node) },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        NodeChip(
-                            node = node,
-                            onClick = { onNodeClicked(node) },
-                        )
+                        NodeChip(node = node, onClick = { onNodeClicked(node) })
                         Spacer(modifier = Modifier.width(12.dp))
                         val longName = node.user.longName
                         if (!longName.isNullOrBlank()) {

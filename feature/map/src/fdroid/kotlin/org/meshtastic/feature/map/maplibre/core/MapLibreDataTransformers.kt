@@ -162,47 +162,50 @@ fun escapeJson(input: String): String {
 fun positionsToLineStringFeature(positions: List<Position>): Feature? {
     if (positions.size < 2) return null
 
-    val points = positions.map { pos ->
-        val lat = pos.latitudeI * DEG_D
-        val lon = pos.longitudeI * DEG_D
-        Point.fromLngLat(lon, lat)
-    }
+    val points =
+        positions.map { pos ->
+            val lat = pos.latitudeI * DEG_D
+            val lon = pos.longitudeI * DEG_D
+            Point.fromLngLat(lon, lat)
+        }
 
     return Feature.fromGeometry(LineString.fromLngLats(points))
 }
 
 /** Converts a list of positions to a GeoJSON FeatureCollection for track point markers */
 fun positionsToPointFeatures(positions: List<Position>): FeatureCollection {
-    val features = positions.mapIndexed { index, pos ->
-        val lat = pos.latitudeI * DEG_D
-        val lon = pos.longitudeI * DEG_D
-        val point = Point.fromLngLat(lon, lat)
-        val feature = Feature.fromGeometry(point)
+    val features =
+        positions.mapIndexed { index, pos ->
+            val lat = pos.latitudeI * DEG_D
+            val lon = pos.longitudeI * DEG_D
+            val point = Point.fromLngLat(lon, lat)
+            val feature = Feature.fromGeometry(point)
 
-        feature.addStringProperty("kind", "track_point")
-        feature.addNumberProperty("index", index)
-        feature.addNumberProperty("time", pos.time)
-        feature.addNumberProperty("altitude", pos.altitude)
-        feature.addNumberProperty("groundSpeed", pos.groundSpeed)
-        feature.addNumberProperty("groundTrack", pos.groundTrack)
-        feature.addNumberProperty("satsInView", pos.satsInView)
-        feature.addNumberProperty("latitude", lat)
-        feature.addNumberProperty("longitude", lon)
+            feature.addStringProperty("kind", "track_point")
+            feature.addNumberProperty("index", index)
+            feature.addNumberProperty("time", pos.time)
+            feature.addNumberProperty("altitude", pos.altitude)
+            feature.addNumberProperty("groundSpeed", pos.groundSpeed)
+            feature.addNumberProperty("groundTrack", pos.groundTrack)
+            feature.addNumberProperty("satsInView", pos.satsInView)
+            feature.addNumberProperty("latitude", lat)
+            feature.addNumberProperty("longitude", lon)
 
-        feature
-    }
+            feature
+        }
 
     return FeatureCollection.fromFeatures(features)
 }
 
 /** Converts nodes to simple GeoJSON FeatureCollection for heatmap */
 fun nodesToHeatmapFeatureCollection(nodes: List<Node>): FeatureCollection {
-    val features = nodes.mapNotNull { node ->
-        val pos = node.validPosition ?: return@mapNotNull null
-        val lat = pos.latitudeI * DEG_D
-        val lon = pos.longitudeI * DEG_D
-        val point = Point.fromLngLat(lon, lat)
-        Feature.fromGeometry(point)
-    }
+    val features =
+        nodes.mapNotNull { node ->
+            val pos = node.validPosition ?: return@mapNotNull null
+            val lat = pos.latitudeI * DEG_D
+            val lon = pos.longitudeI * DEG_D
+            val point = Point.fromLngLat(lon, lat)
+            Feature.fromGeometry(point)
+        }
     return FeatureCollection.fromFeatures(features)
 }

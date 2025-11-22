@@ -24,50 +24,14 @@ import android.graphics.RectF
 import android.os.SystemClock
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationDisabled
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Explore
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.MyLocation
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.Remove
-import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalFloatingToolbar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.draw.rotate
-import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -79,7 +43,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -101,16 +64,13 @@ import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Point
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.LayerType
 import org.meshtastic.feature.map.MapLayerItem
 import org.meshtastic.feature.map.MapViewModel
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.EditWaypointDialog
-import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.TileCacheManagementSheet
 import org.meshtastic.feature.map.maplibre.BaseMapStyle
-import org.meshtastic.feature.map.maplibre.MapLibreConstants
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_CIRCLE_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_LIST_FETCH_MAX
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_RADIAL_MAX
@@ -132,9 +92,8 @@ import org.meshtastic.feature.map.maplibre.core.ensureImportedLayerSourceAndLaye
 import org.meshtastic.feature.map.maplibre.core.ensureSourcesAndLayers
 import org.meshtastic.feature.map.maplibre.core.ensureTrackSourcesAndLayers
 import org.meshtastic.feature.map.maplibre.core.logStyleState
-import org.meshtastic.feature.map.maplibre.core.nodesToHeatmapFeatureCollection
-import org.meshtastic.feature.map.maplibre.core.setNodeLayersVisibility
 import org.meshtastic.feature.map.maplibre.core.nodesToFeatureCollectionJsonWithSelection
+import org.meshtastic.feature.map.maplibre.core.nodesToHeatmapFeatureCollection
 import org.meshtastic.feature.map.maplibre.core.positionsToLineStringFeature
 import org.meshtastic.feature.map.maplibre.core.positionsToPointFeatures
 import org.meshtastic.feature.map.maplibre.core.reinitializeStyleAfterSwitch
@@ -142,7 +101,9 @@ import org.meshtastic.feature.map.maplibre.core.removeImportedLayerSourceAndLaye
 import org.meshtastic.feature.map.maplibre.core.removeTrackSourcesAndLayers
 import org.meshtastic.feature.map.maplibre.core.safeSetGeoJson
 import org.meshtastic.feature.map.maplibre.core.setClusterVisibilityHysteresis
+import org.meshtastic.feature.map.maplibre.core.setNodeLayersVisibility
 import org.meshtastic.feature.map.maplibre.core.waypointsToFeatureCollectionFC
+import org.meshtastic.feature.map.maplibre.utils.MapLibreTileCacheManager
 import org.meshtastic.feature.map.maplibre.utils.applyFilters
 import org.meshtastic.feature.map.maplibre.utils.copyFileToInternalStorage
 import org.meshtastic.feature.map.maplibre.utils.deleteFileFromInternalStorage
@@ -152,18 +113,12 @@ import org.meshtastic.feature.map.maplibre.utils.getFileName
 import org.meshtastic.feature.map.maplibre.utils.hasAnyLocationPermission
 import org.meshtastic.feature.map.maplibre.utils.loadLayerGeoJson
 import org.meshtastic.feature.map.maplibre.utils.loadPersistedLayers
-import org.meshtastic.feature.map.maplibre.utils.MapLibreTileCacheManager
-import org.meshtastic.feature.map.maplibre.utils.protoShortName
-import org.meshtastic.feature.map.maplibre.utils.roleColor
 import org.meshtastic.feature.map.maplibre.utils.selectLabelsForViewport
-import org.meshtastic.feature.map.maplibre.utils.shortNameFallback
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
 import timber.log.Timber
-import kotlin.math.cos
-import kotlin.math.sin
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -179,11 +134,12 @@ fun MapLibrePOC(
     var selectedNodeNum by remember { mutableStateOf<Int?>(null) }
 
     // Log track parameters on entry
-    Timber.tag("MapLibrePOC").d(
-        "MapLibrePOC called - focusedNodeNum=%s, nodeTracks count=%d",
-        focusedNodeNum ?: "null",
-        nodeTracks?.size ?: 0
-    )
+    Timber.tag("MapLibrePOC")
+        .d(
+            "MapLibrePOC called - focusedNodeNum=%s, nodeTracks count=%d",
+            focusedNodeNum ?: "null",
+            nodeTracks?.size ?: 0,
+        )
     val ourNode by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     var isLocationTrackingEnabled by remember { mutableStateOf(false) }
@@ -253,7 +209,6 @@ fun MapLibrePOC(
             Timber.tag("MapLibrePOC").e(e, "Failed to initialize tile cache manager")
         }
     }
-
 
     // Helper functions for layer management
     fun toggleLayerVisibility(layerId: String) {
@@ -340,19 +295,35 @@ fun MapLibrePOC(
     LaunchedEffect(mapLayers, mapRef) {
         mapRef?.let { map ->
             map.style?.let { style ->
-                Timber.tag("MapLibrePOC").d("Layer rendering LaunchedEffect triggered. Layers count: %d", mapLayers.size)
+                Timber.tag("MapLibrePOC")
+                    .d("Layer rendering LaunchedEffect triggered. Layers count: %d", mapLayers.size)
                 coroutineScope.launch {
                     // Load GeoJSON for layers that don't have it cached
                     mapLayers.forEach { layer ->
                         if (!layerGeoJsonCache.containsKey(layer.id)) {
-                            Timber.tag("MapLibrePOC").d("Loading GeoJSON for layer: id=%s, name=%s, type=%s", layer.id, layer.name, layer.layerType)
+                            Timber.tag("MapLibrePOC")
+                                .d(
+                                    "Loading GeoJSON for layer: id=%s, name=%s, type=%s",
+                                    layer.id,
+                                    layer.name,
+                                    layer.layerType,
+                                )
                             val geoJson = loadLayerGeoJson(context, layer)
                             if (geoJson != null) {
-                                val featureCount = try {
-                                    val jsonObj = org.json.JSONObject(geoJson)
-                                    jsonObj.optJSONArray("features")?.length() ?: 0
-                                } catch (e: Exception) { 0 }
-                                Timber.tag("MapLibrePOC").d("GeoJSON loaded for layer %s: %d features, %d bytes", layer.name, featureCount, geoJson.length)
+                                val featureCount =
+                                    try {
+                                        val jsonObj = org.json.JSONObject(geoJson)
+                                        jsonObj.optJSONArray("features")?.length() ?: 0
+                                    } catch (e: Exception) {
+                                        0
+                                    }
+                                Timber.tag("MapLibrePOC")
+                                    .d(
+                                        "GeoJSON loaded for layer %s: %d features, %d bytes",
+                                        layer.name,
+                                        featureCount,
+                                        geoJson.length,
+                                    )
                                 layerGeoJsonCache = layerGeoJsonCache + (layer.id to geoJson)
                             } else {
                                 Timber.tag("MapLibrePOC").e("Failed to load GeoJSON for layer: %s", layer.name)
@@ -365,8 +336,14 @@ fun MapLibrePOC(
                     // Ensure all layers are rendered
                     mapLayers.forEach { layer ->
                         val geoJson = layerGeoJsonCache[layer.id]
-                        Timber.tag("MapLibrePOC").d("Rendering layer: id=%s, name=%s, visible=%s, hasGeoJson=%s",
-                            layer.id, layer.name, layer.isVisible, geoJson != null)
+                        Timber.tag("MapLibrePOC")
+                            .d(
+                                "Rendering layer: id=%s, name=%s, visible=%s, hasGeoJson=%s",
+                                layer.id,
+                                layer.name,
+                                layer.isVisible,
+                                geoJson != null,
+                            )
                         ensureImportedLayerSourceAndLayers(style, layer.id, geoJson, layer.isVisible)
                     }
 
@@ -444,7 +421,17 @@ fun MapLibrePOC(
     }
 
     // Heatmap mode management
-    LaunchedEffect(heatmapEnabled, nodes, mapFilterState, enabledRoles, ourNode, isLocationTrackingEnabled, clusteringEnabled, nodeTracks, focusedNodeNum) {
+    LaunchedEffect(
+        heatmapEnabled,
+        nodes,
+        mapFilterState,
+        enabledRoles,
+        ourNode,
+        isLocationTrackingEnabled,
+        clusteringEnabled,
+        nodeTracks,
+        focusedNodeNum,
+    ) {
         // Don't manage heatmap/clustering when showing tracks
         if (nodeTracks != null && focusedNodeNum != null) return@LaunchedEffect
 
@@ -452,7 +439,8 @@ fun MapLibrePOC(
             map.style?.let { style ->
                 if (heatmapEnabled) {
                     // Filter nodes same way as regular view
-                    val filteredNodes = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
+                    val filteredNodes =
+                        applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
 
                     // Update heatmap source with filtered node positions
                     val heatmapFC = nodesToHeatmapFeatureCollection(filteredNodes)
@@ -470,17 +458,20 @@ fun MapLibrePOC(
                     style.getLayer(HEATMAP_LAYER_ID)?.setProperties(visibility("none"))
 
                     // Restore proper clustering visibility based on current state
-                    val filteredNodes = applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
-                    clustersShown = setClusterVisibilityHysteresis(
-                        map,
-                        style,
-                        filteredNodes,
-                        clusteringEnabled,
-                        clustersShown,
-                        mapFilterState.showPrecisionCircle
-                    )
+                    val filteredNodes =
+                        applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
+                    clustersShown =
+                        setClusterVisibilityHysteresis(
+                            map,
+                            style,
+                            filteredNodes,
+                            clusteringEnabled,
+                            clustersShown,
+                            mapFilterState.showPrecisionCircle,
+                        )
 
-                    Timber.tag("MapLibrePOC").d("Heatmap disabled, clustering=%b, clustersShown=%b", clusteringEnabled, clustersShown)
+                    Timber.tag("MapLibrePOC")
+                        .d("Heatmap disabled, clustering=%b, clustersShown=%b", clusteringEnabled, clustersShown)
                 }
             }
         }
@@ -493,23 +484,28 @@ fun MapLibrePOC(
             return@LaunchedEffect
         }
 
-        val map = mapRef ?: run {
-            Timber.tag("MapLibrePOC").w("LaunchedEffect: mapRef is null")
-            return@LaunchedEffect
-        }
-        val style = map.style ?: run {
-            Timber.tag("MapLibrePOC").w("LaunchedEffect: Style not ready yet")
-            return@LaunchedEffect
-        }
+        val map =
+            mapRef
+                ?: run {
+                    Timber.tag("MapLibrePOC").w("LaunchedEffect: mapRef is null")
+                    return@LaunchedEffect
+                }
+        val style =
+            map.style
+                ?: run {
+                    Timber.tag("MapLibrePOC").w("LaunchedEffect: Style not ready yet")
+                    return@LaunchedEffect
+                }
 
         map.let { map ->
             style.let { style ->
                 if (nodeTracks != null && focusedNodeNum != null) {
-                    Timber.tag("MapLibrePOC").d(
-                        "LaunchedEffect: Rendering tracks for node %d, total positions: %d",
-                        focusedNodeNum,
-                        nodeTracks.size
-                    )
+                    Timber.tag("MapLibrePOC")
+                        .d(
+                            "LaunchedEffect: Rendering tracks for node %d, total positions: %d",
+                            focusedNodeNum,
+                            nodeTracks.size,
+                        )
 
                     // Ensure track sources and layers exist
                     ensureTrackSourcesAndLayers(style)
@@ -520,22 +516,23 @@ fun MapLibrePOC(
                     // Apply time filter
                     val currentTimeSeconds = System.currentTimeMillis() / 1000
                     val filterSeconds = mapFilterState.lastHeardTrackFilter.seconds
-                    val filteredTracks = nodeTracks.filter {
-                        mapFilterState.lastHeardTrackFilter == org.meshtastic.feature.map.LastHeardFilter.Any ||
-                            it.time > currentTimeSeconds - filterSeconds
-                    }
+                    val filteredTracks =
+                        nodeTracks.filter {
+                            mapFilterState.lastHeardTrackFilter == org.meshtastic.feature.map.LastHeardFilter.Any ||
+                                it.time > currentTimeSeconds - filterSeconds
+                        }
 
-                    Timber.tag("MapLibrePOC").d(
-                        "LaunchedEffect: Tracks filtered: %d positions remain (from %d total)",
-                        filteredTracks.size,
-                        nodeTracks.size
-                    )
+                    Timber.tag("MapLibrePOC")
+                        .d(
+                            "LaunchedEffect: Tracks filtered: %d positions remain (from %d total)",
+                            filteredTracks.size,
+                            nodeTracks.size,
+                        )
 
                     // Update track line
                     if (filteredTracks.size >= 2) {
                         positionsToLineStringFeature(filteredTracks)?.let { lineFeature ->
-                            (style.getSource(TRACK_LINE_SOURCE_ID) as? GeoJsonSource)
-                                ?.setGeoJson(lineFeature)
+                            (style.getSource(TRACK_LINE_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(lineFeature)
                             Timber.tag("MapLibrePOC").d("LaunchedEffect: Track line updated")
                         }
                     }
@@ -543,18 +540,18 @@ fun MapLibrePOC(
                     // Update track points
                     if (filteredTracks.isNotEmpty()) {
                         val pointsFC = positionsToPointFeatures(filteredTracks)
-                        (style.getSource(TRACK_POINTS_SOURCE_ID) as? GeoJsonSource)
-                            ?.setGeoJson(pointsFC)
+                        (style.getSource(TRACK_POINTS_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(pointsFC)
                         Timber.tag("MapLibrePOC").d("LaunchedEffect: Track points updated")
 
                         // Center camera on the tracks
                         if (filteredTracks.size == 1) {
                             // Single position - just center on it with a fixed zoom
                             val position = filteredTracks.first()
-                            val latLng = org.maplibre.android.geometry.LatLng(
-                                position.latitudeI * DEG_D,
-                                position.longitudeI * DEG_D
-                            )
+                            val latLng =
+                                org.maplibre.android.geometry.LatLng(
+                                    position.latitudeI * DEG_D,
+                                    position.longitudeI * DEG_D,
+                                )
                             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0))
                             Timber.tag("MapLibrePOC").d("LaunchedEffect: Camera centered on single track position")
                         } else {
@@ -564,21 +561,14 @@ fun MapLibrePOC(
                                 trackBounds.include(
                                     org.maplibre.android.geometry.LatLng(
                                         position.latitudeI * DEG_D,
-                                        position.longitudeI * DEG_D
-                                    )
+                                        position.longitudeI * DEG_D,
+                                    ),
                                 )
                             }
                             val padding = 100 // pixels
-                            map.animateCamera(
-                                CameraUpdateFactory.newLatLngBounds(
-                                    trackBounds.build(),
-                                    padding
-                                )
-                            )
-                            Timber.tag("MapLibrePOC").d(
-                                "LaunchedEffect: Camera centered on %d track positions",
-                                filteredTracks.size
-                            )
+                            map.animateCamera(CameraUpdateFactory.newLatLngBounds(trackBounds.build(), padding))
+                            Timber.tag("MapLibrePOC")
+                                .d("LaunchedEffect: Camera centered on %d track positions", filteredTracks.size)
                         }
                     }
                 } else {
@@ -610,31 +600,34 @@ fun MapLibrePOC(
                             ensureHeatmapSourceAndLayer(style)
 
                             // Setup track sources and layers if rendering node tracks
-                            Timber.tag("MapLibrePOC").d(
-                                "Track check: nodeTracks=%s (%d positions), focusedNodeNum=%s",
-                                if (nodeTracks != null) "NOT NULL" else "NULL",
-                                nodeTracks?.size ?: 0,
-                                focusedNodeNum ?: "NULL"
-                            )
+                            Timber.tag("MapLibrePOC")
+                                .d(
+                                    "Track check: nodeTracks=%s (%d positions), focusedNodeNum=%s",
+                                    if (nodeTracks != null) "NOT NULL" else "NULL",
+                                    nodeTracks?.size ?: 0,
+                                    focusedNodeNum ?: "NULL",
+                                )
 
                             if (nodeTracks != null && focusedNodeNum != null) {
-                                Timber.tag("MapLibrePOC").d(
-                                    "Loading tracks for node %d, total positions: %d",
-                                    focusedNodeNum,
-                                    nodeTracks.size
-                                )
+                                Timber.tag("MapLibrePOC")
+                                    .d(
+                                        "Loading tracks for node %d, total positions: %d",
+                                        focusedNodeNum,
+                                        nodeTracks.size,
+                                    )
 
                                 // Get the focused node to use its color
                                 val focusedNode = nodes.firstOrNull { it.num == focusedNodeNum }
-                                Timber.tag("MapLibrePOC").d(
-                                    "Focused node found: %s (searching in %d nodes)",
-                                    if (focusedNode != null) "YES" else "NO",
-                                    nodes.size
-                                )
+                                Timber.tag("MapLibrePOC")
+                                    .d(
+                                        "Focused node found: %s (searching in %d nodes)",
+                                        if (focusedNode != null) "YES" else "NO",
+                                        nodes.size,
+                                    )
 
-                                val trackColor = focusedNode?.let {
-                                    String.format("#%06X", 0xFFFFFF and it.colors.second)
-                                } ?: "#FF5722" // Default orange color
+                                val trackColor =
+                                    focusedNode?.let { String.format("#%06X", 0xFFFFFF and it.colors.second) }
+                                        ?: "#FF5722" // Default orange color
 
                                 Timber.tag("MapLibrePOC").d("Track color: %s", trackColor)
 
@@ -644,63 +637,79 @@ fun MapLibrePOC(
                                 // Filter tracks by time using lastHeardTrackFilter
                                 val currentTimeSeconds = System.currentTimeMillis() / 1000
                                 val filterSeconds = mapFilterState.lastHeardTrackFilter.seconds
-                                Timber.tag("MapLibrePOC").d(
-                                    "Filtering tracks - filter: %s (seconds: %d), current time: %d",
-                                    mapFilterState.lastHeardTrackFilter,
-                                    filterSeconds,
-                                    currentTimeSeconds
-                                )
+                                Timber.tag("MapLibrePOC")
+                                    .d(
+                                        "Filtering tracks - filter: %s (seconds: %d), current time: %d",
+                                        mapFilterState.lastHeardTrackFilter,
+                                        filterSeconds,
+                                        currentTimeSeconds,
+                                    )
 
-                                val filteredTracks = nodeTracks.filter {
-                                    val keep = mapFilterState.lastHeardTrackFilter == org.meshtastic.feature.map.LastHeardFilter.Any ||
-                                        it.time > currentTimeSeconds - filterSeconds
-                                    if (!keep) {
-                                        Timber.tag("MapLibrePOC").v(
-                                            "Filtering out position at time %d (age: %d seconds)",
-                                            it.time,
-                                            currentTimeSeconds - it.time
-                                        )
-                                    }
-                                    keep
-                                }.sortedBy { it.time }
+                                val filteredTracks =
+                                    nodeTracks
+                                        .filter {
+                                            val keep =
+                                                mapFilterState.lastHeardTrackFilter ==
+                                                    org.meshtastic.feature.map.LastHeardFilter.Any ||
+                                                    it.time > currentTimeSeconds - filterSeconds
+                                            if (!keep) {
+                                                Timber.tag("MapLibrePOC")
+                                                    .v(
+                                                        "Filtering out position at time %d (age: %d seconds)",
+                                                        it.time,
+                                                        currentTimeSeconds - it.time,
+                                                    )
+                                            }
+                                            keep
+                                        }
+                                        .sortedBy { it.time }
 
-                                Timber.tag("MapLibrePOC").d(
-                                    "Tracks filtered: %d positions remain (from %d total)",
-                                    filteredTracks.size,
-                                    nodeTracks.size
-                                )
+                                Timber.tag("MapLibrePOC")
+                                    .d(
+                                        "Tracks filtered: %d positions remain (from %d total)",
+                                        filteredTracks.size,
+                                        nodeTracks.size,
+                                    )
 
                                 // Update track line
                                 if (filteredTracks.size >= 2) {
-                                    Timber.tag("MapLibrePOC").d("Creating line feature from %d points", filteredTracks.size)
+                                    Timber.tag("MapLibrePOC")
+                                        .d("Creating line feature from %d points", filteredTracks.size)
                                     positionsToLineStringFeature(filteredTracks)?.let { lineFeature ->
                                         Timber.tag("MapLibrePOC").d("Setting line feature on source")
-                                        (style.getSource(TRACK_LINE_SOURCE_ID) as? GeoJsonSource)
-                                            ?.setGeoJson(lineFeature)
+                                        (style.getSource(TRACK_LINE_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
+                                            lineFeature,
+                                        )
                                         Timber.tag("MapLibrePOC").d("Track line set successfully")
-                                    } ?: run {
-                                        Timber.tag("MapLibrePOC").w("Failed to create line feature - positionsToLineStringFeature returned null")
                                     }
+                                        ?: run {
+                                            Timber.tag("MapLibrePOC")
+                                                .w(
+                                                    "Failed to create line feature - positionsToLineStringFeature returned null",
+                                                )
+                                        }
                                 } else {
-                                    Timber.tag("MapLibrePOC").w("Not enough points for track line (need >=2, have %d)", filteredTracks.size)
+                                    Timber.tag("MapLibrePOC")
+                                        .w("Not enough points for track line (need >=2, have %d)", filteredTracks.size)
                                 }
 
                                 // Update track points
                                 if (filteredTracks.isNotEmpty()) {
-                                    Timber.tag("MapLibrePOC").d("Creating point features from %d points", filteredTracks.size)
+                                    Timber.tag("MapLibrePOC")
+                                        .d("Creating point features from %d points", filteredTracks.size)
                                     val pointsFC = positionsToPointFeatures(filteredTracks)
-                                    (style.getSource(TRACK_POINTS_SOURCE_ID) as? GeoJsonSource)
-                                        ?.setGeoJson(pointsFC)
+                                    (style.getSource(TRACK_POINTS_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(pointsFC)
                                     Timber.tag("MapLibrePOC").d("Track points set successfully")
                                 } else {
                                     Timber.tag("MapLibrePOC").w("No filtered tracks to display as points")
                                 }
 
-                                Timber.tag("MapLibrePOC").i(
-                                    "✓ Track rendering complete: %d positions displayed for node %d",
-                                    filteredTracks.size,
-                                    focusedNodeNum
-                                )
+                                Timber.tag("MapLibrePOC")
+                                    .i(
+                                        "✓ Track rendering complete: %d positions displayed for node %d",
+                                        filteredTracks.size,
+                                        focusedNodeNum,
+                                    )
 
                                 // Center camera on the tracks
                                 if (filteredTracks.isNotEmpty()) {
@@ -709,21 +718,14 @@ fun MapLibrePOC(
                                         trackBounds.include(
                                             org.maplibre.android.geometry.LatLng(
                                                 position.latitudeI * DEG_D,
-                                                position.longitudeI * DEG_D
-                                            )
+                                                position.longitudeI * DEG_D,
+                                            ),
                                         )
                                     }
                                     val padding = 100 // pixels
-                                    map.animateCamera(
-                                        CameraUpdateFactory.newLatLngBounds(
-                                            trackBounds.build(),
-                                            padding
-                                        )
-                                    )
-                                    Timber.tag("MapLibrePOC").d(
-                                        "Camera centered on %d track positions",
-                                        filteredTracks.size
-                                    )
+                                    map.animateCamera(CameraUpdateFactory.newLatLngBounds(trackBounds.build(), padding))
+                                    Timber.tag("MapLibrePOC")
+                                        .d("Camera centered on %d track positions", filteredTracks.size)
                                 }
                             } else {
                                 Timber.tag("MapLibrePOC").d("No tracks to display - removing track layers")
@@ -914,9 +916,12 @@ fun MapLibrePOC(
                                                     300,
                                                     object : MapLibreMap.CancelableCallback {
                                                         override fun onFinish() {
-                                                            // Calculate screen position AFTER camera animation completes
+                                                            // Calculate screen position AFTER camera animation
+                                                            // completes
                                                             val clusterCenter =
-                                                                map.projection.toScreenLocation(LatLng(clusterLat, clusterLon))
+                                                                map.projection.toScreenLocation(
+                                                                    LatLng(clusterLat, clusterLon),
+                                                                )
 
                                                             // Set overlay state after camera animation completes
                                                             if (pointCount > CLUSTER_RADIAL_MAX) {
@@ -925,25 +930,32 @@ fun MapLibrePOC(
                                                             } else {
                                                                 // Show radial overlay for small clusters
                                                                 expandedCluster =
-                                                                    ExpandedCluster(clusterCenter, members.take(CLUSTER_RADIAL_MAX))
+                                                                    ExpandedCluster(
+                                                                        clusterCenter,
+                                                                        members.take(CLUSTER_RADIAL_MAX),
+                                                                    )
                                                             }
                                                         }
+
                                                         override fun onCancel() {
                                                             // Animation was cancelled, don't show overlay
                                                         }
-                                                    }
+                                                    },
                                                 )
-                                                Timber.tag("MapLibrePOC").d(
-                                                    "Centering on cluster at (%.5f, %.5f) with %d members",
-                                                    clusterLat,
-                                                    clusterLon,
-                                                    members.size
-                                                )
+                                                Timber.tag("MapLibrePOC")
+                                                    .d(
+                                                        "Centering on cluster at (%.5f, %.5f) with %d members",
+                                                        clusterLat,
+                                                        clusterLon,
+                                                        members.size,
+                                                    )
                                             } else {
                                                 // No geometry, show overlay immediately using current screen position
                                                 val clusterCenter =
                                                     (f.geometry() as? Point)?.let { p ->
-                                                        map.projection.toScreenLocation(LatLng(p.latitude(), p.longitude()))
+                                                        map.projection.toScreenLocation(
+                                                            LatLng(p.latitude(), p.longitude()),
+                                                        )
                                                     } ?: screenPoint
                                                 if (pointCount > CLUSTER_RADIAL_MAX) {
                                                     clusterListMembers = members
@@ -973,16 +985,9 @@ fun MapLibrePOC(
                                                 val nodeLat = geom.latitude()
                                                 val nodeLon = geom.longitude()
                                                 val nodeLatLng = LatLng(nodeLat, nodeLon)
-                                                map.animateCamera(
-                                                    CameraUpdateFactory.newLatLng(nodeLatLng),
-                                                    300
-                                                )
-                                                Timber.tag("MapLibrePOC").d(
-                                                    "Centering on node %d at (%.5f, %.5f)",
-                                                    num,
-                                                    nodeLat,
-                                                    nodeLon
-                                                )
+                                                map.animateCamera(CameraUpdateFactory.newLatLng(nodeLatLng), 300)
+                                                Timber.tag("MapLibrePOC")
+                                                    .d("Centering on node %d at (%.5f, %.5f)", num, nodeLat, nodeLon)
                                             }
                                         }
                                         "waypoint" -> {
@@ -998,16 +1003,9 @@ fun MapLibrePOC(
                                                 val wpLat = geom.latitude()
                                                 val wpLon = geom.longitude()
                                                 val wpLatLng = LatLng(wpLat, wpLon)
-                                                map.animateCamera(
-                                                    CameraUpdateFactory.newLatLng(wpLatLng),
-                                                    300
-                                                )
-                                                Timber.tag("MapLibrePOC").d(
-                                                    "Centering on waypoint %d at (%.5f, %.5f)",
-                                                    id,
-                                                    wpLat,
-                                                    wpLon
-                                                )
+                                                map.animateCamera(CameraUpdateFactory.newLatLng(wpLatLng), 300)
+                                                Timber.tag("MapLibrePOC")
+                                                    .d("Centering on waypoint %d at (%.5f, %.5f)", id, wpLat, wpLon)
                                             }
                                         }
                                         else -> {}
@@ -1150,7 +1148,8 @@ fun MapLibrePOC(
                     }
                     // Skip node updates when heatmap is enabled
                     if (!heatmapEnabled) {
-                        Timber.tag("MapLibrePOC").d("Updating sources. nodes=%d, waypoints=%d", nodes.size, waypoints.size)
+                        Timber.tag("MapLibrePOC")
+                            .d("Updating sources. nodes=%d, waypoints=%d", nodes.size, waypoints.size)
                         val density = context.resources.displayMetrics.density
                         val bounds2 = map.projection.visibleRegion.latLngBounds
                         val labelSet = run {
@@ -1168,7 +1167,8 @@ fun MapLibrePOC(
                             val chosen = LinkedHashSet<Int>()
                             for (n in sorted) {
                                 val p = n.validPosition ?: continue
-                                val pt = map.projection.toScreenLocation(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
+                                val pt =
+                                    map.projection.toScreenLocation(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
                                 val cx = (pt.x / cell).toInt()
                                 val cy = (pt.y / cell).toInt()
                                 val key = (cx.toLong() shl 32) or (cy.toLong() and 0xffffffff)
@@ -1189,11 +1189,17 @@ fun MapLibrePOC(
                             setClusterVisibilityHysteresis(
                                 map,
                                 style,
-                                applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled),
-                            clusteringEnabled,
-                            clustersShown,
-                            mapFilterState.showPrecisionCircle,
-                        )
+                                applyFilters(
+                                    nodes,
+                                    mapFilterState,
+                                    enabledRoles,
+                                    ourNode?.num,
+                                    isLocationTrackingEnabled,
+                                ),
+                                clusteringEnabled,
+                                clustersShown,
+                                mapFilterState.showPrecisionCircle,
+                            )
                     }
                     logStyleState("update(block)", style)
                 }
@@ -1202,10 +1208,7 @@ fun MapLibrePOC(
 
         // Role legend (based on roles present in current nodes)
         if (showLegend) {
-            RoleLegend(
-                nodes = nodes,
-                modifier = Modifier.align(Alignment.BottomStart).padding(12.dp),
-            )
+            RoleLegend(nodes = nodes, modifier = Modifier.align(Alignment.BottomStart).padding(12.dp))
         }
 
         // Map controls: horizontal toolbar at the top (matches Google Maps style)
@@ -1337,9 +1340,7 @@ fun MapLibrePOC(
         // Zoom controls (bottom right)
         ZoomControls(
             mapRef = mapRef,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 16.dp, end = 16.dp),
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 16.dp, end = 16.dp),
         )
 
         // Custom tile URL dialog
@@ -1393,10 +1394,7 @@ fun MapLibrePOC(
                     expandedCluster = null
                     node.validPosition?.let { p ->
                         mapRef?.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
-                                15.0,
-                            ),
+                            CameraUpdateFactory.newLatLngZoom(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D), 15.0),
                         )
                     }
                 },
@@ -1448,10 +1446,7 @@ fun MapLibrePOC(
                     clusterListMembers = null
                     node.validPosition?.let { p ->
                         mapRef?.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
-                                15.0,
-                            ),
+                            CameraUpdateFactory.newLatLngZoom(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D), 15.0),
                         )
                     }
                 },

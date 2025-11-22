@@ -34,17 +34,14 @@ import timber.log.Timber
 fun NodeMapScreen(
     nodeMapViewModel: NodeMapViewModel,
     onNavigateUp: () -> Unit,
-    mapViewModel: MapViewModel = hiltViewModel()
+    mapViewModel: MapViewModel = hiltViewModel(),
 ) {
     val node by nodeMapViewModel.node.collectAsStateWithLifecycle()
     val positions by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
     val destNum = node?.num
 
-    Timber.tag("NodeMapScreen").d(
-        "NodeMapScreen rendering - destNum=%s, positions count=%d",
-        destNum ?: "null",
-        positions.size
-    )
+    Timber.tag("NodeMapScreen")
+        .d("NodeMapScreen rendering - destNum=%s, positions count=%d", destNum ?: "null", positions.size)
 
     Scaffold(
         topBar = {
@@ -60,11 +57,8 @@ fun NodeMapScreen(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            Timber.tag("NodeMapScreen").d(
-                "Calling MapLibrePOC with focusedNodeNum=%s, nodeTracks count=%d",
-                destNum ?: "null",
-                positions.size
-            )
+            Timber.tag("NodeMapScreen")
+                .d("Calling MapLibrePOC with focusedNodeNum=%s, nodeTracks count=%d", destNum ?: "null", positions.size)
             MapLibrePOC(
                 mapViewModel = mapViewModel,
                 onNavigateToNodeDetails = {},

@@ -120,14 +120,20 @@ suspend fun getInputStreamFromUri(context: Context, uri: Uri): InputStream? = wi
 suspend fun convertKmlToGeoJson(context: Context, layerItem: MapLayerItem): String? = withContext(Dispatchers.IO) {
     try {
         val uri = layerItem.uri ?: return@withContext null
+        Timber.tag("MapLibreLayerUtils").d("convertKmlToGeoJson: uri=%s", uri)
         val inputStream = getInputStreamFromUri(context, uri) ?: return@withContext null
 
         inputStream.use { stream ->
             // Handle KMZ (ZIP) files
+            val isKmz = layerItem.layerType == LayerType.KML && uri.toString().endsWith(".kmz", ignoreCase = true)
+            Timber.tag("MapLibreLayerUtils").d("File type: isKmz=%s", isKmz)
+
             val content =
-                if (layerItem.layerType == LayerType.KML && uri.toString().endsWith(".kmz", ignoreCase = true)) {
+                if (isKmz) {
+                    Timber.tag("MapLibreLayerUtils").d("Extracting KML from KMZ...")
                     extractKmlFromKmz(stream)
                 } else {
+                    Timber.tag("MapLibreLayerUtils").d("Reading KML directly...")
                     stream.bufferedReader().use { it.readText() }
                 }
 
@@ -136,7 +142,10 @@ suspend fun convertKmlToGeoJson(context: Context, layerItem: MapLayerItem): Stri
                 return@withContext null
             }
 
-            parseKmlToGeoJson(content)
+            Timber.tag("MapLibreLayerUtils").d("KML content extracted: %d bytes", content.length)
+            val result = parseKmlToGeoJson(content)
+            Timber.tag("MapLibreLayerUtils").d("KML parsed to GeoJSON: %d bytes", result.length)
+            result
         }
     } catch (e: Exception) {
         Timber.tag("MapLibreLayerUtils").e(e, "Error converting KML to GeoJSON")
@@ -149,7 +158,7 @@ private fun extractKmlFromKmz(inputStream: InputStream): String? {
     return try {
         val zipInputStream = ZipInputStream(inputStream)
         var entry = zipInputStream.nextEntry
-        
+
         // Look for KML file in the ZIP (usually named "doc.kml" or similar)
         while (entry != null) {
             val fileName = entry.name.lowercase()
@@ -163,7 +172,7 @@ private fun extractKmlFromKmz(inputStream: InputStream): String? {
             zipInputStream.closeEntry()
             entry = zipInputStream.nextEntry
         }
-        
+
         Timber.tag("MapLibreLayerUtils").w("No KML file found in KMZ archive")
         null
     } catch (e: Exception) {
@@ -175,15 +184,41 @@ private fun extractKmlFromKmz(inputStream: InputStream): String? {
 /** Parses KML XML and converts to GeoJSON */
 private fun parseKmlToGeoJson(kmlContent: String): String {
     try {
+        Timber.tag("MapLibreLayerUtils").d("parseKmlToGeoJson: Parsing %d bytes of KML", kmlContent.length)
+
+        // Log first 500 chars of KML to see structure
+        val preview = kmlContent.take(500)
+        Timber.tag("MapLibreLayerUtils").d("KML preview: %s", preview)
+
         val factory = DocumentBuilderFactory.newInstance()
         factory.isNamespaceAware = true
         val builder = factory.newDocumentBuilder()
         val doc = builder.parse(kmlContent.byteInputStream())
 
+        // Log root element
+        val root = doc.documentElement
+        Timber.tag("MapLibreLayerUtils").d("Root element: tagName=%s, namespaceURI=%s", root.tagName, root.namespaceURI)
+
         val features = mutableListOf<Feature>()
 
         // Parse Placemarks (points, lines, polygons)
         val placemarks = doc.getElementsByTagName("Placemark")
+        Timber.tag("MapLibreLayerUtils").d("Found %d Placemark elements", placemarks.length)
+
+        // Also try with namespace
+        val placemarks2 = doc.getElementsByTagNameNS("*", "Placemark")
+        Timber.tag("MapLibreLayerUtils").d("Found %d Placemark elements (with NS wildcard)", placemarks2.length)
+
+        // Check for GroundOverlays (raster images)
+        val groundOverlays = doc.getElementsByTagName("GroundOverlay")
+        if (groundOverlays.length > 0) {
+            Timber.tag("MapLibreLayerUtils")
+                .w(
+                    "Found %d GroundOverlay elements (raster tiles). These are not supported - only vector features (Placemarks) can be displayed.",
+                    groundOverlays.length,
+                )
+        }
+
         for (i in 0 until placemarks.length) {
             val placemark = placemarks.item(i) as? Element ?: continue
             val name = placemark.getElementsByTagName("name").item(0)?.textContent ?: ""
@@ -244,8 +279,11 @@ private fun parseKmlToGeoJson(kmlContent: String): String {
             }
         }
 
+        Timber.tag("MapLibreLayerUtils").d("Parsed %d features from KML", features.size)
         val featureCollection = FeatureCollection.fromFeatures(features)
-        return featureCollection.toJson()
+        val json = featureCollection.toJson()
+        Timber.tag("MapLibreLayerUtils").d("Generated GeoJSON: %d bytes", json.length)
+        return json
     } catch (e: Exception) {
         Timber.tag("MapLibreLayerUtils").e(e, "Error parsing KML")
         return """{"type":"FeatureCollection","features":[]}"""
@@ -270,20 +308,23 @@ private fun parseCoordinates(coordStr: String): List<Point> = coordStr.split(" "
 
 /** Loads GeoJSON from a layer item (converting KML if needed) */
 suspend fun loadLayerGeoJson(context: Context, layerItem: MapLayerItem): String? = withContext(Dispatchers.IO) {
-    Timber.tag("MapLibreLayerUtils").d("loadLayerGeoJson: name=%s, type=%s, uri=%s", layerItem.name, layerItem.layerType, layerItem.uri)
-    val result = when (layerItem.layerType) {
-        LayerType.KML -> {
-            Timber.tag("MapLibreLayerUtils").d("Converting KML to GeoJSON for: %s", layerItem.name)
-            convertKmlToGeoJson(context, layerItem)
+    Timber.tag("MapLibreLayerUtils")
+        .d("loadLayerGeoJson: name=%s, type=%s, uri=%s", layerItem.name, layerItem.layerType, layerItem.uri)
+    val result =
+        when (layerItem.layerType) {
+            LayerType.KML -> {
+                Timber.tag("MapLibreLayerUtils").d("Converting KML to GeoJSON for: %s", layerItem.name)
+                convertKmlToGeoJson(context, layerItem)
+            }
+            LayerType.GEOJSON -> {
+                Timber.tag("MapLibreLayerUtils").d("Loading GeoJSON directly for: %s", layerItem.name)
+                val uri = layerItem.uri ?: return@withContext null
+                getInputStreamFromUri(context, uri)?.use { stream -> stream.bufferedReader().use { it.readText() } }
+            }
         }
-        LayerType.GEOJSON -> {
-            Timber.tag("MapLibreLayerUtils").d("Loading GeoJSON directly for: %s", layerItem.name)
-            val uri = layerItem.uri ?: return@withContext null
-            getInputStreamFromUri(context, uri)?.use { stream -> stream.bufferedReader().use { it.readText() } }
-        }
-    }
     if (result != null) {
-        Timber.tag("MapLibreLayerUtils").d("Successfully loaded GeoJSON for %s: %d bytes", layerItem.name, result.length)
+        Timber.tag("MapLibreLayerUtils")
+            .d("Successfully loaded GeoJSON for %s: %d bytes", layerItem.name, result.length)
     } else {
         Timber.tag("MapLibreLayerUtils").e("Failed to load GeoJSON for: %s", layerItem.name)
     }

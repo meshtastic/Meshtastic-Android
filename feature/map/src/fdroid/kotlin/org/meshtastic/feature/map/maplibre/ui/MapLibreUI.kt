@@ -63,57 +63,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.style.sources.GeoJsonSource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.maplibre.BaseMapStyle
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.DEG_D
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_CLUSTER_SOURCE_ID
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_SOURCE_ID
-import org.meshtastic.feature.map.maplibre.core.nodesToFeatureCollectionJsonWithSelection
-import org.meshtastic.feature.map.maplibre.core.safeSetGeoJson
 import org.meshtastic.feature.map.maplibre.utils.protoShortName
 import org.meshtastic.feature.map.maplibre.utils.roleColor
 import org.meshtastic.feature.map.maplibre.utils.shortNameFallback
 import org.meshtastic.proto.ConfigProtos
 import timber.log.Timber
 
-/**
- * Role legend overlay showing colors for different node roles
- */
+/** Role legend overlay showing colors for different node roles */
 @Composable
-fun RoleLegend(
-    nodes: List<Node>,
-    modifier: Modifier = Modifier,
-) {
+fun RoleLegend(nodes: List<Node>, modifier: Modifier = Modifier) {
     val rolesPresent = nodes.map { it.user.role }.toSet()
 
     if (rolesPresent.isNotEmpty()) {
-        Surface(
-            modifier = modifier,
-            tonalElevation = 4.dp,
-            shadowElevation = 4.dp,
-        ) {
+        Surface(modifier = modifier, tonalElevation = 4.dp, shadowElevation = 4.dp) {
             Column(modifier = Modifier.padding(8.dp)) {
                 rolesPresent.take(6).forEach { role ->
                     val fakeNode =
-                        Node(
-                            num = 0,
-                            user = org.meshtastic.proto.MeshProtos.User.newBuilder().setRole(role).build(),
-                        )
-                    Row(
-                        modifier = Modifier.padding(vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = roleColor(fakeNode),
-                            modifier = Modifier.size(12.dp),
-                        ) {}
+                        Node(num = 0, user = org.meshtastic.proto.MeshProtos.User.newBuilder().setRole(role).build())
+                    Row(modifier = Modifier.padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Surface(shape = CircleShape, color = roleColor(fakeNode), modifier = Modifier.size(12.dp)) {}
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = role.name.lowercase().replaceFirstChar { it.uppercase() },
@@ -126,9 +100,7 @@ fun RoleLegend(
     }
 }
 
-/**
- * Map toolbar with GPS, filter, map style, and layers controls
- */
+/** Map toolbar with GPS, filter, map style, and layers controls */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MapToolbar(
@@ -166,11 +138,12 @@ fun MapToolbar(
         content = {
             // Consolidated GPS button (cycles through: Off -> On -> On with bearing)
             if (hasLocationPermission) {
-                val gpsIcon = when {
-                    isLocationTrackingEnabled && followBearing -> Icons.Filled.MyLocation
-                    isLocationTrackingEnabled -> Icons.Filled.MyLocation
-                    else -> Icons.Outlined.MyLocation
-                }
+                val gpsIcon =
+                    when {
+                        isLocationTrackingEnabled && followBearing -> Icons.Filled.MyLocation
+                        isLocationTrackingEnabled -> Icons.Filled.MyLocation
+                        else -> Icons.Outlined.MyLocation
+                    }
                 MapButton(
                     onClick = {
                         when {
@@ -193,7 +166,8 @@ fun MapToolbar(
                     },
                     icon = gpsIcon,
                     contentDescription = null,
-                    iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { isLocationTrackingEnabled && !followBearing },
+                    iconTint =
+                    MaterialTheme.colorScheme.StatusRed.takeIf { isLocationTrackingEnabled && !followBearing },
                 )
             }
 
@@ -238,28 +212,16 @@ fun MapToolbar(
                         val checked = if (enabledRoles.isEmpty()) true else enabledRoles.contains(role)
                         DropdownMenuItem(
                             text = { Text(role.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                            onClick = {
-                                onRoleToggled(role)
-                            },
-                            trailingIcon = {
-                                Checkbox(
-                                    checked = checked,
-                                    onCheckedChange = { onRoleToggled(role) },
-                                )
-                            },
+                            onClick = { onRoleToggled(role) },
+                            trailingIcon = { Checkbox(checked = checked, onCheckedChange = { onRoleToggled(role) }) },
                         )
                     }
                     androidx.compose.material3.HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Enable clustering") },
-                        onClick = {
-                            onClusteringToggled(!clusteringEnabled)
-                        },
+                        onClick = { onClusteringToggled(!clusteringEnabled) },
                         trailingIcon = {
-                            Checkbox(
-                                checked = clusteringEnabled,
-                                onCheckedChange = { onClusteringToggled(it) },
-                            )
+                            Checkbox(checked = clusteringEnabled, onCheckedChange = { onClusteringToggled(it) })
                         },
                     )
                     DropdownMenuItem(
@@ -268,12 +230,7 @@ fun MapToolbar(
                             onHeatmapToggled()
                             mapFilterExpanded = false
                         },
-                        trailingIcon = {
-                            Checkbox(
-                                checked = heatmapEnabled,
-                                onCheckedChange = { onHeatmapToggled() },
-                            )
-                        },
+                        trailingIcon = { Checkbox(checked = heatmapEnabled, onCheckedChange = { onHeatmapToggled() }) },
                     )
                 }
             }
@@ -330,18 +287,10 @@ fun MapToolbar(
             }
 
             // Map layers button
-            MapButton(
-                onClick = onShowLayersClicked,
-                icon = Icons.Outlined.Layers,
-                contentDescription = null,
-            )
+            MapButton(onClick = onShowLayersClicked, icon = Icons.Outlined.Layers, contentDescription = null)
 
             // Cache management button
-            MapButton(
-                onClick = onShowCacheClicked,
-                icon = Icons.Outlined.Storage,
-                contentDescription = null,
-            )
+            MapButton(onClick = onShowCacheClicked, icon = Icons.Outlined.Storage, contentDescription = null)
 
             // Legend button
             MapButton(onClick = onShowLegendToggled, icon = Icons.Outlined.Info, contentDescription = null)
@@ -349,23 +298,16 @@ fun MapToolbar(
     )
 }
 
-/**
- * Zoom controls (zoom in/out buttons)
- */
+/** Zoom controls (zoom in/out buttons) */
 @Composable
-fun ZoomControls(
-    mapRef: MapLibreMap?,
-    modifier: Modifier = Modifier,
-) {
+fun ZoomControls(mapRef: MapLibreMap?, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceContainer,
         shadowElevation = 3.dp,
     ) {
-        Column(
-            modifier = Modifier.padding(4.dp),
-        ) {
+        Column(modifier = Modifier.padding(4.dp)) {
             // Zoom in button
             MapButton(
                 onClick = {
@@ -395,9 +337,7 @@ fun ZoomControls(
     }
 }
 
-/**
- * Custom tile URL configuration dialog
- */
+/** Custom tile URL configuration dialog */
 @Composable
 fun CustomTileDialog(
     customTileUrlInput: String,
@@ -430,18 +370,12 @@ fun CustomTileDialog(
                 )
             }
         },
-        confirmButton = {
-            TextButton(onClick = onApply) {
-                Text("Apply")
-            }
-        },
+        confirmButton = { TextButton(onClick = onApply) { Text("Apply") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }
 
-/**
- * Radial overlay showing cluster members in a circle
- */
+/** Radial overlay showing cluster members in a circle */
 @Composable
 fun ClusterRadialOverlay(
     centerPx: PointF,
@@ -467,7 +401,8 @@ fun ClusterRadialOverlay(
         val itemWidth = (40 + label.length * 10).dp
 
         Surface(
-            modifier = modifier
+            modifier =
+            modifier
                 .offset(x = xDp - itemWidth / 2, y = yDp - itemHeight / 2)
                 .size(width = itemWidth, height = itemHeight)
                 .clickable { onNodeClicked(node) },
@@ -475,9 +410,7 @@ fun ClusterRadialOverlay(
             color = roleColor(node),
             shadowElevation = 6.dp,
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(text = label, color = Color.White, maxLines = 1)
-            }
+            Box(contentAlignment = Alignment.Center) { Text(text = label, color = Color.White, maxLines = 1) }
         }
     }
 }

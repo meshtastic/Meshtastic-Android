@@ -19,6 +19,8 @@ package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,10 +34,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.LocationDisabled
 import androidx.compose.material.icons.filled.PinDrop
@@ -52,7 +51,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -76,7 +74,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
@@ -427,8 +424,7 @@ fun MapView(
         Timber.d("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
             zoomLevelMax = it.maximumZoomLevel.toDouble()
-            showDownloadButton =
-                if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
+            showDownloadButton = if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
         }
     }
 
@@ -464,18 +460,12 @@ fun MapView(
                 MyLocationNewOverlay(this).apply {
                     enableMyLocation()
                     enableFollowLocation()
-                    getBitmapFromVectorDrawable(
-                        context,
-                        org.meshtastic.core.ui.R.drawable.ic_map_location_dot_24
-                    )
+                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_location_dot_24)
                         ?.let {
                             setPersonIcon(it)
                             setPersonAnchor(0.5f, 0.5f)
                         }
-                    getBitmapFromVectorDrawable(
-                        context,
-                        org.meshtastic.core.ui.R.drawable.ic_map_navigation_24
-                    )?.let {
+                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_navigation_24)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
                     }
@@ -503,18 +493,14 @@ fun MapView(
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember {
-        AppCompatResources.getDrawable(
-            context,
-            org.meshtastic.core.ui.R.drawable.ic_baseline_location_on_24
-        )
+        AppCompatResources.getDrawable(context, org.meshtastic.core.ui.R.drawable.ic_baseline_location_on_24)
     }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = mapViewModel.ourNodeInfo.value
         val displayUnits = mapViewModel.config.display.units
-        val mapFilterStateValue =
-            mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
+        val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (mapFilterStateValue.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
                 return@mapNotNull null
@@ -644,8 +630,7 @@ fun MapView(
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                snippet =
-                    "[$time] ${pt.description}  " + stringResource(Res.string.expires) + ": $expireTimeStr"
+                snippet = "[$time] ${pt.description}  " + stringResource(Res.string.expires) + ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
                 setVisible(false) // This seems to be always false, was this intended?
                 setOnLongClickListener {
@@ -697,13 +682,7 @@ fun MapView(
 
     // Only update osmdroid markers when using osmdroid
     if (!useMapLibre && map != null) {
-        with(map) {
-            UpdateMarkers(
-                onNodesChanged(nodes),
-                onWaypointChanged(waypoints.values),
-                nodeClusterer
-            )
-        }
+        with(map) { UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer) }
     }
 
     fun MapView.generateBoxOverlay() {
@@ -713,18 +692,13 @@ fun MapView(
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
         val polygon =
             Polygon().apply {
-                points = Polygon.pointsAsRect(downloadRegionBoundingBox)
-                    .map { GeoPoint(it.latitude, it.longitude) }
+                points = Polygon.pointsAsRect(downloadRegionBoundingBox).map { GeoPoint(it.latitude, it.longitude) }
             }
         overlays.add(polygon)
         invalidate()
         val tileCount: Int =
             CacheManager(this)
-                .possibleTilesInArea(
-                    downloadRegionBoundingBox,
-                    zoomLevelMin.toInt(),
-                    zoomLevelMax.toInt()
-                )
+                .possibleTilesInArea(downloadRegionBoundingBox, zoomLevelMin.toInt(), zoomLevelMax.toInt())
         cacheEstimate = com.meshtastic.core.strings.getString(Res.string.map_cache_tiles, tileCount)
     }
 
@@ -792,11 +766,12 @@ fun MapView(
             ) { isMapLibre ->
                 if (isMapLibre) {
                     // MapLibre implementation
-                    timber.log.Timber.tag("MapView").d(
-                        "Calling MapLibrePOC with focusedNodeNum=%s, nodeTracks count=%d",
-                        focusedNodeNum ?: "null",
-                        nodeTracks?.size ?: 0
-                    )
+                    timber.log.Timber.tag("MapView")
+                        .d(
+                            "Calling MapLibrePOC with focusedNodeNum=%s, nodeTracks count=%d",
+                            focusedNodeNum ?: "null",
+                            nodeTracks?.size ?: 0,
+                        )
                     org.meshtastic.feature.map.maplibre.ui.MapLibrePOC(
                         mapViewModel = mapViewModel,
                         onNavigateToNodeDetails = navigateToNodeDetails,
@@ -834,8 +809,7 @@ fun MapView(
                     )
                 } else {
                     Column(
-                        modifier = Modifier.padding(top = 16.dp, end = 16.dp)
-                            .align(Alignment.TopEnd),
+                        modifier = Modifier.padding(top = 16.dp, end = 16.dp).align(Alignment.TopEnd),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         MapButton(
@@ -939,11 +913,11 @@ fun MapView(
                         if (hasGps) {
                             MapButton(
                                 icon =
-                                    if (myLocationOverlay == null) {
-                                        Icons.Outlined.MyLocation
-                                    } else {
-                                        Icons.Default.LocationDisabled
-                                    },
+                                if (myLocationOverlay == null) {
+                                    Icons.Outlined.MyLocation
+                                } else {
+                                    Icons.Default.LocationDisabled
+                                },
                                 contentDescription = stringResource(Res.string.toggle_my_position),
                                 onClick = {
                                     if (locationPermissionsState.allPermissionsGranted) {
@@ -1002,7 +976,6 @@ fun MapView(
             }
         }
 
-
         showEditWaypointDialog?.let { waypoint ->
             EditWaypointDialog(
                 waypoint = waypoint,
@@ -1011,12 +984,10 @@ fun MapView(
                     showEditWaypointDialog = null
                     mapViewModel.sendWaypoint(
                         waypoint.copy {
-                            if (id == 0) id =
-                                mapViewModel.generatePacketId() ?: return@EditWaypointDialog
+                            if (id == 0) id = mapViewModel.generatePacketId() ?: return@EditWaypointDialog
                             if (name == "") name = "Dropped Pin"
                             if (expire == 0) expire = Int.MAX_VALUE
-                            lockedTo =
-                                if (waypoint.lockedTo != 0) mapViewModel.myNodeNum ?: 0 else 0
+                            lockedTo = if (waypoint.lockedTo != 0) mapViewModel.myNodeNum ?: 0 else 0
                             if (waypoint.icon == 0) icon = 128205
                         },
                     )
