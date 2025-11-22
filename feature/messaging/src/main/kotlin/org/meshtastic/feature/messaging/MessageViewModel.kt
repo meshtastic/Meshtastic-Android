@@ -164,14 +164,22 @@ constructor(
 
     fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
         viewModelScope.launch(Dispatchers.IO) {
+            Timber.d("clearUnreadCount called with contact=$contact, messageUuid=$messageUuid, lastReadTimestamp=$lastReadTimestamp")
             val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
+            Timber.d("existingTimestamp=$existingTimestamp")
             if (lastReadTimestamp <= existingTimestamp) {
+                Timber.d("Not clearing - timestamp not newer")
                 return@launch
             }
+            Timber.d("Clearing unread count...")
             packetRepository.clearUnreadCount(contact, lastReadTimestamp)
             packetRepository.updateLastReadMessage(contact, messageUuid, lastReadTimestamp)
             val unreadCount = packetRepository.getUnreadCount(contact)
-            if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
+            Timber.d("After clearing, unreadCount=$unreadCount")
+            if (unreadCount == 0) {
+                Timber.d("Canceling notification")
+                meshServiceNotifications.cancelMessageNotification(contact)
+            }
         }
 
     private fun favoriteNode(node: Node) = viewModelScope.launch {

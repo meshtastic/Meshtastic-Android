@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import timber.log.Timber
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
@@ -369,15 +370,24 @@ private fun UpdateUnreadCount(
     onUnreadChanged: (Long, Long) -> Unit,
 ) {
     LaunchedEffect(messages) {
+        Timber.d("UpdateUnreadCount LaunchedEffect started/restarted, messages.size=${messages.size}, fromLocal count=${messages.count { it.fromLocal }}, unread count=${messages.count { !it.read && !it.fromLocal }}")
         snapshotFlow { listState.firstVisibleItemIndex }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
+                Timber.d("Debounce triggered, index=$index")
                 val lastUnreadIndex = messages.indexOfLast { !it.read && !it.fromLocal }
+                Timber.d("lastUnreadIndex=$lastUnreadIndex, messages.size=${messages.size}")
                 if (lastUnreadIndex != -1 && index <= lastUnreadIndex && index < messages.size) {
                     val visibleMessage = messages[index]
+                    Timber.d("visibleMessage read=${visibleMessage.read}, fromLocal=${visibleMessage.fromLocal}")
                     if (!visibleMessage.read && !visibleMessage.fromLocal) {
+                        Timber.d("Calling onUnreadChanged for message ${visibleMessage.uuid}")
                         onUnreadChanged(visibleMessage.uuid, visibleMessage.receivedTime)
+                    } else {
+                        Timber.d("Not calling onUnreadChanged - message already read or from local")
                     }
+                } else {
+                    Timber.d("Not calling onUnreadChanged - condition not met")
                 }
             }
     }
