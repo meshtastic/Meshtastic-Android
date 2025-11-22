@@ -406,7 +406,7 @@ fun MapView(
     var showPurgeTileSourceDialog by remember { mutableStateOf(false) }
     var showMapStyleDialog by remember { mutableStateOf(false) }
     // Map engine selection: false = osmdroid, true = MapLibre
-    var useMapLibre by remember { mutableStateOf(false) }
+    var useMapLibre by remember { mutableStateOf(true) }
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -844,9 +844,9 @@ fun MapView(
                             contentDescription = Res.string.map_style_selection,
                         )
                         MapButton(
-                            onClick = { useMapLibre = true },
+                            onClick = { useMapLibre = false },
                             icon = Icons.Outlined.Layers,
-                            contentDescription = "Switch to MapLibre",
+                            contentDescription = "Switch to osmdroid",
                         )
                         Box(modifier = Modifier) {
                             MapButton(
