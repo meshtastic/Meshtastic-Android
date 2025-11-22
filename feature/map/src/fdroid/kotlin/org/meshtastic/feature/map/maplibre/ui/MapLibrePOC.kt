@@ -193,8 +193,12 @@ fun MapLibrePOC(
     var expandedCluster by remember { mutableStateOf<ExpandedCluster?>(null) }
     var clusterListMembers by remember { mutableStateOf<List<Node>?>(null) }
     var mapRef by remember { mutableStateOf<MapLibreMap?>(null) }
+    var styleReady by remember { mutableStateOf(false) }
     var mapViewRef by remember { mutableStateOf<MapView?>(null) }
     var didInitialCenter by remember { mutableStateOf(false) }
+    // Track whether we're currently showing tracks (for callback checks)
+    val showingTracksRef = remember { mutableStateOf(false) }
+    showingTracksRef.value = nodeTracks != null && focusedNodeNum != null
     var showLegend by remember { mutableStateOf(false) }
     var enabledRoles by remember { mutableStateOf<Set<ConfigProtos.Config.DeviceConfig.Role>>(emptySet()) }
     var clusteringEnabled by remember { mutableStateOf(true) }
@@ -416,7 +420,10 @@ fun MapLibrePOC(
     }
 
     // Heatmap mode management
-    LaunchedEffect(heatmapEnabled, nodes, mapFilterState, enabledRoles, ourNode, isLocationTrackingEnabled, clusteringEnabled) {
+    LaunchedEffect(heatmapEnabled, nodes, mapFilterState, enabledRoles, ourNode, isLocationTrackingEnabled, clusteringEnabled, nodeTracks, focusedNodeNum) {
+        // Don't manage heatmap/clustering when showing tracks
+        if (nodeTracks != null && focusedNodeNum != null) return@LaunchedEffect
+
         mapRef?.let { map ->
             map.style?.let { style ->
                 if (heatmapEnabled) {
@@ -455,6 +462,97 @@ fun MapLibrePOC(
         }
     }
 
+    // Handle node tracks rendering when nodeTracks or focusedNodeNum changes
+    LaunchedEffect(nodeTracks, focusedNodeNum, mapFilterState.lastHeardTrackFilter, styleReady) {
+        if (!styleReady) {
+            Timber.tag("MapLibrePOC").d("LaunchedEffect: Waiting for style to be ready")
+            return@LaunchedEffect
+        }
+
+        val map = mapRef ?: run {
+            Timber.tag("MapLibrePOC").w("LaunchedEffect: mapRef is null")
+            return@LaunchedEffect
+        }
+        val style = map.style ?: run {
+            Timber.tag("MapLibrePOC").w("LaunchedEffect: Style not ready yet")
+            return@LaunchedEffect
+        }
+
+        map.let { map ->
+            style.let { style ->
+                if (nodeTracks != null && focusedNodeNum != null) {
+                    Timber.tag("MapLibrePOC").d(
+                        "LaunchedEffect: Rendering tracks for node %d, total positions: %d",
+                        focusedNodeNum,
+                        nodeTracks.size
+                    )
+
+                    // Ensure track sources and layers exist
+                    ensureTrackSourcesAndLayers(style)
+
+                    // Get the focused node to use its color
+                    val focusedNode = nodes.firstOrNull { it.num == focusedNodeNum }
+
+                    // Apply time filter
+                    val currentTimeSeconds = System.currentTimeMillis() / 1000
+                    val filterSeconds = mapFilterState.lastHeardTrackFilter.seconds
+                    val filteredTracks = nodeTracks.filter {
+                        mapFilterState.lastHeardTrackFilter == org.meshtastic.feature.map.LastHeardFilter.Any ||
+                            it.time > currentTimeSeconds - filterSeconds
+                    }
+
+                    Timber.tag("MapLibrePOC").d(
+                        "LaunchedEffect: Tracks filtered: %d positions remain (from %d total)",
+                        filteredTracks.size,
+                        nodeTracks.size
+                    )
+
+                    // Update track line
+                    if (filteredTracks.size >= 2) {
+                        positionsToLineStringFeature(filteredTracks)?.let { lineFeature ->
+                            (style.getSource(TRACK_LINE_SOURCE_ID) as? GeoJsonSource)
+                                ?.setGeoJson(lineFeature)
+                            Timber.tag("MapLibrePOC").d("LaunchedEffect: Track line updated")
+                        }
+                    }
+
+                    // Update track points
+                    if (filteredTracks.isNotEmpty()) {
+                        val pointsFC = positionsToPointFeatures(filteredTracks)
+                        (style.getSource(TRACK_POINTS_SOURCE_ID) as? GeoJsonSource)
+                            ?.setGeoJson(pointsFC)
+                        Timber.tag("MapLibrePOC").d("LaunchedEffect: Track points updated")
+
+                        // Center camera on the tracks
+                        val trackBounds = org.maplibre.android.geometry.LatLngBounds.Builder()
+                        filteredTracks.forEach { position ->
+                            trackBounds.include(
+                                org.maplibre.android.geometry.LatLng(
+                                    position.latitudeI * DEG_D,
+                                    position.longitudeI * DEG_D
+                                )
+                            )
+                        }
+                        val padding = 100 // pixels
+                        map.animateCamera(
+                            CameraUpdateFactory.newLatLngBounds(
+                                trackBounds.build(),
+                                padding
+                            )
+                        )
+                        Timber.tag("MapLibrePOC").d(
+                            "LaunchedEffect: Camera centered on %d track positions",
+                            filteredTracks.size
+                        )
+                    }
+                } else {
+                    Timber.tag("MapLibrePOC").d("LaunchedEffect: No tracks to display - removing track layers")
+                    removeTrackSourcesAndLayers(style)
+                }
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView<MapView>(
             modifier = Modifier.fillMaxSize(),
@@ -470,6 +568,7 @@ fun MapLibrePOC(
                         map.setStyle(buildMeshtasticStyle(baseStyle)) { style ->
                             Timber.tag("MapLibrePOC").d("Style loaded (base=%s)", baseStyle.label)
                             style.setTransition(TransitionOptions(0, 0))
+                            styleReady = true
                             logStyleState("after-style-load(pre-ensure)", style)
                             ensureSourcesAndLayers(style)
                             ensureHeatmapSourceAndLayer(style)
@@ -566,6 +665,30 @@ fun MapLibrePOC(
                                     filteredTracks.size,
                                     focusedNodeNum
                                 )
+
+                                // Center camera on the tracks
+                                if (filteredTracks.isNotEmpty()) {
+                                    val trackBounds = org.maplibre.android.geometry.LatLngBounds.Builder()
+                                    filteredTracks.forEach { position ->
+                                        trackBounds.include(
+                                            org.maplibre.android.geometry.LatLng(
+                                                position.latitudeI * DEG_D,
+                                                position.longitudeI * DEG_D
+                                            )
+                                        )
+                                    }
+                                    val padding = 100 // pixels
+                                    map.animateCamera(
+                                        CameraUpdateFactory.newLatLngBounds(
+                                            trackBounds.build(),
+                                            padding
+                                        )
+                                    )
+                                    Timber.tag("MapLibrePOC").d(
+                                        "Camera centered on %d track positions",
+                                        filteredTracks.size
+                                    )
+                                }
                             } else {
                                 Timber.tag("MapLibrePOC").d("No tracks to display - removing track layers")
                                 // Remove track layers if no tracks to display
@@ -574,10 +697,49 @@ fun MapLibrePOC(
 
                             // Push current data immediately after style load
                             try {
-                                val density = context.resources.displayMetrics.density
-                                val bounds = map.projection.visibleRegion.latLngBounds
-                                val labelSet = run {
-                                    val visible =
+                                // Only set node data if we're not showing tracks
+                                if (nodeTracks == null || focusedNodeNum == null) {
+                                    val density = context.resources.displayMetrics.density
+                                    val bounds = map.projection.visibleRegion.latLngBounds
+                                    val labelSet = run {
+                                        val visible =
+                                            applyFilters(
+                                                nodes,
+                                                mapFilterState,
+                                                enabledRoles,
+                                                ourNode?.num,
+                                                isLocationTrackingEnabled,
+                                            )
+                                                .filter { n ->
+                                                    val p = n.validPosition ?: return@filter false
+                                                    bounds.contains(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
+                                                }
+                                        val sorted =
+                                            visible.sortedWith(
+                                                compareByDescending<Node> { it.isFavorite }
+                                                    .thenByDescending { it.lastHeard },
+                                            )
+                                        val cell = (80f * density).toInt().coerceAtLeast(48)
+                                        val occupied = HashSet<Long>()
+                                        val chosen = LinkedHashSet<Int>()
+                                        for (n in sorted) {
+                                            val p = n.validPosition ?: continue
+                                            val pt =
+                                                map.projection.toScreenLocation(
+                                                    LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                                )
+                                            val cx = (pt.x / cell).toInt()
+                                            val cy = (pt.y / cell).toInt()
+                                            val key = (cx.toLong() shl 32) or (cy.toLong() and 0xffffffff)
+                                            if (occupied.add(key)) chosen.add(n.num)
+                                        }
+                                        chosen
+                                    }
+                                    (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
+                                        waypointsToFeatureCollectionFC(waypoints.values),
+                                    )
+                                    // Set clustered source only (like MapLibre example)
+                                    val filteredNodes =
                                         applyFilters(
                                             nodes,
                                             mapFilterState,
@@ -585,55 +747,21 @@ fun MapLibrePOC(
                                             ourNode?.num,
                                             isLocationTrackingEnabled,
                                         )
-                                            .filter { n ->
-                                                val p = n.validPosition ?: return@filter false
-                                                bounds.contains(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D))
-                                            }
-                                    val sorted =
-                                        visible.sortedWith(
-                                            compareByDescending<Node> { it.isFavorite }
-                                                .thenByDescending { it.lastHeard },
+                                    val json = nodesToFeatureCollectionJsonWithSelection(filteredNodes, labelSet)
+                                    Timber.tag("MapLibrePOC")
+                                        .d("Setting nodes sources: %d nodes, jsonBytes=%d", nodes.size, json.length)
+                                    safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, json)
+                                    safeSetGeoJson(style, NODES_SOURCE_ID, json) // Also populate non-clustered source
+                                    Timber.tag("MapLibrePOC")
+                                        .d(
+                                            "Initial data set after style load. nodes=%d waypoints=%d",
+                                            nodes.size,
+                                            waypoints.size,
                                         )
-                                    val cell = (80f * density).toInt().coerceAtLeast(48)
-                                    val occupied = HashSet<Long>()
-                                    val chosen = LinkedHashSet<Int>()
-                                    for (n in sorted) {
-                                        val p = n.validPosition ?: continue
-                                        val pt =
-                                            map.projection.toScreenLocation(
-                                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
-                                            )
-                                        val cx = (pt.x / cell).toInt()
-                                        val cy = (pt.y / cell).toInt()
-                                        val key = (cx.toLong() shl 32) or (cy.toLong() and 0xffffffff)
-                                        if (occupied.add(key)) chosen.add(n.num)
-                                    }
-                                    chosen
+                                    logStyleState("after-style-load(post-sources)", style)
+                                } else {
+                                    Timber.tag("MapLibrePOC").d("Skipping node data setup - showing tracks instead")
                                 }
-                                (style.getSource(WAYPOINTS_SOURCE_ID) as? GeoJsonSource)?.setGeoJson(
-                                    waypointsToFeatureCollectionFC(waypoints.values),
-                                )
-                                // Set clustered source only (like MapLibre example)
-                                val filteredNodes =
-                                    applyFilters(
-                                        nodes,
-                                        mapFilterState,
-                                        enabledRoles,
-                                        ourNode?.num,
-                                        isLocationTrackingEnabled,
-                                    )
-                                val json = nodesToFeatureCollectionJsonWithSelection(filteredNodes, labelSet)
-                                Timber.tag("MapLibrePOC")
-                                    .d("Setting nodes sources: %d nodes, jsonBytes=%d", nodes.size, json.length)
-                                safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, json)
-                                safeSetGeoJson(style, NODES_SOURCE_ID, json) // Also populate non-clustered source
-                                Timber.tag("MapLibrePOC")
-                                    .d(
-                                        "Initial data set after style load. nodes=%d waypoints=%d",
-                                        nodes.size,
-                                        waypoints.size,
-                                    )
-                                logStyleState("after-style-load(post-sources)", style)
                             } catch (t: Throwable) {
                                 Timber.tag("MapLibrePOC").e(t, "Failed to set initial data after style load")
                             }
@@ -869,6 +997,11 @@ fun MapLibrePOC(
                                 val st = map.style ?: return@addOnCameraIdleListener
                                 // Skip node updates when heatmap is enabled
                                 if (heatmapEnabled) return@addOnCameraIdleListener
+                                // Skip node updates when showing tracks
+                                if (showingTracksRef.value) {
+                                    Timber.tag("MapLibrePOC").d("onCameraIdle: Skipping node updates - showing tracks")
+                                    return@addOnCameraIdleListener
+                                }
                                 // Debounce to avoid rapid toggling during kinetic flings/tiles loading
                                 val now = SystemClock.uptimeMillis()
                                 if (now - lastClusterEvalMs < 300) return@addOnCameraIdleListener
