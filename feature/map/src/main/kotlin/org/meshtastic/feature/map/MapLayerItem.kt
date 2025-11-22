@@ -29,6 +29,6 @@ data class MapLayerItem(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
     val uri: Uri? = null,
-    var isVisible: Boolean = true,
+    val isVisible: Boolean = true,
     val layerType: LayerType,
 )

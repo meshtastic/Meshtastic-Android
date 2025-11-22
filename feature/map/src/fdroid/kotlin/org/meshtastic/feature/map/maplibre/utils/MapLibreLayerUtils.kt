@@ -105,7 +105,13 @@ suspend fun deleteFileFromInternalStorage(uri: Uri) = withContext(Dispatchers.IO
     }
 }
 
-/** Gets InputStream from URI */
+/**
+ * Gets InputStream from URI.
+ *
+ * **Important:** Caller is responsible for closing the returned stream using `.use {}` or try-with-resources.
+ *
+ * @Suppress("Recycle") is used because this function intentionally returns an unclosed stream for the caller to manage.
+ */
 @Suppress("Recycle")
 suspend fun getInputStreamFromUri(context: Context, uri: Uri): InputStream? = withContext(Dispatchers.IO) {
     try {

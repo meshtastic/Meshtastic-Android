@@ -20,15 +20,12 @@ package org.meshtastic.feature.map.maplibre.ui
 // Import modularized MapLibre components
 
 import android.annotation.SuppressLint
-import android.graphics.RectF
-import android.os.SystemClock
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -62,7 +59,6 @@ import org.maplibre.android.style.expressions.Expression.get
 import org.maplibre.android.style.layers.PropertyFactory.visibility
 import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.style.sources.GeoJsonSource
-import org.maplibre.geojson.Point
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.feature.map.LayerType
 import org.meshtastic.feature.map.MapLayerItem
@@ -71,19 +67,13 @@ import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.TileCacheManagementSheet
 import org.meshtastic.feature.map.maplibre.BaseMapStyle
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_CIRCLE_LAYER_ID
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_LIST_FETCH_MAX
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_RADIAL_MAX
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.DEG_D
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.HEATMAP_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.HEATMAP_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_CLUSTER_SOURCE_ID
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_ID
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_NOCLUSTER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_LINE_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_POINTS_SOURCE_ID
-import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.core.activateLocationComponentForStyle
 import org.meshtastic.feature.map.maplibre.core.buildMeshtasticStyle
@@ -544,7 +534,9 @@ fun MapLibrePOC(
                                     ),
                                 )
                             }
-                            map.animateCamera(CameraUpdateFactory.newLatLngBounds(trackBounds.build(), CAMERA_PADDING_PX))
+                            map.animateCamera(
+                                CameraUpdateFactory.newLatLngBounds(trackBounds.build(), CAMERA_PADDING_PX),
+                            )
                         }
                     }
                 } else {
@@ -726,14 +718,6 @@ fun MapLibrePOC(
                                         waypointsToFeatureCollectionFC(waypoints.values),
                                     )
                                     // Set clustered source only (like MapLibre example)
-                                    val filteredNodes =
-                                        applyFilters(
-                                            nodes,
-                                            mapFilterState,
-                                            enabledRoles,
-                                            ourNode?.num,
-                                            isLocationTrackingEnabled,
-                                        )
                                     val json = nodesToFeatureCollectionJsonWithSelection(filteredNodes, labelSet)
                                     Timber.tag("MapLibrePOC")
                                         .d("Setting nodes sources: %d nodes, jsonBytes=%d", nodes.size, json.length)
@@ -807,10 +791,11 @@ fun MapLibrePOC(
                                     }
                                 } catch (_: Throwable) {}
                             }
-                            map.addOnMapClickListener(
-                                createMapClickListener(
+                            map.addOnMapClickListener { latLng ->
+                                handleMapClick(
                                     map = map,
                                     context = context,
+                                    latLng = latLng,
                                     nodes = nodes,
                                     waypoints = waypoints,
                                     onExpandedClusterChange = { expandedCluster = it },
@@ -818,7 +803,7 @@ fun MapLibrePOC(
                                     onSelectedNodeChange = { selectedNodeNum = it },
                                     onWaypointEditRequest = { editingWaypoint = it },
                                 )
-                            )
+                            }
                             // Long-press to create waypoint
                             map.addOnMapLongClickListener { latLng ->
                                 if (isConnected) {
@@ -833,8 +818,8 @@ fun MapLibrePOC(
                                 true
                             }
                             // Update clustering visibility on camera idle (zoom changes)
-                            map.addOnCameraIdleListener(
-                                createCameraIdleListener(
+                            map.addOnCameraIdleListener {
+                                handleCameraIdle(
                                     map = map,
                                     context = context,
                                     mapViewRef = mapViewRef,
@@ -848,7 +833,7 @@ fun MapLibrePOC(
                                     clusteringEnabled = clusteringEnabled,
                                     clustersShownState = clustersShownState,
                                 )
-                            )
+                            }
                             // Hide expanded cluster overlay whenever camera moves to avoid stale screen positions
                             map.addOnCameraMoveListener {
                                 if (expandedCluster != null || clusterListMembers != null) {
@@ -1135,7 +1120,10 @@ fun MapLibrePOC(
                     expandedCluster = null
                     node.validPosition?.let { p ->
                         mapRef?.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D), DEFAULT_ZOOM_LEVEL),
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                DEFAULT_ZOOM_LEVEL,
+                            ),
                         )
                     }
                 },
@@ -1187,7 +1175,10 @@ fun MapLibrePOC(
                     clusterListMembers = null
                     node.validPosition?.let { p ->
                         mapRef?.animateCamera(
-                            CameraUpdateFactory.newLatLngZoom(LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D), DEFAULT_ZOOM_LEVEL),
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(p.latitudeI * DEG_D, p.longitudeI * DEG_D),
+                                DEFAULT_ZOOM_LEVEL,
+                            ),
                         )
                     }
                 },
