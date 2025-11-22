@@ -66,6 +66,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
 
@@ -184,6 +185,9 @@ constructor(
                         fileHandler.downloadFirmware(zipUrl) { progress ->
                             _state.value = FirmwareUpdateState.Downloading(progress)
                         }
+
+                    // Note: Current API does not provide checksums, so we rely on content-length
+                    // checks during download and integrity checks during extraction.
 
                     // 2. Extract
                     _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_extracting))
@@ -468,8 +472,8 @@ private class FirmwareFileHandler(private val context: Context, private val clie
         if (!response.isSuccessful) throw IOException("Download failed: ${response.code}")
 
         val body = response.body ?: throw IOException("Empty response body")
+        val contentLength = body.contentLength()
         val targetFile = File(context.cacheDir, "firmware_release.zip")
-        val totalBytes = body.contentLength()
 
         body.byteStream().use { input ->
             FileOutputStream(targetFile).use { output ->
@@ -484,9 +488,13 @@ private class FirmwareFileHandler(private val context: Context, private val clie
                     output.write(buffer, 0, bytesRead)
                     totalBytesRead += bytesRead
 
-                    if (totalBytes > 0) {
-                        onProgress(totalBytesRead.toFloat() / totalBytes)
+                    if (contentLength > 0) {
+                        onProgress(totalBytesRead.toFloat() / contentLength)
                     }
+                }
+                // Basic integrity check
+                if (contentLength != -1L && totalBytesRead != contentLength) {
+                    throw IOException("Incomplete download: expected $contentLength bytes, got $totalBytesRead")
                 }
             }
         }
@@ -498,20 +506,34 @@ private class FirmwareFileHandler(private val context: Context, private val clie
         if (target.isEmpty()) return@withContext null
 
         val targetLowerCase = target.lowercase()
+        val matchingEntries = mutableListOf<Pair<ZipEntry, File>>()
 
         ZipInputStream(zipFile.inputStream()).use { zipInput ->
             var entry = zipInput.nextEntry
             while (entry != null) {
                 val name = entry.name.lowercase()
-                if (!entry.isDirectory && name.contains(targetLowerCase) && name.endsWith(".zip")) {
+                if (!entry.isDirectory && isValidFirmwareFile(name, targetLowerCase)) {
                     val outFile = File(context.cacheDir, File(name).name)
-
+                    // We extract to verify it's a valid zip entry payload
                     FileOutputStream(outFile).use { output -> zipInput.copyTo(output) }
-                    return@withContext outFile
+                    matchingEntries.add(entry to outFile)
                 }
                 entry = zipInput.nextEntry
             }
         }
-        null
+        // Best match heuristic: prefer shortest filename (e.g. 'tbeam' matches 'tbeam-s3', but 'tbeam' is shorter)
+        // This prevents flashing 'tbeam-s3' firmware onto a 'tbeam' device if both are present.
+        matchingEntries.minByOrNull { it.first.name.length }?.second
+    }
+
+    /**
+     * Checks if a filename matches the target device.
+     * Enforces stricter matching to avoid substring false positives (e.g. "tbeam" matching "tbeam-s3").
+     */
+    private fun isValidFirmwareFile(filename: String, target: String): Boolean {
+        val regex = Regex(".*[\\-_]${Regex.escape(target)}[\\-_\\.].*")
+        return filename.endsWith(".zip") &&
+            filename.contains(target) &&
+            (regex.matches(filename) || filename.startsWith("$target-") || filename.startsWith("$target."))
     }
 }
