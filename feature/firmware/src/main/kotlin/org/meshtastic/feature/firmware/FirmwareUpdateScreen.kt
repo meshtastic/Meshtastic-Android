@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -67,6 +68,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -92,11 +94,14 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.firmware_update_almost_there
 import org.meshtastic.core.strings.firmware_update_alpha
 import org.meshtastic.core.strings.firmware_update_button
 import org.meshtastic.core.strings.firmware_update_checking
 import org.meshtastic.core.strings.firmware_update_device
+import org.meshtastic.core.strings.firmware_update_disclaimer_text
+import org.meshtastic.core.strings.firmware_update_disclaimer_title
 import org.meshtastic.core.strings.firmware_update_disconnect_warning
 import org.meshtastic.core.strings.firmware_update_do_not_close
 import org.meshtastic.core.strings.firmware_update_done
@@ -112,6 +117,7 @@ import org.meshtastic.core.strings.firmware_update_success
 import org.meshtastic.core.strings.firmware_update_taking_a_while
 import org.meshtastic.core.strings.firmware_update_title
 import org.meshtastic.core.strings.firmware_update_unknown_release
+import org.meshtastic.core.strings.i_know_what_i_m_doing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -222,6 +228,7 @@ private fun ColumnScope.CheckingState() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Suppress("LongMethod")
 private fun ColumnScope.ReadyState(
     state: FirmwareUpdateState.Ready,
     selectedReleaseType: FirmwareReleaseType,
@@ -229,6 +236,19 @@ private fun ColumnScope.ReadyState(
     onStartUpdate: () -> Unit,
     onPickFile: () -> Unit,
 ) {
+    var showDisclaimer by remember { mutableStateOf(false) }
+    var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
+    if (showDisclaimer) {
+        DisclaimerDialog(
+            onDismissRequest = { showDisclaimer = false },
+            onConfirm = {
+                showDisclaimer = false
+                pendingAction?.invoke()
+            },
+        )
+    }
+
     DeviceHardwareImage(state.deviceHardware, Modifier.size(150.dp))
     Spacer(Modifier.height(24.dp))
 
@@ -241,7 +261,13 @@ private fun ColumnScope.ReadyState(
         Spacer(Modifier.height(16.dp))
         ReleaseNotesCard(state.release.releaseNotes)
         Spacer(Modifier.height(24.dp))
-        Button(onClick = onStartUpdate, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+        Button(
+            onClick = {
+                pendingAction = onStartUpdate
+                showDisclaimer = true
+            },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+        ) {
             Icon(Icons.Default.SystemUpdate, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text(stringResource(Res.string.firmware_update_button))
@@ -249,7 +275,13 @@ private fun ColumnScope.ReadyState(
         Spacer(Modifier.height(16.dp))
     }
 
-    OutlinedButton(onClick = onPickFile, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+    OutlinedButton(
+        onClick = {
+            pendingAction = onPickFile
+            showDisclaimer = true
+        },
+        modifier = Modifier.fillMaxWidth().height(56.dp),
+    ) {
         Icon(Icons.Default.Folder, contentDescription = null)
         Spacer(Modifier.width(8.dp))
         Text(stringResource(Res.string.firmware_update_select_file))
@@ -271,6 +303,17 @@ private fun ColumnScope.ReadyState(
             color = MaterialTheme.colorScheme.error,
         )
     }
+}
+
+@Composable
+private fun DisclaimerDialog(onDismissRequest: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(stringResource(Res.string.firmware_update_disclaimer_title)) },
+        text = { Text(stringResource(Res.string.firmware_update_disclaimer_text)) },
+        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(Res.string.i_know_what_i_m_doing)) } },
+        dismissButton = { TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.cancel)) } },
+    )
 }
 
 @Composable

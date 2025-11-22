@@ -356,16 +356,7 @@ constructor(
 
 private fun getDeviceFirmwareUrl(url: String, targetArch: String): String {
     // Architectures ordered by length descending to handle substrings like esp32-s3 vs esp32
-    val knownArchs =
-        listOf(
-            "esp32-s3",
-            "esp32-c3",
-            "esp32-c6",
-            "nrf52840",
-            "rp2040",
-            "stm32",
-            "esp32",
-        )
+    val knownArchs = listOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", "rp2040", "stm32", "esp32")
 
     for (arch in knownArchs) {
         if (url.contains(arch, ignoreCase = true)) {
@@ -527,8 +518,8 @@ private class FirmwareFileHandler(private val context: Context, private val clie
     }
 
     /**
-     * Checks if a filename matches the target device.
-     * Enforces stricter matching to avoid substring false positives (e.g. "tbeam" matching "tbeam-s3").
+     * Checks if a filename matches the target device. Enforces stricter matching to avoid substring false positives
+     * (e.g. "tbeam" matching "tbeam-s3").
      */
     private fun isValidFirmwareFile(filename: String, target: String): Boolean {
         val regex = Regex(".*[\\-_]${Regex.escape(target)}[\\-_\\.].*")

@@ -986,4 +986,6 @@
     <string name="firmware_update_taking_a_while">This might take a minute...</string>
     <string name="firmware_update_select_file">Select Local File</string>
     <string name="firmware_update_unknown_release">Unknown remote release</string>
+    <string name="firmware_update_disclaimer_title">Update Warning</string>
+    <string name="firmware_update_disclaimer_text">You are about to flash new firmware to your device. This process carries risks.\n\n• Ensure your device is charged.\n• Keep the device close to your phone.\n• Do not close the app during the update.\n\nVerify you have selected the correct firmware for your hardware.</string>
 </resources>
