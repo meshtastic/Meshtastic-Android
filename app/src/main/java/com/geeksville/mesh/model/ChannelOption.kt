@@ -25,7 +25,7 @@ private val ModemPreset.bandwidth: Float
         return 0f
     }
 
-private fun LoRaConfig.bandwidth() = if (usePreset) {
+internal fun LoRaConfig.bandwidth() = if (usePreset) {
     val wideLora = region == RegionCode.LORA_24
     modemPreset.bandwidth * if (wideLora) 3.25f else 1f
 } else when (bandwidth) {
@@ -37,6 +37,55 @@ private fun LoRaConfig.bandwidth() = if (usePreset) {
     1600 -> 1.6250f
     else -> bandwidth / 1000f
 }
+
+private val ModemPreset.codingRate: Int
+    get() {
+        for (option in ChannelOption.entries) {
+            if (option.modemPreset == this) return option.codingRate
+        }
+        return 0
+    }
+
+internal fun LoRaConfig.codingRate() = if (usePreset) {
+    when (modemPreset) {
+        ModemPreset.SHORT_FAST -> 5
+        ModemPreset.SHORT_SLOW -> 5
+        ModemPreset.MEDIUM_FAST -> 5
+        ModemPreset.MEDIUM_SLOW -> 5
+        ModemPreset.LONG_FAST -> 5
+        ModemPreset.LONG_MODERATE -> 8
+        ModemPreset.LONG_SLOW -> 8
+        ModemPreset.VERY_LONG_SLOW -> 8
+        else -> 0
+    }
+} else {
+    modemPreset.codingRate
+}
+
+private val ModemPreset.spreadFactor: Int
+    get() {
+        for (option in ChannelOption.entries) {
+            if (option.modemPreset == this) return option.spreadFactor
+        }
+        return 0
+    }
+
+internal fun LoRaConfig.spreadFactor() = if (usePreset) {
+        when (modemPreset) {
+            ModemPreset.SHORT_FAST -> 7
+            ModemPreset.SHORT_SLOW -> 8
+            ModemPreset.MEDIUM_FAST -> 8
+            ModemPreset.MEDIUM_SLOW -> 9
+            ModemPreset.LONG_FAST -> 9
+            ModemPreset.LONG_MODERATE -> 10
+            ModemPreset.LONG_SLOW -> 10
+            ModemPreset.VERY_LONG_SLOW -> 11
+            else -> 0
+        }
+    } else {
+        modemPreset.spreadFactor
+    }
+
 
 val LoRaConfig.numChannels: Int get() {
     for (option in RegionInfo.entries) {
@@ -91,14 +140,16 @@ enum class ChannelOption(
     val modemPreset: ModemPreset,
     val configRes: Int,
     val bandwidth: Float,
+    val spreadFactor: Int,
+    val codingRate: Int,
 ) {
-    SHORT_FAST(ModemPreset.SHORT_FAST, R.string.modem_config_short, .250f),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, R.string.modem_config_slow_short, .250f),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, R.string.modem_config_medium, .250f),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, R.string.modem_config_slow_medium, .250f),
-    LONG_FAST(ModemPreset.LONG_FAST, R.string.modem_config_long, .250f),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, R.string.modem_config_mod_long, .125f),
-    LONG_SLOW(ModemPreset.LONG_SLOW, R.string.modem_config_slow_long, .125f),
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, R.string.modem_config_very_long, .0625f),
+    SHORT_FAST(ModemPreset.SHORT_FAST, R.string.modem_config_short, .250f, 7, 5),
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, R.string.modem_config_slow_short, .250f, 8, 5),
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, R.string.modem_config_medium, .250f, 9, 5),
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, R.string.modem_config_slow_medium, .250f, 10, 5),
+    LONG_FAST(ModemPreset.LONG_FAST, R.string.modem_config_long, .250f, 11, 5),
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, R.string.modem_config_mod_long, .125f, 11, 8),
+    LONG_SLOW(ModemPreset.LONG_SLOW, R.string.modem_config_slow_long, .125f, 12, 8),
+    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, R.string.modem_config_very_long, .0625f, 12, 8),
     ;
 }
