@@ -75,6 +75,10 @@ private const val DFU_RECONNECT_PREFIX = "x"
 private const val DOWNLOAD_BUFFER_SIZE = 8192
 private const val PERCENT_MAX_VALUE = 100f
 
+private const val SCAN_TIMEOUT = 2000L
+
+private const val PACKETS_BEFORE_PRN = 8
+
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
 /**
@@ -179,28 +183,55 @@ constructor(
                 try {
                     // 1. Download
                     _state.value = FirmwareUpdateState.Downloading(0f)
-                    val zipUrl = getDeviceFirmwareUrl(release.zipUrl, hardware.architecture)
 
-                    val downloadedZip =
-                        fileHandler.downloadFirmware(zipUrl) { progress ->
-                            _state.value = FirmwareUpdateState.Downloading(progress)
+                    var firmwareFile: File? = null
+
+                    // Try direct download of the specific device firmware
+                    val version = release.id.removePrefix("v")
+                    // We prefer platformioTarget because it matches the build artifact naming
+                    // convention (lower-case with hyphens).
+                    // hwModelSlug often uses underscores and uppercase
+                    // (e.g. TRACKER_T1000_E vs tracker-t1000-e).
+                    val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+                    val filename = "firmware-$target-$version.zip"
+                    val directUrl = "https://meshtastic.github.io/firmware-$version/$filename"
+
+                    if (fileHandler.checkUrlExists(directUrl)) {
+                        try {
+                            firmwareFile =
+                                fileHandler.downloadFile(directUrl, "firmware_direct.zip") { progress ->
+                                    _state.value = FirmwareUpdateState.Downloading(progress)
+                                }
+                        } catch (e: Exception) {
+                            Timber.w(e, "Direct download failed, falling back to release zip")
                         }
-
-                    // Note: Current API does not provide checksums, so we rely on content-length
-                    // checks during download and integrity checks during extraction.
-
-                    // 2. Extract
-                    _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_extracting))
-                    val extractedFile = fileHandler.extractFirmware(downloadedZip, hardware)
-
-                    if (extractedFile == null) {
-                        val msg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
-                        _state.value = FirmwareUpdateState.Error(msg)
-                        return@launch
                     }
 
-                    tempFirmwareFile = extractedFile
-                    initiateDfu(address, hardware, extractedFile)
+                    if (firmwareFile == null) {
+                        val zipUrl = getDeviceFirmwareUrl(release.zipUrl, hardware.architecture)
+
+                        val downloadedZip =
+                            fileHandler.downloadFile(zipUrl, "firmware_release.zip") { progress ->
+                                _state.value = FirmwareUpdateState.Downloading(progress)
+                            }
+
+                        // Note: Current API does not provide checksums, so we rely on content-length
+                        // checks during download and integrity checks during extraction.
+
+                        // 2. Extract
+                        _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_extracting))
+                        val extracted = fileHandler.extractFirmware(downloadedZip, hardware)
+
+                        if (extracted == null) {
+                            val msg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
+                            _state.value = FirmwareUpdateState.Error(msg)
+                            return@launch
+                        }
+                        firmwareFile = extracted
+                    }
+
+                    tempFirmwareFile = firmwareFile
+                    initiateDfu(address, hardware, firmwareFile!!)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -254,11 +285,16 @@ constructor(
             serviceRepository.meshService?.setDeviceAddress(NO_DEVICE_SELECTED)
 
             DfuServiceInitiator(address)
+                .disableResume()
                 .setDeviceName(deviceHardware.displayName)
-                .setKeepBond(true)
-                .setZip(Uri.fromFile(firmwareFile))
-                .setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
+                .setForceScanningForNewAddressInLegacyDfu(true)
                 .setForeground(true)
+                .setKeepBond(true)
+                .setPacketsReceiptNotificationsEnabled(true)
+                .setPacketsReceiptNotificationsValue(PACKETS_BEFORE_PRN)
+                .setScanTimeout(SCAN_TIMEOUT)
+                .setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
+                .setZip(Uri.fromFile(firmwareFile))
                 .start(context, FirmwareDfuService::class.java)
         }
     }
@@ -434,6 +470,7 @@ private class FirmwareFileHandler(private val context: Context, private val clie
     fun cleanupAllTemporaryFiles() {
         // Use cacheDir directly with File constructor for cleaner paths
         File(context.cacheDir, "firmware_release.zip").deleteIfExists()
+        File(context.cacheDir, "firmware_direct.zip").deleteIfExists()
         File(context.cacheDir, "local_update.zip").deleteIfExists()
     }
 
@@ -443,6 +480,16 @@ private class FirmwareFileHandler(private val context: Context, private val clie
             if (exists()) delete()
         } catch (e: Exception) {
             Timber.w(e, "Failed to delete file: $name")
+        }
+    }
+
+    suspend fun checkUrlExists(url: String): Boolean = withContext(Dispatchers.IO) {
+        val request = Request.Builder().url(url).head().build()
+        try {
+            client.newCall(request).execute().use { response -> response.isSuccessful }
+        } catch (e: IOException) {
+            Timber.w(e, "Failed to check URL existence: $url")
+            false
         }
     }
 
@@ -456,44 +503,45 @@ private class FirmwareFileHandler(private val context: Context, private val clie
         targetFile
     }
 
-    suspend fun downloadFirmware(url: String, onProgress: (Float) -> Unit): File = withContext(Dispatchers.IO) {
-        val request = Request.Builder().url(url).build()
-        val response = client.newCall(request).execute()
+    suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): File =
+        withContext(Dispatchers.IO) {
+            val request = Request.Builder().url(url).build()
+            val response = client.newCall(request).execute()
 
-        if (!response.isSuccessful) throw IOException("Download failed: ${response.code}")
+            if (!response.isSuccessful) throw IOException("Download failed: ${response.code}")
 
-        val body = response.body ?: throw IOException("Empty response body")
-        val contentLength = body.contentLength()
-        val targetFile = File(context.cacheDir, "firmware_release.zip")
+            val body = response.body ?: throw IOException("Empty response body")
+            val contentLength = body.contentLength()
+            val targetFile = File(context.cacheDir, fileName)
 
-        body.byteStream().use { input ->
-            FileOutputStream(targetFile).use { output ->
-                val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
-                var bytesRead: Int
-                var totalBytesRead = 0L
+            body.byteStream().use { input ->
+                FileOutputStream(targetFile).use { output ->
+                    val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
+                    var bytesRead: Int
+                    var totalBytesRead = 0L
 
-                while (input.read(buffer).also { bytesRead = it } != -1) {
-                    // Check for coroutine cancellation during heavy IO loops
-                    if (!isActive) throw CancellationException("Download cancelled")
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        // Check for coroutine cancellation during heavy IO loops
+                        if (!isActive) throw CancellationException("Download cancelled")
 
-                    output.write(buffer, 0, bytesRead)
-                    totalBytesRead += bytesRead
+                        output.write(buffer, 0, bytesRead)
+                        totalBytesRead += bytesRead
 
-                    if (contentLength > 0) {
-                        onProgress(totalBytesRead.toFloat() / contentLength)
+                        if (contentLength > 0) {
+                            onProgress(totalBytesRead.toFloat() / contentLength)
+                        }
+                    }
+                    // Basic integrity check
+                    if (contentLength != -1L && totalBytesRead != contentLength) {
+                        throw IOException("Incomplete download: expected $contentLength bytes, got $totalBytesRead")
                     }
                 }
-                // Basic integrity check
-                if (contentLength != -1L && totalBytesRead != contentLength) {
-                    throw IOException("Incomplete download: expected $contentLength bytes, got $totalBytesRead")
-                }
             }
+            targetFile
         }
-        targetFile
-    }
 
     suspend fun extractFirmware(zipFile: File, hardware: DeviceHardware): File? = withContext(Dispatchers.IO) {
-        val target = hardware.hwModelSlug.ifEmpty { hardware.platformioTarget }
+        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
         if (target.isEmpty()) return@withContext null
 
         val targetLowerCase = target.lowercase()
