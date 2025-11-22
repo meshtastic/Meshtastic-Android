@@ -145,7 +145,6 @@ fun MapLibrePOC(
     var isLocationTrackingEnabled by remember { mutableStateOf(false) }
     var followBearing by remember { mutableStateOf(false) }
     var hasLocationPermission by remember { mutableStateOf(false) }
-    data class ExpandedCluster(val centerPx: android.graphics.PointF, val members: List<Node>)
     var expandedCluster by remember { mutableStateOf<ExpandedCluster?>(null) }
     var clusterListMembers by remember { mutableStateOf<List<Node>?>(null) }
     var mapRef by remember { mutableStateOf<MapLibreMap?>(null) }
@@ -169,8 +168,8 @@ fun MapLibrePOC(
     var baseStyleIndex by remember { mutableStateOf(0) }
     val baseStyle = baseStyles[baseStyleIndex % baseStyles.size]
     // Remember last applied cluster visibility to reduce flashing
-    var clustersShown by remember { mutableStateOf(false) }
-    var lastClusterEvalMs by remember { mutableStateOf(0L) }
+    val clustersShownState = remember { mutableStateOf(false) }
+    var clustersShown by clustersShownState
 
     // Heatmap mode
     var heatmapEnabled by remember { mutableStateOf(false) }
@@ -808,161 +807,18 @@ fun MapLibrePOC(
                                     }
                                 } catch (_: Throwable) {}
                             }
-                            map.addOnMapClickListener { latLng ->
-                                // Any tap on the map clears overlays unless replaced below
-                                expandedCluster = null
-                                clusterListMembers = null
-                                val screenPoint = map.projection.toScreenLocation(latLng)
-                                // Use a small hitbox to improve taps on small circles
-                                val r = (HIT_BOX_RADIUS_DP * context.resources.displayMetrics.density)
-                                val rect =
-                                    android.graphics.RectF(
-                                        (screenPoint.x - r).toFloat(),
-                                        (screenPoint.y - r).toFloat(),
-                                        (screenPoint.x + r).toFloat(),
-                                        (screenPoint.y + r).toFloat(),
-                                    )
-                                val features =
-                                    map.queryRenderedFeatures(
-                                        rect,
-                                        CLUSTER_CIRCLE_LAYER_ID,
-                                        NODES_LAYER_ID,
-                                        NODES_LAYER_NOCLUSTER_ID,
-                                        WAYPOINTS_LAYER_ID,
-                                    )
-                                Timber.tag("MapLibrePOC")
-                                    .d(
-                                        "Map click at (%.5f, %.5f) -> %d features",
-                                        latLng.latitude,
-                                        latLng.longitude,
-                                        features.size,
-                                    )
-                                val f = features.firstOrNull()
-                                // If cluster tapped, expand using true cluster leaves from the source
-                                if (f != null && f.hasProperty("point_count")) {
-                                    val pointCount = f.getNumberProperty("point_count")?.toInt() ?: 0
-                                    val limit = kotlin.math.min(CLUSTER_LIST_FETCH_MAX, pointCount.toLong())
-                                    val src = (map.style?.getSource(NODES_CLUSTER_SOURCE_ID) as? GeoJsonSource)
-                                    if (src != null) {
-                                        val fc = src.getClusterLeaves(f, limit, 0L)
-                                        val nums =
-                                            fc.features()?.mapNotNull { feat ->
-                                                try {
-                                                    feat.getNumberProperty("num")?.toInt()
-                                                } catch (_: Throwable) {
-                                                    null
-                                                }
-                                            } ?: emptyList()
-                                        val members = nodes.filter { nums.contains(it.num) }
-                                        if (members.isNotEmpty()) {
-                                            // Center camera on cluster (without zoom) to keep cluster intact
-                                            val geom = f.geometry()
-                                            if (geom is Point) {
-                                                val clusterLat = geom.latitude()
-                                                val clusterLon = geom.longitude()
-                                                val clusterLatLng = LatLng(clusterLat, clusterLon)
-                                                map.animateCamera(
-                                                    CameraUpdateFactory.newLatLng(clusterLatLng),
-                                                    300,
-                                                    object : MapLibreMap.CancelableCallback {
-                                                        override fun onFinish() {
-                                                            // Calculate screen position AFTER camera animation
-                                                            // completes
-                                                            val clusterCenter =
-                                                                map.projection.toScreenLocation(
-                                                                    LatLng(clusterLat, clusterLon),
-                                                                )
-
-                                                            // Set overlay state after camera animation completes
-                                                            if (pointCount > CLUSTER_RADIAL_MAX) {
-                                                                // Show list for large clusters
-                                                                clusterListMembers = members
-                                                            } else {
-                                                                // Show radial overlay for small clusters
-                                                                expandedCluster =
-                                                                    ExpandedCluster(
-                                                                        clusterCenter,
-                                                                        members.take(CLUSTER_RADIAL_MAX),
-                                                                    )
-                                                            }
-                                                        }
-
-                                                        override fun onCancel() {
-                                                            // Animation was cancelled, don't show overlay
-                                                        }
-                                                    },
-                                                )
-                                                Timber.tag("MapLibrePOC")
-                                                    .d(
-                                                        "Centering on cluster at (%.5f, %.5f) with %d members",
-                                                        clusterLat,
-                                                        clusterLon,
-                                                        members.size,
-                                                    )
-                                            } else {
-                                                // No geometry, show overlay immediately using current screen position
-                                                val clusterCenter =
-                                                    (f.geometry() as? Point)?.let { p ->
-                                                        map.projection.toScreenLocation(
-                                                            LatLng(p.latitude(), p.longitude()),
-                                                        )
-                                                    } ?: screenPoint
-                                                if (pointCount > CLUSTER_RADIAL_MAX) {
-                                                    clusterListMembers = members
-                                                } else {
-                                                    expandedCluster =
-                                                        ExpandedCluster(clusterCenter, members.take(CLUSTER_RADIAL_MAX))
-                                                }
-                                            }
-                                        }
-                                        return@addOnMapClickListener true
-                                    } else {
-                                        map.animateCamera(CameraUpdateFactory.zoomIn())
-                                        return@addOnMapClickListener true
-                                    }
-                                }
-                                // Handle node/waypoint selection
-                                f?.let {
-                                    val kind = it.getStringProperty("kind")
-                                    when (kind) {
-                                        "node" -> {
-                                            val num = it.getNumberProperty("num")?.toInt() ?: -1
-                                            selectedNodeNum = num
-
-                                            // Center camera on selected node
-                                            val geom = it.geometry()
-                                            if (geom is Point) {
-                                                val nodeLat = geom.latitude()
-                                                val nodeLon = geom.longitude()
-                                                val nodeLatLng = LatLng(nodeLat, nodeLon)
-                                                map.animateCamera(CameraUpdateFactory.newLatLng(nodeLatLng), 300)
-                                                Timber.tag("MapLibrePOC")
-                                                    .d("Centering on node %d at (%.5f, %.5f)", num, nodeLat, nodeLon)
-                                            }
-                                        }
-                                        "waypoint" -> {
-                                            val id = it.getNumberProperty("id")?.toInt() ?: -1
-                                            // Open edit dialog for waypoint
-                                            waypoints.values
-                                                .find { pkt -> pkt.data.waypoint?.id == id }
-                                                ?.let { pkt -> editingWaypoint = pkt.data.waypoint }
-
-                                            // Center camera on waypoint
-                                            val geom = it.geometry()
-                                            if (geom is Point) {
-                                                val wpLat = geom.latitude()
-                                                val wpLon = geom.longitude()
-                                                val wpLatLng = LatLng(wpLat, wpLon)
-                                                map.animateCamera(CameraUpdateFactory.newLatLng(wpLatLng), 300)
-                                                Timber.tag("MapLibrePOC")
-                                                    .d("Centering on waypoint %d at (%.5f, %.5f)", id, wpLat, wpLon)
-                                            }
-                                        }
-                                        else -> {}
-                                    }
-                                }
-                                true
-                            }
+                            map.addOnMapClickListener(
+                                createMapClickListener(
+                                    map = map,
+                                    context = context,
+                                    nodes = nodes,
+                                    waypoints = waypoints,
+                                    onExpandedClusterChange = { expandedCluster = it },
+                                    onClusterListMembersChange = { clusterListMembers = it },
+                                    onSelectedNodeChange = { selectedNodeNum = it },
+                                    onWaypointEditRequest = { editingWaypoint = it },
+                                )
+                            )
                             // Long-press to create waypoint
                             map.addOnMapLongClickListener { latLng ->
                                 if (isConnected) {
@@ -977,63 +833,22 @@ fun MapLibrePOC(
                                 true
                             }
                             // Update clustering visibility on camera idle (zoom changes)
-                            map.addOnCameraIdleListener {
-                                val st = map.style ?: return@addOnCameraIdleListener
-                                // Skip node updates when heatmap is enabled
-                                if (heatmapEnabled) return@addOnCameraIdleListener
-                                // Skip node updates when showing tracks
-                                if (showingTracksRef.value) {
-                                    Timber.tag("MapLibrePOC").d("onCameraIdle: Skipping node updates - showing tracks")
-                                    return@addOnCameraIdleListener
-                                }
-                                // Debounce to avoid rapid toggling during kinetic flings/tiles loading
-                                val now = SystemClock.uptimeMillis()
-                                if (now - lastClusterEvalMs < CLUSTER_EVAL_DEBOUNCE_MS) return@addOnCameraIdleListener
-                                lastClusterEvalMs = now
-                                val filtered =
-                                    applyFilters(
-                                        nodes,
-                                        mapFilterState,
-                                        enabledRoles,
-                                        ourNode?.num,
-                                        isLocationTrackingEnabled,
-                                    )
-                                Timber.tag("MapLibrePOC")
-                                    .d("onCameraIdle: filtered nodes=%d (of %d)", filtered.size, nodes.size)
-                                clustersShown =
-                                    setClusterVisibilityHysteresis(
-                                        map,
-                                        st,
-                                        filtered,
-                                        clusteringEnabled,
-                                        clustersShown,
-                                        mapFilterState.showPrecisionCircle,
-                                    )
-                                // Compute which nodes get labels in viewport and update source
-                                val density = context.resources.displayMetrics.density
-                                val labelSet = selectLabelsForViewport(map, filtered, density)
-                                val jsonIdle = nodesToFeatureCollectionJsonWithSelection(filtered, labelSet)
-                                Timber.tag("MapLibrePOC")
-                                    .d(
-                                        "onCameraIdle: updating sources. labelSet=%d (nums=%s) jsonBytes=%d",
-                                        labelSet.size,
-                                        labelSet.take(5).joinToString(","),
-                                        jsonIdle.length,
-                                    )
-                                // Update both clustered and non-clustered sources
-                                safeSetGeoJson(st, NODES_CLUSTER_SOURCE_ID, jsonIdle)
-                                safeSetGeoJson(st, NODES_SOURCE_ID, jsonIdle)
-                                logStyleState("onCameraIdle(post-update)", st)
-                                try {
-                                    val w = mapViewRef?.width ?: 0
-                                    val h = mapViewRef?.height ?: 0
-                                    val bbox = android.graphics.RectF(0f, 0f, w.toFloat(), h.toFloat())
-                                    val rendered =
-                                        map.queryRenderedFeatures(bbox, NODES_LAYER_ID, CLUSTER_CIRCLE_LAYER_ID)
-                                    Timber.tag("MapLibrePOC")
-                                        .d("onCameraIdle: rendered features in viewport=%d", rendered.size)
-                                } catch (_: Throwable) {}
-                            }
+                            map.addOnCameraIdleListener(
+                                createCameraIdleListener(
+                                    map = map,
+                                    context = context,
+                                    mapViewRef = mapViewRef,
+                                    nodes = nodes,
+                                    mapFilterState = mapFilterState,
+                                    enabledRoles = enabledRoles,
+                                    ourNode = ourNode,
+                                    isLocationTrackingEnabled = isLocationTrackingEnabled,
+                                    heatmapEnabled = heatmapEnabled,
+                                    showingTracksRef = showingTracksRef,
+                                    clusteringEnabled = clusteringEnabled,
+                                    clustersShownState = clustersShownState,
+                                )
+                            )
                             // Hide expanded cluster overlay whenever camera moves to avoid stale screen positions
                             map.addOnCameraMoveListener {
                                 if (expandedCluster != null || clusterListMembers != null) {
