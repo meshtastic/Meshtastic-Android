@@ -26,6 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -38,6 +39,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -52,6 +55,7 @@ import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularWavyProgressIndicator
@@ -95,11 +99,13 @@ import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.chirpy
 import org.meshtastic.core.strings.firmware_update_almost_there
 import org.meshtastic.core.strings.firmware_update_alpha
 import org.meshtastic.core.strings.firmware_update_button
 import org.meshtastic.core.strings.firmware_update_checking
 import org.meshtastic.core.strings.firmware_update_device
+import org.meshtastic.core.strings.firmware_update_disclaimer_chirpy_says
 import org.meshtastic.core.strings.firmware_update_disclaimer_text
 import org.meshtastic.core.strings.firmware_update_disclaimer_title
 import org.meshtastic.core.strings.firmware_update_disconnect_warning
@@ -310,7 +316,39 @@ private fun DisclaimerDialog(onDismissRequest: () -> Unit, onConfirm: () -> Unit
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(stringResource(Res.string.firmware_update_disclaimer_title)) },
-        text = { Text(stringResource(Res.string.firmware_update_disclaimer_text)) },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.firmware_update_disclaimer_text))
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(8.dp),
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = spacedBy(4.dp),
+                        ) {
+                            BasicText(text = "🪜", modifier = Modifier.size(48.dp), autoSize = TextAutoSize.StepBased())
+                            AsyncImage(
+                                model =
+                                ImageRequest.Builder(LocalContext.current)
+                                    .data(org.meshtastic.core.ui.R.drawable.chirpy)
+                                    .build(),
+                                contentScale = ContentScale.Fit,
+                                contentDescription = stringResource(Res.string.chirpy),
+                                modifier = Modifier.size(48.dp),
+                            )
+                        }
+                        Text(
+                            text = stringResource(Res.string.firmware_update_disclaimer_chirpy_says),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+            }
+        },
         confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(Res.string.i_know_what_i_m_doing)) } },
         dismissButton = { TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.cancel)) } },
     )
