@@ -17,6 +17,7 @@
 
 package org.meshtastic.core.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.MapColumn
 import androidx.room.Query
@@ -111,6 +112,17 @@ interface PacketDao {
     """,
     )
     fun getMessagesFrom(contact: String): Flow<List<PacketEntity>>
+
+    @Transaction
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND port_num = 1 AND contact_key = :contact
+    ORDER BY received_time DESC
+    """,
+    )
+    fun getMessagesFromPaged(contact: String): PagingSource<Int, PacketEntity>
 
     @Query(
         """

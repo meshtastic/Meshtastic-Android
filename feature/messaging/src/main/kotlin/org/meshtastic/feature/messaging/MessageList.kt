@@ -255,7 +255,7 @@ private fun LazyItemScope.renderChatMessageRow(
 }
 
 @Composable
-private fun MessageStatusDialog(
+internal fun MessageStatusDialog(
     message: Message,
     nodes: List<Node>,
     resendOption: Boolean,

@@ -17,14 +17,20 @@
 
 package org.meshtastic.core.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
+import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
@@ -82,6 +88,26 @@ constructor(
     suspend fun getMessagesFrom(contact: String, getNode: suspend (String?) -> Node) = withContext(dispatchers.io) {
         dbManager.currentDb.value.packetDao().getMessagesFrom(contact).mapLatest { packets ->
             packets.map { packet ->
+                val message = packet.toMessage(getNode)
+                message.replyId
+                    .takeIf { it != null && it != 0 }
+                    ?.let { getPacketByPacketId(it) }
+                    ?.toMessage(getNode)
+                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+            }
+        }
+    }
+
+    fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 50,
+                enablePlaceholders = false,
+                initialLoadSize = 50,
+            ),
+            pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contact) },
+        ).flow.map { pagingData ->
+            pagingData.map { packet ->
                 val message = packet.toMessage(getNode)
                 message.replyId
                     .takeIf { it != null && it != 0 }
