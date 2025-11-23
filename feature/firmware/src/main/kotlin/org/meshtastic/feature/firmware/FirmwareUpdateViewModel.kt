@@ -193,7 +193,7 @@ constructor(
                     // hwModelSlug often uses underscores and uppercase
                     // (e.g. TRACKER_T1000_E vs tracker-t1000-e).
                     val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
-                    val filename = "firmware-$target-$version.zip"
+                    val filename = "firmware-$target-$version-ota.zip"
                     val directUrl = "https://meshtastic.github.io/firmware-$version/$filename"
 
                     if (fileHandler.checkUrlExists(directUrl)) {
