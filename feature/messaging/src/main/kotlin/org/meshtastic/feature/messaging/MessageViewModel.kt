@@ -113,6 +113,12 @@ constructor(
         return pagedMessagesForContactKey
     }
 
+    fun getFirstUnreadMessageUuid(contactKey: String): Flow<Long?> =
+        packetRepository.getFirstUnreadMessageUuid(contactKey)
+
+    fun hasUnreadMessages(contactKey: String): Flow<Boolean> =
+        packetRepository.hasUnreadMessages(contactKey)
+
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {

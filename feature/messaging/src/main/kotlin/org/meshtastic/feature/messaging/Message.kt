@@ -212,9 +212,35 @@ fun MessageScreen(
             derivedStateOf { contactSettings[contactKey]?.lastReadMessageTimestamp }
         }
 
-    // Note: With pagination, some features like unread message tracking and initial scroll
-    // positioning require access to the full message list, which isn't available with paging.
-    // These features are temporarily disabled when using pagination.
+    // Track unread messages using lightweight metadata queries
+    val hasUnreadMessages by viewModel.hasUnreadMessages(contactKey).collectAsStateWithLifecycle(initialValue = false)
+    val firstUnreadMessageUuid by viewModel.getFirstUnreadMessageUuid(contactKey).collectAsStateWithLifecycle(initialValue = null)
+
+    var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
+
+    // Find the index of the first unread message in the paged list
+    val firstUnreadIndex by remember(pagedMessages.itemCount, firstUnreadMessageUuid) {
+        derivedStateOf {
+            firstUnreadMessageUuid?.let { uuid ->
+                (0 until pagedMessages.itemCount).firstOrNull { index ->
+                    pagedMessages[index]?.uuid == uuid
+                }
+            }
+        }
+    }
+
+    // Scroll to first unread message on initial load
+    LaunchedEffect(hasPerformedInitialScroll, firstUnreadIndex, pagedMessages.itemCount) {
+        if (!hasPerformedInitialScroll && hasUnreadMessages && firstUnreadIndex != null && pagedMessages.itemCount > 0) {
+            val targetIndex = (firstUnreadIndex!! - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
+            listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
+            hasPerformedInitialScroll = true
+        } else if (!hasPerformedInitialScroll && pagedMessages.itemCount > 0 && !hasUnreadMessages) {
+            // If no unread messages, just scroll to bottom (most recent)
+            listState.scrollToItem(0)
+            hasPerformedInitialScroll = true
+        }
+    }
 
     val onEvent: (MessageScreenEvent) -> Unit =
         remember(viewModel, contactKey, messageInputState, ourNode) {
@@ -324,6 +350,8 @@ fun MessageScreen(
                         messages = pagedMessages,
                         selectedIds = selectedMessageIds,
                         contactKey = contactKey,
+                        firstUnreadMessageUuid = firstUnreadMessageUuid,
+                        hasUnreadMessages = hasUnreadMessages,
                     ),
                     handlers =
                     MessageListHandlers(

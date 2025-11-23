@@ -320,7 +320,7 @@ internal fun findEarliestUnreadIndex(messages: List<Message>, lastReadMessageTim
 }
 
 @Composable
-private fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
+internal fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

@@ -51,11 +51,28 @@ constructor(
     fun getContacts(): Flow<Map<String, Packet>> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactKeys() }
 
+    fun getContactsPaged(): Flow<PagingData<Packet>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 30,
+                enablePlaceholders = false,
+                initialLoadSize = 30,
+            ),
+            pagingSourceFactory = { dbManager.currentDb.value.packetDao().getContactKeysPaged() },
+        ).flow
+    }
+
     suspend fun getMessageCount(contact: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getMessageCount(contact) }
 
     suspend fun getUnreadCount(contact: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getUnreadCount(contact) }
+
+    fun getFirstUnreadMessageUuid(contact: String): Flow<Long?> =
+        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFirstUnreadMessageUuid(contact) }
+
+    fun hasUnreadMessages(contact: String): Flow<Boolean> =
+        dbManager.currentDb.flatMapLatest { db -> db.packetDao().hasUnreadMessages(contact) }
 
     fun getUnreadCountTotal(): Flow<Int> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountTotal() }

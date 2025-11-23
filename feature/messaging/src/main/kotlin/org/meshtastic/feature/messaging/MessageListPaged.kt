@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -34,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -44,6 +46,9 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
@@ -58,6 +63,8 @@ internal data class MessageListPagedState(
     val messages: LazyPagingItems<Message>,
     val selectedIds: MutableState<Set<Long>>,
     val contactKey: String,
+    val firstUnreadMessageUuid: Long? = null,
+    val hasUnreadMessages: Boolean = false,
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -99,6 +106,13 @@ internal fun MessageListPaged(
 
     val coroutineScope = rememberCoroutineScope()
 
+    // Track unread count based on scroll position
+    UpdateUnreadCountPaged(
+        listState = listState,
+        messages = state.messages,
+        onUnreadChanged = handlers.onUnreadChanged,
+    )
+
     MessageListPagedContent(
         listState = listState,
         state = state,
@@ -124,6 +138,17 @@ private fun MessageListPagedContent(
     onShowReactions: (List<Reaction>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Calculate unread divider position
+    val unreadDividerIndex by remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
+        derivedStateOf {
+            state.firstUnreadMessageUuid?.let { uuid ->
+                (0 until state.messages.itemCount).firstOrNull { index ->
+                    state.messages[index]?.uuid == uuid
+                }
+            }
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -147,6 +172,11 @@ private fun MessageListPagedContent(
                         onShowStatusDialog = onShowStatusDialog,
                         onShowReactions = onShowReactions,
                     )
+
+                    // Show unread divider after the first unread message
+                    if (state.hasUnreadMessages && unreadDividerIndex == index) {
+                        UnreadMessagesDivider(modifier = Modifier.animateItem())
+                    }
                 }
             }
 
@@ -224,4 +254,31 @@ private fun LazyItemScope.renderPagedChatMessageRow(
             }
         },
     )
+}
+
+@OptIn(FlowPreview::class)
+@Composable
+private fun UpdateUnreadCountPaged(
+    listState: LazyListState,
+    messages: LazyPagingItems<Message>,
+    onUnreadChanged: (Long, Long) -> Unit,
+) {
+    LaunchedEffect(messages.itemCount) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
+            .collectLatest { index ->
+                // Find the last unread message in the loaded items
+                val lastUnreadIndex = (0 until messages.itemCount).lastOrNull { i ->
+                    val msg = messages[i]
+                    msg != null && !msg.read && !msg.fromLocal
+                }
+
+                if (lastUnreadIndex != null && index <= lastUnreadIndex && index < messages.itemCount) {
+                    val visibleMessage = messages[index]
+                    if (visibleMessage != null && !visibleMessage.read && !visibleMessage.fromLocal) {
+                        onUnreadChanged(visibleMessage.uuid, visibleMessage.receivedTime)
+                    }
+                }
+            }
+    }
 }

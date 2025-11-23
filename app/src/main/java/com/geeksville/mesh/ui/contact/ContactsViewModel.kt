@@ -19,11 +19,18 @@ package com.geeksville.mesh.ui.contact
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.geeksville.mesh.model.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -38,7 +45,7 @@ import org.meshtastic.core.strings.channel_name
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.channelSet
 import javax.inject.Inject
-import kotlin.collections.map
+import kotlin.collections.map as collectionsMap
 
 @HiltViewModel
 class ContactsViewModel
@@ -71,7 +78,7 @@ constructor(
                     contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
                 }
 
-            (contacts + (placeholder - contacts.keys)).values.map { packet ->
+            (contacts + (placeholder - contacts.keys)).values.collectionsMap { packet ->
                 val data = packet.data
                 val contactKey = packet.contact_key
 
@@ -111,6 +118,56 @@ constructor(
             }
         }
             .stateInWhileSubscribed(initialValue = emptyList())
+
+    val contactListPaged: Flow<PagingData<Contact>> =
+        combine(
+            nodeRepository.myNodeInfo,
+            channels,
+            packetRepository.getContactSettings(),
+        ) { myNodeInfo, channelSet, settings ->
+            Triple(myNodeInfo?.myNodeNum, channelSet, settings)
+        }.flatMapLatest { (myNodeNum, channelSet, settings) ->
+            packetRepository.getContactsPaged().map { pagingData ->
+                pagingData.map { packet ->
+                    val data = packet.data
+                    val contactKey = packet.contact_key
+
+                    // Determine if this is my message (originated on this device)
+                    val fromLocal = data.from == DataPacket.ID_LOCAL
+                    val toBroadcast = data.to == DataPacket.ID_BROADCAST
+
+                    // grab usernames from NodeInfo
+                    val user = getUser(if (fromLocal) data.to else data.from)
+                    val node = getNode(if (fromLocal) data.to else data.from)
+
+                    val shortName = user.shortName
+                    val longName =
+                        if (toBroadcast) {
+                            channelSet.getChannel(data.channel)?.name ?: getString(Res.string.channel_name)
+                        } else {
+                            user.longName
+                        }
+
+                    Contact(
+                        contactKey = contactKey,
+                        shortName = if (toBroadcast) "${data.channel}" else shortName,
+                        longName = longName,
+                        lastMessageTime = getShortDate(data.time),
+                        lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
+                        unreadCount = runBlocking(Dispatchers.IO) { packetRepository.getUnreadCount(contactKey) },
+                        messageCount = runBlocking(Dispatchers.IO) { packetRepository.getMessageCount(contactKey) },
+                        isMuted = settings[contactKey]?.isMuted == true,
+                        isUnmessageable = user.isUnmessagable,
+                        nodeColors =
+                        if (!toBroadcast) {
+                            node.colors
+                        } else {
+                            null
+                        },
+                    )
+                }
+            }
+        }.cachedIn(viewModelScope)
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
