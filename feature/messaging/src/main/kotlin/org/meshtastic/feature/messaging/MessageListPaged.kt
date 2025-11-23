@@ -304,21 +304,36 @@ private fun UpdateUnreadCountPaged(
 ) {
     val currentOnUnreadChange by rememberUpdatedState(onUnreadChange)
 
-    LaunchedEffect(messages.itemCount) {
+    // Track remote message count to restart effect when remote messages change
+    // This fixes race condition when sending/receiving messages during debounce period
+    val remoteMessageCount by
+        remember(messages.itemCount) {
+            derivedStateOf {
+                (0 until messages.itemCount).count { i ->
+                    val msg = messages[i]
+                    msg != null && !msg.fromLocal
+                }
+            }
+        }
+
+    LaunchedEffect(remoteMessageCount, listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
-                // Find the last unread message in the loaded items
+                // Find the last (oldest in timeline) unread message
+                // In a reversed list, higher index = older message
                 val lastUnreadIndex =
                     (0 until messages.itemCount).lastOrNull { i ->
                         val msg = messages[i]
                         msg != null && !msg.read && !msg.fromLocal
                     }
 
-                if (lastUnreadIndex != null && index <= lastUnreadIndex && index < messages.itemCount) {
-                    val visibleMessage = messages[index]
-                    if (visibleMessage != null && !visibleMessage.read && !visibleMessage.fromLocal) {
-                        currentOnUnreadChange(visibleMessage.uuid, visibleMessage.receivedTime)
+                // If user has scrolled to or past the oldest unread message, mark it as read
+                // The DB query marks all messages with timestamp <= this, so it batches all newer ones
+                if (lastUnreadIndex != null && index <= lastUnreadIndex) {
+                    val lastUnreadMessage = messages[lastUnreadIndex]
+                    if (lastUnreadMessage != null) {
+                        currentOnUnreadChange(lastUnreadMessage.uuid, lastUnreadMessage.receivedTime)
                     }
                 }
             }
