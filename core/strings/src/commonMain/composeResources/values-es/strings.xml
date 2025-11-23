@@ -95,9 +95,11 @@
     <string name="config_device_transmitOverLora_summary">Si, además de enviarlo a MQTT y a la API del móvil, nuestra información de vecinos debe ser transmitida por LoRa. (No disponible en un canal con clave y nombre por defecto).</string>
     <string name="config_display_screen_on_secs_summary">Cuánto tiempo permanece encendido la pantalla después de pulsar el botón de usuario o recibir mensajes.</string>
     <string name="config_display_auto_screen_carousel_secs_summary">Cambia automáticamente a la siguiente página en la pantalla como un carrusel, basado en el intervalo especificado.</string>
+    <string name="config_display_compass_north_top_summary">La dirección de la brújula en la pantalla, fuera del círculo, siempre apuntará hacia el norte.</string>
     <string name="config_display_flip_screen_summary">Voltear la pantalla verticalmente.</string>
     <string name="config_display_units_summary">Unidades mostradas en la pantalla del dispositivo.</string>
     <string name="config_display_oled_summary">Anular detección automática de pantalla OLED.</string>
+    <string name="config_display_displaymode_summary">Anula el diseño de pantalla predeterminado.</string>
     <string name="config_display_heading_bold_summary">Encabezado del texto de la pantalla en negrita.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">Requiere que haya un acelerómetro en su dispositivo.</string>
     <string name="config_lora_region_summary">La región donde utilizará su radio.</string>
@@ -107,18 +109,26 @@
     <string name="config_network_eth_enabled_summary">Habilitar Ethernet desactivará la conexión bluetooth a la aplicación. Las conexiones TCP no están disponibles en dispositivos Apple.</string>
     <string name="config_network_udp_enabled_summary">Habilitar paquetes de difusión vía UDP en la red local.</string>
     <string name="config_position_broadcast_secs_summary">El intervalo máximo que puede transcurrir sin que un nodo transmita una posición.</string>
-    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Rapidez de actualización de la posición que se enviará si se cumple la distancia mínima.</string>
-    <string name="config_position_broadcast_smart_minimum_distance_summary">Cambio de distancia mínima en metros para considerar una transmisión de posición Smart.</string>
+    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">La máxima velocidad a la que se enviarán las actualizaciones de posición si se ha cumplido la distancia mínima.</string>
+    <string name="config_position_broadcast_smart_minimum_distance_summary">La distancia mínima de cambio en metros que se tendrá en cuenta para una transmisión inteligente de posición.</string>
+    <string name="config_position_flags_summary">Campos opcionales a incluir al ensamblar mensajes de posición. Cuantos más campos se incluyan, mayor será el tamaño del mensaje, lo que provocará un mayor tiempo de transmisión y un mayor riesgo de pérdida de paquetes.</string>
+    <string name="config_power_is_power_saving_summary">La opción dormirá todo lo posible; los roles de rastreador y sensores y también incluirá la radio LoRa. No uses esta configuración si quieres utilizar tu dispositivo con las aplicaciones del teléfono o si estás usando un dispositivo sin botón de usuario.</string>
     <string name="config_security_private_key">Utilizado para crear una clave compartida con un dispositivo remoto.</string>
     <string name="config_security_admin_key">Clave pública autorizada para enviar mensajes de administración a este nodo.</string>
     <string name="config_security_is_managed">Dispositivo gestionado por administrador de la malla, el usuario no puede acceder a las configuraciones del dispositivo.</string>
     <!-- Position Config -->
+    <string name="position_packet">Paquetes de posición</string>
     <string name="broadcast_interval">Intervalo de transmisión</string>
+    <string name="smart_position">Posición inteligente</string>
     <string name="minimum_interval">Intervalo mínimo</string>
     <string name="minimum_distance">Distancia mínima</string>
     <string name="device_gps">Dispositivo GPS</string>
     <string name="fixed_position">Posición Fijada</string>
     <string name="altitude">Altitud</string>
+    <string name="advanced_device_gps">Configuración avanzada de GPS</string>
+    <string name="gps_receive_gpio">GPIO de recepción GPS</string>
+    <string name="gps_transmit_gpio">GPIO de transmisión GPS</string>
+    <string name="gps_en_gpio">GPIO de habilitación GPS</string>
     <string name="debug">Depuración</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="qr_code">Código QR</string>
@@ -679,6 +689,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="only_favorites">Solo favoritos</string>
     <string name="compromised_keys">Las claves se han visto comprometidas, selecciona OK para generar de nuevo.</string>
     <string name="regenerate_private_key">Regenerar clave privada</string>
+    <string name="regenerate_keys_confirmation">¿Estás seguro de querer regenerar tu clave privada?\n\nLos nodos que hayan intercambiado previamente las claves con este nodo tendrán que quitar ese nodo y volver a intercambiar las claves para poder reanudar la comunicación segura.</string>
     <string name="export_keys">Exportar claves</string>
     <string name="export_keys_confirmation">Exporta claves públicas y privadas a un archivo. Por favor, almacena en algún lugar de forma segura.</string>
     <string name="react">Reaccionar</string>
@@ -697,6 +708,13 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="unknown">Desconocido</string>
     <string name="message_device_managed">Esta radio es gestionada y sólo puede ser cambiada por un administrador remoto.</string>
     <string name="advanced_title">Avanzado</string>
+    <string name="clean_node_database_title">Limpiar nodos de la base de datos</string>
+    <string name="clean_nodes_older_than">Limpiar nodos vistos por última vez más de %1$d días</string>
+    <string name="clean_unknown_nodes">Limpiar sólo nodos desconocidos</string>
+    <string name="clean_low_interaction_nodes">Limpiar nodos con baja/ninguna interacción</string>
+    <string name="clean_ignored_nodes">Limpiar nodos ignorados</string>
+    <string name="clean_now">Limpiar ahora</string>
+    <string name="clean_node_database_confirmation">Esto eliminará los nodos %1$d de su base de datos. Esta acción no se puede deshacer.</string>
     <string name="security_icon_help_green_lock">Un candado verde significa que el canal está cifrado de forma segura con una clave AES de 128 o 256 bits.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_help_yellow_open_lock">Un candado abierto amarillo significa que el canal no está cifrado de forma segura, no se usa para datos precisos de ubicación, y no usa ninguna clave o una clave conocida de 1 byte.</string>
@@ -743,7 +761,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="phone_location">Ubicación del teléfono</string>
     <string name="phone_location_description">Meshtastic utiliza la ubicación de tu teléfono para habilitar varias características. Puedes actualizar los permisos de ubicación en cualquier momento desde la configuración.</string>
     <string name="share_location">Compartir ubicación</string>
-    <string name="share_location_description">Utilice el GPS del teléfono para enviar ubicaciones a su nodo en lugar de usar un GPS hardware en su nodo.</string>
+    <string name="share_location_description">Utilice el GPS del teléfono para enviar ubicaciones a su nodo en lugar de usar el hardware GPS de su nodo.</string>
     <string name="distance_filters">Filtros de distancia</string>
     <string name="distance_filters_description">Filtra la lista de nodos y el mapa de mallas basándose en la proximidad a tu teléfono.</string>
     <string name="mesh_map_location_description">Habilita el punto de posición azul para tu teléfono en el mapa de la malla.</string>
@@ -753,6 +771,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="critical_alerts">Alertas críticas</string>
     <string name="next">Siguiente</string>
     <string name="grant_permissions">Otorgar permisos</string>
+    <string name="clean_node_database_description">Precaución: Esto elimina los nodos de las bases de datos en la aplicación y en el dispositivo.\nLas selecciones son aditivas.</string>
     <string name="connecting_to_device">Conectándose al dispositivo</string>
     <string name="map_type_satellite">Satélite</string>
     <string name="map_type_terrain">Terreno</string>
