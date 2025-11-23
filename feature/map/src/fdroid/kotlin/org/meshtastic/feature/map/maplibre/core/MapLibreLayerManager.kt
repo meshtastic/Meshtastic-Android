@@ -42,6 +42,7 @@ import org.maplibre.android.style.layers.HeatmapLayer
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.PropertyFactory.circleColor
 import org.maplibre.android.style.layers.PropertyFactory.circleOpacity
+import org.maplibre.android.style.layers.PropertyFactory.circlePitchAlignment
 import org.maplibre.android.style.layers.PropertyFactory.circleRadius
 import org.maplibre.android.style.layers.PropertyFactory.circleStrokeColor
 import org.maplibre.android.style.layers.PropertyFactory.circleStrokeWidth
@@ -218,15 +219,17 @@ fun ensureSourcesAndLayers(style: Style) {
         Timber.tag("MapLibrePOC").d("Added node text SymbolLayer")
     }
 
-    // Waypoints layer
+    // Waypoints layer - small precise marker with red ring and white center
     if (style.getLayer(WAYPOINTS_LAYER_ID) == null) {
         val layer =
             CircleLayer(WAYPOINTS_LAYER_ID, WAYPOINTS_SOURCE_ID)
                 .withProperties(
-                    circleColor("#FF5722"),
-                    circleRadius(8f),
-                    circleStrokeColor("#FFFFFF"),
+                    circleColor("#FFFFFF"), // White center for precision
+                    circleRadius(4f), // Small for precision
+                    circleStrokeColor("#FF3B30"), // Red ring
                     circleStrokeWidth(2f),
+                    circleOpacity(1.0f),
+                    circlePitchAlignment("map"), // Keep aligned to map
                 )
         if (style.getLayer(OSM_LAYER_ID) != null) style.addLayerAbove(layer, OSM_LAYER_ID) else style.addLayer(layer)
         Timber.tag("MapLibrePOC").d("Added waypoints CircleLayer")

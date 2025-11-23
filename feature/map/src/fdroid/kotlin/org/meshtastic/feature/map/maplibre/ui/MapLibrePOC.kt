@@ -449,6 +449,14 @@ fun MapLibrePOC(
                     // Restore proper clustering visibility based on current state
                     val filteredNodes =
                         applyFilters(nodes, mapFilterState, enabledRoles, ourNode?.num, isLocationTrackingEnabled)
+
+                    // Update node sources with current data
+                    val density = context.resources.displayMetrics.density
+                    val labelSet = selectLabelsForViewport(map, filteredNodes, density)
+                    val json = nodesToFeatureCollectionJsonWithSelection(filteredNodes, labelSet)
+                    safeSetGeoJson(style, NODES_CLUSTER_SOURCE_ID, json)
+                    safeSetGeoJson(style, NODES_SOURCE_ID, json)
+
                     clustersShown =
                         setClusterVisibilityHysteresis(
                             map,

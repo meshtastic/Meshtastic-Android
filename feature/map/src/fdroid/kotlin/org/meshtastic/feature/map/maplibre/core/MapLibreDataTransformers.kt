@@ -117,9 +117,24 @@ fun waypointsToFeatureCollectionFC(
                 f.addStringProperty("kind", "waypoint")
                 f.addNumberProperty("id", w.id)
                 f.addStringProperty("name", w.name ?: "Waypoint ${w.id}")
-                f.addNumberProperty("icon", w.icon)
+                // Convert icon codepoint to emoji string, use 📍 (0x1F4CD) as default
+                val iconEmoji =
+                    if (w.icon == 0) {
+                        String(Character.toChars(0x1F4CD)) // 📍 Round Pushpin
+                    } else {
+                        String(Character.toChars(w.icon))
+                    }
+                f.addStringProperty("icon", iconEmoji)
+                timber.log.Timber.tag("MapLibrePOC").d(
+                    "Waypoint feature: lat=%.5f, lon=%.5f, icon=%s, name=%s",
+                    lat,
+                    lon,
+                    iconEmoji,
+                    w.name,
+                )
             }
         }
+    timber.log.Timber.tag("MapLibrePOC").d("Created waypoints FC: %d features", features.size)
     return FeatureCollection.fromFeatures(features)
 }
 

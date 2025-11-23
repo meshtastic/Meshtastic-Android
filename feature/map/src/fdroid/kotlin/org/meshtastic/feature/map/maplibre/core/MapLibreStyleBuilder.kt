@@ -203,7 +203,12 @@ fun buildMeshtasticStyle(base: BaseMapStyle, customTileUrl: String? = null): Sty
             )
             .withLayer(
                 CircleLayer(WAYPOINTS_LAYER_ID, WAYPOINTS_SOURCE_ID)
-                    .withProperties(circleColor("#2E7D32"), circleRadius(5f)),
+                    .withProperties(
+                        circleColor("#FFFFFF"), // White center for precision
+                        circleRadius(4f), // Small for precision
+                        circleStrokeColor("#FF3B30"), // Red ring
+                        circleStrokeWidth(2f),
+                    ),
             )
     return builder
 }
