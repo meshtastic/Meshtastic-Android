@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">Knotenfilter löschen</string>
     <string name="node_filter_title">Filtern nach</string>
     <string name="node_filter_include_unknown">Unbekannte Stationen einbeziehen</string>
+    <string name="node_filter_exclude_infrastructure">Infrastruktur ausschließen</string>
     <string name="node_filter_only_online">Offline Knoten ausblenden</string>
     <string name="node_filter_only_direct">Nur direkte Knoten anzeigen</string>
     <string name="node_filter_ignored">Sie sehen ignorierte Knoten,\ndrücken um zur Knotenliste zurückzukehren.</string>
@@ -35,6 +36,7 @@
     <string name="node_sort_via_mqtt">über MQTT</string>
     <string name="via_mqtt">über MQTT</string>
     <string name="node_sort_via_favorite">über Favorit</string>
+    <string name="node_filter_show_ignored">Nur ignorierte Knoten anzeigen</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
@@ -213,6 +215,7 @@
     <string name="debug_clear_logs_confirm">Es werden alle Log- und Datenbankeinträge von Ihrem Gerät entfernt. Dies ist eine vollständige Löschung und sie ist dauerhaft.</string>
     <string name="clear">Leeren</string>
     <string name="message_delivery_status">Zustellungsstatus für Nachrichten</string>
+    <string name="new_messages_below">Neue Nachrichten unten</string>
     <string name="meshtastic_messages_notifications">Benachrichtigung direkte Nachrichten</string>
     <string name="meshtastic_broadcast_notifications">Benachrichtigung allgemeine Nachrichten</string>
     <string name="meshtastic_alerts_notifications">Warnmeldungen</string>
@@ -892,6 +895,7 @@
     <string name="device_configuration">Geräteeinstellungen</string>
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <string name="device_telemetry_enabled">Gerätetelemetrie senden</string>
+    <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul für Gerätetelemetrie, um Daten an das Meshtastic Netzwerk zu senden. Dies sind Richtwerte. Bei stark ausgelasteten Netzwerken werden die Übertragungsintervalle automatisch anhand der Anzahl der Knoten die online sind verlängert. Netzwerke mit weniger als 10 Knoten werden auf kürzere Intervalle skaliert.</string>
     <string name="any">Beliebig</string>
     <string name="one_hour">1 Stunde</string>
     <string name="eight_hours">8 Stunden</string>
@@ -908,4 +912,5 @@
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="relayed_by">Weitergeleitet von: %1$s</string>
     <string name="preserve_favorites">Favoriten beibehalten?</string>
+    <string name="usb_devices">USB Geräte</string>
 </resources>
