@@ -17,7 +17,9 @@
 
 package org.meshtastic.feature.messaging
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +28,9 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -50,12 +55,25 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
+
+internal data class MessageListHandlers(
+    val onUnreadChanged: (Long, Long) -> Unit,
+    val onSendReaction: (String, Int) -> Unit,
+    val onClickChip: (Node) -> Unit,
+    val onDeleteMessages: (List<Long>) -> Unit,
+    val onSendMessage: (String, String) -> Unit,
+    val onReply: (Message?) -> Unit,
+)
 
 internal data class MessageListPagedState(
     val nodes: List<Node>,
@@ -111,6 +129,13 @@ internal fun MessageListPaged(
         listState = listState,
         messages = state.messages,
         onUnreadChanged = handlers.onUnreadChanged,
+    )
+
+    // Auto-scroll to bottom when new messages arrive
+    AutoScrollToBottomPaged(
+        listState = listState,
+        messages = state.messages,
+        hasUnreadMessages = state.hasUnreadMessages,
     )
 
     MessageListPagedContent(
@@ -256,6 +281,32 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     )
 }
 
+@Composable
+private fun AutoScrollToBottomPaged(
+    listState: LazyListState,
+    messages: LazyPagingItems<Message>,
+    hasUnreadMessages: Boolean,
+    itemThreshold: Int = 3,
+) = with(listState) {
+    val shouldAutoScroll by
+        remember(hasUnreadMessages) {
+            derivedStateOf {
+                val isAtBottom =
+                    firstVisibleItemIndex == 0 &&
+                        firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
+                val isNearBottom = firstVisibleItemIndex <= itemThreshold
+                isAtBottom || (!hasUnreadMessages && isNearBottom)
+            }
+        }
+    if (shouldAutoScroll) {
+        LaunchedEffect(messages.itemCount) {
+            if (!isScrollInProgress && messages.itemCount > 0) {
+                scrollToItem(0)
+            }
+        }
+    }
+}
+
 @OptIn(FlowPreview::class)
 @Composable
 private fun UpdateUnreadCountPaged(
@@ -281,4 +332,46 @@ private fun UpdateUnreadCountPaged(
                 }
             }
     }
+}
+
+@Composable
+internal fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        HorizontalDivider(modifier = Modifier.weight(1f))
+        Text(
+            text = stringResource(Res.string.new_messages_below),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        HorizontalDivider(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+internal fun MessageStatusDialog(
+    message: Message,
+    nodes: List<Node>,
+    resendOption: Boolean,
+    onResend: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val (title, text) = message.getStatusStringRes()
+    val relayNodeName by
+        remember(message.relayNode, nodes) {
+            derivedStateOf {
+                message.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
+            }
+        }
+    DeliveryInfo(
+        title = title,
+        resendOption = resendOption,
+        text = text,
+        relayNodeName = relayNodeName,
+        onConfirm = onResend,
+        onDismiss = onDismiss,
+    )
 }

@@ -467,6 +467,14 @@ fun SelectionToolbar(
     )
 }
 
+/**
+ * Non-paginated contact list view.
+ *
+ * NOTE: This is kept for ShareScreen which displays a simple contact picker.
+ * The main ContactsScreen uses [ContactListViewPaged] for better performance.
+ *
+ * @see ContactListViewPaged for the paginated version
+ */
 @Composable
 fun ContactListView(
     contacts: List<Contact>,

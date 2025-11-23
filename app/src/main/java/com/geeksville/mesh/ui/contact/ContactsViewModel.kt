@@ -62,6 +62,14 @@ constructor(
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = channelSet {})
 
+    /**
+     * Non-paginated contact list.
+     *
+     * NOTE: This is kept for ShareScreen which needs a simple, non-paginated list of contacts.
+     * The main ContactsScreen uses [contactListPaged] instead for better performance with large contact lists.
+     *
+     * @see contactListPaged for the paginated version used in ContactsScreen
+     */
     val contactList =
         combine(
             nodeRepository.myNodeInfo,

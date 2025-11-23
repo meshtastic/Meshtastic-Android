@@ -85,13 +85,6 @@ constructor(
     val contactSettings: StateFlow<Map<String, ContactSettings>> =
         packetRepository.getContactSettings().stateInWhileSubscribed(initialValue = emptyMap())
 
-    private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val messagesForContactKey: StateFlow<List<Message>> =
-        contactKeyForMessages
-            .filterNotNull()
-            .flatMapLatest { contactKey -> packetRepository.getMessagesFrom(contactKey, ::getNode) }
-            .stateInWhileSubscribed(initialValue = emptyList())
-
     private val contactKeyForPagedMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val pagedMessagesForContactKey: Flow<PagingData<Message>> =
         contactKeyForPagedMessages
@@ -101,11 +94,6 @@ constructor(
 
     fun setTitle(title: String) {
         viewModelScope.launch { _title.value = title }
-    }
-
-    fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
-        contactKeyForMessages.value = contactKey
-        return messagesForContactKey
     }
 
     fun getMessagesFromPaged(contactKey: String): Flow<PagingData<Message>> {
