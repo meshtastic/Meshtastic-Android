@@ -320,20 +320,29 @@ private fun UpdateUnreadCountPaged(
         snapshotFlow { listState.firstVisibleItemIndex }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
-                // Find the last (oldest in timeline) unread message
-                // In a reversed list, higher index = older message
+                // Find the last (oldest in timeline, highest index) unread message in loaded items
                 val lastUnreadIndex =
                     (0 until messages.itemCount).lastOrNull { i ->
                         val msg = messages[i]
                         msg != null && !msg.read && !msg.fromLocal
                     }
 
-                // If user has scrolled to or past the oldest unread message, mark it as read
-                // The DB query marks all messages with timestamp <= this, so it batches all newer ones
+                // If we've scrolled to/past the oldest unread, mark the first visible unread message
+                // Since newer messages have HIGHER timestamps, marking a newer message's timestamp
+                // will batch-mark all older messages via SQL: WHERE received_time <= timestamp
                 if (lastUnreadIndex != null && index <= lastUnreadIndex) {
-                    val lastUnreadMessage = messages[lastUnreadIndex]
-                    if (lastUnreadMessage != null) {
-                        currentOnUnreadChange(lastUnreadMessage.uuid, lastUnreadMessage.receivedTime)
+                    // Find the first (newest in timeline, lowest index) visible unread message
+                    val firstVisibleUnreadIndex =
+                        (index until messages.itemCount).firstOrNull { i ->
+                            val msg = messages[i]
+                            msg != null && !msg.read && !msg.fromLocal
+                        }
+
+                    if (firstVisibleUnreadIndex != null) {
+                        val firstVisibleUnread = messages[firstVisibleUnreadIndex]
+                        if (firstVisibleUnread != null) {
+                            currentOnUnreadChange(firstVisibleUnread.uuid, firstVisibleUnread.receivedTime)
+                        }
                     }
                 }
             }
