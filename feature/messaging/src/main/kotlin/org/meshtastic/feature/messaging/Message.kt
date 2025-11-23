@@ -37,7 +37,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -94,6 +93,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
@@ -214,28 +214,31 @@ fun MessageScreen(
 
     // Track unread messages using lightweight metadata queries
     val hasUnreadMessages by viewModel.hasUnreadMessages(contactKey).collectAsStateWithLifecycle(initialValue = false)
-    val firstUnreadMessageUuid by viewModel.getFirstUnreadMessageUuid(contactKey).collectAsStateWithLifecycle(initialValue = null)
+    val firstUnreadMessageUuid by
+        viewModel.getFirstUnreadMessageUuid(contactKey).collectAsStateWithLifecycle(initialValue = null)
 
     var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
 
     // Find the index of the first unread message in the paged list
-    val firstUnreadIndex by remember(pagedMessages.itemCount, firstUnreadMessageUuid) {
-        derivedStateOf {
-            firstUnreadMessageUuid?.let { uuid ->
-                (0 until pagedMessages.itemCount).firstOrNull { index ->
-                    pagedMessages[index]?.uuid == uuid
+    val firstUnreadIndex by
+        remember(pagedMessages.itemCount, firstUnreadMessageUuid) {
+            derivedStateOf {
+                firstUnreadMessageUuid?.let { uuid ->
+                    (0 until pagedMessages.itemCount).firstOrNull { index -> pagedMessages[index]?.uuid == uuid }
                 }
             }
         }
-    }
 
     // Scroll to first unread message on initial load
     LaunchedEffect(hasPerformedInitialScroll, firstUnreadIndex, pagedMessages.itemCount) {
-        if (!hasPerformedInitialScroll && hasUnreadMessages && firstUnreadIndex != null && pagedMessages.itemCount > 0) {
+        if (hasPerformedInitialScroll || pagedMessages.itemCount == 0) return@LaunchedEffect
+
+        val shouldScrollToUnread = hasUnreadMessages && firstUnreadIndex != null
+        if (shouldScrollToUnread) {
             val targetIndex = (firstUnreadIndex!! - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
             listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
             hasPerformedInitialScroll = true
-        } else if (!hasPerformedInitialScroll && pagedMessages.itemCount > 0 && !hasUnreadMessages) {
+        } else if (!hasUnreadMessages) {
             // If no unread messages, just scroll to bottom (most recent)
             listState.scrollToItem(0)
             hasPerformedInitialScroll = true

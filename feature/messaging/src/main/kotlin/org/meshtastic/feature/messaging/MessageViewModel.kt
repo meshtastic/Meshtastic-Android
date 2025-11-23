@@ -104,8 +104,7 @@ constructor(
     fun getFirstUnreadMessageUuid(contactKey: String): Flow<Long?> =
         packetRepository.getFirstUnreadMessageUuid(contactKey)
 
-    fun hasUnreadMessages(contactKey: String): Flow<Boolean> =
-        packetRepository.hasUnreadMessages(contactKey)
+    fun hasUnreadMessages(contactKey: String): Flow<Boolean> = packetRepository.hasUnreadMessages(contactKey)
 
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 

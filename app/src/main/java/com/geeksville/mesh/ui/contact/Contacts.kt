@@ -27,9 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.VolumeMute
@@ -51,7 +48,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.animateFloatingActionButton
-import androidx.paging.LoadState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -69,6 +65,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.geeksville.mesh.model.Contact
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -127,22 +127,23 @@ fun ContactsScreen(
 
     // Create channel placeholders (always show broadcast contacts, even when empty)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
-    val channelPlaceholders = remember(channels.settingsList.size) {
-        (0 until channels.settingsList.size).map { ch ->
-            Contact(
-                contactKey = "$ch^all",
-                shortName = "$ch",
-                longName = channels.getChannel(ch)?.name ?: "Channel $ch",
-                lastMessageTime = "",
-                lastMessageText = "",
-                unreadCount = 0,
-                messageCount = 0,
-                isMuted = false,
-                isUnmessageable = false,
-                nodeColors = null,
-            )
+    val channelPlaceholders =
+        remember(channels.settingsList.size) {
+            (0 until channels.settingsList.size).map { ch ->
+                Contact(
+                    contactKey = "$ch^all",
+                    shortName = "$ch",
+                    longName = channels.getChannel(ch)?.name ?: "Channel $ch",
+                    lastMessageTime = "",
+                    lastMessageText = "",
+                    unreadCount = 0,
+                    messageCount = 0,
+                    isMuted = false,
+                    isUnmessageable = false,
+                    nodeColors = null,
+                )
+            }
         }
-    }
 
     val contactsListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -240,7 +241,7 @@ fun ContactsScreen(
                     onSelectAll = {
                         selectedContactKeys.clear()
                         selectedContactKeys.addAll(
-                            (0 until pagedContacts.itemCount).mapNotNull { pagedContacts[it]?.contactKey }
+                            (0 until pagedContacts.itemCount).mapNotNull { pagedContacts[it]?.contactKey },
                         )
                     },
                     isAllMuted = isAllMuted, // Pass the derived state
@@ -470,8 +471,8 @@ fun SelectionToolbar(
 /**
  * Non-paginated contact list view.
  *
- * NOTE: This is kept for ShareScreen which displays a simple contact picker.
- * The main ContactsScreen uses [ContactListViewPaged] for better performance.
+ * NOTE: This is kept for ShareScreen which displays a simple contact picker. The main ContactsScreen uses
+ * [ContactListViewPaged] for better performance.
  *
  * @see ContactListViewPaged for the paginated version
  */
@@ -514,38 +515,20 @@ fun ContactListViewPaged(
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
     listState: LazyListState,
+    modifier: Modifier = Modifier,
     channels: AppOnlyProtos.ChannelSet? = null,
 ) {
     val haptics = LocalHapticFeedback.current
 
     // Handle initial loading state
     if (contacts.loadState.refresh is LoadState.Loading && contacts.itemCount == 0) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            CircularProgressIndicator()
-        }
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         return
     }
 
-    // Filter placeholders to only show those not in contacts
-    // We need to collect all contact keys first before filtering placeholders
-    val contactKeys by remember(contacts.itemCount) {
-        derivedStateOf {
-            (0 until contacts.itemCount).mapNotNull { contacts[it]?.contactKey }.toSet()
-        }
-    }
-    val visiblePlaceholders by remember(channelPlaceholders, contactKeys) {
-        derivedStateOf {
-            channelPlaceholders.filter { placeholder ->
-                // Show placeholder if no contact exists for this channel
-                !contactKeys.contains(placeholder.contactKey)
-            }
-        }
-    }
+    val visiblePlaceholders = rememberVisiblePlaceholders(contacts, channelPlaceholders)
 
-    LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
+    LazyColumn(modifier = modifier.fillMaxSize(), state = listState) {
         // Show channel placeholders first
         items(
             count = visiblePlaceholders.size,
@@ -568,10 +551,7 @@ fun ContactListViewPaged(
         }
 
         // Show paged contacts
-        items(
-            count = contacts.itemCount,
-            key = contacts.itemKey { it.contactKey },
-        ) { index ->
+        items(count = contacts.itemCount, key = contacts.itemKey { it.contactKey }) { index ->
             val contact = contacts[index]
             if (contact != null) {
                 val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
@@ -595,17 +575,26 @@ fun ContactListViewPaged(
             when {
                 loadState.append is LoadState.Loading -> {
                     item(key = "append_loading") {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
+                        Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator()
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun rememberVisiblePlaceholders(
+    contacts: LazyPagingItems<Contact>,
+    channelPlaceholders: List<Contact>,
+): List<Contact> {
+    val contactKeys by
+        remember(contacts.itemCount) {
+            derivedStateOf { (0 until contacts.itemCount).mapNotNull { contacts[it]?.contactKey }.toSet() }
+        }
+    return remember(channelPlaceholders, contactKeys) {
+        channelPlaceholders.filter { placeholder -> !contactKeys.contains(placeholder.contactKey) }
     }
 }

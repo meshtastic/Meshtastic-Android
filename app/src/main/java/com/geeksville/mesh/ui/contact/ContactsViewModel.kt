@@ -65,8 +65,8 @@ constructor(
     /**
      * Non-paginated contact list.
      *
-     * NOTE: This is kept for ShareScreen which needs a simple, non-paginated list of contacts.
-     * The main ContactsScreen uses [contactListPaged] instead for better performance with large contact lists.
+     * NOTE: This is kept for ShareScreen which needs a simple, non-paginated list of contacts. The main ContactsScreen
+     * uses [contactListPaged] instead for better performance with large contact lists.
      *
      * @see contactListPaged for the paginated version used in ContactsScreen
      */
@@ -128,54 +128,56 @@ constructor(
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val contactListPaged: Flow<PagingData<Contact>> =
-        combine(
-            nodeRepository.myNodeInfo,
-            channels,
-            packetRepository.getContactSettings(),
-        ) { myNodeInfo, channelSet, settings ->
+        combine(nodeRepository.myNodeInfo, channels, packetRepository.getContactSettings()) {
+                myNodeInfo,
+                channelSet,
+                settings,
+            ->
             Triple(myNodeInfo?.myNodeNum, channelSet, settings)
-        }.flatMapLatest { (myNodeNum, channelSet, settings) ->
-            packetRepository.getContactsPaged().map { pagingData ->
-                pagingData.map { packet ->
-                    val data = packet.data
-                    val contactKey = packet.contact_key
+        }
+            .flatMapLatest { (myNodeNum, channelSet, settings) ->
+                packetRepository.getContactsPaged().map { pagingData ->
+                    pagingData.map { packet ->
+                        val data = packet.data
+                        val contactKey = packet.contact_key
 
-                    // Determine if this is my message (originated on this device)
-                    val fromLocal = data.from == DataPacket.ID_LOCAL
-                    val toBroadcast = data.to == DataPacket.ID_BROADCAST
+                        // Determine if this is my message (originated on this device)
+                        val fromLocal = data.from == DataPacket.ID_LOCAL
+                        val toBroadcast = data.to == DataPacket.ID_BROADCAST
 
-                    // grab usernames from NodeInfo
-                    val user = getUser(if (fromLocal) data.to else data.from)
-                    val node = getNode(if (fromLocal) data.to else data.from)
+                        // grab usernames from NodeInfo
+                        val user = getUser(if (fromLocal) data.to else data.from)
+                        val node = getNode(if (fromLocal) data.to else data.from)
 
-                    val shortName = user.shortName
-                    val longName =
-                        if (toBroadcast) {
-                            channelSet.getChannel(data.channel)?.name ?: getString(Res.string.channel_name)
-                        } else {
-                            user.longName
-                        }
+                        val shortName = user.shortName
+                        val longName =
+                            if (toBroadcast) {
+                                channelSet.getChannel(data.channel)?.name ?: getString(Res.string.channel_name)
+                            } else {
+                                user.longName
+                            }
 
-                    Contact(
-                        contactKey = contactKey,
-                        shortName = if (toBroadcast) "${data.channel}" else shortName,
-                        longName = longName,
-                        lastMessageTime = getShortDate(data.time),
-                        lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
-                        unreadCount = runBlocking(Dispatchers.IO) { packetRepository.getUnreadCount(contactKey) },
-                        messageCount = runBlocking(Dispatchers.IO) { packetRepository.getMessageCount(contactKey) },
-                        isMuted = settings[contactKey]?.isMuted == true,
-                        isUnmessageable = user.isUnmessagable,
-                        nodeColors =
-                        if (!toBroadcast) {
-                            node.colors
-                        } else {
-                            null
-                        },
-                    )
+                        Contact(
+                            contactKey = contactKey,
+                            shortName = if (toBroadcast) "${data.channel}" else shortName,
+                            longName = longName,
+                            lastMessageTime = getShortDate(data.time),
+                            lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
+                            unreadCount = runBlocking(Dispatchers.IO) { packetRepository.getUnreadCount(contactKey) },
+                            messageCount = runBlocking(Dispatchers.IO) { packetRepository.getMessageCount(contactKey) },
+                            isMuted = settings[contactKey]?.isMuted == true,
+                            isUnmessageable = user.isUnmessagable,
+                            nodeColors =
+                            if (!toBroadcast) {
+                                node.colors
+                            } else {
+                                null
+                            },
+                        )
+                    }
                 }
             }
-        }.cachedIn(viewModelScope)
+            .cachedIn(viewModelScope)
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 

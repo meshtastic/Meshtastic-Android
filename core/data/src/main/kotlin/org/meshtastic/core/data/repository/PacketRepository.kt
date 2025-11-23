@@ -51,16 +51,11 @@ constructor(
     fun getContacts(): Flow<Map<String, Packet>> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactKeys() }
 
-    fun getContactsPaged(): Flow<PagingData<Packet>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 30,
-                enablePlaceholders = false,
-                initialLoadSize = 30,
-            ),
-            pagingSourceFactory = { dbManager.currentDb.value.packetDao().getContactKeysPaged() },
-        ).flow
-    }
+    fun getContactsPaged(): Flow<PagingData<Packet>> = Pager(
+        config = PagingConfig(pageSize = 30, enablePlaceholders = false, initialLoadSize = 30),
+        pagingSourceFactory = { dbManager.currentDb.value.packetDao().getContactKeysPaged() },
+    )
+        .flow
 
     suspend fun getMessageCount(contact: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getMessageCount(contact) }
@@ -115,15 +110,12 @@ constructor(
         }
     }
 
-    fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 50,
-                enablePlaceholders = false,
-                initialLoadSize = 50,
-            ),
-            pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contact) },
-        ).flow.map { pagingData ->
+    fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>> = Pager(
+        config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50),
+        pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contact) },
+    )
+        .flow
+        .map { pagingData ->
             pagingData.map { packet ->
                 val message = packet.toMessage(getNode)
                 message.replyId
@@ -133,7 +125,6 @@ constructor(
                     ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
             }
         }
-    }
 
     suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateMessageStatus(d, m) }

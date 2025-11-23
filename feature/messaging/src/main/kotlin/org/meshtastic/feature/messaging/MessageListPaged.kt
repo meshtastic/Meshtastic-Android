@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -96,10 +97,10 @@ private fun MutableState<Set<Long>>.toggle(uuid: Long) {
 
 @Composable
 internal fun MessageListPaged(
-    modifier: Modifier = Modifier,
-    listState: LazyListState = rememberLazyListState(),
     state: MessageListPagedState,
     handlers: MessageListHandlers,
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { state.selectedIds.value.isNotEmpty() } }
@@ -125,11 +126,7 @@ internal fun MessageListPaged(
     val coroutineScope = rememberCoroutineScope()
 
     // Track unread count based on scroll position
-    UpdateUnreadCountPaged(
-        listState = listState,
-        messages = state.messages,
-        onUnreadChanged = handlers.onUnreadChanged,
-    )
+    UpdateUnreadCountPaged(listState = listState, messages = state.messages, onUnreadChange = handlers.onUnreadChanged)
 
     // Auto-scroll to bottom when new messages arrive
     AutoScrollToBottomPaged(
@@ -164,26 +161,18 @@ private fun MessageListPagedContent(
     modifier: Modifier = Modifier,
 ) {
     // Calculate unread divider position
-    val unreadDividerIndex by remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
-        derivedStateOf {
-            state.firstUnreadMessageUuid?.let { uuid ->
-                (0 until state.messages.itemCount).firstOrNull { index ->
-                    state.messages[index]?.uuid == uuid
+    val unreadDividerIndex by
+        remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
+            derivedStateOf {
+                state.firstUnreadMessageUuid?.let { uuid ->
+                    (0 until state.messages.itemCount).firstOrNull { index -> state.messages[index]?.uuid == uuid }
                 }
             }
         }
-    }
 
     Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = listState,
-            reverseLayout = true,
-        ) {
-            items(
-                count = state.messages.itemCount,
-                key = state.messages.itemKey { it.uuid },
-            ) { index ->
+        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
+            items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
                 val message = state.messages[index]
                 if (message != null) {
                     renderPagedChatMessageRow(
@@ -211,9 +200,7 @@ private fun MessageListPagedContent(
                     loadState.append is LoadState.Loading -> {
                         item(key = "append_loading") {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 CircularProgressIndicator()
@@ -270,9 +257,10 @@ private fun LazyItemScope.renderPagedChatMessageRow(
                 // Note: With pagination, we can't guarantee the original message is loaded
                 // This is a limitation of pagination - we would need to implement
                 // a search/jump feature to load and scroll to specific messages
-                val targetIndex = (0 until state.messages.itemCount).firstOrNull { index ->
-                    state.messages[index]?.packetId == message.replyId
-                }
+                val targetIndex =
+                    (0 until state.messages.itemCount).firstOrNull { index ->
+                        state.messages[index]?.packetId == message.replyId
+                    }
                 if (targetIndex != null) {
                     listState.animateScrollToItem(index = targetIndex)
                 }
@@ -312,22 +300,25 @@ private fun AutoScrollToBottomPaged(
 private fun UpdateUnreadCountPaged(
     listState: LazyListState,
     messages: LazyPagingItems<Message>,
-    onUnreadChanged: (Long, Long) -> Unit,
+    onUnreadChange: (Long, Long) -> Unit,
 ) {
+    val currentOnUnreadChange by rememberUpdatedState(onUnreadChange)
+
     LaunchedEffect(messages.itemCount) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
                 // Find the last unread message in the loaded items
-                val lastUnreadIndex = (0 until messages.itemCount).lastOrNull { i ->
-                    val msg = messages[i]
-                    msg != null && !msg.read && !msg.fromLocal
-                }
+                val lastUnreadIndex =
+                    (0 until messages.itemCount).lastOrNull { i ->
+                        val msg = messages[i]
+                        msg != null && !msg.read && !msg.fromLocal
+                    }
 
                 if (lastUnreadIndex != null && index <= lastUnreadIndex && index < messages.itemCount) {
                     val visibleMessage = messages[index]
                     if (visibleMessage != null && !visibleMessage.read && !visibleMessage.fromLocal) {
-                        onUnreadChanged(visibleMessage.uuid, visibleMessage.receivedTime)
+                        currentOnUnreadChange(visibleMessage.uuid, visibleMessage.receivedTime)
                     }
                 }
             }
