@@ -757,4 +757,9 @@
     <string name="eight_hours">8 小时</string>
     <string name="one_day">24 小时</string>
     <string name="two_days">48 小时</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">更新固件</string>
+    <string name="firmware_update_done">完成</string>
+    <string name="firmware_update_no_device">设备未连接</string>
+    <string name="firmware_update_failed">更新失败</string>
 </resources>

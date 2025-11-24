@@ -135,4 +135,7 @@
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">Mesaj</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Updateaza firmware-ul</string>
+    <string name="firmware_update_failed">Actualizare eșuată</string>
 </resources>
