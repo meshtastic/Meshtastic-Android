@@ -42,6 +42,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DeviceListEntry
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
+import no.nordicsemi.kotlin.ble.client.exception.OperationFailedException
+import no.nordicsemi.kotlin.ble.client.exception.PeripheralNotConnectedException
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
@@ -58,7 +61,9 @@ import org.meshtastic.proto.TelemetryProtos
 import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
 
-@Suppress("TooGenericExceptionCaught")
+private const val RSSI_DELAY = 10
+private const val RSSI_TIMEOUT = 5
+
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
@@ -72,10 +77,17 @@ fun CurrentlyConnectedInfo(
         if (bleDevice != null) {
             while (bleDevice.peripheral.isConnected) {
                 try {
-                    rssi = bleDevice.peripheral.readRssi()
-                    delay(10.seconds)
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to read RSSI")
+                    rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.peripheral.readRssi() }
+                    delay(RSSI_DELAY.seconds)
+                } catch (e: PeripheralNotConnectedException) {
+                    Timber.e(e, "Failed to read RSSI ${e.message}")
+                    break
+                } catch (e: OperationFailedException) {
+                    Timber.e(e, "Failed to read RSSI ${e.message}")
+                    break
+                } catch (e: SecurityException) {
+                    Timber.e(e, "Failed to read RSSI ${e.message}")
+                    break
                 }
             }
         }
