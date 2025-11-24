@@ -316,36 +316,50 @@ private fun UpdateUnreadCountPaged(
             }
         }
 
-    LaunchedEffect(remoteMessageCount, listState) {
-        snapshotFlow { listState.firstVisibleItemIndex }
-            .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
-            .collectLatest { index ->
-                // Find the last (oldest in timeline, highest index) unread message in loaded items
-                val lastUnreadIndex =
-                    (0 until messages.itemCount).lastOrNull { i ->
-                        val msg = messages[i]
-                        msg != null && !msg.read && !msg.fromLocal
-                    }
+    var hasUserInteracted by remember { mutableStateOf(false) }
 
-                // If we've scrolled to/past the oldest unread, mark the first visible unread message
-                // Since newer messages have HIGHER timestamps, marking a newer message's timestamp
-                // will batch-mark all older messages via SQL: WHERE received_time <= timestamp
-                if (lastUnreadIndex != null && index <= lastUnreadIndex) {
-                    // Find the first (newest in timeline, lowest index) visible unread message
-                    val firstVisibleUnreadIndex =
-                        (index until messages.itemCount).firstOrNull { i ->
+    // Track user interaction to prevent marking as read on initial load
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress || listState.firstVisibleItemIndex > 0 }
+            .collectLatest { interacted ->
+                if (interacted && !hasUserInteracted) {
+                    hasUserInteracted = true
+                }
+            }
+    }
+
+    LaunchedEffect(remoteMessageCount, listState, hasUserInteracted) {
+        if (hasUserInteracted) {
+            snapshotFlow { listState.firstVisibleItemIndex }
+                .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
+                .collectLatest { index ->
+                    // Find the last (oldest in timeline, highest index) unread message in loaded items
+                    val lastUnreadIndex =
+                        (0 until messages.itemCount).lastOrNull { i ->
                             val msg = messages[i]
                             msg != null && !msg.read && !msg.fromLocal
                         }
 
-                    if (firstVisibleUnreadIndex != null) {
-                        val firstVisibleUnread = messages[firstVisibleUnreadIndex]
-                        if (firstVisibleUnread != null) {
-                            currentOnUnreadChange(firstVisibleUnread.uuid, firstVisibleUnread.receivedTime)
+                    // If we've scrolled to/past the oldest unread, mark the first visible unread message
+                    // Since newer messages have HIGHER timestamps, marking a newer message's timestamp
+                    // will batch-mark all older messages via SQL: WHERE received_time <= timestamp
+                    if (lastUnreadIndex != null && index <= lastUnreadIndex) {
+                        // Find the first (newest in timeline, lowest index) visible unread message
+                        val firstVisibleUnreadIndex =
+                            (index until messages.itemCount).firstOrNull { i ->
+                                val msg = messages[i]
+                                msg != null && !msg.read && !msg.fromLocal
+                            }
+
+                        if (firstVisibleUnreadIndex != null) {
+                            val firstVisibleUnread = messages[firstVisibleUnreadIndex]
+                            if (firstVisibleUnread != null) {
+                                currentOnUnreadChange(firstVisibleUnread.uuid, firstVisibleUnread.receivedTime)
+                            }
                         }
                     }
                 }
-            }
+        }
     }
 }
 
