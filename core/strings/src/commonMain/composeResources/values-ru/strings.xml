@@ -866,4 +866,9 @@
     <string name="two_days">48 часов</string>
     <string name="last_heard_filter_label">Фильтр по времени последнего сообщения: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Обновите прошивку</string>
+    <string name="firmware_update_retry">Повторить</string>
+    <string name="firmware_update_done">Готово</string>
+    <string name="firmware_update_failed">Ошибка обновления</string>
 </resources>

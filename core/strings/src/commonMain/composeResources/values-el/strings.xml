@@ -205,4 +205,7 @@
     <string name="eight_hours">8 Ώρες</string>
     <string name="one_day">24 Ώρες</string>
     <string name="two_days">48 Ώρες</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Αναβάθμιση Firmware</string>
+    <string name="firmware_update_failed">Αποτυχία ενημέρωσης</string>
 </resources>

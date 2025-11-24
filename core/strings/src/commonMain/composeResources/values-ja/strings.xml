@@ -548,4 +548,7 @@
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">リンクを処理できるアプリケーションがありません。</string>
     <string name="system_settings">システム設定</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">ファームウェア更新</string>
+    <string name="firmware_update_failed">更新失敗</string>
 </resources>

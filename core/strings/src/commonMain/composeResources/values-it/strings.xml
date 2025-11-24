@@ -860,4 +860,8 @@
     <string name="unset">Disattiva - 0</string>
     <string name="relayed_by">Ritrasmesso da: %1$s</string>
     <string name="preserve_favorites">Conservare I Preferiti?</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Aggiorna Firmware</string>
+    <string name="firmware_update_done">Fatto</string>
+    <string name="firmware_update_failed">Aggiornamento non riuscito</string>
 </resources>

@@ -20,8 +20,11 @@ package org.meshtastic.feature.messaging
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -82,21 +85,26 @@ constructor(
     val contactSettings: StateFlow<Map<String, ContactSettings>> =
         packetRepository.getContactSettings().stateInWhileSubscribed(initialValue = emptyMap())
 
-    private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val messagesForContactKey: StateFlow<List<Message>> =
-        contactKeyForMessages
+    private val contactKeyForPagedMessages: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val pagedMessagesForContactKey: Flow<PagingData<Message>> =
+        contactKeyForPagedMessages
             .filterNotNull()
-            .flatMapLatest { contactKey -> packetRepository.getMessagesFrom(contactKey, ::getNode) }
-            .stateInWhileSubscribed(initialValue = emptyList())
+            .flatMapLatest { contactKey -> packetRepository.getMessagesFromPaged(contactKey, ::getNode) }
+            .cachedIn(viewModelScope)
 
     fun setTitle(title: String) {
         viewModelScope.launch { _title.value = title }
     }
 
-    fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
-        contactKeyForMessages.value = contactKey
-        return messagesForContactKey
+    fun getMessagesFromPaged(contactKey: String): Flow<PagingData<Message>> {
+        contactKeyForPagedMessages.value = contactKey
+        return pagedMessagesForContactKey
     }
+
+    fun getFirstUnreadMessageUuid(contactKey: String): Flow<Long?> =
+        packetRepository.getFirstUnreadMessageUuid(contactKey)
+
+    fun hasUnreadMessages(contactKey: String): Flow<Boolean> = packetRepository.hasUnreadMessages(contactKey)
 
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 

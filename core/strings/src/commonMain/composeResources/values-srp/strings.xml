@@ -446,4 +446,8 @@
     <string name="eight_hours">8 Сати</string>
     <string name="one_day">24 Сати</string>
     <string name="two_days">48 Сати</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Ажурирај фирмвер</string>
+    <string name="firmware_update_no_device">Нема повезаних уређаја</string>
+    <string name="firmware_update_failed">Ажурирање неуспело</string>
 </resources>

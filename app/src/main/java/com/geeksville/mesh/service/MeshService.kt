@@ -228,7 +228,7 @@ class MeshService : Service() {
         private const val DEFAULT_CONFIG_ONLY_NONCE = 69420
         private const val DEFAULT_NODE_INFO_NONCE = 69421
 
-        private const val WANT_CONFIG_DELAY = 50L
+        private const val WANT_CONFIG_DELAY = 100L
         private const val HISTORY_TAG = "HistoryReplay"
         private const val DEFAULT_HISTORY_RETURN_WINDOW_MINUTES = 60 * 24
         private const val DEFAULT_HISTORY_RETURN_MAX_MESSAGES = 100
@@ -1722,13 +1722,30 @@ class MeshService : Service() {
         // Just replace/add any entry
         updateNodeInfo(info.num) {
             if (info.hasUser()) {
-                it.user =
-                    info.user.copy {
-                        if (isLicensed) clearPublicKey()
-                        if (info.viaMqtt) longName = "$longName (MQTT)"
-                    }
-                it.longName = it.user.longName
-                it.shortName = it.user.shortName
+                // Check if this is a default/unknown user from firmware (node was evicted and re-created)
+                val isDefaultName = info.user.longName.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+                val isDefaultHwModel = info.user.hwModel == MeshProtos.HardwareModel.UNSET
+                val hasExistingUser = it.user.id.isNotEmpty() && it.user.hwModel != MeshProtos.HardwareModel.UNSET
+
+                // If firmware sends a default user (evicted node), preserve our existing user data
+                val shouldPreserveExisting = hasExistingUser && isDefaultName && isDefaultHwModel
+
+                if (shouldPreserveExisting) {
+                    // Firmware sent us a placeholder - keep all our existing user data
+                    Timber.d(
+                        "Preserving existing user data for node ${info.num}: " +
+                            "kept='${it.user.longName}' (hwModel=${it.user.hwModel}), " +
+                            "skipped default='${info.user.longName}' (hwModel=UNSET)",
+                    )
+                } else {
+                    it.user =
+                        info.user.copy {
+                            if (isLicensed) clearPublicKey()
+                            if (info.viaMqtt) longName = "$longName (MQTT)"
+                        }
+                    it.longName = it.user.longName
+                    it.shortName = it.user.shortName
+                }
             }
 
             if (info.hasPosition()) {

@@ -903,4 +903,8 @@
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%1$s</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">更新韌體</string>
+    <string name="firmware_update_done">完成</string>
+    <string name="firmware_update_failed">更新失敗</string>
 </resources>
