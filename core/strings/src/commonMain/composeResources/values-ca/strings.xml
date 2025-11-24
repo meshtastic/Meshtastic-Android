@@ -201,4 +201,7 @@
     <string name="eight_hours">8 Hores</string>
     <string name="one_day">24 Hores</string>
     <string name="two_days">48 Hores</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Actualitzar firmware</string>
+    <string name="firmware_update_failed">Actualització fallida</string>
 </resources>

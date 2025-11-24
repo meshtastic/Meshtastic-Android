@@ -425,4 +425,8 @@
     <string name="eight_hours">8 Godzin</string>
     <string name="one_day">24 Godzin</string>
     <string name="two_days">48 Godzin</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Aktualizuj oprogramowanie</string>
+    <string name="firmware_update_no_device">Brak podłączonych urządzeń</string>
+    <string name="firmware_update_failed">Aktualizacja nie udała się</string>
 </resources>

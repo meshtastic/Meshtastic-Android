@@ -910,4 +910,9 @@
     <string name="relayed_by">Relayé par : %1$s</string>
     <string name="preserve_favorites">Conserver les favoris ?</string>
     <string name="usb_devices">Appareils USB</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Mise à jour du Firmware</string>
+    <string name="firmware_update_done">Terminé</string>
+    <string name="firmware_update_no_device">Aucun appareil connecté</string>
+    <string name="firmware_update_failed">Échec de la mise à jour</string>
 </resources>

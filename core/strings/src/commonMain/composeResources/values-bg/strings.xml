@@ -728,4 +728,8 @@
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <string name="unset">Не е зададен - 0</string>
     <string name="usb_devices">USB устройства</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Актуализиране на фърмуера</string>
+    <string name="firmware_update_done">Готово</string>
+    <string name="firmware_update_failed">Неуспешна актуализация</string>
 </resources>

@@ -307,4 +307,7 @@
     <string name="eight_hours">8 Годин</string>
     <string name="one_day">24 Годин</string>
     <string name="two_days">48 Годин</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Оновлення прошивки</string>
+    <string name="firmware_update_failed">Помилка оновлення</string>
 </resources>

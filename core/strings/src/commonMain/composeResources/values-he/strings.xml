@@ -149,4 +149,7 @@
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">הודעה</string>
     <string name="settings">הגדרות</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">עדכן קושחה</string>
+    <string name="firmware_update_failed">העדכון נכשל</string>
 </resources>
