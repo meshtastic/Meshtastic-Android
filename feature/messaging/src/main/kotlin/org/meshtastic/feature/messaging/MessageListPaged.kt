@@ -316,23 +316,20 @@ private fun UpdateUnreadCountPaged(
             }
         }
 
-    var hasUserInteracted by remember { mutableStateOf(false) }
-
-    // Track user interaction to prevent marking as read on initial load
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress || listState.firstVisibleItemIndex > 0 }
-            .collectLatest { interacted ->
-                if (interacted && !hasUserInteracted) {
-                    hasUserInteracted = true
-                }
+    // Mark messages as read after debounce period
+    // Handles both scrolling cases and when all unread messages are visible without scrolling
+    LaunchedEffect(remoteMessageCount, listState) {
+        snapshotFlow {
+            // Emit when scroll stops OR when at initial position (covers no-scroll case)
+            if (listState.isScrollInProgress) {
+                null // Scrolling in progress, don't emit
+            } else {
+                listState.firstVisibleItemIndex // Emit current position when not scrolling
             }
-    }
-
-    LaunchedEffect(remoteMessageCount, listState, hasUserInteracted) {
-        if (hasUserInteracted) {
-            snapshotFlow { listState.firstVisibleItemIndex }
-                .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
-                .collectLatest { index ->
+        }
+            .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
+            .collectLatest { index ->
+                if (index != null) {
                     // Find the last (oldest in timeline, highest index) unread message in loaded items
                     val lastUnreadIndex =
                         (0 until messages.itemCount).lastOrNull { i ->
@@ -340,7 +337,7 @@ private fun UpdateUnreadCountPaged(
                             msg != null && !msg.read && !msg.fromLocal
                         }
 
-                    // If we've scrolled to/past the oldest unread, mark the first visible unread message
+                    // If we're at/past the oldest unread, mark the first visible unread message
                     // Since newer messages have HIGHER timestamps, marking a newer message's timestamp
                     // will batch-mark all older messages via SQL: WHERE received_time <= timestamp
                     if (lastUnreadIndex != null && index <= lastUnreadIndex) {
@@ -359,7 +356,7 @@ private fun UpdateUnreadCountPaged(
                         }
                     }
                 }
-        }
+            }
     }
 }
 
