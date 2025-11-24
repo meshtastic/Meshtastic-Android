@@ -112,6 +112,8 @@ constructor(
     private var tempFirmwareFile: File? = null
 
     init {
+        // Cleanup potential leftovers from previous crashes
+        fileHandler.cleanupAllTemporaryFiles()
         checkForUpdates()
 
         // Start listening to DFU events immediately
@@ -398,7 +400,7 @@ private fun getDeviceFirmwareUrl(url: String, targetArch: String): String {
         if (url.contains(arch, ignoreCase = true)) {
             // Replace the found architecture with the target architecture
             // We use replacement to preserve the rest of the URL structure (version, server, etc.)
-            return url.replace(arch, targetArch, ignoreCase = true)
+            return url.replace(arch, targetArch.lowercase(), ignoreCase = true)
         }
     }
 
@@ -467,20 +469,16 @@ private fun dfuProgressFlow(context: Context): Flow<DfuInternalState> = callback
  * extracting specific files from Zip archives.
  */
 private class FirmwareFileHandler(private val context: Context, private val client: OkHttpClient) {
-    fun cleanupAllTemporaryFiles() {
-        // Use cacheDir directly with File constructor for cleaner paths
-        File(context.cacheDir, "firmware_release.zip").deleteIfExists()
-        File(context.cacheDir, "firmware_direct.zip").deleteIfExists()
-        File(context.cacheDir, "local_update.zip").deleteIfExists()
-    }
+    private val tempDir = File(context.cacheDir, "firmware_update")
 
-    @Suppress("TooGenericExceptionCaught")
-    private fun File.deleteIfExists() {
-        try {
-            if (exists()) delete()
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to delete file: $name")
+    fun cleanupAllTemporaryFiles() {
+        runCatching {
+            if (tempDir.exists()) {
+                tempDir.deleteRecursively()
+            }
+            tempDir.mkdirs()
         }
+            .onFailure { e -> Timber.w(e, "Failed to cleanup temp directory") }
     }
 
     suspend fun checkUrlExists(url: String): Boolean = withContext(Dispatchers.IO) {
@@ -497,7 +495,10 @@ private class FirmwareFileHandler(private val context: Context, private val clie
         val inputStream =
             context.contentResolver.openInputStream(uri) ?: throw IOException("Cannot open content URI")
 
-        val targetFile = File(context.cacheDir, "local_update.zip")
+        // Ensure tempDir exists
+        if (!tempDir.exists()) tempDir.mkdirs()
+
+        val targetFile = File(tempDir, "local_update.zip")
 
         inputStream.use { input -> FileOutputStream(targetFile).use { output -> input.copyTo(output) } }
         targetFile
@@ -512,7 +513,11 @@ private class FirmwareFileHandler(private val context: Context, private val clie
 
             val body = response.body ?: throw IOException("Empty response body")
             val contentLength = body.contentLength()
-            val targetFile = File(context.cacheDir, fileName)
+
+            // Ensure tempDir exists
+            if (!tempDir.exists()) tempDir.mkdirs()
+
+            val targetFile = File(tempDir, fileName)
 
             body.byteStream().use { input ->
                 FileOutputStream(targetFile).use { output ->
@@ -547,12 +552,15 @@ private class FirmwareFileHandler(private val context: Context, private val clie
         val targetLowerCase = target.lowercase()
         val matchingEntries = mutableListOf<Pair<ZipEntry, File>>()
 
+        // Ensure tempDir exists
+        if (!tempDir.exists()) tempDir.mkdirs()
+
         ZipInputStream(zipFile.inputStream()).use { zipInput ->
             var entry = zipInput.nextEntry
             while (entry != null) {
                 val name = entry.name.lowercase()
                 if (!entry.isDirectory && isValidFirmwareFile(name, targetLowerCase)) {
-                    val outFile = File(context.cacheDir, File(name).name)
+                    val outFile = File(tempDir, File(name).name)
                     // We extract to verify it's a valid zip entry payload
                     FileOutputStream(outFile).use { output -> zipInput.copyTo(output) }
                     matchingEntries.add(entry to outFile)
