@@ -17,16 +17,22 @@
 
 package org.meshtastic.feature.settings.radio.component
 
+import android.media.MediaPlayer
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,6 +58,7 @@ import org.meshtastic.core.strings.output_duration_milliseconds
 import org.meshtastic.core.strings.output_led_active_high
 import org.meshtastic.core.strings.output_led_gpio
 import org.meshtastic.core.strings.output_vibra_gpio
+import org.meshtastic.core.strings.play
 import org.meshtastic.core.strings.ringtone
 import org.meshtastic.core.strings.use_i2s_as_buzzer
 import org.meshtastic.core.strings.use_pwm_buzzer
@@ -65,7 +72,10 @@ import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
+import timber.log.Timber
+import java.io.File
 
+@Suppress("LongMethod", "TooGenericExceptionCaught")
 @Composable
 fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
@@ -235,6 +245,29 @@ fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewM
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { ringtoneInput = it },
+                    trailingIcon = {
+                        val context = LocalContext.current
+                        IconButton(
+                            onClick = {
+                                try {
+                                    val tempFile = File.createTempFile("ringtone", ".rtttl", context.cacheDir)
+                                    tempFile.writeText(ringtoneInput)
+                                    val mediaPlayer = MediaPlayer()
+                                    mediaPlayer.setDataSource(tempFile.absolutePath)
+                                    mediaPlayer.prepare()
+                                    mediaPlayer.start()
+                                    mediaPlayer.setOnCompletionListener {
+                                        it.release()
+                                        tempFile.delete()
+                                    }
+                                } catch (e: Exception) {
+                                    Timber.e(e, "Failed to play ringtone")
+                                }
+                            },
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.play))
+                        }
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
