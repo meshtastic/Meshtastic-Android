@@ -956,6 +956,7 @@
     <plurals name="relays">
         <item quantity="one">Heard %1$d Relay</item>
         <item quantity="other">Heard %1$d Relays</item>
-    </plurals>    <string name="preserve_favorites">Preserve Favorites?</string>
+    </plurals>
+    <string name="preserve_favorites">Preserve Favorites?</string>
     <string name="usb_devices">USB Devices</string>
 </resources>
