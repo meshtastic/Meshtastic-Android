@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">изчистване на филтъра за възли</string>
     <string name="node_filter_title">Филтриране по</string>
     <string name="node_filter_include_unknown">Включително неизвестните</string>
+    <string name="node_filter_exclude_infrastructure">Изключване на инфраструктурата</string>
     <string name="node_filter_only_online">Скриване на офлайн възлите</string>
     <string name="node_filter_only_direct">Показване само на директни възли</string>
     <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете, за да се върнете към списъка с възли.</string>
@@ -35,6 +36,7 @@
     <string name="node_sort_via_mqtt">с MQTT</string>
     <string name="via_mqtt">с MQTT</string>
     <string name="node_sort_via_favorite">Чрез любим</string>
+    <string name="node_filter_show_ignored">Показване само на игнорираните възли</string>
     <string name="unrecognized">Неразпознат</string>
     <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
@@ -400,6 +402,7 @@
     <string name="gpio_pin_for_rotary_encoder_b_port">GPIO пин за ротационен енкодер Б порт</string>
     <string name="gpio_pin_for_rotary_encoder_press_port">GPIO пин за ротационен енкодер Press порт</string>
     <string name="messages">Съобщения</string>
+    <string name="device_db_cache_limit_summary">Максимален брой бази данни на устройства, които да се съхраняват на този телефон</string>
     <string name="friendly_name">Приятелско име</string>
     <string name="use_input_pullup_mode">Използване на режим INPUT_PULLUP</string>
     <string name="device_config">Устройство</string>
@@ -409,6 +412,7 @@
     <string name="rebroadcast_mode">Режим на препредаване</string>
     <string name="time_zone">Часова зона</string>
     <string name="display_config">Дисплей</string>
+    <string name="screen_on_for">Екранът е включен за</string>
     <string name="compass_north_top">Север на компаса отгоре</string>
     <string name="flip_screen">Обръщане на екрана</string>
     <string name="display_units">Показвани единици</string>
@@ -709,6 +713,7 @@
     <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
     <string name="secondary_channel_position_feature">Деактивирането на позицията на първичния канал позволява периодично излъчване на позиция на първия вторичен канал с активирана позиция, в противен случай е необходимо ръчно заявяване на позиция.</string>
     <string name="device_configuration">Конфигурация на устройството</string>
+    <string name="remotely_administrating">"[Отдалечен] %1$s"</string>
     <string name="device_telemetry_enabled">Изпращане на телеметрия на устройството</string>
     <string name="one_hour">1 час</string>
     <string name="eight_hours">8 часа</string>
@@ -721,4 +726,6 @@
     <string name="no_local_stats">Няма налична статистика</string>
     <string name="analytics_notice">Анализите се събират, за да ни помогнат да подобрим приложението за Android (благодарим ви). Ще получаваме анонимизирана информация за поведението на потребителите. Това включва отчети за сривове, екрани, използвани в приложението и др.</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
+    <string name="unset">Не е зададен - 0</string>
+    <string name="usb_devices">USB устройства</string>
 </resources>

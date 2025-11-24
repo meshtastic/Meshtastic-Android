@@ -61,6 +61,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
+import timber.log.Timber
 import kotlin.collections.buildList
 
 internal data class MessageListState(
@@ -369,16 +370,23 @@ private fun UpdateUnreadCount(
     messages: List<Message>,
     onUnreadChanged: (Long, Long) -> Unit,
 ) {
-    LaunchedEffect(messages) {
+    val remoteMessageCount = remember(messages) { messages.count { !it.fromLocal } }
+
+    LaunchedEffect(remoteMessageCount, listState) {
+        Timber.d("UpdateUnreadCount LaunchedEffect started/restarted, remoteMessageCount=$remoteMessageCount")
         snapshotFlow { listState.firstVisibleItemIndex }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
+                Timber.d("Debounce triggered, index=$index, messages.size=${messages.size}")
                 val lastUnreadIndex = messages.indexOfLast { !it.read && !it.fromLocal }
-                if (lastUnreadIndex != -1 && index <= lastUnreadIndex && index < messages.size) {
-                    val visibleMessage = messages[index]
-                    if (!visibleMessage.read && !visibleMessage.fromLocal) {
-                        onUnreadChanged(visibleMessage.uuid, visibleMessage.receivedTime)
-                    }
+                Timber.d("lastUnreadIndex=$lastUnreadIndex")
+                // If user has scrolled past all unread messages, mark the last unread message as read
+                if (lastUnreadIndex != -1 && index <= lastUnreadIndex) {
+                    val lastUnreadMessage = messages[lastUnreadIndex]
+                    Timber.d("Marking last unread message as read: ${lastUnreadMessage.uuid}")
+                    onUnreadChanged(lastUnreadMessage.uuid, lastUnreadMessage.receivedTime)
+                } else {
+                    Timber.d("Not marking as read - no unread messages or user hasn't scrolled past them")
                 }
             }
     }
