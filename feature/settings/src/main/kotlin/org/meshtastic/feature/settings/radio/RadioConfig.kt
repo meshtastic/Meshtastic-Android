@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -48,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res
@@ -59,6 +61,7 @@ import org.meshtastic.core.strings.debug_panel
 import org.meshtastic.core.strings.device_configuration
 import org.meshtastic.core.strings.export_configuration
 import org.meshtastic.core.strings.factory_reset
+import org.meshtastic.core.strings.firmware_update_title
 import org.meshtastic.core.strings.import_configuration
 import org.meshtastic.core.strings.message_device_managed
 import org.meshtastic.core.strings.module_settings
@@ -82,6 +85,7 @@ fun RadioConfigItemList(
     state: RadioConfigState,
     isManaged: Boolean,
     excludedModulesUnlocked: Boolean = false,
+    isDfuCapable: Boolean = false,
     onPreserveFavoritesToggle: (Boolean) -> Unit = {},
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
@@ -192,6 +196,15 @@ fun RadioConfigItemList(
     TitledCard(title = stringResource(Res.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
         if (isManaged) {
             ManagedMessage()
+        }
+
+        if (isDfuCapable && state.isLocal) {
+            ListItem(
+                text = stringResource(Res.string.firmware_update_title),
+                leadingIcon = Icons.Rounded.SystemUpdate,
+                enabled = enabled,
+                onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+            )
         }
 
         ListItem(

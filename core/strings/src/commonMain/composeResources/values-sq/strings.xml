@@ -233,4 +233,7 @@
     <string name="eight_hours">8 Orë</string>
     <string name="one_day">24 Orë</string>
     <string name="two_days">48 Orë</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Përditëso firmware-n</string>
+    <string name="firmware_update_failed">Përditësimi dështoi</string>
 </resources>

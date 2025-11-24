@@ -913,4 +913,8 @@
     <string name="relayed_by">Edastab: %1$s</string>
     <string name="preserve_favorites">Säilita lemmikud?</string>
     <string name="usb_devices">USB seadmed</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Värskenda püsivara</string>
+    <string name="firmware_update_done">Valmis</string>
+    <string name="firmware_update_failed">Värskendus ebaõnnestus</string>
 </resources>

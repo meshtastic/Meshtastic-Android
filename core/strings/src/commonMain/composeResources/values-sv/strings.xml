@@ -876,4 +876,8 @@
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
     <string name="relayed_by">Vidaresänt av: %1$s</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Uppdatera Firmware</string>
+    <string name="firmware_update_retry">Försök igen</string>
+    <string name="firmware_update_failed">Uppdateringen misslyckades</string>
 </resources>
