@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.osmdroid.android)
     implementation(libs.timber)
 
+    // MapLibre for fdroid POC
+    fdroidImplementation("org.maplibre.gl:android-sdk:12.1.0")
+
     googleImplementation(libs.location.services)
     googleImplementation(libs.maps.compose)
     googleImplementation(libs.maps.compose.utils)
