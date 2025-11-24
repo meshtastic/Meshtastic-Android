@@ -125,13 +125,8 @@ fun waypointsToFeatureCollectionFC(
                         String(Character.toChars(w.icon))
                     }
                 f.addStringProperty("icon", iconEmoji)
-                timber.log.Timber.tag("MapLibrePOC").d(
-                    "Waypoint feature: lat=%.5f, lon=%.5f, icon=%s, name=%s",
-                    lat,
-                    lon,
-                    iconEmoji,
-                    w.name,
-                )
+                timber.log.Timber.tag("MapLibrePOC")
+                    .d("Waypoint feature: lat=%.5f, lon=%.5f, icon=%s, name=%s", lat, lon, iconEmoji, w.name)
             }
         }
     timber.log.Timber.tag("MapLibrePOC").d("Created waypoints FC: %d features", features.size)
