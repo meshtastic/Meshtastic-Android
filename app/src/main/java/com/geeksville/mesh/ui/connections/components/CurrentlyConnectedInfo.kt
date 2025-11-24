@@ -41,7 +41,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DeviceListEntry
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
@@ -72,10 +74,16 @@ fun CurrentlyConnectedInfo(
         if (bleDevice != null) {
             while (bleDevice.peripheral.isConnected) {
                 try {
-                    rssi = bleDevice.peripheral.readRssi()
+                    rssi = withTimeout(5.seconds) {
+                        bleDevice.peripheral.readRssi()
+                    }
                     delay(10.seconds)
+                } catch (e: TimeoutCancellationException) {
+                    Timber.w("RSSI read timed out after 5 seconds")
+                    break
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to read RSSI")
+                    break
                 }
             }
         }
