@@ -35,6 +35,7 @@ dependencies {
     implementation(projects.core.proto)
     implementation(projects.core.strings)
 
+    implementation(libs.androidx.room.paging)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
 

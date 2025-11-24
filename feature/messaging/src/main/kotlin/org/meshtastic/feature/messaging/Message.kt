@@ -93,6 +93,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
@@ -166,7 +167,7 @@ fun MessageScreen(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
-    val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
+    val pagedMessages = viewModel.getMessagesFromPaged(contactKey).collectAsLazyPagingItems()
     val contactSettings by viewModel.contactSettings.collectAsStateWithLifecycle(initialValue = emptyMap())
 
     // UI State managed within this Composable
@@ -211,55 +212,35 @@ fun MessageScreen(
             derivedStateOf { contactSettings[contactKey]?.lastReadMessageTimestamp }
         }
 
+    // Track unread messages using lightweight metadata queries
+    val hasUnreadMessages by viewModel.hasUnreadMessages(contactKey).collectAsStateWithLifecycle(initialValue = false)
+    val firstUnreadMessageUuid by
+        viewModel.getFirstUnreadMessageUuid(contactKey).collectAsStateWithLifecycle(initialValue = null)
+
     var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
 
-    val hasUnreadMessages = messages.any { !it.read && !it.fromLocal }
-
-    val earliestUnreadIndex by
-        remember(messages, lastReadMessageTimestamp) {
-            derivedStateOf { findEarliestUnreadIndex(messages, lastReadMessageTimestamp) }
-        }
-
-    val initialUnreadUuidState = rememberSaveable(contactKey) { mutableStateOf<Long?>(null) }
-
-    LaunchedEffect(messages, earliestUnreadIndex, hasUnreadMessages) {
-        if (!hasUnreadMessages) {
-            initialUnreadUuidState.value = null
-            return@LaunchedEffect
-        }
-        val currentUuid = initialUnreadUuidState.value
-        val fallbackUuid = earliestUnreadIndex?.let { idx -> messages.getOrNull(idx)?.uuid }
-        if (currentUuid != null) {
-            val uuidStillPresent = messages.any { it.uuid == currentUuid }
-            if (!uuidStillPresent) {
-                initialUnreadUuidState.value = fallbackUuid
-            }
-        } else {
-            initialUnreadUuidState.value = fallbackUuid
-        }
-    }
-
-    val initialUnreadMessageUuid = initialUnreadUuidState.value
-
-    val initialUnreadIndex by
-        remember(messages, initialUnreadMessageUuid) {
+    // Find the index of the first unread message in the paged list
+    val firstUnreadIndex by
+        remember(pagedMessages.itemCount, firstUnreadMessageUuid) {
             derivedStateOf {
-                initialUnreadMessageUuid?.let { uuid -> messages.indexOfFirst { it.uuid == uuid } }?.takeIf { it >= 0 }
+                firstUnreadMessageUuid?.let { uuid ->
+                    (0 until pagedMessages.itemCount).firstOrNull { index -> pagedMessages[index]?.uuid == uuid }
+                }
             }
         }
 
-    LaunchedEffect(messages, initialUnreadIndex, earliestUnreadIndex) {
-        if (!hasPerformedInitialScroll && messages.isNotEmpty()) {
-            val unreadStart = initialUnreadIndex ?: earliestUnreadIndex
-            val targetIndex =
-                when {
-                    unreadStart == null -> 0
-                    unreadStart <= 0 -> 0
-                    else -> (unreadStart - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
-                }
-            if (listState.firstVisibleItemIndex != targetIndex) {
-                listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
-            }
+    // Scroll to first unread message on initial load
+    LaunchedEffect(hasPerformedInitialScroll, firstUnreadIndex, pagedMessages.itemCount) {
+        if (hasPerformedInitialScroll || pagedMessages.itemCount == 0) return@LaunchedEffect
+
+        val shouldScrollToUnread = hasUnreadMessages && firstUnreadIndex != null
+        if (shouldScrollToUnread) {
+            val targetIndex = (firstUnreadIndex!! - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
+            listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
+            hasPerformedInitialScroll = true
+        } else if (!hasUnreadMessages) {
+            // If no unread messages, just scroll to bottom (most recent)
+            listState.scrollToItem(0)
             hasPerformedInitialScroll = true
         }
     }
@@ -322,7 +303,8 @@ fun MessageScreen(
                         when (action) {
                             MessageMenuAction.ClipboardCopy -> {
                                 val copiedText =
-                                    messages
+                                    (0 until pagedMessages.itemCount)
+                                        .mapNotNull { pagedMessages[it] }
                                         .filter { it.uuid in selectedMessageIds.value }
                                         .joinToString("\n") { it.text }
                                 onEvent(MessageScreenEvent.CopyToClipboard(copiedText))
@@ -331,11 +313,14 @@ fun MessageScreen(
                             MessageMenuAction.Delete -> showDeleteDialog = true
                             MessageMenuAction.Dismiss -> selectedMessageIds.value = emptySet()
                             MessageMenuAction.SelectAll -> {
+                                // Note: Select All is disabled with pagination since we don't have
+                                // access to the full message list. This would need to be reworked
+                                // to select all currently loaded items instead.
                                 selectedMessageIds.value =
-                                    if (selectedMessageIds.value.size == messages.size) {
+                                    if (selectedMessageIds.value.size == pagedMessages.itemCount) {
                                         emptySet()
                                     } else {
-                                        messages.map { it.uuid }.toSet()
+                                        (0 until pagedMessages.itemCount).mapNotNull { pagedMessages[it]?.uuid }.toSet()
                                     }
                             }
                         }
@@ -358,19 +343,18 @@ fun MessageScreen(
     ) { paddingValues ->
         Column(Modifier.padding(paddingValues)) {
             Box(modifier = Modifier.weight(1f)) {
-                MessageList(
+                MessageListPaged(
                     modifier = Modifier.fillMaxSize(),
                     listState = listState,
                     state =
-                    MessageListState(
+                    MessageListPagedState(
                         nodes = nodes,
                         ourNode = ourNode,
-                        messages = messages,
+                        messages = pagedMessages,
                         selectedIds = selectedMessageIds,
-                        hasUnreadMessages = hasUnreadMessages,
-                        initialUnreadMessageUuid = initialUnreadMessageUuid,
-                        fallbackUnreadIndex = earliestUnreadIndex,
                         contactKey = contactKey,
+                        firstUnreadMessageUuid = firstUnreadMessageUuid,
+                        hasUnreadMessages = hasUnreadMessages,
                     ),
                     handlers =
                     MessageListHandlers(
@@ -403,9 +387,13 @@ fun MessageScreen(
                 )
             }
             val originalMessage by
-                remember(replyingToPacketId, messages) {
+                remember(replyingToPacketId, pagedMessages.itemCount) {
                     derivedStateOf {
-                        replyingToPacketId?.let { messages.firstOrNull { it.packetId == replyingToPacketId } }
+                        replyingToPacketId?.let { id ->
+                            (0 until pagedMessages.itemCount).firstNotNullOfOrNull { index ->
+                                pagedMessages[index]?.takeIf { it.packetId == id }
+                            }
+                        }
                     }
                 }
             ReplySnippet(

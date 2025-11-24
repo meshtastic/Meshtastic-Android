@@ -11,6 +11,7 @@ datastore = "1.2.0"
 lifecycle = "2.10.0"
 navigation = "2.9.6"
 navigation3 = "1.0.0"
+paging = "3.3.5"
 room = "2.8.4"
 
 # Kotlin
@@ -59,7 +60,11 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-navigation-runtime = { module = "androidx.navigation:navigation-runtime", version.ref = "navigation" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }

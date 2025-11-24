@@ -18,6 +18,7 @@
 package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,8 +26,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -46,6 +48,9 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -61,19 +66,6 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
-import timber.log.Timber
-import kotlin.collections.buildList
-
-internal data class MessageListState(
-    val nodes: List<Node>,
-    val ourNode: Node?,
-    val messages: List<Message>,
-    val selectedIds: MutableState<Set<Long>>,
-    val hasUnreadMessages: Boolean,
-    val initialUnreadMessageUuid: Long?,
-    val fallbackUnreadIndex: Int?,
-    val contactKey: String,
-)
 
 internal data class MessageListHandlers(
     val onUnreadChanged: (Long, Long) -> Unit,
@@ -82,6 +74,16 @@ internal data class MessageListHandlers(
     val onDeleteMessages: (List<Long>) -> Unit,
     val onSendMessage: (String, String) -> Unit,
     val onReply: (Message?) -> Unit,
+)
+
+internal data class MessageListPagedState(
+    val nodes: List<Node>,
+    val ourNode: Node?,
+    val messages: LazyPagingItems<Message>,
+    val selectedIds: MutableState<Set<Long>>,
+    val contactKey: String,
+    val firstUnreadMessageUuid: Long? = null,
+    val hasUnreadMessages: Boolean = false,
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -94,25 +96,14 @@ private fun MutableState<Set<Long>>.toggle(uuid: Long) {
 }
 
 @Composable
-internal fun MessageList(
+internal fun MessageListPaged(
+    state: MessageListPagedState,
+    handlers: MessageListHandlers,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    state: MessageListState,
-    handlers: MessageListHandlers,
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { state.selectedIds.value.isNotEmpty() } }
-    val unreadDividerIndex by
-        remember(state.messages, state.initialUnreadMessageUuid, state.fallbackUnreadIndex) {
-            derivedStateOf {
-                state.initialUnreadMessageUuid?.let { uuid ->
-                    state.messages.indexOfFirst { it.uuid == uuid }.takeIf { it >= 0 }
-                } ?: state.fallbackUnreadIndex
-            }
-        }
-    val showUnreadDivider = state.hasUnreadMessages && unreadDividerIndex != null
-    AutoScrollToBottom(listState, state.messages, state.hasUnreadMessages)
-    UpdateUnreadCount(listState, state.messages, handlers.onUnreadChanged)
 
     var showStatusDialog by remember { mutableStateOf<Message?>(null) }
     showStatusDialog?.let { message ->
@@ -133,17 +124,19 @@ internal fun MessageList(
     showReactionDialog?.let { reactions -> ReactionDialog(reactions) { showReactionDialog = null } }
 
     val coroutineScope = rememberCoroutineScope()
-    val messageRows =
-        rememberMessageRows(
-            messages = state.messages,
-            showUnreadDivider = showUnreadDivider,
-            unreadDividerIndex = unreadDividerIndex,
-            initialUnreadMessageUuid = state.initialUnreadMessageUuid,
-        )
 
-    MessageListContent(
+    // Track unread count based on scroll position
+    UpdateUnreadCountPaged(listState = listState, messages = state.messages, onUnreadChange = handlers.onUnreadChanged)
+
+    // Auto-scroll to bottom when new messages arrive
+    AutoScrollToBottomPaged(
         listState = listState,
-        messageRows = messageRows,
+        messages = state.messages,
+        hasUnreadMessages = state.hasUnreadMessages,
+    )
+
+    MessageListPagedContent(
+        listState = listState,
         state = state,
         handlers = handlers,
         inSelectionMode = inSelectionMode,
@@ -155,17 +148,10 @@ internal fun MessageList(
     )
 }
 
-private sealed interface MessageListRow {
-    data class ChatMessage(val index: Int, val message: Message) : MessageListRow
-
-    data class UnreadDivider(val key: String) : MessageListRow
-}
-
 @Composable
-private fun MessageListContent(
+private fun MessageListPagedContent(
     listState: LazyListState,
-    messageRows: List<MessageListRow>,
-    state: MessageListState,
+    state: MessageListPagedState,
     handlers: MessageListHandlers,
     inSelectionMode: Boolean,
     coroutineScope: CoroutineScope,
@@ -174,21 +160,23 @@ private fun MessageListContent(
     onShowReactions: (List<Reaction>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
-        items(
-            items = messageRows,
-            key = { row ->
-                when (row) {
-                    is MessageListRow.ChatMessage -> row.message.uuid
-                    is MessageListRow.UnreadDivider -> row.key
+    // Calculate unread divider position
+    val unreadDividerIndex by
+        remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
+            derivedStateOf {
+                state.firstUnreadMessageUuid?.let { uuid ->
+                    (0 until state.messages.itemCount).firstOrNull { index -> state.messages[index]?.uuid == uuid }
                 }
-            },
-        ) { row ->
-            when (row) {
-                is MessageListRow.UnreadDivider -> UnreadMessagesDivider(modifier = Modifier.animateItem())
-                is MessageListRow.ChatMessage ->
-                    renderChatMessageRow(
-                        row = row,
+            }
+        }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
+            items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
+                val message = state.messages[index]
+                if (message != null) {
+                    renderPagedChatMessageRow(
+                        message = message,
                         state = state,
                         handlers = handlers,
                         inSelectionMode = inSelectionMode,
@@ -198,15 +186,37 @@ private fun MessageListContent(
                         onShowStatusDialog = onShowStatusDialog,
                         onShowReactions = onShowReactions,
                     )
+
+                    // Show unread divider after the first unread message
+                    if (state.hasUnreadMessages && unreadDividerIndex == index) {
+                        UnreadMessagesDivider(modifier = Modifier.animateItem())
+                    }
+                }
+            }
+
+            // Loading indicator at the end (top when reversed) when loading more items
+            state.messages.apply {
+                when {
+                    loadState.append is LoadState.Loading -> {
+                        item(key = "append_loading") {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun LazyItemScope.renderChatMessageRow(
-    row: MessageListRow.ChatMessage,
-    state: MessageListState,
+private fun LazyItemScope.renderPagedChatMessageRow(
+    message: Message,
+    state: MessageListPagedState,
     handlers: MessageListHandlers,
     inSelectionMode: Boolean,
     coroutineScope: CoroutineScope,
@@ -216,7 +226,6 @@ private fun LazyItemScope.renderChatMessageRow(
     onShowReactions: (List<Reaction>) -> Unit,
 ) {
     val ourNode = state.ourNode ?: return
-    val message = row.message
     val selected by
         remember(message.uuid, state.selectedIds.value) {
             derivedStateOf { state.selectedIds.value.contains(message.uuid) }
@@ -245,8 +254,14 @@ private fun LazyItemScope.renderChatMessageRow(
         onShowReactions = { onShowReactions(message.emojis) },
         onNavigateToOriginalMessage = {
             coroutineScope.launch {
-                val targetIndex = state.messages.indexOfFirst { it.packetId == message.replyId }
-                if (targetIndex != -1) {
+                // Note: With pagination, we can't guarantee the original message is loaded
+                // This is a limitation of pagination - we would need to implement
+                // a search/jump feature to load and scroll to specific messages
+                val targetIndex =
+                    (0 until state.messages.itemCount).firstOrNull { index ->
+                        state.messages[index]?.packetId == message.replyId
+                    }
+                if (targetIndex != null) {
                     listState.animateScrollToItem(index = targetIndex)
                 }
             }
@@ -255,7 +270,115 @@ private fun LazyItemScope.renderChatMessageRow(
 }
 
 @Composable
-private fun MessageStatusDialog(
+private fun AutoScrollToBottomPaged(
+    listState: LazyListState,
+    messages: LazyPagingItems<Message>,
+    hasUnreadMessages: Boolean,
+    itemThreshold: Int = 3,
+) = with(listState) {
+    val shouldAutoScroll by
+        remember(hasUnreadMessages) {
+            derivedStateOf {
+                val isAtBottom =
+                    firstVisibleItemIndex == 0 &&
+                        firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
+                val isNearBottom = firstVisibleItemIndex <= itemThreshold
+                isAtBottom || (!hasUnreadMessages && isNearBottom)
+            }
+        }
+    if (shouldAutoScroll) {
+        LaunchedEffect(messages.itemCount) {
+            if (!isScrollInProgress && messages.itemCount > 0) {
+                scrollToItem(0)
+            }
+        }
+    }
+}
+
+@OptIn(FlowPreview::class)
+@Composable
+private fun UpdateUnreadCountPaged(
+    listState: LazyListState,
+    messages: LazyPagingItems<Message>,
+    onUnreadChange: (Long, Long) -> Unit,
+) {
+    val currentOnUnreadChange by rememberUpdatedState(onUnreadChange)
+
+    // Track remote message count to restart effect when remote messages change
+    // This fixes race condition when sending/receiving messages during debounce period
+    val remoteMessageCount by
+        remember(messages.itemCount) {
+            derivedStateOf {
+                (0 until messages.itemCount).count { i ->
+                    val msg = messages[i]
+                    msg != null && !msg.fromLocal
+                }
+            }
+        }
+
+    // Mark messages as read after debounce period
+    // Handles both scrolling cases and when all unread messages are visible without scrolling
+    LaunchedEffect(remoteMessageCount, listState) {
+        snapshotFlow {
+            // Emit when scroll stops OR when at initial position (covers no-scroll case)
+            if (listState.isScrollInProgress) {
+                null // Scrolling in progress, don't emit
+            } else {
+                listState.firstVisibleItemIndex // Emit current position when not scrolling
+            }
+        }
+            .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
+            .collectLatest { index ->
+                if (index != null) {
+                    // Find the last (oldest in timeline, highest index) unread message in loaded items
+                    val lastUnreadIndex =
+                        (0 until messages.itemCount).lastOrNull { i ->
+                            val msg = messages[i]
+                            msg != null && !msg.read && !msg.fromLocal
+                        }
+
+                    // If we're at/past the oldest unread, mark the first visible unread message
+                    // Since newer messages have HIGHER timestamps, marking a newer message's timestamp
+                    // will batch-mark all older messages via SQL: WHERE received_time <= timestamp
+                    if (lastUnreadIndex != null && index <= lastUnreadIndex) {
+                        // Find the first (newest in timeline, lowest index) visible unread message
+                        val firstVisibleUnreadIndex =
+                            (index until messages.itemCount).firstOrNull { i ->
+                                val msg = messages[i]
+                                msg != null && !msg.read && !msg.fromLocal
+                            }
+
+                        if (firstVisibleUnreadIndex != null) {
+                            val firstVisibleUnread = messages[firstVisibleUnreadIndex]
+                            if (firstVisibleUnread != null) {
+                                currentOnUnreadChange(firstVisibleUnread.uuid, firstVisibleUnread.receivedTime)
+                            }
+                        }
+                    }
+                }
+            }
+    }
+}
+
+@Composable
+internal fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        HorizontalDivider(modifier = Modifier.weight(1f))
+        Text(
+            text = stringResource(Res.string.new_messages_below),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        HorizontalDivider(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+internal fun MessageStatusDialog(
     message: Message,
     nodes: List<Node>,
     resendOption: Boolean,
@@ -277,116 +400,4 @@ private fun MessageStatusDialog(
         onConfirm = onResend,
         onDismiss = onDismiss,
     )
-}
-
-@Composable
-private fun rememberMessageRows(
-    messages: List<Message>,
-    showUnreadDivider: Boolean,
-    unreadDividerIndex: Int?,
-    initialUnreadMessageUuid: Long?,
-) = remember(messages, showUnreadDivider, unreadDividerIndex, initialUnreadMessageUuid) {
-    buildList<MessageListRow> {
-        messages.forEachIndexed { index, message ->
-            add(MessageListRow.ChatMessage(index = index, message = message))
-            if (showUnreadDivider && unreadDividerIndex == index) {
-                val key = initialUnreadMessageUuid?.let { "unread-divider-$it" } ?: "unread-divider-index-$index"
-                add(MessageListRow.UnreadDivider(key = key))
-            }
-        }
-    }
-}
-
-/**
- * Calculates the index of the first unread remote message.
- *
- * We track unread state with two sources: the persisted timestamp of the last read message and the in-memory
- * `Message.read` flag. The timestamp helps when the local flag state is stale (e.g. after app restarts), while the flag
- * catches messages that are already marked read locally. We take the maximum of the two indices to target the oldest
- * unread entry that still needs attention. The message list is newest-first, so we deliberately use `lastOrNull` for
- * the timestamp branch to land on the oldest unread item after the stored mark.
- */
-internal fun findEarliestUnreadIndex(messages: List<Message>, lastReadMessageTimestamp: Long?): Int? {
-    val remoteMessages = messages.withIndex().filter { !it.value.fromLocal }
-    if (remoteMessages.isEmpty()) {
-        return null
-    }
-    val timestampIndex =
-        lastReadMessageTimestamp?.let { timestamp ->
-            remoteMessages.lastOrNull { it.value.receivedTime > timestamp }?.index
-        }
-    val readFlagIndex = messages.indexOfLast { !it.read && !it.fromLocal }.takeIf { it != -1 }
-    return listOfNotNull(timestampIndex, readFlagIndex).maxOrNull()
-}
-
-@Composable
-private fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        HorizontalDivider(modifier = Modifier.weight(1f))
-        Text(
-            text = stringResource(Res.string.new_messages_below),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        HorizontalDivider(modifier = Modifier.weight(1f))
-    }
-}
-
-@Composable
-private fun <T> AutoScrollToBottom(
-    listState: LazyListState,
-    list: List<T>,
-    hasUnreadMessages: Boolean,
-    itemThreshold: Int = 3,
-) = with(listState) {
-    val shouldAutoScroll by
-        remember(hasUnreadMessages) {
-            derivedStateOf {
-                val isAtBottom =
-                    firstVisibleItemIndex == 0 &&
-                        firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
-                val isNearBottom = firstVisibleItemIndex <= itemThreshold
-                isAtBottom || (!hasUnreadMessages && isNearBottom)
-            }
-        }
-    if (shouldAutoScroll) {
-        LaunchedEffect(list) {
-            if (!isScrollInProgress) {
-                scrollToItem(0)
-            }
-        }
-    }
-}
-
-@OptIn(FlowPreview::class)
-@Composable
-private fun UpdateUnreadCount(
-    listState: LazyListState,
-    messages: List<Message>,
-    onUnreadChanged: (Long, Long) -> Unit,
-) {
-    val remoteMessageCount = remember(messages) { messages.count { !it.fromLocal } }
-
-    LaunchedEffect(remoteMessageCount, listState) {
-        Timber.d("UpdateUnreadCount LaunchedEffect started/restarted, remoteMessageCount=$remoteMessageCount")
-        snapshotFlow { listState.firstVisibleItemIndex }
-            .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
-            .collectLatest { index ->
-                Timber.d("Debounce triggered, index=$index, messages.size=${messages.size}")
-                val lastUnreadIndex = messages.indexOfLast { !it.read && !it.fromLocal }
-                Timber.d("lastUnreadIndex=$lastUnreadIndex")
-                // If user has scrolled past all unread messages, mark the last unread message as read
-                if (lastUnreadIndex != -1 && index <= lastUnreadIndex) {
-                    val lastUnreadMessage = messages[lastUnreadIndex]
-                    Timber.d("Marking last unread message as read: ${lastUnreadMessage.uuid}")
-                    onUnreadChanged(lastUnreadMessage.uuid, lastUnreadMessage.receivedTime)
-                } else {
-                    Timber.d("Not marking as read - no unread messages or user hasn't scrolled past them")
-                }
-            }
-    }
 }

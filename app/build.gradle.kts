@@ -230,6 +230,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.paging.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
