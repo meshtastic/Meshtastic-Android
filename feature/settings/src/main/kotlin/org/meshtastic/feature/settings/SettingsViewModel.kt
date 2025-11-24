@@ -123,14 +123,14 @@ constructor(
                 } else {
                     // Check BLE address
                     val address = radioPrefs.devAddr
-                    if (address == null || !address.matches(Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}"))) {
+                    if (address == null || !address.startsWith("x")) {
                         flowOf(false)
                     } else {
                         // Check hardware
                         val hwModel = node.user.hwModel.number
                         flow {
                             val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
-                            emit(hw?.architecture?.startsWith("nrf52", ignoreCase = true) == true)
+                            emit(hw?.requiresDfu == true)
                         }
                     }
                 }

@@ -198,7 +198,7 @@ fun RadioConfigItemList(
             ManagedMessage()
         }
 
-        if (isDfuCapable || true) {
+        if (isDfuCapable && state.isLocal) {
             ListItem(
                 text = stringResource(Res.string.firmware_update_title),
                 leadingIcon = Icons.Rounded.SystemUpdate,
