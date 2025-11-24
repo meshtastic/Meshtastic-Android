@@ -55,8 +55,10 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.TelemetryProtos
+import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
 
+@Suppress("TooGenericExceptionCaught")
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
@@ -69,8 +71,12 @@ fun CurrentlyConnectedInfo(
     LaunchedEffect(bleDevice) {
         if (bleDevice != null) {
             while (bleDevice.peripheral.isConnected) {
-                rssi = bleDevice.peripheral.readRssi()
-                delay(10.seconds)
+                try {
+                    rssi = bleDevice.peripheral.readRssi()
+                    delay(10.seconds)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to read RSSI")
+                }
             }
         }
     }
