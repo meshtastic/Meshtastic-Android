@@ -135,7 +135,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
                     ModuleRoute.SERIAL -> SerialConfigScreen(viewModel, onBack = navController::popBackStack)
 
                     ModuleRoute.EXT_NOTIFICATION ->
-                        ExternalNotificationConfigScreen(viewModel, onBack = navController::popBackStack)
+                        ExternalNotificationConfigScreen(viewModel = viewModel, onBack = navController::popBackStack)
 
                     ModuleRoute.STORE_FORWARD ->
                         StoreForwardConfigScreen(viewModel, onBack = navController::popBackStack)

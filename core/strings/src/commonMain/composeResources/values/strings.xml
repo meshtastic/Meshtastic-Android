@@ -552,6 +552,7 @@
     <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
     <string name="nag_timeout_seconds">Nag timeout (seconds)</string>
     <string name="ringtone">Ringtone</string>
+    <string name="play">Play</string>
     <string name="use_i2s_as_buzzer">Use I2S as buzzer</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Options</string>
