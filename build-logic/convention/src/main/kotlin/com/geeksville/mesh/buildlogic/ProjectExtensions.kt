@@ -21,6 +21,18 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.getByType
+import java.io.FileInputStream
+import java.util.Properties
 
 val Project.libs
     get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
+
+val Project.configProperties: Properties
+    get() {
+        val properties = Properties()
+        val propertiesFile = rootProject.file("config.properties")
+        if (propertiesFile.exists()) {
+            FileInputStream(propertiesFile).use { properties.load(it) }
+        }
+        return properties
+    }
