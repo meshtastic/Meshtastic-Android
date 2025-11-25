@@ -48,6 +48,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.feature.settings.radio.ResponseState
 
+@Suppress("LongMethod")
 @Composable
 fun <T : MessageLite> RadioConfigScreenList(
     title: String,
@@ -57,6 +58,7 @@ fun <T : MessageLite> RadioConfigScreenList(
     configState: ConfigState<T>,
     enabled: Boolean,
     onSave: (T) -> Unit,
+    modifier: Modifier = Modifier,
     content: LazyListScope.() -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
@@ -66,6 +68,7 @@ fun <T : MessageLite> RadioConfigScreenList(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             MainAppBar(
                 title = title,

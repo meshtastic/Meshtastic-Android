@@ -228,7 +228,7 @@ class MeshService : Service() {
         private const val DEFAULT_CONFIG_ONLY_NONCE = 69420
         private const val DEFAULT_NODE_INFO_NONCE = 69421
 
-        private const val WANT_CONFIG_DELAY = 50L
+        private const val WANT_CONFIG_DELAY = 100L
         private const val HISTORY_TAG = "HistoryReplay"
         private const val DEFAULT_HISTORY_RETURN_WINDOW_MINUTES = 60 * 24
         private const val DEFAULT_HISTORY_RETURN_MAX_MESSAGES = 100
@@ -1328,6 +1328,9 @@ class MeshService : Service() {
                 p.data.status = m
                 p.routingError = routingError
                 p.data.relayNode = relayNode
+                if (isAck) {
+                    p.data.relays += 1
+                }
                 packetRepository.get().update(p)
             }
             serviceBroadcasts.broadcastMessageStatus(requestId, m)

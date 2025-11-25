@@ -552,6 +552,7 @@
     <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
     <string name="nag_timeout_seconds">Nag timeout (seconds)</string>
     <string name="ringtone">Ringtone</string>
+    <string name="play">Play</string>
     <string name="use_i2s_as_buzzer">Use I2S as buzzer</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Options</string>
@@ -953,6 +954,10 @@
     <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
     <string name="unset">Unset - 0</string>
     <string name="relayed_by">Relayed by: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Heard %1$d Relay</item>
+        <item quantity="other">Heard %1$d Relays</item>
+    </plurals>
     <string name="preserve_favorites">Preserve Favorites?</string>
     <string name="usb_devices">USB Devices</string>
 
