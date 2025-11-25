@@ -233,6 +233,8 @@ class MeshService : Service() {
         private const val DEFAULT_HISTORY_RETURN_WINDOW_MINUTES = 60 * 24
         private const val DEFAULT_HISTORY_RETURN_MAX_MESSAGES = 100
         private const val MAX_EARLY_PACKET_BUFFER = 128
+        private const val PRECISE_POSITION_BITS = 32
+
 
         @VisibleForTesting
         internal fun buildStoreForwardHistoryRequest(
@@ -2503,24 +2505,48 @@ class MeshService : Service() {
             override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
                 if (destNum != myNodeNum) {
                     val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
+                    val channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
+                    val precision = this@MeshService.channelSet.settingsList[channel].moduleSettings.positionPrecision
+
+                    // default meshPosition to empty in case precision is 0 and this channel is not supposed to
+                    // broadcast positions
+                    var meshPosition = position {}
                     val currentPosition =
                         when {
                             provideLocation && position.isValid() -> position
-                            else -> nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
+                            else ->
+                                nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
                         }
-                    if (currentPosition == null) {
-                        Timber.d("Position request skipped - no valid position available")
-                        return@toRemoteExceptions
-                    }
-                    val meshPosition = position {
-                        latitudeI = Position.degI(currentPosition.latitude)
-                        longitudeI = Position.degI(currentPosition.longitude)
+
+                    if (precision > 0 && currentPosition != null) {
+
+                        var latitude = Position.degI(currentPosition.latitude)
+                        var longitude = Position.degI(currentPosition.longitude)
+
+                        // Precision offset replicated from meshtastic firmware
+                        if (precision < PRECISE_POSITION_BITS) {
+                            val mask = -1 shl (PRECISE_POSITION_BITS - precision)
+                            latitude = latitude and mask
+                            longitude = longitude and mask
+
+                            // We want the imprecise position to be the middle of the possible location, not
+                            val offset = 1 shl (PRECISE_POSITION_BITS - 1 - precision)
+                            latitude += offset
+                            longitude += offset
+                        }
+
+                        meshPosition = position {
+                            latitudeI = latitude
+                            longitudeI = longitude
                         altitude = currentPosition.altitude
                         time = currentSecond()
+                            precisionBits = precision
                     }
+                    }
+
                     packetHandler.sendToRadio(
                         newMeshPacketTo(destNum).buildMeshPacket(
-                            channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                            channel = channel,
                             priority = MeshPacket.Priority.BACKGROUND,
                         ) {
                             portnumValue = Portnums.PortNum.POSITION_APP_VALUE
