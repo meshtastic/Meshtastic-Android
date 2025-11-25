@@ -64,6 +64,7 @@ import kotlin.time.Duration.Companion.seconds
 private const val RSSI_DELAY = 10
 private const val RSSI_TIMEOUT = 5
 
+@Suppress("LongMethod", "LoopWithTooManyJumpStatements")
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
