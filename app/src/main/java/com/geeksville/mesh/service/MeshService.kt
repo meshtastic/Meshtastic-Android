@@ -2509,7 +2509,7 @@ class MeshService : Service() {
                 if (destNum != myNodeNum) {
                     val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
                     val channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
-                    val precision = this@MeshService.channelSet.settingsList[channel].moduleSettings.positionPrecision
+                    val precision = this@MeshService.channelSet.settingsList.getOrNull(channel)?.moduleSettings?.positionPrecision ?: 0
 
                     // default meshPosition to empty in case precision is 0 and this channel is not supposed to
                     // broadcast positions
