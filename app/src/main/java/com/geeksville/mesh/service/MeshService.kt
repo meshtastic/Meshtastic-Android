@@ -2532,7 +2532,7 @@ class MeshService : Service() {
                             latitude = latitude and mask
                             longitude = longitude and mask
 
-                            // We want the imprecise position to be the middle of the possible location, not
+                            // We want the imprecise position to be the middle of the possible location, not the edge.
                             val offset = 1 shl (PRECISE_POSITION_BITS - 1 - precision)
                             latitude += offset
                             longitude += offset
