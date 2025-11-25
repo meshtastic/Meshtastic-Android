@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">rensa filtrering av noder</string>
     <string name="node_filter_title">Filtrera på</string>
     <string name="node_filter_include_unknown">Inkludera okända</string>
+    <string name="node_filter_exclude_infrastructure">Dölj infrastruktur</string>
     <string name="node_filter_only_online">Dölj offline-noder</string>
     <string name="node_filter_only_direct">Visa endast direkta noder</string>
     <string name="node_filter_ignored">Du visar ignorerade noder,\nTryck för att återvända till nodlistan.</string>
@@ -35,6 +36,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favoriter</string>
+    <string name="node_filter_show_ignored">Visa endast ignorerade noder</string>
     <string name="unrecognized">Okänd</string>
     <string name="message_status_enroute">Inväntar kvittens</string>
     <string name="message_status_queued">Kvittens köad</string>
@@ -58,6 +60,7 @@
     <string name="role_client_desc">App uppkopplad eller fristående nod.</string>
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Nod som inte vidarebefordrar meddelanden.</string>
+    <string name="role_router">Router</string>
     <string name="role_router_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden. Syns i nod listan.</string>
     <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Kombinerad ROUTER och CLIENT. Ej för mobila noder.</string>
@@ -209,6 +212,7 @@
     <string name="debug_clear_logs_confirm">Detta kommer att ta bort alla loggpaket och databasposter från din enhet - Det är en fullständig återställning och är permanent.</string>
     <string name="clear">Rensa</string>
     <string name="message_delivery_status">Meddelandets leveransstatus</string>
+    <string name="new_messages_below">Nya meddelanden här nedan</string>
     <string name="meshtastic_messages_notifications">Direktmeddelandeaviseringar</string>
     <string name="meshtastic_broadcast_notifications">Meddelandeaviseringar</string>
     <string name="meshtastic_alerts_notifications">Larmmeddelanden</string>
@@ -460,6 +464,7 @@
     <string name="allow_input_source">Tillåt indatakälla</string>
     <string name="send_bell">Skicka ljudavisering</string>
     <string name="messages">Meddelanden</string>
+    <string name="device_db_cache_limit">Gräns för enhetens DB-cache</string>
     <string name="detection_sensor_config">Inställningar för detekteringssensor</string>
     <string name="detection_sensor_enabled">Detektionssensor aktiverad</string>
     <string name="minimum_broadcast_seconds">Minsta sändningsintervall (sekunder)</string>
@@ -876,8 +881,29 @@
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
     <string name="relayed_by">Vidaresänt av: %1$s</string>
+    <string name="usb_devices">USB-enheter</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Uppdatera Firmware</string>
+    <string name="firmware_update_title">Uppdatering av fast programvara</string>
+    <string name="firmware_update_checking">Söker efter uppdateringar...</string>
+    <string name="firmware_update_device">Enhet: %1$s</string>
+    <string name="firmware_update_latest">Senaste utgåva: %1$s</string>
+    <string name="firmware_update_stable">Stabil version</string>
+    <string name="firmware_update_button">Uppdatera fast programvara</string>
+    <string name="firmware_update_downloading">Hämtar fast programvara... %1$d%</string>
+    <string name="firmware_update_error">Fel: %1$s</string>
     <string name="firmware_update_retry">Försök igen</string>
+    <string name="firmware_update_success">Uppdatering lyckades!</string>
+    <string name="firmware_update_done">Klart</string>
+    <string name="firmware_update_updating">Uppdaterar... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Okänd hårdvarumodell: %1$d</string>
+    <string name="firmware_update_no_device">Ingen ansluten enhet</string>
+    <string name="firmware_update_not_found_in_release">Kunde inte hitta fast programvara för %1$s i utgåvan.</string>
+    <string name="firmware_update_extracting">Packar upp fast programvara...</string>
     <string name="firmware_update_failed">Uppdateringen misslyckades</string>
+    <string name="firmware_update_hang_tight">Vänta lite. Snart klar...</string>
+    <string name="firmware_update_keep_device_close">Håll din enhet nära telefonen.</string>
+    <string name="firmware_update_do_not_close">Stäng inte appen.</string>
+    <string name="firmware_update_almost_there">Alldeles snart...</string>
+    <string name="firmware_update_taking_a_while">Det här kan ta en stund...</string>
+    <string name="firmware_update_select_file">Välj lokal fil</string>
 </resources>
