@@ -32,6 +32,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
@@ -341,18 +342,17 @@ private fun UpdateUnreadCountPaged(
     LaunchedEffect(remoteMessageCount, listState, isResumed) {
         snapshotFlow {
             // Emit when scroll stops OR when at initial position (covers no-scroll case)
-            // Also emit when lifecycle state changes by including isResumed in the flow
-            if (listState.isScrollInProgress) {
-                null // Scrolling in progress, don't emit
+            // Include isResumed in the snapshot so lifecycle changes trigger new emissions
+            if (listState.isScrollInProgress || !isResumed) {
+                null // Scrolling in progress or not resumed, don't emit
             } else {
-                Pair(listState.firstVisibleItemIndex, isResumed) // Emit current position when not scrolling
+                listState.firstVisibleItemIndex // Emit current position when not scrolling and resumed
             }
         }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
-            .collectLatest { indexPair ->
-                // Only mark messages as read if the screen is actually visible
-                if (indexPair != null && indexPair.second) {
-                    val index = indexPair.first
+            .collectLatest { index ->
+                // Only mark messages as read if we have a valid index (screen is visible and not scrolling)
+                if (index != null) {
                     // Find the last (oldest in timeline, highest index) unread message in loaded items
                     val lastUnreadIndex =
                         (0 until messages.itemCount).lastOrNull { i ->
