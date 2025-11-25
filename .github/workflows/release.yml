@@ -242,3 +242,15 @@ jobs:
           files: ./artifacts/*/*
           draft: true
           prerelease: true
+
+      - name: Create or Update internal GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: ${{ secrets.INTERNAL_BUILDS_HOST }}
+          token: ${{ secrets._TOKEN }}
+          tag_name: ${{ inputs.tag_name }}
+          name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
+          generate_release_notes: true
+          files: ./artifacts/*/*
+          draft: false
+          prerelease: true
