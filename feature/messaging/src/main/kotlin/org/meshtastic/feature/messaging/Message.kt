@@ -109,6 +109,9 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.MeshProtos
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
@@ -440,8 +443,12 @@ private fun handleQuickChatAction(
     val hasVariables =
         action.message.contains("%LAT", ignoreCase = true) ||
             action.message.contains("%LON", ignoreCase = true) ||
+            action.message.contains("%GPS", ignoreCase = true) ||
+            action.message.contains("%DATE", ignoreCase = true) ||
             action.message.contains("%SNAME", ignoreCase = true) ||
-            action.message.contains("%LNAME", ignoreCase = true)
+            action.message.contains("%LNAME", ignoreCase = true) ||
+            action.message.contains("%SNAMEENC", ignoreCase = true) ||
+            action.message.contains("%LNAMEENC", ignoreCase = true)
 
     val processedMessage =
         if (hasVariables) {
@@ -449,14 +456,21 @@ private fun handleQuickChatAction(
             userPosition?.let {
                 val latitude = "%.7f".format(it.latitudeI * 1e-7)
                 val longitude = "%.7f".format(it.longitudeI * 1e-7)
+                result = result.replace("%GPS", "$latitude,$longitude", ignoreCase = true)
                 result =
                     result.replace("%LAT", latitude, ignoreCase = true).replace("%LON", longitude, ignoreCase = true)
             }
+            // Date/time substitution - always available
+            val dateFormat = SimpleDateFormat("MM/dd/yy HH:mm", Locale.getDefault())
+            val dateString = dateFormat.format(Date())
+            result = result.replace("%DATE", dateString, ignoreCase = true)
             ourNode?.user?.shortName?.let { shortName ->
-                result = result.replace("%SNAME", Uri.encode(shortName), ignoreCase = true)
+                result = result.replace("%SNAMEENC", Uri.encode(shortName), ignoreCase = true)
+                result = result.replace("%SNAME", shortName, ignoreCase = true)
             }
             ourNode?.user?.longName?.let { longName ->
-                result = result.replace("%LNAME", Uri.encode(longName), ignoreCase = true)
+                result = result.replace("%LNAMEENC", Uri.encode(longName), ignoreCase = true)
+                result = result.replace("%LNAME", longName, ignoreCase = true)
             }
             result
         } else {
@@ -746,7 +760,9 @@ private fun QuickChatRow(
     LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         items(allActions, key = { it.position }) { action ->
             val requiresPosition =
-                action.message.contains("%LAT", ignoreCase = true) || action.message.contains("%LON", ignoreCase = true)
+                action.message.contains("%LAT", ignoreCase = true) ||
+                    action.message.contains("%LON", ignoreCase = true) ||
+                    action.message.contains("%GPS", ignoreCase = true)
             val isEnabled = enabled && (!requiresPosition || userPosition != null)
             Button(onClick = { onClick(action) }, enabled = isEnabled) { Text(text = action.name) }
         }

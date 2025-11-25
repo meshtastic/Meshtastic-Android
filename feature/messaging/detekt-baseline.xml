@@ -10,12 +10,12 @@
     <ID>ComposableParamOrder:MessageList.kt$DeliveryInfo</ID>
     <ID>ComposableParamOrder:MessageList.kt$MessageList</ID>
     <ID>ComposableParamOrder:QuickChat.kt$OutlinedTextFieldWithCounter</ID>
+    <ID>CyclomaticComplexMethod:Message.kt$private fun handleQuickChatAction( action: QuickChatAction, messageInputState: TextFieldState, userPosition: MeshProtos.Position?, ourNode: Node?, onSendMessage: (String) -&gt; Unit, )</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onClick</ID>
     <ID>LambdaParameterEventTrailing:Message.kt$onSendMessage</ID>
     <ID>LambdaParameterEventTrailing:MessageList.kt$onReply</ID>
     <ID>LambdaParameterEventTrailing:QuickChat.kt$onNavigateUp</ID>
     <ID>LambdaParameterInRestartableEffect:MessageList.kt$onUnreadChanged</ID>
-    <ID>LongParameterList:MessageViewModel.kt$MessageViewModel$( private val nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, private val quickChatActionRepository: QuickChatActionRepository, private val serviceRepository: ServiceRepository, private val packetRepository: PacketRepository, private val uiPrefs: UiPrefs, private val meshServiceNotifications: MeshServiceNotifications, buildConfigProvider: org.meshtastic.core.common.BuildConfigProvider, )</ID>
     <ID>MagicNumber:Message.kt$1e-7</ID>
     <ID>ModifierMissing:Message.kt$MessageScreen</ID>
     <ID>ModifierNotUsedAtRoot:QuickChat.kt$modifier = modifier.fillMaxSize().padding(innerPadding)</ID>
