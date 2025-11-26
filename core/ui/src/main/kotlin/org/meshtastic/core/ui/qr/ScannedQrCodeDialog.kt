@@ -115,11 +115,22 @@ fun ScannedQrCodeDialog(
         remember(channelSet) { mutableStateListOf(elements = Array(size = channelSet.settingsCount, init = { true })) }
 
     val selectedChannelSet =
+    if (shouldReplace) {
         channelSet.copy {
             val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
             settings.clear()
             settings.addAll(result)
         }
+    } else {
+        channelSet.copy {
+            // When adding (not replacing), include all previous channels + selected new channels
+            val selectedNewChannels = incoming.settingsList.filterIndexed { i, _ ->
+                channelSelections.getOrNull(i) == true
+            }
+            settings.clear()
+            settings.addAll(channels.settingsList + selectedNewChannels)
+        }
+    }
 
     // Compute LoRa configuration changes when in replace mode
     val loraChanges =
