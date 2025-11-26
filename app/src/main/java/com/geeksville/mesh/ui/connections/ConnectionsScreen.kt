@@ -20,7 +20,6 @@ package com.geeksville.mesh.ui.connections
 import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +29,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -52,6 +52,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -123,6 +125,7 @@ fun ConnectionsScreen(
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
+    val density = LocalDensity.current
     val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
@@ -194,37 +197,49 @@ fun ConnectionsScreen(
                     .padding(paddingValues)
                     .padding(16.dp),
             ) {
-                AnimatedVisibility(visible = connectionState == ConnectionState.Connecting) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                        CircularWavyProgressIndicator(modifier = Modifier.size(96.dp).padding(16.dp))
-                    }
-                }
-                AnimatedVisibility(
-                    visible = connectionState.isConnected(),
-                    modifier = Modifier.padding(bottom = 16.dp),
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        ourNode?.let { node ->
-                            TitledCard(title = stringResource(Res.string.connected_device)) {
-                                CurrentlyConnectedInfo(
-                                    node = node,
-                                    bleDevice =
-                                    bleDevices.firstOrNull { it.fullAddress == selectedDevice }
-                                        as DeviceListEntry.Ble?,
-                                    onNavigateToNodeDetails = onNavigateToNodeDetails,
-                                    onClickDisconnect = { scanModel.disconnect() },
-                                )
-                            }
+                var connectionSectionHeight by remember { mutableStateOf(0.dp) }
+                val placeholderHeight = connectionSectionHeight.takeIf { it > 0.dp } ?: 0.dp
+                Box(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).heightIn(min = placeholderHeight)) {
+                    if (connectionState == ConnectionState.Connecting) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().align(Alignment.Center),
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            CircularWavyProgressIndicator(modifier = Modifier.size(96.dp).padding(16.dp))
                         }
+                    }
+                    androidx.compose.animation.AnimatedVisibility(visible = connectionState.isConnected()) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier =
+                            Modifier.fillMaxWidth().onSizeChanged { size ->
+                                if (connectionState.isConnected()) {
+                                    connectionSectionHeight = with(density) { size.height.toDp() }
+                                }
+                            },
+                        ) {
+                            ourNode?.let { node ->
+                                TitledCard(title = stringResource(Res.string.connected_device)) {
+                                    CurrentlyConnectedInfo(
+                                        node = node,
+                                        bleDevice =
+                                        bleDevices.firstOrNull { it.fullAddress == selectedDevice }
+                                            as DeviceListEntry.Ble?,
+                                        onNavigateToNodeDetails = onNavigateToNodeDetails,
+                                        onClickDisconnect = { scanModel.disconnect() },
+                                    )
+                                }
+                            }
 
-                        if (regionUnset && selectedDevice != "m") {
-                            TitledCard(title = null) {
-                                ListItem(
-                                    leadingIcon = Icons.Rounded.Language,
-                                    text = stringResource(Res.string.set_your_region),
-                                ) {
-                                    isWaiting = true
-                                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                            if (regionUnset && selectedDevice != "m") {
+                                TitledCard(title = null) {
+                                    ListItem(
+                                        leadingIcon = Icons.Rounded.Language,
+                                        text = stringResource(Res.string.set_your_region),
+                                    ) {
+                                        isWaiting = true
+                                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                                    }
                                 }
                             }
                         }
