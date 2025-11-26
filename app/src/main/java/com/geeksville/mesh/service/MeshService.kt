@@ -993,8 +993,8 @@ class MeshService : Service() {
     }
 
     /**
-     * Check if a User is a default/placeholder from firmware (node was evicted and re-created)
-     * and whether we should preserve existing user data instead of overwriting it.
+     * Check if a User is a default/placeholder from firmware (node was evicted and re-created) and whether we should
+     * preserve existing user data instead of overwriting it.
      */
     private fun shouldPreserveExistingUser(existing: MeshProtos.User, incoming: MeshProtos.User): Boolean {
         val isDefaultName = incoming.longName.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
@@ -1025,7 +1025,7 @@ class MeshService : Service() {
                 Timber.d(
                     "Preserving existing user data for node $fromNum: " +
                         "kept='${it.user.longName}' (hwModel=${it.user.hwModel}), " +
-                        "skipped default='${p.longName}' (hwModel=UNSET)"
+                        "skipped default='${p.longName}' (hwModel=UNSET)",
                 )
                 // Still update channel and verification status
                 it.channel = channel
