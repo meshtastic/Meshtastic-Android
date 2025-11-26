@@ -24,7 +24,7 @@ hilt = "2.57.2"
 maps-compose = "6.12.2"
 
 # Networking
-ktor = "3.3.2"
+ktor = "3.3.3"
 ktorfit = "2.6.4"
 
 # Other
