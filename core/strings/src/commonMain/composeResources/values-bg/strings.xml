@@ -727,6 +727,7 @@
     <string name="system_settings">Системни настройки</string>
     <string name="no_local_stats">Няма налична статистика</string>
     <string name="analytics_notice">Анализите се събират, за да ни помогнат да подобрим приложението за Android (благодарим ви). Ще получаваме анонимизирана информация за поведението на потребителите. Това включва отчети за сривове, екрани, използвани в приложението и др.</string>
+    <string name="analytics_platforms">"Аналитични платформи:"</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <string name="unset">Не е зададен - 0</string>
     <string name="usb_devices">USB устройства</string>
@@ -739,11 +740,24 @@
     <string name="firmware_update_alpha">Алфа</string>
     <string name="firmware_update_button">Актуализиране на фърмуера</string>
     <string name="firmware_update_disconnect_warning">Забележка: Това временно ще прекъсне връзката с устройството ви по време на актуализацията.</string>
+    <string name="firmware_update_downloading">Изтегляне на фърмуера... %1$d%</string>
     <string name="firmware_update_error">Грешка: %1$s</string>
     <string name="firmware_update_retry">Опитайте отново</string>
+    <string name="firmware_update_success">Актуализацията е успешна!</string>
     <string name="firmware_update_done">Готово</string>
     <string name="firmware_update_starting_dfu">Стартиране на DFU...</string>
     <string name="firmware_update_updating">Актуализиране... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Неизвестен модел хардуер: %1$d</string>
+    <string name="firmware_update_invalid_address">Свързаното устройство не е BLE устройство или адресът е неизвестен (%1$s). DFU изисква BLE.</string>
+    <string name="firmware_update_no_device">Няма свързано устройство</string>
+    <string name="firmware_update_not_found_in_release">Не е намерен фърмуер за %1$s в изданието.</string>
+    <string name="firmware_update_extracting">Извличане на фърмуера...</string>
+    <string name="firmware_update_starting_service">Изключване за стартиране на услугата DFU...</string>
     <string name="firmware_update_failed">Неуспешна актуализация</string>
+    <string name="firmware_update_keep_device_close">Дръжте вашето устройството си близо до телефона си.</string>
+    <string name="firmware_update_do_not_close">Не затваряйте приложението.</string>
+    <string name="firmware_update_taking_a_while">Това може да отнеме минута...</string>
+    <string name="firmware_update_select_file">Изберете локален файл</string>
+    <string name="firmware_update_disclaimer_title">Предупреждение за актуализация</string>
+    <string name="firmware_update_disclaimer_text">Ще инсталирате нов фърмуер на устройството си. Този процес носи рискове.\n\n• Уверете се, че устройството ви е заредено.\n• Дръжте устройството близо до телефона си.\n• Не затваряйте приложението по време на актуализацията.\n\nУверете се, че сте избрали правилния фърмуер за вашия хардуер.</string>
 </resources>
