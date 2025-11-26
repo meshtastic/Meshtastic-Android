@@ -298,10 +298,7 @@ private fun AutoScrollToBottomPaged(
     }
 }
 
-private fun findFirstVisibleUnreadMessage(
-    messages: LazyPagingItems<Message>,
-    visibleIndex: Int,
-): Message? {
+private fun findFirstVisibleUnreadMessage(messages: LazyPagingItems<Message>, visibleIndex: Int): Message? {
     val firstVisibleUnreadIndex =
         (visibleIndex until messages.itemCount).firstOrNull { i ->
             val msg = messages[i]
@@ -377,9 +374,7 @@ private fun UpdateUnreadCountPaged(
                     // will batch-mark all older messages via SQL: WHERE received_time <= timestamp
                     if (lastUnreadIndex != null && index <= lastUnreadIndex) {
                         val firstVisibleUnread = findFirstVisibleUnreadMessage(messages, index)
-                        firstVisibleUnread?.let {
-                            currentOnUnreadChange(it.uuid, it.receivedTime)
-                        }
+                        firstVisibleUnread?.let { currentOnUnreadChange(it.uuid, it.receivedTime) }
                     }
                 }
             }
