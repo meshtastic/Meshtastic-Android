@@ -289,9 +289,18 @@ private fun AutoScrollToBottomPaged(
                 isAtBottom || (!hasUnreadMessages && isNearBottom)
             }
         }
+
+    val isPagingStable by remember {
+        derivedStateOf {
+            messages.loadState.refresh !is LoadState.Loading &&
+                messages.loadState.prepend !is LoadState.Loading &&
+                messages.loadState.append !is LoadState.Loading
+        }
+    }
+
     if (shouldAutoScroll) {
-        LaunchedEffect(messages.itemCount) {
-            if (!isScrollInProgress && messages.itemCount > 0) {
+        LaunchedEffect(messages.itemCount, isPagingStable) {
+            if (!isScrollInProgress && messages.itemCount > 0 && isPagingStable) {
                 scrollToItem(0)
             }
         }
