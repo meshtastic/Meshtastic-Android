@@ -59,9 +59,9 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add_network_device
 import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.confirm_delete_node
-import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.confirm_forget_connection
 import org.meshtastic.core.strings.discovered_network_devices
+import org.meshtastic.core.strings.forget_connection
 import org.meshtastic.core.strings.ip_address
 import org.meshtastic.core.strings.ip_port
 import org.meshtastic.core.strings.no_network_devices
@@ -100,7 +100,10 @@ fun NetworkDevices(
         deviceToDelete?.let {
             ConfirmDeleteDialog(
                 it.fullAddress,
-                onHideDialog = { showDeleteDialog = false },
+                onHideDialog = {
+                    showDeleteDialog = false
+                    deviceToDelete = null
+                },
                 onConfirm = { deviceFullAddress -> scanModel.removeRecentAddress(deviceFullAddress) },
             )
         }
@@ -133,6 +136,10 @@ fun NetworkDevices(
                         connectionState = connectionState,
                         selectedDevice = selectedDevice,
                         onSelect = scanModel::onSelected,
+                        onDelete = { device ->
+                            deviceToDelete = device
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -233,8 +240,8 @@ private fun ConfirmDeleteDialog(
 ) {
     AlertDialog(
         onDismissRequest = onHideDialog,
-        title = { Text(stringResource(Res.string.delete)) },
-        text = { Text(stringResource(Res.string.confirm_delete_node)) },
+        title = { Text(stringResource(Res.string.forget_connection)) },
+        text = { Text(stringResource(Res.string.confirm_forget_connection)) },
         confirmButton = {
             Button(
                 onClick = {
@@ -242,7 +249,7 @@ private fun ConfirmDeleteDialog(
                     onHideDialog()
                 },
             ) {
-                Text(stringResource(Res.string.delete))
+                Text(stringResource(Res.string.forget_connection))
             }
         },
         dismissButton = { Button(onClick = { onHideDialog() }) { Text(stringResource(Res.string.cancel)) } },
