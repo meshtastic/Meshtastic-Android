@@ -774,7 +774,7 @@
     <string name="modules_unlocked">Modules unlocked</string>
     <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Remote</string>
-    <string name="node_count_template">(%1$d online / %2$d total)</string>
+    <string name="node_count_template">(%1$d online / %2$d shown / %3$d total)</string>
     <string name="react">React</string>
     <string name="disconnect">Disconnect</string>
     <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
