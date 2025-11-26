@@ -2289,6 +2289,8 @@ class MeshService : Service() {
                 historyLog { dbSummary }
                 // Do not clear packet DB here; messages are per-device and should persist
                 clearNotifications()
+                // Reload nodes from the newly switched database
+                loadSettings()
             }
         } else {
             Timber.d("SetDeviceAddress: Device address is unchanged, ignoring.")
