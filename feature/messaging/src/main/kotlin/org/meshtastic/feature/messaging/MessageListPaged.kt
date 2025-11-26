@@ -307,21 +307,22 @@ private fun UpdateUnreadCountPaged(
 ) {
     val currentOnUnreadChange by rememberUpdatedState(onUnreadChange)
     val lifecycleOwner = LocalLifecycleOwner.current
-    var isResumed by remember { mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) }
+    var isResumed by remember {
+        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+    }
 
     // Track lifecycle state changes
     DisposableEffect(lifecycleOwner) {
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            when (event) {
-                androidx.lifecycle.Lifecycle.Event.ON_RESUME -> isResumed = true
-                androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> isResumed = false
-                else -> {}
+        val observer =
+            androidx.lifecycle.LifecycleEventObserver { _, event ->
+                when (event) {
+                    androidx.lifecycle.Lifecycle.Event.ON_RESUME -> isResumed = true
+                    androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> isResumed = false
+                    else -> {}
+                }
             }
-        }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     // Track remote message count to restart effect when remote messages change
