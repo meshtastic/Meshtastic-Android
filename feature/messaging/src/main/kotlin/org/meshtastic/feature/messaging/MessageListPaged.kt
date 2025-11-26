@@ -276,6 +276,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     )
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun AutoScrollToBottomPaged(
     listState: LazyListState,
@@ -284,11 +285,11 @@ private fun AutoScrollToBottomPaged(
     hasDialogOpen: Boolean = false,
     itemThreshold: Int = 3,
 ) = with(listState) {
-    val shouldAutoScroll by
+    val shouldStickToBottom by
         remember(hasUnreadMessages, hasDialogOpen) {
             derivedStateOf {
                 if (hasDialogOpen) {
-                    false // Don't auto-scroll when dialogs are open
+                    false
                 } else {
                     val isAtBottom =
                         firstVisibleItemIndex == 0 &&
@@ -299,15 +300,28 @@ private fun AutoScrollToBottomPaged(
             }
         }
 
-    val isPagingStable by remember {
-        derivedStateOf {
-            messages.loadState.refresh !is LoadState.Loading &&
-                messages.loadState.prepend !is LoadState.Loading &&
-                messages.loadState.append !is LoadState.Loading
+    val isRefreshing by remember { derivedStateOf { messages.loadState.refresh is LoadState.Loading } }
+    var wasPreviouslyRefreshing by remember { mutableStateOf(false) }
+
+    // Maintain scroll position during and after refresh
+    LaunchedEffect(isRefreshing, shouldStickToBottom) {
+        if (!shouldStickToBottom) return@LaunchedEffect
+
+        if (isRefreshing) {
+            wasPreviouslyRefreshing = true
+            if (!isScrollInProgress && messages.itemCount > 0) {
+                scrollToItem(0)
+            }
+        } else if (wasPreviouslyRefreshing) {
+            wasPreviouslyRefreshing = false
+            if (messages.itemCount > 0) {
+                scrollToItem(0)
+            }
         }
     }
 
-    if (shouldAutoScroll && isPagingStable) {
+    // Normal auto-scroll for new messages (when not refreshing)
+    if (shouldStickToBottom && !isRefreshing) {
         LaunchedEffect(messages.itemCount) {
             if (!isScrollInProgress && messages.itemCount > 0) {
                 scrollToItem(0)
