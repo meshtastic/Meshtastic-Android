@@ -17,7 +17,11 @@
 
 package com.geeksville.mesh.ui.connections.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -35,8 +39,10 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DeviceListEntry
 import org.jetbrains.compose.resources.stringResource
@@ -55,6 +61,7 @@ fun DeviceListItem(
     device: DeviceListEntry,
     onSelect: () -> Unit,
     modifier: Modifier = Modifier,
+    onDelete: (() -> Unit)? = null,
 ) {
     val icon =
         when (device) {
@@ -81,10 +88,19 @@ fun DeviceListItem(
         }
 
     val useSelectable = modifier == Modifier
+    val interactionSource = remember { MutableInteractionSource() }
+    val indication: Indication = LocalIndication.current
+
     ListItem(
         modifier =
-        if (useSelectable) {
-            modifier.fillMaxWidth().clickable(onClick = onSelect)
+        if (useSelectable && onDelete != null) {
+            modifier.fillMaxWidth().indication(interactionSource, indication).pointerInput(onDelete) {
+                detectTapGestures(onTap = { onSelect() }, onLongPress = { onDelete() })
+            }
+        } else if (useSelectable) {
+            modifier.fillMaxWidth().indication(interactionSource, indication).pointerInput(Unit) {
+                detectTapGestures(onTap = { onSelect() })
+            }
         } else {
             modifier.fillMaxWidth()
         },
