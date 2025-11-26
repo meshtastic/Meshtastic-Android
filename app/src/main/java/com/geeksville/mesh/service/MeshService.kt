@@ -410,7 +410,7 @@ class MeshService : Service() {
             }
             .launchIn(serviceScope)
 
-        loadSettings() // Load our last known node DB
+        loadCachedNodeDB() // Load our last known node DB
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
@@ -482,7 +482,7 @@ class MeshService : Service() {
     // BEGINNING OF MODEL - FIXME, move elsewhere
     //
 
-    private fun loadSettings() = serviceScope.handledLaunch {
+    private fun loadCachedNodeDB() = serviceScope.handledLaunch {
         myNodeInfo = nodeRepository.myNodeInfo.value
         nodeDBbyNodeNum.putAll(nodeRepository.getNodeDBbyNum().first())
         // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
@@ -2104,7 +2104,9 @@ class MeshService : Service() {
         } else {
             newNodes.forEach(::installNodeInfo)
             newNodes.clear()
-            serviceScope.handledLaunch { nodeRepository.installConfig(myNodeInfo!!, nodeDBbyNodeNum.values.toList()) }
+            // Individual nodes are already upserted to DB via updateNodeInfo->nodeRepository.upsert
+            // Only call installConfig to persist myNodeInfo, not to overwrite all nodes
+            serviceScope.handledLaunch { myNodeInfo?.let { nodeRepository.installConfig(it, emptyList()) } }
             haveNodeDB = true
             flushEarlyReceivedPackets("node_info_complete")
             sendAnalytics()
@@ -2310,6 +2312,8 @@ class MeshService : Service() {
                 historyLog { dbSummary }
                 // Do not clear packet DB here; messages are per-device and should persist
                 clearNotifications()
+                // Reload nodes from the newly switched database
+                loadCachedNodeDB()
             }
         } else {
             Timber.d("SetDeviceAddress: Device address is unchanged, ignoring.")

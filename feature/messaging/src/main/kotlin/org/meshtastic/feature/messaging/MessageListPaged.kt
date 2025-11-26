@@ -367,6 +367,7 @@ private fun UpdateUnreadCountPaged(
         }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
+                // Only mark messages as read if we have a valid index (screen is visible and not scrolling)
                 if (index != null) {
                     val lastUnreadIndex = findLastUnreadMessageIndex(messages)
                     // If we're at/past the oldest unread, mark the first visible unread message
