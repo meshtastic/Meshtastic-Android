@@ -310,7 +310,7 @@ private fun AutoScrollToBottomPaged(
     if (shouldAutoScroll) {
         LaunchedEffect(messages.itemCount, isPagingStable) {
             if (!isScrollInProgress && messages.itemCount > 0 && isPagingStable) {
-                scrollToItem(0)
+                animateScrollToItem(0)
             }
         }
     }
