@@ -792,6 +792,8 @@
     <string name="security_icon_help_show_less">Näytä nykyinen tila</string>
     <string name="security_icon_help_dismiss">Hylkää</string>
     <string name="confirm_delete_node">Oletko varma, että haluat poistaa tämän laitteen?</string>
+    <string name="forget_connection">Älä muista tätä yhteyttä</string>
+    <string name="confirm_forget_connection">Haluatko varmasti unohtaa tämän yhteyden?</string>
     <string name="replying_to">Vastataan käyttäjälle %1$s</string>
     <string name="cancel_reply">Peruuta vastaus</string>
     <string name="delete_messages_title">Poistetaanko viestit?</string>

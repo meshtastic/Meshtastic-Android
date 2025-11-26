@@ -37,6 +37,9 @@ body:
             I am able to reproduce the bug with the latest version.
           required: true
         - label: |
+            I have updated to the latest *Alpha* firmware, and am able to reproduce the bug. Many issues are fixed quickly in alpha before the general beta release.
+          required: true
+        - label: |
             I made sure that there are no existing **OPEN or CLOSED issues** which I could contribute my information to.
           required: true
         - label: |
@@ -51,7 +54,9 @@ body:
         - label: |
             I agree to follow this project's Code of Conduct
           required: true
-
+        - label: |
+            I actually read this list, and should be taken seriously.
+          required: false
   - type: input
     id: app-version
     attributes:

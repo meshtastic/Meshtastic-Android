@@ -298,6 +298,21 @@ private fun AutoScrollToBottomPaged(
     }
 }
 
+private fun findFirstVisibleUnreadMessage(messages: LazyPagingItems<Message>, visibleIndex: Int): Message? {
+    val firstVisibleUnreadIndex =
+        (visibleIndex until messages.itemCount).firstOrNull { i ->
+            val msg = messages[i]
+            msg != null && !msg.read && !msg.fromLocal
+        }
+    return firstVisibleUnreadIndex?.let { messages[it] }
+}
+
+private fun findLastUnreadMessageIndex(messages: LazyPagingItems<Message>): Int? =
+    (0 until messages.itemCount).lastOrNull { i ->
+        val msg = messages[i]
+        msg != null && !msg.read && !msg.fromLocal
+    }
+
 @OptIn(FlowPreview::class)
 @Composable
 private fun UpdateUnreadCountPaged(
@@ -354,30 +369,13 @@ private fun UpdateUnreadCountPaged(
             .collectLatest { index ->
                 // Only mark messages as read if we have a valid index (screen is visible and not scrolling)
                 if (index != null) {
-                    // Find the last (oldest in timeline, highest index) unread message in loaded items
-                    val lastUnreadIndex =
-                        (0 until messages.itemCount).lastOrNull { i ->
-                            val msg = messages[i]
-                            msg != null && !msg.read && !msg.fromLocal
-                        }
-
+                    val lastUnreadIndex = findLastUnreadMessageIndex(messages)
                     // If we're at/past the oldest unread, mark the first visible unread message
                     // Since newer messages have HIGHER timestamps, marking a newer message's timestamp
                     // will batch-mark all older messages via SQL: WHERE received_time <= timestamp
                     if (lastUnreadIndex != null && index <= lastUnreadIndex) {
-                        // Find the first (newest in timeline, lowest index) visible unread message
-                        val firstVisibleUnreadIndex =
-                            (index until messages.itemCount).firstOrNull { i ->
-                                val msg = messages[i]
-                                msg != null && !msg.read && !msg.fromLocal
-                            }
-
-                        if (firstVisibleUnreadIndex != null) {
-                            val firstVisibleUnread = messages[firstVisibleUnreadIndex]
-                            if (firstVisibleUnread != null) {
-                                currentOnUnreadChange(firstVisibleUnread.uuid, firstVisibleUnread.receivedTime)
-                            }
-                        }
+                        val firstVisibleUnread = findFirstVisibleUnreadMessage(messages, index)
+                        firstVisibleUnread?.let { currentOnUnreadChange(it.uuid, it.receivedTime) }
                     }
                 }
             }
