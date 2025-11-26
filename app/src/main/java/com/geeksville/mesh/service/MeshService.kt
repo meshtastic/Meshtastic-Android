@@ -2083,7 +2083,11 @@ class MeshService : Service() {
         } else {
             newNodes.forEach(::installNodeInfo)
             newNodes.clear()
-            serviceScope.handledLaunch { nodeRepository.installConfig(myNodeInfo!!, nodeDBbyNodeNum.values.toList()) }
+            // Individual nodes are already upserted to DB via updateNodeInfo->nodeRepository.upsert
+            // Only call installConfig to persist myNodeInfo, not to overwrite all nodes
+            serviceScope.handledLaunch {
+                myNodeInfo?.let { nodeRepository.installConfig(it, emptyList()) }
+            }
             haveNodeDB = true
             flushEarlyReceivedPackets("node_info_complete")
             sendAnalytics()
