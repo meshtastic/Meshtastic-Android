@@ -37,6 +37,9 @@ body:
             I am able to reproduce the bug with the latest version.
           required: true
         - label: |
+            I have updated to the latest *Alpha* firmware, and am able to reproduce the bug.
+          required: true
+        - label: |
             I made sure that there are no existing **OPEN or CLOSED issues** which I could contribute my information to.
           required: true
         - label: |

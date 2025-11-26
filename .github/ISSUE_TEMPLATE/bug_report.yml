@@ -40,6 +40,10 @@ body:
             I made sure that there are no existing **OPEN or CLOSED issues** which I could contribute my information to.
           required: true
         - label: |
+            I have updated to the latest *Alpha* firmware, and am able to reproduce the bug.
+          required: true
+
+        - label: |
             I have taken the time to fill in all the required details. I understand that the bug report will be dismissed otherwise.
           required: true
         - label: |
@@ -51,7 +55,9 @@ body:
         - label: |
             I agree to follow this project's Code of Conduct
           required: true
-
+        - label: |
+            I actually read this list, and should be taken seriously.
+          required: false
   - type: input
     id: app-version
     attributes:
