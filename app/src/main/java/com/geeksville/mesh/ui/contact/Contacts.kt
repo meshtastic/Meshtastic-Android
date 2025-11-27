@@ -482,9 +482,7 @@ private fun ContactListViewPaged(
     val haptics = LocalHapticFeedback.current
 
     if (contacts.loadState.refresh is LoadState.Loading && contacts.itemCount == 0) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         return
     }
 
