@@ -108,7 +108,7 @@ constructor(
                     )
                     .map { list ->
                         list
-                            .filter { it.isIgnored == filter.showIgnored }
+                            .filter { filter.showIgnored || !it.isIgnored }
                             .filter { node ->
                                 if (filter.excludeInfrastructure) {
                                     val role = node.user.role

@@ -30,6 +30,7 @@ import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.NodeWithRelations
+import org.meshtastic.proto.MeshProtos
 
 @Suppress("TooManyFunctions")
 @Dao
@@ -48,6 +49,13 @@ interface NodeInfoDao {
         // Populate the NodeEntity.publicKey field from the User.publicKey for consistency
         // and to support lazy migration.
         incomingNode.publicKey = incomingNode.user.publicKey
+
+        // Populate denormalized name columns from the User protobuf for search functionality
+        // Only populate if the user is not a placeholder (hwModel != UNSET)
+        if (incomingNode.user.hwModel != MeshProtos.HardwareModel.UNSET) {
+            incomingNode.longName = incomingNode.user.longName
+            incomingNode.shortName = incomingNode.user.shortName
+        }
 
         val existingNodeEntity = getNodeByNum(incomingNode.num)?.node
 
@@ -240,4 +248,27 @@ interface NodeInfoDao {
         setMyNodeInfo(mi)
         putAll(nodes.map { getVerifiedNodeForUpsert(it) })
     }
+
+    /**
+     * Backfills longName and shortName columns from the user protobuf for nodes where these columns are NULL. This
+     * ensures search functionality works for all nodes. Skips placeholder/default users (hwModel == UNSET).
+     */
+    @Transaction
+    fun backfillDenormalizedNames() {
+        val nodes = getAllNodesSnapshot()
+        val nodesToUpdate =
+            nodes
+                .filter { node ->
+                    // Only backfill if columns are NULL AND the user is not a placeholder (hwModel != UNSET)
+                    (node.longName == null || node.shortName == null) &&
+                        node.user.hwModel != MeshProtos.HardwareModel.UNSET
+                }
+                .map { node -> node.copy(longName = node.user.longName, shortName = node.user.shortName) }
+        if (nodesToUpdate.isNotEmpty()) {
+            putAll(nodesToUpdate)
+        }
+    }
+
+    @Query("SELECT * FROM nodes")
+    fun getAllNodesSnapshot(): List<NodeEntity>
 }

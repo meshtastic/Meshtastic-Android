@@ -57,4 +57,7 @@ constructor(
 
     override suspend fun setNodeNotes(num: Int, notes: String) =
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().setNodeNotes(num, notes) } }
+
+    override suspend fun backfillDenormalizedNames() =
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().backfillDenormalizedNames() } }
 }
