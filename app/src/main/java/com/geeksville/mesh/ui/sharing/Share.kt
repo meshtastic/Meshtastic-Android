@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Button
@@ -82,7 +82,7 @@ fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit, onNavigate
                 contentPadding = PaddingValues(6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                items(contacts, key = { it.contactKey }) { contact ->
+                itemsIndexed(contacts, key = { index, contact -> "${contact.contactKey}#$index" }) { _, contact ->
                     val selected = contact.contactKey == selectedContact
                     ContactItem(
                         contact = contact,

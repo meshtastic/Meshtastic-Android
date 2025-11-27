@@ -25,7 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
@@ -68,7 +68,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import com.geeksville.mesh.model.Contact
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -488,7 +487,7 @@ fun ContactListView(
 ) {
     val haptics = LocalHapticFeedback.current
     LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
-        items(contacts, key = { it.contactKey }) { contact ->
+        itemsIndexed(contacts, key = { index, contact -> "${contact.contactKey}#$index" }) { _, contact ->
             val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
 
             ContactItem(
@@ -551,7 +550,13 @@ fun ContactListViewPaged(
         }
 
         // Show paged contacts
-        items(count = contacts.itemCount, key = contacts.itemKey { it.contactKey }) { index ->
+        items(
+            count = contacts.itemCount,
+            key = { index ->
+                val contact = contacts[index]
+                contact?.let { "${it.contactKey}#$index" } ?: "contact_placeholder_$index"
+            },
+        ) { index ->
             val contact = contacts[index]
             if (contact != null) {
                 val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
