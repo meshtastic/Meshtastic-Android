@@ -409,7 +409,7 @@ Rango de Valores 0 - 500.</string>
     <string name="canned_message">Mensajes Predefinidos</string>
     <string name="audio">Audio</string>
     <string name="remote_hardware">Hardware Remoto</string>
-    <string name="neighbor_info">Información de Vecinos</string>
+    <string name="neighbor_info">Información de vecinos</string>
     <string name="ambient_lighting">Luz Ambiental</string>
     <string name="detection_sensor">Sensor de Presencia</string>
     <string name="paxcounter">Contador de Paquetes</string>
@@ -425,10 +425,10 @@ Rango de Valores 0 - 500.</string>
     <string name="bluetooth_enabled">Bluetooth activado</string>
     <string name="pairing_mode">Modo de emparejamiento</string>
     <string name="fixed_pin">Pin fijo</string>
-    <string name="uplink_enabled">Subida de Paquetes Permitida</string>
-    <string name="downlink_enabled">Baja de Paquetes Permitida</string>
+    <string name="uplink_enabled">Permitir subida de paquetes</string>
+    <string name="downlink_enabled">Permitir bajada de paquetes</string>
     <string name="default_">Por defecto</string>
-    <string name="position_enabled">Posición activada</string>
+    <string name="position_enabled">Permitir ubicación</string>
     <string name="precise_location">Ubicación precisa</string>
     <string name="gpio_pin">Pin GPIO</string>
     <string name="type">Tipo</string>
@@ -530,15 +530,15 @@ Rango de Valores 0 - 500.</string>
     <string name="address">Dirección del Servidor MQTT</string>
     <string name="username">Usuario</string>
     <string name="password">Contraseña</string>
-    <string name="encryption_enabled">Permitir Encripción</string>
+    <string name="encryption_enabled">Permitir cifrado</string>
     <string name="json_output_enabled">Salida JSON activada</string>
     <string name="tls_enabled">TLS activado</string>
     <string name="root_topic">Tema raíz</string>
     <string name="proxy_to_client_enabled">Compartir Internet a la Radio</string>
-    <string name="map_reporting">Reportar Posición</string>
+    <string name="map_reporting">Reportar ubicación</string>
     <string name="map_reporting_interval_seconds">Tiempo entre Reportes de Posición (en Segundos)</string>
-    <string name="neighbor_info_config">Configuración de Información de Vecinos</string>
-    <string name="neighbor_info_enabled">Información de Vecinos</string>
+    <string name="neighbor_info_config">Configuración de Información de vecinos</string>
+    <string name="neighbor_info_enabled">Información de vecinos</string>
     <string name="update_interval_seconds">Intervalo de refresco (segundos)</string>
     <string name="transmit_over_lora">Transmitir en LoRa</string>
     <string name="network_config">Conexión Red</string>
@@ -633,7 +633,7 @@ Rango de Valores 0 - 500.</string>
     <string name="short_name">Nombre Corto</string>
     <string name="hardware_model">Modelo del dispositivo</string>
     <string name="licensed_amateur_radio">Licencia de radioaficionado (no necesaria)</string>
-    <string name="licensed_amateur_radio_text">Activando esta opción se desactiva la encriptación y deja de ser compatible con la red de Meshtastic normal.</string>
+    <string name="licensed_amateur_radio_text">Activando esta opción se desactiva el cifrado y deja de ser compatible con la red de Meshtastic normal.</string>
     <string name="dew_point">Punto de rocío</string>
     <string name="pressure">Presión</string>
     <string name="gas_resistance">Resistencia del Gas</string>
@@ -699,9 +699,9 @@ Rango de Valores 0 - 500.</string>
     <string name="bottom_nav_settings">Ajustes</string>
     <string name="set_your_region">Introduzca su región</string>
     <string name="reply">Respuesta</string>
-    <string name="map_reporting_summary">Tu nodo enviará periódicamente un paquete sin encriptar de posición en el mapa al servidor MQTT configurado. Esto incluye id, nombre largo y corto, ubicación aproximada, modelo de hardware, rol, versión del firmware, región LoRa, pre-ajuste del módem y nombre del canal principal.</string>
-    <string name="map_reporting_consent_header">Consentimiento para compartir información del nodo sin encriptar por MQTT</string>
-    <string name="map_reporting_consent_text">Al habilitar esta función, reconoces y das tu consentimiento expreso para la transmisión de la ubicación geográfica en tiempo real de tu dispositivo a través del protocolo MQTT sin ser esta encriptada. 
+    <string name="map_reporting_summary">Tu nodo enviará periódicamente un paquete de posición sin cifrar en el mapa al servidor MQTT configurado. Esto incluye id, nombre largo y corto, ubicación aproximada, modelo de hardware, rol, versión del firmware, región LoRa, pre-ajuste del módem y nombre del canal principal.</string>
+    <string name="map_reporting_consent_header">Consentimiento para compartir información del nodo sin cifrar por MQTT</string>
+    <string name="map_reporting_consent_text">Al habilitar esta función, reconoces y das tu consentimiento expreso para la transmisión de la ubicación geográfica en tiempo real de tu dispositivo a través del protocolo MQTT sin ser esta cifrada. 
 Estos datos de ubicación pueden ser utilizados para fines como aparecer en un mapa en directo, rastrear el dispositivo y funciones de telemetría relacionadas.</string>
     <string name="i_agree_to_share_my_location">He leído y entiendo lo anterior. Doy mi consentimiento voluntario para la transmisión no cifrada de los datos de mi nodo a través de MQTT.</string>
     <string name="i_agree">Estoy de acuerdo.</string>
@@ -841,8 +841,8 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="device_telemetry_enabled_summary">Activar/Desactivar el módulo de telemetría del dispositivo para enviar métricas a la malla. Estos son valores nominales. Las mallas congestionadas escalarán automáticamente a intervalos más largos basados en el número de nodos en línea. Mallas con menos de 10 nodos escalarán a intervalos más rápidos.</string>
     <string name="any">Cualquiera</string>
     <string name="one_hour">1 hora</string>
-    <string name="eight_hours">8 Horas</string>
-    <string name="one_day">24 Horas</string>
+    <string name="eight_hours">8 horas</string>
+    <string name="one_day">24 horas</string>
     <string name="two_days">48 Horas</string>
     <string name="last_heard_filter_label">Filtrar por tiempo de la última escucha: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
