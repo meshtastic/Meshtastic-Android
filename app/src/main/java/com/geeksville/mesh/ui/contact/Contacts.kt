@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
@@ -59,6 +58,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
@@ -288,7 +288,7 @@ fun ContactsScreen(
 
 @Suppress("LongMethod")
 @Composable
-fun MuteNotificationsDialog(
+private fun MuteNotificationsDialog(
     showDialog: Boolean,
     selectedContactKeys: List<String>,
     contactSettings: Map<String, ContactSettings>,
@@ -383,7 +383,7 @@ fun MuteNotificationsDialog(
 }
 
 @Composable
-fun DeleteConfirmationDialog(
+private fun DeleteConfirmationDialog(
     showDialog: Boolean,
     selectedCount: Int, // Number of items to be deleted
     onDismiss: () -> Unit,
@@ -425,7 +425,7 @@ fun DeleteConfirmationDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectionToolbar(
+private fun SelectionToolbar(
     selectedCount: Int,
     onCloseSelection: () -> Unit,
     onMuteSelected: () -> Unit,
@@ -467,27 +467,129 @@ fun SelectionToolbar(
     )
 }
 
-/**
- * Non-paginated contact list view.
- *
- * NOTE: This is kept for ShareScreen which displays a simple contact picker. The main ContactsScreen uses
- * [ContactListViewPaged] for better performance.
- *
- * @see ContactListViewPaged for the paginated version
- */
 @Composable
-fun ContactListView(
-    contacts: List<Contact>,
+private fun ContactListViewPaged(
+    contacts: LazyPagingItems<Contact>,
+    channelPlaceholders: List<Contact>,
     selectedList: List<String>,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
     listState: LazyListState,
+    modifier: Modifier = Modifier,
     channels: AppOnlyProtos.ChannelSet? = null,
 ) {
     val haptics = LocalHapticFeedback.current
-    LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
-        itemsIndexed(contacts, key = { index, contact -> "${contact.contactKey}#$index" }) { _, contact ->
+
+    if (contacts.loadState.refresh is LoadState.Loading && contacts.itemCount == 0) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val visiblePlaceholders = rememberVisiblePlaceholders(contacts, channelPlaceholders)
+
+    ContactListContentInternal(
+        contacts = contacts,
+        visiblePlaceholders = visiblePlaceholders,
+        selectedList = selectedList,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        onNodeChipClick = onNodeChipClick,
+        listState = listState,
+        modifier = modifier,
+        channels = channels,
+        haptics = haptics,
+    )
+}
+
+@Composable
+private fun ContactListContentInternal(
+    contacts: LazyPagingItems<Contact>,
+    visiblePlaceholders: List<Contact>,
+    selectedList: List<String>,
+    onClick: (Contact) -> Unit,
+    onLongClick: (Contact) -> Unit,
+    onNodeChipClick: (Contact) -> Unit,
+    listState: LazyListState,
+    channels: AppOnlyProtos.ChannelSet?,
+    haptics: HapticFeedback,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(modifier = modifier.fillMaxSize(), state = listState) {
+        contactListPlaceholdersItems(
+            visiblePlaceholders = visiblePlaceholders,
+            selectedList = selectedList,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            onNodeChipClick = onNodeChipClick,
+            channels = channels,
+            haptics = haptics,
+        )
+
+        contactListPagedItems(
+            contacts = contacts,
+            selectedList = selectedList,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            onNodeChipClick = onNodeChipClick,
+            channels = channels,
+            haptics = haptics,
+        )
+
+        contactListAppendLoadingItem(contacts = contacts)
+    }
+}
+
+private fun LazyListScope.contactListPlaceholdersItems(
+    visiblePlaceholders: List<Contact>,
+    selectedList: List<String>,
+    onClick: (Contact) -> Unit,
+    onLongClick: (Contact) -> Unit,
+    onNodeChipClick: (Contact) -> Unit,
+    channels: AppOnlyProtos.ChannelSet?,
+    haptics: HapticFeedback,
+) {
+    items(
+        count = visiblePlaceholders.size,
+        key = { index -> "placeholder_${visiblePlaceholders[index].contactKey}" },
+    ) { index ->
+        val placeholder = visiblePlaceholders[index]
+        val selected by remember { derivedStateOf { selectedList.contains(placeholder.contactKey) } }
+
+        ContactItem(
+            contact = placeholder,
+            selected = selected,
+            onClick = { onClick(placeholder) },
+            onLongClick = {
+                onLongClick(placeholder)
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            },
+            channels = channels,
+            onNodeChipClick = { onNodeChipClick(placeholder) },
+        )
+    }
+}
+
+private fun LazyListScope.contactListPagedItems(
+    contacts: LazyPagingItems<Contact>,
+    selectedList: List<String>,
+    onClick: (Contact) -> Unit,
+    onLongClick: (Contact) -> Unit,
+    onNodeChipClick: (Contact) -> Unit,
+    channels: AppOnlyProtos.ChannelSet?,
+    haptics: HapticFeedback,
+) {
+    items(
+        count = contacts.itemCount,
+        key = { index ->
+            val contact = contacts[index]
+            contact?.let { "${it.contactKey}#$index" } ?: "contact_placeholder_$index"
+        },
+    ) { index ->
+        val contact = contacts[index]
+        if (contact != null) {
             val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
 
             ContactItem(
@@ -505,84 +607,13 @@ fun ContactListView(
     }
 }
 
-@Composable
-fun ContactListViewPaged(
-    contacts: LazyPagingItems<Contact>,
-    channelPlaceholders: List<Contact>,
-    selectedList: List<String>,
-    onClick: (Contact) -> Unit,
-    onLongClick: (Contact) -> Unit,
-    onNodeChipClick: (Contact) -> Unit,
-    listState: LazyListState,
-    modifier: Modifier = Modifier,
-    channels: AppOnlyProtos.ChannelSet? = null,
-) {
-    val haptics = LocalHapticFeedback.current
-
-    // Handle initial loading state
-    if (contacts.loadState.refresh is LoadState.Loading && contacts.itemCount == 0) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-        return
-    }
-
-    val visiblePlaceholders = rememberVisiblePlaceholders(contacts, channelPlaceholders)
-
-    LazyColumn(modifier = modifier.fillMaxSize(), state = listState) {
-        // Show channel placeholders first
-        items(
-            count = visiblePlaceholders.size,
-            key = { index -> "placeholder_${visiblePlaceholders[index].contactKey}" },
-        ) { index ->
-            val placeholder = visiblePlaceholders[index]
-            val selected by remember { derivedStateOf { selectedList.contains(placeholder.contactKey) } }
-
-            ContactItem(
-                contact = placeholder,
-                selected = selected,
-                onClick = { onClick(placeholder) },
-                onLongClick = {
-                    onLongClick(placeholder)
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                },
-                channels = channels,
-                onNodeChipClick = { onNodeChipClick(placeholder) },
-            )
-        }
-
-        // Show paged contacts
-        items(
-            count = contacts.itemCount,
-            key = { index ->
-                val contact = contacts[index]
-                contact?.let { "${it.contactKey}#$index" } ?: "contact_placeholder_$index"
-            },
-        ) { index ->
-            val contact = contacts[index]
-            if (contact != null) {
-                val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
-
-                ContactItem(
-                    contact = contact,
-                    selected = selected,
-                    onClick = { onClick(contact) },
-                    onLongClick = {
-                        onLongClick(contact)
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    },
-                    channels = channels,
-                    onNodeChipClick = { onNodeChipClick(contact) },
-                )
-            }
-        }
-
-        // Loading indicator when loading more contacts
-        contacts.apply {
-            when {
-                loadState.append is LoadState.Loading -> {
-                    item(key = "append_loading") {
-                        Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
+private fun LazyListScope.contactListAppendLoadingItem(contacts: LazyPagingItems<Contact>) {
+    contacts.apply {
+        when {
+            loadState.append is LoadState.Loading -> {
+                item(key = "append_loading") {
+                    Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
                 }
             }
