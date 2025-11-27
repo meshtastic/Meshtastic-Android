@@ -526,6 +526,7 @@
     <string name="output_duration_milliseconds">Durée de sortie (en millisecondes)</string>
     <string name="nag_timeout_seconds">Délai d'attente du nag</string>
     <string name="ringtone">Sonnerie</string>
+    <string name="play">Lancer</string>
     <string name="use_i2s_as_buzzer">Utiliser l'I2S comme buzzer</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Options</string>
@@ -791,6 +792,8 @@
     <string name="security_icon_help_show_less">Afficher l'état actuel</string>
     <string name="security_icon_help_dismiss">Annuler</string>
     <string name="confirm_delete_node">Êtes-vous sûr de vouloir supprimer ce nœud ?</string>
+    <string name="forget_connection">Oublier la connexion</string>
+    <string name="confirm_forget_connection">Êtes-vous sûr de vouloir oublier cette connexion ?</string>
     <string name="replying_to">Répondre à %1$s</string>
     <string name="cancel_reply">Annuler la réponse</string>
     <string name="delete_messages_title">Supprimer les messages ?</string>
@@ -908,11 +911,44 @@
     <string name="for_more_information_see_our_privacy_policy">Pour plus d'informations, consultez notre politique de confidentialité.</string>
     <string name="unset">Non défini - 0</string>
     <string name="relayed_by">Relayé par : %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Entendu le relai %1$d</item>
+        <item quantity="other">Entendu les relais %1$d</item>
+    </plurals>
     <string name="preserve_favorites">Conserver les favoris ?</string>
     <string name="usb_devices">Appareils USB</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">Mise à jour du firmware</string>
+    <string name="firmware_update_checking">Vérification des mises à jour</string>
+    <string name="firmware_update_device">Appareil : %1$s</string>
+    <string name="firmware_update_latest">Dernière version : %1$s</string>
+    <string name="firmware_update_stable">Stable</string>
+    <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_button">Mise à jour du Firmware</string>
+    <string name="firmware_update_disconnect_warning">Note : cette opération va temporairement déconnecter votre appareil durant la mise à jour.</string>
+    <string name="firmware_update_downloading">Téléchargement du firmware... %1$d%</string>
+    <string name="firmware_update_error">Erreur : %1$s</string>
+    <string name="firmware_update_retry">Réessayer</string>
+    <string name="firmware_update_success">Mise à jour réussie !</string>
     <string name="firmware_update_done">Terminé</string>
+    <string name="firmware_update_starting_dfu">Démarrage du mode DFU...</string>
+    <string name="firmware_update_updating">Mise à jour... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Modèle de matériel inconnu : %1$d</string>
+    <string name="firmware_update_invalid_address">L'appareil connecté n'est pas un appareil Bluetooth ou l'adresse est inconnue (%1$s). Le mode DFU nécessite le Bluetooth.</string>
     <string name="firmware_update_no_device">Aucun appareil connecté</string>
+    <string name="firmware_update_not_found_in_release">Impossible de trouver le firmware pour %1$s dans cette version.</string>
+    <string name="firmware_update_extracting">Extraction du firmware...</string>
+    <string name="firmware_update_starting_service">Déconnexion pour démarrer le service DFU...</string>
     <string name="firmware_update_failed">Échec de la mise à jour</string>
+    <string name="firmware_update_hang_tight">Accrochez-vous, nous travaillons dessus...</string>
+    <string name="firmware_update_keep_device_close">Conservez votre appareil près de votre smartphone.</string>
+    <string name="firmware_update_do_not_close">Ne fermez pas l'application.</string>
+    <string name="firmware_update_almost_there">On y est presque...</string>
+    <string name="firmware_update_taking_a_while">Ça peut prendre une minute...</string>
+    <string name="firmware_update_select_file">Sélectionnez le fichier local</string>
+    <string name="firmware_update_unknown_release">Version distante inconnue</string>
+    <string name="firmware_update_disclaimer_title">Avertissement de mise à jour</string>
+    <string name="firmware_update_disclaimer_text">Vous êtes sur le point d'installer un nouveau firmware sur votre appareil. Ce processus comporte des risques.\n\n• Assurez-vous que votre appareil est chargé.\n• Conservez l'appareil près de votre smartphone.\n• Ne fermez pas l'application durant la mise à jour\n\nVérifiez que vous avez sélectionné le bon firmware pour votre matériel.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy dit : \"Gardez votre échelle à portée de main !\"</string>
+    <string name="chirpy">Chirpy</string>
 </resources>

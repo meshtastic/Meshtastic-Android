@@ -47,7 +47,7 @@
     <string name="routing_error_no_interface">Inget gränssnitt</string>
     <string name="routing_error_max_retransmit">Maximalt antal sändningar nådd</string>
     <string name="routing_error_no_channel">Ingen kanal</string>
-    <string name="routing_error_too_large">Paket för stort</string>
+    <string name="routing_error_too_large">Paket är för stort</string>
     <string name="routing_error_no_response">Inget svar</string>
     <string name="routing_error_bad_request">Misslyckad</string>
     <string name="routing_error_duty_cycle_limit">Gränsen för intermittensfaktor uppnådd</string>
@@ -217,7 +217,7 @@
     <string name="meshtastic_broadcast_notifications">Meddelandeaviseringar</string>
     <string name="meshtastic_alerts_notifications">Larmmeddelanden</string>
     <string name="firmware_too_old">Uppdatering av fast programvara krävs.</string>
-    <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
+    <string name="firmware_old">Radiomodulens fasta programvara är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för fast programvara</a>.</string>
     <string name="okay">Okej</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
     <string name="cant_change_no_radio">Det gick inte att byta kanal, eftersom radiomodulen ännu inte är ansluten. Försök igen.</string>
@@ -270,7 +270,7 @@
     <string name="factory_reset">Återställ till standardinställningar</string>
     <string name="bluetooth_disabled">Bluetooth är inaktiverat. Aktivera den i inställningarna för enheten.</string>
     <string name="open_settings">Öppna inställningar</string>
-    <string name="firmware_version">Fast programversion: %1$s</string>
+    <string name="firmware_version">Fast programvaruversion: %1$s</string>
     <string name="permission_missing_31">Meshtastic behöver \"Närliggande enheter\"-behörigheter aktiverade för att hitta och ansluta till enheter via Bluetooth. Du kan inaktivera när den inte används.</string>
     <string name="direct_message">Direktmeddelande</string>
     <string name="nodedb_reset">Nollställ NodeDB</string>
@@ -679,7 +679,7 @@
     <string name="import_label">Importera</string>
     <string name="request_metadata">Begär metadata</string>
     <string name="actions">Åtgärder</string>
-    <string name="firmware">Firmware</string>
+    <string name="firmware">Fast programvara</string>
     <string name="use_12h_format">Använd 12-timmarsformat</string>
     <string name="display_time_in_12h_format">Visar tiden i 12-timmarsformat när denna är aktiverad.</string>
     <string name="host_metrics_log">Logg för värdstatistik</string>
@@ -696,7 +696,7 @@
     <string name="bottom_nav_settings">Inställningar</string>
     <string name="set_your_region">Ange din region</string>
     <string name="reply">Svara</string>
-    <string name="map_reporting_summary">Din nod kommer periodiskt skicka ett okrypterat paket till den konfigurerade MQTT-servern som inkluderar id, kort och långt namn, ungefärlig plats, hardvarumodell, enhetsroll, mjukvaru-version, LoRa-region, modeminställning och den primära kanalens namn.</string>
+    <string name="map_reporting_summary">Din nod kommer periodiskt skicka ett okrypterat paket till den konfigurerade MQTT-servern som inkluderar id, kort och långt namn, ungefärlig plats, hårdvarumodell, enhetsroll, mjukvaruversion, LoRa-region, modeminställning och den primära kanalens namn.</string>
     <string name="map_reporting_consent_header">Samtycke för att dela okrypterad noddata via MQTT</string>
     <string name="map_reporting_consent_text">Genom att aktivera den här funktionen bekräftar och samtycker du till överföringen av enhetens geografiska plats i realtid över MQTT-protokollet utan kryptering. Denna platsdata kan användas för ändamål som live-kartrapportering, enhetsspårning och relaterade telemetrifunktioner.</string>
     <string name="i_agree_to_share_my_location">Jag har läst och förstått ovanstående. Jag samtycker till okrypterad överföring av mina noddata via MQTT</string>
