@@ -719,7 +719,6 @@
     <string name="modules_unlocked">Modulerna är upplåsta</string>
     <string name="modules_already_unlocked">Modulerna är redan upplåsta</string>
     <string name="remote">Fjärr</string>
-    <string name="node_count_template">(%1$d online / %2$d totalt)</string>
     <string name="react">Reagera</string>
     <string name="disconnect">Koppla från</string>
     <string name="scanning_bluetooth">Söker efter Bluetooth-enheter…</string>

@@ -651,7 +651,6 @@
     <string name="modules_unlocked">Moduly odemčeny</string>
     <string name="modules_already_unlocked">Moduly jsou již odemčeny</string>
     <string name="remote">Vzdálený</string>
-    <string name="node_count_template">(%1$d online / %2$d celkem)</string>
     <string name="react">Odpovědět</string>
     <string name="disconnect">Odpojit</string>
     <string name="scanning_bluetooth">Skenování zařízení Bluetooth…</string>

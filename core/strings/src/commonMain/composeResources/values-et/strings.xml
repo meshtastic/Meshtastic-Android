@@ -747,7 +747,6 @@
     <string name="modules_unlocked">Moodulid on lukustamata</string>
     <string name="modules_already_unlocked">Moodulid juba avatud</string>
     <string name="remote">Kaugjuhtimine</string>
-    <string name="node_count_template">(%1$d võrgus / %2$d kokku)</string>
     <string name="react">Reageeri</string>
     <string name="disconnect">Katkesta ühendus</string>
     <string name="scanning_bluetooth">Otsin sinihamba seadmeid…</string>
