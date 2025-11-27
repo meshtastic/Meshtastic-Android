@@ -130,6 +130,8 @@ fun ExternalNotificationConfigScreen(
         enabled = state.connected,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
+        additionalDirtyCheck = { ringtoneInput != ringtone },
+        onDiscard = { ringtoneInput = ringtone },
         onSave = {
             if (ringtoneInput != ringtone) {
                 viewModel.setRingtone(ringtoneInput)
@@ -259,7 +261,7 @@ fun ExternalNotificationConfigScreen(
                 DropDownPreference(
                     title = stringResource(Res.string.output_duration_milliseconds),
                     items = outputItems.map { it.value to it.toDisplayString() },
-                    selectedItem = formState.value.outputMs,
+                    selectedItem = formState.value.outputMs.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy { outputMs = it.toInt() } },
                 )
@@ -268,7 +270,7 @@ fun ExternalNotificationConfigScreen(
                 DropDownPreference(
                     title = stringResource(Res.string.nag_timeout_seconds),
                     items = nagItems.map { it.value to it.toDisplayString() },
-                    selectedItem = formState.value.nagTimeout,
+                    selectedItem = formState.value.nagTimeout.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy { nagTimeout = it.toInt() } },
                 )

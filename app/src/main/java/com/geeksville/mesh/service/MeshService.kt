@@ -721,6 +721,7 @@ class MeshService : Service() {
             rssi = packet.rxRssi,
             replyId = data.replyId,
             relayNode = packet.relayNode,
+            viaMqtt = packet.viaMqtt,
         )
     }
 
