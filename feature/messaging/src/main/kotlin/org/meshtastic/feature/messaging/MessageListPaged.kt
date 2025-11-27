@@ -128,6 +128,9 @@ internal fun MessageListPaged(
 
     val coroutineScope = rememberCoroutineScope()
 
+    // Disable auto-scroll when any dialog is open to prevent list jumping
+    val hasDialogOpen = showStatusDialog != null || showReactionDialog != null
+
     // Track unread count based on scroll position
     UpdateUnreadCountPaged(listState = listState, messages = state.messages, onUnreadChange = handlers.onUnreadChanged)
 
@@ -136,6 +139,7 @@ internal fun MessageListPaged(
         listState = listState,
         messages = state.messages,
         hasUnreadMessages = state.hasUnreadMessages,
+        hasDialogOpen = hasDialogOpen,
     )
 
     MessageListPagedContent(
@@ -272,24 +276,52 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     )
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun AutoScrollToBottomPaged(
     listState: LazyListState,
     messages: LazyPagingItems<Message>,
     hasUnreadMessages: Boolean,
+    hasDialogOpen: Boolean = false,
     itemThreshold: Int = 3,
 ) = with(listState) {
-    val shouldAutoScroll by
-        remember(hasUnreadMessages) {
+    val shouldStickToBottom by
+        remember(hasUnreadMessages, hasDialogOpen) {
             derivedStateOf {
-                val isAtBottom =
-                    firstVisibleItemIndex == 0 &&
-                        firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
-                val isNearBottom = firstVisibleItemIndex <= itemThreshold
-                isAtBottom || (!hasUnreadMessages && isNearBottom)
+                if (hasDialogOpen) {
+                    false
+                } else {
+                    val isAtBottom =
+                        firstVisibleItemIndex == 0 &&
+                            firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
+                    val isNearBottom = firstVisibleItemIndex <= itemThreshold
+                    isAtBottom || (!hasUnreadMessages && isNearBottom)
+                }
             }
         }
-    if (shouldAutoScroll) {
+
+    val isRefreshing by remember { derivedStateOf { messages.loadState.refresh is LoadState.Loading } }
+    var wasPreviouslyRefreshing by remember { mutableStateOf(false) }
+
+    // Maintain scroll position during and after refresh
+    LaunchedEffect(isRefreshing, shouldStickToBottom) {
+        if (!shouldStickToBottom) return@LaunchedEffect
+
+        if (isRefreshing) {
+            wasPreviouslyRefreshing = true
+            if (!isScrollInProgress && messages.itemCount > 0) {
+                scrollToItem(0)
+            }
+        } else if (wasPreviouslyRefreshing) {
+            wasPreviouslyRefreshing = false
+            if (messages.itemCount > 0) {
+                scrollToItem(0)
+            }
+        }
+    }
+
+    // Normal auto-scroll for new messages (when not refreshing)
+    if (shouldStickToBottom && !isRefreshing) {
         LaunchedEffect(messages.itemCount) {
             if (!isScrollInProgress && messages.itemCount > 0) {
                 scrollToItem(0)
