@@ -16,7 +16,7 @@ enhancement:
  # or files in the .github dir
 repo:
 - any:
-  - head-branch: [repo, Repo]
+  - head-branch: [repo, Repo, REPO, ci, CI]
   - changed-files:
     - any-glob-to-any-file: .github
 
