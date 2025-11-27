@@ -32,6 +32,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
@@ -48,6 +49,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
@@ -125,6 +128,9 @@ internal fun MessageListPaged(
 
     val coroutineScope = rememberCoroutineScope()
 
+    // Disable auto-scroll when any dialog is open to prevent list jumping
+    val hasDialogOpen = showStatusDialog != null || showReactionDialog != null
+
     // Track unread count based on scroll position
     UpdateUnreadCountPaged(listState = listState, messages = state.messages, onUnreadChange = handlers.onUnreadChanged)
 
@@ -133,6 +139,7 @@ internal fun MessageListPaged(
         listState = listState,
         messages = state.messages,
         hasUnreadMessages = state.hasUnreadMessages,
+        hasDialogOpen = hasDialogOpen,
     )
 
     MessageListPagedContent(
@@ -269,24 +276,52 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     )
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 private fun AutoScrollToBottomPaged(
     listState: LazyListState,
     messages: LazyPagingItems<Message>,
     hasUnreadMessages: Boolean,
+    hasDialogOpen: Boolean = false,
     itemThreshold: Int = 3,
 ) = with(listState) {
-    val shouldAutoScroll by
-        remember(hasUnreadMessages) {
+    val shouldStickToBottom by
+        remember(hasUnreadMessages, hasDialogOpen) {
             derivedStateOf {
-                val isAtBottom =
-                    firstVisibleItemIndex == 0 &&
-                        firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
-                val isNearBottom = firstVisibleItemIndex <= itemThreshold
-                isAtBottom || (!hasUnreadMessages && isNearBottom)
+                if (hasDialogOpen) {
+                    false
+                } else {
+                    val isAtBottom =
+                        firstVisibleItemIndex == 0 &&
+                            firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
+                    val isNearBottom = firstVisibleItemIndex <= itemThreshold
+                    isAtBottom || (!hasUnreadMessages && isNearBottom)
+                }
             }
         }
-    if (shouldAutoScroll) {
+
+    val isRefreshing by remember { derivedStateOf { messages.loadState.refresh is LoadState.Loading } }
+    var wasPreviouslyRefreshing by remember { mutableStateOf(false) }
+
+    // Maintain scroll position during and after refresh
+    LaunchedEffect(isRefreshing, shouldStickToBottom) {
+        if (!shouldStickToBottom) return@LaunchedEffect
+
+        if (isRefreshing) {
+            wasPreviouslyRefreshing = true
+            if (!isScrollInProgress && messages.itemCount > 0) {
+                scrollToItem(0)
+            }
+        } else if (wasPreviouslyRefreshing) {
+            wasPreviouslyRefreshing = false
+            if (messages.itemCount > 0) {
+                scrollToItem(0)
+            }
+        }
+    }
+
+    // Normal auto-scroll for new messages (when not refreshing)
+    if (shouldStickToBottom && !isRefreshing) {
         LaunchedEffect(messages.itemCount) {
             if (!isScrollInProgress && messages.itemCount > 0) {
                 scrollToItem(0)
@@ -294,6 +329,21 @@ private fun AutoScrollToBottomPaged(
         }
     }
 }
+
+private fun findFirstVisibleUnreadMessage(messages: LazyPagingItems<Message>, visibleIndex: Int): Message? {
+    val firstVisibleUnreadIndex =
+        (visibleIndex until messages.itemCount).firstOrNull { i ->
+            val msg = messages[i]
+            msg != null && !msg.read && !msg.fromLocal
+        }
+    return firstVisibleUnreadIndex?.let { messages[it] }
+}
+
+private fun findLastUnreadMessageIndex(messages: LazyPagingItems<Message>): Int? =
+    (0 until messages.itemCount).lastOrNull { i ->
+        val msg = messages[i]
+        msg != null && !msg.read && !msg.fromLocal
+    }
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -303,6 +353,24 @@ private fun UpdateUnreadCountPaged(
     onUnreadChange: (Long, Long) -> Unit,
 ) {
     val currentOnUnreadChange by rememberUpdatedState(onUnreadChange)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var isResumed by remember {
+        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+    }
+
+    // Track lifecycle state changes
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            androidx.lifecycle.LifecycleEventObserver { _, event ->
+                when (event) {
+                    androidx.lifecycle.Lifecycle.Event.ON_RESUME -> isResumed = true
+                    androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> isResumed = false
+                    else -> {}
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     // Track remote message count to restart effect when remote messages change
     // This fixes race condition when sending/receiving messages during debounce period
@@ -318,42 +386,28 @@ private fun UpdateUnreadCountPaged(
 
     // Mark messages as read after debounce period
     // Handles both scrolling cases and when all unread messages are visible without scrolling
-    LaunchedEffect(remoteMessageCount, listState) {
+    // Effect restarts when isResumed changes, so returning from background will restart the debounce
+    LaunchedEffect(remoteMessageCount, listState, isResumed) {
         snapshotFlow {
             // Emit when scroll stops OR when at initial position (covers no-scroll case)
-            if (listState.isScrollInProgress) {
-                null // Scrolling in progress, don't emit
+            // Include isResumed in the snapshot so lifecycle changes trigger new emissions
+            if (listState.isScrollInProgress || !isResumed) {
+                null // Scrolling in progress or not resumed, don't emit
             } else {
-                listState.firstVisibleItemIndex // Emit current position when not scrolling
+                listState.firstVisibleItemIndex // Emit current position when not scrolling and resumed
             }
         }
             .debounce(timeoutMillis = UnreadUiDefaults.SCROLL_DEBOUNCE_MILLIS)
             .collectLatest { index ->
+                // Only mark messages as read if we have a valid index (screen is visible and not scrolling)
                 if (index != null) {
-                    // Find the last (oldest in timeline, highest index) unread message in loaded items
-                    val lastUnreadIndex =
-                        (0 until messages.itemCount).lastOrNull { i ->
-                            val msg = messages[i]
-                            msg != null && !msg.read && !msg.fromLocal
-                        }
-
+                    val lastUnreadIndex = findLastUnreadMessageIndex(messages)
                     // If we're at/past the oldest unread, mark the first visible unread message
                     // Since newer messages have HIGHER timestamps, marking a newer message's timestamp
                     // will batch-mark all older messages via SQL: WHERE received_time <= timestamp
                     if (lastUnreadIndex != null && index <= lastUnreadIndex) {
-                        // Find the first (newest in timeline, lowest index) visible unread message
-                        val firstVisibleUnreadIndex =
-                            (index until messages.itemCount).firstOrNull { i ->
-                                val msg = messages[i]
-                                msg != null && !msg.read && !msg.fromLocal
-                            }
-
-                        if (firstVisibleUnreadIndex != null) {
-                            val firstVisibleUnread = messages[firstVisibleUnreadIndex]
-                            if (firstVisibleUnread != null) {
-                                currentOnUnreadChange(firstVisibleUnread.uuid, firstVisibleUnread.receivedTime)
-                            }
-                        }
+                        val firstVisibleUnread = findFirstVisibleUnreadMessage(messages, index)
+                        firstVisibleUnread?.let { currentOnUnreadChange(it.uuid, it.receivedTime) }
                     }
                 }
             }
@@ -397,6 +451,7 @@ internal fun MessageStatusDialog(
         resendOption = resendOption,
         text = text,
         relayNodeName = relayNodeName,
+        relays = message.relays,
         onConfirm = onResend,
         onDismiss = onDismiss,
     )

@@ -30,6 +30,7 @@ fun List<DeviceListEntry>.DeviceListSection(
     selectedDevice: String,
     onSelect: (DeviceListEntry) -> Unit,
     modifier: Modifier = Modifier,
+    onDelete: ((DeviceListEntry) -> Unit)? = null,
 ) {
     if (isNotEmpty()) {
         TitledCard(title = title, modifier = modifier) {
@@ -39,6 +40,7 @@ fun List<DeviceListEntry>.DeviceListSection(
                     connectionState.takeIf { device.fullAddress == selectedDevice } ?: ConnectionState.Disconnected,
                     device = device,
                     onSelect = { onSelect(device) },
+                    onDelete = onDelete?.let { delete -> { delete(device) } },
                     modifier = Modifier.Companion,
                 )
             }

@@ -24,7 +24,7 @@ hilt = "2.57.2"
 maps-compose = "6.12.2"
 
 # Networking
-ktor = "3.3.2"
+ktor = "3.3.3"
 ktorfit = "2.6.4"
 
 # Other
@@ -202,7 +202,7 @@ firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 
 # Other
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.21.0" }
-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.0" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }

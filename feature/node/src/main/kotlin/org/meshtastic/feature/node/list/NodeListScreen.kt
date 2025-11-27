@@ -122,7 +122,7 @@ fun NodeListScreen(
         topBar = {
             MainAppBar(
                 title = stringResource(Res.string.nodes),
-                subtitle = stringResource(Res.string.node_count_template, onlineNodeCount, totalNodeCount),
+                subtitle = stringResource(Res.string.node_count_template, onlineNodeCount, nodes.size, totalNodeCount),
                 ourNode = ourNode,
                 showNodeChip = false,
                 canNavigateUp = false,

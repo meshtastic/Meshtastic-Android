@@ -72,6 +72,8 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
         enabled = state.connected,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
+        additionalDirtyCheck = { messagesInput != messages },
+        onDiscard = { messagesInput = messages },
         onSave = {
             if (messagesInput != messages) {
                 viewModel.setCannedMessages(messagesInput)

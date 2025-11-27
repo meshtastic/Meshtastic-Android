@@ -774,7 +774,7 @@
     <string name="modules_unlocked">Modules unlocked</string>
     <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Remote</string>
-    <string name="node_count_template">(%1$d online / %2$d total)</string>
+    <string name="node_count_template">(%1$d online / %2$d shown / %3$d total)</string>
     <string name="react">React</string>
     <string name="disconnect">Disconnect</string>
     <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
@@ -825,6 +825,8 @@
     <string name="security_icon_help_dismiss">Dismiss</string>
 
     <string name="confirm_delete_node">Are you sure you want to delete this node?</string>
+    <string name="forget_connection">Forget connection</string>
+    <string name="confirm_forget_connection">Are you sure you want to forget this connection?</string>
 
     <string name="replying_to">Replying to %1$s</string>
     <string name="cancel_reply">Cancel reply</string>
@@ -954,6 +956,10 @@
     <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
     <string name="unset">Unset - 0</string>
     <string name="relayed_by">Relayed by: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Heard %1$d Relay</item>
+        <item quantity="other">Heard %1$d Relays</item>
+    </plurals>
     <string name="preserve_favorites">Preserve Favorites?</string>
     <string name="usb_devices">USB Devices</string>
 

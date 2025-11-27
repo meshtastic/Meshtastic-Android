@@ -149,6 +149,8 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         enabled = state.connected,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
+        additionalDirtyCheck = { locationInput != currentPosition },
+        onDiscard = { locationInput = currentPosition },
         onSave = {
             if (formState.value.fixedPosition) {
                 if (locationInput != currentPosition) {
@@ -233,9 +235,9 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         value = locationInput.latitude,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { value ->
-                            if (value >= -90 && value <= 90.0) {
-                                locationInput = locationInput.copy(latitude = value)
+                        onValueChanged = { lat: Double ->
+                            if (lat >= -90 && lat <= 90.0) {
+                                locationInput = locationInput.copy(latitude = lat)
                             }
                         },
                     )
@@ -245,9 +247,9 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         value = locationInput.longitude,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { value ->
-                            if (value >= -180 && value <= 180.0) {
-                                locationInput = locationInput.copy(longitude = value)
+                        onValueChanged = { lon: Double ->
+                            if (lon >= -180 && lon <= 180.0) {
+                                locationInput = locationInput.copy(longitude = lon)
                             }
                         },
                     )
@@ -257,7 +259,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         value = locationInput.altitude,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { value -> locationInput = locationInput.copy(altitude = value) },
+                        onValueChanged = { alt: Int -> locationInput = locationInput.copy(altitude = alt) },
                     )
                     HorizontalDivider()
                     TextButton(

@@ -410,7 +410,7 @@ class MeshService : Service() {
             }
             .launchIn(serviceScope)
 
-        loadSettings() // Load our last known node DB
+        loadCachedNodeDB() // Load our last known node DB
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
@@ -482,7 +482,7 @@ class MeshService : Service() {
     // BEGINNING OF MODEL - FIXME, move elsewhere
     //
 
-    private fun loadSettings() = serviceScope.handledLaunch {
+    private fun loadCachedNodeDB() = serviceScope.handledLaunch {
         myNodeInfo = nodeRepository.myNodeInfo.value
         nodeDBbyNodeNum.putAll(nodeRepository.getNodeDBbyNum().first())
         // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
@@ -721,6 +721,7 @@ class MeshService : Service() {
             rssi = packet.rxRssi,
             replyId = data.replyId,
             relayNode = packet.relayNode,
+            viaMqtt = packet.viaMqtt,
         )
     }
 
@@ -992,6 +993,17 @@ class MeshService : Service() {
         sessionPasskey = a.sessionPasskey
     }
 
+    /**
+     * Check if a User is a default/placeholder from firmware (node was evicted and re-created) and whether we should
+     * preserve existing user data instead of overwriting it.
+     */
+    private fun shouldPreserveExistingUser(existing: MeshProtos.User, incoming: MeshProtos.User): Boolean {
+        val isDefaultName = incoming.longName.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+        val isDefaultHwModel = incoming.hwModel == MeshProtos.HardwareModel.UNSET
+        val hasExistingUser = existing.id.isNotEmpty() && existing.hwModel != MeshProtos.HardwareModel.UNSET
+        return hasExistingUser && isDefaultName && isDefaultHwModel
+    }
+
     private fun handleSharedContactImport(contact: AdminProtos.SharedContact) {
         handleReceivedUser(contact.nodeNum, contact.user, manuallyVerified = true)
     }
@@ -1006,22 +1018,37 @@ class MeshService : Service() {
         updateNodeInfo(fromNum) {
             val newNode = (it.isUnknownUser && p.hwModel != MeshProtos.HardwareModel.UNSET)
 
-            val keyMatch = !it.hasPKC || it.user.publicKey == p.publicKey
-            it.user =
-                if (keyMatch) {
-                    p
-                } else {
-                    p.copy {
-                        Timber.w("Public key mismatch from $longName ($shortName)")
-                        publicKey = NodeEntity.ERROR_BYTE_STRING
+            // Check if this is a default/unknown user from firmware (node was evicted and re-created)
+            val shouldPreserve = shouldPreserveExistingUser(it.user, p)
+
+            if (shouldPreserve) {
+                // Firmware sent us a placeholder - keep all our existing user data
+                Timber.d(
+                    "Preserving existing user data for node $fromNum: " +
+                        "kept='${it.user.longName}' (hwModel=${it.user.hwModel}), " +
+                        "skipped default='${p.longName}' (hwModel=UNSET)",
+                )
+                // Still update channel and verification status
+                it.channel = channel
+                it.manuallyVerified = manuallyVerified
+            } else {
+                val keyMatch = !it.hasPKC || it.user.publicKey == p.publicKey
+                it.user =
+                    if (keyMatch) {
+                        p
+                    } else {
+                        p.copy {
+                            Timber.w("Public key mismatch from $longName ($shortName)")
+                            publicKey = NodeEntity.ERROR_BYTE_STRING
+                        }
                     }
+                it.longName = p.longName
+                it.shortName = p.shortName
+                it.channel = channel
+                it.manuallyVerified = manuallyVerified
+                if (newNode) {
+                    serviceNotifications.showNewNodeSeenNotification(it)
                 }
-            it.longName = p.longName
-            it.shortName = p.shortName
-            it.channel = channel
-            it.manuallyVerified = manuallyVerified
-            if (newNode) {
-                serviceNotifications.showNewNodeSeenNotification(it)
             }
         }
     }
@@ -1326,6 +1353,9 @@ class MeshService : Service() {
                 p.data.status = m
                 p.routingError = routingError
                 p.data.relayNode = relayNode
+                if (isAck) {
+                    p.data.relays += 1
+                }
                 packetRepository.get().update(p)
             }
             serviceBroadcasts.broadcastMessageStatus(requestId, m)
@@ -1720,14 +1750,9 @@ class MeshService : Service() {
         updateNodeInfo(info.num) {
             if (info.hasUser()) {
                 // Check if this is a default/unknown user from firmware (node was evicted and re-created)
-                val isDefaultName = info.user.longName.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
-                val isDefaultHwModel = info.user.hwModel == MeshProtos.HardwareModel.UNSET
-                val hasExistingUser = it.user.id.isNotEmpty() && it.user.hwModel != MeshProtos.HardwareModel.UNSET
+                val shouldPreserve = shouldPreserveExistingUser(it.user, info.user)
 
-                // If firmware sends a default user (evicted node), preserve our existing user data
-                val shouldPreserveExisting = hasExistingUser && isDefaultName && isDefaultHwModel
-
-                if (shouldPreserveExisting) {
+                if (shouldPreserve) {
                     // Firmware sent us a placeholder - keep all our existing user data
                     Timber.d(
                         "Preserving existing user data for node ${info.num}: " +
@@ -2080,7 +2105,9 @@ class MeshService : Service() {
         } else {
             newNodes.forEach(::installNodeInfo)
             newNodes.clear()
-            serviceScope.handledLaunch { nodeRepository.installConfig(myNodeInfo!!, nodeDBbyNodeNum.values.toList()) }
+            // Individual nodes are already upserted to DB via updateNodeInfo->nodeRepository.upsert
+            // Only call installConfig to persist myNodeInfo, not to overwrite all nodes
+            serviceScope.handledLaunch { myNodeInfo?.let { nodeRepository.installConfig(it, emptyList()) } }
             haveNodeDB = true
             flushEarlyReceivedPackets("node_info_complete")
             sendAnalytics()
@@ -2286,6 +2313,8 @@ class MeshService : Service() {
                 historyLog { dbSummary }
                 // Do not clear packet DB here; messages are per-device and should persist
                 clearNotifications()
+                // Reload nodes from the newly switched database
+                loadCachedNodeDB()
             }
         } else {
             Timber.d("SetDeviceAddress: Device address is unchanged, ignoring.")

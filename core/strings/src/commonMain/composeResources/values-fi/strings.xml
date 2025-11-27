@@ -792,6 +792,8 @@
     <string name="security_icon_help_show_less">Näytä nykyinen tila</string>
     <string name="security_icon_help_dismiss">Hylkää</string>
     <string name="confirm_delete_node">Oletko varma, että haluat poistaa tämän laitteen?</string>
+    <string name="forget_connection">Älä muista tätä yhteyttä</string>
+    <string name="confirm_forget_connection">Haluatko varmasti unohtaa tämän yhteyden?</string>
     <string name="replying_to">Vastataan käyttäjälle %1$s</string>
     <string name="cancel_reply">Peruuta vastaus</string>
     <string name="delete_messages_title">Poistetaanko viestit?</string>
@@ -912,6 +914,10 @@
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <string name="unset">Ei asetettu – 0</string>
     <string name="relayed_by">Välittänyt: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Kuultu %1$d kautta</item>
+        <item quantity="other">Kuultu %1$d kautta</item>
+    </plurals>
     <string name="preserve_favorites">Säilytä suosikit?</string>
     <string name="usb_devices">USB-laitteet</string>
     <!-- Firmware Update -->

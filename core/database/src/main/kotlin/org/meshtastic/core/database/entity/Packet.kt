@@ -52,8 +52,9 @@ data class PacketEntity(
             packetId = packetId,
             emojis = reactions.toReaction(getNode),
             replyId = data.replyId,
-            viaMqtt = node.viaMqtt,
+            viaMqtt = data.viaMqtt,
             relayNode = data.relayNode,
+            relays = data.relays,
         )
     }
 }
