@@ -22,20 +22,14 @@ import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -59,6 +53,8 @@ fun <T : MessageLite> RadioConfigScreenList(
     enabled: Boolean,
     onSave: (T) -> Unit,
     modifier: Modifier = Modifier,
+    additionalDirtyCheck: () -> Boolean = { false },
+    onDiscard: () -> Unit = {},
     content: LazyListScope.() -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
@@ -81,47 +77,36 @@ fun <T : MessageLite> RadioConfigScreenList(
             )
         },
     ) { innerPadding ->
-        val showFooterButtons = configState.isDirty
+        val showFooterButtons = configState.isDirty || additionalDirtyCheck()
 
-        Box(modifier = Modifier.padding(innerPadding)) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                content()
+        LazyColumn(
+            modifier = Modifier.padding(innerPadding).fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            content()
 
-                item {
-                    AnimatedVisibility(
-                        visible = showFooterButtons,
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                        enter = expandIn(),
-                        exit = shrinkOut(),
-                    ) {
-                        Spacer(modifier = Modifier.height(64.dp))
-                    }
+            item {
+                AnimatedVisibility(
+                    visible = showFooterButtons,
+                    enter = fadeIn() + expandIn(),
+                    exit = fadeOut() + shrinkOut(),
+                ) {
+                    PreferenceFooter(
+                        enabled = enabled && showFooterButtons,
+                        negativeText = stringResource(Res.string.discard_changes),
+                        onNegativeClicked = {
+                            focusManager.clearFocus()
+                            configState.reset()
+                            onDiscard()
+                        },
+                        positiveText = stringResource(Res.string.save_changes),
+                        onPositiveClicked = {
+                            focusManager.clearFocus()
+                            onSave(configState.value)
+                        },
+                    )
                 }
-            }
-
-            AnimatedVisibility(
-                visible = showFooterButtons,
-                modifier = Modifier.align(Alignment.BottomCenter),
-                enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-                exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-            ) {
-                PreferenceFooter(
-                    enabled = enabled && configState.isDirty,
-                    negativeText = stringResource(Res.string.discard_changes),
-                    onNegativeClicked = {
-                        focusManager.clearFocus()
-                        configState.reset()
-                    },
-                    positiveText = stringResource(Res.string.save_changes),
-                    onPositiveClicked = {
-                        focusManager.clearFocus()
-                        onSave(configState.value)
-                    },
-                )
             }
         }
     }
