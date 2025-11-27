@@ -734,7 +734,6 @@
     <string name="modules_unlocked">Modulok feloldva</string>
     <string name="modules_already_unlocked">A modulok már fel vannak oldva</string>
     <string name="remote">Távoli</string>
-    <string name="node_count_template">(%1$d online / %2$d összesen)</string>
     <string name="react">Reagálás</string>
     <string name="disconnect">Leválasztás</string>
     <string name="scanning_bluetooth">Bluetooth-eszközök keresése…</string>

@@ -747,7 +747,6 @@
     <string name="modules_unlocked">Entsperrte Module</string>
     <string name="modules_already_unlocked">Module sind bereits freigeschaltet</string>
     <string name="remote">Entfernt</string>
-    <string name="node_count_template">(%1$d Online / %2$d Gesamt)</string>
     <string name="react">Reagieren</string>
     <string name="disconnect">Verbindung trennen</string>
     <string name="scanning_bluetooth">Suche nach Bluetooth Geräten…</string>

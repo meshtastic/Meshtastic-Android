@@ -595,7 +595,6 @@
     <string name="modules_unlocked">Модулите са отключени</string>
     <string name="modules_already_unlocked">Модулите вече са отключени</string>
     <string name="remote">Отдалечен</string>
-    <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
     <string name="disconnect">Прекъсване на връзката</string>
     <string name="scanning_bluetooth">Сканиране за Bluetooth устройства…</string>
     <string name="no_ble_devices">Няма сдвоени Bluetooth устройства.</string>

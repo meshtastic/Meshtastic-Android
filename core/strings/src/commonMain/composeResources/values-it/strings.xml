@@ -695,7 +695,6 @@
     <string name="modules_unlocked">Moduli sbloccati</string>
     <string name="modules_already_unlocked">Moduli già sbloccati</string>
     <string name="remote">Controllo remoto</string>
-    <string name="node_count_template">(%1$d online / %2$d in totale)</string>
     <string name="react">Rispondi</string>
     <string name="disconnect">Disconnetti</string>
     <string name="scanning_bluetooth">Scansione dei dispositivi Bluetooth…</string>

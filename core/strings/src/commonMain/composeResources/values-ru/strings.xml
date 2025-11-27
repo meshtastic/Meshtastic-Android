@@ -713,7 +713,6 @@
     <string name="modules_unlocked">Модули разблокированы</string>
     <string name="modules_already_unlocked">Модули уже разблокированы</string>
     <string name="remote">Удаленные</string>
-    <string name="node_count_template">(%1$d в сети / всего %2$d)</string>
     <string name="react">Среагировать</string>
     <string name="disconnect">Отключиться</string>
     <string name="scanning_bluetooth">Сканирование Bluetooth-устройств…</string>

@@ -627,7 +627,6 @@
     <string name="export_keys_confirmation">导出公钥和私钥到文件。请安全地存储某处。</string>
     <string name="modules_unlocked">模块已解锁</string>
     <string name="remote">远程</string>
-    <string name="node_count_template">(%1$d 在线 / %2$d 总计)</string>
     <string name="react">互动</string>
     <string name="disconnect">断开</string>
     <string name="no_network_devices">未找到网络设备。</string>

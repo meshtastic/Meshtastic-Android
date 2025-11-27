@@ -748,7 +748,6 @@
     <string name="modules_unlocked">Modules déverrouillés</string>
     <string name="modules_already_unlocked">Modules déjà déverrouillés</string>
     <string name="remote">Distant</string>
-    <string name="node_count_template">(%1$d en ligne / %2$d total)</string>
     <string name="react">Réagir</string>
     <string name="disconnect">Déconnecter</string>
     <string name="scanning_bluetooth">Recherche de périphériques Bluetooth…</string>
