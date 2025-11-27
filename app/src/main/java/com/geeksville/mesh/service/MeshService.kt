@@ -235,7 +235,6 @@ class MeshService : Service() {
         private const val MAX_EARLY_PACKET_BUFFER = 128
         private const val PRECISE_POSITION_BITS = 32
 
-
         @VisibleForTesting
         internal fun buildStoreForwardHistoryRequest(
             lastRequest: Int,
@@ -2509,7 +2508,8 @@ class MeshService : Service() {
                 if (destNum != myNodeNum) {
                     val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
                     val channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
-                    val precision = this@MeshService.channelSet.settingsList.getOrNull(channel)?.moduleSettings?.positionPrecision ?: 0
+                    val channelSettingsList = this@MeshService.channelSet.settingsList
+                    val precision = channelSettingsList.getOrNull(channel)?.moduleSettings?.positionPrecision ?: 0
 
                     // default meshPosition to empty in case precision is 0 and this channel is not supposed to
                     // broadcast positions
@@ -2517,12 +2517,10 @@ class MeshService : Service() {
                     val currentPosition =
                         when {
                             provideLocation && position.isValid() -> position
-                            else ->
-                                nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
+                            else -> nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
                         }
 
                     if (precision > 0 && currentPosition != null) {
-
                         var latitude = Position.degI(currentPosition.latitude)
                         var longitude = Position.degI(currentPosition.longitude)
 
@@ -2541,10 +2539,10 @@ class MeshService : Service() {
                         meshPosition = position {
                             latitudeI = latitude
                             longitudeI = longitude
-                        altitude = currentPosition.altitude
-                        time = currentSecond()
+                            altitude = currentPosition.altitude
+                            time = currentSecond()
                             precisionBits = precision
-                    }
+                        }
                     }
 
                     packetHandler.sendToRadio(
