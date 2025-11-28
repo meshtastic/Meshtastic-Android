@@ -95,7 +95,16 @@ fun ScannedQrCodeDialog(
     val channelSet =
         remember(shouldReplace) {
             if (shouldReplace) {
-                incoming.copy { loraConfig = loraConfig.copy { configOkToMqtt = channels.loraConfig.configOkToMqtt } }
+                // When replacing, apply the incoming LoRa configuration but preserve certain
+                // locally safe fields such as MQTT flags and TX power. This prevents QR codes
+                // from unintentionally overriding device-specific power limits (e.g. E22 caps).
+                incoming.copy {
+                    loraConfig =
+                        loraConfig.copy {
+                            configOkToMqtt = channels.loraConfig.configOkToMqtt
+                            txPower = channels.loraConfig.txPower
+                        }
+                }
             } else {
                 channels.copy {
                     // To guarantee consistent ordering, using a LinkedHashSet which iterates through
@@ -157,9 +166,6 @@ fun ScannedQrCodeDialog(
                 }
                 if (current.txEnabled != new.txEnabled) {
                     changes.add("Transmit Enabled: ${current.txEnabled} -> ${new.txEnabled}")
-                }
-                if (current.txPower != new.txPower) {
-                    changes.add("Transmit Power: ${current.txPower}dBm -> ${new.txPower}dBm")
                 }
                 if (current.channelNum != new.channelNum) {
                     changes.add("Channel Number: ${current.channelNum} -> ${new.channelNum}")
