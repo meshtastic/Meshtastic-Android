@@ -56,6 +56,7 @@ constructor(
      * @param forceRefresh If true, the local cache will be invalidated and data will be fetched remotely.
      * @return A [Result] containing the [DeviceHardware] on success (or null if not found), or an exception on failure.
      */
+    @Suppress("LongMethod")
     suspend fun getDeviceHardwareByModel(hwModel: Int, forceRefresh: Boolean = false): Result<DeviceHardware?> =
         withContext(Dispatchers.IO) {
             Timber.d(
@@ -64,8 +65,7 @@ constructor(
                 forceRefresh,
             )
 
-            val quirks = bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset()
-            Timber.d("DeviceHardwareRepository: loaded %d bootloader quirks", quirks.size)
+            val quirks = loadQuirks()
 
             if (forceRefresh) {
                 Timber.d("DeviceHardwareRepository: forceRefresh=true, clearing local device hardware cache")
@@ -159,6 +159,12 @@ constructor(
      */
     private fun DeviceHardwareEntity.isStale(): Boolean =
         isIncomplete() || (System.currentTimeMillis() - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
+
+    private fun loadQuirks(): List<BootloaderOtaQuirk> {
+        val quirks = bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset()
+        Timber.d("DeviceHardwareRepository: loaded %d bootloader quirks", quirks.size)
+        return quirks
+    }
 
     private fun applyBootloaderQuirk(
         hwModel: Int,
