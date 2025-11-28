@@ -748,6 +748,7 @@
     <string name="modules_unlocked">Lukitsemattomat moduulit</string>
     <string name="modules_already_unlocked">Moduulit ovat jo käytettävissä</string>
     <string name="remote">Etäyhteys</string>
+    <string name="node_count_template">(%1$d yhdistetty / %2$d nähty / %3$d yhteensä)</string>
     <string name="react">Reagoi</string>
     <string name="disconnect">Katkaise yhteys</string>
     <string name="scanning_bluetooth">Etsitään bluetooth-laitteita…</string>
