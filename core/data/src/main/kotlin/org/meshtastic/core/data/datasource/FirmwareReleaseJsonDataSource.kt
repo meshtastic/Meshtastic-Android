@@ -29,16 +29,14 @@ class FirmwareReleaseJsonDataSource @Inject constructor(private val application:
     // Match the network client behavior: be tolerant of unknown fields so that
     // older app versions can read newer snapshots of firmware_releases.json.
     @OptIn(ExperimentalSerializationApi::class)
-    private val json =
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadFirmwareReleaseFromJsonAsset(): NetworkFirmwareReleases {
-        return application.assets.open("firmware_releases.json").use { inputStream ->
+    fun loadFirmwareReleaseFromJsonAsset(): NetworkFirmwareReleases =
+        application.assets.open("firmware_releases.json").use { inputStream ->
             json.decodeFromStream<NetworkFirmwareReleases>(inputStream)
         }
-    }
 }

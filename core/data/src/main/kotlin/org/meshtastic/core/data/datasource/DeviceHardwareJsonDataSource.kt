@@ -29,16 +29,14 @@ class DeviceHardwareJsonDataSource @Inject constructor(private val application: 
     // Use a tolerant JSON parser so that additional fields in the bundled asset
     // (e.g., "key") do not break deserialization on older app versions.
     @OptIn(ExperimentalSerializationApi::class)
-    private val json =
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware> {
-        return application.assets.open("device_hardware.json").use { inputStream ->
+    fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware> =
+        application.assets.open("device_hardware.json").use { inputStream ->
             json.decodeFromStream<List<NetworkDeviceHardware>>(inputStream)
         }
-    }
 }
