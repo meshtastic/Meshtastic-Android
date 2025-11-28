@@ -30,10 +30,12 @@ import javax.inject.Inject
  */
 class FdroidPlatformAnalytics @Inject constructor() : PlatformAnalytics {
     init {
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
-        Timber.i("F-Droid platform no-op analytics initialized.")
+        // For F-Droid builds we don't initialize external analytics services, but we still want
+        // meaningful logging in both debug and release to help diagnose issues in the field.
+        // Using DebugTree here is acceptable because F-Droid targets power users and we already
+        // redact sensitive values elsewhere when !BuildConfig.DEBUG.
+        Timber.plant(Timber.DebugTree())
+        Timber.i("F-Droid platform no-op analytics initialized (DebugTree planted).")
     }
 
     override fun setDeviceAttributes(firmwareVersion: String, model: String) {
