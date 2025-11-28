@@ -137,7 +137,7 @@ constructor(
 
     /** Returns true if the cached entity is missing important fields and should be refreshed. */
     private fun DeviceHardwareEntity.isIncomplete(): Boolean =
-        displayName.isBlank() || platformioTarget.isBlank() || images == null || images.isEmpty()
+        displayName.isBlank() || platformioTarget.isBlank() || images.isNullOrEmpty()
 
     /**
      * Extension function to check if the cached entity is stale.
