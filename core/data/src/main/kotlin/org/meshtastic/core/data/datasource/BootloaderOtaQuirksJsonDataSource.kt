@@ -35,8 +35,5 @@ class BootloaderOtaQuirksJsonDataSource @Inject constructor(private val applicat
         .onFailure { e -> Timber.w(e, "Failed to load device_bootloader_ota_quirks.json") }
         .getOrDefault(emptyList())
 
-    @Serializable
-    private data class ListWrapper(
-        val devices: List<BootloaderOtaQuirk> = emptyList(),
-    )
+    @Serializable private data class ListWrapper(val devices: List<BootloaderOtaQuirk> = emptyList())
 }

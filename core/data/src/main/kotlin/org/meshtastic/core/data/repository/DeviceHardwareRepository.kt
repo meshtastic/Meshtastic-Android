@@ -75,7 +75,9 @@ constructor(
                 val cachedEntity = localDataSource.getByHwModel(hwModel)
                 if (cachedEntity != null && !cachedEntity.isStale()) {
                     Timber.d("DeviceHardwareRepository: using fresh cached device hardware for hwModel=%d", hwModel)
-                    return@withContext Result.success(applyBootloaderQuirk(hwModel, cachedEntity.asExternalModel(), quirks))
+                    return@withContext Result.success(
+                        applyBootloaderQuirk(hwModel, cachedEntity.asExternalModel(), quirks),
+                    )
                 }
                 Timber.d("DeviceHardwareRepository: no fresh cache for hwModel=%d, attempting remote fetch", hwModel)
             }
@@ -113,7 +115,9 @@ constructor(
                     val staleEntity = localDataSource.getByHwModel(hwModel)
                     if (staleEntity != null && !staleEntity.isIncomplete()) {
                         Timber.d("DeviceHardwareRepository: using stale cached device hardware for hwModel=%d", hwModel)
-                        return@withContext Result.success(applyBootloaderQuirk(hwModel, staleEntity.asExternalModel(), quirks))
+                        return@withContext Result.success(
+                            applyBootloaderQuirk(hwModel, staleEntity.asExternalModel(), quirks),
+                        )
                     }
 
                     // 4. Fallback to bundled JSON if cache is empty or incomplete
@@ -126,24 +130,22 @@ constructor(
                 }
         }
 
-    private suspend fun loadFromBundledJson(
-        hwModel: Int,
-        quirks: List<BootloaderOtaQuirk>,
-    ): Result<DeviceHardware?> = runCatching {
-        Timber.d("DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=%d", hwModel)
-        val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
-        Timber.d("DeviceHardwareRepository: bundled JSON returned %d device hardware entries", jsonHardware.size)
+    private suspend fun loadFromBundledJson(hwModel: Int, quirks: List<BootloaderOtaQuirk>): Result<DeviceHardware?> =
+        runCatching {
+            Timber.d("DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=%d", hwModel)
+            val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
+            Timber.d("DeviceHardwareRepository: bundled JSON returned %d device hardware entries", jsonHardware.size)
 
-        localDataSource.insertAllDeviceHardware(jsonHardware)
-        val base = localDataSource.getByHwModel(hwModel)?.asExternalModel()
-        Timber.d(
-            "DeviceHardwareRepository: lookup after JSON load for hwModel=%d %s",
-            hwModel,
-            if (base != null) "succeeded" else "returned null",
-        )
+            localDataSource.insertAllDeviceHardware(jsonHardware)
+            val base = localDataSource.getByHwModel(hwModel)?.asExternalModel()
+            Timber.d(
+                "DeviceHardwareRepository: lookup after JSON load for hwModel=%d %s",
+                hwModel,
+                if (base != null) "succeeded" else "returned null",
+            )
 
-        applyBootloaderQuirk(hwModel, base, quirks)
-    }
+            applyBootloaderQuirk(hwModel, base, quirks)
+        }
 
     /** Returns true if the cached entity is missing important fields and should be refreshed. */
     private fun DeviceHardwareEntity.isIncomplete(): Boolean =

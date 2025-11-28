@@ -456,10 +456,10 @@ private fun BootloaderWarningCard(deviceHardware: DeviceHardware) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors =
-            CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            ),
+        CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -471,10 +471,7 @@ private fun BootloaderWarningCard(deviceHardware: DeviceHardware) {
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text =
-                        stringResource(
-                            Res.string.firmware_update_usb_bootloader_warning,
-                            deviceHardware.displayName,
-                        ),
+                    stringResource(Res.string.firmware_update_usb_bootloader_warning, deviceHardware.displayName),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
