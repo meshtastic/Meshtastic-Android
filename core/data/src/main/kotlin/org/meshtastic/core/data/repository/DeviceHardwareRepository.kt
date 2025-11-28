@@ -24,6 +24,7 @@ import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asExternalModel
+import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import timber.log.Timber
@@ -63,6 +64,9 @@ constructor(
                 forceRefresh,
             )
 
+            val quirks = bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset()
+            Timber.d("DeviceHardwareRepository: loaded %d bootloader quirks", quirks.size)
+
             if (forceRefresh) {
                 Timber.d("DeviceHardwareRepository: forceRefresh=true, clearing local device hardware cache")
                 localDataSource.deleteAllDeviceHardware()
@@ -71,7 +75,7 @@ constructor(
                 val cachedEntity = localDataSource.getByHwModel(hwModel)
                 if (cachedEntity != null && !cachedEntity.isStale()) {
                     Timber.d("DeviceHardwareRepository: using fresh cached device hardware for hwModel=%d", hwModel)
-                    return@withContext Result.success(cachedEntity.asExternalModel())
+                    return@withContext Result.success(applyBootloaderQuirk(hwModel, cachedEntity.asExternalModel(), quirks))
                 }
                 Timber.d("DeviceHardwareRepository: no fresh cache for hwModel=%d, attempting remote fetch", hwModel)
             }
@@ -96,7 +100,7 @@ constructor(
             }
                 .onSuccess {
                     // Successfully fetched and found the model
-                    return@withContext Result.success(it)
+                    return@withContext Result.success(applyBootloaderQuirk(hwModel, it, quirks))
                 }
                 .onFailure { e ->
                     Timber.w(
@@ -109,7 +113,7 @@ constructor(
                     val staleEntity = localDataSource.getByHwModel(hwModel)
                     if (staleEntity != null && !staleEntity.isIncomplete()) {
                         Timber.d("DeviceHardwareRepository: using stale cached device hardware for hwModel=%d", hwModel)
-                        return@withContext Result.success(staleEntity.asExternalModel())
+                        return@withContext Result.success(applyBootloaderQuirk(hwModel, staleEntity.asExternalModel(), quirks))
                     }
 
                     // 4. Fallback to bundled JSON if cache is empty or incomplete
@@ -118,16 +122,17 @@ constructor(
                         if (staleEntity == null) "empty" else "incomplete",
                         hwModel,
                     )
-                    return@withContext loadFromBundledJson(hwModel)
+                    return@withContext loadFromBundledJson(hwModel, quirks)
                 }
         }
 
-    private suspend fun loadFromBundledJson(hwModel: Int): Result<DeviceHardware?> = runCatching {
+    private suspend fun loadFromBundledJson(
+        hwModel: Int,
+        quirks: List<BootloaderOtaQuirk>,
+    ): Result<DeviceHardware?> = runCatching {
         Timber.d("DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=%d", hwModel)
         val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
         Timber.d("DeviceHardwareRepository: bundled JSON returned %d device hardware entries", jsonHardware.size)
-
-        val quirks = bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset()
 
         localDataSource.insertAllDeviceHardware(jsonHardware)
         val base = localDataSource.getByHwModel(hwModel)?.asExternalModel()
@@ -137,19 +142,7 @@ constructor(
             if (base != null) "succeeded" else "returned null",
         )
 
-        if (base == null) {
-            null
-        } else {
-            val quirk = quirks.firstOrNull { it.hwModel == hwModel }
-            if (quirk != null) {
-                base.copy(
-                    requiresBootloaderUpgradeForOta = quirk.requiresBootloaderUpgradeForOta,
-                    bootloaderInfoUrl = quirk.infoUrl,
-                )
-            } else {
-                base
-            }
-        }
+        applyBootloaderQuirk(hwModel, base, quirks)
     }
 
     /** Returns true if the cached entity is missing important fields and should be refreshed. */
@@ -164,6 +157,34 @@ constructor(
      */
     private fun DeviceHardwareEntity.isStale(): Boolean =
         isIncomplete() || (System.currentTimeMillis() - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
+
+    private fun applyBootloaderQuirk(
+        hwModel: Int,
+        base: DeviceHardware?,
+        quirks: List<BootloaderOtaQuirk>,
+    ): DeviceHardware? {
+        if (base == null) return null
+
+        val quirk = quirks.firstOrNull { it.hwModel == hwModel }
+        Timber.d(
+            "DeviceHardwareRepository: applyBootloaderQuirk for hwModel=%d, quirk found=%b",
+            hwModel,
+            quirk != null,
+        )
+        return if (quirk != null) {
+            Timber.d(
+                "DeviceHardwareRepository: applying quirk: requiresBootloaderUpgradeForOta=%b, infoUrl=%s",
+                quirk.requiresBootloaderUpgradeForOta,
+                quirk.infoUrl,
+            )
+            base.copy(
+                requiresBootloaderUpgradeForOta = quirk.requiresBootloaderUpgradeForOta,
+                bootloaderInfoUrl = quirk.infoUrl,
+            )
+        } else {
+            base
+        }
+    }
 
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeUnit.DAYS.toMillis(1)

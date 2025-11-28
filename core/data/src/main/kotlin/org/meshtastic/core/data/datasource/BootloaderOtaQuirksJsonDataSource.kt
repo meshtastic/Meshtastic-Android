@@ -19,6 +19,7 @@ package org.meshtastic.core.data.datasource
 
 import android.app.Application
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.meshtastic.core.model.BootloaderOtaQuirk
@@ -34,5 +35,8 @@ class BootloaderOtaQuirksJsonDataSource @Inject constructor(private val applicat
         .onFailure { e -> Timber.w(e, "Failed to load device_bootloader_ota_quirks.json") }
         .getOrDefault(emptyList())
 
-    @Serializable private data class ListWrapper(val devices: List<BootloaderOtaQuirk> = emptyList())
+    @Serializable
+    private data class ListWrapper(
+        val devices: List<BootloaderOtaQuirk> = emptyList(),
+    )
 }

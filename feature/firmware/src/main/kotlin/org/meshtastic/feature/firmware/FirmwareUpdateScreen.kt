@@ -448,62 +448,62 @@ private fun DeviceInfoCard(deviceHardware: DeviceHardware, release: FirmwareRele
                 color = MaterialTheme.colorScheme.primary,
             )
         }
+    }
+}
 
-        @Composable
-        private fun BootloaderWarningCard(deviceHardware: DeviceHardware) {
-            ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
-                colors =
-                CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                ),
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onErrorContainer,
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text =
-                            stringResource(
-                                Res.string.firmware_update_usb_bootloader_warning,
-                                deviceHardware.displayName,
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                    }
+@Composable
+private fun BootloaderWarningCard(deviceHardware: DeviceHardware) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors =
+            CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            ),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text =
+                        stringResource(
+                            Res.string.firmware_update_usb_bootloader_warning,
+                            deviceHardware.displayName,
+                        ),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
 
-                    val slug = deviceHardware.hwModelSlug
-                    if (slug.equals("RAK4631", ignoreCase = true)) {
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(Res.string.firmware_update_rak4631_bootloader_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
+            val slug = deviceHardware.hwModelSlug
+            if (slug.equals("RAK4631", ignoreCase = true)) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = stringResource(Res.string.firmware_update_rak4631_bootloader_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
 
-                    val infoUrl = deviceHardware.bootloaderInfoUrl
-                    if (!infoUrl.isNullOrEmpty()) {
-                        Spacer(Modifier.height(8.dp))
-                        val context = LocalContext.current
-                        TextButton(
-                            onClick = {
-                                runCatching {
-                                    val intent =
-                                        android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                                            data = android.net.Uri.parse(infoUrl)
-                                        }
-                                    context.startActivity(intent)
+            val infoUrl = deviceHardware.bootloaderInfoUrl
+            if (!infoUrl.isNullOrEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                val context = LocalContext.current
+                TextButton(
+                    onClick = {
+                        runCatching {
+                            val intent =
+                                android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                                    data = android.net.Uri.parse(infoUrl)
                                 }
-                            },
-                        ) {
-                            Text(text = stringResource(Res.string.learn_more))
+                            context.startActivity(intent)
                         }
-                    }
+                    },
+                ) {
+                    Text(text = stringResource(Res.string.learn_more))
                 }
             }
         }
