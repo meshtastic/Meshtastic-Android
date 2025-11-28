@@ -55,7 +55,11 @@ constructor(
      */
     suspend fun getDeviceHardwareByModel(hwModel: Int, forceRefresh: Boolean = false): Result<DeviceHardware?> =
         withContext(Dispatchers.IO) {
-            Timber.d("DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=%d, forceRefresh=%b)", hwModel, forceRefresh)
+            Timber.d(
+                "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=%d, forceRefresh=%b)",
+                hwModel,
+                forceRefresh,
+            )
 
             if (forceRefresh) {
                 Timber.d("DeviceHardwareRepository: forceRefresh=true, clearing local device hardware cache")
@@ -74,7 +78,10 @@ constructor(
             runCatching {
                 Timber.d("DeviceHardwareRepository: fetching device hardware from remote API")
                 val remoteHardware = remoteDataSource.getAllDeviceHardware()
-                Timber.d("DeviceHardwareRepository: remote API returned %d device hardware entries", remoteHardware.size)
+                Timber.d(
+                    "DeviceHardwareRepository: remote API returned %d device hardware entries",
+                    remoteHardware.size,
+                )
 
                 localDataSource.insertAllDeviceHardware(remoteHardware)
                 val fromDb = localDataSource.getByHwModel(hwModel)?.asExternalModel()
@@ -90,7 +97,11 @@ constructor(
                     return@withContext Result.success(it)
                 }
                 .onFailure { e ->
-                    Timber.w(e, "DeviceHardwareRepository: failed to fetch device hardware from server for hwModel=%d", hwModel)
+                    Timber.w(
+                        e,
+                        "DeviceHardwareRepository: failed to fetch device hardware from server for hwModel=%d",
+                        hwModel,
+                    )
 
                     // 3. Attempt to use stale cache as a fallback, but only if it looks complete.
                     val staleEntity = localDataSource.getByHwModel(hwModel)
@@ -126,10 +137,7 @@ constructor(
 
     /** Returns true if the cached entity is missing important fields and should be refreshed. */
     private fun DeviceHardwareEntity.isIncomplete(): Boolean =
-        displayName.isBlank() ||
-            platformioTarget.isBlank() ||
-            images == null ||
-            images.isEmpty()
+        displayName.isBlank() || platformioTarget.isBlank() || images == null || images.isEmpty()
 
     /**
      * Extension function to check if the cached entity is stale.
