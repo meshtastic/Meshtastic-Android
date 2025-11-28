@@ -526,6 +526,7 @@
     <string name="output_duration_milliseconds">Väljundi kestvus (millisekundit)</string>
     <string name="nag_timeout_seconds">Häire ajalõpp (sekundit)</string>
     <string name="ringtone">Helin</string>
+    <string name="play">Mängi ette</string>
     <string name="use_i2s_as_buzzer">Kasuta I2S summerina</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Valikud</string>
@@ -747,7 +748,7 @@
     <string name="modules_unlocked">Moodulid on lukustamata</string>
     <string name="modules_already_unlocked">Moodulid juba avatud</string>
     <string name="remote">Kaugjuhtimine</string>
-    <string name="node_count_template">(%1$d võrgus / %2$d kokku)</string>
+    <string name="node_count_template">(%1$d võrgus / %2$d näidatud / %3$d kokku)</string>
     <string name="react">Reageeri</string>
     <string name="disconnect">Katkesta ühendus</string>
     <string name="scanning_bluetooth">Otsin sinihamba seadmeid…</string>
@@ -791,6 +792,8 @@
     <string name="security_icon_help_show_less">Näita hetke olukord</string>
     <string name="security_icon_help_dismiss">Loobu</string>
     <string name="confirm_delete_node">Kas olete kindel, et soovite selle sõlme kustutada?</string>
+    <string name="forget_connection">Unusta ühendus</string>
+    <string name="confirm_forget_connection">Kas oled kindel, et tahad selle ühenduse unustada?</string>
     <string name="replying_to">Vasta kasutajale %1$s</string>
     <string name="cancel_reply">Tühista vastus</string>
     <string name="delete_messages_title">Kustuta sõnum?</string>
@@ -910,11 +913,45 @@
     <string name="analytics_platforms">"Analüütika platvormid: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
     <string name="unset">Tühistatud - 0</string>
-    <string name="relayed_by">Edastab: %1$s</string>
+    <string name="relayed_by">Vahendab: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Kuulsin %1$d releed</item>
+        <item quantity="other">Kuuldi %1$d vahendajat</item>
+    </plurals>
     <string name="preserve_favorites">Säilita lemmikud?</string>
     <string name="usb_devices">USB seadmed</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">Püsivara uuendus</string>
+    <string name="firmware_update_checking">Otsin uuendusi...</string>
+    <string name="firmware_update_device">Seade: %1$s</string>
+    <string name="firmware_update_latest">Viimane väljalase: %1$s</string>
+    <string name="firmware_update_stable">Stabiilne</string>
+    <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_button">Värskenda püsivara</string>
+    <string name="firmware_update_disconnect_warning">Märkus. See katkestab ajutiselt teie seadme ühenduse värskendamise ajal.</string>
+    <string name="firmware_update_downloading">Laen püsivara... %1$d%</string>
+    <string name="firmware_update_error">Viga: %1$s</string>
+    <string name="firmware_update_retry">Proovi uuesti</string>
+    <string name="firmware_update_success">Värskendus õnnestus!</string>
     <string name="firmware_update_done">Valmis</string>
+    <string name="firmware_update_starting_dfu">DFU käivitamine...</string>
+    <string name="firmware_update_updating">Uuendan... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Tundmatu riistvaramudel: %1$d</string>
+    <string name="firmware_update_invalid_address">Ühendatud seade ei ole BLE-seade või aadress on teadmata (%1$s). DFU nõuab BLE-d.</string>
+    <string name="firmware_update_no_device">Ühtegi seadet pole ühendatud</string>
+    <string name="firmware_update_not_found_in_release">%1$s püsivara ei leitud selles versioonis.</string>
+    <string name="firmware_update_extracting">Püsivara lahtipakkimine...</string>
+    <string name="firmware_update_starting_service">DFU teenuse käivitamiseks katkestamine ühenduse...</string>
     <string name="firmware_update_failed">Värskendus ebaõnnestus</string>
+    <string name="firmware_update_hang_tight">Pea vastu, me töötame selle kallal...</string>
+    <string name="firmware_update_keep_device_close">Hoidke seade telefoni lähedal.</string>
+    <string name="firmware_update_do_not_close">Ära sulge rakendust.</string>
+    <string name="firmware_update_almost_there">Kohe lõpetan...</string>
+    <string name="firmware_update_taking_a_while">See võib võtta minuti...</string>
+    <string name="firmware_update_select_file">Vali kohalik fail</string>
+    <string name="firmware_update_unknown_release">Tundmatu väljalase</string>
+    <string name="firmware_update_disclaimer_title">Värskenduse hoiatus</string>
+    <string name="firmware_update_disclaimer_text">Oled paigaldamas oma seadmesse uut püsivara. See protsess on ohtlik.\n\n• Veendu, et seade on laetud.\n• Hoia seadet telefoni lähedal.\n• Ära sulge rakendust värskendamise ajal.\n\nKontrolli, et oled oma riistvara jaoks valinud õige püsivara.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy ütleb: \"Hoia oma redel käepärast!\"</string>
+    <string name="chirpy">Chirpy</string>
 </resources>

@@ -502,7 +502,7 @@
     <string name="compass_north_top">Kompass Norden oben</string>
     <string name="flip_screen">Bildschirm spiegeln</string>
     <string name="display_units">Anzeigeeinheiten</string>
-    <string name="oled_type">OLEAD Typ</string>
+    <string name="oled_type">OLED Typ</string>
     <string name="display_mode">Anzeigemodus</string>
     <string name="always_point_north">Immer nach Norden zeigen</string>
     <string name="bold_heading">Fette Überschrift</string>
@@ -526,6 +526,7 @@
     <string name="output_duration_milliseconds">Ausgabedauer (GPIO)</string>
     <string name="nag_timeout_seconds">Nervige Verzögerung (Sekunden)</string>
     <string name="ringtone">Klingelton</string>
+    <string name="play">Wiedergabe</string>
     <string name="use_i2s_as_buzzer">I2S als Buzzer verwenden</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Optionen</string>
@@ -747,7 +748,7 @@
     <string name="modules_unlocked">Entsperrte Module</string>
     <string name="modules_already_unlocked">Module sind bereits freigeschaltet</string>
     <string name="remote">Entfernt</string>
-    <string name="node_count_template">(%1$d Online / %2$d Gesamt)</string>
+    <string name="node_count_template">(%1$d online / %2$d angezeigt / %3$d gesamt)</string>
     <string name="react">Reagieren</string>
     <string name="disconnect">Verbindung trennen</string>
     <string name="scanning_bluetooth">Suche nach Bluetooth Geräten…</string>
@@ -791,6 +792,8 @@
     <string name="security_icon_help_show_less">Aktuellen Status anzeigen</string>
     <string name="security_icon_help_dismiss">Tastatur ausblenden</string>
     <string name="confirm_delete_node">Möchten Sie diesen Knoten wirklich löschen?</string>
+    <string name="forget_connection">Verbindung löschen</string>
+    <string name="confirm_forget_connection">Sind Sie sicher, dass Sie diese Verbindung löschen möchten?</string>
     <string name="replying_to">Antworten auf %1$s</string>
     <string name="cancel_reply">Antwort abbrechen</string>
     <string name="delete_messages_title">Nachricht löschen?</string>
@@ -911,12 +914,44 @@
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="relayed_by">Weitergeleitet von: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Höre %1$d Relais</item>
+        <item quantity="other">Höre %1$d Relais</item>
+    </plurals>
     <string name="preserve_favorites">Favoriten beibehalten?</string>
     <string name="usb_devices">USB Geräte</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">Firmware Aktualisierung</string>
+    <string name="firmware_update_checking">Auf Aktualisierungen überprüfen...</string>
+    <string name="firmware_update_device">Gerät: %1$s</string>
+    <string name="firmware_update_latest">Neueste Version: %1$s</string>
+    <string name="firmware_update_stable">Stabil</string>
+    <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_button">Firmware aktualisieren</string>
+    <string name="firmware_update_disconnect_warning">Hinweis: während der Aktualisierung wird das Gerät zeitweise getrennt.</string>
+    <string name="firmware_update_downloading">Firmware herunterladen... %1$d%</string>
+    <string name="firmware_update_error">Fehler: %1$s</string>
     <string name="firmware_update_retry">Erneut versuchen</string>
+    <string name="firmware_update_success">Aktualisierung erfolgreich!</string>
     <string name="firmware_update_done">Fertig</string>
+    <string name="firmware_update_starting_dfu">DFU wird gestartet...</string>
+    <string name="firmware_update_updating">Aktualisierung... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Unbekanntes Hardware Modell: %1$d</string>
+    <string name="firmware_update_invalid_address">Das verbundene Gerät ist kein BLE Gerät oder die Adresse ist unbekannt (%1$s). DFU benötigt BLE.</string>
     <string name="firmware_update_no_device">Kein Gerät verbunden</string>
+    <string name="firmware_update_not_found_in_release">Firmware für %1$s in der Release Version nicht gefunden.</string>
+    <string name="firmware_update_extracting">Extrahiere Firmware...</string>
+    <string name="firmware_update_starting_service">Trennen um DFU Dienst zu starten...</string>
     <string name="firmware_update_failed">Aktualisierung fehlgeschlagen</string>
+    <string name="firmware_update_hang_tight">Bitte warten, wir arbeiten daran...</string>
+    <string name="firmware_update_keep_device_close">Halten Sie Ihr Gerät in die Nähe Ihres Telefons.</string>
+    <string name="firmware_update_do_not_close">App nicht schließen.</string>
+    <string name="firmware_update_almost_there">Fast fertig...</string>
+    <string name="firmware_update_taking_a_while">Dies könnte einige Minuten dauern...</string>
+    <string name="firmware_update_select_file">Lokale Datei auswählen</string>
+    <string name="firmware_update_unknown_release">Unbekannte Version</string>
+    <string name="firmware_update_disclaimer_title">Aktualisierungswarnung</string>
+    <string name="firmware_update_disclaimer_text">Sie sind im Begriff, eine neue Firmware auf Ihr Gerät zu flashen. Dieser Vorgang birgt Risiken.\n\n• Stellen Sie sicher, dass Ihr Gerät aufgeladen ist.\n• Halten Sie das Gerät in der Nähe Ihres Telefons.\n• Schließen Sie die App während des Updates nicht.\n\nVergewissern Sie sich, dass Sie die richtige Firmware für Ihre Hardware ausgewählt haben.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy sagt: „Halten Sie Ihre Leiter griffbereit!“</string>
+    <string name="chirpy">Chirpy</string>
 </resources>

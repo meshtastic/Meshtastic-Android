@@ -721,7 +721,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="modules_unlocked">Módulos desbloqueados</string>
     <string name="modules_already_unlocked">Módulos ya desbloqueados</string>
     <string name="remote">Remoto</string>
-    <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">Reaccionar</string>
     <string name="disconnect">Desconectar</string>
     <string name="scanning_bluetooth">Buscando dispositivos Bluetooth…</string>
