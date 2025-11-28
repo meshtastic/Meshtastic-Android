@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
     <string name="node_filter_title">Filtrovat podle</string>
     <string name="node_filter_include_unknown">Včetně neznámých</string>
+    <string name="node_filter_exclude_infrastructure">Vyloučit infrastrukturu</string>
     <string name="node_filter_only_online">Skrýt offline uzly</string>
     <string name="node_filter_only_direct">Zobrazit jen přímé uzly</string>
     <string name="node_filter_ignored">Prohlížíte ignorované uzly,\nStiskněte pro návrat do seznamu uzlů.</string>
@@ -35,6 +36,7 @@
     <string name="node_sort_via_mqtt">přes MQTT</string>
     <string name="via_mqtt">přes MQTT</string>
     <string name="node_sort_via_favorite">Oblíbené</string>
+    <string name="node_filter_show_ignored">Zobrazit jen ignorované uzly</string>
     <string name="unrecognized">Neznámý</string>
     <string name="message_status_enroute">Čeká na potvrzení</string>
     <string name="message_status_queued">Ve frontě k odeslání</string>
@@ -226,6 +228,7 @@
     <string name="bluetooth_disabled">Bluetooth je zakázáno. Prosím povolte jej v nastavení zařízení.</string>
     <string name="open_settings">Otevřít nastavení</string>
     <string name="firmware_version">Verze firmware: %1$s</string>
+    <string name="permission_missing_31">Meshtastic potřebuje mít povoleno oprávnění ‚Blízká zařízení‘, aby mohl vyhledávat a připojovat zařízení přes Bluetooth. Když jej nepoužíváte, můžete jej vypnout.</string>
     <string name="direct_message">Přímá zpráva</string>
     <string name="nodedb_reset">Reset NodeDB</string>
     <string name="delivery_confirmed">Doručeno</string>
@@ -651,6 +654,7 @@
     <string name="modules_unlocked">Moduly odemčeny</string>
     <string name="modules_already_unlocked">Moduly jsou již odemčeny</string>
     <string name="remote">Vzdálený</string>
+    <string name="node_count_template">(%1$d online / %2$d zobrazeno / %3$d celkem)</string>
     <string name="react">Odpovědět</string>
     <string name="disconnect">Odpojit</string>
     <string name="scanning_bluetooth">Skenování zařízení Bluetooth…</string>
@@ -700,6 +704,7 @@
     <string name="bluetooth_paired_devices">Spárovaná zařízení</string>
     <string name="bluetooth_available_devices">Dostupná zařízení</string>
     <string name="connected_device">Připojená zařízení</string>
+    <string name="view_release">Zobrazit vydání</string>
     <string name="download">Stáhnout</string>
     <string name="installed_firmware_version">Aktuálně instalováno</string>
     <string name="latest_stable_firmware">Poslední stabilní</string>
@@ -762,10 +767,13 @@
     <string name="no_custom_tile_sources_found">Žádné vlastní zdroje dlaždic</string>
     <string name="edit_custom_tile_source">Upravit vlastní zdroj dlaždic</string>
     <string name="delete_custom_tile_source">Odstranit vlastní zdroj dlaždic</string>
+    <string name="track_point">bod trasy</string>
     <string name="app_settings">Aplikace</string>
     <string name="app_version">Verze</string>
     <string name="location_sharing">Sdílení polohy</string>
     <string name="periodic_position_broadcast">Pravidelné vysílání polohy</string>
+    <string name="uplink_feature_description">Zprávy z mesh sítě budou odesílány do veřejného internetu prostřednictvím libovolného uzlu, který má nakonfigurovanou bránu.</string>
+    <string name="downlink_feature_description">Zprávy z veřejné internetové brány jsou předávány do místní mesh sítě. Kvůli politice nulového počtu skoků se provoz z výchozího MQTT serveru nebude šířit dál než do tohoto zařízení.</string>
     <string name="secondary_channel_position_feature">Vypnutí odesílání polohy na primárním kanálu umožní pravidelné vysílání polohy na prvním sekundárním kanálu, kde je odesílání polohy povoleno. V opačném případě je nutné polohu vyžádat ručně.</string>
     <string name="device_configuration">Nastavení zařízení</string>
     <string name="remotely_administrating">"[Vzdálený] %1$s"</string>
@@ -781,9 +789,42 @@
     <string name="system_settings">Nastavení systému</string>
     <string name="no_local_stats">Žádné statistiky k dispozici</string>
     <string name="analytics_notice">Shromažďujeme analytická data, která nám pomáhají vylepšovat aplikaci pro Android (děkujeme). Získáváme anonymizované informace o chování uživatelů, například hlášení o pádech aplikace, používání jednotlivých obrazovek apod.</string>
+    <string name="unset">Nenastaveno – 0</string>
     <string name="relayed_by">Přeposláno uzlem: %1$s</string>
     <string name="preserve_favorites">Chcete zachovat oblíbené položky?</string>
+    <string name="usb_devices">USB zařízení</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">Aktualizace firmware</string>
+    <string name="firmware_update_checking">Hledání aktualizací...</string>
+    <string name="firmware_update_device">Zařízení: %1$s</string>
+    <string name="firmware_update_latest">Aktuální verze: %1$s</string>
+    <string name="firmware_update_stable">Stabilní</string>
+    <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_button">Aktualizace softwaru</string>
+    <string name="firmware_update_disconnect_warning">Poznámka: Během aktualizace dojde dočasně k odpojení vašeho zařízení.</string>
+    <string name="firmware_update_downloading">Stahování firmware... %1$d%</string>
+    <string name="firmware_update_error">Chyba: %1$s</string>
+    <string name="firmware_update_retry">Zkusit znovu</string>
+    <string name="firmware_update_success">Aktualizace byla úspěšná!</string>
+    <string name="firmware_update_done">Hotovo</string>
+    <string name="firmware_update_starting_dfu">Spouštění DFU...</string>
+    <string name="firmware_update_updating">Aktualizuji... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Neznámý hardwarový model: %1$d</string>
+    <string name="firmware_update_invalid_address">Připojené zařízení není BLE zařízení nebo adresa je neznámá (%1$s). DFU vyžaduje BLE.</string>
+    <string name="firmware_update_no_device">Není připojeno žádné zařízení</string>
+    <string name="firmware_update_not_found_in_release">Firmware pro %1$s nebyl ve vydání nalezen.</string>
+    <string name="firmware_update_extracting">Extrahuji firmware...</string>
+    <string name="firmware_update_starting_service">Odpojuji zařízení pro spuštění DFU služby...</string>
     <string name="firmware_update_failed">Aktualizace selhala</string>
+    <string name="firmware_update_hang_tight">Chvilku strpení, pracujeme na tom...</string>
+    <string name="firmware_update_keep_device_close">Udržujte své zařízení v blízkosti telefonu.</string>
+    <string name="firmware_update_do_not_close">Nezavírejte aplikaci.</string>
+    <string name="firmware_update_almost_there">Už to bude...</string>
+    <string name="firmware_update_taking_a_while">Může to chvíli trvat...</string>
+    <string name="firmware_update_select_file">Vybrat soubor</string>
+    <string name="firmware_update_unknown_release">Neznámá vzdálená verze</string>
+    <string name="firmware_update_disclaimer_title">Upozornění aktualizace</string>
+    <string name="firmware_update_disclaimer_text">Chystáte se nahrát do zařízení nový firmware. Tento proces s sebou nese určitá rizika.\n\n• Ujistěte se, že je zařízení nabité.\n• Udržujte zařízení blízko telefonu.\n• Během aktualizace neukončujte aplikaci.\n\nOvěřte, zda jste vybrali správný firmware pro váš hardware.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">„Chirpy říká: \"Žebřík měj vždycky po ruce!‘“</string>
+    <string name="chirpy"></string>
 </resources>
