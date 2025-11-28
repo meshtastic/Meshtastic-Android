@@ -118,6 +118,7 @@ import org.meshtastic.core.strings.firmware_update_error
 import org.meshtastic.core.strings.firmware_update_hang_tight
 import org.meshtastic.core.strings.firmware_update_keep_device_close
 import org.meshtastic.core.strings.firmware_update_latest
+import org.meshtastic.core.strings.firmware_update_rak4631_bootloader_hint
 import org.meshtastic.core.strings.firmware_update_retry
 import org.meshtastic.core.strings.firmware_update_select_file
 import org.meshtastic.core.strings.firmware_update_stable
@@ -125,7 +126,9 @@ import org.meshtastic.core.strings.firmware_update_success
 import org.meshtastic.core.strings.firmware_update_taking_a_while
 import org.meshtastic.core.strings.firmware_update_title
 import org.meshtastic.core.strings.firmware_update_unknown_release
+import org.meshtastic.core.strings.firmware_update_usb_bootloader_warning
 import org.meshtastic.core.strings.i_know_what_i_m_doing
+import org.meshtastic.core.strings.learn_more
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -257,6 +260,7 @@ private fun ColumnScope.ReadyState(
 ) {
     var showDisclaimer by remember { mutableStateOf(false) }
     var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val device = state.deviceHardware
 
     if (showDisclaimer) {
         DisclaimerDialog(
@@ -268,10 +272,15 @@ private fun ColumnScope.ReadyState(
         )
     }
 
-    DeviceHardwareImage(state.deviceHardware, Modifier.size(150.dp))
+    DeviceHardwareImage(device, Modifier.size(150.dp))
     Spacer(Modifier.height(24.dp))
 
-    DeviceInfoCard(state.deviceHardware, state.release)
+    DeviceInfoCard(device, state.release)
+
+    if (device.requiresBootloaderUpgradeForOta == true) {
+        Spacer(Modifier.height(16.dp))
+        BootloaderWarningCard(device)
+    }
 
     Spacer(Modifier.height(24.dp))
 
@@ -438,6 +447,65 @@ private fun DeviceInfoCard(deviceHardware: DeviceHardware, release: FirmwareRele
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
+        }
+
+        @Composable
+        private fun BootloaderWarningCard(deviceHardware: DeviceHardware) {
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                ),
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text =
+                            stringResource(
+                                Res.string.firmware_update_usb_bootloader_warning,
+                                deviceHardware.displayName,
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+
+                    val slug = deviceHardware.hwModelSlug
+                    if (slug.equals("RAK4631", ignoreCase = true)) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(Res.string.firmware_update_rak4631_bootloader_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+
+                    val infoUrl = deviceHardware.bootloaderInfoUrl
+                    if (!infoUrl.isNullOrEmpty()) {
+                        Spacer(Modifier.height(8.dp))
+                        val context = LocalContext.current
+                        TextButton(
+                            onClick = {
+                                runCatching {
+                                    val intent =
+                                        android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                                            data = android.net.Uri.parse(infoUrl)
+                                        }
+                                    context.startActivity(intent)
+                                }
+                            },
+                        ) {
+                            Text(text = stringResource(Res.string.learn_more))
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
@@ -38,6 +39,7 @@ constructor(
     private val remoteDataSource: DeviceHardwareRemoteDataSource,
     private val localDataSource: DeviceHardwareLocalDataSource,
     private val jsonDataSource: DeviceHardwareJsonDataSource,
+    private val bootloaderOtaQuirksJsonDataSource: BootloaderOtaQuirksJsonDataSource,
 ) {
 
     /**
@@ -96,8 +98,24 @@ constructor(
 
     private suspend fun loadFromBundledJson(hwModel: Int): Result<DeviceHardware?> = runCatching {
         val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
+        val quirks = bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset()
+
         localDataSource.insertAllDeviceHardware(jsonHardware)
-        localDataSource.getByHwModel(hwModel)?.asExternalModel()
+        val base = localDataSource.getByHwModel(hwModel)?.asExternalModel()
+
+        if (base == null) {
+            null
+        } else {
+            val quirk = quirks.firstOrNull { it.hwModel == hwModel }
+            if (quirk != null) {
+                base.copy(
+                    requiresBootloaderUpgradeForOta = quirk.requiresBootloaderUpgradeForOta,
+                    bootloaderInfoUrl = quirk.infoUrl,
+                )
+            } else {
+                base
+            }
+        }
     }
 
     /** Extension function to check if the cached entity is stale. */
