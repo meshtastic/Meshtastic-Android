@@ -120,20 +120,29 @@ constructor(
                 }
         }
 
-    private suspend fun loadFromBundledJson(hwModel: Int): Result<DeviceHardware?> = runCatching {
-        Timber.d("DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=%d", hwModel)
-        val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
-        Timber.d("DeviceHardwareRepository: bundled JSON returned %d device hardware entries", jsonHardware.size)
+    private suspend fun loadFromBundledJson(hwModel: Int): Result<DeviceHardware?> =
+        runCatching {
+            Timber.d("DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=%d", hwModel)
+            val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
+            Timber.d("DeviceHardwareRepository: bundled JSON returned %d device hardware entries", jsonHardware.size)
 
-        localDataSource.insertAllDeviceHardware(jsonHardware)
-        val fromDb = localDataSource.getByHwModel(hwModel)?.asExternalModel()
-        Timber.d(
-            "DeviceHardwareRepository: lookup after JSON load for hwModel=%d %s",
-            hwModel,
-            if (fromDb != null) "succeeded" else "returned null",
-        )
-        fromDb
-    }
+            localDataSource.insertAllDeviceHardware(jsonHardware)
+            val fromDb = localDataSource.getByHwModel(hwModel)?.asExternalModel()
+            Timber.d(
+                "DeviceHardwareRepository: lookup after JSON load for hwModel=%d %s",
+                hwModel,
+                if (fromDb != null) "succeeded" else "returned null",
+            )
+            fromDb
+        }.also { result ->
+            result.exceptionOrNull()?.let { e ->
+                Timber.e(
+                    e,
+                    "DeviceHardwareRepository: failed to load device hardware from bundled JSON for hwModel=%d",
+                    hwModel,
+                )
+            }
+        }
 
     /** Returns true if the cached entity is missing important fields and should be refreshed. */
     private fun DeviceHardwareEntity.isIncomplete(): Boolean =
