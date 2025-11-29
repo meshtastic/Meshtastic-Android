@@ -45,12 +45,12 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jetbrains.compose.resources.getString
-import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
@@ -115,7 +115,7 @@ constructor(
 
     init {
         // Cleanup potential leftovers from previous crashes
-        fileHandler.cleanupAllTemporaryFiles()
+        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
         checkForUpdates()
 
         // Start listening to DFU events immediately
@@ -124,7 +124,7 @@ constructor(
 
     override fun onCleared() {
         super.onCleared()
-        cleanupTemporaryFiles()
+        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
     }
 
     /** Sets the desired [FirmwareReleaseType] (e.g., ALPHA, STABLE) and triggers a new update check. */
@@ -163,8 +163,8 @@ constructor(
                                 release = release,
                                 deviceHardware = deviceHardware,
                                 address = address,
-                                showBootloaderWarning = deviceHardware.requiresBootloaderUpgradeForOta == true &&
-                                    !dismissed,
+                                showBootloaderWarning =
+                                deviceHardware.requiresBootloaderUpgradeForOta == true && !dismissed,
                             )
                     }
                 }
@@ -286,16 +286,16 @@ constructor(
             }
     }
 
-    /**
-     * Persists dismissal of the bootloader warning for the current device and updates state accordingly.
-     */
+    /** Persists dismissal of the bootloader warning for the current device and updates state accordingly. */
     fun dismissBootloaderWarningForCurrentDevice() {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val address = currentState.address
 
         viewModelScope.launch {
             runCatching { bootloaderWarningDataSource.dismiss(address) }
-                .onFailure { e -> Timber.w(e, "Failed to persist bootloader warning dismissal for address=%s", address) }
+                .onFailure { e ->
+                    Timber.w(e, "Failed to persist bootloader warning dismissal for address=%s", address)
+                }
 
             _state.value = currentState.copy(showBootloaderWarning = false)
         }
@@ -344,16 +344,16 @@ constructor(
                     }
                     is DfuInternalState.Error -> {
                         _state.value = FirmwareUpdateState.Error("DFU Error: ${dfuState.message}")
-                        cleanupTemporaryFiles()
+                        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                     }
                     is DfuInternalState.Completed -> {
                         _state.value = FirmwareUpdateState.Success
                         serviceRepository.meshService?.setDeviceAddress("$DFU_RECONNECT_PREFIX${dfuState.address}")
-                        cleanupTemporaryFiles()
+                        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                     }
                     is DfuInternalState.Aborted -> {
                         _state.value = FirmwareUpdateState.Error("DFU Aborted")
-                        cleanupTemporaryFiles()
+                        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
                     }
                     is DfuInternalState.Starting -> {
                         val msg = getString(Res.string.firmware_update_starting_dfu)
@@ -361,15 +361,6 @@ constructor(
                     }
                 }
             }
-    }
-
-    private fun cleanupTemporaryFiles() {
-        runCatching {
-            tempFirmwareFile?.takeIf { it.exists() }?.delete()
-            fileHandler.cleanupAllTemporaryFiles()
-        }
-            .onFailure { e -> Timber.w(e, "Failed to cleanup temp files") }
-        tempFirmwareFile = null
     }
 
     private data class ValidationResult(
@@ -433,6 +424,15 @@ private fun getDeviceFirmwareUrl(url: String, targetArch: String): String {
     }
 
     return url
+}
+
+private fun cleanupTemporaryFiles(fileHandler: FirmwareFileHandler, tempFirmwareFile: File?): File? {
+    runCatching {
+        tempFirmwareFile?.takeIf { it.exists() }?.delete()
+        fileHandler.cleanupAllTemporaryFiles()
+    }
+        .onFailure { e -> Timber.w(e, "Failed to cleanup temp files") }
+    return null
 }
 
 /** Internal state representation for the DFU process flow. */

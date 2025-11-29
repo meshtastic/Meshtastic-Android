@@ -102,6 +102,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.chirpy
+import org.meshtastic.core.strings.dont_show_again_for_device
 import org.meshtastic.core.strings.firmware_update_almost_there
 import org.meshtastic.core.strings.firmware_update_alpha
 import org.meshtastic.core.strings.firmware_update_button
@@ -129,7 +130,6 @@ import org.meshtastic.core.strings.firmware_update_unknown_release
 import org.meshtastic.core.strings.firmware_update_usb_bootloader_warning
 import org.meshtastic.core.strings.i_know_what_i_m_doing
 import org.meshtastic.core.strings.learn_more
-import org.meshtastic.core.strings.dont_show_again_for_device
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -146,17 +146,37 @@ fun FirmwareUpdateScreen(
             uri?.let { viewModel.startUpdateFromFile(it) }
         }
 
-    val shouldKeepScreenOn =
-        when (state) {
-            is FirmwareUpdateState.Downloading,
-            is FirmwareUpdateState.Processing,
-            is FirmwareUpdateState.Updating,
-            -> true
-            else -> false
-        }
+    val shouldKeepScreenOn = shouldKeepFirmwareScreenOn(state)
 
     KeepScreenOn(shouldKeepScreenOn)
 
+    FirmwareUpdateScaffold(
+        modifier = modifier,
+        navController = navController,
+        state = state,
+        selectedReleaseType = selectedReleaseType,
+        onReleaseTypeSelect = viewModel::setReleaseType,
+        onStartUpdate = viewModel::startUpdate,
+        onPickFile = { launcher.launch("application/zip") },
+        onRetry = viewModel::checkForUpdates,
+        onDone = { navController.navigateUp() },
+        onDismissBootloaderWarning = viewModel::dismissBootloaderWarningForCurrentDevice,
+    )
+}
+
+@Composable
+private fun FirmwareUpdateScaffold(
+    navController: NavController,
+    state: FirmwareUpdateState,
+    selectedReleaseType: FirmwareReleaseType,
+    onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
+    onStartUpdate: () -> Unit,
+    onPickFile: () -> Unit,
+    onRetry: () -> Unit,
+    onDone: () -> Unit,
+    onDismissBootloaderWarning: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -190,16 +210,24 @@ fun FirmwareUpdateScreen(
                 FirmwareUpdateContent(
                     state = targetState,
                     selectedReleaseType = selectedReleaseType,
-                    onReleaseTypeSelect = viewModel::setReleaseType,
-                    onStartUpdate = viewModel::startUpdate,
-                    onPickFile = { launcher.launch("application/zip") },
-                    onRetry = viewModel::checkForUpdates,
-                    onDone = { navController.navigateUp() },
-                    onDismissBootloaderWarning = viewModel::dismissBootloaderWarningForCurrentDevice,
+                    onReleaseTypeSelect = onReleaseTypeSelect,
+                    onStartUpdate = onStartUpdate,
+                    onPickFile = onPickFile,
+                    onRetry = onRetry,
+                    onDone = onDone,
+                    onDismissBootloaderWarning = onDismissBootloaderWarning,
                 )
             }
         }
     }
+}
+
+private fun shouldKeepFirmwareScreenOn(state: FirmwareUpdateState): Boolean = when (state) {
+    is FirmwareUpdateState.Downloading,
+    is FirmwareUpdateState.Processing,
+    is FirmwareUpdateState.Updating,
+    -> true
+    else -> false
 }
 
 @Composable
@@ -290,10 +318,7 @@ private fun ColumnScope.ReadyState(
 
     if (state.showBootloaderWarning) {
         Spacer(Modifier.height(16.dp))
-        BootloaderWarningCard(
-            deviceHardware = device,
-            onDismissForDevice = onDismissBootloaderWarning,
-        )
+        BootloaderWarningCard(deviceHardware = device, onDismissForDevice = onDismissBootloaderWarning)
     }
 
     Spacer(Modifier.height(24.dp))

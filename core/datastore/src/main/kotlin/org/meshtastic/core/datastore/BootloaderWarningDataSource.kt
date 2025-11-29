@@ -30,9 +30,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BootloaderWarningDataSource @Inject constructor(
-    private val dataStore: DataStore<Preferences>,
-) {
+class BootloaderWarningDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {
 
     private object PreferencesKeys {
         val DISMISSED_BOOTLOADER_ADDRESSES = stringPreferencesKey("dismissed-bootloader-addresses")
@@ -42,9 +40,7 @@ class BootloaderWarningDataSource @Inject constructor(
         dataStore.data.map { preferences ->
             val jsonString = preferences[PreferencesKeys.DISMISSED_BOOTLOADER_ADDRESSES] ?: return@map emptySet()
 
-            runCatching {
-                Json.decodeFromString<List<String>>(jsonString).toSet()
-            }
+            runCatching { Json.decodeFromString<List<String>>(jsonString).toSet() }
                 .onFailure { e ->
                     if (e is IllegalArgumentException || e is SerializationException) {
                         Timber.w(e, "Failed to parse dismissed bootloader warning addresses, resetting preference")
@@ -55,14 +51,10 @@ class BootloaderWarningDataSource @Inject constructor(
                 .getOrDefault(emptySet())
         }
 
-    /**
-     * Returns true if the bootloader warning has been dismissed for the given [address].
-     */
+    /** Returns true if the bootloader warning has been dismissed for the given [address]. */
     suspend fun isDismissed(address: String): Boolean = dismissedAddressesFlow.first().contains(address)
 
-    /**
-     * Marks the bootloader warning as dismissed for the given [address].
-     */
+    /** Marks the bootloader warning as dismissed for the given [address]. */
     suspend fun dismiss(address: String) {
         val current = dismissedAddressesFlow.first()
         if (current.contains(address)) return
@@ -73,5 +65,3 @@ class BootloaderWarningDataSource @Inject constructor(
         }
     }
 }
-
-
