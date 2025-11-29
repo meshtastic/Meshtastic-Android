@@ -918,6 +918,9 @@
         <item quantity="one">Kuulsin %1$d releed</item>
         <item quantity="other">Kuuldi %1$d vahendajat</item>
     </plurals>
+    <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA-värskendamist peate võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
+    <string name="learn_more">Lisateave</string>
+    <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul kasutage tootja&apos; seerianumbri DFU tööriista (näiteks adafruit-nrfutil dfu koos kaasasoleva alglaaduri jadapordi .zip-failiga). Ainult .uf2-faili kopeerimine ei värskenda alglaadurit.</string>
     <string name="preserve_favorites">Säilita lemmikud?</string>
     <string name="usb_devices">USB seadmed</string>
     <!-- Firmware Update -->

@@ -918,6 +918,7 @@
         <item quantity="one">Höre %1$d Relais</item>
         <item quantity="other">Höre %1$d Relais</item>
     </plurals>
+    <string name="learn_more">Mehr erfahren</string>
     <string name="preserve_favorites">Favoriten beibehalten?</string>
     <string name="usb_devices">USB Geräte</string>
     <!-- Firmware Update -->

@@ -918,6 +918,7 @@
         <item quantity="one">Kuultu %1$d kautta</item>
         <item quantity="other">Kuultu %1$d kautta</item>
     </plurals>
+    <string name="learn_more">Lue lisää</string>
     <string name="preserve_favorites">Säilytä suosikit?</string>
     <string name="usb_devices">USB-laitteet</string>
     <!-- Firmware Update -->

@@ -729,6 +729,7 @@
     <string name="analytics_platforms">"Аналитични платформи:"</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <string name="unset">Не е зададен - 0</string>
+    <string name="learn_more">Научете повече</string>
     <string name="usb_devices">USB устройства</string>
     <!-- Firmware Update -->
     <string name="firmware_update_title">Актуализация на фърмуера</string>
