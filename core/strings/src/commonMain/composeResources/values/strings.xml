@@ -285,6 +285,10 @@
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
     <string name="cant_shutdown">Shutdown not supported on this device</string>
+    <string name="shutdown_warning">⚠️ This will SHUTDOWN the node. Physical interaction will be required to turn it back on.</string>
+    <string name="shutdown_critical_node">⚠️ This is a critical infrastructure node. Type the node name to confirm:</string>
+    <string name="shutdown_node_name">Node: %1$s</string>
+    <string name="shutdown_type_name">Type: %1$s</string>
     <string name="reboot">Reboot</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Show Introduction</string>

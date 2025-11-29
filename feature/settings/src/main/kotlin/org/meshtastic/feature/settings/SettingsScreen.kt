@@ -244,6 +244,7 @@ fun SettingsScreen(
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security.isManaged,
+                node = viewModel.destNode.value,
                 excludedModulesUnlocked = excludedModulesUnlocked,
                 isDfuCapable = isDfuCapable,
                 onPreserveFavoritesToggle = { viewModel.setPreserveFavorites(it) },

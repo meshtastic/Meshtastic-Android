@@ -49,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -76,7 +77,9 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.radio.component.ShutdownConfirmationDialog
 import org.meshtastic.feature.settings.radio.component.WarningDialog
+import org.meshtastic.feature.settings.radio.component.requiresTypedShutdownConfirmation
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -84,6 +87,7 @@ import org.meshtastic.feature.settings.radio.component.WarningDialog
 fun RadioConfigItemList(
     state: RadioConfigState,
     isManaged: Boolean,
+    node: Node? = null,
     excludedModulesUnlocked: Boolean = false,
     isDfuCapable: Boolean = false,
     onPreserveFavoritesToggle: (Boolean) -> Unit = {},
@@ -158,28 +162,43 @@ fun RadioConfigItemList(
         AdminRoute.entries.forEach { route ->
             var showDialog by remember { mutableStateOf(false) }
             if (showDialog) {
-                WarningDialog(
-                    title = "${stringResource(route.title)}?",
-                    text = {
-                        if (route == AdminRoute.NODEDB_RESET) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                Text(text = stringResource(Res.string.preserve_favorites))
-                                Switch(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                    enabled = enabled,
-                                    checked = state.nodeDbResetPreserveFavorites,
-                                    onCheckedChange = onPreserveFavoritesToggle,
-                                )
+                // Use enhanced confirmation for SHUTDOWN and REBOOT
+                if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
+                    val deviceConfig = state.radioConfig.device
+                    val requiresTypedConfirmation = node?.requiresTypedShutdownConfirmation(deviceConfig) ?: false
+
+                    ShutdownConfirmationDialog(
+                        title = "${stringResource(route.title)}?",
+                        node = node,
+                        requiresTypedConfirmation = requiresTypedConfirmation,
+                        onDismiss = { showDialog = false },
+                        isShutdown = route == AdminRoute.SHUTDOWN,
+                        onConfirm = { onRouteClick(route) },
+                    )
+                } else {
+                    WarningDialog(
+                        title = "${stringResource(route.title)}?",
+                        text = {
+                            if (route == AdminRoute.NODEDB_RESET) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text(text = stringResource(Res.string.preserve_favorites))
+                                    Switch(
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                        enabled = enabled,
+                                        checked = state.nodeDbResetPreserveFavorites,
+                                        onCheckedChange = onPreserveFavoritesToggle,
+                                    )
+                                }
                             }
-                        }
-                    },
-                    onDismiss = { showDialog = false },
-                    onConfirm = { onRouteClick(route) },
-                )
+                        },
+                        onDismiss = { showDialog = false },
+                        onConfirm = { onRouteClick(route) },
+                    )
+                }
             }
 
             ListItem(
