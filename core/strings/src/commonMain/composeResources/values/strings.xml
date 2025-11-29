@@ -964,6 +964,7 @@
     <string name="firmware_update_usb_bootloader_warning">%1$s usually ships with a bootloader that does not support OTA updates. You may need to flash an OTA-capable bootloader over USB before flashing OTA.</string>
     <string name="learn_more">Learn more</string>
     <string name="firmware_update_rak4631_bootloader_hint">For RAK WisBlock RAK4631, use the vendor&apos;s serial DFU tool (for example, adafruit-nrfutil dfu serial with the provided bootloader .zip file). Copying the .uf2 file alone will not update the bootloader.</string>
+    <string name="dont_show_again_for_device">Don&apos;t show again for this device</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
     <string name="usb_devices">USB Devices</string>
 

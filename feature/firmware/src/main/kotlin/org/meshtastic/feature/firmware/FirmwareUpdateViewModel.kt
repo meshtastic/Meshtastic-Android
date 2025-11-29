@@ -45,6 +45,7 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.NodeRepository
@@ -99,6 +100,7 @@ constructor(
     client: OkHttpClient,
     private val serviceRepository: ServiceRepository,
     @ApplicationContext private val context: Context,
+    private val bootloaderWarningDataSource: BootloaderWarningDataSource,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
@@ -155,7 +157,15 @@ constructor(
                     val deviceHardware = getDeviceHardware(ourNode) ?: return@launch
 
                     firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value).collectLatest { release ->
-                        _state.value = FirmwareUpdateState.Ready(release, deviceHardware, address)
+                        val dismissed = bootloaderWarningDataSource.isDismissed(address)
+                        _state.value =
+                            FirmwareUpdateState.Ready(
+                                release = release,
+                                deviceHardware = deviceHardware,
+                                address = address,
+                                showBootloaderWarning = deviceHardware.requiresBootloaderUpgradeForOta == true &&
+                                    !dismissed,
+                            )
                     }
                 }
                     .onFailure { e ->
@@ -175,7 +185,9 @@ constructor(
     @Suppress("TooGenericExceptionCaught")
     fun startUpdate() {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
-        val (release, hardware, address) = currentState
+        val release = currentState.release
+        val hardware = currentState.deviceHardware
+        val address = currentState.address
 
         if (release == null || !isValidBluetoothAddress(address)) return
 
@@ -251,7 +263,8 @@ constructor(
     @Suppress("TooGenericExceptionCaught")
     fun startUpdateFromFile(uri: Uri) {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
-        val (_, hardware, address) = currentState
+        val hardware = currentState.deviceHardware
+        val address = currentState.address
 
         if (!isValidBluetoothAddress(address)) return
 
@@ -271,6 +284,21 @@ constructor(
                     _state.value = FirmwareUpdateState.Error(e.message ?: "Local update failed")
                 }
             }
+    }
+
+    /**
+     * Persists dismissal of the bootloader warning for the current device and updates state accordingly.
+     */
+    fun dismissBootloaderWarningForCurrentDevice() {
+        val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
+        val address = currentState.address
+
+        viewModelScope.launch {
+            runCatching { bootloaderWarningDataSource.dismiss(address) }
+                .onFailure { e -> Timber.w(e, "Failed to persist bootloader warning dismissal for address=%s", address) }
+
+            _state.value = currentState.copy(showBootloaderWarning = false)
+        }
     }
 
     /**

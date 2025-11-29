@@ -129,6 +129,7 @@ import org.meshtastic.core.strings.firmware_update_unknown_release
 import org.meshtastic.core.strings.firmware_update_usb_bootloader_warning
 import org.meshtastic.core.strings.i_know_what_i_m_doing
 import org.meshtastic.core.strings.learn_more
+import org.meshtastic.core.strings.dont_show_again_for_device
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -194,6 +195,7 @@ fun FirmwareUpdateScreen(
                     onPickFile = { launcher.launch("application/zip") },
                     onRetry = viewModel::checkForUpdates,
                     onDone = { navController.navigateUp() },
+                    onDismissBootloaderWarning = viewModel::dismissBootloaderWarningForCurrentDevice,
                 )
             }
         }
@@ -209,6 +211,7 @@ private fun FirmwareUpdateContent(
     onPickFile: () -> Unit,
     onRetry: () -> Unit,
     onDone: () -> Unit,
+    onDismissBootloaderWarning: () -> Unit,
 ) {
     val modifier =
         if (state is FirmwareUpdateState.Ready) {
@@ -228,7 +231,14 @@ private fun FirmwareUpdateContent(
                 -> CheckingState()
 
                 is FirmwareUpdateState.Ready ->
-                    ReadyState(state, selectedReleaseType, onReleaseTypeSelect, onStartUpdate, onPickFile)
+                    ReadyState(
+                        state = state,
+                        selectedReleaseType = selectedReleaseType,
+                        onReleaseTypeSelect = onReleaseTypeSelect,
+                        onStartUpdate = onStartUpdate,
+                        onPickFile = onPickFile,
+                        onDismissBootloaderWarning = onDismissBootloaderWarning,
+                    )
 
                 is FirmwareUpdateState.Downloading -> DownloadingState(state)
                 is FirmwareUpdateState.Processing -> ProcessingState(state.message)
@@ -257,6 +267,7 @@ private fun ColumnScope.ReadyState(
     onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
     onStartUpdate: () -> Unit,
     onPickFile: () -> Unit,
+    onDismissBootloaderWarning: () -> Unit,
 ) {
     var showDisclaimer by remember { mutableStateOf(false) }
     var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -277,9 +288,12 @@ private fun ColumnScope.ReadyState(
 
     DeviceInfoCard(device, state.release)
 
-    if (device.requiresBootloaderUpgradeForOta == true) {
+    if (state.showBootloaderWarning) {
         Spacer(Modifier.height(16.dp))
-        BootloaderWarningCard(device)
+        BootloaderWarningCard(
+            deviceHardware = device,
+            onDismissForDevice = onDismissBootloaderWarning,
+        )
     }
 
     Spacer(Modifier.height(24.dp))
@@ -452,7 +466,7 @@ private fun DeviceInfoCard(deviceHardware: DeviceHardware, release: FirmwareRele
 }
 
 @Composable
-private fun BootloaderWarningCard(deviceHardware: DeviceHardware) {
+private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDevice: () -> Unit) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors =
@@ -502,6 +516,11 @@ private fun BootloaderWarningCard(deviceHardware: DeviceHardware) {
                 ) {
                     Text(text = stringResource(Res.string.learn_more))
                 }
+            }
+
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = onDismissForDevice) {
+                Text(text = stringResource(Res.string.dont_show_again_for_device))
             }
         }
     }
