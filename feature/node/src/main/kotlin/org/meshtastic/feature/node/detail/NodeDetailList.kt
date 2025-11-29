@@ -17,6 +17,7 @@
 
 package org.meshtastic.feature.node.detail
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -109,7 +110,7 @@ fun NodeDetailList(
     }
 
     Column(
-        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).focusable(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (metricsState.deviceHardware != null) {
