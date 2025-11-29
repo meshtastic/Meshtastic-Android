@@ -40,3 +40,6 @@
 # Our app is opensource no need to obsfucate
 -dontobfuscate
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
+
+# Fix for D8 warning: The companion object Companion could not be found in class com.google.android.gms.internal.location.zze
+-keep class com.google.android.gms.internal.location.zze { *; }

@@ -15,20 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.android.build.api.dsl.LibraryExtension
-import com.geeksville.mesh.buildlogic.configureAndroidCompose
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.getByType
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.hilt)
+}
 
-class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
-    override fun apply(target: Project) {
-        with(target) {
-            apply(plugin = "org.jetbrains.kotlin.plugin.compose")
-            val extension = extensions.getByType<LibraryExtension>()
-            configureAndroidCompose(extension)
-        }
-    }
+android { namespace = "org.meshtastic.core.domain" }
 
+dependencies {
+    implementation(projects.core.common)
+    implementation(projects.core.data)
+    implementation(projects.core.database)
+    implementation(projects.core.model)
+    implementation(projects.core.proto)
+
+    implementation(libs.javax.inject)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.timber)
+
+    testImplementation(libs.junit)
+    testImplementation(testFixtures(projects.core.model))
 }
