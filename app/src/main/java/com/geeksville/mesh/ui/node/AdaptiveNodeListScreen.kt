@@ -38,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
@@ -87,6 +88,9 @@ fun AdaptiveNodeListScreen(
         value = navigator.scaffoldValue,
         listPane = {
             AnimatedPane {
+                val focusManager = LocalFocusManager.current
+                // Prevent TextFields from auto-focusing when pane animates in
+                LaunchedEffect(Unit) { focusManager.clearFocus() }
                 NodeListScreen(
                     navigateToNodeDetails = { nodeId ->
                         scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, nodeId) }
@@ -98,7 +102,10 @@ fun AdaptiveNodeListScreen(
         },
         detailPane = {
             AnimatedPane {
+                val focusManager = LocalFocusManager.current
                 val nodeId = navigator.currentDestination?.contentKey
+                // Prevent TextFields from auto-focusing when pane animates in
+                LaunchedEffect(nodeId) { focusManager.clearFocus() }
                 if (nodeId != null) {
                     NodeDetailScreenWrapper(
                         nodeId = nodeId,
