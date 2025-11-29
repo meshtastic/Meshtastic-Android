@@ -870,4 +870,5 @@
     <string name="firmware_update_retry">Повторить</string>
     <string name="firmware_update_done">Готово</string>
     <string name="firmware_update_failed">Ошибка обновления</string>
+    <string name="chirpy">Чирпи</string>
 </resources>
