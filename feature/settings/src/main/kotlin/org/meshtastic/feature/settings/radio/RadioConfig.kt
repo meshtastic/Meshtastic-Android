@@ -79,7 +79,6 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.component.ShutdownConfirmationDialog
 import org.meshtastic.feature.settings.radio.component.WarningDialog
-import org.meshtastic.feature.settings.radio.component.requiresTypedShutdownConfirmation
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -164,13 +163,9 @@ fun RadioConfigItemList(
             if (showDialog) {
                 // Use enhanced confirmation for SHUTDOWN and REBOOT
                 if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
-                    val deviceConfig = state.radioConfig.device
-                    val requiresTypedConfirmation = node?.requiresTypedShutdownConfirmation(deviceConfig) ?: false
-
                     ShutdownConfirmationDialog(
                         title = "${stringResource(route.title)}?",
                         node = node,
-                        requiresTypedConfirmation = requiresTypedConfirmation,
                         onDismiss = { showDialog = false },
                         isShutdown = route == AdminRoute.SHUTDOWN,
                         onConfirm = { onRouteClick(route) },
