@@ -91,6 +91,7 @@ fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
     viewModel: NodeListViewModel = hiltViewModel(),
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
+    activeNodeId: Int? = null,
 ) {
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
 
@@ -208,6 +209,8 @@ fun NodeListScreen(
                                 null
                             }
 
+                        val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
+
                         NodeItem(
                             modifier = Modifier.animateItem(),
                             thisNode = ourNode,
@@ -218,6 +221,7 @@ fun NodeListScreen(
                             onLongClick = longClick,
                             currentTimeMillis = currentTimeMillis,
                             connectionState = connectionState,
+                            isActive = isActive,
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {
