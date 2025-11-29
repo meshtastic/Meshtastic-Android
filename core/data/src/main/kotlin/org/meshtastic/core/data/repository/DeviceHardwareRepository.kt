@@ -130,10 +130,7 @@ constructor(
                 }
         }
 
-    private suspend fun loadFromBundledJson(
-        hwModel: Int,
-        quirks: List<BootloaderOtaQuirk>,
-    ): Result<DeviceHardware?> =
+    private suspend fun loadFromBundledJson(hwModel: Int, quirks: List<BootloaderOtaQuirk>): Result<DeviceHardware?> =
         runCatching {
             Timber.d("DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=%d", hwModel)
             val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
