@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.component
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.Message
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.twotone.Mediation
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
@@ -56,5 +57,11 @@ internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction
     TracerouteButton(
         lastTracerouteTime = lastTracerouteTime,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },
+    )
+    ListItem(
+        text = stringResource(Res.string.request_neighbor_info),
+        leadingIcon = Icons.TwoTone.Mediation,
+        trailingIcon = null,
+        onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestNeighbourInfo(node))) },
     )
 }
