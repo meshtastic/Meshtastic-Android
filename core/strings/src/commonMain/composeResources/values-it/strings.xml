@@ -858,6 +858,7 @@
     <string name="for_more_information_see_our_privacy_policy">Per ulteriori informazioni, consulta la nostra informativa sulla privacy.</string>
     <string name="unset">Disattiva - 0</string>
     <string name="relayed_by">Ritrasmesso da: %1$s</string>
+    <string name="learn_more">Maggiori informazioni</string>
     <string name="preserve_favorites">Conservare I Preferiti?</string>
     <!-- Firmware Update -->
     <string name="firmware_update_button">Aggiorna Firmware</string>

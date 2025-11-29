@@ -880,6 +880,7 @@
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
     <string name="relayed_by">Vidaresänt av: %1$s</string>
+    <string name="learn_more">Läs mer</string>
     <string name="usb_devices">USB-enheter</string>
     <!-- Firmware Update -->
     <string name="firmware_update_title">Uppdatering av fast programvara</string>
