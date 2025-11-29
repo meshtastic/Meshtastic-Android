@@ -25,9 +25,18 @@ import org.meshtastic.core.model.NetworkDeviceHardware
 import javax.inject.Inject
 
 class DeviceHardwareJsonDataSource @Inject constructor(private val application: Application) {
+
+    // Use a tolerant JSON parser so that additional fields in the bundled asset
+    // (e.g., "key") do not break deserialization on older app versions.
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware> {
-        val inputStream = application.assets.open("device_hardware.json")
-        return Json.decodeFromStream<List<NetworkDeviceHardware>>(inputStream)
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
     }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware> =
+        application.assets.open("device_hardware.json").use { inputStream ->
+            json.decodeFromStream<List<NetworkDeviceHardware>>(inputStream)
+        }
 }
