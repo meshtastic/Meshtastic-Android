@@ -72,6 +72,8 @@ fun DeviceHardwareEntity.asExternalModel() = DeviceHardware(
     partitionScheme = partitionScheme,
     platformioTarget = platformioTarget,
     requiresDfu = requiresDfu,
+    requiresBootloaderUpgradeForOta = null,
+    bootloaderInfoUrl = null,
     supportLevel = supportLevel,
     tags = tags,
 )
