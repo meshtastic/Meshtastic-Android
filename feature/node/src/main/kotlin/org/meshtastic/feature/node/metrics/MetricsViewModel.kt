@@ -24,16 +24,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -73,7 +72,7 @@ private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 private fun MeshPacket.hasValidSignal(): Boolean =
     rxTime > 0 && (rxSnr != 0f && rxRssi != 0) && (hopStart > 0 && hopStart - hopLimit == 0)
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
 class MetricsViewModel
 @Inject
@@ -82,13 +81,16 @@ constructor(
     private val app: Application,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
-    radioConfigRepository: RadioConfigRepository,
+    private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
 ) : ViewModel() {
-    private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum
+    private var destNum: Int? =
+        runCatching { savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum }.getOrNull()
+
+    private var jobs: Job? = null
 
     private fun MeshLog.hasValidTraceroute(): Boolean =
         with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
@@ -132,126 +134,157 @@ constructor(
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     init {
-        if (destNum != null) {
-            nodeRepository.nodeDBbyNum
-                .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
-                .distinctUntilChanged()
-                .onEach { (node, ourNode) ->
-                    // Create a fallback node if not found in database (for hidden clients, etc.)
-                    val actualNode = node ?: createFallbackNode(destNum)
-                    val deviceHardware =
-                        actualNode.user.hwModel.safeNumber().let {
-                            deviceHardwareRepository.getDeviceHardwareByModel(it)
+        initializeFlows()
+    }
+
+    fun setNodeId(id: Int) {
+        if (destNum != id) {
+            destNum = id
+            initializeFlows()
+        }
+    }
+
+    @Suppress("LongMethod")
+    private fun initializeFlows() {
+        jobs?.cancel()
+        val currentDestNum = destNum
+        jobs =
+            viewModelScope.launch {
+                if (currentDestNum != null) {
+                    launch {
+                        nodeRepository.nodeDBbyNum
+                            .mapLatest { nodes -> nodes[currentDestNum] to nodes.keys.firstOrNull() }
+                            .distinctUntilChanged()
+                            .collect { (node, ourNode) ->
+                                // Create a fallback node if not found in database (for hidden clients, etc.)
+                                val actualNode = node ?: createFallbackNode(currentDestNum)
+                                val deviceHardware =
+                                    actualNode.user.hwModel.safeNumber().let {
+                                        deviceHardwareRepository.getDeviceHardwareByModel(it)
+                                    }
+                                _state.update { state ->
+                                    state.copy(
+                                        node = actualNode,
+                                        isLocal = currentDestNum == ourNode,
+                                        deviceHardware = deviceHardware.getOrNull(),
+                                    )
+                                }
+                            }
+                    }
+
+                    launch {
+                        radioConfigRepository.deviceProfileFlow.collect { profile ->
+                            val moduleConfig = profile.moduleConfig
+                            _state.update { state ->
+                                state.copy(
+                                    isManaged = profile.config.security.isManaged,
+                                    isFahrenheit = moduleConfig.telemetry.environmentDisplayFahrenheit,
+                                    displayUnits = profile.config.display.units,
+                                )
+                            }
                         }
-                    _state.update { state ->
-                        state.copy(
-                            node = actualNode,
-                            isLocal = destNum == ourNode,
-                            deviceHardware = deviceHardware.getOrNull(),
-                        )
                     }
-                }
-                .launchIn(viewModelScope)
 
-            radioConfigRepository.deviceProfileFlow
-                .onEach { profile ->
-                    val moduleConfig = profile.moduleConfig
-                    _state.update { state ->
-                        state.copy(
-                            isManaged = profile.config.security.isManaged,
-                            isFahrenheit = moduleConfig.telemetry.environmentDisplayFahrenheit,
-                            displayUnits = profile.config.display.units,
-                        )
+                    launch {
+                        meshLogRepository.getTelemetryFrom(currentDestNum).collect { telemetry ->
+                            _state.update { state ->
+                                state.copy(
+                                    deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
+                                    powerMetrics = telemetry.filter { it.hasPowerMetrics() },
+                                    hostMetrics = telemetry.filter { it.hasHostMetrics() },
+                                )
+                            }
+                            _environmentState.update { state ->
+                                state.copy(
+                                    environmentMetrics =
+                                    telemetry.filter {
+                                        it.hasEnvironmentMetrics() &&
+                                            it.environmentMetrics.hasRelativeHumidity() &&
+                                            it.environmentMetrics.hasTemperature() &&
+                                            !it.environmentMetrics.temperature.isNaN()
+                                    },
+                                )
+                            }
+                        }
                     }
-                }
-                .launchIn(viewModelScope)
 
-            meshLogRepository
-                .getTelemetryFrom(destNum)
-                .onEach { telemetry ->
-                    _state.update { state ->
-                        state.copy(
-                            deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                            powerMetrics = telemetry.filter { it.hasPowerMetrics() },
-                            hostMetrics = telemetry.filter { it.hasHostMetrics() },
-                        )
+                    launch {
+                        meshLogRepository.getMeshPacketsFrom(currentDestNum).collect { meshPackets ->
+                            _state.update { state ->
+                                state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
+                            }
+                        }
                     }
-                    _environmentState.update { state ->
-                        state.copy(
-                            environmentMetrics =
-                            telemetry.filter {
-                                it.hasEnvironmentMetrics() &&
-                                    it.environmentMetrics.hasRelativeHumidity() &&
-                                    it.environmentMetrics.hasTemperature() &&
-                                    !it.environmentMetrics.temperature.isNaN()
-                            },
-                        )
+
+                    launch {
+                        combine(
+                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
+                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.TRACEROUTE_APP_VALUE),
+                        ) { request, response ->
+                            _state.update { state ->
+                                state.copy(
+                                    tracerouteRequests = request.filter { it.hasValidTraceroute() },
+                                    tracerouteResults = response,
+                                )
+                            }
+                        }
+                            .collect {}
                     }
-                }
-                .launchIn(viewModelScope)
 
-            meshLogRepository
-                .getMeshPacketsFrom(destNum)
-                .onEach { meshPackets ->
-                    _state.update { state -> state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() }) }
-                }
-                .launchIn(viewModelScope)
+                    launch {
+                        meshLogRepository.getMeshPacketsFrom(
+                            currentDestNum,
+                            PortNum.POSITION_APP_VALUE,
+                        ).collect { packets ->
+                            val distinctPositions =
+                                packets
+                                    .mapNotNull { it.toPosition() }
+                                    .asFlow()
+                                    .distinctUntilChanged { old, new ->
+                                        old.time == new.time ||
+                                            (old.latitudeI == new.latitudeI && old.longitudeI == new.longitudeI)
+                                    }
+                                    .toList()
+                            _state.update { state -> state.copy(positionLogs = distinctPositions) }
+                        }
+                    }
 
-            combine(
-                meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
-                meshLogRepository.getLogsFrom(destNum ?: 0, PortNum.TRACEROUTE_APP_VALUE),
-            ) { request, response ->
-                _state.update { state ->
-                    state.copy(
-                        tracerouteRequests = request.filter { it.hasValidTraceroute() },
-                        tracerouteResults = response,
-                    )
+                    launch {
+                        meshLogRepository.getLogsFrom(
+                            currentDestNum,
+                            Portnums.PortNum.PAXCOUNTER_APP_VALUE,
+                        ).collect { logs ->
+                            _state.update { state -> state.copy(paxMetrics = logs) }
+                        }
+                    }
+
+                    launch {
+                        firmwareReleaseRepository.stableRelease.filterNotNull().collect { latestStable ->
+                            _state.update { state -> state.copy(latestStableFirmware = latestStable) }
+                        }
+                    }
+
+                    launch {
+                        firmwareReleaseRepository.alphaRelease.filterNotNull().collect { latestAlpha ->
+                            _state.update { state -> state.copy(latestAlphaFirmware = latestAlpha) }
+                        }
+                    }
+
+                    launch {
+                        meshLogRepository
+                            .getMyNodeInfo()
+                            .map { it?.firmwareEdition }
+                            .distinctUntilChanged()
+                            .collect { firmwareEdition ->
+                                _state.update { state -> state.copy(firmwareEdition = firmwareEdition) }
+                            }
+                    }
+
+                    Timber.d("MetricsViewModel created")
+                } else {
+                    Timber.d("MetricsViewModel: destNum is null, skipping metrics flows initialization.")
                 }
             }
-                .launchIn(viewModelScope)
-
-            meshLogRepository
-                .getMeshPacketsFrom(destNum, PortNum.POSITION_APP_VALUE)
-                .onEach { packets ->
-                    val distinctPositions =
-                        packets
-                            .mapNotNull { it.toPosition() }
-                            .asFlow()
-                            .distinctUntilChanged { old, new ->
-                                old.time == new.time ||
-                                    (old.latitudeI == new.latitudeI && old.longitudeI == new.longitudeI)
-                            }
-                            .toList()
-                    _state.update { state -> state.copy(positionLogs = distinctPositions) }
-                }
-                .launchIn(viewModelScope)
-
-            meshLogRepository
-                .getLogsFrom(destNum, Portnums.PortNum.PAXCOUNTER_APP_VALUE)
-                .onEach { logs -> _state.update { state -> state.copy(paxMetrics = logs) } }
-                .launchIn(viewModelScope)
-
-            firmwareReleaseRepository.stableRelease
-                .filterNotNull()
-                .onEach { latestStable -> _state.update { state -> state.copy(latestStableFirmware = latestStable) } }
-                .launchIn(viewModelScope)
-
-            firmwareReleaseRepository.alphaRelease
-                .filterNotNull()
-                .onEach { latestAlpha -> _state.update { state -> state.copy(latestAlphaFirmware = latestAlpha) } }
-                .launchIn(viewModelScope)
-
-            meshLogRepository
-                .getMyNodeInfo()
-                .map { it?.firmwareEdition }
-                .distinctUntilChanged()
-                .onEach { firmwareEdition -> _state.update { state -> state.copy(firmwareEdition = firmwareEdition) } }
-                .launchIn(viewModelScope)
-
-            Timber.d("MetricsViewModel created")
-        } else {
-            Timber.d("MetricsViewModel: destNum is null, skipping metrics flows initialization.")
-        }
     }
 
     override fun onCleared() {

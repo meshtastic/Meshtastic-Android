@@ -61,6 +61,9 @@ import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
 
+private const val ACTIVE_ALPHA = 0.5f
+private const val INACTIVE_ALPHA = 0.2f
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -74,6 +77,7 @@ fun NodeItem(
     onLongClick: (() -> Unit)? = null,
     currentTimeMillis: Long,
     connectionState: ConnectionState,
+    isActive: Boolean = false,
 ) {
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isIgnored = thatNode.isIgnored
@@ -91,7 +95,8 @@ fun NodeItem(
             thatNode.colors.second
         }
             ?.let {
-                val containerColor = Color(it).copy(alpha = 0.2f)
+                val alpha = if (isActive) ACTIVE_ALPHA else INACTIVE_ALPHA
+                val containerColor = Color(it).copy(alpha = alpha)
                 contentColor = contentColorFor(containerColor)
                 CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
             } ?: (CardDefaults.cardColors())

@@ -17,6 +17,8 @@
 
 package org.meshtastic.feature.node.list
 
+import kotlinx.coroutines.flow.map
+import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import javax.inject.Inject
 
@@ -26,6 +28,13 @@ class NodeFilterPreferences @Inject constructor(private val uiPreferencesDataSou
     val onlyOnline = uiPreferencesDataSource.onlyOnline
     val onlyDirect = uiPreferencesDataSource.onlyDirect
     val showIgnored = uiPreferencesDataSource.showIgnored
+
+    val nodeSortOption =
+        uiPreferencesDataSource.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
+
+    fun setNodeSort(option: NodeSortOption) {
+        uiPreferencesDataSource.setNodeSort(option.ordinal)
+    }
 
     fun toggleIncludeUnknown() {
         uiPreferencesDataSource.setIncludeUnknown(!includeUnknown.value)

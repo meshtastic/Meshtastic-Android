@@ -64,23 +64,23 @@ object NodesRoutes {
 }
 
 object NodeDetailRoutes {
-    @Serializable data object DeviceMetrics : Route
+    @Serializable data class DeviceMetrics(val destNum: Int) : Route
 
-    @Serializable data object NodeMap : Route
+    @Serializable data class NodeMap(val destNum: Int) : Route
 
-    @Serializable data object PositionLog : Route
+    @Serializable data class PositionLog(val destNum: Int) : Route
 
-    @Serializable data object EnvironmentMetrics : Route
+    @Serializable data class EnvironmentMetrics(val destNum: Int) : Route
 
-    @Serializable data object SignalMetrics : Route
+    @Serializable data class SignalMetrics(val destNum: Int) : Route
 
-    @Serializable data object PowerMetrics : Route
+    @Serializable data class PowerMetrics(val destNum: Int) : Route
 
-    @Serializable data object TracerouteLog : Route
+    @Serializable data class TracerouteLog(val destNum: Int) : Route
 
-    @Serializable data object HostMetricsLog : Route
+    @Serializable data class HostMetricsLog(val destNum: Int) : Route
 
-    @Serializable data object PaxMetrics : Route
+    @Serializable data class PaxMetrics(val destNum: Int) : Route
 }
 
 object SettingsRoutes {

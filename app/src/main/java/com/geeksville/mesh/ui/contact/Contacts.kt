@@ -112,6 +112,7 @@ fun ContactsScreen(
     onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
+    activeContactKey: String? = null,
 ) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
@@ -252,6 +253,7 @@ fun ContactsScreen(
                 contacts = pagedContacts,
                 channelPlaceholders = channelPlaceholders,
                 selectedList = selectedContactKeys,
+                activeContactKey = activeContactKey,
                 onClick = onContactClick,
                 onLongClick = onContactLongClick,
                 onNodeChipClick = onNodeChipClick,
@@ -473,6 +475,7 @@ private fun ContactListViewPaged(
     contacts: LazyPagingItems<Contact>,
     channelPlaceholders: List<Contact>,
     selectedList: List<String>,
+    activeContactKey: String?,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
@@ -493,6 +496,7 @@ private fun ContactListViewPaged(
         contacts = contacts,
         visiblePlaceholders = visiblePlaceholders,
         selectedList = selectedList,
+        activeContactKey = activeContactKey,
         onClick = onClick,
         onLongClick = onLongClick,
         onNodeChipClick = onNodeChipClick,
@@ -508,6 +512,7 @@ private fun ContactListContentInternal(
     contacts: LazyPagingItems<Contact>,
     visiblePlaceholders: List<Contact>,
     selectedList: List<String>,
+    activeContactKey: String?,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
@@ -520,6 +525,7 @@ private fun ContactListContentInternal(
         contactListPlaceholdersItems(
             visiblePlaceholders = visiblePlaceholders,
             selectedList = selectedList,
+            activeContactKey = activeContactKey,
             onClick = onClick,
             onLongClick = onLongClick,
             onNodeChipClick = onNodeChipClick,
@@ -530,6 +536,7 @@ private fun ContactListContentInternal(
         contactListPagedItems(
             contacts = contacts,
             selectedList = selectedList,
+            activeContactKey = activeContactKey,
             onClick = onClick,
             onLongClick = onLongClick,
             onNodeChipClick = onNodeChipClick,
@@ -544,6 +551,7 @@ private fun ContactListContentInternal(
 private fun LazyListScope.contactListPlaceholdersItems(
     visiblePlaceholders: List<Contact>,
     selectedList: List<String>,
+    activeContactKey: String?,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
@@ -556,10 +564,12 @@ private fun LazyListScope.contactListPlaceholdersItems(
     ) { index ->
         val placeholder = visiblePlaceholders[index]
         val selected by remember { derivedStateOf { selectedList.contains(placeholder.contactKey) } }
+        val isActive = remember(placeholder.contactKey, activeContactKey) { placeholder.contactKey == activeContactKey }
 
         ContactItem(
             contact = placeholder,
             selected = selected,
+            isActive = isActive,
             onClick = { onClick(placeholder) },
             onLongClick = {
                 onLongClick(placeholder)
@@ -574,6 +584,7 @@ private fun LazyListScope.contactListPlaceholdersItems(
 private fun LazyListScope.contactListPagedItems(
     contacts: LazyPagingItems<Contact>,
     selectedList: List<String>,
+    activeContactKey: String?,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
@@ -590,10 +601,12 @@ private fun LazyListScope.contactListPagedItems(
         val contact = contacts[index]
         if (contact != null) {
             val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
+            val isActive = remember(contact.contactKey, activeContactKey) { contact.contactKey == activeContactKey }
 
             ContactItem(
                 contact = contact,
                 selected = selected,
+                isActive = isActive,
                 onClick = { onClick(contact) },
                 onLongClick = {
                     onLongClick(contact)
