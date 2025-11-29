@@ -62,12 +62,7 @@ fun ShutdownConfirmationDialog(
         onDismissRequest = {},
         icon = { icon?.let { Icon(imageVector = it, contentDescription = null) } },
         title = { Text(text = title) },
-        text = {
-            ShutdownDialogContent(
-                nodeLongName = nodeLongName,
-                isShutdown = isShutdown,
-            )
-        },
+        text = { ShutdownDialogContent(nodeLongName = nodeLongName, isShutdown = isShutdown) },
         dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(Res.string.cancel)) } },
         confirmButton = {
             Button(
@@ -83,10 +78,7 @@ fun ShutdownConfirmationDialog(
 }
 
 @Composable
-private fun ShutdownDialogContent(
-    nodeLongName: String,
-    isShutdown: Boolean,
-) {
+private fun ShutdownDialogContent(nodeLongName: String, isShutdown: Boolean) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         Text(
             text = stringResource(Res.string.shutdown_node_name, nodeLongName),
@@ -118,12 +110,5 @@ private fun ShutdownConfirmationDialogPreview() {
             user = MeshProtos.User.newBuilder().setLongName("Rooftop Router Node").setShortName("ROOF").build(),
         )
 
-    AppTheme {
-        ShutdownConfirmationDialog(
-            title = "Shutdown?",
-            node = mockNode,
-            onDismiss = {},
-            onConfirm = {},
-        )
-    }
+    AppTheme { ShutdownConfirmationDialog(title = "Shutdown?", node = mockNode, onDismiss = {}, onConfirm = {}) }
 }
