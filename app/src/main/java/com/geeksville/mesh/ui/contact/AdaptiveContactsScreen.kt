@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.contact
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,6 +67,10 @@ fun AdaptiveContactsScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
+
+    BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) {
+        scope.launch { navigator.navigateBack(backNavigationBehavior) }
+    }
 
     LaunchedEffect(initialContactKey) {
         if (initialContactKey != null) {
