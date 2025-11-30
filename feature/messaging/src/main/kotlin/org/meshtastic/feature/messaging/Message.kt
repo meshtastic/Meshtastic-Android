@@ -22,6 +22,7 @@ package org.meshtastic.feature.messaging
 import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -85,6 +86,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -158,6 +160,7 @@ fun MessageScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
+    val focusManager = LocalFocusManager.current
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
@@ -174,6 +177,9 @@ fun MessageScreen(
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
+
+    // Prevent the message TextField from stealing focus when the screen opens
+    LaunchedEffect(contactKey) { focusManager.clearFocus() }
 
     // Derived state, memoized for performance
     val channelInfo =
@@ -337,7 +343,7 @@ fun MessageScreen(
             }
         },
     ) { paddingValues ->
-        Column(Modifier.padding(paddingValues)) {
+        Column(Modifier.fillMaxSize().padding(paddingValues).focusable()) {
             Box(modifier = Modifier.weight(1f)) {
                 MessageListPaged(
                     modifier = Modifier.fillMaxSize(),
