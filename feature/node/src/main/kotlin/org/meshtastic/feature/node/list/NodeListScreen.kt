@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.list
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -148,7 +149,7 @@ fun NodeListScreen(
             )
         },
     ) { contentPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+        Box(modifier = Modifier.fillMaxSize().padding(contentPadding).focusable()) {
             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
                     val animatedAlpha by

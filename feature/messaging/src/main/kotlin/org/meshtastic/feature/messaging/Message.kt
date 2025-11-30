@@ -85,7 +85,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -144,7 +143,6 @@ private const val ROUNDED_CORNER_PERCENT = 100
  * @param contactKey A unique key identifying the contact or channel.
  * @param message An optional message to pre-fill in the input field.
  * @param viewModel The [MessageViewModel] instance for handling business logic and state.
- * @param navigateToMessages Callback to navigate to a different message thread.
  * @param navigateToNodeDetails Callback to navigate to a node's detail screen.
  * @param onNavigateBack Callback to navigate back from this screen.
  */
@@ -154,7 +152,6 @@ fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: MessageViewModel = hiltViewModel(),
-    navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     navigateToQuickChatOptions: () -> Unit,
     onNavigateBack: () -> Unit,
@@ -270,7 +267,6 @@ fun MessageScreen(
                     is MessageScreenEvent.NodeDetails -> navigateToNodeDetails(event.node.num)
 
                     is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
-                    is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey)
                     is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
                     is MessageScreenEvent.CopyToClipboard -> {

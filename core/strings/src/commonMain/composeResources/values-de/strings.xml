@@ -918,7 +918,9 @@
         <item quantity="one">Höre %1$d Relais</item>
         <item quantity="other">Höre %1$d Relais</item>
     </plurals>
+    <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="learn_more">Mehr erfahren</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
     <string name="preserve_favorites">Favoriten beibehalten?</string>
     <string name="usb_devices">USB Geräte</string>
     <!-- Firmware Update -->

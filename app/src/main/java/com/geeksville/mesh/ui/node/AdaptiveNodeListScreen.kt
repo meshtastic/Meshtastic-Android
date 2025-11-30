@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.node
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,18 +31,20 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.nodes
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -63,18 +64,7 @@ fun AdaptiveNodeListScreen(
 ) {
     val navigator = rememberListDetailPaneScaffoldNavigator<Int>()
     val scope = rememberCoroutineScope()
-
-    val isDetailActive = navigator.currentDestination?.contentKey != null
-
-    BackHandler(enabled = isDetailActive) {
-        scope.launch {
-            if (navigator.canNavigateBack()) {
-                navigator.navigateBack()
-            } else {
-                navigator.navigateTo(ListDetailPaneScaffoldRole.List, null)
-            }
-        }
-    }
+    val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
     LaunchedEffect(initialNodeId) {
         if (initialNodeId != null) {
@@ -87,6 +77,9 @@ fun AdaptiveNodeListScreen(
         value = navigator.scaffoldValue,
         listPane = {
             AnimatedPane {
+                val focusManager = LocalFocusManager.current
+                // Prevent TextFields from auto-focusing when pane animates in
+                LaunchedEffect(Unit) { focusManager.clearFocus() }
                 NodeListScreen(
                     navigateToNodeDetails = { nodeId ->
                         scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, nodeId) }
@@ -98,34 +91,21 @@ fun AdaptiveNodeListScreen(
         },
         detailPane = {
             AnimatedPane {
-                val nodeId = navigator.currentDestination?.contentKey
-                if (nodeId != null) {
-                    NodeDetailScreenWrapper(
-                        nodeId = nodeId,
-                        navigateToMessages = onNavigateToMessages,
-                        onNavigate = { route -> navController.navigate(route) },
-                        onNavigateUp = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.List, null) } },
-                    )
-                } else {
-                    PlaceholderScreen()
-                }
+                val focusManager = LocalFocusManager.current
+                // Prevent TextFields from auto-focusing when pane animates in
+                navigator.currentDestination?.contentKey?.let { nodeId ->
+                    key(nodeId) {
+                        LaunchedEffect(nodeId) { focusManager.clearFocus() }
+                        NodeDetailScreen(
+                            nodeId = nodeId,
+                            navigateToMessages = onNavigateToMessages,
+                            onNavigate = { route -> navController.navigate(route) },
+                            onNavigateUp = { scope.launch { navigator.navigateBack(backNavigationBehavior) } },
+                        )
+                    }
+                } ?: PlaceholderScreen()
             }
         },
-    )
-}
-
-@Composable
-private fun NodeDetailScreenWrapper(
-    nodeId: Int,
-    navigateToMessages: (String) -> Unit,
-    onNavigate: (Route) -> Unit,
-    onNavigateUp: () -> Unit,
-) {
-    NodeDetailScreen(
-        onNavigateUp = onNavigateUp,
-        navigateToMessages = navigateToMessages,
-        onNavigate = onNavigate,
-        overrideNodeId = nodeId,
     )
 }
 
