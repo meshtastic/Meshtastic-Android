@@ -17,6 +17,7 @@
 
 package org.meshtastic.feature.node.list
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +33,6 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
-import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
@@ -44,10 +44,10 @@ import javax.inject.Inject
 class NodeListViewModel
 @Inject
 constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    private val uiPreferencesDataSource: UiPreferencesDataSource,
     val nodeActions: NodeActions,
     val nodeFilterPreferences: NodeFilterPreferences,
 ) : ViewModel() {
@@ -63,10 +63,9 @@ constructor(
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested = _sharedContactRequested.asStateFlow()
 
-    private val nodeSortOption =
-        uiPreferencesDataSource.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
+    private val nodeSortOption = nodeFilterPreferences.nodeSortOption
 
-    private val _nodeFilterText = MutableStateFlow("")
+    private val _nodeFilterText = savedStateHandle.getStateFlow(KEY_FILTER_TEXT, "")
     private val includeUnknown = nodeFilterPreferences.includeUnknown
     private val excludeInfrastructure = nodeFilterPreferences.excludeInfrastructure
     private val onlyOnline = nodeFilterPreferences.onlyOnline
@@ -134,11 +133,11 @@ constructor(
     var nodeFilterText: String
         get() = _nodeFilterText.value
         set(value) {
-            _nodeFilterText.value = value
+            savedStateHandle[KEY_FILTER_TEXT] = value
         }
 
     fun setSortOption(sort: NodeSortOption) {
-        uiPreferencesDataSource.setNodeSort(sort.ordinal)
+        nodeFilterPreferences.setNodeSort(sort)
     }
 
     fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
@@ -150,6 +149,10 @@ constructor(
     fun ignoreNode(node: Node) = viewModelScope.launch { nodeActions.ignoreNode(node) }
 
     fun removeNode(nodeNum: Int) = viewModelScope.launch { nodeActions.removeNode(nodeNum) }
+
+    companion object {
+        private const val KEY_FILTER_TEXT = "filter_text"
+    }
 }
 
 data class NodesUiState(

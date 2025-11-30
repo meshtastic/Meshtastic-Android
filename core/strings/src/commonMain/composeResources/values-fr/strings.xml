@@ -915,6 +915,7 @@
         <item quantity="one">Entendu le relai %1$d</item>
         <item quantity="other">Entendu les relais %1$d</item>
     </plurals>
+    <string name="learn_more">En savoir plus</string>
     <string name="preserve_favorites">Conserver les favoris ?</string>
     <string name="usb_devices">Appareils USB</string>
     <!-- Firmware Update -->

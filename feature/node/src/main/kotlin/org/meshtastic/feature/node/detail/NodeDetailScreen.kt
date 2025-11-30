@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import org.meshtastic.feature.node.model.NodeDetailAction
 @Suppress("LongMethod")
 @Composable
 fun NodeDetailScreen(
+    nodeId: Int,
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     nodeDetailViewModel: NodeDetailViewModel = hiltViewModel(),
@@ -49,6 +51,8 @@ fun NodeDetailScreen(
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
 ) {
+    LaunchedEffect(nodeId) { viewModel.setNodeId(nodeId) }
+
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val lastTracerouteTime by nodeDetailViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()

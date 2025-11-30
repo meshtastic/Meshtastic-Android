@@ -19,24 +19,21 @@ package org.meshtastic.core.data.datasource
 
 import android.app.Application
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
-import org.meshtastic.core.model.NetworkFirmwareReleases
+import org.meshtastic.core.model.BootloaderOtaQuirk
+import timber.log.Timber
 import javax.inject.Inject
 
-class FirmwareReleaseJsonDataSource @Inject constructor(private val application: Application) {
-
-    // Match the network client behavior: be tolerant of unknown fields so that
-    // older app versions can read newer snapshots of firmware_releases.json.
+class BootloaderOtaQuirksJsonDataSource @Inject constructor(private val application: Application) {
     @OptIn(ExperimentalSerializationApi::class)
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
+    fun loadBootloaderOtaQuirksFromJsonAsset(): List<BootloaderOtaQuirk> = runCatching {
+        val inputStream = application.assets.open("device_bootloader_ota_quirks.json")
+        inputStream.use { Json.decodeFromStream<ListWrapper>(it).devices }
     }
+        .onFailure { e -> Timber.w(e, "Failed to load device_bootloader_ota_quirks.json") }
+        .getOrDefault(emptyList())
 
-    @OptIn(ExperimentalSerializationApi::class)
-    fun loadFirmwareReleaseFromJsonAsset(): NetworkFirmwareReleases =
-        application.assets.open("firmware_releases.json").use { inputStream ->
-            json.decodeFromStream<NetworkFirmwareReleases>(inputStream)
-        }
+    @Serializable private data class ListWrapper(val devices: List<BootloaderOtaQuirk> = emptyList())
 }

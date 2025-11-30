@@ -61,7 +61,7 @@ fun MetricsSection(
         TitledCard(title = stringResource(Res.string.logs), modifier = modifier) {
             nonPositionLogs.forEach { type ->
                 ListItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
-                    onAction(NodeDetailAction.Navigate(type.route))
+                    onAction(NodeDetailAction.Navigate(type.routeFactory(node.num)))
                 }
             }
         }

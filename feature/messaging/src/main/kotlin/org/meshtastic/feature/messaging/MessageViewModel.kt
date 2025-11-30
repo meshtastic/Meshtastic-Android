@@ -18,6 +18,7 @@
 package org.meshtastic.feature.messaging
 
 import android.os.RemoteException
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -54,10 +55,12 @@ import javax.inject.Inject
 
 private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
 
+@Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
 class MessageViewModel
 @Inject
 constructor(
+    savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
@@ -92,12 +95,21 @@ constructor(
             .flatMapLatest { contactKey -> packetRepository.getMessagesFromPaged(contactKey, ::getNode) }
             .cachedIn(viewModelScope)
 
+    init {
+        val contactKey = savedStateHandle.get<String>("contactKey")
+        if (contactKey != null) {
+            contactKeyForPagedMessages.value = contactKey
+        }
+    }
+
     fun setTitle(title: String) {
         viewModelScope.launch { _title.value = title }
     }
 
     fun getMessagesFromPaged(contactKey: String): Flow<PagingData<Message>> {
-        contactKeyForPagedMessages.value = contactKey
+        if (contactKeyForPagedMessages.value != contactKey) {
+            contactKeyForPagedMessages.value = contactKey
+        }
         return pagedMessagesForContactKey
     }
 

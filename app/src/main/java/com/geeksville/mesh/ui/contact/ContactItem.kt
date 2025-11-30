@@ -37,6 +37,7 @@ import androidx.compose.material.icons.automirrored.twotone.VolumeOff
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -67,20 +68,39 @@ fun ContactItem(
     contact: Contact,
     selected: Boolean,
     modifier: Modifier = Modifier,
+    isActive: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onNodeChipClick: () -> Unit = {},
     channels: AppOnlyProtos.ChannelSet? = null,
 ) = with(contact) {
+    val isOutlined = !selected && !isActive
+
+    val colors =
+        if (isOutlined) {
+            CardDefaults.outlinedCardColors(containerColor = Color.Transparent)
+        } else {
+            val containerColor = if (selected) Color.Gray else MaterialTheme.colorScheme.surfaceVariant
+            CardDefaults.cardColors(containerColor = containerColor)
+        }
+
+    val border =
+        if (isOutlined) {
+            CardDefaults.outlinedCardBorder()
+        } else {
+            null
+        }
+
     Card(
         modifier =
         modifier
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background)
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .semantics { contentDescription = shortName },
         shape = RoundedCornerShape(12.dp),
+        colors = colors,
+        border = border,
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             ContactHeader(contact = contact, channels = channels, onNodeChipClick = onNodeChipClick)

@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.list
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -91,6 +92,7 @@ fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
     viewModel: NodeListViewModel = hiltViewModel(),
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
+    activeNodeId: Int? = null,
 ) {
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
 
@@ -147,7 +149,7 @@ fun NodeListScreen(
             )
         },
     ) { contentPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+        Box(modifier = Modifier.fillMaxSize().padding(contentPadding).focusable()) {
             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
                     val animatedAlpha by
@@ -208,6 +210,8 @@ fun NodeListScreen(
                                 null
                             }
 
+                        val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
+
                         NodeItem(
                             modifier = Modifier.animateItem(),
                             thisNode = ourNode,
@@ -218,6 +222,7 @@ fun NodeListScreen(
                             onLongClick = longClick,
                             currentTimeMillis = currentTimeMillis,
                             connectionState = connectionState,
+                            isActive = isActive,
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {

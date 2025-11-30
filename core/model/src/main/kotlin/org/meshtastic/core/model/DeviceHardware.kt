@@ -32,6 +32,13 @@ data class DeviceHardware(
     val partitionScheme: String? = null,
     val platformioTarget: String = "",
     val requiresDfu: Boolean? = null,
+    /**
+     * Indicates that the device typically ships with a bootloader that does not support OTA DFU, and that a one-time
+     * bootloader upgrade (usually over USB) is recommended before attempting firmware updates from the app.
+     */
+    val requiresBootloaderUpgradeForOta: Boolean? = null,
+    /** Optional URL pointing to documentation for upgrading the bootloader. */
+    val bootloaderInfoUrl: String? = null,
     val supportLevel: Int? = null,
     val tags: List<String>? = null,
 )

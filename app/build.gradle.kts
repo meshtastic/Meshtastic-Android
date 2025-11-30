@@ -219,6 +219,8 @@ dependencies {
     implementation(projects.feature.firmware)
 
     implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.adaptive.layout)
+    implementation(libs.androidx.compose.material3.adaptive.navigation)
     implementation(libs.androidx.compose.material3.navigationSuite)
     implementation(libs.material)
     implementation(libs.androidx.compose.material3)
