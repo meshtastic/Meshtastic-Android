@@ -102,6 +102,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.chirpy
+import org.meshtastic.core.strings.dont_show_again_for_device
 import org.meshtastic.core.strings.firmware_update_almost_there
 import org.meshtastic.core.strings.firmware_update_alpha
 import org.meshtastic.core.strings.firmware_update_button
@@ -129,7 +130,6 @@ import org.meshtastic.core.strings.firmware_update_unknown_release
 import org.meshtastic.core.strings.firmware_update_usb_bootloader_warning
 import org.meshtastic.core.strings.i_know_what_i_m_doing
 import org.meshtastic.core.strings.learn_more
-import org.meshtastic.core.strings.dont_show_again_for_device
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -318,10 +318,7 @@ private fun ColumnScope.ReadyState(
 
     if (state.showBootloaderWarning) {
         Spacer(Modifier.height(16.dp))
-        BootloaderWarningCard(
-            deviceHardware = device,
-            onDismissForDevice = onDismissBootloaderWarning,
-        )
+        BootloaderWarningCard(deviceHardware = device, onDismissForDevice = onDismissBootloaderWarning)
     }
 
     Spacer(Modifier.height(24.dp))

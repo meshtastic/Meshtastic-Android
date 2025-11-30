@@ -30,11 +30,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BootloaderWarningDataSource
-@Inject
-constructor(
-    private val dataStore: DataStore<Preferences>,
-) {
+class BootloaderWarningDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {
 
     private object PreferencesKeys {
         val DISMISSED_BOOTLOADER_ADDRESSES = stringPreferencesKey("dismissed-bootloader-addresses")
@@ -55,14 +51,10 @@ constructor(
                 .getOrDefault(emptySet())
         }
 
-    /**
-     * Returns true if the bootloader warning has been dismissed for the given [address].
-     */
+    /** Returns true if the bootloader warning has been dismissed for the given [address]. */
     suspend fun isDismissed(address: String): Boolean = dismissedAddressesFlow.first().contains(address)
 
-    /**
-     * Marks the bootloader warning as dismissed for the given [address].
-     */
+    /** Marks the bootloader warning as dismissed for the given [address]. */
     suspend fun dismiss(address: String) {
         val current = dismissedAddressesFlow.first()
         if (current.contains(address)) return
