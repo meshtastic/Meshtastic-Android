@@ -34,6 +34,7 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -64,9 +65,13 @@ fun AdaptiveContactsScreen(
 ) {
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
-
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
+    LaunchedEffect(initialContactKey) {
+        if (initialContactKey != null) {
+            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, initialContactKey)
+        }
+    }
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
         value = navigator.scaffoldValue,
