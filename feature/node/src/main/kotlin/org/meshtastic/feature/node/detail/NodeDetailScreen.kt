@@ -43,19 +43,15 @@ import org.meshtastic.feature.node.model.NodeDetailAction
 @Suppress("LongMethod")
 @Composable
 fun NodeDetailScreen(
+    nodeId: Int,
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     nodeDetailViewModel: NodeDetailViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
-    overrideNodeId: Int? = null,
 ) {
-    LaunchedEffect(overrideNodeId) {
-        if (overrideNodeId != null) {
-            viewModel.setNodeId(overrideNodeId)
-        }
-    }
+    LaunchedEffect(nodeId) { viewModel.setNodeId(nodeId) }
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()

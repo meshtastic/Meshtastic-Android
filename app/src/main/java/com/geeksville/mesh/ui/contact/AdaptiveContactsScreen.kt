@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.contact
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,9 +31,10 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,13 +65,7 @@ fun AdaptiveContactsScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
 
-    BackHandler(navigator.canNavigateBack()) { scope.launch { navigator.navigateBack() } }
-
-    LaunchedEffect(initialContactKey) {
-        if (initialContactKey != null) {
-            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, initialContactKey)
-        }
-    }
+    val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
@@ -97,28 +91,17 @@ fun AdaptiveContactsScreen(
         },
         detailPane = {
             AnimatedPane {
-                val contactKey = navigator.currentDestination?.contentKey
-
-                if (contactKey != null) {
-                    MessageScreen(
-                        contactKey = contactKey,
-                        message = if (contactKey == initialContactKey) initialMessage else "",
-                        navigateToMessages = { newContactKey ->
-                            scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, newContactKey) }
-                        },
-                        navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
-                        navigateToQuickChatOptions = { navController.navigate(ContactsRoutes.QuickChat) },
-                        onNavigateBack = {
-                            if (navigator.canNavigateBack()) {
-                                scope.launch { navigator.navigateBack() }
-                            } else {
-                                navController.navigateUp()
-                            }
-                        },
-                    )
-                } else {
-                    PlaceholderScreen()
-                }
+                navigator.currentDestination?.contentKey?.let { contactKey ->
+                    key(contactKey) {
+                        MessageScreen(
+                            contactKey = contactKey,
+                            message = if (contactKey == initialContactKey) initialMessage else "",
+                            navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
+                            navigateToQuickChatOptions = { navController.navigate(ContactsRoutes.QuickChat) },
+                            onNavigateBack = { scope.launch { navigator.navigateBack(backNavigationBehavior) } },
+                        )
+                    }
+                } ?: PlaceholderScreen()
             }
         },
     )
