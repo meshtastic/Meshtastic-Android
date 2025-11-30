@@ -16,7 +16,7 @@
  */
 
 @file:Suppress("TooManyFunctions")
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 
 package org.meshtastic.feature.firmware
 
