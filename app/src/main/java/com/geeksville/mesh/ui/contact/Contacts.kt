@@ -522,8 +522,8 @@ private fun ContactListContentInternal(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier = modifier.fillMaxSize(), state = listState) {
-        contactListPlaceholdersItems(
-            visiblePlaceholders = visiblePlaceholders,
+        contactListPagedItems(
+            contacts = contacts,
             selectedList = selectedList,
             activeContactKey = activeContactKey,
             onClick = onClick,
@@ -533,8 +533,8 @@ private fun ContactListContentInternal(
             haptics = haptics,
         )
 
-        contactListPagedItems(
-            contacts = contacts,
+        contactListPlaceholdersItems(
+            visiblePlaceholders = visiblePlaceholders,
             selectedList = selectedList,
             activeContactKey = activeContactKey,
             onClick = onClick,
