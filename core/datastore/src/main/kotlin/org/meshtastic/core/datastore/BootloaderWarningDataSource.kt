@@ -30,7 +30,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class BootloaderWarningDataSource @Inject constructor(
+class BootloaderWarningDataSource
+@Inject
+constructor(
     private val dataStore: DataStore<Preferences>,
 ) {
 
@@ -42,9 +44,7 @@ class BootloaderWarningDataSource @Inject constructor(
         dataStore.data.map { preferences ->
             val jsonString = preferences[PreferencesKeys.DISMISSED_BOOTLOADER_ADDRESSES] ?: return@map emptySet()
 
-            runCatching {
-                Json.decodeFromString<List<String>>(jsonString).toSet()
-            }
+            runCatching { Json.decodeFromString<List<String>>(jsonString).toSet() }
                 .onFailure { e ->
                     if (e is IllegalArgumentException || e is SerializationException) {
                         Timber.w(e, "Failed to parse dismissed bootloader warning addresses, resetting preference")
@@ -73,5 +73,3 @@ class BootloaderWarningDataSource @Inject constructor(
         }
     }
 }
-
-
