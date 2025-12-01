@@ -259,6 +259,10 @@
     <string name="resend">Saada uuesti</string>
     <string name="shutdown">Lülita välja</string>
     <string name="cant_shutdown">Seade ei toeta väljalülitamist</string>
+    <string name="shutdown_warning">⚠️ See LÜLITAB sõlme välja. Uuesti sisselülitamiseks on vaja füüsilist sekkumist.</string>
+    <string name="shutdown_critical_node">⚠️ See on kriitilise infrastruktuuri sõlm. Kinnitamiseks sisestage sõlme nimi:</string>
+    <string name="shutdown_node_name">Sõlm: %1$s</string>
+    <string name="shutdown_type_name">Tüüp: %1$s</string>
     <string name="reboot">Taaskäivita</string>
     <string name="traceroute">Marsruudi</string>
     <string name="intro_show">Näita tutvustust</string>
@@ -921,6 +925,7 @@
     <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA-värskendamist peate võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="learn_more">Lisateave</string>
     <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul kasutage tootja&apos; seerianumbri DFU tööriista (näiteks adafruit-nrfutil dfu koos kaasasoleva alglaaduri jadapordi .zip-failiga). Ainult .uf2-faili kopeerimine ei värskenda alglaadurit.</string>
+    <string name="dont_show_again_for_device">Ära selle &apos; seadme puhul enam kuva</string>
     <string name="preserve_favorites">Säilita lemmikud?</string>
     <string name="usb_devices">USB seadmed</string>
     <!-- Firmware Update -->
