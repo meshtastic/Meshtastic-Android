@@ -259,6 +259,10 @@
     <string name="resend">Lähetä uudestaan</string>
     <string name="shutdown">Sammuta</string>
     <string name="cant_shutdown">Sammutusta ei tueta tällä laitteella</string>
+    <string name="shutdown_warning">⚠️ Tämä SAMMUTTAA laitteen. Saat laitteen takaisin toimintaan kytkemällä virran päälle.</string>
+    <string name="shutdown_critical_node">⚠️ Tämä on kriittinen infrastruktuurilaite. Kirjoita laitteen nimi vahvistaaksesi:</string>
+    <string name="shutdown_node_name">Laite: %1$s</string>
+    <string name="shutdown_type_name">Tyyppi: %1$s</string>
     <string name="reboot">Käynnistä uudelleen</string>
     <string name="traceroute">Reitinselvitys</string>
     <string name="intro_show">Näytä esittely</string>

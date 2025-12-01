@@ -259,6 +259,10 @@
     <string name="resend">Renvoyer</string>
     <string name="shutdown">Éteindre</string>
     <string name="cant_shutdown">Arrêt non pris en charge sur cet appareil</string>
+    <string name="shutdown_warning">⚠️ Vous allez ETEINDRE le nœud. Une interaction physique sera requise pour le rallumer.</string>
+    <string name="shutdown_critical_node">⚠️ Il s'agit d'un nœud infrastructure important. Tapez le nom du nœud pour valider son extinction :</string>
+    <string name="shutdown_node_name">Nœud : %1$s</string>
+    <string name="shutdown_type_name">Type : %1$s</string>
     <string name="reboot">Redémarrer</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Afficher l'introduction</string>
@@ -542,7 +546,7 @@
     <string name="tx_enabled">Transmission activée</string>
     <string name="tx_power_dbm">Puissance d'émission</string>
     <string name="frequency_slot">Slot de fréquence</string>
-    <string name="override_duty_cycle">Ne pas prendre en compte la limite d'utilisation</string>
+    <string name="override_duty_cycle">Autoriser le dépassement du temps d'utilisation du réseau radio</string>
     <string name="ignore_incoming">Ignorer les entrées</string>
     <string name="sx126x_rx_boosted_gain">Gain RX Boosté</string>
     <string name="override_frequency_mhz">Remplacer la fréquence</string>
@@ -570,7 +574,7 @@
     <string name="enabled">Activé</string>
     <string name="wifi_enabled">WiFi activé</string>
     <string name="ssid">SSID</string>
-    <string name="psk">PSK</string>
+    <string name="psk">PSK (clé)</string>
     <string name="ethernet_config">Options Ethernet</string>
     <string name="ethernet_enabled">Ethernet activé</string>
     <string name="ntp_server">Serveur NTP</string>
@@ -950,6 +954,6 @@
     <string name="firmware_update_unknown_release">Version distante inconnue</string>
     <string name="firmware_update_disclaimer_title">Avertissement de mise à jour</string>
     <string name="firmware_update_disclaimer_text">Vous êtes sur le point d'installer un nouveau firrmware sur votre appareil. Ce processus comporte des risques.\n\n• Assurez-vous que votre appareil est chargé.\n• Conservez l'appareil près de votre smartphone.\n• Ne fermez pas l'application durant la mise à jour\n\nVérifiez que vous avez sélectionné le bon firmware pour votre matériel.</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Chirpy dit : \"Gardez votre échelle à portée de main !\"</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Gardez votre échelle à portée de main !</string>
     <string name="chirpy">Chirpy</string>
 </resources>
