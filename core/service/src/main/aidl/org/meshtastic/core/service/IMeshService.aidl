@@ -135,6 +135,9 @@ interface IMeshService {
     /// Send FactoryReset admin packet to nodeNum
     void requestFactoryReset(in int requestId, in int destNum);
 
+    /// Send reboot to DFU admin packet
+    void rebootToDfu();
+
     /// Send NodedbReset admin packet to nodeNum
     void requestNodedbReset(in int requestId, in int destNum, in boolean preserveFavorites);
 
@@ -145,6 +148,11 @@ interface IMeshService {
     Is the packet radio currently connected to the phone?  Returns a ConnectionState string.
     */
     String connectionState();
+
+    /**
+    What is the transport method for the radio connection. Returns a transport string.
+    */
+    String connectionTransport();
 
     /// If a macaddress we will try to talk to our device, if null we will be idle.
     /// Any current connection will be dropped (even if the device address is the same) before reconnecting.

@@ -27,6 +27,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,17 +55,21 @@ import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.firmware_update_copying
 import org.meshtastic.core.strings.firmware_update_extracting
 import org.meshtastic.core.strings.firmware_update_failed
 import org.meshtastic.core.strings.firmware_update_invalid_address
 import org.meshtastic.core.strings.firmware_update_no_device
 import org.meshtastic.core.strings.firmware_update_not_found_in_release
+import org.meshtastic.core.strings.firmware_update_rebooting
 import org.meshtastic.core.strings.firmware_update_starting_dfu
 import org.meshtastic.core.strings.firmware_update_starting_service
 import org.meshtastic.core.strings.firmware_update_unknown_hardware
 import org.meshtastic.core.strings.firmware_update_updating
+import org.meshtastic.core.strings.firmware_update_waiting_for_device
 import timber.log.Timber
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.zip.ZipEntry
@@ -77,8 +82,11 @@ private const val DOWNLOAD_BUFFER_SIZE = 8192
 private const val PERCENT_MAX_VALUE = 100f
 
 private const val SCAN_TIMEOUT = 2000L
-
 private const val PACKETS_BEFORE_PRN = 8
+
+private const val REBOOT_DELAY = 5000L
+private const val DFU_DRIVE_SEARCH_TIMEOUT = 20
+private const val DFU_DRIVE_SEARCH_INTERVAL = 1000L
 
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
@@ -89,7 +97,7 @@ private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}"
  * Device Firmware Update (DFU) process over Bluetooth.
  */
 @HiltViewModel
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 class FirmwareUpdateViewModel
 @Inject
 constructor(
@@ -189,70 +197,122 @@ constructor(
         val hardware = currentState.deviceHardware
         val address = currentState.address
 
-        if (release == null || !isValidBluetoothAddress(address)) return
+        if (release == null) return
 
         updateJob?.cancel()
         updateJob =
             viewModelScope.launch {
-                try {
-                    // 1. Download
-                    _state.value = FirmwareUpdateState.Downloading(0f)
-
-                    var firmwareFile: File? = null
-
-                    // Try direct download of the specific device firmware
-                    val version = release.id.removePrefix("v")
-                    // We prefer platformioTarget because it matches the build artifact naming
-                    // convention (lower-case with hyphens).
-                    // hwModelSlug often uses underscores and uppercase
-                    // (e.g. TRACKER_T1000_E vs tracker-t1000-e).
-                    val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
-                    val filename = "firmware-$target-$version-ota.zip"
-                    val directUrl = "https://meshtastic.github.io/firmware-$version/$filename"
-
-                    if (fileHandler.checkUrlExists(directUrl)) {
-                        try {
-                            firmwareFile =
-                                fileHandler.downloadFile(directUrl, "firmware_direct.zip") { progress ->
-                                    _state.value = FirmwareUpdateState.Downloading(progress)
-                                }
-                        } catch (e: Exception) {
-                            Timber.w(e, "Direct download failed, falling back to release zip")
-                        }
-                    }
-
-                    if (firmwareFile == null) {
-                        val zipUrl = getDeviceFirmwareUrl(release.zipUrl, hardware.architecture)
-
-                        val downloadedZip =
-                            fileHandler.downloadFile(zipUrl, "firmware_release.zip") { progress ->
-                                _state.value = FirmwareUpdateState.Downloading(progress)
-                            }
-
-                        // Note: Current API does not provide checksums, so we rely on content-length
-                        // checks during download and integrity checks during extraction.
-
-                        // 2. Extract
-                        _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_extracting))
-                        val extracted = fileHandler.extractFirmware(downloadedZip, hardware)
-
-                        if (extracted == null) {
-                            val msg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
-                            _state.value = FirmwareUpdateState.Error(msg)
-                            return@launch
-                        }
-                        firmwareFile = extracted
-                    }
-
-                    tempFirmwareFile = firmwareFile
-                    initiateDfu(address, hardware, firmwareFile!!)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Timber.e(e)
-                    _state.value = FirmwareUpdateState.Error(e.message ?: getString(Res.string.firmware_update_failed))
+                val transport = serviceRepository.connectionTransport.value
+                if (transport == "Serial" && hardware.requiresDfu == true) {
+                    startUsbDfuUpdate(release, hardware)
+                } else {
+                    if (!isValidBluetoothAddress(address)) return@launch
+                    startOtaUpdate(release, hardware, address)
                 }
             }
+    }
+
+    private suspend fun startOtaUpdate(release: FirmwareRelease, hardware: DeviceHardware, address: String) {
+        try {
+            // 1. Download
+            _state.value = FirmwareUpdateState.Downloading(0f)
+
+            var firmwareFile: File? = null
+
+            // Try direct download of the specific device firmware
+            val version = release.id.removePrefix("v")
+            // We prefer platformioTarget because it matches the build artifact naming
+            // convention (lower-case with hyphens).
+            // hwModelSlug often uses underscores and uppercase
+            // (e.g. TRACKER_T1000_E vs tracker-t1000-e).
+            val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+            val filename = "firmware-$target-$version-ota.zip"
+            val directUrl = "https://meshtastic.github.io/firmware-$version/$filename"
+
+            if (fileHandler.checkUrlExists(directUrl)) {
+                try {
+                    firmwareFile =
+                        fileHandler.downloadFile(directUrl, "firmware_direct.zip") { progress ->
+                            _state.value = FirmwareUpdateState.Downloading(progress)
+                        }
+                } catch (e: Exception) {
+                    Timber.w(e, "Direct download failed, falling back to release zip")
+                }
+            }
+
+            if (firmwareFile == null) {
+                val zipUrl = getDeviceFirmwareUrl(release.zipUrl, hardware.architecture)
+
+                val downloadedZip =
+                    fileHandler.downloadFile(zipUrl, "firmware_release.zip") { progress ->
+                        _state.value = FirmwareUpdateState.Downloading(progress)
+                    }
+
+                // Note: Current API does not provide checksums, so we rely on content-length
+                // checks during download and integrity checks during extraction.
+
+                // 2. Extract
+                _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_extracting))
+                val extracted = fileHandler.extractFirmware(downloadedZip, hardware)
+
+                if (extracted == null) {
+                    val msg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
+                    _state.value = FirmwareUpdateState.Error(msg)
+                    return
+                }
+                firmwareFile = extracted
+            }
+
+            tempFirmwareFile = firmwareFile
+            initiateDfu(address, hardware, firmwareFile)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.e(e)
+            _state.value = FirmwareUpdateState.Error(e.message ?: getString(Res.string.firmware_update_failed))
+        }
+    }
+
+    private suspend fun startUsbDfuUpdate(release: FirmwareRelease, hardware: DeviceHardware) {
+        try {
+            // 1. Download
+            _state.value = FirmwareUpdateState.Downloading(0f)
+
+            // We prefer platformioTarget because it matches the build artifact naming
+            // convention (lower-case with hyphens).
+            // hwModelSlug often uses underscores and uppercase
+            // (e.g. TRACKER_T1000_E vs tracker-t1000-e).
+            val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+            val version = release.id.removePrefix("v")
+            val filename = "firmware-$target-$version.uf2"
+            val directUrl = "https://meshtastic.github.io/firmware-filename-list/$version.txt"
+
+            val firmwareFile = fileHandler.downloadFile(directUrl, filename) { progress ->
+                _state.value = FirmwareUpdateState.Downloading(progress)
+            }
+            tempFirmwareFile = firmwareFile
+
+            // 2. Reboot to DFU
+            _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_rebooting))
+            serviceRepository.meshService?.rebootToDfu()
+            delay(REBOOT_DELAY) // Wait for the device to reboot
+
+            // 3. Wait for DFU device and copy
+            _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_waiting_for_device))
+            val dfuDrive = fileHandler.waitForDfuDrive()
+            if (dfuDrive != null) {
+                _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_copying))
+                fileHandler.copyFileTo(firmwareFile, dfuDrive)
+                _state.value = FirmwareUpdateState.Success
+            } else {
+                _state.value = FirmwareUpdateState.Error("DFU drive not found")
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Timber.e(e)
+            _state.value = FirmwareUpdateState.Error(e.message ?: getString(Res.string.firmware_update_failed))
+        }
     }
 
     /**
@@ -610,5 +670,28 @@ private class FirmwareFileHandler(private val context: Context, private val clie
         return filename.endsWith(".zip") &&
             filename.contains(target) &&
             (regex.matches(filename) || filename.startsWith("$target-") || filename.startsWith("$target."))
+    }
+
+    suspend fun waitForDfuDrive(): File? = withContext(Dispatchers.IO) {
+        // This is a simplified implementation. A real implementation would use a BroadcastReceiver
+        // to listen for ACTION_MEDIA_MOUNTED intents.
+        repeat(DFU_DRIVE_SEARCH_TIMEOUT) {
+            val externalDirs = context.getExternalFilesDirs(null)
+            externalDirs.forEach { file ->
+                if (file.absolutePath.contains("RPI-RP2")) { // Example for Raspberry Pi Pico
+                    return@withContext file
+                }
+            }
+            delay(DFU_DRIVE_SEARCH_INTERVAL)
+        }
+        null
+    }
+
+    suspend fun copyFileTo(sourceFile: File, destination: File) = withContext(Dispatchers.IO) {
+        FileInputStream(sourceFile).use { input ->
+            FileOutputStream(File(destination, sourceFile.name)).use { output ->
+                input.copyTo(output)
+            }
+        }
     }
 }

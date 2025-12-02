@@ -1006,4 +1006,7 @@
     <string name="firmware_update_disclaimer_text">You are about to flash new firmware to your device. This process carries risks.\n\n• Ensure your device is charged.\n• Keep the device close to your phone.\n• Do not close the app during the update.\n\nVerify you have selected the correct firmware for your hardware.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy says, "Keep your ladder handy!"</string>
     <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Rebooting to DFU...</string>
+    <string name="firmware_update_waiting_for_device">Waiting for DFU device...</string>
+    <string name="firmware_update_copying">Copying firmware...</string>
 </resources>
