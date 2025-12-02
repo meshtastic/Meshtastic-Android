@@ -285,6 +285,10 @@
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
     <string name="cant_shutdown">Shutdown not supported on this device</string>
+    <string name="shutdown_warning">⚠️ This will SHUTDOWN the node. Physical interaction will be required to turn it back on.</string>
+    <string name="shutdown_critical_node">⚠️ This is a critical infrastructure node. Type the node name to confirm:</string>
+    <string name="shutdown_node_name">Node: %1$s</string>
+    <string name="shutdown_type_name">Type: %1$s</string>
     <string name="reboot">Reboot</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Show Introduction</string>
@@ -964,6 +968,7 @@
     <string name="firmware_update_usb_bootloader_warning">%1$s usually ships with a bootloader that does not support OTA updates. You may need to flash an OTA-capable bootloader over USB before flashing OTA.</string>
     <string name="learn_more">Learn more</string>
     <string name="firmware_update_rak4631_bootloader_hint">For RAK WisBlock RAK4631, use the vendor&apos;s serial DFU tool (for example, adafruit-nrfutil dfu serial with the provided bootloader .zip file). Copying the .uf2 file alone will not update the bootloader.</string>
+    <string name="dont_show_again_for_device">Don&apos;t show again for this device</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
     <string name="usb_devices">USB Devices</string>
 

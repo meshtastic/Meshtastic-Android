@@ -259,6 +259,10 @@
     <string name="resend">Lähetä uudestaan</string>
     <string name="shutdown">Sammuta</string>
     <string name="cant_shutdown">Sammutusta ei tueta tällä laitteella</string>
+    <string name="shutdown_warning">⚠️ Tämä SAMMUTTAA laitteen. Saat laitteen takaisin toimintaan kytkemällä virran päälle.</string>
+    <string name="shutdown_critical_node">⚠️ Tämä on kriittinen infrastruktuurilaite. Kirjoita laitteen nimi vahvistaaksesi:</string>
+    <string name="shutdown_node_name">Laite: %1$s</string>
+    <string name="shutdown_type_name">Tyyppi: %1$s</string>
     <string name="reboot">Käynnistä uudelleen</string>
     <string name="traceroute">Reitinselvitys</string>
     <string name="intro_show">Näytä esittely</string>
@@ -918,7 +922,10 @@
         <item quantity="one">Kuultu %1$d kautta</item>
         <item quantity="other">Kuultu %1$d kautta</item>
     </plurals>
+    <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="learn_more">Lue lisää</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -moduulille valmistajan &apos; DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial -komentoa yhdessä annetun bootloaderin .zip-tiedoston kanssa). Pelkän .uf2-tiedoston kopioiminen ei päivitä bootloaderia.</string>
+    <string name="dont_show_again_for_device">Älä näytä &apos; enää tälle laitteelle</string>
     <string name="preserve_favorites">Säilytä suosikit?</string>
     <string name="usb_devices">USB-laitteet</string>
     <!-- Firmware Update -->

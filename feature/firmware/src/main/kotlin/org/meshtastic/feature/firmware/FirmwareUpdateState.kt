@@ -25,8 +25,12 @@ sealed interface FirmwareUpdateState {
 
     data object Checking : FirmwareUpdateState
 
-    data class Ready(val release: FirmwareRelease?, val deviceHardware: DeviceHardware, val address: String) :
-        FirmwareUpdateState
+    data class Ready(
+        val release: FirmwareRelease?,
+        val deviceHardware: DeviceHardware,
+        val address: String,
+        val showBootloaderWarning: Boolean,
+    ) : FirmwareUpdateState
 
     data class Downloading(val progress: Float) : FirmwareUpdateState
 

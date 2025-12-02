@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.node
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -65,6 +66,10 @@ fun AdaptiveNodeListScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<Int>()
     val scope = rememberCoroutineScope()
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
+
+    BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) {
+        scope.launch { navigator.navigateBack(backNavigationBehavior) }
+    }
 
     LaunchedEffect(initialNodeId) {
         if (initialNodeId != null) {

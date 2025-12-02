@@ -25,7 +25,7 @@ maps-compose = "6.12.2"
 
 # Networking
 ktor = "3.3.3"
-ktorfit = "2.6.4"
+ktorfit = "2.6.5"
 
 # Other
 coil = "3.3.0"

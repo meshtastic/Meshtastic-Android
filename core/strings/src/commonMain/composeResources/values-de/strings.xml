@@ -259,6 +259,10 @@
     <string name="resend">Erneut senden</string>
     <string name="shutdown">Herunterfahren</string>
     <string name="cant_shutdown">Herunterfahren wird auf diesem Gerät nicht unterstützt</string>
+    <string name="shutdown_warning">:warnung: Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten.</string>
+    <string name="shutdown_critical_node">:Warnung: Dies ist ein kritischer Infrastrukturknoten. Geben Sie den Knotennamen zur Bestätigung ein:</string>
+    <string name="shutdown_node_name">Knoten: %1$s</string>
+    <string name="shutdown_type_name">Typ: %1$s</string>
     <string name="reboot">Neustarten</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Einführung zeigen</string>
@@ -921,6 +925,7 @@
     <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="learn_more">Mehr erfahren</string>
     <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
+    <string name="dont_show_again_for_device">Für dieses Gerät nicht erneut anzeigen</string>
     <string name="preserve_favorites">Favoriten beibehalten?</string>
     <string name="usb_devices">USB Geräte</string>
     <!-- Firmware Update -->

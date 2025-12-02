@@ -213,6 +213,7 @@
     <string name="resend">Poslat znovu</string>
     <string name="shutdown">Vypnout</string>
     <string name="cant_shutdown">Vypnutí není na tomto zařízení podporováno</string>
+    <string name="shutdown_critical_node">⚠️ Toto je kritický infrastrukturní uzel. Pro potvrzení zadejte název uzlu:</string>
     <string name="reboot">Restartovat</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Zobrazit úvod</string>
@@ -791,6 +792,10 @@
     <string name="analytics_notice">Shromažďujeme analytická data, která nám pomáhají vylepšovat aplikaci pro Android (děkujeme). Získáváme anonymizované informace o chování uživatelů, například hlášení o pádech aplikace, používání jednotlivých obrazovek apod.</string>
     <string name="unset">Nenastaveno – 0</string>
     <string name="relayed_by">Přeposláno uzlem: %1$s</string>
+    <string name="firmware_update_usb_bootloader_warning">%1$s je obvykle dodáván s bootloaderem, který nepodporuje OTA aktualizace. Před nahráváním přes OTA může být nutné nejprve přes USB nahrát bootloader s podporou OTA.</string>
+    <string name="learn_more">Zjistit více</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Pro RAK WisBlock RAK4631 použijte výrobní nástroj pro sériové DFU (například adafruit-nrfutil dfu serial s poskytnutým .zip souborem bootloaderu). Pouhé zkopírování .uf2 souboru samo o sobě bootloader neaktualizuje.</string>
+    <string name="dont_show_again_for_device">U tohoto zařízení již nezobrazovat</string>
     <string name="preserve_favorites">Chcete zachovat oblíbené položky?</string>
     <string name="usb_devices">USB zařízení</string>
     <!-- Firmware Update -->
@@ -825,6 +830,6 @@
     <string name="firmware_update_unknown_release">Neznámá vzdálená verze</string>
     <string name="firmware_update_disclaimer_title">Upozornění aktualizace</string>
     <string name="firmware_update_disclaimer_text">Chystáte se nahrát do zařízení nový firmware. Tento proces s sebou nese určitá rizika.\n\n• Ujistěte se, že je zařízení nabité.\n• Udržujte zařízení blízko telefonu.\n• Během aktualizace neukončujte aplikaci.\n\nOvěřte, zda jste vybrali správný firmware pro váš hardware.</string>
-    <string name="firmware_update_disclaimer_chirpy_says">„Chirpy říká: \"Žebřík měj vždycky po ruce!‘“</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy říká: \"Žebřík měj vždycky po ruce!\"</string>
     <string name="chirpy"></string>
 </resources>
