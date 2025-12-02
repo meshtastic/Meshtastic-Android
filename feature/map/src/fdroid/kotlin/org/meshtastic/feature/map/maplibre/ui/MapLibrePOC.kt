@@ -564,6 +564,7 @@ fun MapLibrePOC(
                     mapViewRef = this
                     getMapAsync { map ->
                         mapRef = map
+                        map.applyZoomPreferences(baseStyle)
                         Timber.tag("MapLibrePOC").d("getMapAsync() map acquired, setting style...")
                         // Set initial base raster style using MapLibre test-app pattern
                         map.setStyle(buildMeshtasticStyle(baseStyle)) { style ->
@@ -1037,6 +1038,7 @@ fun MapLibrePOC(
                 val next = baseStyles[baseStyleIndex % baseStyles.size]
                 mapRef?.let { map ->
                     Timber.tag("MapLibrePOC").d("Switching base style to: %s", next.label)
+                    map.applyZoomPreferences(next)
                     map.setStyle(buildMeshtasticStyle(next)) { st ->
                         Timber.tag("MapLibrePOC").d("Base map switched to: %s", next.label)
                         val density = context.resources.displayMetrics.density
@@ -1089,7 +1091,9 @@ fun MapLibrePOC(
                         // Apply custom tiles (use first base style as template but we'll override the raster source)
                         mapRef?.let { map ->
                             Timber.tag("MapLibrePOC").d("Switching to custom tiles: %s", customTileUrl)
-                            map.setStyle(buildMeshtasticStyle(baseStyles[0], customTileUrl)) { st ->
+                            val templateStyle = baseStyles[baseStyleIndex % baseStyles.size]
+                            map.applyZoomPreferences(templateStyle)
+                            map.setStyle(buildMeshtasticStyle(templateStyle, customTileUrl)) { st ->
                                 Timber.tag("MapLibrePOC").d("Custom tiles applied")
                                 val density = context.resources.displayMetrics.density
                                 clustersShown =
@@ -1259,4 +1263,9 @@ fun MapLibrePOC(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+}
+
+private fun MapLibreMap.applyZoomPreferences(style: BaseMapStyle) {
+    setMinZoomPreference(style.minZoom.toDouble())
+    setMaxZoomPreference(style.maxZoom.toDouble())
 }

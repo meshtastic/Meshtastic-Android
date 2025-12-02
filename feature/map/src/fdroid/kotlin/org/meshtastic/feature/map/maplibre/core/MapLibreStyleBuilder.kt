@@ -84,8 +84,8 @@ fun buildMeshtasticStyle(base: BaseMapStyle, customTileUrl: String? = null): Sty
                 RasterSource(
                     OSM_SOURCE_ID,
                     TileSet("osm", tileUrl).apply {
-                        minZoom = 0f
-                        maxZoom = 22f
+                        minZoom = base.minZoom
+                        maxZoom = base.maxZoom
                     },
                     128,
                 ),

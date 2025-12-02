@@ -54,13 +54,30 @@ object MapLibreConstants {
 }
 
 /** Base map style options (raster tiles; key-free) */
-enum class BaseMapStyle(val label: String, val urlTemplate: String) {
-    OSM_STANDARD("OSM", "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"),
-    CARTO_LIGHT("Light", "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"),
-    CARTO_DARK("Dark", "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"),
+enum class BaseMapStyle(val label: String, val urlTemplate: String, val minZoom: Float, val maxZoom: Float) {
+    OSM_STANDARD(
+        label = "OSM",
+        urlTemplate = "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        minZoom = 0f,
+        maxZoom = 19f,
+    ),
+    CARTO_LIGHT(
+        label = "Light",
+        urlTemplate = "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+        minZoom = 0f,
+        maxZoom = 20f,
+    ),
+    CARTO_DARK(
+        label = "Dark",
+        urlTemplate = "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+        minZoom = 0f,
+        maxZoom = 20f,
+    ),
     ESRI_SATELLITE(
-        "Satellite",
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        label = "Satellite",
+        urlTemplate = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        minZoom = 1f,
+        maxZoom = 19f,
     ),
 }
 
