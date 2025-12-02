@@ -35,6 +35,7 @@ dependencies {
     implementation(projects.core.strings)
 
     implementation(libs.androidx.annotation)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
