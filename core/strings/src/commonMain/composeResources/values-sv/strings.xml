@@ -256,6 +256,9 @@
     <string name="resend">Skicka igen</string>
     <string name="shutdown">Stäng av</string>
     <string name="cant_shutdown">Enhet stöder inte avstängning</string>
+    <string name="shutdown_critical_node">⚠️ Detta är en viktig infrastrukturnod. Skriv nodens namn för att bekräfta:</string>
+    <string name="shutdown_node_name">Nod: %1$s</string>
+    <string name="shutdown_type_name">Typ: %1$s</string>
     <string name="reboot">Starta om</string>
     <string name="traceroute">Traceroute (spåra rutt)</string>
     <string name="intro_show">Visa introduktion</string>
@@ -511,6 +514,7 @@
     <string name="output_duration_milliseconds">Utmatningstid (millisekunder)</string>
     <string name="nag_timeout_seconds">Sluta tjata efter (sekunder)</string>
     <string name="ringtone">Ringsignal</string>
+    <string name="play">Spela upp</string>
     <string name="use_i2s_as_buzzer">Använd I2S som summer</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Alternativ</string>
@@ -762,6 +766,8 @@
     <string name="security_icon_help_show_less">Visa aktuell status</string>
     <string name="security_icon_help_dismiss">Stäng</string>
     <string name="confirm_delete_node">Är du säker på att du vill ta bort den här noden?</string>
+    <string name="forget_connection">Glöm anslutningen</string>
+    <string name="confirm_forget_connection">Är du säker på att du vill glömma den här anslutningen?</string>
     <string name="replying_to">Svarar till %1$s</string>
     <string name="cancel_reply">Avbryt svar</string>
     <string name="delete_messages_title">Ta bort  meddelanden?</string>
@@ -888,7 +894,9 @@
     <string name="firmware_update_device">Enhet: %1$s</string>
     <string name="firmware_update_latest">Senaste utgåva: %1$s</string>
     <string name="firmware_update_stable">Stabil version</string>
+    <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_button">Uppdatera fast programvara</string>
+    <string name="firmware_update_disconnect_warning">Obs: Under uppdateringen kommer enheten att tillfälligt kopplas bort.</string>
     <string name="firmware_update_downloading">Hämtar fast programvara... %1$d%</string>
     <string name="firmware_update_error">Fel: %1$s</string>
     <string name="firmware_update_retry">Försök igen</string>
