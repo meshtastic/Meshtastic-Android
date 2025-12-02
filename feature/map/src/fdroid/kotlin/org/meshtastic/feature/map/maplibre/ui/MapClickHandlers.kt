@@ -21,18 +21,22 @@ import android.content.Context
 import android.graphics.PointF
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.geojson.Point
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.CLUSTER_CIRCLE_LAYER_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.DEG_D
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_CLUSTER_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_NOCLUSTER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_LAYER_ID
 import org.meshtastic.proto.MeshProtos.Waypoint
 import timber.log.Timber
+import kotlin.math.max
+import kotlin.math.min
 
 data class ExpandedCluster(val centerPx: PointF, val members: List<Node>)
 
@@ -40,6 +44,9 @@ data class ExpandedCluster(val centerPx: PointF, val members: List<Node>)
 private const val HIT_BOX_RADIUS_DP = 24f
 private const val CLUSTER_LIST_FETCH_MAX = 200
 private const val CLUSTER_RADIAL_MAX = 10
+private const val CLUSTER_OVERLAY_ZOOM_THRESHOLD = 13.5
+private const val MIN_CLUSTER_SPAN_DEGREES = 0.002
+private const val CLUSTER_BOUNDS_PADDING_PX = 96
 
 /**
  * Handles map click events for cluster expansion, node selection, and waypoint editing.
@@ -115,6 +122,24 @@ fun handleMapClick(
             val members = nodes.filter { nums.contains(it.num) }
 
             if (members.isNotEmpty()) {
+                val clusterBounds = buildClusterBounds(members)
+                val zoom = map.cameraPosition?.zoom ?: 0.0
+
+                if (shouldZoomToBounds(zoom, clusterBounds, members.size)) {
+                    clusterBounds?.let { bounds ->
+                        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.bounds, CLUSTER_BOUNDS_PADDING_PX))
+                        Timber.tag("MapClickHandlers")
+                            .d(
+                                "Zooming to cluster bounds (zoom=%.2f, latSpan=%.4f, lonSpan=%.4f, members=%d)",
+                                zoom,
+                                bounds.latSpan,
+                                bounds.lonSpan,
+                                members.size,
+                            )
+                        return true
+                    }
+                }
+
                 // Center camera on cluster (without zoom) to keep cluster intact
                 val geom = f.geometry()
                 if (geom is Point) {
@@ -209,4 +234,41 @@ fun handleMapClick(
         }
     }
     return true
+}
+
+private data class ClusterBounds(val bounds: LatLngBounds, val latSpan: Double, val lonSpan: Double)
+
+private fun buildClusterBounds(members: List<Node>): ClusterBounds? {
+    val builder = LatLngBounds.Builder()
+    var included = false
+    var minLat = Double.MAX_VALUE
+    var maxLat = -Double.MAX_VALUE
+    var minLon = Double.MAX_VALUE
+    var maxLon = -Double.MAX_VALUE
+
+    members.forEach { node ->
+        node.validPosition?.let { vp ->
+            val lat = vp.latitudeI * DEG_D
+            val lon = vp.longitudeI * DEG_D
+            builder.include(LatLng(lat, lon))
+            minLat = min(minLat, lat)
+            maxLat = max(maxLat, lat)
+            minLon = min(minLon, lon)
+            maxLon = max(maxLon, lon)
+            included = true
+        }
+    }
+
+    return if (included) {
+        ClusterBounds(bounds = builder.build(), latSpan = maxLat - minLat, lonSpan = maxLon - minLon)
+    } else {
+        null
+    }
+}
+
+private fun shouldZoomToBounds(zoom: Double, clusterBounds: ClusterBounds?, memberCount: Int): Boolean {
+    if (clusterBounds == null || memberCount <= 1) return false
+    val hasMeaningfulSpread =
+        clusterBounds.latSpan > MIN_CLUSTER_SPAN_DEGREES || clusterBounds.lonSpan > MIN_CLUSTER_SPAN_DEGREES
+    return zoom < CLUSTER_OVERLAY_ZOOM_THRESHOLD && hasMeaningfulSpread
 }
