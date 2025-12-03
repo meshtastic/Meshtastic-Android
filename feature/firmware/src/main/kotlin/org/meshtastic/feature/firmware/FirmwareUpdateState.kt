@@ -31,6 +31,7 @@ sealed interface FirmwareUpdateState {
         val deviceHardware: DeviceHardware,
         val address: String,
         val showBootloaderWarning: Boolean,
+        val updateMethod: FirmwareUpdateMethod,
     ) : FirmwareUpdateState
 
     data class Downloading(val progress: Float) : FirmwareUpdateState

@@ -1011,4 +1011,7 @@
     <string name="firmware_update_copying">Copying firmware...</string>
     <string name="firmware_update_save_dfu_file">Please save the .uf2 file to your device&apos;s DFU drive.</string>
     <string name="firmware_update_flashing">Flashing device, please wait...</string>
+    <string name="firmware_update_method_usb">USB File Transfer</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">Update via %1$s</string>
 </resources>

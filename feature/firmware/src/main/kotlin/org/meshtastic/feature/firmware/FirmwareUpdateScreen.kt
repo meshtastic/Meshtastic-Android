@@ -53,6 +53,8 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.rounded.Bluetooth
+import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -81,6 +83,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -201,35 +204,17 @@ private fun FirmwareUpdateScaffold(
         },
     ) { padding ->
         Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-            AnimatedContent(
-                targetState = state,
-                contentKey = { targetState ->
-                    when (targetState) {
-                        is FirmwareUpdateState.Idle -> "Idle"
-                        is FirmwareUpdateState.Checking -> "Checking"
-                        is FirmwareUpdateState.Ready -> "Ready"
-                        is FirmwareUpdateState.Downloading -> "Downloading"
-                        is FirmwareUpdateState.Processing -> "Processing"
-                        is FirmwareUpdateState.Updating -> "Updating"
-                        is FirmwareUpdateState.Error -> "Error"
-                        is FirmwareUpdateState.Success -> "Success"
-                        is FirmwareUpdateState.AwaitingFileSave -> "AwaitingFileSave"
-                    }
-                },
-                label = "FirmwareState",
-            ) { targetState ->
-                FirmwareUpdateContent(
-                    state = targetState,
-                    selectedReleaseType = selectedReleaseType,
-                    onReleaseTypeSelect = onReleaseTypeSelect,
-                    onStartUpdate = onStartUpdate,
-                    onPickFile = onPickFile,
-                    onSaveFile = onSaveFile,
-                    onRetry = onRetry,
-                    onDone = onDone,
-                    onDismissBootloaderWarning = onDismissBootloaderWarning,
-                )
-            }
+            FirmwareUpdateContent(
+                state = state,
+                selectedReleaseType = selectedReleaseType,
+                onReleaseTypeSelect = onReleaseTypeSelect,
+                onStartUpdate = onStartUpdate,
+                onPickFile = onPickFile,
+                onSaveFile = onSaveFile,
+                onRetry = onRetry,
+                onDone = onDone,
+                onDismissBootloaderWarning = onDismissBootloaderWarning,
+            )
         }
     }
 }
@@ -317,6 +302,7 @@ private fun ColumnScope.ReadyState(
 
     if (showDisclaimer) {
         DisclaimerDialog(
+            updateMethod = state.updateMethod,
             onDismissRequest = { showDisclaimer = false },
             onConfirm = {
                 showDisclaimer = false
@@ -325,17 +311,12 @@ private fun ColumnScope.ReadyState(
         )
     }
 
-    DeviceHardwareImage(device, Modifier.size(150.dp))
-    Spacer(Modifier.height(24.dp))
-
-    DeviceInfoCard(device, state.release)
+    DeviceInfoCard(device, state.release, state.updateMethod)
 
     if (state.showBootloaderWarning) {
         Spacer(Modifier.height(16.dp))
         BootloaderWarningCard(deviceHardware = device, onDismissForDevice = onDismissBootloaderWarning)
     }
-
-    Spacer(Modifier.height(24.dp))
 
     if (state.release != null) {
         ReleaseTypeSelector(selectedReleaseType, onReleaseTypeSelect)
@@ -367,27 +348,10 @@ private fun ColumnScope.ReadyState(
         Spacer(Modifier.width(8.dp))
         Text(stringResource(Res.string.firmware_update_select_file))
     }
-
-    Spacer(Modifier.height(16.dp))
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            Icons.Default.Warning,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(16.dp),
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            stringResource(Res.string.firmware_update_disconnect_warning),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.error,
-        )
-    }
 }
 
 @Composable
-private fun DisclaimerDialog(onDismissRequest: () -> Unit, onConfirm: () -> Unit) {
+private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismissRequest: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(stringResource(Res.string.firmware_update_disclaimer_title)) },
@@ -395,38 +359,57 @@ private fun DisclaimerDialog(onDismissRequest: () -> Unit, onConfirm: () -> Unit
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.firmware_update_disclaimer_text))
                 Spacer(modifier = Modifier.height(8.dp))
-                Card(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(4.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(8.dp),
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = spacedBy(4.dp),
-                        ) {
-                            BasicText(text = "🪜", modifier = Modifier.size(48.dp), autoSize = TextAutoSize.StepBased())
-                            AsyncImage(
-                                model =
-                                ImageRequest.Builder(LocalContext.current)
-                                    .data(org.meshtastic.core.ui.R.drawable.chirpy)
-                                    .build(),
-                                contentScale = ContentScale.Fit,
-                                contentDescription = stringResource(Res.string.chirpy),
-                                modifier = Modifier.size(48.dp),
-                            )
-                        }
-                        Text(
-                            text = stringResource(Res.string.firmware_update_disclaimer_chirpy_says),
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        stringResource(Res.string.firmware_update_disconnect_warning),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                if (updateMethod is FirmwareUpdateMethod.Ble) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    ChirpyCard()
                 }
             }
         },
         confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(Res.string.i_know_what_i_m_doing)) } },
         dismissButton = { TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.cancel)) } },
     )
+}
+
+@Composable
+private fun ChirpyCard() {
+    Card(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                modifier = Modifier.padding(8.dp),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = spacedBy(4.dp),
+            ) {
+                BasicText(text = "🪜", modifier = Modifier.size(48.dp), autoSize = TextAutoSize.StepBased())
+                AsyncImage(
+                    model =
+                    ImageRequest.Builder(LocalContext.current)
+                        .data(org.meshtastic.core.ui.R.drawable.chirpy)
+                        .build(),
+                    contentScale = ContentScale.Fit,
+                    contentDescription = stringResource(Res.string.chirpy),
+                    modifier = Modifier.size(48.dp),
+                )
+            }
+            Text(
+                text = stringResource(Res.string.firmware_update_disclaimer_chirpy_says),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
+    }
 }
 
 @Composable
@@ -474,7 +457,11 @@ private fun ReleaseNotesCard(releaseNotes: String) {
 }
 
 @Composable
-private fun DeviceInfoCard(deviceHardware: DeviceHardware, release: FirmwareRelease?) {
+private fun DeviceInfoCard(
+    deviceHardware: DeviceHardware,
+    release: FirmwareRelease?,
+    updateMethod: FirmwareUpdateMethod,
+) {
     val target = deviceHardware.hwModelSlug.ifEmpty { deviceHardware.platformioTarget }
 
     ElevatedCard(
@@ -482,17 +469,42 @@ private fun DeviceInfoCard(deviceHardware: DeviceHardware, release: FirmwareRele
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                stringResource(Res.string.firmware_update_device, deviceHardware.displayName),
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                DeviceHardwareImage(deviceHardware, Modifier.size(80.dp))
+
+                Text(
+                    stringResource(Res.string.firmware_update_device, deviceHardware.displayName),
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                )
+            }
             Spacer(Modifier.height(8.dp))
             Text(
                 "Target: $target",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Spacer(Modifier.height(4.dp))
+            Row {
+                Icon(
+                    when (updateMethod) {
+                        FirmwareUpdateMethod.Ble -> Icons.Rounded.Bluetooth
+                        FirmwareUpdateMethod.Usb -> Icons.Rounded.Usb
+                        else -> Icons.Default.SystemUpdate
+                    },
+                    contentDescription = stringResource(updateMethod.description),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    stringResource(updateMethod.description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Spacer(Modifier.height(4.dp))
             val releaseTitle = release?.title ?: stringResource(Res.string.firmware_update_unknown_release)
             Text(
@@ -633,7 +645,8 @@ private fun ColumnScope.AwaitingFileSaveState(
     state: FirmwareUpdateState.AwaitingFileSave,
     onSaveFile: (String) -> Unit,
 ) {
-    LaunchedEffect(state) { onSaveFile(state.fileName) }
+    val saveFile by rememberUpdatedState(onSaveFile)
+    LaunchedEffect(state) { saveFile(state.fileName) }
 
     CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
