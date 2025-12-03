@@ -855,12 +855,20 @@ class MeshService : Service() {
                     Portnums.PortNum.NODEINFO_APP_VALUE ->
                         if (!fromUs) {
                             Timber.d("Received NODEINFO_APP from $fromId")
-                            val u =
-                                MeshProtos.User.parseFrom(data.payload).copy {
-                                    if (isLicensed) clearPublicKey()
-                                    if (packet.viaMqtt) longName = "$longName (MQTT)"
-                                }
-                            handleReceivedUser(packet.from, u, packet.channel)
+                            try {
+                                val u =
+                                    MeshProtos.User.parseFrom(data.payload).copy {
+                                        if (isLicensed) clearPublicKey()
+                                        if (packet.viaMqtt) longName = "$longName (MQTT)"
+                                    }
+                                handleReceivedUser(packet.from, u, packet.channel)
+                            } catch (e: InvalidProtocolBufferException) {
+                                Timber.e(
+                                    e,
+                                    "Failed to parse User proto from $fromId." +
+                                        " Payload: ${data.payload.toByteArray().toHexString()}",
+                                )
+                            }
                         }
 
                     // Handle new telemetry info
