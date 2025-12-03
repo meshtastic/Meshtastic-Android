@@ -214,6 +214,10 @@
     <string name="resend">Повторно изпращане</string>
     <string name="shutdown">Изключване</string>
     <string name="cant_shutdown">Изключването не се поддържа на това устройство</string>
+    <string name="shutdown_warning">⚠️ Това ще ИЗКЛЮЧИ възела. Ще е необходимо физическо взаимодействие, за да се включи отново.</string>
+    <string name="shutdown_critical_node">⚠️ Това е възел от критична инфраструктура. Въведете името на възела, за да потвърдите:</string>
+    <string name="shutdown_node_name">Възел: %1$s</string>
+    <string name="shutdown_type_name">Тип: %1$s</string>
     <string name="reboot">Рестартиране</string>
     <string name="traceroute">Трасиране на маршрут</string>
     <string name="intro_show">Показване на въведение</string>
@@ -595,6 +599,7 @@
     <string name="modules_unlocked">Модулите са отключени</string>
     <string name="modules_already_unlocked">Модулите вече са отключени</string>
     <string name="remote">Отдалечен</string>
+    <string name="node_count_template">(%1$d онлайн / %2$d показани / %3$d общо)</string>
     <string name="disconnect">Прекъсване на връзката</string>
     <string name="scanning_bluetooth">Сканиране за Bluetooth устройства…</string>
     <string name="no_ble_devices">Няма сдвоени Bluetooth устройства.</string>
