@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Detect spam or low-quality content
-        uses: actions/ai-inference@v1
+        uses: actions/ai-inference@v2
         id: ai
         with:
           prompt: |

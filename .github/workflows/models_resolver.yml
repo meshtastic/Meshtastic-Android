@@ -14,7 +14,7 @@ jobs:
     if: github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
     steps:
       - name: Generate welcome message
-        uses: actions/ai-inference@v1
+        uses: actions/ai-inference@v2
         id: ai
         with:
           prompt: |

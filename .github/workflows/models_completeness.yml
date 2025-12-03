@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check issue completeness
-        uses: actions/ai-inference@v1
+        uses: actions/ai-inference@v2
         id: ai
         with:
           prompt: |
