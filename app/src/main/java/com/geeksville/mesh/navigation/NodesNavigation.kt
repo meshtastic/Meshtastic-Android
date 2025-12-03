@@ -97,13 +97,20 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, scrollToTo
                 ),
             ),
         ) { backStackEntry ->
-            val args = backStackEntry.toRoute<NodesRoutes.NodeDetail>()
+            // Get destNum from the parent graph (NodeDetailGraph) if available,
+            // otherwise from the route itself (for deep links)
+            val parentGraphEntry =
+                remember(backStackEntry) { navController.getBackStackEntry<NodesRoutes.NodeDetailGraph>() }
+            val graphArgs = parentGraphEntry.toRoute<NodesRoutes.NodeDetailGraph>()
+            val routeArgs = backStackEntry.toRoute<NodesRoutes.NodeDetail>()
+            val nodeId = graphArgs.destNum ?: routeArgs.destNum
+
             // When navigating directly to NodeDetail (e.g. from Map or deep link),
             // we use the Adaptive screen initialized with the specific node ID.
             AdaptiveNodeListScreen(
                 navController = navController,
                 scrollToTopEvents = scrollToTopEvents,
-                initialNodeId = args.destNum,
+                initialNodeId = nodeId,
                 onNavigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
             )
         }
