@@ -44,10 +44,15 @@ import org.meshtastic.core.strings.add_layer
 import org.meshtastic.core.strings.hide_layer
 import org.meshtastic.core.strings.manage_map_layers
 import org.meshtastic.core.strings.map_layer_formats
+import org.meshtastic.core.strings.marker_color_mode_description
+import org.meshtastic.core.strings.marker_color_mode_node
+import org.meshtastic.core.strings.marker_color_mode_role
+import org.meshtastic.core.strings.marker_color_mode_title
 import org.meshtastic.core.strings.no_map_layers_loaded
 import org.meshtastic.core.strings.remove_layer
 import org.meshtastic.core.strings.show_layer
 import org.meshtastic.feature.map.MapLayerItem
+import org.meshtastic.feature.map.MarkerColorMode
 
 @Suppress("LongMethod")
 @Composable
@@ -57,6 +62,8 @@ fun CustomMapLayersSheet(
     onToggleVisibility: (String) -> Unit,
     onRemoveLayer: (String) -> Unit,
     onAddLayerClicked: () -> Unit,
+    markerColorMode: MarkerColorMode? = null,
+    onMarkerColorModeChange: ((MarkerColorMode) -> Unit)? = null,
 ) {
     LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
@@ -73,6 +80,29 @@ fun CustomMapLayersSheet(
                 text = stringResource(Res.string.map_layer_formats),
                 style = MaterialTheme.typography.bodySmall,
             )
+        }
+        if (markerColorMode != null && onMarkerColorModeChange != null) {
+            item {
+                ListItem(
+                    headlineContent = { Text(stringResource(Res.string.marker_color_mode_title)) },
+                    supportingContent = { Text(stringResource(Res.string.marker_color_mode_description)) },
+                    trailingContent = {
+                        Button(onClick = { onMarkerColorModeChange(markerColorMode.toggle()) }) {
+                            Text(
+                                text =
+                                stringResource(
+                                    if (markerColorMode == MarkerColorMode.ROLE) {
+                                        Res.string.marker_color_mode_role
+                                    } else {
+                                        Res.string.marker_color_mode_node
+                                    },
+                                ),
+                            )
+                        }
+                    },
+                )
+                HorizontalDivider()
+            }
         }
 
         if (mapLayers.isEmpty()) {

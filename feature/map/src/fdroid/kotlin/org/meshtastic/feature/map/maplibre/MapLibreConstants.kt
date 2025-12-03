@@ -33,6 +33,8 @@ object MapLibreConstants {
     const val TRACK_POINTS_SOURCE_ID = "meshtastic-track-points-source"
     const val HEATMAP_SOURCE_ID = "meshtastic-heatmap-source"
     const val OSM_SOURCE_ID = "osm-tiles"
+    const val NODE_COLOR_PROPERTY = "nodeColor"
+    const val ROLE_COLOR_PROPERTY = "roleColor"
 
     // Layer IDs
     const val NODES_LAYER_ID = "meshtastic-nodes-layer" // From clustered source, filtered

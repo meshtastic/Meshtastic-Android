@@ -55,7 +55,12 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Style
+import org.maplibre.android.style.expressions.Expression.coalesce
 import org.maplibre.android.style.expressions.Expression.get
+import org.maplibre.android.style.expressions.Expression.literal
+import org.maplibre.android.style.expressions.Expression.toColor
+import org.maplibre.android.style.layers.PropertyFactory.circleColor
 import org.maplibre.android.style.layers.PropertyFactory.visibility
 import org.maplibre.android.style.layers.TransitionOptions
 import org.maplibre.android.style.sources.GeoJsonSource
@@ -63,6 +68,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.feature.map.LayerType
 import org.meshtastic.feature.map.MapLayerItem
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.MarkerColorMode
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.TileCacheManagementSheet
@@ -71,7 +77,11 @@ import org.meshtastic.feature.map.maplibre.MapLibreConstants.DEG_D
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.HEATMAP_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.HEATMAP_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_CLUSTER_SOURCE_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_LAYER_NOCLUSTER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_SOURCE_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODE_COLOR_PROPERTY
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.ROLE_COLOR_PROPERTY
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_LINE_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.TRACK_POINTS_SOURCE_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_SOURCE_ID
@@ -144,7 +154,7 @@ fun MapLibrePOC(
     // Track whether we're currently showing tracks (for callback checks)
     val showingTracksRef = remember { mutableStateOf(false) }
     showingTracksRef.value = nodeTracks != null && focusedNodeNum != null
-    var showLegend by remember { mutableStateOf(false) }
+    var markerColorMode by remember { mutableStateOf(MarkerColorMode.NODE) }
     var enabledRoles by remember { mutableStateOf<Set<ConfigProtos.Config.DeviceConfig.Role>>(emptySet()) }
     var clusteringEnabled by remember { mutableStateOf(true) }
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
@@ -172,6 +182,12 @@ fun MapLibrePOC(
     // Tile cache management - initialize after MapLibre is initialized
     var tileCacheManager by remember { mutableStateOf<MapLibreTileCacheManager?>(null) }
     var showCacheBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(markerColorMode, styleReady, mapRef) {
+        val style = mapRef?.style ?: return@LaunchedEffect
+        if (!styleReady) return@LaunchedEffect
+        applyMarkerColorMode(style, markerColorMode)
+    }
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle()
@@ -574,6 +590,7 @@ fun MapLibrePOC(
                             logStyleState("after-style-load(pre-ensure)", style)
                             ensureSourcesAndLayers(style)
                             ensureHeatmapSourceAndLayer(style)
+                            applyMarkerColorMode(style, markerColorMode)
 
                             // Setup track sources and layers if rendering node tracks
                             Timber.tag("MapLibrePOC")
@@ -942,7 +959,7 @@ fun MapLibrePOC(
         )
 
         // Role legend (based on roles present in current nodes)
-        if (showLegend) {
+        if (markerColorMode == MarkerColorMode.ROLE) {
             RoleLegend(nodes = nodes, modifier = Modifier.align(Alignment.BottomStart).padding(12.dp))
         }
 
@@ -1057,6 +1074,7 @@ fun MapLibrePOC(
                                 clustersShown,
                                 density,
                             )
+                        applyMarkerColorMode(st, markerColorMode)
                     }
                 }
             },
@@ -1067,7 +1085,8 @@ fun MapLibrePOC(
             },
             onShowLayersClicked = { showLayersBottomSheet = true },
             onShowCacheClicked = { showCacheBottomSheet = true },
-            onShowLegendToggled = { showLegend = !showLegend },
+            markerColorMode = markerColorMode,
+            onMarkerColorModeToggle = { markerColorMode = markerColorMode.toggle() },
             heatmapEnabled = heatmapEnabled,
             onHeatmapToggled = { heatmapEnabled = !heatmapEnabled },
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 16.dp),
@@ -1111,6 +1130,7 @@ fun MapLibrePOC(
                                         clustersShown,
                                         density,
                                     )
+                                applyMarkerColorMode(st, markerColorMode)
                             }
                         }
                     }
@@ -1157,6 +1177,8 @@ fun MapLibrePOC(
                         showLayersBottomSheet = false
                         openFilePicker()
                     },
+                    markerColorMode = markerColorMode,
+                    onMarkerColorModeChange = { mode -> markerColorMode = mode },
                 )
             }
         }
@@ -1269,3 +1291,16 @@ private fun MapLibreMap.applyZoomPreferences(style: BaseMapStyle) {
     setMinZoomPreference(style.minZoom.toDouble())
     setMaxZoomPreference(style.maxZoom.toDouble())
 }
+
+private fun applyMarkerColorMode(style: Style, mode: MarkerColorMode) {
+    val expression =
+        when (mode) {
+            MarkerColorMode.ROLE -> markerColorExpression(ROLE_COLOR_PROPERTY)
+            MarkerColorMode.NODE -> markerColorExpression(NODE_COLOR_PROPERTY)
+        }
+    style.getLayer(NODES_LAYER_ID)?.setProperties(circleColor(expression))
+    style.getLayer(NODES_LAYER_NOCLUSTER_ID)?.setProperties(circleColor(expression))
+}
+
+private fun markerColorExpression(primaryProperty: String) =
+    coalesce(toColor(get(primaryProperty)), toColor(get(ROLE_COLOR_PROPERTY)), toColor(literal("#2E7D32")))

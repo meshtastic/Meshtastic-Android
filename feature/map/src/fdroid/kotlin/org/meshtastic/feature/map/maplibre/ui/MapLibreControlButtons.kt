@@ -30,6 +30,7 @@ import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -42,12 +43,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.marker_color_mode_node
+import org.meshtastic.core.strings.marker_color_mode_role
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.MarkerColorMode
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.maplibre.BaseMapStyle
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODES_CLUSTER_SOURCE_ID
@@ -70,6 +76,8 @@ fun MapLibreControlButtons(
     onLegendClick: () -> Unit,
     onStyleClick: () -> Unit,
     onLayersClick: () -> Unit = {},
+    markerColorMode: MarkerColorMode,
+    onMarkerColorToggle: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.End) {
@@ -114,6 +122,21 @@ fun MapLibreControlButtons(
                 contentDescription = null,
             )
         }
+
+        Spacer(modifier = Modifier.size(8.dp))
+
+        MapButton(
+            onClick = onMarkerColorToggle,
+            icon = Icons.Outlined.Palette,
+            contentDescription =
+            stringResource(
+                if (markerColorMode == MarkerColorMode.ROLE) {
+                    Res.string.marker_color_mode_role
+                } else {
+                    Res.string.marker_color_mode_node
+                },
+            ),
+        )
 
         Spacer(modifier = Modifier.size(8.dp))
 

@@ -198,6 +198,9 @@ fun roleColorHex(node: Node): String = when (node.user.role) {
 /** Get Color object for a node based on its role */
 fun roleColor(node: Node): Color = Color(android.graphics.Color.parseColor(roleColorHex(node)))
 
+/** Get hex color for a node based on its unique node color */
+fun nodeColorHex(node: Node): String = String.format("#%06X", 0xFFFFFF and node.colors.second)
+
 /** Apply filters to node list */
 fun applyFilters(
     all: List<Node>,

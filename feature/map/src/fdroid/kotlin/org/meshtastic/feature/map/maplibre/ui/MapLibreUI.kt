@@ -33,10 +33,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Tune
@@ -62,11 +62,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.maps.MapLibreMap
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.marker_color_mode_node
+import org.meshtastic.core.strings.marker_color_mode_role
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
+import org.meshtastic.feature.map.MarkerColorMode
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.maplibre.BaseMapStyle
 import org.meshtastic.feature.map.maplibre.utils.protoShortName
@@ -124,7 +129,8 @@ fun MapToolbar(
     onCustomTileClicked: () -> Unit,
     onShowLayersClicked: () -> Unit,
     onShowCacheClicked: () -> Unit,
-    onShowLegendToggled: () -> Unit,
+    markerColorMode: MarkerColorMode,
+    onMarkerColorModeToggle: () -> Unit,
     heatmapEnabled: Boolean,
     onHeatmapToggled: () -> Unit,
     modifier: Modifier = Modifier,
@@ -292,8 +298,18 @@ fun MapToolbar(
             // Cache management button
             MapButton(onClick = onShowCacheClicked, icon = Icons.Outlined.Storage, contentDescription = null)
 
-            // Legend button
-            MapButton(onClick = onShowLegendToggled, icon = Icons.Outlined.Info, contentDescription = null)
+            MapButton(
+                onClick = onMarkerColorModeToggle,
+                icon = Icons.Outlined.Palette,
+                contentDescription =
+                stringResource(
+                    if (markerColorMode == MarkerColorMode.ROLE) {
+                        Res.string.marker_color_mode_role
+                    } else {
+                        Res.string.marker_color_mode_node
+                    },
+                ),
+            )
         },
     )
 }

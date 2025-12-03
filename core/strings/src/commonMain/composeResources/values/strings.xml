@@ -911,6 +911,12 @@
     <string name="add_layer_button">Add Layer</string>
     <string name="hide_layer">Hide Layer</string>
     <string name="show_layer">Show Layer</string>
+    <string name="role_legend_title">Show role legend</string>
+    <string name="role_legend_description">Display a role-to-color legend overlay on the map.</string>
+    <string name="marker_color_mode_title">Marker colors</string>
+    <string name="marker_color_mode_description">Switch between role colors and node-specific colors.</string>
+    <string name="marker_color_mode_role">Role colors</string>
+    <string name="marker_color_mode_node">Node colors</string>
     <string name="remove_layer">Remove Layer</string>
     <string name="add_layer">Add Layer</string>
     <string name="nodes_at_this_location">Nodes at this location</string>

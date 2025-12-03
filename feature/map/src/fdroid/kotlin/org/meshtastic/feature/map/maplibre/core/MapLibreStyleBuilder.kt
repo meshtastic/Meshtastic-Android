@@ -68,6 +68,7 @@ import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODE_TEXT_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.NODE_TEXT_LAYER_NOCLUSTER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.OSM_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.OSM_SOURCE_ID
+import org.meshtastic.feature.map.maplibre.MapLibreConstants.ROLE_COLOR_PROPERTY
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.STYLE_URL
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_LAYER_ID
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.WAYPOINTS_SOURCE_ID
@@ -134,7 +135,7 @@ fun buildMeshtasticStyle(base: BaseMapStyle, customTileUrl: String? = null): Sty
             .withLayer(
                 CircleLayer(NODES_LAYER_ID, NODES_CLUSTER_SOURCE_ID)
                     .withProperties(
-                        circleColor(coalesce(toColor(get("color")), toColor(literal("#2E7D32")))),
+                        circleColor(defaultMarkerColorExpression()),
                         circleRadius(
                             interpolate(linear(), zoom(), stop(8, 4f), stop(12, 6f), stop(16, 8f), stop(18, 9.5f)),
                         ),
@@ -169,7 +170,7 @@ fun buildMeshtasticStyle(base: BaseMapStyle, customTileUrl: String? = null): Sty
             .withLayer(
                 CircleLayer(NODES_LAYER_NOCLUSTER_ID, NODES_SOURCE_ID)
                     .withProperties(
-                        circleColor(coalesce(toColor(get("color")), toColor(literal("#2E7D32")))),
+                        circleColor(defaultMarkerColorExpression()),
                         circleRadius(
                             interpolate(linear(), zoom(), stop(8, 4f), stop(12, 6f), stop(16, 8f), stop(18, 9.5f)),
                         ),
@@ -215,3 +216,5 @@ fun buildMeshtasticStyle(base: BaseMapStyle, customTileUrl: String? = null): Sty
 
 /** Returns an empty GeoJSON FeatureCollection as a JSON string */
 fun emptyFeatureCollectionJson(): String = """{"type":"FeatureCollection","features":[]}"""
+
+private fun defaultMarkerColorExpression() = coalesce(toColor(get(ROLE_COLOR_PROPERTY)), toColor(literal("#2E7D32")))

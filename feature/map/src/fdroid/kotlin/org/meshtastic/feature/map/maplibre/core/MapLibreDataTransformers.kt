@@ -26,6 +26,7 @@ import org.maplibre.geojson.Point
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.feature.map.maplibre.MapLibreConstants.DEG_D
 import org.meshtastic.feature.map.maplibre.getPrecisionMeters
+import org.meshtastic.feature.map.maplibre.utils.nodeColorHex
 import org.meshtastic.feature.map.maplibre.utils.protoShortName
 import org.meshtastic.feature.map.maplibre.utils.roleColorHex
 import org.meshtastic.feature.map.maplibre.utils.safeSubstring
@@ -53,10 +54,11 @@ fun nodesToFeatureCollectionJsonWithSelection(nodes: List<Node>, labelNums: Set<
             val shortEsc = escapeJson(shortForMap)
             val show = if (labelNums.contains(node.num)) 1 else 0
             val role = node.user.role.name
-            val color = roleColorHex(node)
+            val roleColor = roleColorHex(node)
+            val nodeColor = nodeColorHex(node)
             val longEsc = escapeJson(node.user.longName ?: "")
             val precisionMeters = getPrecisionMeters(pos.precisionBits) ?: 0.0
-            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"$longEsc","short":"$shortEsc","role":"$role","color":"$color","showLabel":$show,"precisionMeters":$precisionMeters}}"""
+            """{"type":"Feature","geometry":{"type":"Point","coordinates":[$lon,$lat]},"properties":{"kind":"node","num":${node.num},"name":"$longEsc","short":"$shortEsc","role":"$role","roleColor":"$roleColor","nodeColor":"$nodeColor","color":"$roleColor","showLabel":$show,"precisionMeters":$precisionMeters}}"""
         }
     return """{"type":"FeatureCollection","features":[${features.joinToString(",")}]}"""
 }
@@ -91,6 +93,8 @@ fun nodesToFeatureCollectionWithSelectionFC(nodes: List<Node>, labelNums: Set<In
                     }
             f.addStringProperty("short", shortForMap)
             f.addStringProperty("role", node.user.role.name)
+            f.addStringProperty("roleColor", roleColorHex(node))
+            f.addStringProperty("nodeColor", nodeColorHex(node))
             f.addStringProperty("color", roleColorHex(node))
             f.addNumberProperty("showLabel", if (labelNums.contains(node.num)) 1 else 0)
             val precisionMeters = getPrecisionMeters(pos.precisionBits) ?: 0.0
