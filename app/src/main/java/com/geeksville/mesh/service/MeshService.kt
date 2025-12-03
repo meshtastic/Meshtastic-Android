@@ -2509,9 +2509,7 @@ class MeshService : Service() {
                 r.toString()
             }
 
-            override fun connectionTransport(): String = toRemoteExceptions {
-                currentTransport()
-            }
+            override fun connectionTransport(): String = toRemoteExceptions { currentTransport() }
 
             override fun startProvideLocation() = toRemoteExceptions { startLocationRequests() }
 
@@ -2610,9 +2608,7 @@ class MeshService : Service() {
             }
 
             override fun rebootToDfu() {
-                packetHandler.sendToRadio(
-                    newMeshPacketTo(myNodeNum).buildAdminPacket { enterDfuModeRequest = true },
-                )
+                packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { enterDfuModeRequest = true })
             }
 
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {

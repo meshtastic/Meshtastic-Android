@@ -121,6 +121,7 @@ import org.meshtastic.core.strings.firmware_update_keep_device_close
 import org.meshtastic.core.strings.firmware_update_latest
 import org.meshtastic.core.strings.firmware_update_rak4631_bootloader_hint
 import org.meshtastic.core.strings.firmware_update_retry
+import org.meshtastic.core.strings.firmware_update_save_dfu_file
 import org.meshtastic.core.strings.firmware_update_select_file
 import org.meshtastic.core.strings.firmware_update_stable
 import org.meshtastic.core.strings.firmware_update_success
@@ -141,9 +142,16 @@ fun FirmwareUpdateScreen(
     val state by viewModel.state.collectAsState()
     val selectedReleaseType by viewModel.selectedReleaseType.collectAsState()
 
-    val launcher =
+    val getFileLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { viewModel.startUpdateFromFile(it) }
+        }
+
+    val saveFileLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.CreateDocument("application/octet-stream"),
+        ) { uri: Uri? ->
+            uri?.let { viewModel.saveDfuFile(it) }
         }
 
     val shouldKeepScreenOn = shouldKeepFirmwareScreenOn(state)
@@ -157,7 +165,8 @@ fun FirmwareUpdateScreen(
         selectedReleaseType = selectedReleaseType,
         onReleaseTypeSelect = viewModel::setReleaseType,
         onStartUpdate = viewModel::startUpdate,
-        onPickFile = { launcher.launch("application/zip") },
+        onPickFile = { getFileLauncher.launch("application/zip") },
+        onSaveFile = { fileName -> saveFileLauncher.launch(fileName) },
         onRetry = viewModel::checkForUpdates,
         onDone = { navController.navigateUp() },
         onDismissBootloaderWarning = viewModel::dismissBootloaderWarningForCurrentDevice,
@@ -172,6 +181,7 @@ private fun FirmwareUpdateScaffold(
     onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
     onStartUpdate: () -> Unit,
     onPickFile: () -> Unit,
+    onSaveFile: (String) -> Unit,
     onRetry: () -> Unit,
     onDone: () -> Unit,
     onDismissBootloaderWarning: () -> Unit,
@@ -203,6 +213,7 @@ private fun FirmwareUpdateScaffold(
                         is FirmwareUpdateState.Updating -> "Updating"
                         is FirmwareUpdateState.Error -> "Error"
                         is FirmwareUpdateState.Success -> "Success"
+                        is FirmwareUpdateState.AwaitingFileSave -> "AwaitingFileSave"
                     }
                 },
                 label = "FirmwareState",
@@ -213,6 +224,7 @@ private fun FirmwareUpdateScaffold(
                     onReleaseTypeSelect = onReleaseTypeSelect,
                     onStartUpdate = onStartUpdate,
                     onPickFile = onPickFile,
+                    onSaveFile = onSaveFile,
                     onRetry = onRetry,
                     onDone = onDone,
                     onDismissBootloaderWarning = onDismissBootloaderWarning,
@@ -227,6 +239,7 @@ private fun shouldKeepFirmwareScreenOn(state: FirmwareUpdateState): Boolean = wh
     is FirmwareUpdateState.Processing,
     is FirmwareUpdateState.Updating,
     -> true
+
     else -> false
 }
 
@@ -237,6 +250,7 @@ private fun FirmwareUpdateContent(
     onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
     onStartUpdate: () -> Unit,
     onPickFile: () -> Unit,
+    onSaveFile: (String) -> Unit,
     onRetry: () -> Unit,
     onDone: () -> Unit,
     onDismissBootloaderWarning: () -> Unit,
@@ -272,8 +286,8 @@ private fun FirmwareUpdateContent(
                 is FirmwareUpdateState.Processing -> ProcessingState(state.message)
                 is FirmwareUpdateState.Updating -> UpdatingState(state)
                 is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = onRetry)
-
                 is FirmwareUpdateState.Success -> SuccessState(onDone = onDone)
+                is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, onSaveFile)
             }
         },
     )
@@ -612,6 +626,22 @@ private fun ColumnScope.UpdatingState(state: FirmwareUpdateState.Updating) {
     LinearWavyProgressIndicator(progress = { state.progress }, modifier = Modifier.fillMaxWidth())
     Spacer(Modifier.height(16.dp))
     CyclingMessages()
+}
+
+@Composable
+private fun ColumnScope.AwaitingFileSaveState(
+    state: FirmwareUpdateState.AwaitingFileSave,
+    onSaveFile: (String) -> Unit,
+) {
+    LaunchedEffect(state) { onSaveFile(state.fileName) }
+
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
+    Spacer(Modifier.height(24.dp))
+    Text(
+        stringResource(Res.string.firmware_update_save_dfu_file),
+        style = MaterialTheme.typography.titleMedium,
+        textAlign = TextAlign.Center,
+    )
 }
 
 private const val CYCLE_DELAY = 4000L

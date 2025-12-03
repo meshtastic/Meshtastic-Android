@@ -17,8 +17,13 @@
 
 package org.meshtastic.feature.firmware
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,15 +39,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter
 import no.nordicsemi.android.dfu.DfuServiceInitiator
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper
-import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.core.ConnectionState
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jetbrains.compose.resources.getString
@@ -53,12 +58,15 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.prefs.radio.RadioPrefs
+import org.meshtastic.core.prefs.radio.isBle
+import org.meshtastic.core.prefs.radio.isSerial
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.firmware_update_copying
 import org.meshtastic.core.strings.firmware_update_extracting
 import org.meshtastic.core.strings.firmware_update_failed
-import org.meshtastic.core.strings.firmware_update_invalid_address
+import org.meshtastic.core.strings.firmware_update_flashing
 import org.meshtastic.core.strings.firmware_update_no_device
 import org.meshtastic.core.strings.firmware_update_not_found_in_release
 import org.meshtastic.core.strings.firmware_update_rebooting
@@ -66,7 +74,6 @@ import org.meshtastic.core.strings.firmware_update_starting_dfu
 import org.meshtastic.core.strings.firmware_update_starting_service
 import org.meshtastic.core.strings.firmware_update_unknown_hardware
 import org.meshtastic.core.strings.firmware_update_updating
-import org.meshtastic.core.strings.firmware_update_waiting_for_device
 import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
@@ -83,10 +90,8 @@ private const val PERCENT_MAX_VALUE = 100f
 
 private const val SCAN_TIMEOUT = 2000L
 private const val PACKETS_BEFORE_PRN = 8
-
 private const val REBOOT_DELAY = 5000L
-private const val DFU_DRIVE_SEARCH_TIMEOUT = 20
-private const val DFU_DRIVE_SEARCH_INTERVAL = 1000L
+private const val DEVICE_DETACH_TIMEOUT = 30_000L
 
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
@@ -104,9 +109,9 @@ constructor(
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val nodeRepository: NodeRepository,
-    private val centralManager: CentralManager,
     client: OkHttpClient,
     private val serviceRepository: ServiceRepository,
+    private val radioPrefs: RadioPrefs,
     @ApplicationContext private val context: Context,
     private val bootloaderWarningDataSource: BootloaderWarningDataSource,
 ) : ViewModel() {
@@ -154,26 +159,26 @@ constructor(
                 _state.value = FirmwareUpdateState.Checking
 
                 runCatching {
-                    val validationResult = validateDeviceAndConnection()
-
-                    if (validationResult == null) {
-                        // Validation failed, state is already set to Error inside validateDeviceAndConnection
+                    val ourNode = nodeRepository.ourNodeInfo.value
+                    val address = radioPrefs.devAddr?.drop(1)
+                    if (address == null || ourNode == null) {
+                        _state.value = FirmwareUpdateState.Error(getString(Res.string.firmware_update_no_device))
                         return@launch
                     }
-
-                    val (ourNode, _, address) = validationResult
-                    val deviceHardware = getDeviceHardware(ourNode) ?: return@launch
-
-                    firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value).collectLatest { release ->
-                        val dismissed = bootloaderWarningDataSource.isDismissed(address)
-                        _state.value =
-                            FirmwareUpdateState.Ready(
-                                release = release,
-                                deviceHardware = deviceHardware,
-                                address = address,
-                                showBootloaderWarning =
-                                deviceHardware.requiresBootloaderUpgradeForOta == true && !dismissed,
-                            )
+                    getDeviceHardware(ourNode)?.let { deviceHardware ->
+                        firmwareReleaseRepository.getReleaseFlow(
+                            _selectedReleaseType.value,
+                        ).collectLatest { release ->
+                            val dismissed = bootloaderWarningDataSource.isDismissed(address)
+                            _state.value =
+                                FirmwareUpdateState.Ready(
+                                    release = release,
+                                    deviceHardware = deviceHardware,
+                                    address = address,
+                                    showBootloaderWarning =
+                                    deviceHardware.requiresBootloaderUpgradeForOta == true && !dismissed,
+                                )
+                        }
                     }
                 }
                     .onFailure { e ->
@@ -202,11 +207,9 @@ constructor(
         updateJob?.cancel()
         updateJob =
             viewModelScope.launch {
-                val transport = serviceRepository.connectionTransport.value
-                if (transport == "Serial" && hardware.requiresDfu == true) {
+                if (radioPrefs.isSerial()) {
                     startUsbDfuUpdate(release, hardware)
-                } else {
-                    if (!isValidBluetoothAddress(address)) return@launch
+                } else if (radioPrefs.isBle()) {
                     startOtaUpdate(release, hardware, address)
                 }
             }
@@ -221,13 +224,10 @@ constructor(
 
             // Try direct download of the specific device firmware
             val version = release.id.removePrefix("v")
-            // We prefer platformioTarget because it matches the build artifact naming
-            // convention (lower-case with hyphens).
-            // hwModelSlug often uses underscores and uppercase
-            // (e.g. TRACKER_T1000_E vs tracker-t1000-e).
             val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
             val filename = "firmware-$target-$version-ota.zip"
-            val directUrl = "https://meshtastic.github.io/firmware-$version/$filename"
+            val directUrl =
+                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-$version/$filename"
 
             if (fileHandler.checkUrlExists(directUrl)) {
                 try {
@@ -247,11 +247,6 @@ constructor(
                     fileHandler.downloadFile(zipUrl, "firmware_release.zip") { progress ->
                         _state.value = FirmwareUpdateState.Downloading(progress)
                     }
-
-                // Note: Current API does not provide checksums, so we rely on content-length
-                // checks during download and integrity checks during extraction.
-
-                // 2. Extract
                 _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_extracting))
                 val extracted = fileHandler.extractFirmware(downloadedZip, hardware)
 
@@ -275,43 +270,57 @@ constructor(
 
     private suspend fun startUsbDfuUpdate(release: FirmwareRelease, hardware: DeviceHardware) {
         try {
-            // 1. Download
             _state.value = FirmwareUpdateState.Downloading(0f)
 
-            // We prefer platformioTarget because it matches the build artifact naming
-            // convention (lower-case with hyphens).
-            // hwModelSlug often uses underscores and uppercase
-            // (e.g. TRACKER_T1000_E vs tracker-t1000-e).
             val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
             val version = release.id.removePrefix("v")
             val filename = "firmware-$target-$version.uf2"
-            val directUrl = "https://meshtastic.github.io/firmware-filename-list/$version.txt"
+            val directUrl =
+                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-$version/$filename"
 
-            val firmwareFile = fileHandler.downloadFile(directUrl, filename) { progress ->
-                _state.value = FirmwareUpdateState.Downloading(progress)
-            }
+            val firmwareFile =
+                fileHandler.downloadFile(directUrl, filename) { progress ->
+                    _state.value = FirmwareUpdateState.Downloading(progress)
+                }
             tempFirmwareFile = firmwareFile
 
-            // 2. Reboot to DFU
             _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_rebooting))
             serviceRepository.meshService?.rebootToDfu()
-            delay(REBOOT_DELAY) // Wait for the device to reboot
+            delay(REBOOT_DELAY)
 
-            // 3. Wait for DFU device and copy
-            _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_waiting_for_device))
-            val dfuDrive = fileHandler.waitForDfuDrive()
-            if (dfuDrive != null) {
-                _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_copying))
-                fileHandler.copyFileTo(firmwareFile, dfuDrive)
-                _state.value = FirmwareUpdateState.Success
-            } else {
-                _state.value = FirmwareUpdateState.Error("DFU drive not found")
-            }
+            _state.value = FirmwareUpdateState.AwaitingFileSave(firmwareFile, filename)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Timber.e(e)
             _state.value = FirmwareUpdateState.Error(e.message ?: getString(Res.string.firmware_update_failed))
+        }
+    }
+
+    /** Saves the downloaded DFU file to the URI chosen by the user. */
+    fun saveDfuFile(uri: Uri) {
+        val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return
+        val firmwareFile = currentState.uf2File
+
+        viewModelScope.launch {
+            try {
+                _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_copying))
+                fileHandler.copyFileToUri(firmwareFile, uri)
+
+                _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_flashing))
+
+                withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { waitForDeviceDetach(context).first() }
+                    ?: Timber.w("Timed out waiting for device to detach, assuming success")
+
+                _state.value = FirmwareUpdateState.Success
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e)
+                _state.value = FirmwareUpdateState.Error(e.message ?: getString(Res.string.firmware_update_failed))
+            } finally {
+                cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+            }
         }
     }
 
@@ -361,13 +370,6 @@ constructor(
         }
     }
 
-    /**
-     * Configures the DFU service and starts the update.
-     *
-     * @param address The Bluetooth address of the target device.
-     * @param deviceHardware The hardware definition of the target device.
-     * @param firmwareFile The local file containing the firmware image.
-     */
     private fun initiateDfu(address: String, deviceHardware: DeviceHardware, firmwareFile: File) {
         viewModelScope.launch {
             _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_starting_service))
@@ -389,66 +391,31 @@ constructor(
         }
     }
 
-    /**
-     * Bridges the callback-based DfuServiceListenerHelper to a Kotlin Flow. This decouples the listener implementation
-     * from the ViewModel state.
-     */
     private suspend fun observeDfuProgress() {
-        dfuProgressFlow(context)
-            .flowOn(Dispatchers.Main) // Listener Helper typically needs main thread for registration
-            .collect { dfuState ->
-                when (dfuState) {
-                    is DfuInternalState.Progress -> {
-                        val msg = getString(Res.string.firmware_update_updating, "${dfuState.percent}")
-                        _state.value = FirmwareUpdateState.Updating(dfuState.percent / PERCENT_MAX_VALUE, msg)
-                    }
-                    is DfuInternalState.Error -> {
-                        _state.value = FirmwareUpdateState.Error("DFU Error: ${dfuState.message}")
-                        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
-                    }
-                    is DfuInternalState.Completed -> {
-                        _state.value = FirmwareUpdateState.Success
-                        serviceRepository.meshService?.setDeviceAddress("$DFU_RECONNECT_PREFIX${dfuState.address}")
-                        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
-                    }
-                    is DfuInternalState.Aborted -> {
-                        _state.value = FirmwareUpdateState.Error("DFU Aborted")
-                        tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
-                    }
-                    is DfuInternalState.Starting -> {
-                        val msg = getString(Res.string.firmware_update_starting_dfu)
-                        _state.value = FirmwareUpdateState.Processing(msg)
-                    }
+        dfuProgressFlow(context).flowOn(Dispatchers.Main).collect { dfuState ->
+            when (dfuState) {
+                is DfuInternalState.Progress -> {
+                    val msg = getString(Res.string.firmware_update_updating, "${dfuState.percent}")
+                    _state.value = FirmwareUpdateState.Updating(dfuState.percent / PERCENT_MAX_VALUE, msg)
+                }
+                is DfuInternalState.Error -> {
+                    _state.value = FirmwareUpdateState.Error("DFU Error: ${dfuState.message}")
+                    tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                }
+                is DfuInternalState.Completed -> {
+                    _state.value = FirmwareUpdateState.Success
+                    serviceRepository.meshService?.setDeviceAddress("$DFU_RECONNECT_PREFIX${dfuState.address}")
+                    tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                }
+                is DfuInternalState.Aborted -> {
+                    _state.value = FirmwareUpdateState.Error("DFU Aborted")
+                    tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                }
+                is DfuInternalState.Starting -> {
+                    val msg = getString(Res.string.firmware_update_starting_dfu)
+                    _state.value = FirmwareUpdateState.Processing(msg)
                 }
             }
-    }
-
-    private data class ValidationResult(
-        val node: org.meshtastic.core.database.model.Node,
-        val peripheral: no.nordicsemi.kotlin.ble.client.android.Peripheral,
-        val address: String,
-    )
-
-    /**
-     * Validates that a Meshtastic device is known (in Node DB), connected via Bluetooth, and has a valid Bluetooth
-     * address.
-     */
-    private suspend fun validateDeviceAndConnection(): ValidationResult? {
-        val ourNode = nodeRepository.ourNodeInfo.value
-        val connectedPeripheral =
-            centralManager.getBondedPeripherals().firstOrNull { it.state.value == ConnectionState.Connected }
-        val address = connectedPeripheral?.address
-
-        return if (ourNode != null && connectedPeripheral != null && address != null) {
-            if (isValidBluetoothAddress(address)) {
-                ValidationResult(ourNode, connectedPeripheral, address)
-            } else {
-                _state.value = FirmwareUpdateState.Error(getString(Res.string.firmware_update_invalid_address, address))
-                null
-            }
-        } else {
-            _state.value = FirmwareUpdateState.Error(getString(Res.string.firmware_update_no_device))
-            null
         }
     }
 
@@ -472,13 +439,10 @@ constructor(
 }
 
 private fun getDeviceFirmwareUrl(url: String, targetArch: String): String {
-    // Architectures ordered by length descending to handle substrings like esp32-s3 vs esp32
     val knownArchs = listOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", "rp2040", "stm32", "esp32")
 
     for (arch in knownArchs) {
         if (url.contains(arch, ignoreCase = true)) {
-            // Replace the found architecture with the target architecture
-            // We use replacement to preserve the rest of the URL structure (version, server, etc.)
             return url.replace(arch, targetArch.lowercase(), ignoreCase = true)
         }
     }
@@ -495,7 +459,27 @@ private fun cleanupTemporaryFiles(fileHandler: FirmwareFileHandler, tempFirmware
     return null
 }
 
-/** Internal state representation for the DFU process flow. */
+private fun waitForDeviceDetach(context: Context): Flow<Unit> = callbackFlow {
+    val receiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action == UsbManager.ACTION_USB_DEVICE_DETACHED) {
+                    trySend(Unit).isSuccess
+                    close()
+                }
+            }
+        }
+    val filter = IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+    } else {
+        @Suppress("UnspecifiedRegisterReceiverFlag")
+        context.registerReceiver(receiver, filter)
+    }
+    awaitClose { context.unregisterReceiver(receiver) }
+}
+
 private sealed interface DfuInternalState {
     data class Starting(val address: String) : DfuInternalState
 
@@ -516,7 +500,6 @@ private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType):
     FirmwareReleaseType.ALPHA -> alphaRelease
 }
 
-/** Converts Nordic DFU callbacks to a cold Flow. Automatically registers/unregisters the listener. */
 private fun dfuProgressFlow(context: Context): Flow<DfuInternalState> = callbackFlow {
     val listener =
         object : DfuProgressListenerAdapter() {
@@ -552,10 +535,6 @@ private fun dfuProgressFlow(context: Context): Flow<DfuInternalState> = callback
     awaitClose { DfuServiceListenerHelper.unregisterProgressListener(context, listener) }
 }
 
-/**
- * Helper class to handle file operations related to firmware updates, such as downloading, copying from URI, and
- * extracting specific files from Zip archives.
- */
 private class FirmwareFileHandler(private val context: Context, private val client: OkHttpClient) {
     private val tempDir = File(context.cacheDir, "firmware_update")
 
@@ -583,7 +562,6 @@ private class FirmwareFileHandler(private val context: Context, private val clie
         val inputStream =
             context.contentResolver.openInputStream(uri) ?: throw IOException("Cannot open content URI")
 
-        // Ensure tempDir exists
         if (!tempDir.exists()) tempDir.mkdirs()
 
         val targetFile = File(tempDir, "local_update.zip")
@@ -602,7 +580,6 @@ private class FirmwareFileHandler(private val context: Context, private val clie
             val body = response.body ?: throw IOException("Empty response body")
             val contentLength = body.contentLength()
 
-            // Ensure tempDir exists
             if (!tempDir.exists()) tempDir.mkdirs()
 
             val targetFile = File(tempDir, fileName)
@@ -614,7 +591,6 @@ private class FirmwareFileHandler(private val context: Context, private val clie
                     var totalBytesRead = 0L
 
                     while (input.read(buffer).also { bytesRead = it } != -1) {
-                        // Check for coroutine cancellation during heavy IO loops
                         if (!isActive) throw CancellationException("Download cancelled")
 
                         output.write(buffer, 0, bytesRead)
@@ -624,7 +600,6 @@ private class FirmwareFileHandler(private val context: Context, private val clie
                             onProgress(totalBytesRead.toFloat() / contentLength)
                         }
                     }
-                    // Basic integrity check
                     if (contentLength != -1L && totalBytesRead != contentLength) {
                         throw IOException("Incomplete download: expected $contentLength bytes, got $totalBytesRead")
                     }
@@ -640,7 +615,6 @@ private class FirmwareFileHandler(private val context: Context, private val clie
         val targetLowerCase = target.lowercase()
         val matchingEntries = mutableListOf<Pair<ZipEntry, File>>()
 
-        // Ensure tempDir exists
         if (!tempDir.exists()) tempDir.mkdirs()
 
         ZipInputStream(zipFile.inputStream()).use { zipInput ->
@@ -649,22 +623,15 @@ private class FirmwareFileHandler(private val context: Context, private val clie
                 val name = entry.name.lowercase()
                 if (!entry.isDirectory && isValidFirmwareFile(name, targetLowerCase)) {
                     val outFile = File(tempDir, File(name).name)
-                    // We extract to verify it's a valid zip entry payload
                     FileOutputStream(outFile).use { output -> zipInput.copyTo(output) }
                     matchingEntries.add(entry to outFile)
                 }
                 entry = zipInput.nextEntry
             }
         }
-        // Best match heuristic: prefer shortest filename (e.g. 'tbeam' matches 'tbeam-s3', but 'tbeam' is shorter)
-        // This prevents flashing 'tbeam-s3' firmware onto a 'tbeam' device if both are present.
         matchingEntries.minByOrNull { it.first.name.length }?.second
     }
 
-    /**
-     * Checks if a filename matches the target device. Enforces stricter matching to avoid substring false positives
-     * (e.g. "tbeam" matching "tbeam-s3").
-     */
     private fun isValidFirmwareFile(filename: String, target: String): Boolean {
         val regex = Regex(".*[\\-_]${Regex.escape(target)}[\\-_\\.].*")
         return filename.endsWith(".zip") &&
@@ -672,26 +639,12 @@ private class FirmwareFileHandler(private val context: Context, private val clie
             (regex.matches(filename) || filename.startsWith("$target-") || filename.startsWith("$target."))
     }
 
-    suspend fun waitForDfuDrive(): File? = withContext(Dispatchers.IO) {
-        // This is a simplified implementation. A real implementation would use a BroadcastReceiver
-        // to listen for ACTION_MEDIA_MOUNTED intents.
-        repeat(DFU_DRIVE_SEARCH_TIMEOUT) {
-            val externalDirs = context.getExternalFilesDirs(null)
-            externalDirs.forEach { file ->
-                if (file.absolutePath.contains("RPI-RP2")) { // Example for Raspberry Pi Pico
-                    return@withContext file
-                }
-            }
-            delay(DFU_DRIVE_SEARCH_INTERVAL)
-        }
-        null
-    }
+    suspend fun copyFileToUri(sourceFile: File, destinationUri: Uri) = withContext(Dispatchers.IO) {
+        val inputStream = FileInputStream(sourceFile)
+        val outputStream =
+            context.contentResolver.openOutputStream(destinationUri)
+                ?: throw IOException("Cannot open content URI for writing")
 
-    suspend fun copyFileTo(sourceFile: File, destination: File) = withContext(Dispatchers.IO) {
-        FileInputStream(sourceFile).use { input ->
-            FileOutputStream(File(destination, sourceFile.name)).use { output ->
-                input.copyTo(output)
-            }
-        }
+        inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }
     }
 }
