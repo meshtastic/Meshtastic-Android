@@ -2509,8 +2509,6 @@ class MeshService : Service() {
                 r.toString()
             }
 
-            override fun connectionTransport(): String = toRemoteExceptions { currentTransport() }
-
             override fun startProvideLocation() = toRemoteExceptions { startLocationRequests() }
 
             override fun stopProvideLocation() = toRemoteExceptions { stopLocationRequests() }
