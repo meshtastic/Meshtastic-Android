@@ -120,6 +120,7 @@
     <string name="label_short_turbo">Lühike ulatus - turbo</string>
     <string name="label_short_fast">Lühike ulatus - kiire</string>
     <string name="label_short_slow">Lühike ulatus - aeglane</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
     <string name="config_network_wifi_enabled_summary">WiFi lubamine keelab rakenduses Bluetooth-ühenduse.</string>
     <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab Bluetooth-ühenduse rakendusega. TCP-sõlmede ühendused pole Apple'i seadmetes saadaval.</string>
     <string name="config_network_udp_enabled_summary">Luba kohalikus võrgus pakettide edastamine UDP kaudu.</string>

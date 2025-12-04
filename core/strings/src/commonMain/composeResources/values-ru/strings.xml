@@ -109,6 +109,7 @@
     <string name="label_short_turbo">Малая дальность - Турбо</string>
     <string name="label_short_fast">Малая дальность - Быстрый</string>
     <string name="label_short_slow">Малая дальность - Медленный</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
     <string name="config_network_wifi_enabled_summary">Включение WiFi отключит Bluetooth-подключение к приложению.</string>
     <string name="config_network_eth_enabled_summary">Включение Ethernet отключит Bluetooth-соединение с приложением. TCP-соединения не доступны на устройствах Apple.</string>
     <string name="config_network_udp_enabled_summary">Включить вещание пакетов через UDP в локальной сети.</string>

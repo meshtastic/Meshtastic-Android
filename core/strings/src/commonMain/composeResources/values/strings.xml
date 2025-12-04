@@ -137,6 +137,7 @@
     <string name="label_short_turbo">Short Range - Turbo</string>
     <string name="label_short_fast">Short Range - Fast</string>
     <string name="label_short_slow">Short Range - Slow</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
 
     <string name="config_network_wifi_enabled_summary">Enabling WiFi will disable the bluetooth connection to the app.</string>
     <string name="config_network_eth_enabled_summary">Enabling Ethernet will disable the bluetooth connection to the app. TCP node connections are not available on Apple devices.</string>

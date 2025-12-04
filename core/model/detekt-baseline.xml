@@ -26,6 +26,7 @@
     <ID>MagicNumber:ChannelOption.kt$ChannelOption.SHORT_FAST$.250f</ID>
     <ID>MagicNumber:ChannelOption.kt$ChannelOption.SHORT_SLOW$.250f</ID>
     <ID>MagicNumber:ChannelOption.kt$ChannelOption.VERY_LONG_SLOW$.0625f</ID>
+    <ID>MagicNumber:ChannelOption.kt$ChannelOption.EDGE_FAST_LOW$.0625f</ID>
     <ID>MagicNumber:ChannelSet.kt$40</ID>
     <ID>MagicNumber:ChannelSet.kt$960</ID>
     <ID>SwallowedException:ChannelSet.kt$ex: Throwable</ID>

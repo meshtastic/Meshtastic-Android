@@ -118,6 +118,7 @@
     <string name="label_short_turbo">Kis hatótáv – Turbó</string>
     <string name="label_short_fast">Kis hatótáv – Gyors</string>
     <string name="label_short_slow">Kis hatótáv – Lassú</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
     <string name="config_network_wifi_enabled_summary">A Wi-Fi engedélyezése letiltja az alkalmazáshoz tartozó Bluetooth-kapcsolatot.</string>
     <string name="config_network_eth_enabled_summary">Az Ethernet engedélyezése letiltja az alkalmazáshoz tartozó Bluetooth-kapcsolatot. A TCP csomópont-kapcsolatok Apple eszközökön nem érhetők el.</string>
     <string name="config_network_udp_enabled_summary">Csomagok sugárzásának engedélyezése UDP-n a helyi hálózaton.</string>

@@ -97,6 +97,7 @@ data class Channel(
                         ModemPreset.LONG_SLOW -> "LongSlow"
                         ModemPreset.LONG_MODERATE -> "LongMod"
                         ModemPreset.VERY_LONG_SLOW -> "VLongSlow"
+                        ModemPreset.EDGE_FAST_LOW -> "EdgeFastLow"
                         else -> "Invalid"
                     }
                 } else {

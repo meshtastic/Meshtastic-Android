@@ -120,6 +120,7 @@
     <string name="label_short_turbo">Portée courte - Turbo</string>
     <string name="label_short_fast">Portée courte - Rapide</string>
     <string name="label_short_slow">Portée courte- Lent</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
     <string name="config_network_wifi_enabled_summary">L'activation du Wifi désactivera la connexion Bluetooth à l'application.</string>
     <string name="config_network_eth_enabled_summary">Activer Ethernet désactivera la connexion Bluetooth à l'application. Les connexions de nœuds via TCP ne sont pas disponibles sur les appareils Apple.</string>
     <string name="config_network_udp_enabled_summary">Activer les paquets de diffusion via UDP sur le réseau local.</string>

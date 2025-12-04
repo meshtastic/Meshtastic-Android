@@ -118,6 +118,7 @@
     <string name="label_short_turbo">Short Range - Turbo</string>
     <string name="label_short_fast">Short Range - Fast</string>
     <string name="label_short_slow">Short Range - Slow</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
     <string name="config_network_wifi_enabled_summary">啟用 Wi-Fi 後，藍牙與應用程式的連線將會停用。</string>
     <string name="config_network_eth_enabled_summary">啟用乙太網路會導致與 App 的藍牙連線中斷。此外，TCP 節點連線在 Apple 設備上不可用。</string>
     <string name="config_network_udp_enabled_summary">允許透過本地網路上的 UDP 廣播封包。</string>
