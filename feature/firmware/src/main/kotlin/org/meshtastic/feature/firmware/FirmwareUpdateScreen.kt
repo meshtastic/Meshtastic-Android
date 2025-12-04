@@ -83,7 +83,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -132,8 +131,12 @@ import org.meshtastic.core.strings.firmware_update_taking_a_while
 import org.meshtastic.core.strings.firmware_update_title
 import org.meshtastic.core.strings.firmware_update_unknown_release
 import org.meshtastic.core.strings.firmware_update_usb_bootloader_warning
+import org.meshtastic.core.strings.firmware_update_usb_instruction_text
+import org.meshtastic.core.strings.firmware_update_usb_instruction_title
 import org.meshtastic.core.strings.i_know_what_i_m_doing
 import org.meshtastic.core.strings.learn_more
+import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.save
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -657,8 +660,25 @@ private fun ColumnScope.AwaitingFileSaveState(
     state: FirmwareUpdateState.AwaitingFileSave,
     onSaveFile: (String) -> Unit,
 ) {
-    val saveFile by rememberUpdatedState(onSaveFile)
-    LaunchedEffect(state) { saveFile(state.fileName) }
+    var showDialog by remember { mutableStateOf(true) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { /* No-op to force user to acknowledge */ },
+            title = { Text(stringResource(Res.string.firmware_update_usb_instruction_title)) },
+            text = { Text(stringResource(Res.string.firmware_update_usb_instruction_text)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        onSaveFile(state.fileName)
+                    },
+                ) {
+                    Text(stringResource(Res.string.okay))
+                }
+            },
+        )
+    }
 
     CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
@@ -667,6 +687,13 @@ private fun ColumnScope.AwaitingFileSaveState(
         style = MaterialTheme.typography.titleMedium,
         textAlign = TextAlign.Center,
     )
+    
+    if (!showDialog) {
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = { onSaveFile(state.fileName) }) {
+            Text(stringResource(Res.string.save))
+        }
+    }
 }
 
 private const val CYCLE_DELAY = 4000L
