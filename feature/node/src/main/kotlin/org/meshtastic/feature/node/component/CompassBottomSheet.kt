@@ -42,6 +42,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -65,13 +66,10 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassWarning
 
-private const val NORTH_STROKE_WIDTH = 6f
-private const val TARGET_STROKE_WIDTH = 10f
-private const val HEADING_STROKE_WIDTH = 4f
-private const val NORTH_OFFSET = 24f
-private const val TARGET_OFFSET = 28f
+private const val TARGET_STROKE_WIDTH = 8f
 private const val TARGET_DOT_RADIUS = 12f
-private const val HEADING_OFFSET = 12f
+private const val TARGET_OUTER_OFFSET = 20f
+private const val TARGET_INNER_INSET = 12f
 private const val CANVAS_NORTH_OFFSET_DEGREES = 90.0
 private const val DIAL_WIDTH_FRACTION = 0.66f
 private const val LABEL_RADIUS_OFFSET = 36f
@@ -106,7 +104,6 @@ fun CompassSheetContent(
         CompassDial(
             heading = uiState.heading,
             bearing = uiState.bearing,
-            targetColor = uiState.targetColor,
             modifier = Modifier.fillMaxWidth(DIAL_WIDTH_FRACTION).aspectRatio(1f),
         )
 
@@ -207,10 +204,16 @@ private fun warningText(warning: CompassWarning): String = when (warning) {
 }
 
 @Composable
-private fun CompassDial(heading: Float?, bearing: Float?, targetColor: Color, modifier: Modifier = Modifier) {
+private fun CompassDial(
+    heading: Float?,
+    bearing: Float?,
+    modifier: Modifier = Modifier,
+    markerColor: Color = Color(0xFF2196F3),
+) {
     val background = MaterialTheme.colorScheme.surfaceVariant
     val outline = MaterialTheme.colorScheme.onSurfaceVariant
-    // Black line shows target bearing; red line shows north so users can align by rotating the phone.
+    val targetStroke = markerColor
+    // Draw target relative to the phone heading so the dot is at the top when walking toward the node.
     val relativeBearing = if (heading != null && bearing != null) bearing - heading else bearing
 
     Canvas(modifier = modifier) {
@@ -220,60 +223,42 @@ private fun CompassDial(heading: Float?, bearing: Float?, targetColor: Color, mo
         val quarterRadius = radius - QUARTER_RADIUS_OFFSET
         val textPaint = buildLabelPaint(outline)
 
-        drawCircle(color = background, radius = radius)
-        drawCircle(
-            color = outline,
-            radius = radius,
-            style = androidx.compose.ui.graphics.drawscope.Stroke(HEADING_STROKE_WIDTH),
-        )
+        // Rotate the dial to match phone heading so North stays aligned with the real world.
+        rotate(heading ?: 0f, pivot = center) {
+            drawCircle(color = background, radius = radius)
+            drawCircle(
+                color = outline,
+                radius = radius,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(TARGET_STROKE_WIDTH / 2),
+            )
 
-        // North indicator
-        drawLine(
-            color = Color.Red,
-            start = center,
-            end = Offset(center.x, center.y - radius + NORTH_OFFSET),
-            strokeWidth = NORTH_STROKE_WIDTH,
-            cap = StrokeCap.Round,
-        )
+            drawCardinalLabels(center, labelRadius, textPaint)
+            drawQuarterTicks(center, quarterRadius, outline)
+        }
 
-        // Target direction
+        // Target direction marker (blue line + dot just outside the dial)
         if (relativeBearing != null) {
             val angleRad = Math.toRadians((relativeBearing - CANVAS_NORTH_OFFSET_DEGREES).toDouble())
-            val end =
+            val lineEnd =
                 Offset(
-                    x = center.x + (radius - TARGET_OFFSET) * kotlin.math.cos(angleRad).toFloat(),
-                    y = center.y + (radius - TARGET_OFFSET) * kotlin.math.sin(angleRad).toFloat(),
+                    x = center.x + (radius - TARGET_INNER_INSET) * kotlin.math.cos(angleRad).toFloat(),
+                    y = center.y + (radius - TARGET_INNER_INSET) * kotlin.math.sin(angleRad).toFloat(),
+                )
+            val dotCenter =
+                Offset(
+                    x = center.x + (radius + TARGET_OUTER_OFFSET) * kotlin.math.cos(angleRad).toFloat(),
+                    y = center.y + (radius + TARGET_OUTER_OFFSET) * kotlin.math.sin(angleRad).toFloat(),
                 )
 
             drawLine(
-                color = targetColor,
+                color = targetStroke,
                 start = center,
-                end = end,
+                end = lineEnd,
                 strokeWidth = TARGET_STROKE_WIDTH,
                 cap = StrokeCap.Round,
             )
-            drawCircle(color = targetColor, radius = TARGET_DOT_RADIUS, center = end)
+            drawCircle(color = targetStroke, radius = TARGET_DOT_RADIUS, center = dotCenter)
         }
-
-        // Heading indicator ring
-        heading?.let {
-            val angleRad = Math.toRadians((it - CANVAS_NORTH_OFFSET_DEGREES).toDouble())
-            val end =
-                Offset(
-                    x = center.x + (radius - HEADING_OFFSET) * kotlin.math.cos(angleRad).toFloat(),
-                    y = center.y + (radius - HEADING_OFFSET) * kotlin.math.sin(angleRad).toFloat(),
-                )
-            drawLine(
-                color = outline,
-                start = center,
-                end = end,
-                strokeWidth = HEADING_STROKE_WIDTH,
-                cap = StrokeCap.Round,
-            )
-        }
-
-        drawCardinalLabels(center, labelRadius, textPaint)
-        drawQuarterTicks(center, quarterRadius, outline)
     }
 }
 
