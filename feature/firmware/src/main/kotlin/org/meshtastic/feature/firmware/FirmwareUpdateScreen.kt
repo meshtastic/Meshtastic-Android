@@ -91,6 +91,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -107,8 +108,8 @@ import org.meshtastic.core.strings.chirpy
 import org.meshtastic.core.strings.dont_show_again_for_device
 import org.meshtastic.core.strings.firmware_update_almost_there
 import org.meshtastic.core.strings.firmware_update_alpha
-import org.meshtastic.core.strings.firmware_update_button
 import org.meshtastic.core.strings.firmware_update_checking
+import org.meshtastic.core.strings.firmware_update_currently_installed
 import org.meshtastic.core.strings.firmware_update_device
 import org.meshtastic.core.strings.firmware_update_disclaimer_chirpy_says
 import org.meshtastic.core.strings.firmware_update_disclaimer_text
@@ -121,6 +122,7 @@ import org.meshtastic.core.strings.firmware_update_error
 import org.meshtastic.core.strings.firmware_update_hang_tight
 import org.meshtastic.core.strings.firmware_update_keep_device_close
 import org.meshtastic.core.strings.firmware_update_latest
+import org.meshtastic.core.strings.firmware_update_method_detail
 import org.meshtastic.core.strings.firmware_update_rak4631_bootloader_hint
 import org.meshtastic.core.strings.firmware_update_retry
 import org.meshtastic.core.strings.firmware_update_save_dfu_file
@@ -326,7 +328,7 @@ private fun ColumnScope.ReadyState(
         )
     }
 
-    DeviceInfoCard(device, state.release, state.updateMethod)
+    DeviceInfoCard(device, state.release, state.currentFirmwareVersion)
 
     if (state.showBootloaderWarning) {
         Spacer(Modifier.height(16.dp))
@@ -345,9 +347,22 @@ private fun ColumnScope.ReadyState(
             },
             modifier = Modifier.fillMaxWidth().height(56.dp),
         ) {
-            Icon(Icons.Default.SystemUpdate, contentDescription = null)
+            Icon(
+                imageVector =
+                when (state.updateMethod) {
+                    FirmwareUpdateMethod.Ble -> Icons.Rounded.Bluetooth
+                    FirmwareUpdateMethod.Usb -> Icons.Rounded.Usb
+                    else -> Icons.Default.SystemUpdate
+                },
+                contentDescription = null,
+            )
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(Res.string.firmware_update_button))
+            Text(
+                stringResource(
+                    resource = Res.string.firmware_update_method_detail,
+                    stringResource(state.updateMethod.description),
+                ),
+            )
         }
         Spacer(Modifier.height(16.dp))
     }
@@ -475,7 +490,7 @@ private fun ReleaseNotesCard(releaseNotes: String) {
 private fun DeviceInfoCard(
     deviceHardware: DeviceHardware,
     release: FirmwareRelease?,
-    updateMethod: FirmwareUpdateMethod,
+    currentFirmwareVersion: String? = null,
 ) {
     val target = deviceHardware.hwModelSlug.ifEmpty { deviceHardware.platformioTarget }
 
@@ -504,26 +519,17 @@ private fun DeviceInfoCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
-            Row {
-                Icon(
-                    when (updateMethod) {
-                        FirmwareUpdateMethod.Ble -> Icons.Rounded.Bluetooth
-                        FirmwareUpdateMethod.Usb -> Icons.Rounded.Usb
-                        else -> Icons.Default.SystemUpdate
-                    },
-                    contentDescription = stringResource(updateMethod.description),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            val currentVersion =
+                stringResource(
+                    Res.string.firmware_update_currently_installed,
+                    currentFirmwareVersion ?: stringResource(Res.string.firmware_update_unknown_release),
                 )
-                Text(
-                    stringResource(updateMethod.description),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            Text(modifier = Modifier.fillMaxWidth(), text = currentVersion)
             Spacer(Modifier.height(4.dp))
-            val releaseTitle = release?.title ?: stringResource(Res.string.firmware_update_unknown_release)
+            val releaseVersion = release?.title ?: stringResource(Res.string.firmware_update_unknown_release)
             Text(
-                stringResource(Res.string.firmware_update_latest, releaseTitle),
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.firmware_update_latest, releaseVersion),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -574,7 +580,7 @@ private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDe
                         runCatching {
                             val intent =
                                 android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                                    data = android.net.Uri.parse(infoUrl)
+                                    data = infoUrl.toUri()
                                 }
                             context.startActivity(intent)
                         }
@@ -687,12 +693,10 @@ private fun ColumnScope.AwaitingFileSaveState(
         style = MaterialTheme.typography.titleMedium,
         textAlign = TextAlign.Center,
     )
-    
+
     if (!showDialog) {
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { onSaveFile(state.fileName) }) {
-            Text(stringResource(Res.string.save))
-        }
+        Button(onClick = { onSaveFile(state.fileName) }) { Text(stringResource(Res.string.save)) }
     }
 }
 

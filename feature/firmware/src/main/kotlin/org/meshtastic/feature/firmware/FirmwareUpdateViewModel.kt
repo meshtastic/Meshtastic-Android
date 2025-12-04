@@ -162,6 +162,7 @@ constructor(
                                         !dismissed &&
                                         radioPrefs.isBle(),
                                     updateMethod = firmwareUpdateMethod,
+                                    currentFirmwareVersion = ourNode.metadata?.firmwareVersion,
                                 )
                         }
                     }
@@ -250,7 +251,7 @@ constructor(
                     _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_extracting))
                     val extension = if (currentState.updateMethod is FirmwareUpdateMethod.Ble) ".zip" else ".uf2"
                     val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
-                    
+
                     tempFirmwareFile = extractedFile
                     val firmwareUri = if (extractedFile != null) Uri.fromFile(extractedFile) else uri
 
@@ -263,7 +264,7 @@ constructor(
                             updateState = { _state.value = it },
                             notFoundMsg = "File not found",
                             startingMsg = getString(Res.string.firmware_update_starting_service),
-                            firmwareUri = firmwareUri
+                            firmwareUri = firmwareUri,
                         )
                     } else if (currentState.updateMethod is FirmwareUpdateMethod.Usb) {
                         usbUpdateHandler.startUpdate(
@@ -272,7 +273,7 @@ constructor(
                             hardware = currentState.deviceHardware,
                             updateState = { _state.value = it },
                             rebootingMsg = getString(Res.string.firmware_update_rebooting),
-                            firmwareUri = firmwareUri
+                            firmwareUri = firmwareUri,
                         )
                     }
                 } catch (e: CancellationException) {

@@ -191,8 +191,7 @@ constructor(
 
     suspend fun copyUriToUri(sourceUri: Uri, destinationUri: Uri) = withContext(Dispatchers.IO) {
         val inputStream =
-            context.contentResolver.openInputStream(sourceUri)
-                ?: throw IOException("Cannot open source URI")
+            context.contentResolver.openInputStream(sourceUri) ?: throw IOException("Cannot open source URI")
         val outputStream =
             context.contentResolver.openOutputStream(destinationUri)
                 ?: throw IOException("Cannot open destination URI")

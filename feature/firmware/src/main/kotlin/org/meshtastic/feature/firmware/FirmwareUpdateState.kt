@@ -33,6 +33,7 @@ sealed interface FirmwareUpdateState {
         val address: String,
         val showBootloaderWarning: Boolean,
         val updateMethod: FirmwareUpdateMethod,
+        val currentFirmwareVersion: String? = null,
     ) : FirmwareUpdateState
 
     data class Downloading(val progress: Float) : FirmwareUpdateState
@@ -45,9 +46,6 @@ sealed interface FirmwareUpdateState {
 
     data object Success : FirmwareUpdateState
 
-    data class AwaitingFileSave(
-        val uf2File: File?,
-        val fileName: String,
-        val sourceUri: Uri? = null,
-    ) : FirmwareUpdateState
+    data class AwaitingFileSave(val uf2File: File?, val fileName: String, val sourceUri: Uri? = null) :
+        FirmwareUpdateState
 }
