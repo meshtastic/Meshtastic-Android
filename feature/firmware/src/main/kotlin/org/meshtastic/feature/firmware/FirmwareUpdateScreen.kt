@@ -145,7 +145,11 @@ fun FirmwareUpdateScreen(
     val state by viewModel.state.collectAsState()
     val selectedReleaseType by viewModel.selectedReleaseType.collectAsState()
 
-    val getFileLauncher =
+    val getZipFileLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let { viewModel.startUpdateFromFile(it) }
+        }
+    val getUf2FileLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { viewModel.startUpdateFromFile(it) }
         }
@@ -168,7 +172,15 @@ fun FirmwareUpdateScreen(
         selectedReleaseType = selectedReleaseType,
         onReleaseTypeSelect = viewModel::setReleaseType,
         onStartUpdate = viewModel::startUpdate,
-        onPickFile = { getFileLauncher.launch("application/zip") },
+        onPickFile = {
+            if (state is FirmwareUpdateState.Ready) {
+                if ((state as FirmwareUpdateState.Ready).updateMethod is FirmwareUpdateMethod.Ble) {
+                    getZipFileLauncher.launch("application/zip")
+                } else if ((state as FirmwareUpdateState.Ready).updateMethod is FirmwareUpdateMethod.Usb) {
+                    getUf2FileLauncher.launch("*/*")
+                }
+            }
+        },
         onSaveFile = { fileName -> saveFileLauncher.launch(fileName) },
         onRetry = viewModel::checkForUpdates,
         onDone = { navController.navigateUp() },

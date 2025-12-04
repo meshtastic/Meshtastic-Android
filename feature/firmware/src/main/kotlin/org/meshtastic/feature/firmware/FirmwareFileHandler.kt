@@ -70,18 +70,6 @@ constructor(
         }
     }
 
-    suspend fun copyUriToFile(uri: Uri): File = withContext(Dispatchers.IO) {
-        val inputStream =
-            context.contentResolver.openInputStream(uri) ?: throw IOException("Cannot open content URI")
-
-        if (!tempDir.exists()) tempDir.mkdirs()
-
-        val targetFile = File(tempDir, "local_update.zip")
-
-        inputStream.use { input -> FileOutputStream(targetFile).use { output -> input.copyTo(output) } }
-        targetFile
-    }
-
     suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): File? =
         withContext(Dispatchers.IO) {
             val request = Request.Builder().url(url).build()
@@ -154,6 +142,37 @@ constructor(
             matchingEntries.minByOrNull { it.first.name.length }?.second
         }
 
+    suspend fun extractFirmware(uri: Uri, hardware: DeviceHardware, fileExtension: String): File? =
+        withContext(Dispatchers.IO) {
+            val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+            if (target.isEmpty()) return@withContext null
+
+            val targetLowerCase = target.lowercase()
+            val matchingEntries = mutableListOf<Pair<ZipEntry, File>>()
+
+            if (!tempDir.exists()) tempDir.mkdirs()
+
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
+                ZipInputStream(inputStream).use { zipInput ->
+                    var entry = zipInput.nextEntry
+                    while (entry != null) {
+                        val name = entry.name.lowercase()
+                        if (!entry.isDirectory && isValidFirmwareFile(name, targetLowerCase, fileExtension)) {
+                            val outFile = File(tempDir, File(name).name)
+                            FileOutputStream(outFile).use { output -> zipInput.copyTo(output) }
+                            matchingEntries.add(entry to outFile)
+                        }
+                        entry = zipInput.nextEntry
+                    }
+                }
+            } catch (e: IOException) {
+                Timber.w(e, "Failed to extract firmware from URI")
+                return@withContext null
+            }
+            matchingEntries.minByOrNull { it.first.name.length }?.second
+        }
+
     private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean {
         val regex = Regex(".*[\\-_]${Regex.escape(target)}[\\-_\\.].*")
         return filename.endsWith(fileExtension) &&
@@ -166,6 +185,17 @@ constructor(
         val outputStream =
             context.contentResolver.openOutputStream(destinationUri)
                 ?: throw IOException("Cannot open content URI for writing")
+
+        inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }
+    }
+
+    suspend fun copyUriToUri(sourceUri: Uri, destinationUri: Uri) = withContext(Dispatchers.IO) {
+        val inputStream =
+            context.contentResolver.openInputStream(sourceUri)
+                ?: throw IOException("Cannot open source URI")
+        val outputStream =
+            context.contentResolver.openOutputStream(destinationUri)
+                ?: throw IOException("Cannot open destination URI")
 
         inputStream.use { input -> outputStream.use { output -> input.copyTo(output) } }
     }

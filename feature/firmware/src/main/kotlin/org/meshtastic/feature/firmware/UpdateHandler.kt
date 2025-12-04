@@ -115,34 +115,41 @@ constructor(
         updateState: (FirmwareUpdateState) -> Unit,
         notFoundMsg: String,
         startingMsg: String,
+        firmwareUri: Uri? = null,
     ): File? {
-        try {
+        return try {
             updateState(FirmwareUpdateState.Downloading(0f))
-            val firmwareFile =
-                firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
-                    updateState(FirmwareUpdateState.Downloading(progress))
-                }
 
-            return if (firmwareFile == null) {
-                updateState(FirmwareUpdateState.Error(notFoundMsg))
+            if (firmwareUri != null) {
+                initiateDfu(address, hardware, firmwareUri, updateState, startingMsg)
                 null
             } else {
-                initiateDfu(address, hardware, firmwareFile, updateState, startingMsg)
-                firmwareFile
+                val firmwareFile =
+                    firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
+                        updateState(FirmwareUpdateState.Downloading(progress))
+                    }
+
+                if (firmwareFile == null) {
+                    updateState(FirmwareUpdateState.Error(notFoundMsg))
+                    null
+                } else {
+                    initiateDfu(address, hardware, Uri.fromFile(firmwareFile), updateState, startingMsg)
+                    firmwareFile
+                }
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Timber.e(e)
             updateState(FirmwareUpdateState.Error(e.message ?: "OTA Update failed"))
-            return null
+            null
         }
     }
 
     private fun initiateDfu(
         address: String,
         deviceHardware: DeviceHardware,
-        firmwareFile: File,
+        firmwareUri: Uri,
         updateState: (FirmwareUpdateState) -> Unit,
         startingMsg: String,
     ) {
@@ -159,7 +166,7 @@ constructor(
             .setPacketsReceiptNotificationsValue(PACKETS_BEFORE_PRN)
             .setScanTimeout(SCAN_TIMEOUT)
             .setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
-            .setZip(Uri.fromFile(firmwareFile))
+            .setZip(firmwareUri)
             .start(context, FirmwareDfuService::class.java)
     }
 }
@@ -176,30 +183,40 @@ constructor(
         hardware: DeviceHardware,
         updateState: (FirmwareUpdateState) -> Unit,
         rebootingMsg: String,
+        firmwareUri: Uri? = null,
     ): File? {
-        try {
+        return try {
             updateState(FirmwareUpdateState.Downloading(0f))
-            val firmwareFile =
-                firmwareRetriever.retrieveUsbFirmware(release, hardware) { progress ->
-                    updateState(FirmwareUpdateState.Downloading(progress))
-                }
 
-            return if (firmwareFile == null) {
-                updateState(FirmwareUpdateState.Error("Could not retrieve firmware file."))
-                null
-            } else {
+            if (firmwareUri != null) {
                 updateState(FirmwareUpdateState.Processing(rebootingMsg))
                 serviceRepository.meshService?.rebootToDfu()
                 delay(REBOOT_DELAY)
-                updateState(FirmwareUpdateState.AwaitingFileSave(firmwareFile, firmwareFile.name))
-                firmwareFile
+                updateState(FirmwareUpdateState.AwaitingFileSave(null, "firmware.uf2", firmwareUri))
+                null
+            } else {
+                val firmwareFile =
+                    firmwareRetriever.retrieveUsbFirmware(release, hardware) { progress ->
+                        updateState(FirmwareUpdateState.Downloading(progress))
+                    }
+
+                if (firmwareFile == null) {
+                    updateState(FirmwareUpdateState.Error("Could not retrieve firmware file."))
+                    null
+                } else {
+                    updateState(FirmwareUpdateState.Processing(rebootingMsg))
+                    serviceRepository.meshService?.rebootToDfu()
+                    delay(REBOOT_DELAY)
+                    updateState(FirmwareUpdateState.AwaitingFileSave(firmwareFile, firmwareFile.name))
+                    firmwareFile
+                }
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Timber.e(e)
             updateState(FirmwareUpdateState.Error(e.message ?: "USB Update failed"))
-            return null
+            null
         }
     }
 }

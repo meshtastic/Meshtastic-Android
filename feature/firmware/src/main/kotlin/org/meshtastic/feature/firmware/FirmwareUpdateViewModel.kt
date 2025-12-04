@@ -18,12 +18,14 @@
 package org.meshtastic.feature.firmware
 
 import android.content.BroadcastReceiver
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
+import android.webkit.MimeTypeMap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -210,11 +212,16 @@ constructor(
     fun saveDfuFile(uri: Uri) {
         val currentState = _state.value as? FirmwareUpdateState.AwaitingFileSave ?: return
         val firmwareFile = currentState.uf2File
+        val sourceUri = currentState.sourceUri
 
         viewModelScope.launch {
             try {
                 _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_copying))
-                fileHandler.copyFileToUri(firmwareFile, uri)
+                if (firmwareFile != null) {
+                    fileHandler.copyFileToUri(firmwareFile, uri)
+                } else if (sourceUri != null) {
+                    fileHandler.copyUriToUri(sourceUri, uri)
+                }
 
                 _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_flashing))
                 withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { waitForDeviceDetach(context).first() }
@@ -232,26 +239,60 @@ constructor(
         }
     }
 
+    fun getMimeType(uri: Uri): String {
+        var mimeType = ""
+            mimeType =
+                if (ContentResolver.SCHEME_CONTENT == uri.scheme) {
+                    val cr = context.contentResolver
+                    cr.getType(uri) ?: ""
+                } else {
+                    val ext = MimeTypeMap.getFileExtensionFromUrl(uri.toString())
+                    MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) ?: ""
+                }
+        return mimeType
+    }
+
     fun startUpdateFromFile(uri: Uri) {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
-        if (!isValidBluetoothAddress(currentState.address)) return
+        if (currentState.updateMethod is FirmwareUpdateMethod.Ble && !isValidBluetoothAddress(currentState.address)) {
+            return
+        }
 
         updateJob?.cancel()
         updateJob =
             viewModelScope.launch {
                 try {
                     _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_extracting))
-                    val localFile = fileHandler.copyUriToFile(uri)
-                    tempFirmwareFile = localFile
+                    val extension = if (currentState.updateMethod is FirmwareUpdateMethod.Ble) ".zip" else ".uf2"
+                    val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
+                    
+                    tempFirmwareFile = extractedFile
+                    val firmwareUri = if (extractedFile != null) Uri.fromFile(extractedFile) else uri
 
-                    otaUpdateHandler.startUpdate(
-                        release = FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
-                        hardware = currentState.deviceHardware,
-                        address = currentState.address,
-                        updateState = { _state.value = it },
-                        notFoundMsg = "File not found",
-                        startingMsg = getString(Res.string.firmware_update_starting_service),
-                    )
+                    val mimeType = getMimeType(uri)
+                    Timber.d("MIME type: $mimeType")
+
+                    if (currentState.updateMethod is FirmwareUpdateMethod.Ble) {
+                        otaUpdateHandler.startUpdate(
+                            release =
+                            FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                            hardware = currentState.deviceHardware,
+                            address = currentState.address,
+                            updateState = { _state.value = it },
+                            notFoundMsg = "File not found",
+                            startingMsg = getString(Res.string.firmware_update_starting_service),
+                            firmwareUri = firmwareUri
+                        )
+                    } else if (currentState.updateMethod is FirmwareUpdateMethod.Usb) {
+                        usbUpdateHandler.startUpdate(
+                            release =
+                            FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                            hardware = currentState.deviceHardware,
+                            updateState = { _state.value = it },
+                            rebootingMsg = getString(Res.string.firmware_update_rebooting),
+                            firmwareUri = firmwareUri
+                        )
+                    }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
