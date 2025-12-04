@@ -164,7 +164,6 @@ constructor(
             .setForceScanningForNewAddressInLegacyDfu(true)
             .setForeground(true)
             .setKeepBond(true)
-            .setRestoreBond(true)
             .setForceDfu(false)
             .setPrepareDataObjectDelay(DATA_OBJECT_DELAY)
             .setPacketsReceiptNotificationsValue(PACKETS_BEFORE_PRN)
