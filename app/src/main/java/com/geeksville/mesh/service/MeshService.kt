@@ -604,12 +604,13 @@ class MeshService : Service() {
         nodeNum: Int,
         withBroadcast: Boolean = true,
         channel: Int = 0,
+        forcePersist: Boolean = false,
         crossinline updateFn: (NodeEntity) -> Unit,
     ) {
         val info = getOrCreateNodeInfo(nodeNum, channel)
         updateFn(info)
 
-        if (info.user.id.isNotEmpty() && haveNodeDB) {
+        if (info.user.id.isNotEmpty() && (haveNodeDB || forcePersist)) {
             serviceScope.handledLaunch { nodeRepository.upsert(info) }
         }
 
@@ -1747,7 +1748,7 @@ class MeshService : Service() {
     /** Convert a protobuf NodeInfo into our model objects and update our node DB */
     private fun installNodeInfo(info: MeshProtos.NodeInfo) {
         // Just replace/add any entry
-        updateNodeInfo(info.num) {
+        updateNodeInfo(info.num, forcePersist = true) {
             if (info.hasUser()) {
                 // Check if this is a default/unknown user from firmware (node was evicted and re-created)
                 val shouldPreserve = shouldPreserveExistingUser(it.user, info.user)
