@@ -34,6 +34,8 @@ private const val SCAN_TIMEOUT = 2000L
 private const val PACKETS_BEFORE_PRN = 8
 private const val REBOOT_DELAY = 5000L
 
+private const val DATA_OBJECT_DELAY = 400L
+
 /** Retrieves firmware files, either by direct download or by extracting from a release asset. */
 class FirmwareRetriever @Inject constructor(private val fileHandler: FirmwareFileHandler) {
     suspend fun retrieveOtaFirmware(
@@ -162,7 +164,9 @@ constructor(
             .setForceScanningForNewAddressInLegacyDfu(true)
             .setForeground(true)
             .setKeepBond(true)
-            .setPacketsReceiptNotificationsEnabled(true)
+            .setRestoreBond(true)
+            .setForceDfu(false)
+            .setPrepareDataObjectDelay(DATA_OBJECT_DELAY)
             .setPacketsReceiptNotificationsValue(PACKETS_BEFORE_PRN)
             .setScanTimeout(SCAN_TIMEOUT)
             .setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
