@@ -37,7 +37,10 @@ import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import javax.inject.Inject
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.min
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 private const val ALIGNMENT_TOLERANCE_DEGREES = 5f
 private const val FULL_CIRCLE_DEGREES = 360f
@@ -45,6 +48,8 @@ private const val BEARING_FORMAT = "%.0f°"
 private const val MILLIS_PER_SECOND = 1000
 private const val SECONDS_PER_HOUR = 3600
 private const val SECONDS_PER_MINUTE = 60
+private const val HUNDRED = 100f
+private const val MILLIMETERS_PER_METER = 1000f
 
 @HiltViewModel
 /** Bridges heading + phone location into a single compass UI stream scoped to a target node. */
@@ -61,11 +66,13 @@ constructor(
 
     private var updatesJob: Job? = null
     private var targetPosition: Pair<Double, Double>? = null
+    private var targetPositionProto: org.meshtastic.proto.MeshProtos.Position? = null
     private var targetPositionTimeSec: Long? = null
 
     fun start(node: Node, displayUnits: DisplayUnits) {
         val targetPos = node.validPosition?.let { node.latitude to node.longitude }
         targetPosition = targetPos
+        targetPositionProto = node.position
         val targetColor = Color(node.colors.second)
         val targetName = node.user.longName.ifBlank { node.user.shortName.ifBlank { node.num.toString() } }
         targetPositionTimeSec = node.position.time.takeIf { it > 0 }?.toLong()
@@ -105,11 +112,15 @@ constructor(
         val warnings = buildWarnings(headingState, locationState)
         val target = targetPosition
 
+        val positionalAccuracyMeters = target?.let { calculatePositionalAccuracyMeters() }
+        val distanceMeters = calculateDistanceMeters(locationState, target)
         val bearingDegrees = calculateBearing(locationState, target)
-        val distanceText = calculateDistanceText(locationState, target, bearingDegrees, current.displayUnits)
+        val distanceText = distanceMeters?.toDistanceString(current.displayUnits)
         val bearingText = bearingDegrees?.let { BEARING_FORMAT.format(it) }
         val isAligned = isAligned(headingState.heading, bearingDegrees)
         val lastUpdateText = targetPositionTimeSec?.let { formatElapsed(it) }
+        val angularErrorDeg = calculateAngularError(positionalAccuracyMeters, distanceMeters)
+        val errorRadiusText = positionalAccuracyMeters?.toInt()?.toDistanceString(current.displayUnits)
 
         return current.copy(
             heading = headingState.heading,
@@ -119,6 +130,8 @@ constructor(
             warnings = warnings,
             isAligned = isAligned,
             lastUpdateText = lastUpdateText,
+            errorRadiusText = errorRadiusText,
+            angularErrorDeg = angularErrorDeg,
         )
     }
 
@@ -143,23 +156,17 @@ constructor(
             null
         }
 
-    private fun calculateDistanceText(
+    private fun calculateDistanceMeters(
         locationState: PhoneLocationState,
         target: Pair<Double, Double>?,
-        bearingDegrees: Float?,
-        displayUnits: DisplayUnits,
-    ): String? = if (bearingDegrees != null && target != null && locationState.location != null) {
-        latLongToMeter(
-            locationState.location.latitude,
-            locationState.location.longitude,
-            target.first,
-            target.second,
-        )
-            .toInt()
-            .toDistanceString(displayUnits)
-    } else {
-        null
-    }
+    ): Int? =
+        if (canUseLocation(locationState, target)) {
+            val location = locationState.location ?: return null
+            val activeTarget = target ?: return null
+            latLongToMeter(location.latitude, location.longitude, activeTarget.first, activeTarget.second).toInt()
+        } else {
+            null
+        }
 
     private fun canUseLocation(locationState: PhoneLocationState, target: Pair<Double, Double>?): Boolean =
         target != null &&
@@ -185,5 +192,37 @@ constructor(
         val seconds = diff % SECONDS_PER_MINUTE
         // Show a short elapsed string to match iOS behavior and avoid locale/format churn
         return "${hours}h ${minutes}m ${seconds}s ago"
+    }
+
+    private fun calculatePositionalAccuracyMeters(): Float? {
+        val position = targetPositionProto ?: return null
+        val positionTime = targetPositionTimeSec
+        if (positionTime == null || positionTime <= 0) return null
+
+        val gpsAccuracyMm = position.gpsAccuracy.toFloat()
+        if (gpsAccuracyMm <= 0f) return null
+
+        val dop: Float =
+            when {
+                position.getPDOP() > 0 -> position.getPDOP() / HUNDRED
+                position.getHDOP() > 0 && position.getVDOP() > 0 ->
+                    sqrt(
+                        (position.getHDOP() / HUNDRED).toDouble().pow(2.0) +
+                            (position.getVDOP() / HUNDRED).toDouble().pow(2.0),
+                    ).toFloat()
+                position.getHDOP() > 0 -> position.getHDOP() / HUNDRED
+                else -> return null
+            }
+
+        return (gpsAccuracyMm / MILLIMETERS_PER_METER) * dop
+    }
+
+    private fun calculateAngularError(positionalAccuracyMeters: Float?, distanceMeters: Int?): Float? {
+        val distance = distanceMeters ?: return null
+        val accuracy = positionalAccuracyMeters ?: return null
+        if (distance <= 0) return FULL_CIRCLE_DEGREES / 2
+
+        val radians = atan2(accuracy.toDouble(), distance.toDouble())
+        return Math.toDegrees(radians).toFloat().coerceIn(0f, FULL_CIRCLE_DEGREES / 2)
     }
 }

@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -55,6 +56,8 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.compass_bearing
 import org.meshtastic.core.strings.compass_bearing_na
 import org.meshtastic.core.strings.compass_distance
+import org.meshtastic.core.strings.compass_uncertainty
+import org.meshtastic.core.strings.compass_uncertainty_unknown
 import org.meshtastic.core.strings.compass_location_disabled
 import org.meshtastic.core.strings.compass_no_location_fix
 import org.meshtastic.core.strings.compass_no_location_permission
@@ -104,6 +107,7 @@ fun CompassSheetContent(
         CompassDial(
             heading = uiState.heading,
             bearing = uiState.bearing,
+            angularErrorDeg = uiState.angularErrorDeg,
             modifier = Modifier.fillMaxWidth(DIAL_WIDTH_FRACTION).aspectRatio(1f),
         )
 
@@ -118,6 +122,14 @@ fun CompassSheetContent(
                     uiState.bearingText?.let { stringResource(Res.string.compass_bearing, it) }
                         ?: stringResource(Res.string.compass_bearing_na),
                     style = MaterialTheme.typography.bodyLarge,
+                )
+                Text(
+                    text =
+                    uiState.errorRadiusText?.let { radius ->
+                        val angle = uiState.angularErrorDeg?.let { "%.0f°".format(it) } ?: "?"
+                        stringResource(Res.string.compass_uncertainty, radius, angle)
+                    } ?: stringResource(Res.string.compass_uncertainty_unknown),
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
@@ -207,6 +219,7 @@ private fun warningText(warning: CompassWarning): String = when (warning) {
 private fun CompassDial(
     heading: Float?,
     bearing: Float?,
+    angularErrorDeg: Float?,
     modifier: Modifier = Modifier,
     markerColor: Color = Color(0xFF2196F3),
 ) {
@@ -238,6 +251,19 @@ private fun CompassDial(
 
         // Target direction marker (blue line + dot just outside the dial)
         if (relativeBearing != null) {
+            if (angularErrorDeg != null && angularErrorDeg > 0f) {
+                val arcRadius = radius - TARGET_INNER_INSET
+                drawArc(
+                    color = targetStroke.copy(alpha = 0.25f),
+                    startAngle = (relativeBearing - angularErrorDeg - CANVAS_NORTH_OFFSET_DEGREES).toFloat(),
+                    sweepAngle = angularErrorDeg * 2f,
+                    useCenter = false,
+                    style = Stroke(width = TARGET_STROKE_WIDTH),
+                    topLeft = Offset(center.x - arcRadius, center.y - arcRadius),
+                    size = androidx.compose.ui.geometry.Size(arcRadius * 2, arcRadius * 2),
+                )
+            }
+
             val angleRad = Math.toRadians((relativeBearing - CANVAS_NORTH_OFFSET_DEGREES).toDouble())
             val lineEnd =
                 Offset(
@@ -332,6 +358,8 @@ private fun CompassSheetPreview() {
                 distanceText = "1.2 km",
                 bearingText = "90°",
                 lastUpdateText = "0h 3m 10s ago",
+                errorRadiusText = "150 m",
+                angularErrorDeg = 12f,
                 isAligned = false,
             ),
             onRequestLocationPermission = {},

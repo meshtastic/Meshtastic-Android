@@ -40,6 +40,8 @@ data class CompassUiState(
     val lastUpdateText: String? = null,
     val positionTimeSec: Long? = null, // Epoch seconds for the target position (used for elapsed display)
     val warnings: List<CompassWarning> = emptyList(),
+    val errorRadiusText: String? = null,
+    val angularErrorDeg: Float? = null,
     val isAligned: Boolean = false,
     val hasTargetPosition: Boolean = true,
     val displayUnits: DisplayUnits = DisplayUnits.METRIC,
