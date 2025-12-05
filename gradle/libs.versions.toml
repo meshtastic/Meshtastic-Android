@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "9.0.0-beta02"
+agp = "9.0.0-beta03"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -40,7 +40,7 @@ protobuf = "4.33.1"
 [libraries]
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.0" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.1" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
