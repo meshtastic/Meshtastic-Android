@@ -18,11 +18,7 @@
 package com.geeksville.mesh.buildlogic
 
 import com.diffplug.gradle.spotless.SpotlessExtension
-import io.gitlab.arturbosch.detekt.Detekt
-import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.named
 
 internal fun Project.configureSpotless(extension: SpotlessExtension) = extension.apply {
     extension.apply {
