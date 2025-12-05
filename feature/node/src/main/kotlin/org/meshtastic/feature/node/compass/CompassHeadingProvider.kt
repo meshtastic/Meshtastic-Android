@@ -22,6 +22,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.hardware.GeomagneticField
+import android.location.Location
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -33,14 +35,19 @@ private const val ORIENTATION_SIZE = 3
 private const val DEGREES_IN_CIRCLE = 360f
 
 data class HeadingState(
-    val heading: Float? = null,
+    val heading: Float? = null, // 0..360 degrees
     val hasSensor: Boolean = true,
     val accuracy: Int = SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM,
 )
 
 class CompassHeadingProvider @Inject constructor(@ApplicationContext private val context: Context) {
-    // Emits the current compass heading, preferring rotation vector and falling back to accel+magnetometer.
-    fun headingUpdates(): Flow<HeadingState> = callbackFlow {
+
+    /**
+     * Emits compass heading in degrees. If a location is provided, applies true north correction.
+     *
+     * @param location Optional Location from the phone's location provider.
+     */
+    fun headingUpdates(location: Location? = null): Flow<HeadingState> = callbackFlow {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         if (sensorManager == null) {
             trySend(HeadingState(hasSensor = false))
@@ -65,44 +72,57 @@ class CompassHeadingProvider @Inject constructor(@ApplicationContext private val
         var hasAccel = false
         var hasMagnet = false
 
-        val listener =
-            object : SensorEventListener {
-                override fun onSensorChanged(event: SensorEvent) {
-                    when (event.sensor.type) {
-                        Sensor.TYPE_ROTATION_VECTOR -> {
-                            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
-                            SensorManager.getOrientation(rotationMatrix, orientation)
-                            val azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                            val heading = (azimuth + DEGREES_IN_CIRCLE) % DEGREES_IN_CIRCLE
-                            trySend(HeadingState(heading = heading, hasSensor = true, accuracy = event.accuracy))
-                        }
-
-                        Sensor.TYPE_ACCELEROMETER -> {
-                            System.arraycopy(event.values, 0, accelValues, 0, accelValues.size)
-                            hasAccel = true
-                        }
-
-                        Sensor.TYPE_MAGNETIC_FIELD -> {
-                            System.arraycopy(event.values, 0, magnetValues, 0, magnetValues.size)
-                            hasMagnet = true
-                        }
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                when (event.sensor.type) {
+                    Sensor.TYPE_ROTATION_VECTOR -> {
+                        SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
                     }
-
-                    if (rotationSensor == null && hasAccel && hasMagnet) {
-                        val success = SensorManager.getRotationMatrix(rotationMatrix, null, accelValues, magnetValues)
-                        if (success) {
-                            SensorManager.getOrientation(rotationMatrix, orientation)
-                            val azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                            val heading = (azimuth + DEGREES_IN_CIRCLE) % DEGREES_IN_CIRCLE
-                            trySend(HeadingState(heading = heading, hasSensor = true, accuracy = event.accuracy))
-                        }
+                    Sensor.TYPE_ACCELEROMETER -> {
+                        System.arraycopy(event.values, 0, accelValues, 0, accelValues.size)
+                        hasAccel = true
+                    }
+                    Sensor.TYPE_MAGNETIC_FIELD -> {
+                        System.arraycopy(event.values, 0, magnetValues, 0, magnetValues.size)
+                        hasMagnet = true
                     }
                 }
 
-                override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-                    // No-op; accuracy is emitted with heading updates.
+                val ready = rotationSensor != null || (hasAccel && hasMagnet)
+                if (ready) {
+                    if (rotationSensor == null) {
+                        SensorManager.getRotationMatrix(rotationMatrix, null, accelValues, magnetValues)
+                    }
+
+                    SensorManager.getOrientation(rotationMatrix, orientation)
+                    var azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
+                    var heading = (azimuth + 360) % 360
+
+                    // True north correction using phone location if available
+                    location?.let { loc ->
+                        val geomagnetic = GeomagneticField(
+                            loc.latitude.toFloat(),
+                            loc.longitude.toFloat(),
+                            loc.altitude.toFloat(),
+                            System.currentTimeMillis()
+                        )
+                        heading = (heading + geomagnetic.declination + 360) % 360
+                    }
+
+                    trySend(
+                        HeadingState(
+                            heading = heading,
+                            hasSensor = true,
+                            accuracy = event.accuracy
+                        )
+                    )
                 }
             }
+
+            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+                // No-op
+            }
+        }
 
         rotationSensor?.let { sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_UI) }
         if (rotationSensor == null) {
