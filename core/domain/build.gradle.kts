@@ -15,18 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.android.build.api.dsl.ApplicationExtension
-import com.geeksville.mesh.buildlogic.configureFlavors
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.kotlin.dsl.configure
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.hilt)
+}
 
-class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
-    override fun apply(target: Project) {
-        with(target) {
-            extensions.configure<ApplicationExtension> {
-                configureFlavors(this)
-            }
-        }
-    }
+android { namespace = "org.meshtastic.core.domain" }
+
+dependencies {
+    implementation(projects.core.common)
+    implementation(projects.core.data)
+    implementation(projects.core.database)
+    implementation(projects.core.model)
+    implementation(projects.core.proto)
+
+    implementation(libs.javax.inject)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.timber)
+
+    testImplementation(libs.junit)
+    testImplementation(testFixtures(projects.core.model))
 }
