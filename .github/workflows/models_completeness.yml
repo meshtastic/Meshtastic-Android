@@ -3,10 +3,6 @@ name: Issue Completeness Check
 on:
   issues:
     types: [opened]
-    filters:
-      - if: >
-          !contains(github.event.issue.labels.*.name, 'enhancement') &&
-          !contains(github.event.issue.title, 'Feature Request')
 
 permissions:
   issues: write
@@ -15,6 +11,7 @@ permissions:
 jobs:
   check-completeness:
     runs-on: ubuntu-latest
+    if: ${{ !contains(join(github.event.issue.labels.*.name, ','), 'enhancement')) && !(contains(github.event.issue.title, 'feature request') }}
     steps:
       - name: Check issue completeness
         uses: actions/ai-inference@v2
@@ -27,7 +24,7 @@ jobs:
             Body: ${{ github.event.issue.body }}
           system-prompt: You are a helpful assistant that helps analyze GitHub issues for completeness.
           model: openai/gpt-4o-mini
-          temperature: 0.2
+          # temperature: 0.2
 
       - name: Comment on issue
         if: steps.ai.outputs.response != ''
