@@ -218,7 +218,6 @@
     <string name="meshtastic_service_notifications">Service notifications</string>
     <string name="about">About</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
-    <string name="channel_key_already_in_use">A channel with this key is already in use</string>
     <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug Panel</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>

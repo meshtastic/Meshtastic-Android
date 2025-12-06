@@ -40,11 +40,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
@@ -52,19 +50,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.util.hasDuplicateKeys
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.accept
 import org.meshtastic.core.strings.add
 import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.channel_key_already_in_use
 import org.meshtastic.core.strings.new_channel_rcvd
 import org.meshtastic.core.strings.replace
 import org.meshtastic.core.ui.component.ChannelSelection
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.channelSet
@@ -296,16 +290,10 @@ fun ScannedQrCodeDialog(
                             )
                         }
 
-                        val context = LocalContext.current
-                        val coroutineScope = rememberCoroutineScope()
                         TextButton(
                             onClick = {
-                                if (selectedChannelSet.hasDuplicateKeys()) {
-                                    coroutineScope.launch { context.showToast(Res.string.channel_key_already_in_use) }
-                                } else {
-                                    onDismiss()
-                                    onConfirm(selectedChannelSet)
-                                }
+                                onDismiss()
+                                onConfirm(selectedChannelSet)
                             },
                             enabled = selectedChannelSet.settingsCount in 1..8,
                         ) {
