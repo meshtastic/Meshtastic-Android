@@ -157,5 +157,9 @@ private fun handleNodeAction(
         is NodeDetailAction.ShareContact -> {
             /* Handled in NodeDetailContent */
         }
+
+        is NodeDetailAction.OpenCompass -> {
+            /* Handled in NodeDetailList */
+        }
     }
 }
