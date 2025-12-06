@@ -74,7 +74,6 @@
     <!-- Position Config -->
     <string name="channel_name">チャンネル名</string>
     <string name="qr_code">QRコード</string>
-    <string name="application_icon">アプリアイコン</string>
     <string name="unknown_username">ユーザー名不明</string>
     <string name="send">送信</string>
     <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 https://github.com/orgs/meshtastic/discussions\n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>
@@ -549,6 +548,5 @@
     <string name="error_no_app_to_handle_link">リンクを処理できるアプリケーションがありません。</string>
     <string name="system_settings">システム設定</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">ファームウェア更新</string>
     <string name="firmware_update_failed">更新失敗</string>
 </resources>

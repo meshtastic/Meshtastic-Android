@@ -71,7 +71,6 @@
     <!-- Position Config -->
     <string name="channel_name">Kanal Navn</string>
     <string name="qr_code">QR kode</string>
-    <string name="application_icon">applikasjon ikon</string>
     <string name="unknown_username">Ukjent Brukernavn</string>
     <string name="send">Send</string>
     <string name="warning_not_paired">Du har ikke paret en Meshtastic kompatibel radio med denne telefonen. Vennligst parr en enhet, og sett ditt brukernavn.\n\nDenne åpen kildekode applikasjonen er i alfa-testing, Hvis du finner problemer, vennligst post på vårt forum: https://github.com/orgs/meshtastic/discussions\n\nFor mer informasjon, se vår nettside - www.meshtastic.org.</string>
@@ -257,6 +256,5 @@
     <string name="one_day">24 Timer</string>
     <string name="two_days">48 Timer</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Oppdater Firmware</string>
     <string name="firmware_update_failed">Oppdatering feilet</string>
 </resources>

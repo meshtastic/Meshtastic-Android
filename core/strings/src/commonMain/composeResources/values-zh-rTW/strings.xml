@@ -151,7 +151,6 @@
     <string name="debug">调试</string>
     <string name="channel_name">頻道名稱</string>
     <string name="qr_code">QRCODE</string>
-    <string name="application_icon">應用程式圖示</string>
     <string name="unknown_username">未知的使用者名稱</string>
     <string name="send">傳送</string>
     <string name="warning_not_paired">您尚未將手機與 Meshtastic 相容的裝置配對。請先配對裝置並設置您的使用者名稱。\n\n此開源應用程式仍在開發中，如有問題，請在我們的論壇 https://github.com/orgs/meshtastic/discussions 上面發文詢問。\n\n 也可參閱我們的網頁 - www.meshtastic.org。</string>
@@ -903,7 +902,6 @@
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%1$s</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">更新韌體</string>
     <string name="firmware_update_done">完成</string>
     <string name="firmware_update_failed">更新失敗</string>
 </resources>

@@ -105,7 +105,6 @@
     <string name="debug">Depuração</string>
     <string name="channel_name">Nome do Canal</string>
     <string name="qr_code">Código QR</string>
-    <string name="application_icon">icone da aplicação</string>
     <string name="unknown_username">Nome de utilizador desconhecido</string>
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Ainda não emparelhou um rádio compatível com Meshtastic com este telefone. Emparelhe um dispositivo e defina seu nome de usuário.\n\nEste aplicativo de código aberto está em teste alfa, se encontrar problemas, por favor reporte através do nosso forum em: https://github.com/orgs/meshtastic/discussions\n\nPara obter mais informações, consulte a nossa página web - www.meshtastic.org.</string>
@@ -565,6 +564,5 @@
     <string name="one_day">24 Horas</string>
     <string name="two_days">48 Horas</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Atualizar Firmware</string>
     <string name="firmware_update_failed">Atualização falhou</string>
 </resources>

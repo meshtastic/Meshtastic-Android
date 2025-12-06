@@ -123,7 +123,6 @@
     <string name="debug">Debugowanie</string>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="qr_code">Kod QR</string>
-    <string name="application_icon">ikona aplikacji</string>
     <string name="unknown_username">Nieznana nazwa użytkownika</string>
     <string name="send">Wyślij</string>
     <string name="warning_not_paired">Nie sparowałeś jeszcze urządzenia Meshtastic z tym telefonem. Proszę sparować urządzenie i ustawić swoją nazwę użytkownika.\n\nTa aplikacja open-source jest w fazie rozwoju, jeśli znajdziesz problemy, napisz na naszym forum: https://github.com/orgs/meshtastic/discussions\n\nWięcej informacji znajdziesz na naszej stronie internetowej - www.meshtastic.org.</string>
@@ -559,7 +558,6 @@
     <string name="two_days">48 Godzin</string>
     <string name="learn_more">Dowiedz się więcej</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Aktualizuj oprogramowanie</string>
     <string name="firmware_update_no_device">Brak podłączonych urządzeń</string>
     <string name="firmware_update_failed">Aktualizacja nie udała się</string>
 </resources>

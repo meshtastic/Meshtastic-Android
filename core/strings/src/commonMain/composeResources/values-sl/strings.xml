@@ -71,7 +71,6 @@
     <!-- Position Config -->
     <string name="channel_name">Ime kanala</string>
     <string name="qr_code">QR koda</string>
-    <string name="application_icon">Ikona aplikacije</string>
     <string name="unknown_username">Neznano uporabniško ime</string>
     <string name="send">Pošlji</string>
     <string name="warning_not_paired">S tem telefonom še niste seznanili združljivega Meshtastic radia. Prosimo povežite napravo in nastavite svoje uporabniško ime. \n\nTa odprtokodna aplikacija je v alfa testiranju, če imate težave, objavite na našem spletnem klepetu.\n\nZa več informacij glejte našo spletno stran - www.meshtastic.org.</string>
@@ -261,6 +260,5 @@
     <string name="one_day">24 Ur</string>
     <string name="two_days">48 Ur</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Posodobite vdelano programsko opremo</string>
     <string name="firmware_update_failed">Posodobitev neuspešna</string>
 </resources>

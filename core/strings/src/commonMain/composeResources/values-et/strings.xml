@@ -153,7 +153,6 @@
     <string name="debug">Silumine</string>
     <string name="channel_name">Kanali nimi</string>
     <string name="qr_code">QR kood</string>
-    <string name="application_icon">rakenduse ikoon</string>
     <string name="unknown_username">Tundmatu kasutajanimi</string>
     <string name="send">Saada</string>
     <string name="warning_not_paired">Ei ole veel ühendanud Meshtastic -kokku sobivat raadiot telefoniga. Seo seade selle telefoniga ja määra kasutajanimi.\n\nSee avatud lähtekoodiga programm on alpha-testi staatuses. Kui märkad vigu, saada palun sõnum meie foorumisse: https://github.com/orgs/meshtastic/discussions\n\nLisateave kodulehel - www.meshtastic.org.</string>
@@ -935,7 +934,6 @@
     <string name="firmware_update_latest">Viimane väljalase: %1$s</string>
     <string name="firmware_update_stable">Stabiilne</string>
     <string name="firmware_update_alpha">Alfa</string>
-    <string name="firmware_update_button">Värskenda püsivara</string>
     <string name="firmware_update_disconnect_warning">Märkus. See katkestab ajutiselt teie seadme ühenduse värskendamise ajal.</string>
     <string name="firmware_update_downloading">Laen püsivara... %1$d%</string>
     <string name="firmware_update_error">Viga: %1$s</string>
@@ -945,7 +943,6 @@
     <string name="firmware_update_starting_dfu">DFU käivitamine...</string>
     <string name="firmware_update_updating">Uuendan... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Tundmatu riistvaramudel: %1$d</string>
-    <string name="firmware_update_invalid_address">Ühendatud seade ei ole BLE-seade või aadress on teadmata (%1$s). DFU nõuab BLE-d.</string>
     <string name="firmware_update_no_device">Ühtegi seadet pole ühendatud</string>
     <string name="firmware_update_not_found_in_release">%1$s püsivara ei leitud selles versioonis.</string>
     <string name="firmware_update_extracting">Püsivara lahtipakkimine...</string>
