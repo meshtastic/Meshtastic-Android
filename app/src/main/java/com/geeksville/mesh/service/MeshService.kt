@@ -1459,6 +1459,7 @@ class MeshService : Service() {
     private fun onConnectionChanged(c: ConnectionState) {
         if (connectionStateHolder.connectionState.value == c && c !is ConnectionState.Connected) return
         Timber.d("onConnectionChanged: ${connectionStateHolder.connectionState.value} -> $c")
+        serviceRepository.setConnectionTransport(currentTransport())
 
         // Cancel any existing timeouts
         sleepTimeout?.cancel()
@@ -2602,6 +2603,10 @@ class MeshService : Service() {
                 packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { rebootSeconds = 5 },
                 )
+            }
+
+            override fun rebootToDfu() {
+                packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { enterDfuModeRequest = true })
             }
 
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
