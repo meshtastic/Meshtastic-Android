@@ -92,6 +92,7 @@ fun ChannelSet.qrCode(shouldAdd: Boolean): Bitmap? = try {
 
 /**
  * Check if the ChannelSet contains any duplicate PSKs.
+ *
  * @return true if there are duplicate PSKs, false otherwise
  */
 fun ChannelSet.hasDuplicateKeys(): Boolean {

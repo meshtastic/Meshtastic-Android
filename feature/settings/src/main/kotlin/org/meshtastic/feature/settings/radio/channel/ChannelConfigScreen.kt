@@ -41,11 +41,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,12 +55,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.util.hasDuplicateKeys
-import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add
 import org.meshtastic.core.strings.cancel
@@ -72,10 +70,10 @@ import org.meshtastic.core.strings.press_and_drag
 import org.meshtastic.core.strings.send
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
 import org.meshtastic.feature.settings.radio.channel.component.ChannelConfigHeader
@@ -84,6 +82,7 @@ import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDial
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
 import org.meshtastic.feature.settings.radio.channel.component.SECONDARY_CHANNEL_EPOCH
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
+import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.channelSettings
@@ -147,10 +146,13 @@ private fun ChannelConfigScreen(
     // Check if the current channel list has duplicate PSKs - recompute when list changes
     var hasDuplicateKeys by remember { mutableStateOf(false) }
     LaunchedEffect(settingsListInput.size, settingsListInput.toList(), loraConfig) {
-        val channelSet = AppOnlyProtos.ChannelSet.newBuilder().apply {
-            addAllSettings(settingsListInput.toList())
-            setLoraConfig(loraConfig)
-        }.build()
+        val channelSet =
+            AppOnlyProtos.ChannelSet.newBuilder()
+                .apply {
+                    addAllSettings(settingsListInput.toList())
+                    setLoraConfig(loraConfig)
+                }
+                .build()
         hasDuplicateKeys = channelSet.hasDuplicateKeys()
     }
 
@@ -167,8 +169,7 @@ private fun ChannelConfigScreen(
             modemPresetName = modemPresetName,
             onAddClick = { newChannelSettings ->
                 val isEditing = index < settingsListInput.size
-                val originalChannel = if (isEditing) settingsListInput[index] else null
-                
+
                 // Build a temporary list to check for duplicates
                 val tempList = settingsListInput.toMutableList()
                 if (isEditing) {
@@ -176,19 +177,20 @@ private fun ChannelConfigScreen(
                 } else {
                     tempList.add(newChannelSettings)
                 }
-                
+
                 // Check for duplicates in the temporary list
-                val tempChannelSet = AppOnlyProtos.ChannelSet.newBuilder().apply {
-                    addAllSettings(tempList)
-                    setLoraConfig(loraConfig)
-                }.build()
-                
+                val tempChannelSet =
+                    AppOnlyProtos.ChannelSet.newBuilder()
+                        .apply {
+                            addAllSettings(tempList)
+                            setLoraConfig(loraConfig)
+                        }
+                        .build()
+
                 val hasDuplicate = tempChannelSet.hasDuplicateKeys()
 
                 if (hasDuplicate) {
-                    coroutineScope.launch {
-                        context.showToast(Res.string.channel_key_already_in_use)
-                    }
+                    coroutineScope.launch { context.showToast(Res.string.channel_key_already_in_use) }
                     // If this was a new channel added by FAB (at the end), remove it
                     // FAB adds channel then opens dialog, so index will be lastIndex
                     if (index == settingsListInput.size - 1 && index >= 0) {
@@ -303,9 +305,7 @@ private fun ChannelConfigScreen(
                             onPositiveClicked = {
                                 focusManager.clearFocus()
                                 if (hasDuplicateKeys) {
-                                    coroutineScope.launch {
-                                        context.showToast(Res.string.channel_key_already_in_use)
-                                    }
+                                    coroutineScope.launch { context.showToast(Res.string.channel_key_already_in_use) }
                                 } else {
                                     onPositiveClicked(settingsListInput)
                                 }

@@ -63,8 +63,8 @@ import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.channel_key_already_in_use
 import org.meshtastic.core.strings.new_channel_rcvd
 import org.meshtastic.core.strings.replace
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.component.ChannelSelection
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.channelSet
@@ -301,9 +301,7 @@ fun ScannedQrCodeDialog(
                         TextButton(
                             onClick = {
                                 if (selectedChannelSet.hasDuplicateKeys()) {
-                                    coroutineScope.launch {
-                                        context.showToast(Res.string.channel_key_already_in_use)
-                                    }
+                                    coroutineScope.launch { context.showToast(Res.string.channel_key_already_in_use) }
                                 } else {
                                     onDismiss()
                                     onConfirm(selectedChannelSet)
