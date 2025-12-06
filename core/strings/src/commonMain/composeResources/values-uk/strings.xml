@@ -230,6 +230,7 @@
     <string name="info">Інформація</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Спільний ключ</string>
+    <string name="encryption_error">Не збігаються відкритий ключ</string>
     <string name="more_details">Докладніше</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
@@ -273,6 +274,7 @@
     <string name="range_test">Тест дальності</string>
     <string name="telemetry">Телеметрія</string>
     <string name="audio">Аудіо</string>
+    <string name="remote_hardware">Віддалене обладнання</string>
     <string name="audio_config">Налаштування аудіо</string>
     <string name="ptt_pin">PTT контакт</string>
     <string name="bluetooth_config">Налаштування Bluetooth</string>
@@ -304,6 +306,7 @@
     <string name="lora_config">LoRa</string>
     <string name="options">Налаштування</string>
     <string name="advanced">Розширені</string>
+    <string name="modem_preset">Пресети</string>
     <string name="frequency_offset_mhz">Зсув частоти (МГц)</string>
     <string name="region_frequency_plan">Регіон</string>
     <string name="tx_power_dbm">Потужність передачі</string>
@@ -317,6 +320,7 @@
     <string name="username">Ім'я користувача</string>
     <string name="password">Пароль</string>
     <string name="encryption_enabled">Шифрування увімкнено</string>
+    <string name="json_output_enabled">Вивід JSON увімкнено</string>
     <string name="tls_enabled">TLS увімкнений</string>
     <string name="update_interval_seconds">Інтервал оновлення (секунд)</string>
     <string name="network_config">Мережа</string>
@@ -428,6 +432,7 @@
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Безпека каналу</string>
     <string name="cancel_reply">Скасувати відповідь</string>
     <string name="delete_messages_title">Видалити повідомлення?</string>
     <string name="message_input_label">Повідомлення</string>
@@ -444,6 +449,7 @@
     <string name="latest_alpha_firmware">Остання альфа</string>
     <string name="get_started">З чого почати</string>
     <string name="intro_welcome">Ласкаво просимо до</string>
+    <string name="create_your_own_networks">Створіть свої власні мережі</string>
     <string name="app_notifications">Сповіщення застосунку</string>
     <string name="incoming_messages">Вхідні повідомлення</string>
     <string name="notifications_for_channel_and_direct_messages">Сповіщення для каналу та особистих повідомлень.</string>
