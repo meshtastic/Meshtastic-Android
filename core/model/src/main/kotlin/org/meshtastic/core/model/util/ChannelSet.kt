@@ -89,3 +89,21 @@ fun ChannelSet.qrCode(shouldAdd: Boolean): Bitmap? = try {
     Timber.e("URL was too complex to render as barcode")
     null
 }
+
+/**
+ * Check if the ChannelSet contains any duplicate PSKs.
+ *
+ * @return true if there are duplicate PSKs, false otherwise
+ */
+fun ChannelSet.hasDuplicateKeys(): Boolean {
+    val pskList = mutableListOf<ByteArray>()
+    for (setting in settingsList) {
+        val channel = Channel(setting, loraConfig)
+        val pskBytes = channel.psk.toByteArray()
+        if (pskList.any { it contentEquals pskBytes }) {
+            return true
+        }
+        pskList.add(pskBytes)
+    }
+    return false
+}
