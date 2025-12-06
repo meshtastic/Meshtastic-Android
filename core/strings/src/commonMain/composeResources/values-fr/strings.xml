@@ -726,6 +726,7 @@
     <string name="conversations">Conversations</string>
     <string name="nodes">Nœuds</string>
     <string name="bottom_nav_settings">Réglages</string>
+    <string name="selected">Sélectionné</string>
     <string name="set_your_region">Définir votre région</string>
     <string name="reply">Répondre</string>
     <string name="map_reporting_summary">Votre nœud enverra périodiquement un paquet de rapport de position non chiffré au serveur MQTT configuré. Ce paquet inclut l'identifiant, les noms long et court, la position approximative, le modèle matériel, le rôle, la version du micrologiciel, la région LoRa, le préréglage du modem et le nom du canal principal.</string>
@@ -928,6 +929,7 @@
     <string name="firmware_update_title">Mise à jour du firmware</string>
     <string name="firmware_update_checking">Vérification des mises à jour...</string>
     <string name="firmware_update_device">Appareil : %1$s</string>
+    <string name="firmware_update_currently_installed">Actuellement installé : %1$s</string>
     <string name="firmware_update_latest">Dernière version : %1$s</string>
     <string name="firmware_update_stable">Stable</string>
     <string name="firmware_update_alpha">Alpha</string>
@@ -940,6 +942,7 @@
     <string name="firmware_update_starting_dfu">Démarrage du mode DFU...</string>
     <string name="firmware_update_updating">Mise à jour... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Modèle de matériel inconnu : %1$d</string>
+    <string name="firmware_update_invalid_address">Le périphérique connecté n'est pas un périphérique BLE valide ou l'adresse est inconnue (%1$s).</string>
     <string name="firmware_update_no_device">Aucun appareil connecté</string>
     <string name="firmware_update_not_found_in_release">Impossible de trouver le firmware pour %1$s dans cette version.</string>
     <string name="firmware_update_extracting">Extraction du firmware...</string>
@@ -953,7 +956,17 @@
     <string name="firmware_update_select_file">Sélectionnez le fichier local</string>
     <string name="firmware_update_unknown_release">Version distante inconnue</string>
     <string name="firmware_update_disclaimer_title">Avertissement de mise à jour</string>
-    <string name="firmware_update_disclaimer_text">Vous êtes sur le point d'installer un nouveau firrmware sur votre appareil. Ce processus comporte des risques.\n\n• Assurez-vous que votre appareil est chargé.\n• Conservez l'appareil près de votre smartphone.\n• Ne fermez pas l'application durant la mise à jour\n\nVérifiez que vous avez sélectionné le bon firmware pour votre matériel.</string>
+    <string name="firmware_update_disclaimer_text">Vous êtes sur le point d'installer un nouveau micrologiciel (firrmware) sur votre appareil. Ce processus comporte des risques.\n\n• Assurez-vous que votre appareil est chargé.\n• Conservez l'appareil près de votre smartphone.\n• Ne fermez pas l'application durant la mise à jour\n\nVérifiez que vous avez sélectionné le bon firmware pour votre matériel.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Gardez votre échelle à portée de main !</string>
     <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Redémarrage en mode DFU...</string>
+    <string name="firmware_update_waiting_for_device">Attente du périphérique en mode DFU...</string>
+    <string name="firmware_update_copying">Copie du micrologiciel (firmware)...</string>
+    <string name="firmware_update_save_dfu_file">Veuillez enregistrer le fichier .uf2 sur le lecteur DFU de votre appareil.</string>
+    <string name="firmware_update_flashing">Flash de l'appareil, veuillez patienter...</string>
+    <string name="firmware_update_method_usb">Transfert de fichier USB</string>
+    <string name="firmware_update_method_ble">Mise à jour via Bluetooth</string>
+    <string name="firmware_update_method_detail">Mettre à jour via %1$s</string>
+    <string name="firmware_update_usb_instruction_title">Sélectionnez un lecteur USB DFU</string>
+    <string name="firmware_update_usb_instruction_text">Votre appareil a redémarré en mode DFU et devrait apparaître comme une clé USB (par exemple, RAK4631).\n\nLorsque le sélecteur de fichier s'ouvre, veuillez sélectionner la racine de ce lecteur pour enregistrer le fichier firmware.</string>
 </resources>

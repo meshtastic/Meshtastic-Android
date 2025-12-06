@@ -111,7 +111,12 @@
     <string name="config_lora_modem_preset_summary">Le preimpostazioni del modem disponibili, la predefinita è Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Imposta il numero massimo di hop, il predefinito è 3. Aumentare gli hop comporta anche aumentare la congestione e dovrebbe essere utilizzato con attenzione. Con 0 hop, i messaggi non otterranno ACK.</string>
     <string name="config_lora_frequency_slot_summary">La frequenza di funzionamento del nodo viene calcolata in base alla regione, alla preimpostazione del modem e a questo campo. Quando è a 0, lo slot viene calcolato automaticamente in base al nome del canale primario e cambierà rispetto allo slot pubblico predefinito. Torna allo slot pubblico predefinito se sono configurati canali primari privati e secondari pubblici.</string>
+    <string name="config_network_wifi_enabled_summary">L'attivazione della WiFi disabiliterà la connessione bluetooth con l'app.</string>
+    <string name="config_network_eth_enabled_summary">L'attivazione della connessione Ethernet disabiliterà la connessione bluetooth all'app. La connessione al nodo via TCP non è disponibile per i dispositivi Apple.</string>
     <string name="config_network_udp_enabled_summary">Abilita la trasmissione di pacchetti tramite UDP sulla rete locale.</string>
+    <string name="config_position_broadcast_secs_summary">Il tempo massimo che può trascorrere senza che il nodo trasmetta la posizione.</string>
+    <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Il tempo minimo tra un invio e l'altro per aggiornare della posizione, se la distanza minima è stata raggiunta.</string>
+    <string name="config_position_broadcast_smart_minimum_distance_summary">La distanza minima percorsa in metri per essere considerata per la trasmissione in modalità smart position.</string>
     <string name="config_security_private_key">Usato per creare una chiave condivisa con un dispositivo remoto.</string>
     <string name="config_security_serial_enabled">Console seriale attraverso la Stream API.</string>
     <string name="config_security_debug_log_api_enabled">Output live debug logging su seriale, visualizza ed esporta i log di posizione dei dispositivi redatti su Bluetooth.</string>
@@ -341,6 +346,7 @@
     <string name="alert_bell_text">Carattere Campana Di Allarme!</string>
     <string name="critical_alert">Avvisi critici</string>
     <string name="favorite">Preferito</string>
+    <string name="add_favorite">Aggiungi ai preferiti</string>
     <string name="favorite_add">Aggiungere '%1$s' ai nodi preferiti?</string>
     <string name="favorite_remove">Rimuovere '%1$s' dai nodi preferiti?</string>
     <string name="power_metrics_log">Registro Metriche Alimentazione</string>
@@ -495,6 +501,7 @@
     <string name="override_frequency_mhz">Sovrascrivi Frequenza</string>
     <string name="pa_fan_disabled">Ventola PA disabilitata</string>
     <string name="ignore_mqtt">Ignora MQTT</string>
+    <string name="ok_to_mqtt">OK per MQTT</string>
     <string name="mqtt_config">Configurazione MQTT</string>
     <string name="mqtt_enabled">MQTT abilitato</string>
     <string name="address">Indirizzo</string>
@@ -669,6 +676,7 @@
     <string name="conversations">Conversazioni</string>
     <string name="nodes">Nodi</string>
     <string name="bottom_nav_settings">Impostazioni</string>
+    <string name="selected">Selezionato</string>
     <string name="set_your_region">Imposta la tua regione</string>
     <string name="reply">Rispondi</string>
     <string name="map_reporting_summary">Il nodo invierà periodicamente un pacchetto di report mappa non cifrato al server MQTT configurato, questo include il nome id lungo e breve, posizione approssimativa, modello hardware, ruolo, versione firmware, regione LoRa, configurazione modem e nome del canale primario.</string>
@@ -859,7 +867,34 @@
     <string name="relayed_by">Ritrasmesso da: %1$s</string>
     <string name="learn_more">Maggiori informazioni</string>
     <string name="preserve_favorites">Conservare I Preferiti?</string>
+    <string name="usb_devices">Dispositivi USB</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">Aggiornamento Firmware</string>
+    <string name="firmware_update_checking">Verifica aggiornamenti in corso...</string>
+    <string name="firmware_update_device">Dispositivo: %1$s</string>
+    <string name="firmware_update_currently_installed">Versione Installata: %1$s</string>
+    <string name="firmware_update_latest">Versione Più Recente: %1$s</string>
+    <string name="firmware_update_stable">Stabile</string>
+    <string name="firmware_update_alpha">Alfa</string>
+    <string name="firmware_update_disconnect_warning">Nota: Questa procedura scollegherà temporaneamente il dispositivo durante l'aggiornamento.</string>
+    <string name="firmware_update_downloading">Scaricamento in corso del firmware... %1$d%</string>
+    <string name="firmware_update_error">Errore: %1$s</string>
+    <string name="firmware_update_retry">Riprova</string>
+    <string name="firmware_update_success">Aggiornamento Riuscito!</string>
     <string name="firmware_update_done">Fatto</string>
+    <string name="firmware_update_starting_dfu">Avvio modalità DFU...</string>
+    <string name="firmware_update_updating">Aggiornamento in corso... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Modello hardware sconosciuto: %1$d</string>
+    <string name="firmware_update_no_device">Nessun dispositivo connesso</string>
+    <string name="firmware_update_not_found_in_release">Impossibile trovare il firmware per %1$s nelle release.</string>
+    <string name="firmware_update_extracting">Estrazione firmware in corso...</string>
+    <string name="firmware_update_starting_service">Disconnessione in corso per avviare il servizio DFU...</string>
     <string name="firmware_update_failed">Aggiornamento non riuscito</string>
+    <string name="firmware_update_keep_device_close">Mantieni il dispositivo vicino al telefono.</string>
+    <string name="firmware_update_do_not_close">Non chiudere l'app.</string>
+    <string name="firmware_update_almost_there">Ci siamo quasi...</string>
+    <string name="firmware_update_taking_a_while">Potrebbe volerci un minuto...</string>
+    <string name="firmware_update_select_file">Seleziona File Locale</string>
+    <string name="firmware_update_unknown_release">Versione remota sconosciuta</string>
+    <string name="firmware_update_disclaimer_title">Avvertenza Aggiornamento</string>
 </resources>
