@@ -67,8 +67,23 @@ fun AdaptiveNodeListScreen(
     val scope = rememberCoroutineScope()
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
+    // Handle back navigation from detail pane
     BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) {
-        scope.launch { navigator.navigateBack(backNavigationBehavior) }
+        if (initialNodeId != null) {
+            // If opened with initialNodeId (from Map/Connections), always go back to previous screen
+            navController.navigateUp()
+        } else {
+            // Normal navigation within scaffold (when opened from Nodes tab)
+            scope.launch { navigator.navigateBack(backNavigationBehavior) }
+        }
+    }
+
+    // Handle back from list pane when opened with initialNodeId
+    // This handles the case where user is on list pane after scaffold navigation on tablet
+    BackHandler(
+        enabled = initialNodeId != null && navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.List,
+    ) {
+        navController.navigateUp()
     }
 
     LaunchedEffect(initialNodeId) {

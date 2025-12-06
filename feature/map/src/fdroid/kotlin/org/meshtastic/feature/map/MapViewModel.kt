@@ -39,6 +39,7 @@ constructor(
     serviceRepository: ServiceRepository,
     radioConfigRepository: RadioConfigRepository,
     buildConfigProvider: BuildConfigProvider,
+    private val mapLibrePrefs: org.meshtastic.core.prefs.map.MapLibrePrefs,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
 
     var mapStyleId: Int
@@ -56,4 +57,85 @@ constructor(
     val applicationId = buildConfigProvider.applicationId
 
     fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+
+    // MapLibre camera position
+    fun saveCameraPosition(latitude: Double, longitude: Double, zoom: Double, bearing: Double, tilt: Double) {
+        mapLibrePrefs.cameraTargetLat = latitude
+        mapLibrePrefs.cameraTargetLng = longitude
+        mapLibrePrefs.cameraZoom = zoom
+        mapLibrePrefs.cameraBearing = bearing
+        mapLibrePrefs.cameraTilt = tilt
+        // Set flag to restore position on next map open (e.g., returning from node details)
+        mapLibrePrefs.shouldRestoreCameraPosition = true
+    }
+
+    fun getCameraPosition(): CameraState? {
+        // Only restore if flag is set (user is returning from node details)
+        if (!mapLibrePrefs.shouldRestoreCameraPosition) {
+            return null
+        }
+
+        val lat = mapLibrePrefs.cameraTargetLat
+        val lng = mapLibrePrefs.cameraTargetLng
+
+        // Clear the flag so position is only restored once (on return from node details)
+        mapLibrePrefs.shouldRestoreCameraPosition = false
+
+        return if (lat != 0.0 || lng != 0.0) {
+            CameraState(
+                latitude = lat,
+                longitude = lng,
+                zoom = mapLibrePrefs.cameraZoom,
+                bearing = mapLibrePrefs.cameraBearing,
+                tilt = mapLibrePrefs.cameraTilt,
+            )
+        } else {
+            null
+        }
+    }
+
+    // Map settings
+    var markerColorMode: String
+        get() = mapLibrePrefs.markerColorMode
+        set(value) {
+            mapLibrePrefs.markerColorMode = value
+        }
+
+    var clusteringEnabled: Boolean
+        get() = mapLibrePrefs.clusteringEnabled
+        set(value) {
+            mapLibrePrefs.clusteringEnabled = value
+        }
+
+    var heatmapEnabled: Boolean
+        get() = mapLibrePrefs.heatmapEnabled
+        set(value) {
+            mapLibrePrefs.heatmapEnabled = value
+        }
+
+    var baseStyleIndex: Int
+        get() = mapLibrePrefs.baseStyleIndex
+        set(value) {
+            mapLibrePrefs.baseStyleIndex = value
+        }
+
+    var customTileUrl: String?
+        get() = mapLibrePrefs.customTileUrl
+        set(value) {
+            mapLibrePrefs.customTileUrl = value
+        }
+
+    var usingCustomTiles: Boolean
+        get() = mapLibrePrefs.usingCustomTiles
+        set(value) {
+            mapLibrePrefs.usingCustomTiles = value
+        }
 }
+
+data class CameraState(
+    val latitude: Double,
+    val longitude: Double,
+    val zoom: Double,
+    val bearing: Double,
+    val tilt: Double,
+)

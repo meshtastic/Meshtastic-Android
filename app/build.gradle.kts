@@ -254,6 +254,9 @@ dependencies {
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)
 
+    // MapLibre for F-Droid flavor (POC - additive, does not remove osmdroid yet)
+    fdroidImplementation("org.maplibre.gl:android-sdk:12.1.0")
+
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
 

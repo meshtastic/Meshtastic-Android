@@ -35,7 +35,13 @@ fun NavGraphBuilder.mapGraph(navController: NavHostController) {
                     restoreState = true
                 }
             },
-            navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
+            navigateToNodeDetails = {
+                navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
+                    // Don't save the state of the map when navigating to node details
+                    // This ensures pressing back from node detail returns to map, not node list
+                    launchSingleTop = false
+                }
+            },
         )
     }
 }
