@@ -28,6 +28,7 @@ import org.meshtastic.core.strings.label_short_fast
 import org.meshtastic.core.strings.label_short_slow
 import org.meshtastic.core.strings.label_short_turbo
 import org.meshtastic.core.strings.label_very_long_slow
+import org.meshtastic.core.strings.label_edge_fast_low
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.RegionCode
@@ -315,4 +316,5 @@ enum class ChannelOption(val modemPreset: ModemPreset, val labelRes: StringResou
     SHORT_TURBO(ModemPreset.SHORT_TURBO, Res.string.label_short_turbo, bandwidth = .500f),
     SHORT_FAST(ModemPreset.SHORT_FAST, Res.string.label_short_fast, .250f),
     SHORT_SLOW(ModemPreset.SHORT_SLOW, Res.string.label_short_slow, .250f),
+    EDGE_FAST_LOW(ModemPreset.EDGE_FAST_LOW, Res.string.label_edge_fast_low, .0625f),
 }

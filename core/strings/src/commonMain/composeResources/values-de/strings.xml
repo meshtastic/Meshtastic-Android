@@ -120,6 +120,7 @@
     <string name="label_short_turbo">Kurze Reichweite - Turbo</string>
     <string name="label_short_fast">Kurze Reichweite - Schnell</string>
     <string name="label_short_slow">Kurze Reichweite - Langsam</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
     <string name="config_network_wifi_enabled_summary">Durch die Aktivierung von WLAN wird die Bluetooth Verbindung zur App deaktiviert.</string>
     <string name="config_network_eth_enabled_summary">Durch Aktivieren von Ethernet wird die Bluetooth Verbindung zur App deaktiviert. TCP Knotenverbindungen sind auf Apple Geräten nicht verfügbar.</string>
     <string name="config_network_udp_enabled_summary">Aktivieren Sie die Übertragung von Paketen per UDP über das lokale Netzwerk.</string>

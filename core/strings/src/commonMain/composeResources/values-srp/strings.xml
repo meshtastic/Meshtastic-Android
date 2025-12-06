@@ -99,6 +99,7 @@
     <string name="label_short_turbo">Кратки домет - Турбо</string>
     <string name="label_short_fast">Кратки домет - Брзо</string>
     <string name="label_short_slow">Кратки домет - Споро</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
     <string name="config_network_wifi_enabled_summary">Омогућавање ВајФаја ће онемогућити блутут везу са апликацијом.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Минимална промена растојања у метрима која ће се узети у обзир за паметно емитовање позиције.</string>
     <string name="config_position_flags_summary">Опциони поља за укључивање при склапању порука о позицији. Што више поља је укључено, порука ће бити већа, што доводи до дужег времена емитовања и већег ризика од губитка пакета.</string>

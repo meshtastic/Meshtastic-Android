@@ -117,6 +117,7 @@
     <string name="label_short_turbo">Kort räckvidd - supersnabbt</string>
     <string name="label_short_fast">Kort räckvidd - snabbt</string>
     <string name="label_short_slow">Kort räckvidd - långsamt</string>
+    <string name="label_edge_fast_low">Edge Fast Low</string>
     <string name="config_network_wifi_enabled_summary">Aktivering av WiFi kommer att inaktivera Bluetooth-anslutningen till appen.</string>
     <string name="config_network_eth_enabled_summary">Aktivering av Ethernet kommer att inaktivera Bluetooth-anslutningen till appen. TCP-nodanslutningar är inte tillgängliga på Apple-enheter.</string>
     <string name="config_network_udp_enabled_summary">Aktivera UDP-sändning över det lokala nätverket.</string>
