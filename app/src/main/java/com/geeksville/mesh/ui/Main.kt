@@ -172,6 +172,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
     val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
+    val pendingDeepLink by uIViewModel.deepLinkRequested.collectAsStateWithLifecycle()
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -254,6 +255,32 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val navSuiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
+
+    // Handle pending deep links (e.g., from notifications) once NavHost is ready
+    LaunchedEffect(pendingDeepLink) {
+        pendingDeepLink?.let { uri ->
+            // Prefer explicit route for node details to ensure correct navigation
+            if (uri.scheme == "meshtastic" && uri.host == "meshtastic") {
+                val segments = uri.pathSegments
+                if (segments.isNotEmpty() && segments[0] == "node") {
+                    val destNum = segments.getOrNull(1)?.toIntOrNull()
+                    val routed =
+                        runCatching { navController.navigate(NodesRoutes.NodeDetailGraph(destNum)) }
+                            .onFailure { ex -> Timber.w(ex, "Failed to navigate via NodeDetailGraph for: $uri") }
+                            .isSuccess
+                    if (!routed) {
+                        runCatching { navController.navigate(uri) }
+                            .onFailure { ex -> Timber.w(ex, "Failed to navigate to deep link: $uri") }
+                    }
+                    uIViewModel.clearDeepLinkRequested()
+                    return@let
+                }
+            }
+            runCatching { navController.navigate(uri) }
+                .onFailure { ex -> Timber.w(ex, "Failed to navigate to deep link: $uri") }
+            uIViewModel.clearDeepLinkRequested()
+        }
+    }
 
     // State for determining the connection type icon to display
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
