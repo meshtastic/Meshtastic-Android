@@ -96,7 +96,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannelUrl
-import org.meshtastic.core.model.util.hasDuplicateKeys
 import org.meshtastic.core.model.util.qrCode
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.Route
@@ -108,7 +107,6 @@ import org.meshtastic.core.strings.are_you_sure_change_default
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.cant_change_no_radio
 import org.meshtastic.core.strings.channel_invalid
-import org.meshtastic.core.strings.channel_key_already_in_use
 import org.meshtastic.core.strings.copy
 import org.meshtastic.core.strings.edit
 import org.meshtastic.core.strings.modem_preset
@@ -233,12 +231,6 @@ fun ChannelScreen(
 
     // Send new channel settings to the device
     fun installSettings(newChannelSet: ChannelSet) {
-        // Check for duplicate keys before installing
-        if (newChannelSet.hasDuplicateKeys()) {
-            scope.launch { context.showToast(Res.string.channel_key_already_in_use) }
-            return
-        }
-
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
             viewModel.setChannels(newChannelSet)
