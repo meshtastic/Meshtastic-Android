@@ -18,10 +18,14 @@
 package org.meshtastic.feature.messaging
 
 import android.os.RemoteException
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +37,7 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
@@ -50,10 +55,12 @@ import javax.inject.Inject
 
 private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
 
+@Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
 class MessageViewModel
 @Inject
 constructor(
+    savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
     quickChatActionRepository: QuickChatActionRepository,
@@ -78,21 +85,38 @@ constructor(
 
     val quickChatActions = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
-    private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val messagesForContactKey: StateFlow<List<Message>> =
-        contactKeyForMessages
+    val contactSettings: StateFlow<Map<String, ContactSettings>> =
+        packetRepository.getContactSettings().stateInWhileSubscribed(initialValue = emptyMap())
+
+    private val contactKeyForPagedMessages: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val pagedMessagesForContactKey: Flow<PagingData<Message>> =
+        contactKeyForPagedMessages
             .filterNotNull()
-            .flatMapLatest { contactKey -> packetRepository.getMessagesFrom(contactKey, ::getNode) }
-            .stateInWhileSubscribed(initialValue = emptyList())
+            .flatMapLatest { contactKey -> packetRepository.getMessagesFromPaged(contactKey, ::getNode) }
+            .cachedIn(viewModelScope)
+
+    init {
+        val contactKey = savedStateHandle.get<String>("contactKey")
+        if (contactKey != null) {
+            contactKeyForPagedMessages.value = contactKey
+        }
+    }
 
     fun setTitle(title: String) {
         viewModelScope.launch { _title.value = title }
     }
 
-    fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
-        contactKeyForMessages.value = contactKey
-        return messagesForContactKey
+    fun getMessagesFromPaged(contactKey: String): Flow<PagingData<Message>> {
+        if (contactKeyForPagedMessages.value != contactKey) {
+            contactKeyForPagedMessages.value = contactKey
+        }
+        return pagedMessagesForContactKey
     }
+
+    fun getFirstUnreadMessageUuid(contactKey: String): Flow<Long?> =
+        packetRepository.getFirstUnreadMessageUuid(contactKey)
+
+    fun hasUnreadMessages(contactKey: String): Flow<Boolean> = packetRepository.hasUnreadMessages(contactKey)
 
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 
@@ -158,11 +182,17 @@ constructor(
     fun deleteMessages(uuidList: List<Long>) =
         viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
 
-    fun clearUnreadCount(contact: String, timestamp: Long) = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.clearUnreadCount(contact, timestamp)
-        val unreadCount = packetRepository.getUnreadCount(contact)
-        if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
-    }
+    fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
+        viewModelScope.launch(Dispatchers.IO) {
+            val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
+            if (lastReadTimestamp <= existingTimestamp) {
+                return@launch
+            }
+            packetRepository.clearUnreadCount(contact, lastReadTimestamp)
+            packetRepository.updateLastReadMessage(contact, messageUuid, lastReadTimestamp)
+            val unreadCount = packetRepository.getUnreadCount(contact)
+            if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
+        }
 
     private fun favoriteNode(node: Node) = viewModelScope.launch {
         try {

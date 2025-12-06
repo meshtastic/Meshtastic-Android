@@ -35,7 +35,6 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favorito</string>
-    <string name="node_filter_show_ignored">Nós ignorados</string>
     <string name="unrecognized">Desconhecido</string>
     <string name="message_status_enroute">A aguardar confirmação</string>
     <string name="message_status_queued">Na fila de envio</string>
@@ -95,6 +94,14 @@
     <string name="config_network_udp_enabled_summary">Ativar a transmissão de pacotes via UDP através da rede local.</string>
     <string name="config_position_broadcast_secs_summary">O intervalo máximo que pode decorrer sem que um nó transmita a sua posição.</string>
     <!-- Position Config -->
+    <string name="broadcast_interval">Intervalo de Difusão</string>
+    <string name="smart_position">Posição Inteligente</string>
+    <string name="minimum_interval">Intervalo Mínimo</string>
+    <string name="minimum_distance">Distância Mínima</string>
+    <string name="device_gps">GPS do Dispositivo</string>
+    <string name="fixed_position">Posição fixa</string>
+    <string name="altitude">Altitude</string>
+    <string name="update_interval">Intervalo de Atualização</string>
     <string name="debug">Depuração</string>
     <string name="channel_name">Nome do Canal</string>
     <string name="qr_code">Código QR</string>
@@ -122,6 +129,7 @@
     <string name="ip_port">Porta:</string>
     <string name="connected">Ligado</string>
     <string name="connected_to">Ligado ao rádio (%1$s)</string>
+    <string name="connecting">A ligar</string>
     <string name="not_connected">Desligado</string>
     <string name="connected_sleeping">Ligado ao rádio, mas está a dormir</string>
     <string name="app_too_old">A aplicação é muito antiga</string>
@@ -206,6 +214,8 @@
     <string name="map_purge_fail">Falha na remoção do cache SQL, consulte logcat para obter detalhes</string>
     <string name="map_cache_manager">Gerenciador de cache</string>
     <string name="map_download_complete">Download concluído!</string>
+    <string name="map_download_errors">Download concluído com %1$d erros</string>
+    <string name="map_cache_tiles">%1$d blocos</string>
     <string name="map_subDescription">direção: %1$d° distância: %2$s</string>
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_delete">Apagar o ponto de referência?</string>
@@ -554,4 +564,7 @@
     <string name="eight_hours">8 Horas</string>
     <string name="one_day">24 Horas</string>
     <string name="two_days">48 Horas</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Atualizar Firmware</string>
+    <string name="firmware_update_failed">Atualização falhou</string>
 </resources>

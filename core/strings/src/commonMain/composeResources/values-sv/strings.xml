@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">rensa filtrering av noder</string>
     <string name="node_filter_title">Filtrera på</string>
     <string name="node_filter_include_unknown">Inkludera okända</string>
+    <string name="node_filter_exclude_infrastructure">Dölj infrastruktur</string>
     <string name="node_filter_only_online">Dölj offline-noder</string>
     <string name="node_filter_only_direct">Visa endast direkta noder</string>
     <string name="node_filter_ignored">Du visar ignorerade noder,\nTryck för att återvända till nodlistan.</string>
@@ -35,7 +36,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favoriter</string>
-    <string name="node_filter_show_ignored">Ignorerade noder</string>
+    <string name="node_filter_show_ignored">Visa endast ignorerade noder</string>
     <string name="unrecognized">Okänd</string>
     <string name="message_status_enroute">Inväntar kvittens</string>
     <string name="message_status_queued">Kvittens köad</string>
@@ -46,7 +47,7 @@
     <string name="routing_error_no_interface">Inget gränssnitt</string>
     <string name="routing_error_max_retransmit">Maximalt antal sändningar nådd</string>
     <string name="routing_error_no_channel">Ingen kanal</string>
-    <string name="routing_error_too_large">Paket för stort</string>
+    <string name="routing_error_too_large">Paket är för stort</string>
     <string name="routing_error_no_response">Inget svar</string>
     <string name="routing_error_bad_request">Misslyckad</string>
     <string name="routing_error_duty_cycle_limit">Gränsen för intermittensfaktor uppnådd</string>
@@ -59,6 +60,7 @@
     <string name="role_client_desc">App uppkopplad eller fristående nod.</string>
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Nod som inte vidarebefordrar meddelanden.</string>
+    <string name="role_router">Router</string>
     <string name="role_router_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden. Syns i nod listan.</string>
     <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Kombinerad ROUTER och CLIENT. Ej för mobila noder.</string>
@@ -179,6 +181,7 @@
     <string name="connection_status">Aktuella anslutningar:</string>
     <string name="wifi_ip">Wifi IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="connecting">Ansluter</string>
     <string name="not_connected">Ej ansluten</string>
     <string name="connected_sleeping">Ansluten till radioenhet, men den är i sovläge</string>
     <string name="app_too_old">Applikationen måste uppgraderas</string>
@@ -209,11 +212,12 @@
     <string name="debug_clear_logs_confirm">Detta kommer att ta bort alla loggpaket och databasposter från din enhet - Det är en fullständig återställning och är permanent.</string>
     <string name="clear">Rensa</string>
     <string name="message_delivery_status">Meddelandets leveransstatus</string>
+    <string name="new_messages_below">Nya meddelanden här nedan</string>
     <string name="meshtastic_messages_notifications">Direktmeddelandeaviseringar</string>
     <string name="meshtastic_broadcast_notifications">Meddelandeaviseringar</string>
     <string name="meshtastic_alerts_notifications">Larmmeddelanden</string>
     <string name="firmware_too_old">Uppdatering av fast programvara krävs.</string>
-    <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
+    <string name="firmware_old">Radiomodulens fasta programvara är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för fast programvara</a>.</string>
     <string name="okay">Okej</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
     <string name="cant_change_no_radio">Det gick inte att byta kanal, eftersom radiomodulen ännu inte är ansluten. Försök igen.</string>
@@ -252,6 +256,9 @@
     <string name="resend">Skicka igen</string>
     <string name="shutdown">Stäng av</string>
     <string name="cant_shutdown">Enhet stöder inte avstängning</string>
+    <string name="shutdown_critical_node">⚠️ Detta är en viktig infrastrukturnod. Skriv nodens namn för att bekräfta:</string>
+    <string name="shutdown_node_name">Nod: %1$s</string>
+    <string name="shutdown_type_name">Typ: %1$s</string>
     <string name="reboot">Starta om</string>
     <string name="traceroute">Traceroute (spåra rutt)</string>
     <string name="intro_show">Visa introduktion</string>
@@ -266,7 +273,7 @@
     <string name="factory_reset">Återställ till standardinställningar</string>
     <string name="bluetooth_disabled">Bluetooth är inaktiverat. Aktivera den i inställningarna för enheten.</string>
     <string name="open_settings">Öppna inställningar</string>
-    <string name="firmware_version">Fast programversion: %1$s</string>
+    <string name="firmware_version">Fast programvaruversion: %1$s</string>
     <string name="permission_missing_31">Meshtastic behöver \"Närliggande enheter\"-behörigheter aktiverade för att hitta och ansluta till enheter via Bluetooth. Du kan inaktivera när den inte används.</string>
     <string name="direct_message">Direktmeddelande</string>
     <string name="nodedb_reset">Nollställ NodeDB</string>
@@ -295,6 +302,8 @@
     <string name="map_purge_fail">SQL-cache rensning misslyckades, se logcat för detaljer</string>
     <string name="map_cache_manager">Cache-hanterare</string>
     <string name="map_download_complete">Nedladdningen slutförd!</string>
+    <string name="map_download_errors">Nedladdning slutförd med %1$d fel</string>
+    <string name="map_cache_tiles">%1$d kartdelar</string>
     <string name="map_subDescription">bäring: %1$d° distans: %2$s</string>
     <string name="waypoint_edit">Redigera vägpunkt</string>
     <string name="waypoint_delete">Radera vägpunkt?</string>
@@ -458,6 +467,7 @@
     <string name="allow_input_source">Tillåt indatakälla</string>
     <string name="send_bell">Skicka ljudavisering</string>
     <string name="messages">Meddelanden</string>
+    <string name="device_db_cache_limit">Gräns för enhetens DB-cache</string>
     <string name="detection_sensor_config">Inställningar för detekteringssensor</string>
     <string name="detection_sensor_enabled">Detektionssensor aktiverad</string>
     <string name="minimum_broadcast_seconds">Minsta sändningsintervall (sekunder)</string>
@@ -504,6 +514,7 @@
     <string name="output_duration_milliseconds">Utmatningstid (millisekunder)</string>
     <string name="nag_timeout_seconds">Sluta tjata efter (sekunder)</string>
     <string name="ringtone">Ringsignal</string>
+    <string name="play">Spela upp</string>
     <string name="use_i2s_as_buzzer">Använd I2S som summer</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Alternativ</string>
@@ -672,7 +683,7 @@
     <string name="import_label">Importera</string>
     <string name="request_metadata">Begär metadata</string>
     <string name="actions">Åtgärder</string>
-    <string name="firmware">Firmware</string>
+    <string name="firmware">Fast programvara</string>
     <string name="use_12h_format">Använd 12-timmarsformat</string>
     <string name="display_time_in_12h_format">Visar tiden i 12-timmarsformat när denna är aktiverad.</string>
     <string name="host_metrics_log">Logg för värdstatistik</string>
@@ -689,7 +700,7 @@
     <string name="bottom_nav_settings">Inställningar</string>
     <string name="set_your_region">Ange din region</string>
     <string name="reply">Svara</string>
-    <string name="map_reporting_summary">Din nod kommer periodiskt skicka ett okrypterat paket till den konfigurerade MQTT-servern som inkluderar id, kort och långt namn, ungefärlig plats, hardvarumodell, enhetsroll, mjukvaru-version, LoRa-region, modeminställning och den primära kanalens namn.</string>
+    <string name="map_reporting_summary">Din nod kommer periodiskt skicka ett okrypterat paket till den konfigurerade MQTT-servern som inkluderar id, kort och långt namn, ungefärlig plats, hårdvarumodell, enhetsroll, mjukvaruversion, LoRa-region, modeminställning och den primära kanalens namn.</string>
     <string name="map_reporting_consent_header">Samtycke för att dela okrypterad noddata via MQTT</string>
     <string name="map_reporting_consent_text">Genom att aktivera den här funktionen bekräftar och samtycker du till överföringen av enhetens geografiska plats i realtid över MQTT-protokollet utan kryptering. Denna platsdata kan användas för ändamål som live-kartrapportering, enhetsspårning och relaterade telemetrifunktioner.</string>
     <string name="i_agree_to_share_my_location">Jag har läst och förstått ovanstående. Jag samtycker till okrypterad överföring av mina noddata via MQTT</string>
@@ -712,7 +723,6 @@
     <string name="modules_unlocked">Modulerna är upplåsta</string>
     <string name="modules_already_unlocked">Modulerna är redan upplåsta</string>
     <string name="remote">Fjärr</string>
-    <string name="node_count_template">(%1$d online / %2$d totalt)</string>
     <string name="react">Reagera</string>
     <string name="disconnect">Koppla från</string>
     <string name="scanning_bluetooth">Söker efter Bluetooth-enheter…</string>
@@ -756,6 +766,8 @@
     <string name="security_icon_help_show_less">Visa aktuell status</string>
     <string name="security_icon_help_dismiss">Stäng</string>
     <string name="confirm_delete_node">Är du säker på att du vill ta bort den här noden?</string>
+    <string name="forget_connection">Glöm anslutningen</string>
+    <string name="confirm_forget_connection">Är du säker på att du vill glömma den här anslutningen?</string>
     <string name="replying_to">Svarar till %1$s</string>
     <string name="cancel_reply">Avbryt svar</string>
     <string name="delete_messages_title">Ta bort  meddelanden?</string>
@@ -819,6 +831,7 @@
     <string name="notification_permissions_description">Meshtastic använder aviseringar för att hålla dig uppdaterad om nya meddelanden och andra viktiga händelser. Du kan uppdatera dina aviseringsbehörigheter när som helst från inställningar.</string>
     <string name="next">Nästa</string>
     <string name="grant_permissions">Ge behörigheter</string>
+    <string name="nodes_queued_for_deletion">%1$d noder köade för radering:</string>
     <string name="clean_node_database_description">Varning: Detta tar bort noder från både appen och enhetens databaser.\nMarkeringar är inklusive.</string>
     <string name="connecting_to_device">Ansluter till enhet</string>
     <string name="map_type_normal">Normal</string>
@@ -858,12 +871,12 @@
     <string name="device_configuration">Konfiguration av enhet</string>
     <string name="remotely_administrating">"[Fjärr] %1$s"</string>
     <string name="device_telemetry_enabled">Skicka enhetstelemetri</string>
-    <string name="device_telemetry_enabled_summary">Aktivera/inaktivera enhetens telemetrimodul för att skicka mätvärden till nätet</string>
     <string name="any">Valfri</string>
     <string name="one_hour">1 timme</string>
     <string name="eight_hours">8 timmar</string>
     <string name="one_day">24 timmar</string>
     <string name="two_days">48 timmar</string>
+    <string name="last_heard_filter_label">Filtrera på senaste kontakt: %1$s</string>
     <string name="dbm_value">%1$d dBm</string>
     <string name="error_no_app_to_handle_link">Saknar applikation för att hantera länken.</string>
     <string name="system_settings">Systeminställningar</string>
@@ -872,4 +885,33 @@
     <string name="analytics_platforms">"Analysplattformar: "</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
+    <string name="relayed_by">Vidaresänt av: %1$s</string>
+    <string name="learn_more">Läs mer</string>
+    <string name="usb_devices">USB-enheter</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_title">Uppdatering av fast programvara</string>
+    <string name="firmware_update_checking">Söker efter uppdateringar...</string>
+    <string name="firmware_update_device">Enhet: %1$s</string>
+    <string name="firmware_update_latest">Senaste utgåva: %1$s</string>
+    <string name="firmware_update_stable">Stabil version</string>
+    <string name="firmware_update_alpha">Alfa</string>
+    <string name="firmware_update_button">Uppdatera fast programvara</string>
+    <string name="firmware_update_disconnect_warning">Obs: Under uppdateringen kommer enheten att tillfälligt kopplas bort.</string>
+    <string name="firmware_update_downloading">Hämtar fast programvara... %1$d%</string>
+    <string name="firmware_update_error">Fel: %1$s</string>
+    <string name="firmware_update_retry">Försök igen</string>
+    <string name="firmware_update_success">Uppdatering lyckades!</string>
+    <string name="firmware_update_done">Klart</string>
+    <string name="firmware_update_updating">Uppdaterar... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Okänd hårdvarumodell: %1$d</string>
+    <string name="firmware_update_no_device">Ingen ansluten enhet</string>
+    <string name="firmware_update_not_found_in_release">Kunde inte hitta fast programvara för %1$s i utgåvan.</string>
+    <string name="firmware_update_extracting">Packar upp fast programvara...</string>
+    <string name="firmware_update_failed">Uppdateringen misslyckades</string>
+    <string name="firmware_update_hang_tight">Vänta lite. Snart klar...</string>
+    <string name="firmware_update_keep_device_close">Håll din enhet nära telefonen.</string>
+    <string name="firmware_update_do_not_close">Stäng inte appen.</string>
+    <string name="firmware_update_almost_there">Alldeles snart...</string>
+    <string name="firmware_update_taking_a_while">Det här kan ta en stund...</string>
+    <string name="firmware_update_select_file">Välj lokal fil</string>
 </resources>

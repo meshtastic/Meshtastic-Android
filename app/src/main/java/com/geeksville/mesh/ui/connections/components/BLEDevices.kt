@@ -33,12 +33,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BluetoothDisabled
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -50,6 +52,8 @@ import com.geeksville.mesh.model.DeviceListEntry
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
@@ -63,18 +67,20 @@ import org.meshtastic.core.strings.permission_missing
 import org.meshtastic.core.strings.permission_missing_31
 import org.meshtastic.core.strings.scan
 import org.meshtastic.core.strings.scanning_bluetooth
-import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.util.showToast
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth
  * permissions using `accompanist-permissions`.
  *
  * @param connectionState The current connection state of the MeshService.
- * @param btDevices List of discovered BLE devices.
+ * @param bondedDevices List of discovered BLE devices.
+ * @param availableDevices
  * @param selectedDevice The full address of the currently selected device.
  * @param scanModel The ViewModel responsible for Bluetooth scanning logic.
+ * @param bluetoothEnabled
  */
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun BLEDevices(
@@ -93,28 +99,54 @@ fun BLEDevices(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
         } else {
-            // ACCESS_FINE_LOCATION is required for Bluetooth scanning on pre-S devices.
-            listOf(Manifest.permission.ACCESS_FINE_LOCATION)
+            listOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            )
         }
     }
+
+    val context = LocalContext.current
+    val permsMissing =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            stringResource(Res.string.permission_missing_31)
+        } else {
+            stringResource(Res.string.permission_missing)
+        }
+    val coroutineScope = rememberCoroutineScope()
+
+    val singlePermissionState =
+        rememberPermissionState(
+            permission = Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            onPermissionResult = { granted ->
+                scanModel.refreshPermissions()
+                scanModel.startScan()
+            },
+        )
 
     val permissionsState =
         rememberMultiplePermissionsState(
             permissions = bluetoothPermissionsList,
-            onPermissionsResult = {
-                if (it.values.all { granted -> granted } && bluetoothEnabled) {
-                    scanModel.startScan()
+            onPermissionsResult = { permissions ->
+                val granted = permissions.values.all { it }
+                if (permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
+                    coroutineScope.launch { context.showToast(permsMissing) }
+                    singlePermissionState.launchPermissionRequest()
+                }
+                if (granted) {
                     scanModel.refreshPermissions()
+                    scanModel.startScan()
                 } else {
-                    // If permissions are not granted, we can show a message or handle it accordingly.
+                    coroutineScope.launch { context.showToast(permsMissing) }
                 }
             },
         )
 
     val settingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-            // Eventually auto scan once bluetooth is available
-            // checkPermissionsAndScan(permissionsState, scanModel, bluetoothEnabled)
+            scanModel.refreshPermissions()
+            scanModel.startScan()
         }
 
     Column(
@@ -158,7 +190,9 @@ fun BLEDevices(
                                 }
 
                                 if (isScanning) {
-                                    CircularProgressIndicator(modifier = Modifier.size(24.dp).align(Alignment.Center))
+                                    CircularWavyProgressIndicator(
+                                        modifier = Modifier.size(24.dp).align(Alignment.Center),
+                                    )
                                 }
                             }
                         }
@@ -176,14 +210,14 @@ fun BLEDevices(
                             actionButton = scanButton,
                         )
                     } else {
-                        bondedDevices.Section(
+                        bondedDevices.DeviceListSection(
                             title = stringResource(Res.string.bluetooth_paired_devices),
                             connectionState = connectionState,
                             selectedDevice = selectedDevice,
                             onSelect = scanModel::onSelected,
                         )
 
-                        availableDevices.Section(
+                        availableDevices.DeviceListSection(
                             title = stringResource(Res.string.bluetooth_available_devices),
                             connectionState = connectionState,
                             selectedDevice = selectedDevice,
@@ -223,27 +257,5 @@ private fun checkPermissionsAndScan(
         scanModel.startScan()
     } else {
         permissionsState.launchMultiplePermissionRequest()
-    }
-}
-
-@Composable
-private fun List<DeviceListEntry>.Section(
-    title: String,
-    connectionState: ConnectionState,
-    selectedDevice: String,
-    onSelect: (DeviceListEntry) -> Unit,
-) {
-    if (isNotEmpty()) {
-        TitledCard(title = title) {
-            forEach { device ->
-                val connected = connectionState == ConnectionState.CONNECTED && device.fullAddress == selectedDevice
-                DeviceListItem(
-                    connected = connected,
-                    device = device,
-                    onSelect = { onSelect(device) },
-                    modifier = Modifier,
-                )
-            }
-        }
     }
 }

@@ -161,7 +161,8 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
     val deviceConfig = state.radioConfig.device
     val formState = rememberConfigState(initialValue = deviceConfig)
     var selectedRole by rememberSaveable { mutableStateOf(formState.value.role) }
-    val infrastructureRoles = listOf(DeviceConfig.Role.ROUTER, DeviceConfig.Role.REPEATER)
+    val infrastructureRoles =
+        listOf(DeviceConfig.Role.ROUTER, DeviceConfig.Role.ROUTER_LATE, DeviceConfig.Role.REPEATER)
     if (selectedRole != formState.value.role) {
         if (selectedRole in infrastructureRoles) {
             RouterRoleConfirmationDialog(

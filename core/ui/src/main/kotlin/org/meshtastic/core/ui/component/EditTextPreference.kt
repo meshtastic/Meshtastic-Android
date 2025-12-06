@@ -163,6 +163,7 @@ fun EditTextPreference(
     onValueChanged: (Double) -> Unit,
     modifier: Modifier = Modifier,
     summary: String? = null,
+    onFocusChanged: (FocusState) -> Unit = {},
 ) {
     var valueState by remember(value) { mutableStateOf(value.toString()) }
     val decimalSeparators = setOf('.', ',', '٫', '、', '·') // set of possible decimal separators
@@ -185,7 +186,7 @@ fun EditTextPreference(
                 }
             }
         },
-        onFocusChanged = {},
+        onFocusChanged = onFocusChanged,
         modifier = modifier,
     )
 }

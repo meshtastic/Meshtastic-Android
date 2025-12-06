@@ -32,6 +32,7 @@
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_title">Filter by</string>
     <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_filter_exclude_infrastructure">Exclude infrastructure</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
     <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
@@ -46,7 +47,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favorite</string>
-    <string name="node_filter_show_ignored">Ignored Nodes</string>
+    <string name="node_filter_show_ignored">Only show ignored Nodes</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_queued">Queued for sending</string>
@@ -209,6 +210,7 @@
     <string name="connection_status">Current connections:</string>
     <string name="wifi_ip">Wifi IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="connecting">Connecting</string>
     <string name="not_connected">Not connected</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="app_too_old">Application update required</string>
@@ -239,6 +241,7 @@
     <string name="debug_clear_logs_confirm">This will remove all log packets and database entries from your device - It is a full reset, and is permanent.</string>
     <string name="clear">Clear</string>
     <string name="message_delivery_status">Message delivery status</string>
+    <string name="new_messages_below">New messages below</string>
     <string name="meshtastic_messages_notifications">Direct message notifications</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>
@@ -282,6 +285,10 @@
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
     <string name="cant_shutdown">Shutdown not supported on this device</string>
+    <string name="shutdown_warning">⚠️ This will SHUTDOWN the node. Physical interaction will be required to turn it back on.</string>
+    <string name="shutdown_critical_node">⚠️ This is a critical infrastructure node. Type the node name to confirm:</string>
+    <string name="shutdown_node_name">Node: %1$s</string>
+    <string name="shutdown_type_name">Type: %1$s</string>
     <string name="reboot">Reboot</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Show Introduction</string>
@@ -549,6 +556,7 @@
     <string name="output_duration_milliseconds">Output duration (milliseconds)</string>
     <string name="nag_timeout_seconds">Nag timeout (seconds)</string>
     <string name="ringtone">Ringtone</string>
+    <string name="play">Play</string>
     <string name="use_i2s_as_buzzer">Use I2S as buzzer</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Options</string>
@@ -771,7 +779,7 @@
     <string name="modules_unlocked">Modules unlocked</string>
     <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Remote</string>
-    <string name="node_count_template">(%1$d online / %2$d total)</string>
+    <string name="node_count_template">(%1$d online / %2$d shown / %3$d total)</string>
     <string name="react">React</string>
     <string name="disconnect">Disconnect</string>
     <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
@@ -822,6 +830,8 @@
     <string name="security_icon_help_dismiss">Dismiss</string>
 
     <string name="confirm_delete_node">Are you sure you want to delete this node?</string>
+    <string name="forget_connection">Forget connection</string>
+    <string name="confirm_forget_connection">Are you sure you want to forget this connection?</string>
 
     <string name="replying_to">Replying to %1$s</string>
     <string name="cancel_reply">Cancel reply</string>
@@ -930,7 +940,7 @@
     <string name="device_configuration">Device configuration</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <string name="device_telemetry_enabled">Send Device Telemetry</string>
-    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
+    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh. These are nominal values. Congested meshes will automatically scale to longer intervals based on number of online nodes. Meshes less than 10 nodes will scale to faster intervals.</string>
     <string name="any">Any</string>
     <string name="one_hour">1 Hour</string>
     <string name="eight_hours">8 Hours</string>
@@ -951,5 +961,50 @@
     <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
     <string name="unset">Unset - 0</string>
     <string name="relayed_by">Relayed by: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Heard %1$d Relay</item>
+        <item quantity="other">Heard %1$d Relays</item>
+    </plurals>
+
+    <string name="firmware_update_usb_bootloader_warning">%1$s usually ships with a bootloader that does not support OTA updates. You may need to flash an OTA-capable bootloader over USB before flashing OTA.</string>
+    <string name="learn_more">Learn more</string>
+    <string name="firmware_update_rak4631_bootloader_hint">For RAK WisBlock RAK4631, use the vendor&apos;s serial DFU tool (for example, adafruit-nrfutil dfu serial with the provided bootloader .zip file). Copying the .uf2 file alone will not update the bootloader.</string>
+    <string name="dont_show_again_for_device">Don&apos;t show again for this device</string>
     <string name="preserve_favorites">Preserve Favorites?</string>
+    <string name="usb_devices">USB Devices</string>
+
+    <!-- Firmware Update -->
+    <string name="firmware_update_title">Firmware Update</string>
+    <string name="firmware_update_checking">Checking for updates...</string>
+    <string name="firmware_update_device">Device: %1$s</string>
+    <string name="firmware_update_latest">Latest Release: %1$s</string>
+    <string name="firmware_update_stable">Stable</string>
+    <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_button">Update Firmware</string>
+    <string name="firmware_update_disconnect_warning">Note: This will temporarily disconnect your device during the update.</string>
+    <string name="firmware_update_downloading">Downloading firmware... %1$d%</string>
+    <string name="firmware_update_error">Error: %1$s</string>
+    <string name="firmware_update_retry">Retry</string>
+    <string name="firmware_update_success">Update Successful!</string>
+    <string name="firmware_update_done">Done</string>
+    <string name="firmware_update_starting_dfu">Starting DFU...</string>
+    <string name="firmware_update_updating">Updating... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Unknown hardware model: %1$d</string>
+    <string name="firmware_update_invalid_address">Connected device is not a BLE device or address is unknown (%1$s). DFU requires BLE.</string>
+    <string name="firmware_update_no_device">No device connected</string>
+    <string name="firmware_update_not_found_in_release">Could not find firmware for %1$s in release.</string>
+    <string name="firmware_update_extracting">Extracting firmware...</string>
+    <string name="firmware_update_starting_service">Disconnecting to start DFU service...</string>
+    <string name="firmware_update_failed">Update failed</string>
+    <string name="firmware_update_hang_tight">Hang tight, we are working on it...</string>
+    <string name="firmware_update_keep_device_close">Keep your device close to your phone.</string>
+    <string name="firmware_update_do_not_close">Do not close the app.</string>
+    <string name="firmware_update_almost_there">Almost there...</string>
+    <string name="firmware_update_taking_a_while">This might take a minute...</string>
+    <string name="firmware_update_select_file">Select Local File</string>
+    <string name="firmware_update_unknown_release">Unknown remote release</string>
+    <string name="firmware_update_disclaimer_title">Update Warning</string>
+    <string name="firmware_update_disclaimer_text">You are about to flash new firmware to your device. This process carries risks.\n\n• Ensure your device is charged.\n• Keep the device close to your phone.\n• Do not close the app during the update.\n\nVerify you have selected the correct firmware for your hardware.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy says, "Keep your ladder handy!"</string>
+    <string name="chirpy">Chirpy</string>
 </resources>

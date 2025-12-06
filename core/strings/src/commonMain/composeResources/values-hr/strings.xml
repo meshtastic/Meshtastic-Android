@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtriraj</string>
     <string name="desc_node_filter_clear">očisti filter čvorova</string>
     <string name="node_filter_include_unknown">Uključujući nepoznate</string>
@@ -26,6 +27,9 @@
     <string name="node_sort_last_heard">Posljednje čuo</string>
     <string name="node_sort_via_mqtt">putem MQTT</string>
     <string name="via_mqtt">putem MQTT</string>
+    <string name="routing_error_none">Potvrđeno</string>
+    <string name="routing_error_too_large">Paket je prevelik</string>
+    <string name="routing_error_no_response">Nema odgovora</string>
     <!-- Position Config -->
     <string name="channel_name">Naziv kanala</string>
     <string name="qr_code">QR kod</string>
@@ -132,6 +136,8 @@
     <string name="map_purge_fail">Čišćenje SQL predmemorije nije uspjelo, pogledajte logcat za detalje</string>
     <string name="map_cache_manager">Upravitelj predmemorije</string>
     <string name="map_download_complete">Preuzimanje je završeno!</string>
+    <string name="map_download_errors">Preuzimanje je završeno s %1$d pogrešaka</string>
+    <string name="map_cache_tiles">%1$d dijelova karte</string>
     <string name="map_subDescription">smjer: %1$d° udaljenost: %2$s</string>
     <string name="waypoint_edit">Uredi putnu točku</string>
     <string name="waypoint_delete">Obriši putnu točku?</string>
@@ -144,6 +150,12 @@
     <string name="mute_8_hours">8 sati</string>
     <string name="mute_1_week">1 tjedan</string>
     <string name="mute_always">Uvijek</string>
+    <string name="audio">Zvuk</string>
+    <string name="audio_config">Postavke Zvuka</string>
+    <string name="bluetooth_config">Postavke Bluetootha</string>
+    <string name="default_">Zadano</string>
+    <string name="details">Detalji</string>
+    <string name="red">Crveno</string>
     <string name="region_frequency_plan">Regija</string>
     <string name="distance">Udaljenost</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
@@ -154,4 +166,7 @@
     <string name="eight_hours">8 Sati</string>
     <string name="one_day">24 Sati</string>
     <string name="two_days">48 Sati</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Ažuriranje firmwarea</string>
+    <string name="firmware_update_failed">Ažuriranje neuspjelo</string>
 </resources>

@@ -25,10 +25,18 @@ import org.meshtastic.core.model.NetworkFirmwareReleases
 import javax.inject.Inject
 
 class FirmwareReleaseJsonDataSource @Inject constructor(private val application: Application) {
+
+    // Match the network client behavior: be tolerant of unknown fields so that
+    // older app versions can read newer snapshots of firmware_releases.json.
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadFirmwareReleaseFromJsonAsset(): NetworkFirmwareReleases {
-        val inputStream = application.assets.open("firmware_releases.json")
-        val result = inputStream.use { Json.decodeFromStream<NetworkFirmwareReleases>(inputStream) }
-        return result
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
     }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    fun loadFirmwareReleaseFromJsonAsset(): NetworkFirmwareReleases =
+        application.assets.open("firmware_releases.json").use { inputStream ->
+            json.decodeFromStream<NetworkFirmwareReleases>(inputStream)
+        }
 }

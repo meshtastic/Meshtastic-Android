@@ -171,6 +171,8 @@
     <string name="map_purge_fail">Teip ar ghlanadh Cásla SQL, féach logcat le haghaidh sonraí</string>
     <string name="map_cache_manager">Bainisteoir Cásla</string>
     <string name="map_download_complete">Íoslódáil críochnaithe!</string>
+    <string name="map_download_errors">Íoslódáil críochnaithe le %1$d earráidí</string>
+    <string name="map_cache_tiles">%1$d tíleanna</string>
     <string name="map_subDescription">comhthéacs: %1$d° achar: %2$s</string>
     <string name="waypoint_edit">Cuir in eagar an pointe bealach</string>
     <string name="waypoint_delete">Scrios an pointe bealach?</string>
@@ -241,4 +243,7 @@
     <string name="eight_hours">8 Uair an chloig</string>
     <string name="one_day">24 Uair an chloig</string>
     <string name="two_days">48 Uair an chloig</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Nuashonraigh firmware</string>
+    <string name="firmware_update_failed">Nuacht nuashonraithe</string>
 </resources>

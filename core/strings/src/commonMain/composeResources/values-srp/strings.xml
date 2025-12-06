@@ -230,6 +230,8 @@
     <string name="map_purge_fail">Пражњење SQL кеша није успело, погледајте logcat за детаље</string>
     <string name="map_cache_manager">Меначер кеш меморије</string>
     <string name="map_download_complete">Преузимање готово!</string>
+    <string name="map_download_errors">Преузимање довршено са %1$d грешака</string>
+    <string name="map_cache_tiles">%1$d плочице</string>
     <string name="map_subDescription">смер: %1$d° растојање: %2$s</string>
     <string name="waypoint_edit">Измените тачку путање</string>
     <string name="waypoint_delete">Обрисати тачку путање?</string>
@@ -444,4 +446,8 @@
     <string name="eight_hours">8 Сати</string>
     <string name="one_day">24 Сати</string>
     <string name="two_days">48 Сати</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Ажурирај фирмвер</string>
+    <string name="firmware_update_no_device">Нема повезаних уређаја</string>
+    <string name="firmware_update_failed">Ажурирање неуспело</string>
 </resources>

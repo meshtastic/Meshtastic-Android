@@ -37,4 +37,6 @@ interface NodeInfoWriteDataSource {
     suspend fun upsert(metadata: MetadataEntity)
 
     suspend fun setNodeNotes(num: Int, notes: String)
+
+    suspend fun backfillDenormalizedNames()
 }

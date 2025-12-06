@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
     <string name="node_filter_title">Suodata otsikon mukaan</string>
     <string name="node_filter_include_unknown">Näytä tuntemattomat</string>
+    <string name="node_filter_exclude_infrastructure">Ohita infrastruktuurilaitteet</string>
     <string name="node_filter_only_online">Piilota ei yhteydessä olevat laitteet</string>
     <string name="node_filter_only_direct">Näytä vain suorat yhteydet</string>
     <string name="node_filter_ignored">Katselet tällä hetkellä huomioimattomia laitteita,\nPaina palataksesi laitelistaan.</string>
@@ -35,7 +36,7 @@
     <string name="node_sort_via_mqtt">MQTT:n kautta</string>
     <string name="via_mqtt">MQTT:n kautta</string>
     <string name="node_sort_via_favorite">Suosikkien kautta</string>
-    <string name="node_filter_show_ignored">Huomioimattomat laitteet</string>
+    <string name="node_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
     <string name="unrecognized">Tuntematon</string>
     <string name="message_status_enroute">Odottaa vahvistusta</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
@@ -183,6 +184,7 @@
     <string name="connection_status">Aktiiviset yhteydet:</string>
     <string name="wifi_ip">WiFi-verkon IP:</string>
     <string name="ethernet_ip">Ethernet-verkon IP:</string>
+    <string name="connecting">Yhdistetään</string>
     <string name="not_connected">Ei yhdistetty</string>
     <string name="connected_sleeping">Yhdistetty radioon, mutta se on lepotilassa</string>
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
@@ -213,6 +215,7 @@
     <string name="debug_clear_logs_confirm">Tämä poistaa kaikki lokipaketit ja tietokantamerkinnät laitteestasi – Kyseessä on täydellinen nollaus, ja se on pysyvä.</string>
     <string name="clear">Tyhjennä</string>
     <string name="message_delivery_status">Viestin toimitustila</string>
+    <string name="new_messages_below">Uudet viestit alla</string>
     <string name="meshtastic_messages_notifications">Suorien viestien ilmoitukset</string>
     <string name="meshtastic_broadcast_notifications">Yleislähetysviestien ilmoitukset</string>
     <string name="meshtastic_alerts_notifications">Hälytysilmoitukset</string>
@@ -256,6 +259,10 @@
     <string name="resend">Lähetä uudestaan</string>
     <string name="shutdown">Sammuta</string>
     <string name="cant_shutdown">Sammutusta ei tueta tällä laitteella</string>
+    <string name="shutdown_warning">⚠️ Tämä SAMMUTTAA laitteen. Saat laitteen takaisin toimintaan kytkemällä virran päälle.</string>
+    <string name="shutdown_critical_node">⚠️ Tämä on kriittinen infrastruktuurilaite. Kirjoita laitteen nimi vahvistaaksesi:</string>
+    <string name="shutdown_node_name">Laite: %1$s</string>
+    <string name="shutdown_type_name">Tyyppi: %1$s</string>
     <string name="reboot">Käynnistä uudelleen</string>
     <string name="traceroute">Reitinselvitys</string>
     <string name="intro_show">Näytä esittely</string>
@@ -299,6 +306,8 @@
     <string name="map_purge_fail">SQL-välimuistin tyhjennys epäonnistui, katso logcat saadaksesi lisätietoja</string>
     <string name="map_cache_manager">Välimuistin Hallinta</string>
     <string name="map_download_complete">Lataus on valmis!</string>
+    <string name="map_download_errors">Lataus valmis %1$d virheellä</string>
+    <string name="map_cache_tiles">%1$d Laattaa</string>
     <string name="map_subDescription">suunta: %1$d° etäisyys: %2$s</string>
     <string name="waypoint_edit">Muokkaa reittipistettä</string>
     <string name="waypoint_delete">Poista reittipiste?</string>
@@ -521,6 +530,7 @@
     <string name="output_duration_milliseconds">Ulostulon kesto (millisekuntia)</string>
     <string name="nag_timeout_seconds">Hälytysaikakatkaisu (sekuntia)</string>
     <string name="ringtone">Soittoääni</string>
+    <string name="play">Aloita</string>
     <string name="use_i2s_as_buzzer">Käytä I2S protokollaa äänimerkille</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Valinnat</string>
@@ -742,7 +752,7 @@
     <string name="modules_unlocked">Lukitsemattomat moduulit</string>
     <string name="modules_already_unlocked">Moduulit ovat jo käytettävissä</string>
     <string name="remote">Etäyhteys</string>
-    <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
+    <string name="node_count_template">(%1$d yhdistetty / %2$d nähty / %3$d yhteensä)</string>
     <string name="react">Reagoi</string>
     <string name="disconnect">Katkaise yhteys</string>
     <string name="scanning_bluetooth">Etsitään bluetooth-laitteita…</string>
@@ -786,6 +796,8 @@
     <string name="security_icon_help_show_less">Näytä nykyinen tila</string>
     <string name="security_icon_help_dismiss">Hylkää</string>
     <string name="confirm_delete_node">Oletko varma, että haluat poistaa tämän laitteen?</string>
+    <string name="forget_connection">Älä muista tätä yhteyttä</string>
+    <string name="confirm_forget_connection">Haluatko varmasti unohtaa tämän yhteyden?</string>
     <string name="replying_to">Vastataan käyttäjälle %1$s</string>
     <string name="cancel_reply">Peruuta vastaus</string>
     <string name="delete_messages_title">Poistetaanko viestit?</string>
@@ -849,6 +861,7 @@
     <string name="notification_permissions_description">Meshtastic käyttää ilmoituksia tiedottaakseen uusista viesteistä ja muista tärkeistä tapahtumista. Voit muuttaa ilmoitusasetuksia milloin tahansa.</string>
     <string name="next">Seuraava</string>
     <string name="grant_permissions">Myönnä oikeudet</string>
+    <string name="nodes_queued_for_deletion">%1$d laitetta jonossa poistettavaksi:</string>
     <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
     <string name="connecting_to_device">Yhdistetään laitteeseen</string>
     <string name="map_type_normal">Normaali</string>
@@ -889,7 +902,7 @@
     <string name="device_configuration">Laitteen asetukset</string>
     <string name="remotely_administrating">"[Etälaite] %1$s"</string>
     <string name="device_telemetry_enabled">Lähetä laitteen telemetriatiedot</string>
-    <string name="device_telemetry_enabled_summary">Ota käyttöön/poista käytöstä telemetriamoduuli laitteen mittaustietojen lähettämiseksi mesh-verkkoon</string>
+    <string name="device_telemetry_enabled_summary">Ota käyttöön tai poista käytöstä laitteen telemetriamoduuli, joka lähettää mittaustietoja mesh-verkkoon. Arvot ovat nimellisiä. Ruuhkaisissa verkoissa lähetysväliä pidennetään automaattisesti verkossa olevien laitteiden määrän perusteella. Alle 10 laitteen verkoissa lähetysväliä lyhennetään automaattisesti.</string>
     <string name="any">Milloin tahansa</string>
     <string name="one_hour">1 tunti</string>
     <string name="eight_hours">8 tuntia</string>
@@ -905,5 +918,48 @@
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <string name="unset">Ei asetettu – 0</string>
     <string name="relayed_by">Välittänyt: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Kuultu %1$d kautta</item>
+        <item quantity="other">Kuultu %1$d kautta</item>
+    </plurals>
+    <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
+    <string name="learn_more">Lue lisää</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -moduulille valmistajan &apos; DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial -komentoa yhdessä annetun bootloaderin .zip-tiedoston kanssa). Pelkän .uf2-tiedoston kopioiminen ei päivitä bootloaderia.</string>
+    <string name="dont_show_again_for_device">Älä näytä &apos; enää tälle laitteelle</string>
     <string name="preserve_favorites">Säilytä suosikit?</string>
+    <string name="usb_devices">USB-laitteet</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_title">Laiteohjelmiston päivitys</string>
+    <string name="firmware_update_checking">Tarkistetaan päivityksiä...</string>
+    <string name="firmware_update_device">Laite: %1$s</string>
+    <string name="firmware_update_latest">Viimeisin julkaisu: %1$s</string>
+    <string name="firmware_update_stable">Vakaa</string>
+    <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_button">Päivitä laiteohjelmisto</string>
+    <string name="firmware_update_disconnect_warning">Huomio: Tämä katkaisee laitteesi yhteyden tilapäisesti päivityksen aikana.</string>
+    <string name="firmware_update_downloading">Ladataan laiteohjelmistoa... %1$d%</string>
+    <string name="firmware_update_error">Virhe: %1$s</string>
+    <string name="firmware_update_retry">Yritä uudelleen</string>
+    <string name="firmware_update_success">Päivitys onnistui!</string>
+    <string name="firmware_update_done">Valmis</string>
+    <string name="firmware_update_starting_dfu">Käynnistetään DFU...</string>
+    <string name="firmware_update_updating">Päivitetään… %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Tuntematon laitemalli: %1$d</string>
+    <string name="firmware_update_invalid_address">Yhdistetty laite ei ole BLE-laite tai osoite on tuntematon (%1$s). DFU vaatii BLE:n.</string>
+    <string name="firmware_update_no_device">Ei laitetta kytkettynä</string>
+    <string name="firmware_update_not_found_in_release">Ei löytynyt firmwarea kohteelle %1$s julkaisusta.</string>
+    <string name="firmware_update_extracting">Puretaan laiteohjainta...</string>
+    <string name="firmware_update_starting_service">Katkaistaan yhteys DFU-palvelun käynnistämistä varten...</string>
+    <string name="firmware_update_failed">Päivitys epäonnistui</string>
+    <string name="firmware_update_hang_tight">Odota, prosessi on käynnissä...</string>
+    <string name="firmware_update_keep_device_close">Pidä laitteesi lähellä puhelinta.</string>
+    <string name="firmware_update_do_not_close">Älä sulje sovellusta.</string>
+    <string name="firmware_update_almost_there">Melkein valmista...</string>
+    <string name="firmware_update_taking_a_while">Tämä voi kestää hetken...</string>
+    <string name="firmware_update_select_file">Valitse paikallinen tiedosto</string>
+    <string name="firmware_update_unknown_release">Tuntematon etäjulkaisu</string>
+    <string name="firmware_update_disclaimer_title">Päivitysvaroitus</string>
+    <string name="firmware_update_disclaimer_text">Olet päivittämässä uutta laiteohjelmistoa laitteeseesi. Tämä prosessi sisältää riskejä.\n\n• Varmista, että laitteesi on ladattu.\n• Pidä laite lähellä puhelintasi.\n• Älä sulje sovellusta päivityksen aikana.\n\nVarmista, että olet valinnut laitteeseesi sopivan firmware-version.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy sanoo: ”Pidä tikkaat valmiina – koskaan ei tiedä milloin tarvitset niitä!</string>
+    <string name="chirpy">Chirpy</string>
 </resources>

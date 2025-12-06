@@ -135,7 +135,7 @@ constructor(
         queueJob =
             scope.handledLaunch {
                 Timber.d("packet queueJob started")
-                while (connectionStateHolder.getState() == ConnectionState.CONNECTED) {
+                while (connectionStateHolder.connectionState.value == ConnectionState.Connected) {
                     // take the first packet from the queue head
                     val packet = queuedPackets.poll() ?: break
                     try {
@@ -181,7 +181,9 @@ constructor(
         val future = CompletableFuture<Boolean>()
         queueResponse[packet.id] = future
         try {
-            if (connectionStateHolder.getState() != ConnectionState.CONNECTED) throw RadioNotConnectedException()
+            if (connectionStateHolder.connectionState.value != ConnectionState.Connected) {
+                throw RadioNotConnectedException()
+            }
             sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
         } catch (ex: Exception) {
             Timber.e(ex, "sendToRadio error: ${ex.message}")

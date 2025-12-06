@@ -133,6 +133,7 @@ fun SettingsScreen(
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
+    val isDfuCapable by settingsViewModel.isDfuCapable.collectAsStateWithLifecycle()
 
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
@@ -243,7 +244,9 @@ fun SettingsScreen(
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security.isManaged,
+                node = viewModel.destNode.value,
                 excludedModulesUnlocked = excludedModulesUnlocked,
+                isDfuCapable = isDfuCapable,
                 onPreserveFavoritesToggle = { viewModel.setPreserveFavorites(it) },
                 onRouteClick = { route ->
                     isWaiting = true

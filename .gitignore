@@ -41,3 +41,7 @@ keystore.properties
 
 /build-logic/convention/build/*
 /build-logic/build/
+
+# Personal build scripts
+build-and-install-android.sh
+wireless-install.sh

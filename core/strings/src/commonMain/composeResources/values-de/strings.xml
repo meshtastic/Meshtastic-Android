@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">Knotenfilter löschen</string>
     <string name="node_filter_title">Filtern nach</string>
     <string name="node_filter_include_unknown">Unbekannte Stationen einbeziehen</string>
+    <string name="node_filter_exclude_infrastructure">Infrastruktur ausschließen</string>
     <string name="node_filter_only_online">Offline Knoten ausblenden</string>
     <string name="node_filter_only_direct">Nur direkte Knoten anzeigen</string>
     <string name="node_filter_ignored">Sie sehen ignorierte Knoten,\ndrücken um zur Knotenliste zurückzukehren.</string>
@@ -35,7 +36,7 @@
     <string name="node_sort_via_mqtt">über MQTT</string>
     <string name="via_mqtt">über MQTT</string>
     <string name="node_sort_via_favorite">über Favorit</string>
-    <string name="node_filter_show_ignored">Ignorierte Knoten</string>
+    <string name="node_filter_show_ignored">Nur ignorierte Knoten anzeigen</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
@@ -183,6 +184,7 @@
     <string name="connection_status">Aktuelle Verbindungen:</string>
     <string name="wifi_ip">WLAN IP:</string>
     <string name="ethernet_ip">Ethernet IP:</string>
+    <string name="connecting">Wird verbunden</string>
     <string name="not_connected">Nicht verbunden</string>
     <string name="connected_sleeping">Mit Funkgerät verbunden, aber es ist im Schlafmodus</string>
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
@@ -213,6 +215,7 @@
     <string name="debug_clear_logs_confirm">Es werden alle Log- und Datenbankeinträge von Ihrem Gerät entfernt. Dies ist eine vollständige Löschung und sie ist dauerhaft.</string>
     <string name="clear">Leeren</string>
     <string name="message_delivery_status">Zustellungsstatus für Nachrichten</string>
+    <string name="new_messages_below">Neue Nachrichten unten</string>
     <string name="meshtastic_messages_notifications">Benachrichtigung direkte Nachrichten</string>
     <string name="meshtastic_broadcast_notifications">Benachrichtigung allgemeine Nachrichten</string>
     <string name="meshtastic_alerts_notifications">Warnmeldungen</string>
@@ -256,6 +259,10 @@
     <string name="resend">Erneut senden</string>
     <string name="shutdown">Herunterfahren</string>
     <string name="cant_shutdown">Herunterfahren wird auf diesem Gerät nicht unterstützt</string>
+    <string name="shutdown_warning">:warnung: Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten.</string>
+    <string name="shutdown_critical_node">:Warnung: Dies ist ein kritischer Infrastrukturknoten. Geben Sie den Knotennamen zur Bestätigung ein:</string>
+    <string name="shutdown_node_name">Knoten: %1$s</string>
+    <string name="shutdown_type_name">Typ: %1$s</string>
     <string name="reboot">Neustarten</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Einführung zeigen</string>
@@ -299,6 +306,8 @@
     <string name="map_purge_fail">Das Säubern des SQL-Zwischenspeichers ist fehlgeschlagen, siehe Logcat für Details</string>
     <string name="map_cache_manager">Zwischenspeicher-Verwaltung</string>
     <string name="map_download_complete">Herunterladen abgeschlossen!</string>
+    <string name="map_download_errors">Herunterladen abgeschlossen mit %1$d Fehlern</string>
+    <string name="map_cache_tiles">%1$d Kacheln</string>
     <string name="map_subDescription">Richtung: %1$d° Entfernung: %2$s</string>
     <string name="waypoint_edit">Wegpunkt bearbeiten</string>
     <string name="waypoint_delete">Wegpunkt löschen?</string>
@@ -497,7 +506,7 @@
     <string name="compass_north_top">Kompass Norden oben</string>
     <string name="flip_screen">Bildschirm spiegeln</string>
     <string name="display_units">Anzeigeeinheiten</string>
-    <string name="oled_type">OLEAD Typ</string>
+    <string name="oled_type">OLED Typ</string>
     <string name="display_mode">Anzeigemodus</string>
     <string name="always_point_north">Immer nach Norden zeigen</string>
     <string name="bold_heading">Fette Überschrift</string>
@@ -521,6 +530,7 @@
     <string name="output_duration_milliseconds">Ausgabedauer (GPIO)</string>
     <string name="nag_timeout_seconds">Nervige Verzögerung (Sekunden)</string>
     <string name="ringtone">Klingelton</string>
+    <string name="play">Wiedergabe</string>
     <string name="use_i2s_as_buzzer">I2S als Buzzer verwenden</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Optionen</string>
@@ -742,7 +752,7 @@
     <string name="modules_unlocked">Entsperrte Module</string>
     <string name="modules_already_unlocked">Module sind bereits freigeschaltet</string>
     <string name="remote">Entfernt</string>
-    <string name="node_count_template">(%1$d Online / %2$d Gesamt)</string>
+    <string name="node_count_template">(%1$d online / %2$d angezeigt / %3$d gesamt)</string>
     <string name="react">Reagieren</string>
     <string name="disconnect">Verbindung trennen</string>
     <string name="scanning_bluetooth">Suche nach Bluetooth Geräten…</string>
@@ -786,6 +796,8 @@
     <string name="security_icon_help_show_less">Aktuellen Status anzeigen</string>
     <string name="security_icon_help_dismiss">Tastatur ausblenden</string>
     <string name="confirm_delete_node">Möchten Sie diesen Knoten wirklich löschen?</string>
+    <string name="forget_connection">Verbindung löschen</string>
+    <string name="confirm_forget_connection">Sind Sie sicher, dass Sie diese Verbindung löschen möchten?</string>
     <string name="replying_to">Antworten auf %1$s</string>
     <string name="cancel_reply">Antwort abbrechen</string>
     <string name="delete_messages_title">Nachricht löschen?</string>
@@ -849,6 +861,7 @@
     <string name="notification_permissions_description">Meshtastic nutzt Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
     <string name="grant_permissions">Berechtigungen erteilen</string>
+    <string name="nodes_queued_for_deletion">%1$d Knoten in der Warteschlange zum Löschen:</string>
     <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
     <string name="connecting_to_device">Verbinde mit Gerät</string>
     <string name="map_type_normal">Normal</string>
@@ -889,7 +902,7 @@
     <string name="device_configuration">Geräteeinstellungen</string>
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <string name="device_telemetry_enabled">Gerätetelemetrie senden</string>
-    <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul Gerätetelemetrie, um Daten an das Netzwerk zu senden</string>
+    <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul für Gerätetelemetrie, um Daten an das Meshtastic Netzwerk zu senden. Dies sind Richtwerte. Bei stark ausgelasteten Netzwerken werden die Übertragungsintervalle automatisch anhand der Anzahl der Knoten die online sind verlängert. Netzwerke mit weniger als 10 Knoten werden auf kürzere Intervalle skaliert.</string>
     <string name="any">Beliebig</string>
     <string name="one_hour">1 Stunde</string>
     <string name="eight_hours">8 Stunden</string>
@@ -905,5 +918,48 @@
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="relayed_by">Weitergeleitet von: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Höre %1$d Relais</item>
+        <item quantity="other">Höre %1$d Relais</item>
+    </plurals>
+    <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
+    <string name="learn_more">Mehr erfahren</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
+    <string name="dont_show_again_for_device">Für dieses Gerät nicht erneut anzeigen</string>
     <string name="preserve_favorites">Favoriten beibehalten?</string>
+    <string name="usb_devices">USB Geräte</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_title">Firmware Aktualisierung</string>
+    <string name="firmware_update_checking">Auf Aktualisierungen überprüfen...</string>
+    <string name="firmware_update_device">Gerät: %1$s</string>
+    <string name="firmware_update_latest">Neueste Version: %1$s</string>
+    <string name="firmware_update_stable">Stabil</string>
+    <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_button">Firmware aktualisieren</string>
+    <string name="firmware_update_disconnect_warning">Hinweis: während der Aktualisierung wird das Gerät zeitweise getrennt.</string>
+    <string name="firmware_update_downloading">Firmware herunterladen... %1$d%</string>
+    <string name="firmware_update_error">Fehler: %1$s</string>
+    <string name="firmware_update_retry">Erneut versuchen</string>
+    <string name="firmware_update_success">Aktualisierung erfolgreich!</string>
+    <string name="firmware_update_done">Fertig</string>
+    <string name="firmware_update_starting_dfu">DFU wird gestartet...</string>
+    <string name="firmware_update_updating">Aktualisierung... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Unbekanntes Hardware Modell: %1$d</string>
+    <string name="firmware_update_invalid_address">Das verbundene Gerät ist kein BLE Gerät oder die Adresse ist unbekannt (%1$s). DFU benötigt BLE.</string>
+    <string name="firmware_update_no_device">Kein Gerät verbunden</string>
+    <string name="firmware_update_not_found_in_release">Firmware für %1$s in der Release Version nicht gefunden.</string>
+    <string name="firmware_update_extracting">Extrahiere Firmware...</string>
+    <string name="firmware_update_starting_service">Trennen um DFU Dienst zu starten...</string>
+    <string name="firmware_update_failed">Aktualisierung fehlgeschlagen</string>
+    <string name="firmware_update_hang_tight">Bitte warten, wir arbeiten daran...</string>
+    <string name="firmware_update_keep_device_close">Halten Sie Ihr Gerät in die Nähe Ihres Telefons.</string>
+    <string name="firmware_update_do_not_close">App nicht schließen.</string>
+    <string name="firmware_update_almost_there">Fast fertig...</string>
+    <string name="firmware_update_taking_a_while">Dies könnte einige Minuten dauern...</string>
+    <string name="firmware_update_select_file">Lokale Datei auswählen</string>
+    <string name="firmware_update_unknown_release">Unbekannte Version</string>
+    <string name="firmware_update_disclaimer_title">Aktualisierungswarnung</string>
+    <string name="firmware_update_disclaimer_text">Sie sind im Begriff, eine neue Firmware auf Ihr Gerät zu flashen. Dieser Vorgang birgt Risiken.\n\n• Stellen Sie sicher, dass Ihr Gerät aufgeladen ist.\n• Halten Sie das Gerät in der Nähe Ihres Telefons.\n• Schließen Sie die App während des Updates nicht.\n\nVergewissern Sie sich, dass Sie die richtige Firmware für Ihre Hardware ausgewählt haben.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy sagt: „Halten Sie Ihre Leiter griffbereit!“</string>
+    <string name="chirpy">Chirpy</string>
 </resources>

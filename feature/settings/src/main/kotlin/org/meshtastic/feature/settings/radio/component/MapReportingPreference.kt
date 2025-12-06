@@ -51,6 +51,7 @@ import org.meshtastic.core.strings.map_reporting_summary
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.precisionBitsToMeters
+import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import kotlin.math.roundToInt
@@ -131,10 +132,11 @@ fun MapReportingPreference(
                     DropDownPreference(
                         modifier = Modifier.padding(bottom = 16.dp),
                         title = stringResource(Res.string.map_reporting_interval_seconds),
-                        items = publishItems.map { it.value to it.toDisplayString() },
-                        selectedItem = publishIntervalSecs,
+                        items = publishItems.map { it to it.toDisplayString() },
+                        selectedItem =
+                        FixedUpdateIntervals.fromValue(publishIntervalSecs.toLong()) ?: publishItems.first(),
                         enabled = enabled,
-                        onItemSelected = { onPublishIntervalSecsChanged(it.toInt()) },
+                        onItemSelected = { onPublishIntervalSecsChanged(it.value.toInt()) },
                     )
                 }
             }

@@ -49,6 +49,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -89,6 +90,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.channelsGraph
 import com.geeksville.mesh.navigation.connectionsGraph
 import com.geeksville.mesh.navigation.contactsGraph
+import com.geeksville.mesh.navigation.firmwareGraph
 import com.geeksville.mesh.navigation.mapGraph
 import com.geeksville.mesh.navigation.nodesGraph
 import com.geeksville.mesh.navigation.settingsGraph
@@ -118,6 +120,7 @@ import org.meshtastic.core.strings.bottom_nav_settings
 import org.meshtastic.core.strings.client_notification
 import org.meshtastic.core.strings.compromised_keys
 import org.meshtastic.core.strings.connected
+import org.meshtastic.core.strings.connecting
 import org.meshtastic.core.strings.connections
 import org.meshtastic.core.strings.conversations
 import org.meshtastic.core.strings.device_sleeping
@@ -174,13 +177,13 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
         LaunchedEffect(connectionState, notificationPermissionState) {
-            if (connectionState == ConnectionState.CONNECTED && !notificationPermissionState.status.isGranted) {
+            if (connectionState == ConnectionState.Connected && !notificationPermissionState.status.isGranted) {
                 notificationPermissionState.launchPermissionRequest()
             }
         }
     }
 
-    if (connectionState == ConnectionState.CONNECTED) {
+    if (connectionState == ConnectionState.Connected) {
         sharedContactRequested?.let {
             SharedContactDialog(sharedContact = it, onDismiss = { uIViewModel.clearSharedContactRequested() })
         }
@@ -387,16 +390,18 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                 item(
                     icon = {
                         TooltipBox(
-                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                            positionProvider =
+                            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                             tooltip = {
                                 PlainTooltip {
                                     Text(
                                         if (isConnectionsRoute) {
                                             when (connectionState) {
-                                                ConnectionState.CONNECTED -> stringResource(Res.string.connected)
-                                                ConnectionState.DEVICE_SLEEP ->
+                                                ConnectionState.Connected -> stringResource(Res.string.connected)
+                                                ConnectionState.Connecting -> stringResource(Res.string.connecting)
+                                                ConnectionState.DeviceSleep ->
                                                     stringResource(Res.string.device_sleeping)
-                                                ConnectionState.DISCONNECTED -> stringResource(Res.string.disconnected)
+                                                ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
                                             }
                                         } else {
                                             stringResource(destination.label)
@@ -525,6 +530,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             channelsGraph(navController)
             connectionsGraph(navController)
             settingsGraph(navController)
+            firmwareGraph(navController)
         }
     }
 }
@@ -543,7 +549,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val latestStableFirmwareRelease by
         viewModel.latestStableFirmwareRelease.collectAsStateWithLifecycle(DeviceVersion("2.6.4"))
     LaunchedEffect(connectionState, firmwareEdition) {
-        if (connectionState == ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.Connected) {
             firmwareEdition?.let { edition ->
                 Timber.d("FirmwareEdition: ${edition.name}")
                 when (edition) {
@@ -561,7 +567,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
 
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo) {
-        if (connectionState == ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.Connected) {
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE && BuildConfig.DEBUG.not()
                 if (isOld) {

@@ -48,68 +48,87 @@ import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 private const val USER_PREFERENCES_NAME = "user_preferences"
 
+@Retention(AnnotationRetention.BINARY)
+@Qualifier
+annotation class DataStoreScope
+
 @InstallIn(SingletonComponent::class)
 @Module
 object DataStoreModule {
+
+    @Provides
+    @Singleton
+    @DataStoreScope
+    fun provideDataStoreScope(): CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     @Singleton
     @Provides
-    fun providePreferencesDataStore(@ApplicationContext appContext: Context): DataStore<Preferences> =
-        PreferenceDataStoreFactory.create(
-            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
-            migrations =
-            listOf(
-                SharedPreferencesMigration(context = appContext, sharedPreferencesName = USER_PREFERENCES_NAME),
-                SharedPreferencesMigration(
-                    context = appContext,
-                    sharedPreferencesName = "ui-prefs",
-                    keysToMigrate =
-                    setOf(
-                        KEY_APP_INTRO_COMPLETED,
-                        KEY_THEME,
-                        KEY_NODE_SORT,
-                        KEY_INCLUDE_UNKNOWN,
-                        KEY_ONLY_ONLINE,
-                        KEY_ONLY_DIRECT,
-                        KEY_SHOW_IGNORED,
-                    ),
+    fun providePreferencesDataStore(
+        @ApplicationContext appContext: Context,
+        @DataStoreScope scope: CoroutineScope,
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
+        migrations =
+        listOf(
+            SharedPreferencesMigration(context = appContext, sharedPreferencesName = USER_PREFERENCES_NAME),
+            SharedPreferencesMigration(
+                context = appContext,
+                sharedPreferencesName = "ui-prefs",
+                keysToMigrate =
+                setOf(
+                    KEY_APP_INTRO_COMPLETED,
+                    KEY_THEME,
+                    KEY_NODE_SORT,
+                    KEY_INCLUDE_UNKNOWN,
+                    KEY_ONLY_ONLINE,
+                    KEY_ONLY_DIRECT,
+                    KEY_SHOW_IGNORED,
                 ),
             ),
-            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-            produceFile = { appContext.preferencesDataStoreFile(USER_PREFERENCES_NAME) },
-        )
+        ),
+        scope = scope,
+        produceFile = { appContext.preferencesDataStoreFile(USER_PREFERENCES_NAME) },
+    )
 
     @Singleton
     @Provides
-    fun provideLocalConfigDataStore(@ApplicationContext appContext: Context): DataStore<LocalConfig> =
-        DataStoreFactory.create(
-            serializer = LocalConfigSerializer,
-            produceFile = { appContext.dataStoreFile("local_config.pb") },
-            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig.getDefaultInstance() }),
-            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-        )
+    fun provideLocalConfigDataStore(
+        @ApplicationContext appContext: Context,
+        @DataStoreScope scope: CoroutineScope,
+    ): DataStore<LocalConfig> = DataStoreFactory.create(
+        serializer = LocalConfigSerializer,
+        produceFile = { appContext.dataStoreFile("local_config.pb") },
+        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig.getDefaultInstance() }),
+        scope = scope,
+    )
 
     @Singleton
     @Provides
-    fun provideModuleConfigDataStore(@ApplicationContext appContext: Context): DataStore<LocalModuleConfig> =
-        DataStoreFactory.create(
-            serializer = ModuleConfigSerializer,
-            produceFile = { appContext.dataStoreFile("module_config.pb") },
-            corruptionHandler =
-            ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig.getDefaultInstance() }),
-            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-        )
+    fun provideModuleConfigDataStore(
+        @ApplicationContext appContext: Context,
+        @DataStoreScope scope: CoroutineScope,
+    ): DataStore<LocalModuleConfig> = DataStoreFactory.create(
+        serializer = ModuleConfigSerializer,
+        produceFile = { appContext.dataStoreFile("module_config.pb") },
+        corruptionHandler =
+        ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig.getDefaultInstance() }),
+        scope = scope,
+    )
 
     @Singleton
     @Provides
-    fun provideChannelSetDataStore(@ApplicationContext appContext: Context): DataStore<ChannelSet> =
-        DataStoreFactory.create(
-            serializer = ChannelSetSerializer,
-            produceFile = { appContext.dataStoreFile("channel_set.pb") },
-            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet.getDefaultInstance() }),
-            scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
-        )
+    fun provideChannelSetDataStore(
+        @ApplicationContext appContext: Context,
+        @DataStoreScope scope: CoroutineScope,
+    ): DataStore<ChannelSet> = DataStoreFactory.create(
+        serializer = ChannelSetSerializer,
+        produceFile = { appContext.dataStoreFile("channel_set.pb") },
+        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet.getDefaultInstance() }),
+        scope = scope,
+    )
 }

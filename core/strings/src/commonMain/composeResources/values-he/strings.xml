@@ -131,6 +131,8 @@
     <string name="map_purge_fail">נכשל איפוס מטמון SQL, ראה logcat לפרטים</string>
     <string name="map_cache_manager">ניהול מטמון</string>
     <string name="map_download_complete">ההורדה הושלמה!</string>
+    <string name="map_download_errors">ההורדה הושלמה עם %1$d שגיאות</string>
+    <string name="map_cache_tiles">%1$d אזורי מפה</string>
     <string name="map_subDescription">כיוון: %1$d° מרחק: %2$s</string>
     <string name="waypoint_edit">ערוך נקודת ציון</string>
     <string name="waypoint_delete">מחק נקודת ציון?</string>
@@ -147,4 +149,7 @@
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">הודעה</string>
     <string name="settings">הגדרות</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">עדכן קושחה</string>
+    <string name="firmware_update_failed">העדכון נכשל</string>
 </resources>

@@ -33,7 +33,6 @@
     <string name="node_sort_via_mqtt">通过 MQTT</string>
     <string name="via_mqtt">通过 MQTT</string>
     <string name="node_sort_via_favorite">通过收藏夹</string>
-    <string name="node_filter_show_ignored">忽略的节点</string>
     <string name="unrecognized">无法识别的</string>
     <string name="message_status_enroute">正在等待确认</string>
     <string name="message_status_queued">发送队列中</string>
@@ -127,6 +126,7 @@
     <string name="ip_port">端口：</string>
     <string name="connected">已连接</string>
     <string name="connected_to">已连接至设备 (%1$s)</string>
+    <string name="connecting">正在连接</string>
     <string name="not_connected">尚未联机</string>
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
     <string name="app_too_old">需要更新应用程序</string>
@@ -234,6 +234,8 @@
     <string name="map_purge_fail">清除 SQL 缓存失败，请查看 logcat 纪录</string>
     <string name="map_cache_manager">缓存管理员</string>
     <string name="map_download_complete">下载已完成！</string>
+    <string name="map_download_errors">下载完成，但有 %1$d 个错误</string>
+    <string name="map_cache_tiles">%1$d 图砖</string>
     <string name="map_subDescription">方位：%1$d° 距离：%2$s</string>
     <string name="waypoint_edit">编辑航点</string>
     <string name="waypoint_delete">删除航点?</string>
@@ -625,7 +627,6 @@
     <string name="export_keys_confirmation">导出公钥和私钥到文件。请安全地存储某处。</string>
     <string name="modules_unlocked">模块已解锁</string>
     <string name="remote">远程</string>
-    <string name="node_count_template">(%1$d 在线 / %2$d 总计)</string>
     <string name="react">互动</string>
     <string name="disconnect">断开</string>
     <string name="no_network_devices">未找到网络设备。</string>
@@ -724,6 +725,7 @@
     <string name="configure_critical_alerts">配置关键警报</string>
     <string name="notification_permissions_description">Meshtastic 使用通知来随时更新新消息和其他重要事件。您可以随时从设置中更新您的通知权限。</string>
     <string name="next">下一步</string>
+    <string name="nodes_queued_for_deletion">%1$d 节点待删除：</string>
     <string name="clean_node_database_description">注意：这将从应用内和设备上的数据库中移除节点。\n选择是附加性的。</string>
     <string name="connecting_to_device">正在连接设备</string>
     <string name="map_type_normal">普通</string>
@@ -754,4 +756,9 @@
     <string name="eight_hours">8 小时</string>
     <string name="one_day">24 小时</string>
     <string name="two_days">48 小时</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">更新固件</string>
+    <string name="firmware_update_done">完成</string>
+    <string name="firmware_update_no_device">设备未连接</string>
+    <string name="firmware_update_failed">更新失败</string>
 </resources>

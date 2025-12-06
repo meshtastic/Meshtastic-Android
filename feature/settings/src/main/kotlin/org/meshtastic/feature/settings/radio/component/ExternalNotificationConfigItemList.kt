@@ -17,16 +17,28 @@
 
 package org.meshtastic.feature.settings.radio.component
 
+import android.media.MediaPlayer
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,6 +56,7 @@ import org.meshtastic.core.strings.alert_message_vibra
 import org.meshtastic.core.strings.external_notification
 import org.meshtastic.core.strings.external_notification_config
 import org.meshtastic.core.strings.external_notification_enabled
+import org.meshtastic.core.strings.import_label
 import org.meshtastic.core.strings.nag_timeout_seconds
 import org.meshtastic.core.strings.notifications_on_alert_bell_receipt
 import org.meshtastic.core.strings.notifications_on_message_receipt
@@ -52,6 +65,7 @@ import org.meshtastic.core.strings.output_duration_milliseconds
 import org.meshtastic.core.strings.output_led_active_high
 import org.meshtastic.core.strings.output_led_gpio
 import org.meshtastic.core.strings.output_vibra_gpio
+import org.meshtastic.core.strings.play
 import org.meshtastic.core.strings.ringtone
 import org.meshtastic.core.strings.use_i2s_as_buzzer
 import org.meshtastic.core.strings.use_pwm_buzzer
@@ -65,23 +79,59 @@ import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
+import timber.log.Timber
+import java.io.File
 
+private const val MAX_RINGTONE_SIZE = 230
+
+@Suppress("LongMethod", "TooGenericExceptionCaught")
 @Composable
-fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
+fun ExternalNotificationConfigScreen(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val extNotificationConfig = state.moduleConfig.externalNotification
     val ringtone = state.ringtone
     val formState = rememberConfigState(initialValue = extNotificationConfig)
     var ringtoneInput by rememberSaveable(ringtone) { mutableStateOf(ringtone) }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                try {
+                    context.contentResolver.openInputStream(it)?.use { stream ->
+                        stream.bufferedReader().use { reader ->
+                            val buffer = CharArray(MAX_RINGTONE_SIZE)
+                            val read = reader.read(buffer)
+                            if (read > 0) {
+                                ringtoneInput = String(buffer, 0, read)
+                                Toast.makeText(context, "Imported ringtone", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "File is empty", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Error importing ringtone")
+                    Toast.makeText(context, "Error importing: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
     RadioConfigScreenList(
+        modifier = modifier,
         title = stringResource(Res.string.external_notification),
         onBack = onBack,
         configState = formState,
         enabled = state.connected,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
+        additionalDirtyCheck = { ringtoneInput != ringtone },
+        onDiscard = { ringtoneInput = ringtone },
         onSave = {
             if (ringtoneInput != ringtone) {
                 viewModel.setRingtone(ringtoneInput)
@@ -211,7 +261,7 @@ fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewM
                 DropDownPreference(
                     title = stringResource(Res.string.output_duration_milliseconds),
                     items = outputItems.map { it.value to it.toDisplayString() },
-                    selectedItem = formState.value.outputMs,
+                    selectedItem = formState.value.outputMs.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy { outputMs = it.toInt() } },
                 )
@@ -220,7 +270,7 @@ fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewM
                 DropDownPreference(
                     title = stringResource(Res.string.nag_timeout_seconds),
                     items = nagItems.map { it.value to it.toDisplayString() },
-                    selectedItem = formState.value.nagTimeout,
+                    selectedItem = formState.value.nagTimeout.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy { nagTimeout = it.toInt() } },
                 )
@@ -228,13 +278,45 @@ fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewM
                 EditTextPreference(
                     title = stringResource(Res.string.ringtone),
                     value = ringtoneInput,
-                    maxSize = 230, // ringtone max_size:231
+                    maxSize = MAX_RINGTONE_SIZE,
                     enabled = state.connected,
                     isError = false,
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { ringtoneInput = it },
+                    trailingIcon = {
+                        Row {
+                            IconButton(onClick = { launcher.launch("*/*") }, enabled = state.connected) {
+                                Icon(
+                                    Icons.Default.FolderOpen,
+                                    contentDescription = stringResource(Res.string.import_label),
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    try {
+                                        val tempFile = File.createTempFile("ringtone", ".rtttl", context.cacheDir)
+                                        tempFile.writeText(ringtoneInput)
+                                        val mediaPlayer = MediaPlayer()
+                                        mediaPlayer.setDataSource(tempFile.absolutePath)
+                                        mediaPlayer.prepare()
+                                        mediaPlayer.start()
+                                        mediaPlayer.setOnCompletionListener {
+                                            it.release()
+                                            tempFile.delete()
+                                        }
+                                    } catch (e: Exception) {
+                                        Timber.e(e, "Failed to play ringtone")
+                                    }
+                                },
+                                enabled = state.connected,
+                            ) {
+                                Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.play))
+                            }
+                        }
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(

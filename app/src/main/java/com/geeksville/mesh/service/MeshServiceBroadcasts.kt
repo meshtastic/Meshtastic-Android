@@ -75,7 +75,7 @@ constructor(
 
     /** Broadcast our current connection status */
     fun broadcastConnection() {
-        val connectionState = connectionStateHolder.getState()
+        val connectionState = connectionStateHolder.connectionState.value
         val intent = Intent(MeshService.ACTION_MESH_CONNECTED).putExtra(EXTRA_CONNECTED, connectionState.toString())
         serviceRepository.setConnectionState(connectionState)
         explicitBroadcast(intent)

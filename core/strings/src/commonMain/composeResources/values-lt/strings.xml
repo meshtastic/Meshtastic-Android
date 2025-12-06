@@ -169,6 +169,8 @@
     <string name="map_purge_fail">SQL talpyklos išvalymas nepavyko, detales žiūrėkite logcat</string>
     <string name="map_cache_manager">Talpyklos valdymas</string>
     <string name="map_download_complete">Atsiuntimas baigtas!</string>
+    <string name="map_download_errors">Atsiuntimas baigtas su %1$d klaidomis</string>
+    <string name="map_cache_tiles">%1$d plytelės</string>
     <string name="map_subDescription">kryptis: %1$d° atstumas: %2$s</string>
     <string name="waypoint_edit">Redaguoti kelio tašką</string>
     <string name="waypoint_delete">Ištrinti orientyrą?</string>
@@ -246,4 +248,7 @@
     <string name="eight_hours">8 Valandos</string>
     <string name="one_day">24 Valandos</string>
     <string name="two_days">48 Valandos</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Atnaujinti Firmware</string>
+    <string name="firmware_update_failed">Atnaujinti nepavyko</string>
 </resources>

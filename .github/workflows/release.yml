@@ -53,7 +53,7 @@ jobs:
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -96,7 +96,7 @@ jobs:
     environment: Release
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -137,7 +137,7 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.4.7'
           bundler-cache: true
 
       - name: Build and Deploy Google Play to Internal Track with Fastlane
@@ -173,7 +173,7 @@ jobs:
     environment: Release
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -203,7 +203,7 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.4.7'
           bundler-cache: true
 
       - name: Build F-Droid with Fastlane
@@ -241,4 +241,16 @@ jobs:
           generate_release_notes: true
           files: ./artifacts/*/*
           draft: true
+          prerelease: true
+
+      - name: Create or Update internal GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: ${{ secrets.INTERNAL_BUILDS_HOST }}
+          token: ${{ secrets.INTERNAL_BUILDS_HOST_PAT }}
+          tag_name: ${{ inputs.tag_name }}
+          name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
+          generate_release_notes: true
+          files: ./artifacts/*/*
+          draft: false
           prerelease: true

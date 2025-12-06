@@ -176,6 +176,8 @@
     <string name="map_purge_fail">Čiščenje predpomnilnika SQL Cache ni uspelo, za podrobnosti glejte logcat</string>
     <string name="map_cache_manager">Upravitelj predpomnilnika</string>
     <string name="map_download_complete">Prenos končan!</string>
+    <string name="map_download_errors">Prenos končan z %1$d napakami</string>
+    <string name="map_cache_tiles">%1$d plošče</string>
     <string name="map_subDescription">lega: %1$d° oddaljenost: %2$s</string>
     <string name="waypoint_edit">Uredi točko poti</string>
     <string name="waypoint_delete">Izbriši točko poti?</string>
@@ -258,4 +260,7 @@
     <string name="eight_hours">8 Ur</string>
     <string name="one_day">24 Ur</string>
     <string name="two_days">48 Ur</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Posodobite vdelano programsko opremo</string>
+    <string name="firmware_update_failed">Posodobitev neuspešna</string>
 </resources>

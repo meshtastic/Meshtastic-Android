@@ -28,7 +28,7 @@ jobs:
         api-level: ${{ fromJson(inputs.api_levels) }} # Use the input to define the matrix
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: 'recursive'
 

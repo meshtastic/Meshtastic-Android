@@ -90,7 +90,7 @@ fun PositionSection(
             InsetDivider()
 
             ListItem(text = stringResource(LogsType.NODE_MAP.titleRes), leadingIcon = LogsType.NODE_MAP.icon) {
-                onAction(NodeDetailAction.Navigate(LogsType.NODE_MAP.route))
+                onAction(NodeDetailAction.Navigate(LogsType.NODE_MAP.routeFactory(node.num)))
             }
         }
 
@@ -99,7 +99,7 @@ fun PositionSection(
             InsetDivider()
 
             ListItem(text = stringResource(LogsType.POSITIONS.titleRes), leadingIcon = LogsType.POSITIONS.icon) {
-                onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.route))
+                onAction(NodeDetailAction.Navigate(LogsType.POSITIONS.routeFactory(node.num)))
             }
         }
     }

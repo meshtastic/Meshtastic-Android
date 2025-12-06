@@ -65,7 +65,7 @@ jobs:
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -109,7 +109,7 @@ jobs:
     needs: [ prepare-build-info, promote-release ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: 'recursive'

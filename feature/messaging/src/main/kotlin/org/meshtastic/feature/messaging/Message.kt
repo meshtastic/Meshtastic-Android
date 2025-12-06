@@ -22,6 +22,7 @@ package org.meshtastic.feature.messaging
 import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -73,6 +74,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,7 +86,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -92,6 +94,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
@@ -127,6 +130,7 @@ import org.meshtastic.core.strings.unknown_channel
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.AppOnlyProtos
 import java.nio.charset.StandardCharsets
@@ -141,7 +145,6 @@ private const val ROUNDED_CORNER_PERCENT = 100
  * @param contactKey A unique key identifying the contact or channel.
  * @param message An optional message to pre-fill in the input field.
  * @param viewModel The [MessageViewModel] instance for handling business logic and state.
- * @param navigateToMessages Callback to navigate to a different message thread.
  * @param navigateToNodeDetails Callback to navigate to a node's detail screen.
  * @param onNavigateBack Callback to navigate back from this screen.
  */
@@ -151,20 +154,21 @@ fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: MessageViewModel = hiltViewModel(),
-    navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     navigateToQuickChatOptions: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
+    val focusManager = LocalFocusManager.current
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
-    val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
+    val pagedMessages = viewModel.getMessagesFromPaged(contactKey).collectAsLazyPagingItems()
+    val contactSettings by viewModel.contactSettings.collectAsStateWithLifecycle(initialValue = emptyMap())
 
     // UI State managed within this Composable
     var replyingToPacketId by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -173,6 +177,9 @@ fun MessageScreen(
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
+
+    // Prevent the message TextField from stealing focus when the screen opens
+    LaunchedEffect(contactKey) { focusManager.clearFocus() }
 
     // Derived state, memoized for performance
     val channelInfo =
@@ -201,14 +208,49 @@ fun MessageScreen(
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
 
-    val listState =
-        rememberLazyListState(
-            initialFirstVisibleItemIndex = remember(messages) { messages.indexOfLast { !it.read }.coerceAtLeast(0) },
-        )
+    val listState = rememberLazyListState()
+
+    val lastReadMessageTimestamp by
+        remember(contactKey, contactSettings) {
+            derivedStateOf { contactSettings[contactKey]?.lastReadMessageTimestamp }
+        }
+
+    // Track unread messages using lightweight metadata queries
+    val hasUnreadMessages by viewModel.hasUnreadMessages(contactKey).collectAsStateWithLifecycle(initialValue = false)
+    val firstUnreadMessageUuid by
+        viewModel.getFirstUnreadMessageUuid(contactKey).collectAsStateWithLifecycle(initialValue = null)
+
+    var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
+
+    // Find the index of the first unread message in the paged list
+    val firstUnreadIndex by
+        remember(pagedMessages.itemCount, firstUnreadMessageUuid) {
+            derivedStateOf {
+                firstUnreadMessageUuid?.let { uuid ->
+                    (0 until pagedMessages.itemCount).firstOrNull { index -> pagedMessages[index]?.uuid == uuid }
+                }
+            }
+        }
+
+    // Scroll to first unread message on initial load
+    LaunchedEffect(hasPerformedInitialScroll, firstUnreadIndex, pagedMessages.itemCount) {
+        if (hasPerformedInitialScroll || pagedMessages.itemCount == 0) return@LaunchedEffect
+
+        val shouldScrollToUnread = hasUnreadMessages && firstUnreadIndex != null
+        if (shouldScrollToUnread) {
+            val targetIndex = (firstUnreadIndex!! - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
+            listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
+            hasPerformedInitialScroll = true
+        } else if (!hasUnreadMessages) {
+            // If no unread messages, just scroll to bottom (most recent)
+            listState.scrollToItem(0)
+            hasPerformedInitialScroll = true
+        }
+    }
 
     val onEvent: (MessageScreenEvent) -> Unit =
         remember(viewModel, contactKey, messageInputState, ourNode) {
-            { event ->
+            fun handle(event: MessageScreenEvent) {
                 when (event) {
                     is MessageScreenEvent.SendMessage -> {
                         viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
@@ -226,12 +268,11 @@ fun MessageScreen(
                     }
 
                     is MessageScreenEvent.ClearUnreadCount ->
-                        viewModel.clearUnreadCount(contactKey, event.lastReadMessageId)
+                        viewModel.clearUnreadCount(contactKey, event.messageUuid, event.lastReadTimestamp)
 
                     is MessageScreenEvent.NodeDetails -> navigateToNodeDetails(event.node.num)
 
                     is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
-                    is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey)
                     is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
                     is MessageScreenEvent.CopyToClipboard -> {
@@ -240,6 +281,8 @@ fun MessageScreen(
                     }
                 }
             }
+
+            ::handle
         }
 
     if (showDeleteDialog) {
@@ -262,7 +305,8 @@ fun MessageScreen(
                         when (action) {
                             MessageMenuAction.ClipboardCopy -> {
                                 val copiedText =
-                                    messages
+                                    (0 until pagedMessages.itemCount)
+                                        .mapNotNull { pagedMessages[it] }
                                         .filter { it.uuid in selectedMessageIds.value }
                                         .joinToString("\n") { it.text }
                                 onEvent(MessageScreenEvent.CopyToClipboard(copiedText))
@@ -271,11 +315,14 @@ fun MessageScreen(
                             MessageMenuAction.Delete -> showDeleteDialog = true
                             MessageMenuAction.Dismiss -> selectedMessageIds.value = emptySet()
                             MessageMenuAction.SelectAll -> {
+                                // Note: Select All is disabled with pagination since we don't have
+                                // access to the full message list. This would need to be reworked
+                                // to select all currently loaded items instead.
                                 selectedMessageIds.value =
-                                    if (selectedMessageIds.value.size == messages.size) {
+                                    if (selectedMessageIds.value.size == pagedMessages.itemCount) {
                                         emptySet()
                                     } else {
-                                        messages.map { it.uuid }.toSet()
+                                        (0 until pagedMessages.itemCount).mapNotNull { pagedMessages[it]?.uuid }.toSet()
                                     }
                             }
                         }
@@ -296,22 +343,32 @@ fun MessageScreen(
             }
         },
     ) { paddingValues ->
-        Column(Modifier.padding(paddingValues)) {
+        Column(Modifier.fillMaxSize().padding(paddingValues).focusable()) {
             Box(modifier = Modifier.weight(1f)) {
-                MessageList(
-                    nodes = nodes,
-                    ourNode = ourNode,
+                MessageListPaged(
                     modifier = Modifier.fillMaxSize(),
                     listState = listState,
-                    messages = messages,
-                    selectedIds = selectedMessageIds,
-                    onUnreadChanged = { messageId -> onEvent(MessageScreenEvent.ClearUnreadCount(messageId)) },
-                    onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
-                    onDeleteMessages = { viewModel.deleteMessages(it) },
-                    onSendMessage = { text, contactKey -> viewModel.sendMessage(text, contactKey) },
-                    contactKey = contactKey,
-                    onReply = { message -> replyingToPacketId = message?.packetId },
-                    onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
+                    state =
+                    MessageListPagedState(
+                        nodes = nodes,
+                        ourNode = ourNode,
+                        messages = pagedMessages,
+                        selectedIds = selectedMessageIds,
+                        contactKey = contactKey,
+                        firstUnreadMessageUuid = firstUnreadMessageUuid,
+                        hasUnreadMessages = hasUnreadMessages,
+                    ),
+                    handlers =
+                    MessageListHandlers(
+                        onUnreadChanged = { messageUuid, timestamp ->
+                            onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
+                        },
+                        onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
+                        onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
+                        onDeleteMessages = { viewModel.deleteMessages(it) },
+                        onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
+                        onReply = { message -> replyingToPacketId = message?.packetId },
+                    ),
                 )
                 // Show FAB if we can scroll towards the newest messages (index 0).
                 if (listState.canScrollBackward) {
@@ -332,9 +389,13 @@ fun MessageScreen(
                 )
             }
             val originalMessage by
-                remember(replyingToPacketId, messages) {
+                remember(replyingToPacketId, pagedMessages.itemCount) {
                     derivedStateOf {
-                        replyingToPacketId?.let { messages.firstOrNull { it.packetId == replyingToPacketId } }
+                        replyingToPacketId?.let { id ->
+                            (0 until pagedMessages.itemCount).firstNotNullOfOrNull { index ->
+                                pagedMessages[index]?.takeIf { it.packetId == id }
+                            }
+                        }
                     }
                 }
             ReplySnippet(

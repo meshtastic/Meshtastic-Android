@@ -35,7 +35,6 @@
     <string name="node_sort_via_mqtt">MQTT-n Keresztül</string>
     <string name="via_mqtt">MQTT-n Keresztül</string>
     <string name="node_sort_via_favorite">Kedvencek szerint</string>
-    <string name="node_filter_show_ignored">Figyelmen kívül hagyott csomópontok</string>
     <string name="unrecognized">Ismeretlen</string>
     <string name="message_status_enroute">Visszajelzésre vár</string>
     <string name="message_status_queued">Elküldésre vár</string>
@@ -180,6 +179,7 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Kapcsolódva</string>
     <string name="connected_to">Kapcsolódva a(z) %1$s rádióhoz</string>
+    <string name="connecting">Csatlakozás…</string>
     <string name="not_connected">Nincs kapcsolat</string>
     <string name="connected_sleeping">Kapcsolódva a rádióhoz, de az alvó üzemmódban van</string>
     <string name="app_too_old">Az alkalmazás frissítése szükséges</string>
@@ -296,6 +296,8 @@
     <string name="map_purge_fail">SQL gyorsítótár kiürítése sikertelen, a részleteket lásd a logcat-ben</string>
     <string name="map_cache_manager">Gyorsítótár kezelő</string>
     <string name="map_download_complete">A letöltés befejeződött!</string>
+    <string name="map_download_errors">A letöltés %1$d hibával fejeződött be</string>
+    <string name="map_cache_tiles">%1$d csempe</string>
     <string name="map_subDescription">irányszög: %1$d° távolság: %2$s</string>
     <string name="waypoint_edit">Útpont szerkesztés</string>
     <string name="waypoint_delete">Útpont törlés?</string>
@@ -732,7 +734,6 @@
     <string name="modules_unlocked">Modulok feloldva</string>
     <string name="modules_already_unlocked">A modulok már fel vannak oldva</string>
     <string name="remote">Távoli</string>
-    <string name="node_count_template">(%1$d online / %2$d összesen)</string>
     <string name="react">Reagálás</string>
     <string name="disconnect">Leválasztás</string>
     <string name="scanning_bluetooth">Bluetooth-eszközök keresése…</string>
@@ -836,6 +837,7 @@
     <string name="notification_permissions_description">A Meshtastic értesítésekkel tájékoztat az új üzenetekről és más fontos eseményekről. Az értesítési engedélyeket bármikor módosíthatod a beállításokban.</string>
     <string name="next">Tovább</string>
     <string name="grant_permissions">Engedély megadása</string>
+    <string name="nodes_queued_for_deletion">%1$d csomópont vár törlésre:</string>
     <string name="clean_node_database_description">Figyelem: Ez eltávolítja a csomópontokat az alkalmazás és az eszköz adatbázisából.\nA kijelölések összeadódnak.</string>
     <string name="connecting_to_device">Csatlakozás az eszközhöz</string>
     <string name="map_type_normal">Normál</string>
@@ -876,7 +878,6 @@
     <string name="device_configuration">Eszközkonfiguráció</string>
     <string name="remotely_administrating">"[Távoli] %1$s"</string>
     <string name="device_telemetry_enabled">Eszköztelemetria küldése</string>
-    <string name="device_telemetry_enabled_summary">A telemetria modul engedélyezése/letiltása a metrikák hálózatra küldéséhez</string>
     <string name="any">Bármely</string>
     <string name="one_hour">1 óra</string>
     <string name="eight_hours">8 óra</string>
@@ -891,4 +892,7 @@
     <string name="analytics_platforms">"Analitikai platformok: "</string>
     <string name="for_more_information_see_our_privacy_policy">További információért lásd az adatvédelmi irányelveinket.</string>
     <string name="unset">Nincs beállítva – 0</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Firmware frissítés</string>
+    <string name="firmware_update_failed">A frissítés sikertelen</string>
 </resources>

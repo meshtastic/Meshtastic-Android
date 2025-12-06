@@ -153,7 +153,7 @@ fun ChannelScreen(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
 
-    val enabled = connectionState == ConnectionState.CONNECTED && !viewModel.isManaged
+    val enabled = connectionState == ConnectionState.Connected && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
@@ -363,12 +363,12 @@ fun ChannelScreen(
             item {
                 PreferenceFooter(
                     enabled = enabled,
-                    negativeText = Res.string.reset,
+                    negativeText = stringResource(Res.string.reset),
                     onNegativeClicked = {
                         focusManager.clearFocus()
                         showResetDialog = true
                     },
-                    positiveText = Res.string.scan,
+                    positiveText = stringResource(Res.string.scan),
                     onPositiveClicked = {
                         focusManager.clearFocus()
                         if (cameraPermissionState.status.isGranted) {

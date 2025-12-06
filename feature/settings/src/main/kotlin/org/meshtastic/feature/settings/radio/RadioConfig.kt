@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Storage
+import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -48,6 +49,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res
@@ -59,6 +62,7 @@ import org.meshtastic.core.strings.debug_panel
 import org.meshtastic.core.strings.device_configuration
 import org.meshtastic.core.strings.export_configuration
 import org.meshtastic.core.strings.factory_reset
+import org.meshtastic.core.strings.firmware_update_title
 import org.meshtastic.core.strings.import_configuration
 import org.meshtastic.core.strings.message_device_managed
 import org.meshtastic.core.strings.module_settings
@@ -73,6 +77,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.radio.component.ShutdownConfirmationDialog
 import org.meshtastic.feature.settings.radio.component.WarningDialog
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -81,7 +86,9 @@ import org.meshtastic.feature.settings.radio.component.WarningDialog
 fun RadioConfigItemList(
     state: RadioConfigState,
     isManaged: Boolean,
+    node: Node? = null,
     excludedModulesUnlocked: Boolean = false,
+    isDfuCapable: Boolean = false,
     onPreserveFavoritesToggle: (Boolean) -> Unit = {},
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
@@ -154,28 +161,39 @@ fun RadioConfigItemList(
         AdminRoute.entries.forEach { route ->
             var showDialog by remember { mutableStateOf(false) }
             if (showDialog) {
-                WarningDialog(
-                    title = "${stringResource(route.title)}?",
-                    text = {
-                        if (route == AdminRoute.NODEDB_RESET) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                Text(text = stringResource(Res.string.preserve_favorites))
-                                Switch(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                    enabled = enabled,
-                                    checked = state.nodeDbResetPreserveFavorites,
-                                    onCheckedChange = onPreserveFavoritesToggle,
-                                )
+                // Use enhanced confirmation for SHUTDOWN and REBOOT
+                if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
+                    ShutdownConfirmationDialog(
+                        title = "${stringResource(route.title)}?",
+                        node = node,
+                        onDismiss = { showDialog = false },
+                        isShutdown = route == AdminRoute.SHUTDOWN,
+                        onConfirm = { onRouteClick(route) },
+                    )
+                } else {
+                    WarningDialog(
+                        title = "${stringResource(route.title)}?",
+                        text = {
+                            if (route == AdminRoute.NODEDB_RESET) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text(text = stringResource(Res.string.preserve_favorites))
+                                    Switch(
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                        enabled = enabled,
+                                        checked = state.nodeDbResetPreserveFavorites,
+                                        onCheckedChange = onPreserveFavoritesToggle,
+                                    )
+                                }
                             }
-                        }
-                    },
-                    onDismiss = { showDialog = false },
-                    onConfirm = { onRouteClick(route) },
-                )
+                        },
+                        onDismiss = { showDialog = false },
+                        onConfirm = { onRouteClick(route) },
+                    )
+                }
             }
 
             ListItem(
@@ -192,6 +210,15 @@ fun RadioConfigItemList(
     TitledCard(title = stringResource(Res.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
         if (isManaged) {
             ManagedMessage()
+        }
+
+        if (isDfuCapable && state.isLocal) {
+            ListItem(
+                text = stringResource(Res.string.firmware_update_title),
+                leadingIcon = Icons.Rounded.SystemUpdate,
+                enabled = enabled,
+                onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+            )
         }
 
         ListItem(

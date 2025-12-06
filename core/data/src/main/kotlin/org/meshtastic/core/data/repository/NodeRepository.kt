@@ -54,6 +54,13 @@ constructor(
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
 ) {
+    init {
+        // Backfill denormalized name columns for existing nodes on startup
+        processLifecycle.coroutineScope.launchWhenCreated {
+            withContext(dispatchers.io) { nodeInfoWriteDataSource.backfillDenormalizedNames() }
+        }
+    }
+
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?> =
         nodeInfoReadDataSource

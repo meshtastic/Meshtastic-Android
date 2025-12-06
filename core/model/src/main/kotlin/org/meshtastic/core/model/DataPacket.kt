@@ -62,6 +62,8 @@ data class DataPacket(
     var rssi: Int = 0,
     var replyId: Int? = null, // If this is a reply to a previous message, this is the ID of that message
     var relayNode: Int? = null,
+    var relays: Int = 0,
+    var viaMqtt: Boolean = false, // True if this packet passed via MQTT somewhere along its path
 ) : Parcelable {
 
     /** If there was an error with this message, this string describes what was wrong. */

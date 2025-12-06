@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.list
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -91,6 +92,7 @@ fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
     viewModel: NodeListViewModel = hiltViewModel(),
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
+    activeNodeId: Int? = null,
 ) {
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
 
@@ -122,7 +124,7 @@ fun NodeListScreen(
         topBar = {
             MainAppBar(
                 title = stringResource(Res.string.nodes),
-                subtitle = stringResource(Res.string.node_count_template, onlineNodeCount, totalNodeCount),
+                subtitle = stringResource(Res.string.node_count_template, onlineNodeCount, nodes.size, totalNodeCount),
                 ourNode = ourNode,
                 showNodeChip = false,
                 canNavigateUp = false,
@@ -140,14 +142,14 @@ fun NodeListScreen(
                 sharedContact = sharedContact,
                 modifier =
                 Modifier.animateFloatingActionButton(
-                    visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
+                    visible = !isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
                 onSharedContactRequested = { contact -> viewModel.setSharedContactRequested(contact) },
             )
         },
     ) { contentPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+        Box(modifier = Modifier.fillMaxSize().padding(contentPadding).focusable()) {
             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
                     val animatedAlpha by
@@ -159,17 +161,21 @@ fun NodeListScreen(
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
                         filterText = state.filter.filterText,
-                        onTextChange = viewModel::setNodeFilterText,
+                        onTextChange = { viewModel.nodeFilterText = it },
                         currentSortOption = state.sort,
                         onSortSelect = viewModel::setSortOption,
                         includeUnknown = state.filter.includeUnknown,
-                        onToggleIncludeUnknown = viewModel::toggleIncludeUnknown,
+                        onToggleIncludeUnknown = { viewModel.nodeFilterPreferences.toggleIncludeUnknown() },
+                        excludeInfrastructure = state.filter.excludeInfrastructure,
+                        onToggleExcludeInfrastructure = {
+                            viewModel.nodeFilterPreferences.toggleExcludeInfrastructure()
+                        },
                         onlyOnline = state.filter.onlyOnline,
-                        onToggleOnlyOnline = viewModel::toggleOnlyOnline,
+                        onToggleOnlyOnline = { viewModel.nodeFilterPreferences.toggleOnlyOnline() },
                         onlyDirect = state.filter.onlyDirect,
-                        onToggleOnlyDirect = viewModel::toggleOnlyDirect,
+                        onToggleOnlyDirect = { viewModel.nodeFilterPreferences.toggleOnlyDirect() },
                         showIgnored = state.filter.showIgnored,
-                        onToggleShowIgnored = viewModel::toggleShowIgnored,
+                        onToggleShowIgnored = { viewModel.nodeFilterPreferences.toggleShowIgnored() },
                         ignoredNodeCount = ignoredNodeCount,
                     )
                 }
@@ -204,6 +210,8 @@ fun NodeListScreen(
                                 null
                             }
 
+                        val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
+
                         NodeItem(
                             modifier = Modifier.animateItem(),
                             thisNode = ourNode,
@@ -213,7 +221,8 @@ fun NodeListScreen(
                             onClick = { navigateToNodeDetails(node.num) },
                             onLongClick = longClick,
                             currentTimeMillis = currentTimeMillis,
-                            isConnected = connectionState.isConnected(),
+                            connectionState = connectionState,
+                            isActive = isActive,
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {

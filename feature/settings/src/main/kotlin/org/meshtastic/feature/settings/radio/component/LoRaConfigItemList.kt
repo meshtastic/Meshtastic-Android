@@ -47,6 +47,7 @@ import org.meshtastic.core.strings.lora
 import org.meshtastic.core.strings.modem_preset
 import org.meshtastic.core.strings.ok_to_mqtt
 import org.meshtastic.core.strings.options
+import org.meshtastic.core.strings.override_duty_cycle
 import org.meshtastic.core.strings.override_frequency_mhz
 import org.meshtastic.core.strings.pa_fan_disabled
 import org.meshtastic.core.strings.region_frequency_plan
@@ -166,6 +167,14 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     checked = formState.value.txEnabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy { txEnabled = it } },
+                    containerColor = CardDefaults.cardColors().containerColor,
+                )
+                HorizontalDivider()
+                SwitchPreference(
+                    title = stringResource(Res.string.override_duty_cycle),
+                    checked = formState.value.overrideDutyCycle,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { overrideDutyCycle = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()

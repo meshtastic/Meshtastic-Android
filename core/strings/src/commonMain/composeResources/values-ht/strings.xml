@@ -168,6 +168,8 @@
     <string name="map_purge_fail">Echèk efase Kach SQL, tcheke logcat pou detay</string>
     <string name="map_cache_manager">Manadjè Kach</string>
     <string name="map_download_complete">Telechajman konplè!</string>
+    <string name="map_download_errors">Telechajman konplè avèk %1$d erè</string>
+    <string name="map_cache_tiles">%1$d tèk</string>
     <string name="map_subDescription">ang: %1$d° distans: %2$s</string>
     <string name="waypoint_edit">Modifye pwen</string>
     <string name="waypoint_delete">Efase pwen?</string>
@@ -230,4 +232,7 @@
     <string name="eight_hours">8 Èdtan</string>
     <string name="one_day">24 Èdtan</string>
     <string name="two_days">48 Èdtan</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Mete ajou mikrolojisyèl</string>
+    <string name="firmware_update_failed">Mizajou echwe</string>
 </resources>

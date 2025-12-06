@@ -181,6 +181,8 @@
     <string name="map_purge_fail">Vyčistenie SQL Cache zlyhalo, podrobnosti nájdete v logcat</string>
     <string name="map_cache_manager">Cache Manager</string>
     <string name="map_download_complete">Sťahovanie dokončené!</string>
+    <string name="map_download_errors">Sťahovanie ukončené s %1$d chybami</string>
+    <string name="map_cache_tiles">%1$d dlaždíc</string>
     <string name="map_subDescription">smer: %1$d° vzdialenosť: %2$s</string>
     <string name="waypoint_edit">Editovať cieľový bod</string>
     <string name="waypoint_delete">Vymazať cieľový bod?</string>
@@ -359,4 +361,7 @@
     <string name="eight_hours">8 Hodín</string>
     <string name="one_day">24 Hodín</string>
     <string name="two_days">48 Hodín</string>
+    <!-- Firmware Update -->
+    <string name="firmware_update_button">Aktualizácia firmvéru</string>
+    <string name="firmware_update_failed">Aktualizácia zlyhala</string>
 </resources>
