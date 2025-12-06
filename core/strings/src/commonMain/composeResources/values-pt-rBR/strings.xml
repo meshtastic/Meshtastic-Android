@@ -77,7 +77,6 @@
     <!-- Position Config -->
     <string name="channel_name">Nome do canal</string>
     <string name="qr_code">Código QR</string>
-    <string name="application_icon">ícone do aplicativo</string>
     <string name="unknown_username">Nome desconhecido</string>
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: https://github.com/orgs/meshtastic/discussions\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
@@ -727,7 +726,6 @@
     <string name="one_day">24 Horas</string>
     <string name="two_days">48 Horas</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Atualizar Firmware</string>
     <string name="firmware_update_done">Concluído</string>
     <string name="firmware_update_failed">Atualização falhou</string>
 </resources>

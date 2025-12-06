@@ -64,7 +64,6 @@
     <!-- Position Config -->
     <string name="channel_name">Kanalo pavadinimas</string>
     <string name="qr_code">QR kodas</string>
-    <string name="application_icon">aplikacijos piktograma</string>
     <string name="unknown_username">Nežinomas vartotojo vardas</string>
     <string name="send">Siųsti</string>
     <string name="warning_not_paired">Su šiuo telefonu dar nėra susietas joks Meshtastic įtaisais. Prašome suporuoti įrenginį ir nustatyti savo vartotojo vardą.\n\nŠi atvirojo kodo programa yra kūrimo stadijoje, jei pastebėsite problemas, prašome pranešti mūsų forume: https://github.com/orgs/meshtastic/discussions\n\nDaugiau informacijos rasite mūsų interneto svetainėje - www.meshtastic.org.</string>
@@ -249,6 +248,5 @@
     <string name="one_day">24 Valandos</string>
     <string name="two_days">48 Valandos</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Atnaujinti Firmware</string>
     <string name="firmware_update_failed">Atnaujinti nepavyko</string>
 </resources>

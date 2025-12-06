@@ -123,7 +123,6 @@
     <string name="debug">Debug</string>
     <string name="channel_name">Nome del canale</string>
     <string name="qr_code">Codice QR</string>
-    <string name="application_icon">Icona dell'applicazione</string>
     <string name="unknown_username">Nome Utente Sconosciuto</string>
     <string name="send">Invia</string>
     <string name="warning_not_paired">Non è ancora stato abbinato un dispositivo radio compatibile Meshtastic a questo telefono. È necessario abbinare un dispositivo e impostare il nome utente.\n\nQuesta applicazione open-source è ancora in via di sviluppo, se si riscontrano problemi, rivolgersi al forum: https://github.com/orgs/meshtastic/discussions\n\nPer maggiori informazioni visitare la pagina web - www.meshtastic.org.</string>
@@ -861,7 +860,6 @@
     <string name="learn_more">Maggiori informazioni</string>
     <string name="preserve_favorites">Conservare I Preferiti?</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Aggiorna Firmware</string>
     <string name="firmware_update_done">Fatto</string>
     <string name="firmware_update_failed">Aggiornamento non riuscito</string>
 </resources>

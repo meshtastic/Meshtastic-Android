@@ -66,7 +66,6 @@
     <string name="gpio">GPIO</string>
     <string name="channel_name">Ім'я каналу</string>
     <string name="qr_code">QR код</string>
-    <string name="application_icon">значок додатку</string>
     <string name="unknown_username">Невідомий користувач</string>
     <string name="send">Надіслати</string>
     <string name="warning_not_paired">Ви ще не підєднали пристрій, сумісний з Meshtastic. Будьласка приєднайте пристрій і введіть ім’я користувача.\n\nЦя програма з відкритим вихідним кодом знаходиться в розробці, якщо ви виявите проблеми, опублікуйте їх на нашому форумі: https://github.com/orgs/meshtastic/discussions\n\nДля отримання додаткової інформації відвідайте нашу веб-сторінку - www.meshtastic.org.</string>
@@ -496,7 +495,6 @@
     <string name="firmware_update_latest">Останній реліз: %1$s</string>
     <string name="firmware_update_stable">Стабільна</string>
     <string name="firmware_update_alpha">Альфа</string>
-    <string name="firmware_update_button">Оновлення прошивки</string>
     <string name="firmware_update_disconnect_warning">Примітка: це тимчасово від'єднає ваш пристрій на час оновлення.</string>
     <string name="firmware_update_downloading">Завантаження прошивки... %1$d%</string>
     <string name="firmware_update_error">Помилка: %1$s</string>

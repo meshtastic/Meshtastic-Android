@@ -150,7 +150,6 @@
     <string name="debug">Felsökning</string>
     <string name="channel_name">Kanalnamn</string>
     <string name="qr_code">QR-kod</string>
-    <string name="application_icon">applikationsikon</string>
     <string name="unknown_username">Okänt användarnamn</string>
     <string name="send">Skicka</string>
     <string name="warning_not_paired">Du har ännu inte parat en Meshtastic-kompatibel radio med den här telefonen. Koppla ihop en enhet och ange ditt användarnamn.\n\nDetta öppna källkodsprogram (open source) är under utveckling, om du hittar problem, vänligen publicera det på vårt forum: https://github.com/orgs/meshtastic/discussions\n\nFör mer information se vår webbsida - www.meshtastic.org.</string>
@@ -895,7 +894,6 @@
     <string name="firmware_update_latest">Senaste utgåva: %1$s</string>
     <string name="firmware_update_stable">Stabil version</string>
     <string name="firmware_update_alpha">Alfa</string>
-    <string name="firmware_update_button">Uppdatera fast programvara</string>
     <string name="firmware_update_disconnect_warning">Obs: Under uppdateringen kommer enheten att tillfälligt kopplas bort.</string>
     <string name="firmware_update_downloading">Hämtar fast programvara... %1$d%</string>
     <string name="firmware_update_error">Fel: %1$s</string>
