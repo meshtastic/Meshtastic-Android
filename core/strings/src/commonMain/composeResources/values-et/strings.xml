@@ -192,6 +192,7 @@
     <string name="meshtastic_service_notifications">Teenuse teavitused</string>
     <string name="about">Teave</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
+    <string name="channel_key_already_in_use">Selle võtmega kanal on juba kasutusel</string>
     <string name="contact_invalid">See kontakt on sobimatu ja seda ei saa lisada</string>
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_decoded_payload">Dekodeeritud andmed:</string>
@@ -726,6 +727,7 @@
     <string name="conversations">Vestlused</string>
     <string name="nodes">Sõlmed</string>
     <string name="bottom_nav_settings">Sätted</string>
+    <string name="selected">Valitud</string>
     <string name="set_your_region">Määra regioon</string>
     <string name="reply">Vasta</string>
     <string name="map_reporting_summary">Teie sõlm saadab pidevalt määratletud MQTT serverile krüpteerimata kaardiaruande pakete, mis sisaldab ID-d, pikka- ja lühinime, ligikaudset asukohta, riistvaramudelit, rolli, püsivara versiooni, LoRa regiooni, modemi eelseadistust ja peamise kanali nime.</string>
@@ -921,7 +923,7 @@
         <item quantity="one">Kuulsin %1$d releed</item>
         <item quantity="other">Kuuldi %1$d vahendajat</item>
     </plurals>
-    <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA-värskendamist peate võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
+    <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="learn_more">Lisateave</string>
     <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul kasutage tootja&apos; seerianumbri DFU tööriista (näiteks adafruit-nrfutil dfu koos kaasasoleva alglaaduri jadapordi .zip-failiga). Ainult .uf2-faili kopeerimine ei värskenda alglaadurit.</string>
     <string name="dont_show_again_for_device">Ära selle &apos; seadme puhul enam kuva</string>
@@ -931,6 +933,7 @@
     <string name="firmware_update_title">Püsivara uuendus</string>
     <string name="firmware_update_checking">Otsin uuendusi...</string>
     <string name="firmware_update_device">Seade: %1$s</string>
+    <string name="firmware_update_currently_installed">Praegu paigaldatud: %1$s</string>
     <string name="firmware_update_latest">Viimane väljalase: %1$s</string>
     <string name="firmware_update_stable">Stabiilne</string>
     <string name="firmware_update_alpha">Alfa</string>
@@ -943,6 +946,7 @@
     <string name="firmware_update_starting_dfu">DFU käivitamine...</string>
     <string name="firmware_update_updating">Uuendan... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Tundmatu riistvaramudel: %1$d</string>
+    <string name="firmware_update_invalid_address">Ühendatud seade ei ole kehtiv BLE seade või aadress on teadmata (%1$s).</string>
     <string name="firmware_update_no_device">Ühtegi seadet pole ühendatud</string>
     <string name="firmware_update_not_found_in_release">%1$s püsivara ei leitud selles versioonis.</string>
     <string name="firmware_update_extracting">Püsivara lahtipakkimine...</string>
@@ -959,4 +963,14 @@
     <string name="firmware_update_disclaimer_text">Oled paigaldamas oma seadmesse uut püsivara. See protsess on ohtlik.\n\n• Veendu, et seade on laetud.\n• Hoia seadet telefoni lähedal.\n• Ära sulge rakendust värskendamise ajal.\n\nKontrolli, et oled oma riistvara jaoks valinud õige püsivara.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy ütleb: \"Hoia oma redel käepärast!\"</string>
     <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Taaskäivitamine DFU reziimi...</string>
+    <string name="firmware_update_waiting_for_device">Ootan DFU seadet...</string>
+    <string name="firmware_update_copying">Püsivara kopeerimine...</string>
+    <string name="firmware_update_save_dfu_file">Palun salvesta .uf2-fail oma seadme&apos; DFU kettale.</string>
+    <string name="firmware_update_flashing">Seadme värskendamine, palun oota...</string>
+    <string name="firmware_update_method_usb">USB failiedastus</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">Uuendamine %1$s kaudu</string>
+    <string name="firmware_update_usb_instruction_title">Vali DFU USB ketas</string>
+    <string name="firmware_update_usb_instruction_text">Teie seade on taaskäivitatud DFU režiimis ja peaks kuvatama USB kettana (nt RAK4631).\n\nKui failivalija avaneb, valige püsivara faili salvestamiseks selle ketta juurkaust.</string>
 </resources>
