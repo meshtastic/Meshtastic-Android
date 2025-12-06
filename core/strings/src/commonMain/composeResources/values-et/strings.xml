@@ -192,7 +192,6 @@
     <string name="meshtastic_service_notifications">Teenuse teavitused</string>
     <string name="about">Teave</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
-    <string name="channel_key_already_in_use">Selle võtmega kanal on juba kasutusel</string>
     <string name="contact_invalid">See kontakt on sobimatu ja seda ei saa lisada</string>
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_decoded_payload">Dekodeeritud andmed:</string>
