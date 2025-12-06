@@ -94,6 +94,7 @@ import org.meshtastic.core.strings.mute_status_muted_for_days
 import org.meshtastic.core.strings.mute_status_muted_for_hours
 import org.meshtastic.core.strings.mute_status_unmuted
 import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.strings.select_all
 import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.MainAppBar
@@ -227,7 +228,10 @@ fun ContactsScreen(
                 ),
                 onClick = onNavigateToShare,
             ) {
-                Icon(Icons.Rounded.QrCode2, contentDescription = null)
+                Icon(
+                    Icons.Rounded.QrCode2,
+                    contentDescription = stringResource(Res.string.share_contact),
+                )
             }
         },
     ) { paddingValues ->

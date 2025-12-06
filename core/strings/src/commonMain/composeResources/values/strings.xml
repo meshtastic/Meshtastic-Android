@@ -752,6 +752,7 @@
     <string name="conversations">Conversations</string>
     <string name="nodes">Nodes</string>
     <string name="bottom_nav_settings">Settings</string>
+    <string name="selected">Selected</string>
     <string name="set_your_region">Set your region</string>
     <string name="reply">Reply</string>
     <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
