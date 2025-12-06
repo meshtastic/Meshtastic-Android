@@ -37,15 +37,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,17 +57,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.util.hasDuplicateKeys
+import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add
 import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.channel_key_already_in_use
 import org.meshtastic.core.strings.channel_name
 import org.meshtastic.core.strings.channels
 import org.meshtastic.core.strings.press_and_drag
 import org.meshtastic.core.strings.send
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
@@ -135,21 +144,66 @@ private fun ChannelConfigScreen(
         settingsList.size != settingsListInput.size ||
             settingsList.zip(settingsListInput).any { (item1, item2) -> item1 != item2 }
 
+    // Check if the current channel list has duplicate PSKs - recompute when list changes
+    var hasDuplicateKeys by remember { mutableStateOf(false) }
+    LaunchedEffect(settingsListInput.size, settingsListInput.toList(), loraConfig) {
+        val channelSet = AppOnlyProtos.ChannelSet.newBuilder().apply {
+            addAllSettings(settingsListInput.toList())
+            setLoraConfig(loraConfig)
+        }.build()
+        hasDuplicateKeys = channelSet.hasDuplicateKeys()
+    }
+
     var showEditChannelDialog: Int? by rememberSaveable { mutableStateOf(null) }
     var showChannelLegendDialog by rememberSaveable { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
         EditChannelDialog(
             channelSettings = with(settingsListInput) { if (size > index) get(index) else channelSettings {} },
             modemPresetName = modemPresetName,
-            onAddClick = {
-                if (settingsListInput.size > index) {
-                    settingsListInput[index] = it
+            onAddClick = { newChannelSettings ->
+                val isEditing = index < settingsListInput.size
+                val originalChannel = if (isEditing) settingsListInput[index] else null
+                
+                // Build a temporary list to check for duplicates
+                val tempList = settingsListInput.toMutableList()
+                if (isEditing) {
+                    tempList[index] = newChannelSettings
                 } else {
-                    settingsListInput.add(it)
+                    tempList.add(newChannelSettings)
                 }
-                showEditChannelDialog = null
+                
+                // Check for duplicates in the temporary list
+                val tempChannelSet = AppOnlyProtos.ChannelSet.newBuilder().apply {
+                    addAllSettings(tempList)
+                    setLoraConfig(loraConfig)
+                }.build()
+                
+                val hasDuplicate = tempChannelSet.hasDuplicateKeys()
+
+                if (hasDuplicate) {
+                    coroutineScope.launch {
+                        context.showToast(Res.string.channel_key_already_in_use)
+                    }
+                    // If this was a new channel added by FAB (at the end), remove it
+                    // FAB adds channel then opens dialog, so index will be lastIndex
+                    if (index == settingsListInput.size - 1 && index >= 0) {
+                        settingsListInput.removeAt(index)
+                        showEditChannelDialog = null
+                    }
+                    // If editing existing channel, don't update - keep original and dialog open
+                } else {
+                    if (isEditing) {
+                        settingsListInput[index] = newChannelSettings
+                    } else {
+                        settingsListInput.add(newChannelSettings)
+                    }
+                    showEditChannelDialog = null
+                }
             },
             onDismissRequest = { showEditChannelDialog = null },
         )
@@ -238,7 +292,7 @@ private fun ChannelConfigScreen(
                     item { Spacer(modifier = Modifier.weight(1f)) }
                     item {
                         PreferenceFooter(
-                            enabled = enabled && isEditing,
+                            enabled = enabled && isEditing && !hasDuplicateKeys,
                             negativeText = stringResource(Res.string.cancel),
                             onNegativeClicked = {
                                 focusManager.clearFocus()
@@ -248,7 +302,13 @@ private fun ChannelConfigScreen(
                             positiveText = stringResource(Res.string.send),
                             onPositiveClicked = {
                                 focusManager.clearFocus()
-                                onPositiveClicked(settingsListInput)
+                                if (hasDuplicateKeys) {
+                                    coroutineScope.launch {
+                                        context.showToast(Res.string.channel_key_already_in_use)
+                                    }
+                                } else {
+                                    onPositiveClicked(settingsListInput)
+                                }
                             },
                         )
                     }
