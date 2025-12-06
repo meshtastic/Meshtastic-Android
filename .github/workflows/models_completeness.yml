@@ -3,6 +3,10 @@ name: Issue Completeness Check
 on:
   issues:
     types: [opened]
+    filters:
+      - if: >
+          !contains(github.event.issue.labels.*.name, 'enhancement') &&
+          !contains(github.event.issue.title, 'Feature Request')
 
 permissions:
   issues: write
