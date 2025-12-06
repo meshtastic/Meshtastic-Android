@@ -3,10 +3,6 @@ name: Issue Completeness Check
 on:
   issues:
     types: [opened]
-    filters:
-      - if: >
-          !contains(github.event.issue.labels.*.name, 'enhancement') &&
-          !contains(github.event.issue.title, 'Feature Request')
 
 permissions:
   issues: write
@@ -16,7 +12,20 @@ jobs:
   check-completeness:
     runs-on: ubuntu-latest
     steps:
+      - name: Check if should skip
+        uses: actions/github-script@v8
+        id: check-skip
+        with:
+          script: |
+            const title = context.payload.issue.title.toLowerCase();
+            const labels = context.payload.issue.labels.map(label => label.name);
+            const hasFeatureRequest = title.includes('feature request');
+            const hasEnhancement = labels.includes('enhancement');
+            const shouldSkip = hasFeatureRequest && hasEnhancement;
+            core.setOutput('should_skip', shouldSkip);
+      
       - name: Check issue completeness
+        if: steps.check-skip.outputs.should_skip != 'true'
         uses: actions/ai-inference@v2
         id: ai
         with:
@@ -27,10 +36,10 @@ jobs:
             Body: ${{ github.event.issue.body }}
           system-prompt: You are a helpful assistant that helps analyze GitHub issues for completeness.
           model: openai/gpt-4o-mini
-          temperature: 0.2
+          # temperature: 0.2
 
       - name: Comment on issue
-        if: steps.ai.outputs.response != ''
+        if: steps.check-skip.outputs.should_skip != 'true' && steps.ai.outputs.response != ''
         uses: actions/github-script@v8
         with:
           script: |
