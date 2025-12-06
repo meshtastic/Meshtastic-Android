@@ -32,9 +32,11 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -45,16 +47,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipAnchorPosition
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -71,6 +68,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
@@ -115,18 +113,15 @@ import org.meshtastic.core.strings.app_too_old
 import org.meshtastic.core.strings.bottom_nav_settings
 import org.meshtastic.core.strings.client_notification
 import org.meshtastic.core.strings.compromised_keys
-import org.meshtastic.core.strings.connected
-import org.meshtastic.core.strings.connecting
 import org.meshtastic.core.strings.connections
 import org.meshtastic.core.strings.conversations
-import org.meshtastic.core.strings.device_sleeping
-import org.meshtastic.core.strings.disconnected
 import org.meshtastic.core.strings.firmware_old
 import org.meshtastic.core.strings.firmware_too_old
 import org.meshtastic.core.strings.map
 import org.meshtastic.core.strings.must_update
 import org.meshtastic.core.strings.nodes
 import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.selected
 import org.meshtastic.core.strings.should_update
 import org.meshtastic.core.strings.should_update_firmware
 import org.meshtastic.core.strings.traceroute
@@ -293,97 +288,83 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                 val isConnectionsRoute = destination == TopLevelDestination.Connections
                 item(
                     icon = {
-                        TooltipBox(
-                            positionProvider =
-                            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                            tooltip = {
-                                PlainTooltip {
-                                    Text(
-                                        if (isConnectionsRoute) {
-                                            when (connectionState) {
-                                                ConnectionState.Connected -> stringResource(Res.string.connected)
-                                                ConnectionState.Connecting -> stringResource(Res.string.connecting)
-                                                ConnectionState.DeviceSleep ->
-                                                    stringResource(Res.string.device_sleeping)
-                                                ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
-                                            }
-                                        } else {
-                                            stringResource(destination.label)
-                                        },
-                                    )
-                                }
-                            },
-                            state = rememberTooltipState(),
-                        ) {
-                            if (isConnectionsRoute) {
-                                Box(
-                                    modifier =
-                                    Modifier.drawWithCache {
-                                        onDrawWithContent {
-                                            drawContent()
-                                            if (animatedGlowAlpha.value > 0f) {
-                                                val glowRadius = size.minDimension
-                                                drawCircle(
-                                                    brush =
-                                                    Brush.radialGradient(
-                                                        colors =
-                                                        listOf(
-                                                            currentGlowColor.copy(
-                                                                alpha = 0.8f * animatedGlowAlpha.value,
-                                                            ),
-                                                            currentGlowColor.copy(
-                                                                alpha = 0.4f * animatedGlowAlpha.value,
-                                                            ),
-                                                            Color.Transparent,
+                        val destinationLabel = stringResource(destination.label)
+                        if (isConnectionsRoute) {
+                            Box(
+                                modifier =
+                                Modifier.drawWithCache {
+                                    onDrawWithContent {
+                                        drawContent()
+                                        if (animatedGlowAlpha.value > 0f) {
+                                            val glowRadius = size.minDimension
+                                            drawCircle(
+                                                brush =
+                                                Brush.radialGradient(
+                                                    colors =
+                                                    listOf(
+                                                        currentGlowColor.copy(
+                                                            alpha = 0.8f * animatedGlowAlpha.value,
                                                         ),
-                                                        center = center,
-                                                        radius = glowRadius,
+                                                        currentGlowColor.copy(
+                                                            alpha = 0.4f * animatedGlowAlpha.value,
+                                                        ),
+                                                        Color.Transparent,
                                                     ),
+                                                    center = center,
                                                     radius = glowRadius,
-                                                    blendMode = BlendMode.Screen,
-                                                )
-                                            }
+                                                ),
+                                                radius = glowRadius,
+                                                blendMode = BlendMode.Screen,
+                                            )
                                         }
-                                    },
-                                ) {
-                                    ConnectionsNavIcon(
-                                        connectionState = connectionState,
-                                        deviceType = DeviceType.fromAddress(selectedDevice),
-                                    )
-                                }
-                            } else {
-                                BadgedBox(
-                                    badge = {
-                                        if (destination == TopLevelDestination.Conversations) {
-                                            // Keep track of the last non-zero count for display during exit animation
-                                            var lastNonZeroCount by remember { mutableIntStateOf(unreadMessageCount) }
-                                            if (unreadMessageCount > 0) {
-                                                lastNonZeroCount = unreadMessageCount
-                                            }
-                                            AnimatedVisibility(
-                                                visible = unreadMessageCount > 0,
-                                                enter = scaleIn() + fadeIn(),
-                                                exit = scaleOut() + fadeOut(),
-                                            ) {
-                                                Badge { Text(lastNonZeroCount.toString()) }
-                                            }
+                                    }
+                                },
+                            ) {
+                                ConnectionsNavIcon(
+                                    connectionState = connectionState,
+                                    deviceType = DeviceType.fromAddress(selectedDevice),
+                                    contentDescription = destinationLabel,
+                                )
+                            }
+                        } else {
+                            BadgedBox(
+                                badge = {
+                                    if (destination == TopLevelDestination.Conversations) {
+                                        // Keep track of the last non-zero count for display during exit animation
+                                        var lastNonZeroCount by remember { mutableIntStateOf(unreadMessageCount) }
+                                        if (unreadMessageCount > 0) {
+                                            lastNonZeroCount = unreadMessageCount
                                         }
-                                    },
-                                ) {
-                                    Icon(
-                                        imageVector = destination.icon,
-                                        contentDescription = stringResource(destination.label),
-                                        tint = LocalContentColor.current,
-                                    )
-                                }
+                                        AnimatedVisibility(
+                                            visible = unreadMessageCount > 0,
+                                            enter = scaleIn() + fadeIn(),
+                                            exit = scaleOut() + fadeOut(),
+                                        ) {
+                                            Badge { Text(lastNonZeroCount.toString()) }
+                                        }
+                                    }
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = destination.icon,
+                                    contentDescription = stringResource(destination.label),
+                                    tint = LocalContentColor.current,
+                                )
                             }
                         }
                     },
                     selected = isSelected,
                     label = {
-                        if (navSuiteType != NavigationSuiteType.ShortNavigationBarCompact) {
-                            Text(stringResource(destination.label))
-                        }
+                        Text(
+                            text = stringResource(destination.label),
+                            modifier =
+                            if (navSuiteType == NavigationSuiteType.ShortNavigationBarCompact) {
+                                Modifier.width(1.dp)
+                                    .height(1.dp) // hide on phone - min 1x1 or talkback won't see it.
+                            } else {
+                                Modifier
+                            },
+                        )
                     },
                     onClick = {
                         val isRepress = destination == topLevelDestination
