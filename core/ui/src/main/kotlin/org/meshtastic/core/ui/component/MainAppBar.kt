@@ -42,7 +42,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.R
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.application_icon
 import org.meshtastic.core.strings.navigate_back
 import org.meshtastic.core.ui.component.preview.BooleanProvider
 import org.meshtastic.core.ui.component.preview.previewNode
@@ -84,13 +83,10 @@ fun MainAppBar(
             }
         } else {
             {
-                IconButton(enabled = false, onClick = {}) {
-                    Icon(
-                        imageVector =
-                        ImageVector.vectorResource(id = org.meshtastic.core.ui.R.drawable.ic_meshtastic),
-                        contentDescription = stringResource(Res.string.application_icon),
-                    )
-                }
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = org.meshtastic.core.ui.R.drawable.ic_meshtastic),
+                    contentDescription = null,
+                )
             }
         },
         actions = {
