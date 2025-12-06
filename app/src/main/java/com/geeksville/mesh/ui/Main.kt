@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
@@ -129,6 +130,7 @@ import org.meshtastic.core.strings.firmware_old
 import org.meshtastic.core.strings.firmware_too_old
 import org.meshtastic.core.strings.map
 import org.meshtastic.core.strings.must_update
+import org.meshtastic.core.strings.neighbor_info
 import org.meshtastic.core.strings.nodes
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.should_update
@@ -256,7 +258,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val neighborInfoResponse by uIViewModel.neighborInfoResponse.observeAsState()
     neighborInfoResponse?.let { response ->
         SimpleAlertDialog(
-            title = R.string.neighbor_info,
+            title = Res.string.neighbor_info,
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     fun tryParseNeighborInfo(input: String): MeshProtos.NeighborInfo? {
@@ -340,7 +342,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     }
                 }
             },
-            dismissText = stringResource(id = R.string.okay),
+            dismissText = stringResource(Res.string.okay),
             onDismiss = { uIViewModel.clearNeighborInfoResponse() },
         )
     }

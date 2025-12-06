@@ -27,6 +27,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.direct_message
 import org.meshtastic.core.strings.exchange_userinfo
+import org.meshtastic.core.strings.request_neighbor_info
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
