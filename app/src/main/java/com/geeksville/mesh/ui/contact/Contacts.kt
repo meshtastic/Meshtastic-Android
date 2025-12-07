@@ -165,7 +165,11 @@ fun ContactsScreen(
                 .mapNotNull { pagedContacts[it] }
                 .filter { it.contactKey in selectedContactKeys }
         }
-    val selectedCount = remember(selectedContacts) { selectedContacts.sumOf { it.messageCount } }
+    // Get message count directly from repository for selected contacts
+    var selectedCount by remember { mutableStateOf(0) }
+    LaunchedEffect(selectedContactKeys.size, selectedContactKeys.joinToString(",")) {
+        selectedCount = viewModel.getTotalMessageCount(selectedContactKeys.toList())
+    }
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
 
     // Callback functions for item interaction
@@ -398,7 +402,7 @@ private fun DeleteConfirmationDialog(
             pluralStringResource(
                 Res.plurals.delete_messages,
                 selectedCount,
-                arrayOf(selectedCount), // Pass the count as a format argument
+                selectedCount, // Pass the count as a format argument
             )
 
         AlertDialog(
