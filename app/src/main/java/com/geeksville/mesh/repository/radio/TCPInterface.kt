@@ -106,7 +106,7 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
 
         Socket(InetAddress.getByName(host), port).use { socket ->
             socket.tcpNoDelay = true
-            socket.soTimeout = 500
+            socket.soTimeout = 5000
             this@TCPInterface.socket = socket
 
             BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
@@ -119,7 +119,7 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
                     backoffDelay = MIN_BACKOFF_MILLIS
 
                     var timeoutCount = 0
-                    while (timeoutCount < 180) {
+                    while (timeoutCount < 18) {
                         try { // close after 90s of inactivity
                             val c = inputStream.read()
                             if (c == -1) {
