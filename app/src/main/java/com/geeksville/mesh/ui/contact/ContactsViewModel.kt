@@ -189,5 +189,15 @@ constructor(
 
     fun getContactSettings() = packetRepository.getContactSettings()
 
+    /**
+     * Get the total message count for a list of contact keys. This queries the repository directly, so it works even if
+     * contacts aren't loaded in the paged list.
+     */
+    suspend fun getTotalMessageCount(contactKeys: List<String>): Int = if (contactKeys.isEmpty()) {
+        0
+    } else {
+        contactKeys.sumOf { contactKey -> packetRepository.getMessageCount(contactKey) }
+    }
+
     private fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 }
