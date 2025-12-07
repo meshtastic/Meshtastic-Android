@@ -397,10 +397,6 @@ private fun DeleteConfirmationDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit, // Lambda to handle the delete action
 ) {
-    // Log the selectedCount for debugging purposes
-    androidx.compose.runtime.LaunchedEffect(selectedCount) {
-        android.util.Log.d("DeleteConfirmationDialog", "Selected count for deletion: $selectedCount")
-    }
     if (showDialog) {
         val deleteMessage =
             pluralStringResource(
