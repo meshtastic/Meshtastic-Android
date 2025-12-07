@@ -39,18 +39,26 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.compass_bearing
@@ -68,6 +76,9 @@ import org.meshtastic.core.strings.last_position_update
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassWarning
+import kotlin.io.path.Path
+import kotlin.math.cos
+import kotlin.math.sin
 
 private const val TARGET_STROKE_WIDTH = 8f
 private const val TARGET_DOT_RADIUS = 12f
@@ -109,6 +120,7 @@ fun CompassSheetContent(
             bearing = uiState.bearing,
             angularErrorDeg = uiState.angularErrorDeg,
             modifier = Modifier.fillMaxWidth(DIAL_WIDTH_FRACTION).aspectRatio(1f),
+            markerColor = uiState.targetColor
         )
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -214,7 +226,6 @@ private fun warningText(warning: CompassWarning): String = when (warning) {
     CompassWarning.LOCATION_DISABLED -> stringResource(Res.string.compass_location_disabled)
     CompassWarning.NO_LOCATION_FIX -> stringResource(Res.string.compass_no_location_fix)
 }
-
 @Composable
 private fun CompassDial(
     heading: Float?,
@@ -223,119 +234,182 @@ private fun CompassDial(
     modifier: Modifier = Modifier,
     markerColor: Color = Color(0xFF2196F3),
 ) {
-    val background = MaterialTheme.colorScheme.surfaceVariant
-    val outline = MaterialTheme.colorScheme.onSurfaceVariant
-    val targetStroke = markerColor
-    // Draw target relative to the phone heading so the dot is at the top when walking toward the node.
-    val relativeBearing = if (heading != null && bearing != null) bearing - heading else bearing
+    val compassRoseColor = MaterialTheme.colorScheme.primary
+    val tickColor = MaterialTheme.colorScheme.onSurface
+    val cardinalColor = MaterialTheme.colorScheme.primary
+    val degreeTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val northPointerColor = Color.Red
+    val headingIndicatorColor = MaterialTheme.colorScheme.secondary
+
+    val textMeasurer = rememberTextMeasurer()
+    val cardinalStyle = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold)
+    val degreeStyle = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Medium)
 
     Canvas(modifier = modifier) {
-        val radius = size.minDimension / 2f
-        val center = center
-        val labelRadius = radius - LABEL_RADIUS_OFFSET
-        val quarterRadius = radius - QUARTER_RADIUS_OFFSET
-        val textPaint = buildLabelPaint(outline)
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val radius = size.minDimension / 2f * 0.88f
+        val ringStroke = 3.dp.toPx()
 
-        // Rotate the dial to match phone heading so North stays aligned with the real world.
-        rotate(heading ?: 0f, pivot = center) {
-            drawCircle(color = background, radius = radius)
+        val currentHeading = heading ?: 0f
+        val currentBearing = bearing
+
+        rotate(-currentHeading, center) {
+            // Compass circles
             drawCircle(
-                color = outline,
+                color = compassRoseColor,
                 radius = radius,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(TARGET_STROKE_WIDTH / 2),
+                center = center,
+                style = Stroke(width = ringStroke)
+            )
+            drawCircle(
+                color = compassRoseColor.copy(alpha = 0.35f),
+                radius = radius * 0.85f,
+                center = center,
+                style = Stroke(width = 1.dp.toPx())
             )
 
-            drawCardinalLabels(center, labelRadius, textPaint)
-            drawQuarterTicks(center, quarterRadius, outline)
-        }
+            // Tick marks
+            for (deg in 0 until 360 step 5) {
+                val isCardinal = deg % 90 == 0
+                val isMajor = deg % 30 == 0
+                val tickLength = when {
+                    isCardinal -> radius * 0.14f
+                    isMajor -> radius * 0.09f
+                    else -> radius * 0.045f
+                }
+                val tickWidth = when {
+                    isCardinal -> 3.dp.toPx()
+                    isMajor -> 2.dp.toPx()
+                    else -> 1.dp.toPx()
+                }
 
-        // Target direction marker (blue line + dot just outside the dial)
-        if (relativeBearing != null) {
-            if (angularErrorDeg != null && angularErrorDeg > 0f) {
-                val arcRadius = radius - TARGET_INNER_INSET
-                drawArc(
-                    color = targetStroke.copy(alpha = 0.25f),
-                    startAngle = (relativeBearing - angularErrorDeg - CANVAS_NORTH_OFFSET_DEGREES).toFloat(),
-                    sweepAngle = angularErrorDeg * 2f,
-                    useCenter = false,
-                    style = Stroke(width = TARGET_STROKE_WIDTH),
-                    topLeft = Offset(center.x - arcRadius, center.y - arcRadius),
-                    size = androidx.compose.ui.geometry.Size(arcRadius * 2, arcRadius * 2),
+                val angle = Math.toRadians(deg.toDouble())
+                val outer = Offset(
+                    center.x + radius * sin(angle).toFloat(),
+                    center.y - radius * cos(angle).toFloat()
+                )
+                val inner = Offset(
+                    center.x + (radius - tickLength) * sin(angle).toFloat(),
+                    center.y - (radius - tickLength) * cos(angle).toFloat()
+                )
+
+                drawLine(
+                    color = if (deg == 0) northPointerColor else tickColor,
+                    start = inner,
+                    end = outer,
+                    strokeWidth = tickWidth,
+                    cap = StrokeCap.Round
                 )
             }
 
-            val angleRad = Math.toRadians((relativeBearing - CANVAS_NORTH_OFFSET_DEGREES).toDouble())
-            val lineEnd =
-                Offset(
-                    x = center.x + (radius - TARGET_INNER_INSET) * kotlin.math.cos(angleRad).toFloat(),
-                    y = center.y + (radius - TARGET_INNER_INSET) * kotlin.math.sin(angleRad).toFloat(),
-                )
-            val dotCenter =
-                Offset(
-                    x = center.x + (radius + TARGET_OUTER_OFFSET) * kotlin.math.cos(angleRad).toFloat(),
-                    y = center.y + (radius + TARGET_OUTER_OFFSET) * kotlin.math.sin(angleRad).toFloat(),
+            // Compass rose center
+            drawCompassRoseCenter(
+                center = center,
+                size = radius * 0.13f,
+                color = compassRoseColor,
+                northColor = northPointerColor
+            )
+
+            // Cardinal labels (moved closer to center)
+            val cardinalRadius = radius * 0.48f
+            val cardinals = listOf(
+                Triple("N", 0, northPointerColor),
+                Triple("E", 90, cardinalColor),
+                Triple("S", 180, cardinalColor),
+                Triple("W", 270, cardinalColor)
+            )
+
+            for ((label, deg, color) in cardinals) {
+                val angle = Math.toRadians(deg.toDouble())
+                val x = center.x + cardinalRadius * sin(angle).toFloat()
+                val y = center.y - cardinalRadius * cos(angle).toFloat()
+
+                val layout = textMeasurer.measure(label, style = cardinalStyle.copy(color = color))
+
+                withTransform({ rotate(currentHeading, Offset(x, y)) }) {
+                    drawText(
+                        textLayoutResult = layout,
+                        topLeft = Offset(
+                            x - layout.size.width / 2f,
+                            y - layout.size.height / 2f
+                        )
+                    )
+                }
+            }
+
+            // Degree labels
+            val degRadius = radius * 0.72f
+            for (d in 0 until 360 step 30) {
+                val angle = Math.toRadians(d.toDouble())
+                val x = center.x + degRadius * sin(angle).toFloat()
+                val y = center.y - degRadius * cos(angle).toFloat()
+
+                val layout = textMeasurer.measure(
+                    d.toString(),
+                    style = degreeStyle.copy(color = degreeTextColor)
                 )
 
+                withTransform({ rotate(currentHeading, Offset(x, y)) }) {
+                    drawText(
+                        textLayoutResult = layout,
+                        topLeft = Offset(
+                            x - layout.size.width / 2f,
+                            y - layout.size.height / 2f
+                        )
+                    )
+                }
+            }
+
+            // Bearing marker
+            if (currentBearing != null && angularErrorDeg != null && angularErrorDeg > 0f) {
+                val arcRadius = radius * 0.78f
+                drawArc(
+                    color = markerColor.copy(alpha = 0.25f),
+                    startAngle = currentBearing - angularErrorDeg,
+                    sweepAngle = angularErrorDeg * 2f,
+                    useCenter = false,
+                    style = Stroke(width = 8f),
+                    topLeft = Offset(center.x - arcRadius, center.y - arcRadius),
+                    size = Size(arcRadius * 2, arcRadius * 2)
+                )
+            }
+            if (currentBearing != null) {
+                val angle = Math.toRadians(currentBearing.toDouble())
+                val dot = Offset(
+                    center.x + (radius * 0.95f) * sin(angle).toFloat(),
+                    center.y - (radius * 0.95f) * cos(angle).toFloat()
+                )
+                drawCircle(color = markerColor, radius = 10.dp.toPx(), center = dot)
+            }
+        }
+
+        // Heading indicator as a simple line
+        if (heading != null) {
+            val headingEnd = Offset(center.x, center.y - radius * 0.78f)
             drawLine(
-                color = targetStroke,
+                color = headingIndicatorColor,
                 start = center,
-                end = lineEnd,
-                strokeWidth = TARGET_STROKE_WIDTH,
-                cap = StrokeCap.Round,
+                end = headingEnd,
+                strokeWidth = 6.dp.toPx(),
+                cap = StrokeCap.Round
             )
-            drawCircle(color = targetStroke, radius = TARGET_DOT_RADIUS, center = dotCenter)
         }
     }
 }
 
-@Suppress("MagicNumber")
-private fun DrawScope.drawCardinalLabels(center: Offset, labelRadius: Float, textPaint: android.graphics.Paint) {
-    val labels = listOf("N" to 0.0, "E" to 90.0, "S" to 180.0, "W" to 270.0)
-
-    drawIntoCanvas { canvas ->
-        labels.forEach { (label, degrees) ->
-            val angleRad = Math.toRadians(degrees - CANVAS_NORTH_OFFSET_DEGREES)
-            val x = center.x + labelRadius * kotlin.math.cos(angleRad).toFloat()
-            val y = center.y + labelRadius * kotlin.math.sin(angleRad).toFloat() + textPaint.textSize / 3f
-            canvas.nativeCanvas.drawText(label, x, y, textPaint)
-        }
+private fun DrawScope.drawCompassRoseCenter(center: Offset, size: Float, color: Color, northColor: Color) {
+    val path = Path().apply {
+        moveTo(center.x, center.y - size)
+        lineTo(center.x + size * 0.35f, center.y)
+        lineTo(center.x, center.y + size * 0.35f)
+        lineTo(center.x - size * 0.35f, center.y)
+        close()
     }
+
+    drawPath(path, color.copy(alpha = 0.5f))
+    drawCircle(color = color, radius = size * 0.25f, center = center)
 }
 
-@Suppress("MagicNumber")
-private fun DrawScope.drawQuarterTicks(center: Offset, quarterRadius: Float, outline: Color) {
-    val tickAngles = listOf(45.0, 135.0, 225.0, 315.0)
-    tickAngles.forEach { degrees ->
-        val angleRad = Math.toRadians(degrees - CANVAS_NORTH_OFFSET_DEGREES)
-        val start =
-            Offset(
-                x = center.x + (quarterRadius - QUARTER_TICK_INSET) * kotlin.math.cos(angleRad).toFloat(),
-                y = center.y + (quarterRadius - QUARTER_TICK_INSET) * kotlin.math.sin(angleRad).toFloat(),
-            )
-        val end =
-            Offset(
-                x = center.x + quarterRadius * kotlin.math.cos(angleRad).toFloat(),
-                y = center.y + quarterRadius * kotlin.math.sin(angleRad).toFloat(),
-            )
-        drawLine(color = outline, start = start, end = end, strokeWidth = QUARTER_TICK_STROKE, cap = StrokeCap.Round)
-    }
-
-    val eighthAngles = listOf(22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5)
-    eighthAngles.forEach { degrees ->
-        val angleRad = Math.toRadians(degrees - CANVAS_NORTH_OFFSET_DEGREES)
-        val start =
-            Offset(
-                x = center.x + (quarterRadius - EIGHTH_TICK_INSET) * kotlin.math.cos(angleRad).toFloat(),
-                y = center.y + (quarterRadius - EIGHTH_TICK_INSET) * kotlin.math.sin(angleRad).toFloat(),
-            )
-        val end =
-            Offset(
-                x = center.x + quarterRadius * kotlin.math.cos(angleRad).toFloat(),
-                y = center.y + quarterRadius * kotlin.math.sin(angleRad).toFloat(),
-            )
-        drawLine(color = outline, start = start, end = end, strokeWidth = QUARTER_TICK_STROKE, cap = StrokeCap.Round)
-    }
-}
 
 private fun buildLabelPaint(outline: Color): android.graphics.Paint = android.graphics.Paint().apply {
     color = outline.toArgb()
