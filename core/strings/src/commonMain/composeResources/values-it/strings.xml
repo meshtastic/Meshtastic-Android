@@ -117,14 +117,30 @@
     <string name="config_position_broadcast_secs_summary">Il tempo massimo che può trascorrere senza che il nodo trasmetta la posizione.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Il tempo minimo tra un invio e l'altro per aggiornare della posizione, se la distanza minima è stata raggiunta.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">La distanza minima percorsa in metri per essere considerata per la trasmissione in modalità smart position.</string>
+    <string name="config_position_gps_update_interval_summary">Quanto spesso si tenterà di recuperare una posizione dal GPS (se &lt;10sec il GPS rimarrà sempre attivo).</string>
+    <string name="config_position_flags_summary">Dati facoltativi da includere nei messaggi di posizione. Più campi sono selezionati, più grande sarà il messaggio, che richiederà maggior tempo di trasmissione e aumenterà il rischio di perdita di pacchetti.</string>
+    <string name="config_power_is_power_saving_summary">Verranno sospese tutte le funzioni per la maggior parte del tempo. Per i ruoli di tracker e sensor, è inclusa nella sospensione anche la radio lora. Questa configurazione è sconsigliata se il dispositivo viene utilizzato con le app del telefono o se il dispositivo è privo di pulsanti utente.</string>
+    <string name="config_security_public_key">Viene generata a partire dalla chiave pubblica e viene inviata agli altri nodi della mesh per permettere loro di calcolare una chiave segreta condivisa.</string>
     <string name="config_security_private_key">Usato per creare una chiave condivisa con un dispositivo remoto.</string>
+    <string name="config_security_admin_key">La chiave pubblica che autorizza un nodo a inviare messaggi di amministrazione a questo nodo.</string>
+    <string name="config_security_is_managed">Il dispositivo è gestito da un amministratore nella mesh, l'utente non è in grado di accedere a nessuna delle impostazioni del dispositivo.</string>
     <string name="config_security_serial_enabled">Console seriale attraverso la Stream API.</string>
     <string name="config_security_debug_log_api_enabled">Output live debug logging su seriale, visualizza ed esporta i log di posizione dei dispositivi redatti su Bluetooth.</string>
     <!-- Position Config -->
+    <string name="position_packet">Pacchetto Posizione</string>
     <string name="broadcast_interval">Intervallo Di Trasmissione</string>
+    <string name="smart_position">Posizione Smart</string>
+    <string name="minimum_interval">Intervallo Minimo</string>
+    <string name="minimum_distance">Distanza Minima</string>
+    <string name="device_gps">GPS Del Dispositivo</string>
     <string name="fixed_position">Posizione Fissa</string>
     <string name="altitude">Altitudine</string>
     <string name="update_interval">Intervallo di Aggiornamento</string>
+    <string name="advanced_device_gps">Impostazioni Avanzate Dispositivo GPS</string>
+    <string name="gps_receive_gpio">GPIO di Ricezione del GPS</string>
+    <string name="gps_transmit_gpio">GPIO di Trasmissione del GPS</string>
+    <string name="gps_en_gpio">GPIO EN del GPS</string>
+    <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
     <string name="channel_name">Nome del canale</string>
     <string name="qr_code">Codice QR</string>
@@ -135,6 +151,7 @@
     <string name="analytics_okay">Consenti analisi e segnalazione di crash.</string>
     <string name="accept">Accetta</string>
     <string name="cancel">Annulla</string>
+    <string name="discard_changes">Annulla</string>
     <string name="save_changes">Salva</string>
     <string name="new_channel_rcvd">Ricevuta URL del Nuovo Canale</string>
     <string name="permission_missing">Meshtastic ha bisogno dei permessi di localizzazione abilitati per trovare nuovi dispositivi via Bluetooth. Puoi disabilitare quando non è in uso.</string>
@@ -154,6 +171,9 @@
     <string name="ip_port">Porta:</string>
     <string name="connected">Connesso</string>
     <string name="connected_to">Connesso alla radio (%1$s)</string>
+    <string name="connection_status">Connessioni attive:</string>
+    <string name="wifi_ip">IP Wifi:</string>
+    <string name="ethernet_ip">IP Ethernet:</string>
     <string name="connecting">Connessione in corso</string>
     <string name="not_connected">Non connesso</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
@@ -163,6 +183,7 @@
     <string name="meshtastic_service_notifications">Notifiche di servizio</string>
     <string name="about">Informazioni</string>
     <string name="channel_invalid">L'URL di questo Canale non è valida e non può essere usata</string>
+    <string name="contact_invalid">Questo contatto non è valido e non può essere aggiunto</string>
     <string name="debug_panel">Pannello Di Debug</string>
     <string name="debug_decoded_payload">Payload decodificato:</string>
     <string name="debug_logs_export">Esporta i logs</string>
@@ -184,6 +205,7 @@
     <string name="debug_clear_logs_confirm">Verranno rimossi tutti i pacchetti dei log e le voci del database dal dispositivo - Si tratta di un ripristino completo ed irreversibile.</string>
     <string name="clear">Svuota</string>
     <string name="message_delivery_status">Stato di consegna messaggi</string>
+    <string name="new_messages_below">Nuovi messaggi sotto</string>
     <string name="meshtastic_messages_notifications">Notifiche di messaggi diretti</string>
     <string name="meshtastic_broadcast_notifications">Notifiche di messaggi broadcast</string>
     <string name="meshtastic_alerts_notifications">Notifiche di allarme</string>
@@ -227,6 +249,10 @@
     <string name="resend">Reinvia</string>
     <string name="shutdown">Spegni</string>
     <string name="cant_shutdown">Spegnimento non supportato su questo dispositivo</string>
+    <string name="shutdown_warning">⚠️ Il nodo verrà SPENTO. Sarà necessario un intervento manuale per riaccenderlo.</string>
+    <string name="shutdown_critical_node">⚠️ Questo nodo è critico per l'infrastruttura. Digitare il nome del nodo per confermare:</string>
+    <string name="shutdown_node_name">Nodo: %1$s</string>
+    <string name="shutdown_type_name">Tipo: %1$s</string>
     <string name="reboot">Riavvia</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Mostra Guida introduttiva</string>
@@ -248,6 +274,7 @@
     <string name="delivery_confirmed">Consegna confermata</string>
     <string name="error">Errore</string>
     <string name="ignore">Ignora</string>
+    <string name="remove_ignored">Rimuovi da ignorati</string>
     <string name="ignore_add">Aggiungere '%1$s' alla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
     <string name="ignore_remove">Rimuovere '%1$s' dalla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
     <string name="map_select_download_region">Seleziona la regione da scaricare</string>
@@ -283,6 +310,11 @@
     <string name="mute_8_hours">8 ore</string>
     <string name="mute_1_week">1 settimana</string>
     <string name="mute_always">Sempre</string>
+    <string name="currently">Attualmente:</string>
+    <string name="mute_status_always">Sempre mutato</string>
+    <string name="mute_status_unmuted">Non mutato</string>
+    <string name="mute_status_muted_for_days">Mutato per %1d giorni, %.1f ore</string>
+    <string name="mute_status_muted_for_hours">Mutato per %.1f ore</string>
     <string name="replace">Sostituisci</string>
     <string name="wifi_qr_code_scan">Scansiona codice QR WiFi</string>
     <string name="wifi_qr_code_error">Formato codice QR delle Credenziali WiFi non valido</string>
@@ -301,8 +333,11 @@
     <string name="ch_util_definition">Utilizzazione del canale attuale, compreso TX, RX ben formato e RX malformato (cioè rumore).</string>
     <string name="air_util_definition">Percentuale di tempo di trasmissione utilizzato nell’ultima ora.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Significato Chiave Di Crittografia</string>
     <string name="encryption_psk">Chiave Condivisa</string>
+    <string name="encryption_psk_text">Solo i messaggi del canale possono essere inviati/ricevuti. I messaggi diretti necessitano dell'Infrastruttura a Chiave Pubblica, presente nel firmware 2.5+.</string>
     <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
+    <string name="encryption_pkc_text">I messaggi diretti stanno usando la crittografia basata sulla nuova infrastruttura a chiave pubblica.</string>
     <string name="encryption_error">Chiave pubblica errata</string>
     <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
     <string name="exchange_userinfo">Scambia informazioni utente</string>
@@ -347,6 +382,7 @@
     <string name="critical_alert">Avvisi critici</string>
     <string name="favorite">Preferito</string>
     <string name="add_favorite">Aggiungi ai preferiti</string>
+    <string name="remove_favorite">Rimuovi dai preferiti</string>
     <string name="favorite_add">Aggiungere '%1$s' ai nodi preferiti?</string>
     <string name="favorite_remove">Rimuovere '%1$s' dai nodi preferiti?</string>
     <string name="power_metrics_log">Registro Metriche Alimentazione</string>
@@ -364,6 +400,7 @@
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifiche batteria scarica (nodi preferiti)</string>
     <string name="baro_pressure">Pressione barometrica</string>
     <string name="udp_enabled">Abilitato</string>
+    <string name="udp_broadcast">Trasmissione UDP</string>
     <string name="udp_config">Configurazione UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Ricevuto l'ultima volta: %2$s<br>Posizione più recente: %3$s<br>Batteria: %4$s]]></string>
     <string name="toggle_my_position">Attiva/disattiva posizione</string>
@@ -432,6 +469,8 @@
     <string name="allow_input_source">Consenti sorgente di input</string>
     <string name="send_bell">Invia campanella</string>
     <string name="messages">Messaggi</string>
+    <string name="device_db_cache_limit">Limite cache DB del dispositivo</string>
+    <string name="device_db_cache_limit_summary">Numero massimo di database di nodi da mantenere in questo telefono</string>
     <string name="detection_sensor_config">Configurazione Sensore Rilevamento</string>
     <string name="detection_sensor_enabled">Sensore Rilevamento attivo</string>
     <string name="minimum_broadcast_seconds">Trasmissione minima (secondi)</string>
@@ -480,6 +519,7 @@
     <string name="output_duration_milliseconds">Durata output (millisecondi)</string>
     <string name="nag_timeout_seconds">Timeout chiusura popup (secondi)</string>
     <string name="ringtone">Suoneria</string>
+    <string name="play">Riproduci</string>
     <string name="use_i2s_as_buzzer">Usa I2S come buzzer</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Opzioni</string>
@@ -702,6 +742,7 @@
     <string name="modules_unlocked">Moduli sbloccati</string>
     <string name="modules_already_unlocked">Moduli già sbloccati</string>
     <string name="remote">Controllo remoto</string>
+    <string name="node_count_template">(%1$d online / %2$d visualizzati / %3$d in totale)</string>
     <string name="react">Rispondi</string>
     <string name="disconnect">Disconnetti</string>
     <string name="scanning_bluetooth">Scansione dei dispositivi Bluetooth…</string>
@@ -745,6 +786,8 @@
     <string name="security_icon_help_show_less">Mostra lo stato attuale</string>
     <string name="security_icon_help_dismiss">Annulla</string>
     <string name="confirm_delete_node">Sei sicuro di voler eliminare questo nodo?</string>
+    <string name="forget_connection">Dimentica connessione</string>
+    <string name="confirm_forget_connection">Sei sicuro di voler eliminare questa connessione?</string>
     <string name="replying_to">Rispondendo a %1$s</string>
     <string name="cancel_reply">Annulla risposta</string>
     <string name="delete_messages_title">Eliminare messaggi?</string>
@@ -865,7 +908,10 @@
     <string name="for_more_information_see_our_privacy_policy">Per ulteriori informazioni, consulta la nostra informativa sulla privacy.</string>
     <string name="unset">Disattiva - 0</string>
     <string name="relayed_by">Ritrasmesso da: %1$s</string>
+    <string name="firmware_update_usb_bootloader_warning">%1$s di solito viene fornito con un bootloader che non supporta gli aggiornamenti OTA. Potrebbe essere necessario flashare tramite USB un bootloader con funzione OTA prima di flashare tramite OTA.</string>
     <string name="learn_more">Maggiori informazioni</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Per RAK WisBlock RAK4631, utilizzare lo strumento seriale DFU fornito dal produttore (per esempio, adafruit-nrfutil dfu serial con il file .zip del bootloader fornito). La sola copia del file .uf2 non aggiornerà il bootloader.</string>
+    <string name="dont_show_again_for_device">Non mostrare di nuovo per questo dispositivo</string>
     <string name="preserve_favorites">Conservare I Preferiti?</string>
     <string name="usb_devices">Dispositivi USB</string>
     <!-- Firmware Update -->
@@ -885,11 +931,13 @@
     <string name="firmware_update_starting_dfu">Avvio modalità DFU...</string>
     <string name="firmware_update_updating">Aggiornamento in corso... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Modello hardware sconosciuto: %1$d</string>
+    <string name="firmware_update_invalid_address">Il dispositivo connesso non è un dispositivo BLE valido oppure l'indirizzo è sconosciuto (%1$s).</string>
     <string name="firmware_update_no_device">Nessun dispositivo connesso</string>
     <string name="firmware_update_not_found_in_release">Impossibile trovare il firmware per %1$s nelle release.</string>
     <string name="firmware_update_extracting">Estrazione firmware in corso...</string>
     <string name="firmware_update_starting_service">Disconnessione in corso per avviare il servizio DFU...</string>
     <string name="firmware_update_failed">Aggiornamento non riuscito</string>
+    <string name="firmware_update_hang_tight">Un po' di pazienza, operazioni in corso...</string>
     <string name="firmware_update_keep_device_close">Mantieni il dispositivo vicino al telefono.</string>
     <string name="firmware_update_do_not_close">Non chiudere l'app.</string>
     <string name="firmware_update_almost_there">Ci siamo quasi...</string>
@@ -897,4 +945,17 @@
     <string name="firmware_update_select_file">Seleziona File Locale</string>
     <string name="firmware_update_unknown_release">Versione remota sconosciuta</string>
     <string name="firmware_update_disclaimer_title">Avvertenza Aggiornamento</string>
+    <string name="firmware_update_disclaimer_text">Sta per essere caricato un nuovo firmware sul dispositivo. Questo processo comporta dei rischi.\n\n• Assicurarsi che il dispositivo sia carico.\n• Tenere il dispositivo vicino al telefono.\n• Non chiudere l'app durante l'aggiornamento.\n\nVerificare di aver selezionato il firmware corretto per il dispositivo.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy dice: \"Tieni la tua scala a portata di mano!\"</string>
+    <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Riavvio in DFU...</string>
+    <string name="firmware_update_waiting_for_device">In attesa del dispositivo DFU...</string>
+    <string name="firmware_update_copying">Copia del firmware...</string>
+    <string name="firmware_update_save_dfu_file">Salva il file .uf2 nell'unità DFU del dispositivo.</string>
+    <string name="firmware_update_flashing">Flash del dispositivo in corso, attendere...</string>
+    <string name="firmware_update_method_usb">Trasferimento File via USB</string>
+    <string name="firmware_update_method_ble">OTA tramite BLE</string>
+    <string name="firmware_update_method_detail">Aggiorna tramite %1$s</string>
+    <string name="firmware_update_usb_instruction_title">Selezionare il Disco DFU USB</string>
+    <string name="firmware_update_usb_instruction_text">Il dispositivo è stato riavviato in modalità DFU e dovrebbe apparire come un disco USB (ad es. RAK4631).\n\nQuando il selettore di file si apre, selezionare la cartella principale (root) dell'unità per salvare il file con il firmware.</string>
 </resources>

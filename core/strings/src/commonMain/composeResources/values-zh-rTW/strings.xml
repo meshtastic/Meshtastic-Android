@@ -902,6 +902,8 @@
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%1$s</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">韌體更新</string>
+    <string name="firmware_update_checking">正在檢查更新……</string>
     <string name="firmware_update_done">完成</string>
     <string name="firmware_update_failed">更新失敗</string>
 </resources>
