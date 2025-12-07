@@ -22,6 +22,7 @@
     <string name="node_filter_title">Фільтрувати за</string>
     <string name="node_filter_include_unknown">Включаючи невідомий</string>
     <string name="node_filter_only_online">Сховати вузли не в мережі</string>
+    <string name="node_filter_only_direct">Показувати лише прямі вузли</string>
     <string name="node_filter_show_details">Показати деталі</string>
     <string name="node_sort_title">Сортувати за</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -30,6 +31,8 @@
     <string name="node_sort_via_mqtt">через MQTT</string>
     <string name="via_mqtt">через MQTT</string>
     <string name="node_sort_via_favorite">через Обране</string>
+    <string name="message_status_enroute">Очікування на підтвердження</string>
+    <string name="message_status_queued">У черзі для надсилання</string>
     <string name="routing_error_none">Підтверджено</string>
     <string name="routing_error_no_route">Маршрут відсутній</string>
     <string name="routing_error_timeout">Таймаут</string>
@@ -41,7 +44,11 @@
     <string name="role_client">Клієнт</string>
     <string name="role_client_mute_desc">Пристрій, який не пересилає пакети з інших пристроїв.</string>
     <string name="role_router_client_desc">Комбінація ROUTER і CLIENT. Не для мобільних пристроїв.</string>
+    <string name="role_tracker">Трекер</string>
     <string name="role_sensor">Датчик</string>
+    <string name="role_tak">ТАК</string>
+    <string name="role_tak_tracker_desc">Увімкнути автоматичну передачу TAK PLI та зменшити кількість звичайних трансляцій.</string>
+    <string name="rebroadcast_mode_known_only_desc">Ігнорує отримані повідомлення від чужих мереж, як-от LOCAL ONLY, але робить крок далі, також ігноруючи повідомлення від вузлів, яких немає в списку відомих вузлів.</string>
     <string name="config_device_tzdef_summary">Часовий пояс для дати на екрані та журналі пристрою.</string>
     <string name="config_device_use_phone_tz">Використовувати часовий пояс телефону</string>
     <string name="config_display_flip_screen_summary">Перевернути екран по вертикалі.</string>
