@@ -49,14 +49,6 @@ class ServiceRepository @Inject constructor() {
         _connectionState.value = connectionState
     }
 
-    private val _connectionTransport: MutableStateFlow<String> = MutableStateFlow("Unknown")
-    val connectionTransport: StateFlow<String>
-        get() = _connectionTransport
-
-    fun setConnectionTransport(connectionTransport: String) {
-        _connectionTransport.value = connectionTransport
-    }
-
     private val _clientNotification = MutableStateFlow<MeshProtos.ClientNotification?>(null)
     val clientNotification: StateFlow<MeshProtos.ClientNotification?>
         get() = _clientNotification
