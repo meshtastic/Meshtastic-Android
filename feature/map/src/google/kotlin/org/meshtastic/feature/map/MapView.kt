@@ -116,6 +116,9 @@ import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.NodeClusterMarkers
 import org.meshtastic.feature.map.component.WaypointMarkers
 import org.meshtastic.feature.map.model.NodeClusterItem
+import org.meshtastic.feature.map.model.TracerouteOutgoingColor
+import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.feature.map.model.TracerouteReturnColor
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.MeshProtos.Position
 import org.meshtastic.proto.MeshProtos.Waypoint
@@ -123,6 +126,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
 import timber.log.Timber
 import java.text.DateFormat
+import kotlin.math.max
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 private const val DEG_D = 1e-7
@@ -136,6 +140,7 @@ fun MapView(
     navigateToNodeDetails: (Int) -> Unit,
     focusedNodeNum: Int? = null,
     nodeTracks: List<Position>? = null,
+    tracerouteOverlay: TracerouteOverlay? = null,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -253,6 +258,7 @@ fun MapView(
             .collectAsStateWithLifecycle(listOf())
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
+    val overlayNodeNums = remember(tracerouteOverlay) { tracerouteOverlay?.relatedNodeNums ?: emptySet() }
 
     val filteredNodes =
         allNodes
@@ -263,8 +269,17 @@ fun MapView(
                     node.num == ourNodeInfo?.num
             }
 
+    val overlayNodes = allNodes.filter { overlayNodeNums.contains(it.num) }
+
+    val displayNodes =
+        if (tracerouteOverlay != null) {
+            overlayNodes.ifEmpty { filteredNodes }
+        } else {
+            filteredNodes
+        }
+
     val nodeClusterItems =
-        filteredNodes.map { node ->
+        displayNodes.map { node ->
             val latLng = LatLng(node.position.latitudeI * DEG_D, node.position.longitudeI * DEG_D)
             NodeClusterItem(
                 node = node,
@@ -287,6 +302,17 @@ fun MapView(
             true -> ComposeMapColorScheme.DARK
             else -> ComposeMapColorScheme.LIGHT
         }
+    val tracerouteForwardPoints =
+        remember(tracerouteOverlay, displayNodes) {
+            val nodeLookup = displayNodes.associateBy { it.num }
+            tracerouteOverlay?.forwardRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
+        }
+    val tracerouteReturnPoints =
+        remember(tracerouteOverlay, displayNodes) {
+            val nodeLookup = displayNodes.associateBy { it.num }
+            tracerouteOverlay?.returnRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
+        }
+    var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
     var showLayersBottomSheet by remember { mutableStateOf(false) }
 
@@ -329,6 +355,26 @@ fun MapView(
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
+    LaunchedEffect(tracerouteOverlay, tracerouteForwardPoints, tracerouteReturnPoints) {
+        if (tracerouteOverlay == null || hasCenteredTraceroute) return@LaunchedEffect
+        val allPoints = (tracerouteForwardPoints + tracerouteReturnPoints).distinct()
+        if (allPoints.isNotEmpty()) {
+            val cameraUpdate =
+                if (allPoints.size == 1) {
+                    CameraUpdateFactory.newLatLngZoom(allPoints.first(), max(cameraPositionState.position.zoom, 12f))
+                } else {
+                    val bounds = LatLngBounds.builder()
+                    allPoints.forEach { bounds.include(it) }
+                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 120)
+                }
+            try {
+                cameraPositionState.animate(cameraUpdate)
+                hasCenteredTraceroute = true
+            } catch (e: IllegalStateException) {
+                Timber.d("Error centering traceroute overlay: ${e.message}")
+            }
+        }
+    }
 
     Scaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -365,6 +411,25 @@ fun MapView(
                             TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                         }
                     }
+                }
+
+                if (tracerouteForwardPoints.size >= 2) {
+                    Polyline(
+                        points = tracerouteForwardPoints,
+                        jointType = JointType.ROUND,
+                        color = TracerouteOutgoingColor,
+                        width = 9f,
+                        zIndex = 1.5f,
+                    )
+                }
+                if (tracerouteReturnPoints.size >= 2) {
+                    Polyline(
+                        points = tracerouteReturnPoints,
+                        jointType = JointType.ROUND,
+                        color = TracerouteReturnColor,
+                        width = 7f,
+                        zIndex = 1.4f,
+                    )
                 }
 
                 if (nodeTracks != null && focusedNodeNum != null) {
@@ -446,6 +511,25 @@ fun MapView(
                             }
                             true
                         },
+                    )
+                }
+
+                if (tracerouteForwardPoints.size >= 2) {
+                    Polyline(
+                        points = tracerouteForwardPoints,
+                        jointType = JointType.ROUND,
+                        color = TracerouteOutgoingColor,
+                        width = 9f,
+                        zIndex = 2f,
+                    )
+                }
+                if (tracerouteReturnPoints.size >= 2) {
+                    Polyline(
+                        points = tracerouteReturnPoints,
+                        jointType = JointType.ROUND,
+                        color = TracerouteReturnColor,
+                        width = 7f,
+                        zIndex = 1.5f,
                     )
                 }
 

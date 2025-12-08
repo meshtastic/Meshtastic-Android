@@ -106,6 +106,7 @@ import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MapRoutes
+import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -130,6 +131,7 @@ import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.should_update
 import org.meshtastic.core.strings.should_update_firmware
 import org.meshtastic.core.strings.traceroute
+import org.meshtastic.core.strings.view_on_map
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.SimpleAlertDialog
@@ -241,9 +243,19 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             title = Res.string.traceroute,
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(text = annotateTraceroute(response))
+                    Text(text = annotateTraceroute(response.message))
                 }
             },
+            confirmText = if (response.hasOverlay) stringResource(Res.string.view_on_map) else null,
+            onConfirm =
+                response.takeIf { it.hasOverlay }?.let { traceroute ->
+                    {
+                        navController.navigate(
+                            NodeDetailRoutes.TracerouteMap(traceroute.destinationNodeNum, traceroute.requestId),
+                        )
+                        uIViewModel.clearTracerouteResponse()
+                    }
+                },
             dismissText = stringResource(Res.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
         )

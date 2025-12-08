@@ -55,6 +55,7 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.client_notification
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -246,7 +247,7 @@ constructor(
         Timber.d("ViewModel cleared")
     }
 
-    val tracerouteResponse: LiveData<String?>
+    val tracerouteResponse: LiveData<TracerouteResponse?>
         get() = serviceRepository.tracerouteResponse.asLiveData()
 
     fun clearTracerouteResponse() {

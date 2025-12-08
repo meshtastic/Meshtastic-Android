@@ -80,6 +80,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.toOneLineString
@@ -92,6 +93,7 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.connected_count
 import org.meshtastic.core.strings.connecting
@@ -924,11 +926,12 @@ class MeshService : Service() {
 
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
                         Timber.d("Received TRACEROUTE_APP from $fromId")
+                        val routeDiscovery = packet.fullRouteDiscovery
                         val full = packet.getFullTracerouteResponse(::getUserName)
                         if (full != null) {
                             val requestId = packet.decoded.requestId
                             val start = tracerouteStartTimes.remove(requestId)
-                            val response =
+                            val responseText =
                                 if (start != null) {
                                     val elapsedMs = System.currentTimeMillis() - start
                                     val seconds = elapsedMs / 1000.0
@@ -937,7 +940,19 @@ class MeshService : Service() {
                                 } else {
                                     full
                                 }
-                            serviceRepository.setTracerouteResponse(response)
+                            val destination =
+                                routeDiscovery?.routeList?.firstOrNull()
+                                    ?: routeDiscovery?.routeBackList?.lastOrNull()
+                                    ?: 0
+                            serviceRepository.setTracerouteResponse(
+                                TracerouteResponse(
+                                    message = responseText,
+                                    destinationNodeNum = destination,
+                                    requestId = requestId,
+                                    forwardRoute = routeDiscovery?.routeList.orEmpty(),
+                                    returnRoute = routeDiscovery?.routeBackList.orEmpty(),
+                                ),
+                            )
                         }
                     }
 

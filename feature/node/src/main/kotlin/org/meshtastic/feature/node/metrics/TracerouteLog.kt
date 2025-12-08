@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.metrics
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -72,6 +73,7 @@ import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.strings.traceroute_diff
 import org.meshtastic.core.strings.traceroute_direct
 import org.meshtastic.core.strings.traceroute_hops
+import org.meshtastic.core.strings.view_on_map
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
 import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
@@ -91,19 +93,28 @@ fun TracerouteLogScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     onNavigateUp: () -> Unit,
+    onViewOnMap: (requestId: Int) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) }
 
     fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
 
-    var showDialog by remember { mutableStateOf<AnnotatedString?>(null) }
+    data class TracerouteDialog(val message: AnnotatedString, val requestId: Int, val canShowOnMap: Boolean)
+
+    var showDialog by remember { mutableStateOf<TracerouteDialog?>(null) }
 
     if (showDialog != null) {
-        val message = showDialog ?: AnnotatedString("") // Should not be null if dialog is shown
+        val dialogState = showDialog
+        val message = dialogState?.message ?: AnnotatedString("") // Should not be null if dialog is shown
         SimpleAlertDialog(
             title = Res.string.traceroute,
             text = { SelectionContainer { Text(text = message) } },
+            confirmText = if (dialogState?.canShowOnMap == true) stringResource(Res.string.view_on_map) else null,
+            onConfirm = {
+                dialogState?.let { onViewOnMap(it.requestId) }
+                showDialog = null
+            },
             onDismiss = { showDialog = null },
         )
     }
@@ -154,6 +165,7 @@ fun TracerouteLogScreen(
                             res.fromRadio.packet.getTracerouteResponse(::getUsername)?.let { AnnotatedString(it) }
                         }
                     }
+                val canShowOnMap = result != null
 
                 Box {
                     TracerouteItem(
@@ -161,14 +173,17 @@ fun TracerouteLogScreen(
                         text = "$time - $text",
                         modifier =
                         Modifier.combinedClickable(onLongClick = { expanded = true }) {
-                            if (tracerouteDetailsAnnotated != null) {
-                                showDialog = tracerouteDetailsAnnotated
-                            } else if (result != null) {
-                                // Fallback for results that couldn't be fully annotated but have basic info
-                                val basicInfo = result.fromRadio.packet.getTracerouteResponse(::getUsername)
-                                if (basicInfo != null) {
-                                    showDialog = AnnotatedString(basicInfo)
+                            val dialogMessage = tracerouteDetailsAnnotated
+                                ?: result?.fromRadio?.packet?.getTracerouteResponse(::getUsername)?.let {
+                                    AnnotatedString(it)
                                 }
+                            if (dialogMessage != null) {
+                                showDialog =
+                                    TracerouteDialog(
+                                        message = dialogMessage,
+                                        requestId = log.fromRadio.packet.id,
+                                        canShowOnMap = canShowOnMap,
+                                    )
                             }
                         },
                     )
@@ -203,15 +218,18 @@ private fun DeleteItem(onClick: () -> Unit) {
 }
 
 @Composable
-private fun TracerouteItem(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+private fun TracerouteItem(
+    icon: ImageVector,
+    text: String,
+    modifier: Modifier = Modifier,
+) {
     Card(modifier = modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 2.dp)) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(imageVector = icon, contentDescription = stringResource(Res.string.traceroute))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = text, style = MaterialTheme.typography.bodyLarge)
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(imageVector = icon, contentDescription = stringResource(Res.string.traceroute))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = text, style = MaterialTheme.typography.bodyLarge)
+            }
         }
     }
 }

@@ -18,6 +18,7 @@
 package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
+import android.graphics.Paint
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -66,6 +67,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -128,6 +130,9 @@ import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
+import org.meshtastic.feature.map.model.TracerouteOutgoingColor
+import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.feature.map.model.TracerouteReturnColor
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
@@ -148,13 +153,13 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
 
-@Composable
 private fun MapView.UpdateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
@@ -218,7 +223,11 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
 @OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
-fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails: (Int) -> Unit) {
+fun MapView(
+    mapViewModel: MapViewModel = hiltViewModel(),
+    navigateToNodeDetails: (Int) -> Unit,
+    tracerouteOverlay: TracerouteOverlay? = null,
+) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
@@ -320,6 +329,28 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
+    val nodeLookup = remember(nodes) { nodes.filter { it.validPosition != null }.associateBy { it.num } }
+    val overlayNodeNums = remember(tracerouteOverlay) { tracerouteOverlay?.relatedNodeNums ?: emptySet() }
+    val nodesForMarkers =
+        if (tracerouteOverlay != null) {
+            nodes.filter { overlayNodeNums.contains(it.num) }
+        } else {
+            nodes
+        }
+    val tracerouteForwardPoints =
+        remember(tracerouteOverlay, nodeLookup) {
+            tracerouteOverlay?.forwardRoute?.mapNotNull {
+                nodeLookup[it]?.let { node -> GeoPoint(node.latitude, node.longitude) }
+            } ?: emptyList()
+        }
+    val tracerouteReturnPoints =
+        remember(tracerouteOverlay, nodeLookup) {
+            tracerouteOverlay?.returnRoute?.mapNotNull {
+                nodeLookup[it]?.let { node -> GeoPoint(node.latitude, node.longitude) }
+            } ?: emptyList()
+        }
+    val traceroutePolylines = remember { mutableStateListOf<Polyline>() }
+    var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
     val markerIcon = remember {
         AppCompatResources.getDrawable(context, org.meshtastic.core.ui.R.drawable.ic_baseline_location_on_24)
@@ -331,7 +362,12 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         val displayUnits = mapViewModel.config.display.units
         val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
-            if (mapFilterStateValue.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
+            if (
+                mapFilterStateValue.onlyFavorites &&
+                !node.isFavorite &&
+                !overlayNodeNums.contains(node.num) &&
+                !node.equals(ourNode)
+            ) {
                 return@mapNotNull null
             }
 
@@ -424,7 +460,6 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         mapViewModel.getUser(id).longName
     }
 
-    @Composable
     @Suppress("MagicNumber")
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
@@ -456,15 +491,17 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
 
                     else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
                 }
-            MarkerWithLabel(this, label, emoji).apply {
-                id = "${pt.id}"
-                title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                snippet = "[$time] ${pt.description}  " + stringResource(Res.string.expires) + ": $expireTimeStr"
-                position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
-                setVisible(false) // This seems to be always false, was this intended?
-                setOnLongClickListener {
-                    showMarkerLongPressDialog(pt.id)
-                    true
+                MarkerWithLabel(this, label, emoji).apply {
+                    id = "${pt.id}"
+                    title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
+                    snippet =
+                        "[$time] ${pt.description}  " + com.meshtastic.core.strings.getString(Res.string.expires) +
+                            ": $expireTimeStr"
+                    position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
+                    setVisible(false) // This seems to be always false, was this intended?
+                    setOnLongClickListener {
+                        showMarkerLongPressDialog(pt.id)
+                        true
                 }
             }
         }
@@ -509,7 +546,52 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
         invalidate()
     }
 
-    with(map) { UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer) }
+    fun MapView.updateTracerouteOverlay(forwardPoints: List<GeoPoint>, returnPoints: List<GeoPoint>) {
+        overlays.removeAll(traceroutePolylines)
+        traceroutePolylines.clear()
+
+        fun buildPolyline(points: List<GeoPoint>, color: Int, strokeWidth: Float): Polyline = Polyline().apply {
+            setPoints(points)
+            outlinePaint.apply {
+                this.color = color
+                this.strokeWidth = strokeWidth
+                strokeCap = Paint.Cap.ROUND
+                strokeJoin = Paint.Join.ROUND
+                style = Paint.Style.STROKE
+            }
+        }
+
+        forwardPoints
+            .takeIf { it.size >= 2 }
+            ?.let { points ->
+                traceroutePolylines.add(
+                    buildPolyline(points, TracerouteOutgoingColor.toArgb(), with(density) { 6.dp.toPx() }),
+                )
+            }
+        returnPoints
+            .takeIf { it.size >= 2 }
+            ?.let { points ->
+                traceroutePolylines.add(
+                    buildPolyline(points, TracerouteReturnColor.toArgb(), with(density) { 5.dp.toPx() }),
+                )
+            }
+        overlays.addAll(traceroutePolylines)
+        invalidate()
+    }
+
+    LaunchedEffect(tracerouteOverlay, tracerouteForwardPoints, tracerouteReturnPoints) {
+        if (tracerouteOverlay == null || hasCenteredTraceroute) return@LaunchedEffect
+        val allPoints = (tracerouteForwardPoints + tracerouteReturnPoints)
+        if (allPoints.isNotEmpty()) {
+            if (allPoints.size == 1) {
+                map.controller.setCenter(allPoints.first())
+                map.controller.setZoom(13.0)
+            } else {
+                map.zoomToBoundingBox(BoundingBox.fromGeoPoints(allPoints), true)
+            }
+            hasCenteredTraceroute = true
+        }
+    }
 
     fun MapView.generateBoxOverlay() {
         overlays.removeAll { it is Polygon }
@@ -587,7 +669,13 @@ fun MapView(mapViewModel: MapViewModel = hiltViewModel(), navigateToNodeDetails:
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
-                update = { mapView -> mapView.drawOverlays() }, // Renamed map to mapView to avoid conflict
+                update = { mapView ->
+                    mapView.updateTracerouteOverlay(tracerouteForwardPoints, tracerouteReturnPoints)
+                    with(mapView) {
+                        UpdateMarkers(onNodesChanged(nodesForMarkers), onWaypointChanged(waypoints.values), nodeClusterer)
+                    }
+                    mapView.drawOverlays()
+                }, // Renamed map to mapView to avoid conflict
             )
             if (downloadRegionBoundingBox != null) {
                 CacheLayout(
