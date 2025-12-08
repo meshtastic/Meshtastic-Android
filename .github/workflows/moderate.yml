@@ -1,29 +1,30 @@
-name: AI Community Moderator
-
+name: AI Moderator
 on:
   issues:
-    types: [opened]
-  pull_request:
     types: [opened]
   issue_comment:
     types: [created]
   pull_request_review_comment:
     types: [created]
-  discussion:
-    types: [created]
-  discussion_comment:
-    types: [created]
 
 jobs:
-  moderate:
+  spam-detection:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       issues: write
       pull-requests: write
-      discussions: write
       models: read
+      contents: read
     steps:
-      - uses: benbalter/ai-community-moderator@v1
+      - uses: actions/checkout@v4
+      - uses: github/ai-moderator@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          spam-label: 'spam'
+          ai-label: 'ai-generated'
+          minimize-detected-comments: true
+          # Built-in prompt configuration (all enabled by default)
+          enable-spam-detection: true
+          enable-link-spam-detection: true
+          enable-ai-detection: true
+          # custom-prompt-path: '.github/prompts/my-custom.prompt.yml'  # Optional
