@@ -153,7 +153,6 @@
     <string name="debug">Vianetsintä</string>
     <string name="channel_name">Kanavan nimi</string>
     <string name="qr_code">QR-koodi</string>
-    <string name="application_icon">Sovelluskuvake</string>
     <string name="unknown_username">Tuntematon käyttäjänimi</string>
     <string name="send">Lähetä</string>
     <string name="warning_not_paired">Et ole vielä yhdistänyt Meshtastic -yhteensopivaa radiota tähän puhelimeen. Muodosta laitepari puhelimen kanssa ja aseta käyttäjänimesi.\n\nTämä avoimen lähdekoodin sovellus on vielä kehitysvaiheessa. Jos löydät virheen, lähetä siitä viesti foorumillemme: https://github.com/orgs/meshtastic/discussions\n\nLisätietoja saat verkkosivuiltamme - www.meshtastic.org.</string>
@@ -727,6 +726,7 @@
     <string name="conversations">Keskustelut</string>
     <string name="nodes">Laitteet</string>
     <string name="bottom_nav_settings">Asetukset</string>
+    <string name="selected">Valittu</string>
     <string name="set_your_region">Määritä alue</string>
     <string name="reply">Vastaa</string>
     <string name="map_reporting_summary">Laitteesi lähettää määräajoin salaamattoman karttaraporttipaketin määritettyyn MQTT-palvelimeen. Tämä paketti sisältää seuraavat tiedot: tunnisteen, pitkän ja lyhyen nimen, likimääräisen sijainnin, laitemallin, roolin, laiteohjelmiston version, LoRa-alueen, modeemiesiasetuksen ja ensisijaisen kanavan nimen.</string>
@@ -932,10 +932,10 @@
     <string name="firmware_update_title">Laiteohjelmiston päivitys</string>
     <string name="firmware_update_checking">Tarkistetaan päivityksiä...</string>
     <string name="firmware_update_device">Laite: %1$s</string>
+    <string name="firmware_update_currently_installed">Nyt asennettu: %1$s</string>
     <string name="firmware_update_latest">Viimeisin julkaisu: %1$s</string>
     <string name="firmware_update_stable">Vakaa</string>
     <string name="firmware_update_alpha">Alpha</string>
-    <string name="firmware_update_button">Päivitä laiteohjelmisto</string>
     <string name="firmware_update_disconnect_warning">Huomio: Tämä katkaisee laitteesi yhteyden tilapäisesti päivityksen aikana.</string>
     <string name="firmware_update_downloading">Ladataan laiteohjelmistoa... %1$d%</string>
     <string name="firmware_update_error">Virhe: %1$s</string>
@@ -945,7 +945,7 @@
     <string name="firmware_update_starting_dfu">Käynnistetään DFU...</string>
     <string name="firmware_update_updating">Päivitetään… %1$s%</string>
     <string name="firmware_update_unknown_hardware">Tuntematon laitemalli: %1$d</string>
-    <string name="firmware_update_invalid_address">Yhdistetty laite ei ole BLE-laite tai osoite on tuntematon (%1$s). DFU vaatii BLE:n.</string>
+    <string name="firmware_update_invalid_address">Yhdistetty laite ei ole kelvollinen BLE-laite tai osoite on tuntematon (%1$s).</string>
     <string name="firmware_update_no_device">Ei laitetta kytkettynä</string>
     <string name="firmware_update_not_found_in_release">Ei löytynyt firmwarea kohteelle %1$s julkaisusta.</string>
     <string name="firmware_update_extracting">Puretaan laiteohjainta...</string>
@@ -962,4 +962,15 @@
     <string name="firmware_update_disclaimer_text">Olet päivittämässä uutta laiteohjelmistoa laitteeseesi. Tämä prosessi sisältää riskejä.\n\n• Varmista, että laitteesi on ladattu.\n• Pidä laite lähellä puhelintasi.\n• Älä sulje sovellusta päivityksen aikana.\n\nVarmista, että olet valinnut laitteeseesi sopivan firmware-version.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy sanoo: ”Pidä tikkaat valmiina – koskaan ei tiedä milloin tarvitset niitä!</string>
     <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
+    <string name="firmware_update_waiting_for_device">Odottaa DFU-laitetta...</string>
+    <string name="firmware_update_copying">Kopioidaan laiteohjainta...</string>
+    <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi&apos; DFU-asemaan.</string>
+    <string name="firmware_update_flashing">Ohjelmoidaan laitetta. Odota...</string>
+    <string name="firmware_update_method_usb">USB-tiedonsiirto</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">Päivitä %1$s kautta</string>
+    <string name="firmware_update_usb_instruction_title">Valitse DFU USB-asema</string>
+    <string name="firmware_update_usb_instruction_text">Laitteesi on käynnistynyt uudelleen DFU-tilaan ja sen pitäisi näkyä USB-asemana (esim. RAK4631).
+\n\nKun tiedostonvalitsin avautuu, valitse kyseisen aseman juurihakemisto tallentaaksesi laiteohjelmistotiedoston.</string>
 </resources>

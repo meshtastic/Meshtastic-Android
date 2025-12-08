@@ -2619,6 +2619,10 @@ class MeshService : Service() {
                 )
             }
 
+            override fun rebootToDfu() {
+                packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { enterDfuModeRequest = true })
+            }
+
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
                 packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { factoryResetDevice = 1 },

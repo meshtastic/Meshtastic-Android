@@ -77,7 +77,6 @@
     <string name="debug">Hata Ayıklama</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="qr_code">Karekod</string>
-    <string name="application_icon">uygulama ikonu</string>
     <string name="unknown_username">Bilinmeyen kullanıcı adı</string>
     <string name="send">Gönder</string>
     <string name="warning_not_paired">Telefonu, Meshtastic uyumlu bir cihaz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin.\n\nAçık kaynaklı bu uygulama şu an alfa-test aşamasında, problem fark ederseniz forumda lütfen paylaşın: https://github.com/orgs/meshtastic/discussions\n\nDaha fazla bilgi için, sitemiz: www.meshtastic.org.</string>
@@ -580,6 +579,5 @@
     <string name="one_day">24 Saat</string>
     <string name="two_days">48 Saat</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Yazılım güncelle</string>
     <string name="firmware_update_failed">Güncelleme başarısız</string>
 </resources>

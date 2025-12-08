@@ -6,7 +6,7 @@ accompanist = "0.37.3"
 
 # androidx
 androidxComposeMaterial3Adaptive = "1.2.0"
-androidxTracing = "1.9.5"
+androidxTracing = "1.10.0"
 datastore = "1.2.0"
 lifecycle = "2.10.0"
 navigation = "2.9.6"
@@ -34,7 +34,7 @@ detekt = "1.23.8"
 devtools-ksp = "2.3.3"
 markdownRenderer = "0.38.1"
 osmdroid-android = "6.1.20"
-protobuf = "4.33.1"
+protobuf = "4.33.2"
 
 
 [libraries]
@@ -71,7 +71,7 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 
 # AndroidX Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.11.01" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.12.00" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
@@ -154,7 +154,7 @@ osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "os
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
 streamsupport-minifuture = { module = "net.sourceforge.streamsupport:streamsupport-minifuture", version = "1.7.4" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
-usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.9.0" }
+usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version = "4.3.0" }
 
 # Build Logic
@@ -163,7 +163,7 @@ android-tools-common = { module = "com.android.tools:common", version = "31.13.1
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.21.0" }
-detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.0" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.1" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version = "3.0.6" }

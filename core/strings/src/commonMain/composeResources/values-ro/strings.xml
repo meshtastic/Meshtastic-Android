@@ -21,7 +21,6 @@
     <!-- Position Config -->
     <string name="channel_name">Numele canalului</string>
     <string name="qr_code">Cod QR</string>
-    <string name="application_icon">Iconița aplicației</string>
     <string name="unknown_username">Nume utilizator necunoscut</string>
     <string name="send">Trimite</string>
     <string name="warning_not_paired">Încă nu ai asociat un radio compatibil cu Meshtastic cu acest telefon. Te rugăm să asociezi un dispozitiv și să îți setezi numele de utilizator.\n\nAceastă aplicaţie open-source este în dezvoltare, dacă întâmpinaţi probleme, vă rugăm să postaţi pe forumul nostru: https://github.com/orgs/meshtastic/discussions\n\nPentru mai multe informații, consultați pagina noastră de internet - www.meshtastic.org.</string>
@@ -136,6 +135,5 @@
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">Mesaj</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Updateaza firmware-ul</string>
     <string name="firmware_update_failed">Actualizare eșuată</string>
 </resources>

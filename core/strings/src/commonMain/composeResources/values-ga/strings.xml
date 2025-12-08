@@ -65,7 +65,6 @@
     <!-- Position Config -->
     <string name="channel_name">Ainm Cainéal</string>
     <string name="qr_code">Cód QR</string>
-    <string name="application_icon">deilbhín feidhmchláir</string>
     <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
     <string name="send">Seol</string>
     <string name="warning_not_paired">Níl raidió comhoiriúnach Meshtastic péireáilte leis an bhfón seo agat fós. Péireáil gléas le do thoil agus socraigh d’ainm úsáideora.\n\nTá an feidhmchlár foinse oscailte seo faoi alfa-thástáil, má aimsíonn tú fadhbanna cuir iad ar ár bhfóram: https://github.com/orgs/meshtastic/discussions\n\nLe haghaidh tuilleadh faisnéise féach ar ár leathanach gréasáin - www.meshtastic.org.</string>
@@ -244,6 +243,5 @@
     <string name="one_day">24 Uair an chloig</string>
     <string name="two_days">48 Uair an chloig</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Nuashonraigh firmware</string>
     <string name="firmware_update_failed">Nuacht nuashonraithe</string>
 </resources>

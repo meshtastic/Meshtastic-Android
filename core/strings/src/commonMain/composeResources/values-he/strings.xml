@@ -26,7 +26,6 @@
     <!-- Position Config -->
     <string name="channel_name">שם הערוץ</string>
     <string name="qr_code">קוד QR</string>
-    <string name="application_icon">אייקון אפליקציה</string>
     <string name="unknown_username">שם המשתמש אינו מוכר</string>
     <string name="send">שלח</string>
     <string name="warning_not_paired">עוד לא צימדת מכשיר תומך משטסטיק לטלפון זה. בבקשה צמד מכשיר והגדר שם משתמש.\n\nאפליקציית קוד פתוח זה נמצא בפיתוח, במקשר של בעיות בבקשה גש לפורום: https://github.com/orgs/meshtastic/discussions\n\n למידע נוסף בקרו באתר - www.meshtastic.org.</string>
@@ -150,6 +149,5 @@
     <string name="message_input_label">הודעה</string>
     <string name="settings">הגדרות</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">עדכן קושחה</string>
     <string name="firmware_update_failed">העדכון נכשל</string>
 </resources>
