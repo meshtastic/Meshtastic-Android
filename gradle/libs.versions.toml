@@ -34,7 +34,7 @@ detekt = "1.23.8"
 devtools-ksp = "2.3.3"
 markdownRenderer = "0.38.1"
 osmdroid-android = "6.1.20"
-protobuf = "4.33.1"
+protobuf = "4.33.2"
 
 
 [libraries]
@@ -154,7 +154,7 @@ osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "os
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
 streamsupport-minifuture = { module = "net.sourceforge.streamsupport:streamsupport-minifuture", version = "1.7.4" }
 timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
-usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.9.0" }
+usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version = "4.3.0" }
 
 # Build Logic

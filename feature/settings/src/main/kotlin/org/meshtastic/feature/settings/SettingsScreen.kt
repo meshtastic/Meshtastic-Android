@@ -54,6 +54,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -134,7 +135,7 @@ fun SettingsScreen(
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
     val isDfuCapable by settingsViewModel.isDfuCapable.collectAsStateWithLifecycle()
-
+    val destNode by viewModel.destNode.collectAsState()
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
     if (isWaiting) {
@@ -228,7 +229,7 @@ fun SettingsScreen(
                 if (state.isLocal) {
                     ourNode?.user?.longName
                 } else {
-                    val remoteName = viewModel.destNode.value?.user?.longName ?: ""
+                    val remoteName = destNode?.user?.longName ?: ""
                     stringResource(Res.string.remotely_administrating, remoteName)
                 },
                 ourNode = ourNode,
@@ -244,7 +245,7 @@ fun SettingsScreen(
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security.isManaged,
-                node = viewModel.destNode.value,
+                node = destNode,
                 excludedModulesUnlocked = excludedModulesUnlocked,
                 isDfuCapable = isDfuCapable,
                 onPreserveFavoritesToggle = { viewModel.setPreserveFavorites(it) },

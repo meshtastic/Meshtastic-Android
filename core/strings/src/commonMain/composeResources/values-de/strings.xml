@@ -153,7 +153,6 @@
     <string name="debug">Debug</string>
     <string name="channel_name">Kanalname</string>
     <string name="qr_code">QR-Code</string>
-    <string name="application_icon">Anwendungssymbol</string>
     <string name="unknown_username">Unbekannter Nutzername</string>
     <string name="send">Senden</string>
     <string name="warning_not_paired">Sie haben noch kein zu Meshtastic kompatibles Funkgerät mit diesem Telefon gekoppelt. Bitte koppeln Sie ein Gerät und legen Sie Ihren Benutzernamen fest.\n\nDiese quelloffene App befindet sich im Test. Wenn Sie Probleme finden, veröffentlichen Sie diese bitte auf unserer Website im Chat.\n\nWeitere Informationen finden Sie auf unserer Webseite - www.meshtastic.org.</string>
@@ -727,6 +726,7 @@
     <string name="conversations">Konversationen</string>
     <string name="nodes">Knoten</string>
     <string name="bottom_nav_settings">Einstellungen</string>
+    <string name="selected">Ausgewählt</string>
     <string name="set_your_region">Region festlegen</string>
     <string name="reply">Antworten</string>
     <string name="map_reporting_summary">Ihr Knoten sendet in regelmäßigen Abständen eine unverschlüsselte Nachricht mit Kartenbericht an den konfigurierten MQTT-Server. Einschließlich ID, langen und kurzen Namen, ungefährer Standort, Hardwaremodell, Geräterolle, Firmware-Version, LoRa Region, Modem-Voreinstellung und Name des Primärkanal.</string>
@@ -932,10 +932,10 @@
     <string name="firmware_update_title">Firmware Aktualisierung</string>
     <string name="firmware_update_checking">Auf Aktualisierungen überprüfen...</string>
     <string name="firmware_update_device">Gerät: %1$s</string>
+    <string name="firmware_update_currently_installed">Momentan installiert: %1$s</string>
     <string name="firmware_update_latest">Neueste Version: %1$s</string>
     <string name="firmware_update_stable">Stabil</string>
     <string name="firmware_update_alpha">Alpha</string>
-    <string name="firmware_update_button">Firmware aktualisieren</string>
     <string name="firmware_update_disconnect_warning">Hinweis: während der Aktualisierung wird das Gerät zeitweise getrennt.</string>
     <string name="firmware_update_downloading">Firmware herunterladen... %1$d%</string>
     <string name="firmware_update_error">Fehler: %1$s</string>
@@ -945,7 +945,7 @@
     <string name="firmware_update_starting_dfu">DFU wird gestartet...</string>
     <string name="firmware_update_updating">Aktualisierung... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Unbekanntes Hardware Modell: %1$d</string>
-    <string name="firmware_update_invalid_address">Das verbundene Gerät ist kein BLE Gerät oder die Adresse ist unbekannt (%1$s). DFU benötigt BLE.</string>
+    <string name="firmware_update_invalid_address">Das verbundene Gerät ist kein gültiges BLE Gerät oder die Adresse ist unbekannt (%1$s).</string>
     <string name="firmware_update_no_device">Kein Gerät verbunden</string>
     <string name="firmware_update_not_found_in_release">Firmware für %1$s in der Release Version nicht gefunden.</string>
     <string name="firmware_update_extracting">Extrahiere Firmware...</string>
@@ -962,4 +962,14 @@
     <string name="firmware_update_disclaimer_text">Sie sind im Begriff, eine neue Firmware auf Ihr Gerät zu flashen. Dieser Vorgang birgt Risiken.\n\n• Stellen Sie sicher, dass Ihr Gerät aufgeladen ist.\n• Halten Sie das Gerät in der Nähe Ihres Telefons.\n• Schließen Sie die App während des Updates nicht.\n\nVergewissern Sie sich, dass Sie die richtige Firmware für Ihre Hardware ausgewählt haben.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy sagt: „Halten Sie Ihre Leiter griffbereit!“</string>
     <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Neustart in DFU Modus...</string>
+    <string name="firmware_update_waiting_for_device">Warte auf DFU Gerät...</string>
+    <string name="firmware_update_copying">Kopiere Firmware...</string>
+    <string name="firmware_update_save_dfu_file">Bitte speichern Sie die .uf2-Datei auf DFU Laufwerk Ihres Gerätes.</string>
+    <string name="firmware_update_flashing">Gerät wird programmiert, bitte warten...</string>
+    <string name="firmware_update_method_usb">USB Dateiübertragung</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">Update über %1$s</string>
+    <string name="firmware_update_usb_instruction_title">DFU USB Laufwerk auswählen</string>
+    <string name="firmware_update_usb_instruction_text">Ihr Gerät wurde im DFU Modus neu gestartet und sollte als USB Laufwerk (z. B. RAK4631) angezeigt werden.\nWenn sich die Dateiauswahl öffnet, wählen Sie bitte das Stammverzeichnis dieses Laufwerks aus, um die Firmware Datei zu speichern.</string>
 </resources>

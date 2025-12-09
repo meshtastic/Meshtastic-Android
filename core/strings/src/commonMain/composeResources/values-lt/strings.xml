@@ -59,12 +59,12 @@
     <string name="role_tak_tracker_desc">Įgalina automatines TAK PLI transliacijas ir sumažina rutininių transliacijų kiekį.</string>
     <string name="rebroadcast_mode_all_desc">Persiųsti visas žinutes, nesvarbu jos iš Jūsų privataus tinklo ar iš kito tinklo su analogiškais LoRa parametrais.</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Taip pat kaip ir VISI bet nebando dekoduoti paketų ir juos tiesiog persiunčia. Galima naudoti tik Repeater rolės įtaise. Įjungus bet kokiame kitame įtaise - veiks tiesiog kaip VISI.</string>
+    <string name="rebroadcast_mode_known_only">Tik žinomi</string>
     <string name="rebroadcast_mode_none">Nėra</string>
     <string name="rebroadcast_mode_none_desc">Leidžiama tik SENSOR, TRACKER ar TAK_TRACKER rolių įtaisams. Tai užblokuos visas retransliacijas, ne taip kaip CLIENT_MUTE atveju.</string>
     <!-- Position Config -->
     <string name="channel_name">Kanalo pavadinimas</string>
     <string name="qr_code">QR kodas</string>
-    <string name="application_icon">aplikacijos piktograma</string>
     <string name="unknown_username">Nežinomas vartotojo vardas</string>
     <string name="send">Siųsti</string>
     <string name="warning_not_paired">Su šiuo telefonu dar nėra susietas joks Meshtastic įtaisais. Prašome suporuoti įrenginį ir nustatyti savo vartotojo vardą.\n\nŠi atvirojo kodo programa yra kūrimo stadijoje, jei pastebėsite problemas, prašome pranešti mūsų forume: https://github.com/orgs/meshtastic/discussions\n\nDaugiau informacijos rasite mūsų interneto svetainėje - www.meshtastic.org.</string>
@@ -144,6 +144,7 @@
     <string name="quick_chat_append">Pridėti prie žinutės</string>
     <string name="quick_chat_instant">Siųsti nedelsiant</string>
     <string name="factory_reset">Gamyklinis atstatymas</string>
+    <string name="open_settings">Atidaryti nustatymus</string>
     <string name="direct_message">Tiesioginė žinutė</string>
     <string name="nodedb_reset">NodeDB perkrauti</string>
     <string name="delivery_confirmed">Nustatymas įkeltas</string>
@@ -235,20 +236,22 @@
     <string name="max">Max</string>
     <string name="copy">Kopijuoti</string>
     <string name="alert_bell_text">Skambučio simbolis!</string>
+    <string name="red">Raudona</string>
     <string name="region_frequency_plan">Regionas</string>
     <string name="public_key">Viešasis raktas</string>
     <string name="private_key">Privatus raktas</string>
     <string name="timeout">Baigėsi laikas</string>
     <string name="distance">Atstumas</string>
+    <string name="reply">Atsakyti</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">Žinutė</string>
+    <string name="nodes_at_this_location"></string>
     <string name="eight_hours">8 Valandos</string>
     <string name="one_day">24 Valandos</string>
     <string name="two_days">48 Valandos</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Atnaujinti Firmware</string>
     <string name="firmware_update_failed">Atnaujinti nepavyko</string>
 </resources>

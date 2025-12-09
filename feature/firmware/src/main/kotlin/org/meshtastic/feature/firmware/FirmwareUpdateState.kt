@@ -17,8 +17,10 @@
 
 package org.meshtastic.feature.firmware
 
+import android.net.Uri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import java.io.File
 
 sealed interface FirmwareUpdateState {
     data object Idle : FirmwareUpdateState
@@ -30,6 +32,8 @@ sealed interface FirmwareUpdateState {
         val deviceHardware: DeviceHardware,
         val address: String,
         val showBootloaderWarning: Boolean,
+        val updateMethod: FirmwareUpdateMethod,
+        val currentFirmwareVersion: String? = null,
     ) : FirmwareUpdateState
 
     data class Downloading(val progress: Float) : FirmwareUpdateState
@@ -41,4 +45,7 @@ sealed interface FirmwareUpdateState {
     data class Error(val error: String) : FirmwareUpdateState
 
     data object Success : FirmwareUpdateState
+
+    data class AwaitingFileSave(val uf2File: File?, val fileName: String, val sourceUri: Uri? = null) :
+        FirmwareUpdateState
 }

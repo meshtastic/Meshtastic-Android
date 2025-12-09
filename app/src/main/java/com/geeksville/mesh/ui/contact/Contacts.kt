@@ -95,6 +95,7 @@ import org.meshtastic.core.strings.mute_status_muted_for_hours
 import org.meshtastic.core.strings.mute_status_unmuted
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.select_all
+import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -164,7 +165,11 @@ fun ContactsScreen(
                 .mapNotNull { pagedContacts[it] }
                 .filter { it.contactKey in selectedContactKeys }
         }
-    val selectedCount = remember(selectedContacts) { selectedContacts.sumOf { it.messageCount } }
+    // Get message count directly from repository for selected contacts
+    var selectedCount by remember { mutableStateOf(0) }
+    LaunchedEffect(selectedContactKeys.size, selectedContactKeys.joinToString(",")) {
+        selectedCount = viewModel.getTotalMessageCount(selectedContactKeys.toList())
+    }
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
 
     // Callback functions for item interaction
@@ -227,7 +232,7 @@ fun ContactsScreen(
                 ),
                 onClick = onNavigateToShare,
             ) {
-                Icon(Icons.Rounded.QrCode2, contentDescription = null)
+                Icon(Icons.Rounded.QrCode2, contentDescription = stringResource(Res.string.share_contact))
             }
         },
     ) { paddingValues ->
@@ -397,7 +402,7 @@ private fun DeleteConfirmationDialog(
             pluralStringResource(
                 Res.plurals.delete_messages,
                 selectedCount,
-                arrayOf(selectedCount), // Pass the count as a format argument
+                selectedCount, // Pass the count as a format argument
             )
 
         AlertDialog(

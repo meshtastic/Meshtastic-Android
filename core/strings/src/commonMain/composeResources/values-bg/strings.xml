@@ -116,7 +116,6 @@
     <string name="debug">Отстраняване на грешки</string>
     <string name="channel_name">Име на канал</string>
     <string name="qr_code">QR код</string>
-    <string name="application_icon">икона на приложението</string>
     <string name="unknown_username">Неизвестен потребител</string>
     <string name="send">Изпрати</string>
     <string name="warning_not_paired">Все още не сте сдвоили радио, съвместимо с Meshtastic, с този телефон. Моля, сдвоете устройство и задайте вашето потребителско име.\n\nТова приложение с отворен код е в процес на разработка, ако откриете проблеми, моля, публикувайте в нашия форум: https://github.com/orgs/meshtastic/discussions\n\nЗа повече информация вижте нашата уеб страница на адрес www.meshtastic.org.</string>
@@ -172,6 +171,7 @@
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
+    <string name="new_messages_below">Нови съобщения по-долу</string>
     <string name="meshtastic_messages_notifications">Известия за директни съобщения</string>
     <string name="meshtastic_broadcast_notifications">Известия за излъчвани съобщения</string>
     <string name="meshtastic_alerts_notifications">Известия за предупреждения</string>
@@ -308,6 +308,7 @@
     <string name="more_details">Повече подробности</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Индикатор за силата на получения сигнал - измерване, използвано за определяне на нивото на получения сигнал, приемано от антената. По-високата стойност на RSSI обикновено показва по-силна и по-стабилна връзка.</string>
     <string name="iaq_definition">(Качество на въздуха в помещенията) относителна скала за IAQ, стойностите са измерени с Bosch BME680. Диапазон на стойностите 0–500.</string>
     <string name="device_metrics_log">Журнал на показателите на устройството</string>
     <string name="node_map">Карта на възела</string>
@@ -406,6 +407,7 @@
     <string name="gpio_pin_for_rotary_encoder_b_port">GPIO пин за ротационен енкодер Б порт</string>
     <string name="gpio_pin_for_rotary_encoder_press_port">GPIO пин за ротационен енкодер Press порт</string>
     <string name="messages">Съобщения</string>
+    <string name="device_db_cache_limit">Лимит на кеша на DB на устройството</string>
     <string name="device_db_cache_limit_summary">Максимален брой бази данни на устройства, които да се съхраняват на този телефон</string>
     <string name="friendly_name">Приятелско име</string>
     <string name="use_input_pullup_mode">Използване на режим INPUT_PULLUP</string>
@@ -488,6 +490,9 @@
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
     <string name="shutdown_on_power_loss">Изключване при загуба на захранване</string>
     <string name="shutdown_on_battery_delay_seconds">Забавяне при изключване при изтощаване на батерията (секунди)</string>
+    <string name="super_deep_sleep_duration_seconds">Продължителност на супер дълбок сън</string>
+    <string name="light_sleep_duration_seconds">Продължителност на лек сън</string>
+    <string name="minimum_wake_time_seconds">Минимално време за събуждане</string>
     <string name="battery_ina_2xx_i2c_address">I2C адрес на батерията INA_2XX</string>
     <string name="range_test_config">Конфигуриране на Тест на обхвата</string>
     <string name="range_test_enabled">Тест на обхвата е активиран</string>
@@ -578,6 +583,7 @@
     <string name="conversations">Разговори</string>
     <string name="nodes">Възли</string>
     <string name="bottom_nav_settings">Настройки</string>
+    <string name="selected">Избрани</string>
     <string name="set_your_region">Задайте вашия регион</string>
     <string name="reply">Отговор</string>
     <string name="map_reporting_consent_header">Съгласие за споделяне на некриптирани данни от възела чрез MQTT</string>
@@ -734,16 +740,20 @@
     <string name="analytics_platforms">"Аналитични платформи:"</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <string name="unset">Не е зададен - 0</string>
+    <string name="relayed_by">Препредадено от: %1$s</string>
+    <string name="firmware_update_usb_bootloader_warning">%1$s обикновено се доставя с буутлоудър, който не поддържа OTA актуализации. Може да се наложи да флашнете OTA - съвместим буутлоудър през USB, преди да флашнете OTA.</string>
     <string name="learn_more">Научете повече</string>
+    <string name="firmware_update_rak4631_bootloader_hint">За RAK WisBlock RAK4631, използвайте серийния DFU инструмент на производителя (например, adafruit-nrfutil dfu serial с предоставения .zip файл с буутлоудъра). Копирането само на файла .uf2 няма да актуализира буутлоудъра.</string>
+    <string name="dont_show_again_for_device">Да не се показва отново за това устройство</string>
     <string name="usb_devices">USB устройства</string>
     <!-- Firmware Update -->
     <string name="firmware_update_title">Актуализация на фърмуера</string>
     <string name="firmware_update_checking">Проверка за актуализации...</string>
     <string name="firmware_update_device">Устройство: %1$s</string>
+    <string name="firmware_update_currently_installed">Текущия инсталиран: %1$s</string>
     <string name="firmware_update_latest">Последна версия: %1$s</string>
     <string name="firmware_update_stable">Стабилен</string>
     <string name="firmware_update_alpha">Алфа</string>
-    <string name="firmware_update_button">Актуализиране на фърмуера</string>
     <string name="firmware_update_disconnect_warning">Забележка: Това временно ще прекъсне връзката с устройството ви по време на актуализацията.</string>
     <string name="firmware_update_downloading">Изтегляне на фърмуера... %1$d%</string>
     <string name="firmware_update_error">Грешка: %1$s</string>
@@ -753,7 +763,7 @@
     <string name="firmware_update_starting_dfu">Стартиране на DFU...</string>
     <string name="firmware_update_updating">Актуализиране... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Неизвестен модел хардуер: %1$d</string>
-    <string name="firmware_update_invalid_address">Свързаното устройство не е BLE устройство или адресът е неизвестен (%1$s). DFU изисква BLE.</string>
+    <string name="firmware_update_invalid_address">Свързаното устройство не е валидно BLE устройство или адресът е неизвестен (%1$s).</string>
     <string name="firmware_update_no_device">Няма свързано устройство</string>
     <string name="firmware_update_not_found_in_release">Не е намерен фърмуер за %1$s в изданието.</string>
     <string name="firmware_update_extracting">Извличане на фърмуера...</string>
@@ -761,8 +771,17 @@
     <string name="firmware_update_failed">Неуспешна актуализация</string>
     <string name="firmware_update_keep_device_close">Дръжте устройството близо до телефона си.</string>
     <string name="firmware_update_do_not_close">Не затваряйте приложението.</string>
+    <string name="firmware_update_almost_there">Почти е готово...</string>
     <string name="firmware_update_taking_a_while">Това може да отнеме минута...</string>
     <string name="firmware_update_select_file">Изберете локален файл</string>
     <string name="firmware_update_disclaimer_title">Предупреждение за актуализация</string>
     <string name="firmware_update_disclaimer_text">Ще инсталирате нов фърмуер на устройството си. Този процес носи рискове.\n\n• Уверете се, че устройството ви е заредено.\n• Дръжте устройството близо до телефона си.\n• Не затваряйте приложението по време на актуализацията.\n\nУверете се, че сте избрали правилния фърмуер за вашия хардуер.</string>
+    <string name="firmware_update_rebooting">Рестартиране в DFU...</string>
+    <string name="firmware_update_waiting_for_device">Изчакване за DFU устройство...</string>
+    <string name="firmware_update_copying">Копиране на фърмуера...</string>
+    <string name="firmware_update_flashing">Програмиране на устройството, моля изчакайте...</string>
+    <string name="firmware_update_method_usb">Прехвърляне на файл през USB</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">Актуализиране чрез %1$s</string>
+    <string name="firmware_update_usb_instruction_title">Изберете DFU USB устройство</string>
 </resources>

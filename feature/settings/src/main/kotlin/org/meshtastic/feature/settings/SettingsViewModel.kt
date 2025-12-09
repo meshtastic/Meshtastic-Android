@@ -48,6 +48,8 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.radio.RadioPrefs
+import org.meshtastic.core.prefs.radio.isBle
+import org.meshtastic.core.prefs.radio.isSerial
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
@@ -120,19 +122,12 @@ constructor(
             .flatMapLatest { (node, connectionState) ->
                 if (node == null || !connectionState.isConnected()) {
                     flowOf(false)
+                } else if (radioPrefs.isBle() || radioPrefs.isSerial()) {
+                    val hwModel = node.user.hwModel.number
+                    val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
+                    flow { emit(hw?.requiresDfu == true) }
                 } else {
-                    // Check BLE address
-                    val address = radioPrefs.devAddr
-                    if (address == null || !address.startsWith("x")) {
-                        flowOf(false)
-                    } else {
-                        // Check hardware
-                        val hwModel = node.user.hwModel.number
-                        flow {
-                            val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
-                            emit(hw?.requiresDfu == true)
-                        }
-                    }
+                    flowOf(false)
                 }
             }
             .stateInWhileSubscribed(initialValue = false)
