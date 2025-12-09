@@ -19,48 +19,62 @@
 
 package org.meshtastic.feature.settings.util
 
+import org.jetbrains.compose.resources.PluralStringResource
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.interval_always_on
+import org.meshtastic.core.strings.interval_unset
+import org.meshtastic.core.strings.plurals_hours
+import org.meshtastic.core.strings.plurals_minutes
+import org.meshtastic.core.strings.plurals_seconds
 import java.util.concurrent.TimeUnit
 
 /**
  * Defines a set of fixed time intervals in seconds, commonly used for configuration settings.
  *
  * @param value The interval duration in seconds.
+ * @param textRes The string resource for the display name of the interval.
  */
-enum class FixedUpdateIntervals(val value: Long) {
-    UNSET(0L),
-    ONE_SECOND(1L),
-    TWO_SECONDS(2L),
-    THREE_SECONDS(3L),
-    FOUR_SECONDS(4L),
-    FIVE_SECONDS(5L),
-    TEN_SECONDS(10L),
-    FIFTEEN_SECONDS(15L),
-    TWENTY_SECONDS(20L),
-    THIRTY_SECONDS(30L),
-    FORTY_FIVE_SECONDS(45L),
-    ONE_MINUTE(TimeUnit.MINUTES.toSeconds(1)),
-    TWO_MINUTES(TimeUnit.MINUTES.toSeconds(2)),
-    FIVE_MINUTES(TimeUnit.MINUTES.toSeconds(5)),
-    TEN_MINUTES(TimeUnit.MINUTES.toSeconds(10)),
-    FIFTEEN_MINUTES(TimeUnit.MINUTES.toSeconds(15)),
-    THIRTY_MINUTES(TimeUnit.MINUTES.toSeconds(30)),
-    ONE_HOUR(TimeUnit.HOURS.toSeconds(1)),
-    TWO_HOURS(TimeUnit.HOURS.toSeconds(2)),
-    THREE_HOURS(TimeUnit.HOURS.toSeconds(3)),
-    FOUR_HOURS(TimeUnit.HOURS.toSeconds(4)),
-    FIVE_HOURS(TimeUnit.HOURS.toSeconds(5)),
-    SIX_HOURS(TimeUnit.HOURS.toSeconds(6)),
-    TWELVE_HOURS(TimeUnit.HOURS.toSeconds(12)),
-    EIGHTEEN_HOURS(TimeUnit.HOURS.toSeconds(18)),
-    TWENTY_FOUR_HOURS(TimeUnit.HOURS.toSeconds(24)),
-    THIRTY_SIX_HOURS(TimeUnit.HOURS.toSeconds(36)),
-    FORTY_EIGHT_HOURS(TimeUnit.HOURS.toSeconds(48)),
-    SEVENTY_TWO_HOURS(TimeUnit.HOURS.toSeconds(72)),
-    ALWAYS_ON(Int.MAX_VALUE.toLong()),
-    EIGHTY_SECONDS(TimeUnit.SECONDS.toSeconds(80)),
-    NINETY_SECONDS(TimeUnit.SECONDS.toSeconds(90)),
-    EIGHT_SECONDS(TimeUnit.SECONDS.toSeconds(8)),
-    FORTY_SECONDS(TimeUnit.SECONDS.toSeconds(40)),
+enum class FixedUpdateIntervals(
+    val value: Long,
+    val textRes: StringResource? = null,
+    val pluralRes: PluralStringResource? = null,
+    val quantity: Int? = null,
+) {
+    UNSET(0L, textRes = Res.string.interval_unset),
+    ONE_SECOND(1L, pluralRes = Res.plurals.plurals_seconds, quantity = 1),
+    TWO_SECONDS(2L, pluralRes = Res.plurals.plurals_seconds, quantity = 2),
+    THREE_SECONDS(3L, pluralRes = Res.plurals.plurals_seconds, quantity = 3),
+    FOUR_SECONDS(4L, pluralRes = Res.plurals.plurals_seconds, quantity = 4),
+    FIVE_SECONDS(5L, pluralRes = Res.plurals.plurals_seconds, quantity = 5),
+    TEN_SECONDS(10L, pluralRes = Res.plurals.plurals_seconds, quantity = 10),
+    FIFTEEN_SECONDS(15L, pluralRes = Res.plurals.plurals_seconds, quantity = 15),
+    TWENTY_SECONDS(20L, pluralRes = Res.plurals.plurals_seconds, quantity = 20),
+    THIRTY_SECONDS(30L, pluralRes = Res.plurals.plurals_seconds, quantity = 30),
+    FORTY_FIVE_SECONDS(45L, pluralRes = Res.plurals.plurals_seconds, quantity = 45),
+    ONE_MINUTE(TimeUnit.MINUTES.toSeconds(1), pluralRes = Res.plurals.plurals_minutes, quantity = 1),
+    TWO_MINUTES(TimeUnit.MINUTES.toSeconds(2), pluralRes = Res.plurals.plurals_minutes, quantity = 2),
+    FIVE_MINUTES(TimeUnit.MINUTES.toSeconds(5), pluralRes = Res.plurals.plurals_minutes, quantity = 5),
+    TEN_MINUTES(TimeUnit.MINUTES.toSeconds(10), pluralRes = Res.plurals.plurals_minutes, quantity = 10),
+    FIFTEEN_MINUTES(TimeUnit.MINUTES.toSeconds(15), pluralRes = Res.plurals.plurals_minutes, quantity = 15),
+    THIRTY_MINUTES(TimeUnit.MINUTES.toSeconds(30), pluralRes = Res.plurals.plurals_minutes, quantity = 30),
+    ONE_HOUR(TimeUnit.HOURS.toSeconds(1), pluralRes = Res.plurals.plurals_hours, quantity = 1),
+    TWO_HOURS(TimeUnit.HOURS.toSeconds(2), pluralRes = Res.plurals.plurals_hours, quantity = 2),
+    THREE_HOURS(TimeUnit.HOURS.toSeconds(3), pluralRes = Res.plurals.plurals_hours, quantity = 3),
+    FOUR_HOURS(TimeUnit.HOURS.toSeconds(4), pluralRes = Res.plurals.plurals_hours, quantity = 4),
+    FIVE_HOURS(TimeUnit.HOURS.toSeconds(5), pluralRes = Res.plurals.plurals_hours, quantity = 5),
+    SIX_HOURS(TimeUnit.HOURS.toSeconds(6), pluralRes = Res.plurals.plurals_hours, quantity = 6),
+    TWELVE_HOURS(TimeUnit.HOURS.toSeconds(12), pluralRes = Res.plurals.plurals_hours, quantity = 12),
+    EIGHTEEN_HOURS(TimeUnit.HOURS.toSeconds(18), pluralRes = Res.plurals.plurals_hours, quantity = 18),
+    TWENTY_FOUR_HOURS(TimeUnit.HOURS.toSeconds(24), pluralRes = Res.plurals.plurals_hours, quantity = 24),
+    THIRTY_SIX_HOURS(TimeUnit.HOURS.toSeconds(36), pluralRes = Res.plurals.plurals_hours, quantity = 36),
+    FORTY_EIGHT_HOURS(TimeUnit.HOURS.toSeconds(48), pluralRes = Res.plurals.plurals_hours, quantity = 48),
+    SEVENTY_TWO_HOURS(TimeUnit.HOURS.toSeconds(72), pluralRes = Res.plurals.plurals_hours, quantity = 72),
+    ALWAYS_ON(Int.MAX_VALUE.toLong(), textRes = Res.string.interval_always_on),
+    EIGHTY_SECONDS(TimeUnit.SECONDS.toSeconds(80), pluralRes = Res.plurals.plurals_seconds, quantity = 80),
+    NINETY_SECONDS(TimeUnit.SECONDS.toSeconds(90), pluralRes = Res.plurals.plurals_seconds, quantity = 90),
+    EIGHT_SECONDS(TimeUnit.SECONDS.toSeconds(8), pluralRes = Res.plurals.plurals_seconds, quantity = 8),
+    FORTY_SECONDS(TimeUnit.SECONDS.toSeconds(40), pluralRes = Res.plurals.plurals_seconds, quantity = 40),
     ;
 
     companion object {
