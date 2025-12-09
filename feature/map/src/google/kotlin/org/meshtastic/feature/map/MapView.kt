@@ -269,11 +269,9 @@ fun MapView(
                     node.num == ourNodeInfo?.num
             }
 
-    val overlayNodes = allNodes.filter { overlayNodeNums.contains(it.num) }
-
     val displayNodes =
         if (tracerouteOverlay != null) {
-            overlayNodes.ifEmpty { filteredNodes }
+            allNodes.filter { overlayNodeNums.contains(it.num) }
         } else {
             filteredNodes
         }
