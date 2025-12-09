@@ -30,5 +30,7 @@ data class TracerouteOverlay(
         get() = forwardRoute.isNotEmpty() || returnRoute.isNotEmpty()
 }
 
-val TracerouteOutgoingColor = Color(0xFFD32F2F)
-val TracerouteReturnColor = Color(0xFF1976D2)
+// High-contrast pair that stays legible on light/dark tiles and for most color-blind users.
+// Use partial alpha so polylines don’t overpower markers/tiles.
+val TracerouteOutgoingColor = Color(0xCCE86A00) // orange @ ~80% opacity
+val TracerouteReturnColor = Color(0xCC0081C7) // cyan @ ~80% opacity
