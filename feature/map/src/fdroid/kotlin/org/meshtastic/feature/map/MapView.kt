@@ -160,7 +160,7 @@ import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
 
-private fun MapView.UpdateMarkers(
+private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
     nodeClusterer: RadiusMarkerClusterer,
@@ -491,17 +491,18 @@ fun MapView(
 
                     else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
                 }
-                MarkerWithLabel(this, label, emoji).apply {
-                    id = "${pt.id}"
-                    title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                    snippet =
-                        "[$time] ${pt.description}  " + com.meshtastic.core.strings.getString(Res.string.expires) +
-                            ": $expireTimeStr"
-                    position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
-                    setVisible(false) // This seems to be always false, was this intended?
-                    setOnLongClickListener {
-                        showMarkerLongPressDialog(pt.id)
-                        true
+            MarkerWithLabel(this, label, emoji).apply {
+                id = "${pt.id}"
+                title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
+                snippet =
+                    "[$time] ${pt.description}  " +
+                    com.meshtastic.core.strings.getString(Res.string.expires) +
+                    ": $expireTimeStr"
+                position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
+                setVisible(false) // This seems to be always false, was this intended?
+                setOnLongClickListener {
+                    showMarkerLongPressDialog(pt.id)
+                    true
                 }
             }
         }
@@ -672,7 +673,11 @@ fun MapView(
                 update = { mapView ->
                     mapView.updateTracerouteOverlay(tracerouteForwardPoints, tracerouteReturnPoints)
                     with(mapView) {
-                        UpdateMarkers(onNodesChanged(nodesForMarkers), onWaypointChanged(waypoints.values), nodeClusterer)
+                        updateMarkers(
+                            onNodesChanged(nodesForMarkers),
+                            onWaypointChanged(waypoints.values),
+                            nodeClusterer,
+                        )
                     }
                     mapView.drawOverlays()
                 }, // Renamed map to mapView to avoid conflict

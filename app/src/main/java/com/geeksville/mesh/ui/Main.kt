@@ -251,7 +251,9 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             },
             confirmText = if (response.hasOverlay) stringResource(Res.string.view_on_map) else null,
             onConfirm =
-                response.takeIf { it.hasOverlay }?.let { traceroute ->
+            response
+                .takeIf { it.hasOverlay }
+                ?.let { traceroute ->
                     {
                         navController.navigate(
                             NodeDetailRoutes.TracerouteMap(traceroute.destinationNodeNum, traceroute.requestId),

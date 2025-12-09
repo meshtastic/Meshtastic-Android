@@ -53,9 +53,9 @@ import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.fallback_node_name
 import org.meshtastic.core.ui.util.toPosition
+import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.Portnums
@@ -93,6 +93,8 @@ constructor(
 
     private var jobs: Job? = null
 
+    private val tracerouteOverlayCache = MutableStateFlow<Map<Int, TracerouteOverlay>>(emptyMap())
+
     private fun MeshLog.hasValidTraceroute(): Boolean =
         with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
 
@@ -120,16 +122,37 @@ constructor(
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
 
     fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
+        tracerouteOverlayCache.value[requestId]?.let {
+            return it
+        }
         val response = serviceRepository.tracerouteResponse.value ?: return null
         if (response.requestId != requestId) return null
         return TracerouteOverlay(
             requestId = response.requestId,
             forwardRoute = response.forwardRoute,
             returnRoute = response.returnRoute,
-        ).takeIf { it.hasRoutes }
+        )
+            .takeIf { it.hasRoutes }
+            ?.also { overlay -> tracerouteOverlayCache.update { it + (requestId to overlay) } }
     }
 
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
+
+    init {
+        viewModelScope.launch {
+            serviceRepository.tracerouteResponse.filterNotNull().collect { response ->
+                val overlay =
+                    TracerouteOverlay(
+                        requestId = response.requestId,
+                        forwardRoute = response.forwardRoute,
+                        returnRoute = response.returnRoute,
+                    )
+                if (overlay.hasRoutes) {
+                    tracerouteOverlayCache.update { it + (response.requestId to overlay) }
+                }
+            }
+        }
+    }
 
     fun clearPosition() = viewModelScope.launch(dispatchers.io) {
         destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }

@@ -173,10 +173,11 @@ fun TracerouteLogScreen(
                         text = "$time - $text",
                         modifier =
                         Modifier.combinedClickable(onLongClick = { expanded = true }) {
-                            val dialogMessage = tracerouteDetailsAnnotated
-                                ?: result?.fromRadio?.packet?.getTracerouteResponse(::getUsername)?.let {
-                                    AnnotatedString(it)
-                                }
+                            val dialogMessage =
+                                tracerouteDetailsAnnotated
+                                    ?: result?.fromRadio?.packet?.getTracerouteResponse(::getUsername)?.let {
+                                        AnnotatedString(it)
+                                    }
                             if (dialogMessage != null) {
                                 showDialog =
                                     TracerouteDialog(
@@ -218,11 +219,7 @@ private fun DeleteItem(onClick: () -> Unit) {
 }
 
 @Composable
-private fun TracerouteItem(
-    icon: ImageVector,
-    text: String,
-    modifier: Modifier = Modifier,
-) {
+private fun TracerouteItem(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
     Card(modifier = modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 2.dp)) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
