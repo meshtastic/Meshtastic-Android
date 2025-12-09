@@ -258,8 +258,8 @@
     <string name="resend">Erneut senden</string>
     <string name="shutdown">Herunterfahren</string>
     <string name="cant_shutdown">Herunterfahren wird auf diesem Gerät nicht unterstützt</string>
-    <string name="shutdown_warning">:warnung: Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten.</string>
-    <string name="shutdown_critical_node">:Warnung: Dies ist ein kritischer Infrastrukturknoten. Geben Sie den Knotennamen zur Bestätigung ein:</string>
+    <string name="shutdown_warning">:warnung: Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten. </string>
+    <string name="shutdown_critical_node">:Warnung: Dies ist ein kritischer Infrastrukturknoten. Geben Sie den Knotennamen zur Bestätigung ein: </string>
     <string name="shutdown_node_name">Knoten: %1$s</string>
     <string name="shutdown_type_name">Typ: %1$s</string>
     <string name="reboot">Neustarten</string>
