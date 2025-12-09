@@ -159,6 +159,11 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
+import kotlin.math.abs
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
@@ -348,6 +353,32 @@ fun MapView(
             tracerouteOverlay?.returnRoute?.mapNotNull {
                 nodeLookup[it]?.let { node -> GeoPoint(node.latitude, node.longitude) }
             } ?: emptyList()
+        }
+    val tracerouteHeadingReferencePoints =
+        remember(tracerouteForwardPoints, tracerouteReturnPoints) {
+            when {
+                tracerouteForwardPoints.size >= 2 -> tracerouteForwardPoints
+                tracerouteReturnPoints.size >= 2 -> tracerouteReturnPoints
+                else -> emptyList()
+            }
+        }
+    val tracerouteForwardOffsetPoints =
+        remember(tracerouteForwardPoints, tracerouteHeadingReferencePoints) {
+            offsetPolyline(
+                points = tracerouteForwardPoints,
+                offsetMeters = TRACEROUTE_OFFSET_METERS,
+                headingReferencePoints = tracerouteHeadingReferencePoints,
+                sideMultiplier = 1.0,
+            )
+        }
+    val tracerouteReturnOffsetPoints =
+        remember(tracerouteReturnPoints, tracerouteHeadingReferencePoints) {
+            offsetPolyline(
+                points = tracerouteReturnPoints,
+                offsetMeters = TRACEROUTE_OFFSET_METERS,
+                headingReferencePoints = tracerouteHeadingReferencePoints,
+                sideMultiplier = -1.0,
+            )
         }
     val traceroutePolylines = remember { mutableStateListOf<Polyline>() }
     var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
@@ -671,7 +702,7 @@ fun MapView(
                 },
                 modifier = Modifier.fillMaxSize(),
                 update = { mapView ->
-                    mapView.updateTracerouteOverlay(tracerouteForwardPoints, tracerouteReturnPoints)
+                    mapView.updateTracerouteOverlay(tracerouteForwardOffsetPoints, tracerouteReturnOffsetPoints)
                     with(mapView) {
                         updateMarkers(
                             onNodesChanged(nodesForMarkers),
@@ -1034,5 +1065,54 @@ private fun MapsDialog(
                 }
             }
         }
+    }
+}
+
+private const val EARTH_RADIUS_METERS = 6_371_000.0
+private const val TRACEROUTE_OFFSET_METERS = 100.0
+
+private fun Double.toRad(): Double = Math.toRadians(this)
+
+private fun bearingRad(from: GeoPoint, to: GeoPoint): Double {
+    val lat1 = from.latitude.toRad()
+    val lat2 = to.latitude.toRad()
+    val dLon = (to.longitude - from.longitude).toRad()
+    return atan2(sin(dLon) * cos(lat2), cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(dLon))
+}
+
+private fun GeoPoint.offsetPoint(headingRad: Double, offsetMeters: Double): GeoPoint {
+    val distanceByRadius = offsetMeters / EARTH_RADIUS_METERS
+    val lat1 = latitude.toRad()
+    val lon1 = longitude.toRad()
+    val lat2 = asin(sin(lat1) * cos(distanceByRadius) + cos(lat1) * sin(distanceByRadius) * cos(headingRad))
+    val lon2 =
+        lon1 + atan2(sin(headingRad) * sin(distanceByRadius) * cos(lat1), cos(distanceByRadius) - sin(lat1) * sin(lat2))
+    return GeoPoint(Math.toDegrees(lat2), Math.toDegrees(lon2))
+}
+
+private fun offsetPolyline(
+    points: List<GeoPoint>,
+    offsetMeters: Double,
+    headingReferencePoints: List<GeoPoint> = points,
+    sideMultiplier: Double = 1.0,
+): List<GeoPoint> {
+    val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
+    if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
+
+    val headings =
+        headingPoints.mapIndexed { index, _ ->
+            when (index) {
+                0 -> bearingRad(headingPoints[0], headingPoints[1])
+                headingPoints.lastIndex ->
+                    bearingRad(headingPoints[headingPoints.lastIndex - 1], headingPoints[headingPoints.lastIndex])
+
+                else -> bearingRad(headingPoints[index - 1], headingPoints[index + 1])
+            }
+        }
+
+    return points.mapIndexed { index, point ->
+        val heading = headings[index.coerceIn(0, headings.lastIndex)]
+        val perpendicularHeading = heading + (Math.PI / 2 * sideMultiplier)
+        point.offsetPoint(perpendicularHeading, abs(offsetMeters))
     }
 }

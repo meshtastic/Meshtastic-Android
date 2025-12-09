@@ -74,6 +74,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.maps.android.SphericalUtil
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -126,11 +127,13 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
 import timber.log.Timber
 import java.text.DateFormat
+import kotlin.math.abs
 import kotlin.math.max
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 private const val DEG_D = 1e-7
 private const val HEADING_DEG = 1e-5
+private const val TRACEROUTE_OFFSET_METERS = 100.0
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -310,6 +313,32 @@ fun MapView(
             val nodeLookup = displayNodes.associateBy { it.num }
             tracerouteOverlay?.returnRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
         }
+    val tracerouteHeadingReferencePoints =
+        remember(tracerouteForwardPoints, tracerouteReturnPoints) {
+            when {
+                tracerouteForwardPoints.size >= 2 -> tracerouteForwardPoints
+                tracerouteReturnPoints.size >= 2 -> tracerouteReturnPoints
+                else -> emptyList()
+            }
+        }
+    val tracerouteForwardOffsetPoints =
+        remember(tracerouteForwardPoints, tracerouteHeadingReferencePoints) {
+            offsetPolyline(
+                points = tracerouteForwardPoints,
+                offsetMeters = TRACEROUTE_OFFSET_METERS,
+                headingReferencePoints = tracerouteHeadingReferencePoints,
+                sideMultiplier = 1.0,
+            )
+        }
+    val tracerouteReturnOffsetPoints =
+        remember(tracerouteReturnPoints, tracerouteHeadingReferencePoints) {
+            offsetPolyline(
+                points = tracerouteReturnPoints,
+                offsetMeters = TRACEROUTE_OFFSET_METERS,
+                headingReferencePoints = tracerouteHeadingReferencePoints,
+                sideMultiplier = -1.0,
+            )
+        }
     var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
     var showLayersBottomSheet by remember { mutableStateOf(false) }
@@ -413,7 +442,7 @@ fun MapView(
 
                 if (tracerouteForwardPoints.size >= 2) {
                     Polyline(
-                        points = tracerouteForwardPoints,
+                        points = tracerouteForwardOffsetPoints,
                         jointType = JointType.ROUND,
                         color = TracerouteOutgoingColor,
                         width = 9f,
@@ -422,7 +451,7 @@ fun MapView(
                 }
                 if (tracerouteReturnPoints.size >= 2) {
                     Polyline(
-                        points = tracerouteReturnPoints,
+                        points = tracerouteReturnOffsetPoints,
                         jointType = JointType.ROUND,
                         color = TracerouteReturnColor,
                         width = 7f,
@@ -514,7 +543,7 @@ fun MapView(
 
                 if (tracerouteForwardPoints.size >= 2) {
                     Polyline(
-                        points = tracerouteForwardPoints,
+                        points = tracerouteForwardOffsetPoints,
                         jointType = JointType.ROUND,
                         color = TracerouteOutgoingColor,
                         width = 9f,
@@ -523,7 +552,7 @@ fun MapView(
                 }
                 if (tracerouteReturnPoints.size >= 2) {
                     Polyline(
-                        points = tracerouteReturnPoints,
+                        points = tracerouteReturnOffsetPoints,
                         jointType = JointType.ROUND,
                         color = TracerouteReturnColor,
                         width = 7f,
@@ -778,3 +807,33 @@ internal fun Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.l
 private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
 
 private fun Waypoint.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+
+private fun offsetPolyline(
+    points: List<LatLng>,
+    offsetMeters: Double,
+    headingReferencePoints: List<LatLng> = points,
+    sideMultiplier: Double = 1.0,
+): List<LatLng> {
+    val headingPoints = headingReferencePoints.takeIf { it.size >= 2 } ?: points
+    if (points.size < 2 || headingPoints.size < 2 || offsetMeters == 0.0) return points
+
+    val headings =
+        headingPoints.mapIndexed { index, _ ->
+            when (index) {
+                0 -> SphericalUtil.computeHeading(headingPoints[0], headingPoints[1])
+                headingPoints.lastIndex ->
+                    SphericalUtil.computeHeading(
+                        headingPoints[headingPoints.lastIndex - 1],
+                        headingPoints[headingPoints.lastIndex],
+                    )
+
+                else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
+            }
+        }
+
+    return points.mapIndexed { index, point ->
+        val heading = headings[index.coerceIn(0, headings.lastIndex)]
+        val perpendicularHeading = heading + (90.0 * sideMultiplier)
+        SphericalUtil.computeOffset(point, abs(offsetMeters), perpendicularHeading)
+    }
+}
