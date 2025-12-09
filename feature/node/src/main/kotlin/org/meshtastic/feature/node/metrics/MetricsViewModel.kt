@@ -129,6 +129,8 @@ constructor(
         ).takeIf { it.hasRoutes }
     }
 
+    fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
+
     fun clearPosition() = viewModelScope.launch(dispatchers.io) {
         destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }
     }

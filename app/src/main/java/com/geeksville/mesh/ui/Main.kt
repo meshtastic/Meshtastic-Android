@@ -256,7 +256,6 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                         navController.navigate(
                             NodeDetailRoutes.TracerouteMap(traceroute.destinationNodeNum, traceroute.requestId),
                         )
-                        uIViewModel.clearTracerouteResponse()
                     }
                 },
             dismissText = stringResource(Res.string.okay),
