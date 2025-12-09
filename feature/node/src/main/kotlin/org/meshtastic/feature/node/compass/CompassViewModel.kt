@@ -34,6 +34,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.core.ui.component.precisionBitsToMeters
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import javax.inject.Inject
 import kotlin.math.abs
@@ -75,7 +76,8 @@ constructor(
         targetPositionProto = node.position
         val targetColor = Color(node.colors.second)
         val targetName = node.user.longName.ifBlank { node.user.shortName.ifBlank { node.num.toString() } }
-        targetPositionTimeSec = node.position.time.takeIf { it > 0 }?.toLong()
+        targetPositionTimeSec =
+            node.position.timestamp.takeIf { it > 0 }?.toLong() ?: node.position.time.takeIf { it > 0 }?.toLong()
 
         _uiState.update {
             it.copy(
@@ -200,9 +202,7 @@ constructor(
         if (positionTime == null || positionTime <= 0) return null
 
         val gpsAccuracyMm = position.gpsAccuracy.toFloat()
-        if (gpsAccuracyMm <= 0f) return null
-
-        val dop: Float =
+        val dop: Float? =
             when {
                 position.getPDOP() > 0 -> position.getPDOP() / HUNDRED
                 position.getHDOP() > 0 && position.getVDOP() > 0 ->
@@ -211,10 +211,19 @@ constructor(
                             (position.getVDOP() / HUNDRED).toDouble().pow(2.0),
                     ).toFloat()
                 position.getHDOP() > 0 -> position.getHDOP() / HUNDRED
-                else -> return null
+                else -> null
             }
 
-        return (gpsAccuracyMm / MILLIMETERS_PER_METER) * dop
+        if (gpsAccuracyMm > 0f && dop != null) {
+            return (gpsAccuracyMm / MILLIMETERS_PER_METER) * dop
+        }
+
+        // Fallback: infer radius from precision bits if provided
+        if (position.precisionBits > 0) {
+            return precisionBitsToMeters(position.precisionBits).toFloat()
+        }
+
+        return null
     }
 
     private fun calculateAngularError(positionalAccuracyMeters: Float?, distanceMeters: Int?): Float? {

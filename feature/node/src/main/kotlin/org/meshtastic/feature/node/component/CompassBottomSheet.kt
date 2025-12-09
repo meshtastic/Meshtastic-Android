@@ -360,21 +360,45 @@ private fun CompassDial(
                 }
             }
 
-            // Bearing marker
-            if (currentBearing != null && angularErrorDeg != null && angularErrorDeg > 0f) {
-                val arcRadius = radius * 0.78f
+            // Bearing marker (adjust bearing by current heading because the canvas is rotated)
+            val bearingForDraw = currentBearing
+            if (bearingForDraw != null && angularErrorDeg != null && angularErrorDeg > 0f) {
+                val arcRadius = radius * 0.82f
+                val startAngleNorth = bearingForDraw - angularErrorDeg
+                val sweep = angularErrorDeg * 2f
+                val faint = markerColor.copy(alpha = 0.18f)
+                // Canvas drawArc: 0deg = 3 o'clock, +clockwise. Convert north=0° to that space.
+                val startAngleCanvas = (startAngleNorth - 90f).normalizeDegrees()
+
+                // Filled wedge for the cone shading.
                 drawArc(
-                    color = markerColor.copy(alpha = 0.25f),
-                    startAngle = currentBearing - angularErrorDeg,
-                    sweepAngle = angularErrorDeg * 2f,
-                    useCenter = false,
-                    style = Stroke(width = 8f),
+                    color = faint,
+                    startAngle = startAngleCanvas,
+                    sweepAngle = sweep,
+                    useCenter = true,
                     topLeft = Offset(center.x - arcRadius, center.y - arcRadius),
                     size = Size(arcRadius * 2, arcRadius * 2)
                 )
+
+                // Cone edge lines for clarity
+                val edgeRadius = arcRadius
+                val startRad = Math.toRadians(startAngleNorth.toDouble())
+                val endRad = Math.toRadians((startAngleNorth + sweep).toDouble())
+                val startEnd =
+                    Offset(
+                        center.x + edgeRadius * sin(startRad).toFloat(),
+                        center.y - edgeRadius * cos(startRad).toFloat()
+                    )
+                val endEnd =
+                    Offset(
+                        center.x + edgeRadius * sin(endRad).toFloat(),
+                        center.y - edgeRadius * cos(endRad).toFloat()
+                    )
+                drawLine(color = faint, start = center, end = startEnd, strokeWidth = 6f, cap = StrokeCap.Round)
+                drawLine(color = faint, start = center, end = endEnd, strokeWidth = 6f, cap = StrokeCap.Round)
             }
-            if (currentBearing != null) {
-                val angle = Math.toRadians(currentBearing.toDouble())
+            if (bearingForDraw != null) {
+                val angle = Math.toRadians(bearingForDraw.toDouble())
                 val dot = Offset(
                     center.x + (radius * 0.95f) * sin(angle).toFloat(),
                     center.y - (radius * 0.95f) * cos(angle).toFloat()
@@ -408,6 +432,11 @@ private fun DrawScope.drawCompassRoseCenter(center: Offset, size: Float, color: 
 
     drawPath(path, color.copy(alpha = 0.5f))
     drawCircle(color = color, radius = size * 0.25f, center = center)
+}
+
+private fun Float.normalizeDegrees(): Float {
+    val normalized = this % 360f
+    return if (normalized < 0f) normalized + 360f else normalized
 }
 
 
