@@ -55,6 +55,7 @@ import org.meshtastic.core.strings.fallback_node_name
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.Portnums
@@ -117,6 +118,16 @@ constructor(
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
+
+    fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
+        val response = serviceRepository.tracerouteResponse.value ?: return null
+        if (response.requestId != requestId) return null
+        return TracerouteOverlay(
+            requestId = response.requestId,
+            forwardRoute = response.forwardRoute,
+            returnRoute = response.returnRoute,
+        ).takeIf { it.hasRoutes }
+    }
 
     fun clearPosition() = viewModelScope.launch(dispatchers.io) {
         destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }

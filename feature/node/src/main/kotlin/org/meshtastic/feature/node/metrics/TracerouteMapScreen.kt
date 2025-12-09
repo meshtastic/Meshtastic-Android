@@ -67,12 +67,14 @@ fun TracerouteMapScreen(
             ?.fromRadio
             ?.packet
             ?.fullRouteDiscovery
-    val overlay =
+    val overlayFromLogs =
         remember(routeDiscovery) {
             routeDiscovery?.let {
                 TracerouteOverlay(requestId = requestId, forwardRoute = it.routeList, returnRoute = it.routeBackList)
             }
         }
+    val overlayFromService = remember(requestId) { metricsViewModel.getTracerouteOverlay(requestId) }
+    val overlay = overlayFromLogs ?: overlayFromService
 
     Scaffold(
         topBar = {
