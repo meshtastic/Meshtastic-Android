@@ -202,4 +202,5 @@
     <string name="two_days">48 Hores</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualització fallida</string>
+    <string name="interval_unset">No configurat</string>
 </resources>

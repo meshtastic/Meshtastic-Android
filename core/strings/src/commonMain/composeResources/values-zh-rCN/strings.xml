@@ -963,4 +963,6 @@
 请确认你已为你的硬件选择了正确的固件。</string>
     <string name="firmware_update_disclaimer_chirpy_says">请提前备份旧版本固件及降级教程，以备更新失败时恢复设备</string>
     <string name="chirpy">Chirpy</string>
+    <string name="interval_unset">未设置</string>
+    <string name="interval_always_on">常亮</string>
 </resources>

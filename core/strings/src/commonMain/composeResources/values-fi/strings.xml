@@ -973,4 +973,5 @@
     <string name="firmware_update_usb_instruction_title">Valitse DFU USB-asema</string>
     <string name="firmware_update_usb_instruction_text">Laitteesi on käynnistynyt uudelleen DFU-tilaan ja sen pitäisi näkyä USB-asemana (esim. RAK4631).
 \n\nKun tiedostonvalitsin avautuu, valitse kyseisen aseman juurihakemisto tallentaaksesi laiteohjelmistotiedoston.</string>
+    <string name="interval_unset">Ei yhdistetty</string>
 </resources>
