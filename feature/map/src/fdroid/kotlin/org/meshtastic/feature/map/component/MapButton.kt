@@ -20,10 +20,12 @@ package org.meshtastic.feature.map.component
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -49,9 +51,20 @@ fun MapButton(
 }
 
 @Composable
-fun MapButton(icon: ImageVector, contentDescription: String?, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
-    FloatingActionButton(onClick = onClick, modifier = modifier) {
-        Icon(imageVector = icon, contentDescription = contentDescription, modifier = Modifier.size(24.dp))
+fun MapButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    iconTint: Color? = null,
+) {
+    FilledIconButton(onClick = onClick, modifier = modifier) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(24.dp),
+            tint = iconTint ?: LocalContentColor.current,
+        )
     }
 }
 

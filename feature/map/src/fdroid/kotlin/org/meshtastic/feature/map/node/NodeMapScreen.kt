@@ -17,47 +17,54 @@
 
 package org.meshtastic.feature.map.node
 
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.meshtastic.feature.map.addCopyright
-import org.meshtastic.feature.map.addPolyline
-import org.meshtastic.feature.map.addPositionMarkers
-import org.meshtastic.feature.map.addScaleBarOverlay
-import org.meshtastic.feature.map.rememberMapViewWithLifecycle
-import org.osmdroid.util.BoundingBox
-import org.osmdroid.util.GeoPoint
-
-private const val DEG_D = 1e-7
+import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.maplibre.ui.MapLibrePOC
+import timber.log.Timber
 
 @Composable
-fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) {
-    val density = LocalDensity.current
-    val positionLogs by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
-    val geoPoints = positionLogs.map { GeoPoint(it.latitudeI * DEG_D, it.longitudeI * DEG_D) }
-    val cameraView = remember { BoundingBox.fromGeoPoints(geoPoints) }
-    val mapView =
-        rememberMapViewWithLifecycle(
-            applicationId = nodeMapViewModel.applicationId,
-            box = cameraView,
-            tileSource = nodeMapViewModel.tileSource,
-        )
+fun NodeMapScreen(
+    nodeMapViewModel: NodeMapViewModel,
+    onNavigateUp: () -> Unit,
+    mapViewModel: MapViewModel = hiltViewModel(),
+) {
+    val node by nodeMapViewModel.node.collectAsStateWithLifecycle()
+    val positions by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
+    val destNum = node?.num
 
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { mapView },
-        update = { map ->
-            map.overlays.clear()
-            map.addCopyright()
-            map.addScaleBarOverlay(density)
+    Timber.tag("NodeMapScreen")
+        .d("NodeMapScreen rendering - destNum=%s, positions count=%d", destNum ?: "null", positions.size)
 
-            map.addPolyline(density, geoPoints) {}
-            map.addPositionMarkers(positionLogs) {}
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = node?.user?.longName ?: "",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onClickChip = {},
+            )
         },
-    )
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            Timber.tag("NodeMapScreen")
+                .d("Calling MapLibrePOC with focusedNodeNum=%s, nodeTracks count=%d", destNum ?: "null", positions.size)
+            MapLibrePOC(
+                mapViewModel = mapViewModel,
+                onNavigateToNodeDetails = {},
+                focusedNodeNum = destNum,
+                nodeTracks = positions,
+            )
+        }
+    }
 }

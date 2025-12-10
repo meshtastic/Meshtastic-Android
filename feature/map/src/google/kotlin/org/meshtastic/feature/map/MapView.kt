@@ -464,7 +464,7 @@ fun MapView(
                             mapViewModel.loadMapLayerIfNeeded(map, layerItem)
                             when (layerItem.layerType) {
                                 LayerType.KML -> {
-                                    layerItem.kmlLayerData?.let { kmlLayer ->
+                                    mapViewModel.getKmlLayer(layerItem.id)?.let { kmlLayer ->
                                         if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
                                             kmlLayer.addLayerToMap()
                                         } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
@@ -474,7 +474,7 @@ fun MapView(
                                 }
 
                                 LayerType.GEOJSON -> {
-                                    layerItem.geoJsonLayerData?.let { geoJsonLayer ->
+                                    mapViewModel.getGeoJsonLayer(layerItem.id)?.let { geoJsonLayer ->
                                         if (layerItem.isVisible && !geoJsonLayer.isLayerOnMap) {
                                             geoJsonLayer.addLayerToMap()
                                         } else if (!layerItem.isVisible && geoJsonLayer.isLayerOnMap) {
