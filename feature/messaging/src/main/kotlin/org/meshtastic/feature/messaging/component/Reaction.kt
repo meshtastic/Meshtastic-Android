@@ -22,6 +22,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -51,8 +52,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Reaction
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.ui.component.BottomSheetDialog
+import org.meshtastic.core.ui.component.Rssi
+import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.MeshProtos
 
@@ -106,6 +112,10 @@ internal fun ReactionRow(
 
 private fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
 
+private const val WEIGHT_NAME = 1.0f
+private const val WEIGHT_EMOJI = 0.2f
+private const val WEIGHT_METRICS = 1.0f
+
 @Composable
 internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
     BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
@@ -136,8 +146,31 @@ internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = reaction.user.longName, style = MaterialTheme.typography.titleMedium)
-                    Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        text = reaction.user.longName,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(WEIGHT_NAME),
+                    )
+                    Text(
+                        text = reaction.emoji,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(WEIGHT_EMOJI),
+                    )
+                    Box(modifier = Modifier.weight(WEIGHT_METRICS), contentAlignment = Alignment.CenterEnd) {
+                        if (reaction.snr != 0.0f) {
+                            if (reaction.hopsAway == 0) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Snr(reaction.snr)
+                                    Rssi(reaction.rssi)
+                                }
+                            } else {
+                                Text(
+                                    text = stringResource(Res.string.hops_away_template, reaction.hopsAway),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -167,12 +200,18 @@ private fun ReactionRowPreview() {
                     user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
+                    snr = -1.0f,
+                    rssi = -99,
+                    hopsAway = 1,
                 ),
                 Reaction(
                     replyId = 1,
                     user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
+                    snr = -1.0f,
+                    rssi = -99,
+                    hopsAway = 1,
                 ),
             ),
         )
