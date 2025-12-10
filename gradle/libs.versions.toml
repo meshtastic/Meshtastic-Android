@@ -18,6 +18,7 @@ room = "2.8.4"
 kotlin = "2.2.21"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.9.0"
+ktlint = "1.7.1"
 
 # Google
 hilt = "2.57.2"
