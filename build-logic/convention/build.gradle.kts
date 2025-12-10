@@ -22,6 +22,7 @@ plugins {
     alias(libs.plugins.android.lint)
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.detekt)
 }
 
 group = "com.geeksville.mesh.buildlogic"
@@ -55,6 +56,8 @@ dependencies {
     compileOnly(libs.secrets.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
     compileOnly(libs.truth)
+
+    detektPlugins(libs.detekt.formatting)
 }
 
 tasks {
@@ -82,6 +85,20 @@ spotless {
             "(^(?![\\/ ]\\*).*$)"
         )
     }
+}
+
+detekt {
+    toolVersion = libs.versions.detekt.get()
+    config.setFrom(rootProject.file("../config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
+    baseline = file("detekt-baseline.xml")
+    source.setFrom(
+        files(
+            "src/main/java",
+            "src/main/kotlin",
+        )
+    )
 }
 
 gradlePlugin {
