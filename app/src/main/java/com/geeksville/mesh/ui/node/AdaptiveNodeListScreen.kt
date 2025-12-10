@@ -42,10 +42,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.nodes
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -68,7 +70,17 @@ fun AdaptiveNodeListScreen(
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
     BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) {
-        scope.launch { navigator.navigateBack(backNavigationBehavior) }
+        // Check if we navigated here from another screen (e.g., from Messages or Map)
+        val previousEntry = navController.previousBackStackEntry
+        val isFromDifferentGraph = previousEntry?.destination?.hasRoute<NodesRoutes.NodesGraph>() == false
+
+        if (isFromDifferentGraph) {
+            // Navigate back via NavController to return to the previous screen
+            navController.navigateUp()
+        } else {
+            // Close the detail pane within the adaptive scaffold
+            scope.launch { navigator.navigateBack(backNavigationBehavior) }
+        }
     }
 
     LaunchedEffect(initialNodeId) {
