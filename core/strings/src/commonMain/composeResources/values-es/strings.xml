@@ -853,4 +853,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="usb_devices">Dispositivos USB</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualización fallida</string>
+    <string name="interval_unset">Sin configurar</string>
 </resources>

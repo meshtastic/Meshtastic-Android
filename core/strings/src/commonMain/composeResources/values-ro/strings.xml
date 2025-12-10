@@ -136,4 +136,5 @@
     <string name="message_input_label">Mesaj</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualizare eșuată</string>
+    <string name="interval_unset">Nesetat</string>
 </resources>

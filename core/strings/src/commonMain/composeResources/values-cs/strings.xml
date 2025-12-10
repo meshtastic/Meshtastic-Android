@@ -829,4 +829,5 @@
     <string name="firmware_update_disclaimer_text">Chystáte se nahrát do zařízení nový firmware. Tento proces s sebou nese určitá rizika.\n\n• Ujistěte se, že je zařízení nabité.\n• Udržujte zařízení blízko telefonu.\n• Během aktualizace neukončujte aplikaci.\n\nOvěřte, zda jste vybrali správný firmware pro váš hardware.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy říká: \"Žebřík měj vždycky po ruce!\"</string>
     <string name="chirpy"></string>
+    <string name="interval_unset">Zrušit nastavení</string>
 </resources>

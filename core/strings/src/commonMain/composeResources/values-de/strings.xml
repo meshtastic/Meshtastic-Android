@@ -972,4 +972,6 @@
     <string name="firmware_update_method_detail">Update über %1$s</string>
     <string name="firmware_update_usb_instruction_title">DFU USB Laufwerk auswählen</string>
     <string name="firmware_update_usb_instruction_text">Ihr Gerät wurde im DFU Modus neu gestartet und sollte als USB Laufwerk (z. B. RAK4631) angezeigt werden.\nWenn sich die Dateiauswahl öffnet, wählen Sie bitte das Stammverzeichnis dieses Laufwerks aus, um die Firmware Datei zu speichern.</string>
+    <string name="interval_unset">Nicht konfiguriert</string>
+    <string name="interval_always_on">Immer an</string>
 </resources>

@@ -972,4 +972,5 @@
     <string name="firmware_update_method_detail">Uuendamine %1$s kaudu</string>
     <string name="firmware_update_usb_instruction_title">Vali DFU USB ketas</string>
     <string name="firmware_update_usb_instruction_text">Teie seade on taaskäivitatud DFU režiimis ja peaks kuvatama USB kettana (nt RAK4631).\n\nKui failivalija avaneb, valige püsivara faili salvestamiseks selle ketta juurkaust.</string>
+    <string name="interval_unset">Määramatta</string>
 </resources>
