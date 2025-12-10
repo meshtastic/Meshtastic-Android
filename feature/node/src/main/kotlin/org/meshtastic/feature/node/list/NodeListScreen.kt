@@ -94,14 +94,7 @@ fun NodeListScreen(
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
 ) {
-    val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
-
-    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
-    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
-    val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
-    val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
-    val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -115,7 +108,6 @@ fun NodeListScreen(
     }
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
-    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
 
     val isScrollInProgress by remember {
         derivedStateOf { listState.isScrollInProgress && (listState.canScrollForward || listState.canScrollBackward) }
@@ -124,8 +116,8 @@ fun NodeListScreen(
         topBar = {
             MainAppBar(
                 title = stringResource(Res.string.nodes),
-                subtitle = stringResource(Res.string.node_count_template, onlineNodeCount, nodes.size, totalNodeCount),
-                ourNode = ourNode,
+                subtitle = stringResource(Res.string.node_count_template, state.onlineNodeCount, state.totalNodeCount),
+                ourNode = state.ourNodeInfo,
                 showNodeChip = false,
                 canNavigateUp = false,
                 onNavigateUp = {},
@@ -134,7 +126,7 @@ fun NodeListScreen(
             )
         },
         floatingActionButton = {
-            val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
+            val firmwareVersion = DeviceVersion(state.ourNodeInfo?.metadata?.firmwareVersion ?: "0.0.0")
             val shareCapable = firmwareVersion.supportsQrCodeSharing()
             val sharedContact: AdminProtos.SharedContact? by
                 viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
@@ -142,7 +134,8 @@ fun NodeListScreen(
                 sharedContact = sharedContact,
                 modifier =
                 Modifier.animateFloatingActionButton(
-                    visible = !isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable,
+                    visible =
+                    !isScrollInProgress && state.connectionState == ConnectionState.Connected && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
                 onSharedContactRequested = { contact -> viewModel.setSharedContactRequested(contact) },
@@ -160,27 +153,21 @@ fun NodeListScreen(
                             .graphicsLayer(alpha = animatedAlpha)
                             .background(MaterialTheme.colorScheme.surfaceDim)
                             .padding(8.dp),
-                        filterText = state.filter.filterText,
-                        onTextChange = { viewModel.nodeFilterText = it },
+                        filterState = state.filter,
                         currentSortOption = state.sort,
                         onSortSelect = viewModel::setSortOption,
-                        includeUnknown = state.filter.includeUnknown,
                         onToggleIncludeUnknown = { viewModel.nodeFilterPreferences.toggleIncludeUnknown() },
-                        excludeInfrastructure = state.filter.excludeInfrastructure,
                         onToggleExcludeInfrastructure = {
                             viewModel.nodeFilterPreferences.toggleExcludeInfrastructure()
                         },
-                        onlyOnline = state.filter.onlyOnline,
                         onToggleOnlyOnline = { viewModel.nodeFilterPreferences.toggleOnlyOnline() },
-                        onlyDirect = state.filter.onlyDirect,
                         onToggleOnlyDirect = { viewModel.nodeFilterPreferences.toggleOnlyDirect() },
-                        showIgnored = state.filter.showIgnored,
                         onToggleShowIgnored = { viewModel.nodeFilterPreferences.toggleShowIgnored() },
-                        ignoredNodeCount = ignoredNodeCount,
+                        ignoredNodeCount = state.ignoredNodeCount,
                     )
                 }
 
-                items(nodes, key = { it.num }) { node ->
+                items(state.nodes, key = { it.num }) { node ->
                     var displayFavoriteDialog by remember { mutableStateOf(false) }
                     var displayIgnoreDialog by remember { mutableStateOf(false) }
                     var displayRemoveDialog by remember { mutableStateOf(false) }
@@ -204,7 +191,7 @@ fun NodeListScreen(
 
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                         val longClick =
-                            if (node.num != ourNode?.num) {
+                            if (node.num != state.ourNodeInfo?.num) {
                                 { expanded = true }
                             } else {
                                 null
@@ -214,17 +201,17 @@ fun NodeListScreen(
 
                         NodeItem(
                             modifier = Modifier.animateItem(),
-                            thisNode = ourNode,
+                            thisNode = state.ourNodeInfo,
                             thatNode = node,
                             distanceUnits = state.distanceUnits,
                             tempInFahrenheit = state.tempInFahrenheit,
                             onClick = { navigateToNodeDetails(node.num) },
                             onLongClick = longClick,
                             currentTimeMillis = currentTimeMillis,
-                            connectionState = connectionState,
+                            connectionState = state.connectionState,
                             isActive = isActive,
                         )
-                        val isThisNode = remember(node) { ourNode?.num == node.num }
+                        val isThisNode = remember(node) { state.ourNodeInfo?.num == node.num }
                         if (!isThisNode) {
                             ContextMenu(
                                 expanded = expanded,
