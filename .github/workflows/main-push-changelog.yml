@@ -1,0 +1,55 @@
+name: Main Push Changelog
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: main-push-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  main-push-changelog:
+    name: Generate main push changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Determine last production tag
+        id: last_prod_tag
+        run: |
+          # Find the most recent tag that looks like a production release (vX.Y.Z)
+          TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-creatordate | head -n 1)
+          echo "Found last production tag: $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog from last production tag to current
+        if: steps.last_prod_tag.outputs.tag != ''
+        uses: mikepenz/release-changelog-builder-action@v5
+        id: changelog
+        with:
+          configuration: .github/release.yml
+          fromTag: ${{ steps.last_prod_tag.outputs.tag }}
+          toTag: ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print main push summary
+        run: |
+          echo "Pushed to main"
+          echo "SHA: $GITHUB_SHA"
+          echo "Actor: $GITHUB_ACTOR"
+          echo "Ref: $GITHUB_REF"
+          echo ""
+          if [ "${{ steps.last_prod_tag.outputs.tag }}" != "" ]; then
+            echo "Changelog since last production tag (${{ steps.last_prod_tag.outputs.tag }})":
+            echo "----------------------------------------"
+            echo "${{ steps.changelog.outputs.changelog }}"
+          else
+            echo "No production tag (vX.Y.Z) found. Skipping changelog generation."
+          fi
+
