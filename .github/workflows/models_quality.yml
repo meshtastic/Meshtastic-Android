@@ -14,6 +14,7 @@ permissions:
 jobs:
   quality-check:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'issues' || (github.event_name == 'pull_request' && github.event.pull_request.labels == null || !contains(join(github.event.pull_request.labels.*.name, ','), 'automation')) }}
     steps:
       - name: Detect spam or low-quality content
         uses: actions/ai-inference@v2
@@ -28,7 +29,7 @@ jobs:
             Respond with one of: spam, ai-generated, needs-review, or ok
           system-prompt: You detect spam and low-quality contributions. Be conservative - only flag obvious spam or AI slop.
           model: openai/gpt-4o-mini
-          temperature: 0.1
+          # temperature: 0.1
 
       - name: Apply label if needed
         if: steps.ai.outputs.response != 'ok'

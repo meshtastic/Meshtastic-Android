@@ -123,7 +123,6 @@
     <string name="debug">Дебагуј</string>
     <string name="channel_name">Naziv kanala</string>
     <string name="qr_code">QR kod</string>
-    <string name="application_icon">ikonica aplikacije</string>
     <string name="unknown_username">Nepoznato korisničko ime</string>
     <string name="send">Pošalji</string>
     <string name="warning_not_paired">Још нисте упарили Мештастик компатибилан радио са овим телефоном. Молимо вас да упарите уређај и поставите своје корисничко име.\n\nОва апликација отвореног кода је у развоју, ако нађете проблеме, молимо вас да их објавите на нашем форуму: https://github.com/orgs/meshtastic/discussions\n\nЗа више информација посетите нашу веб страницу - www.meshtastic.org.</string>
@@ -447,7 +446,8 @@
     <string name="one_day">24 Сати</string>
     <string name="two_days">48 Сати</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Ažuriraj firmver</string>
     <string name="firmware_update_no_device">Нема повезаних уређаја</string>
     <string name="firmware_update_failed">Ažuriranje nije uspelo</string>
+    <string name="interval_unset">Ukloni</string>
+    <string name="interval_always_on">Увек укључен</string>
 </resources>

@@ -179,7 +179,6 @@
 
     <string name="channel_name">Channel Name</string>
     <string name="qr_code">QR code</string>
-    <string name="application_icon">application icon</string>
     <string name="unknown_username">Unknown Username</string>
     <string name="send">Send</string>
     <string name="warning_not_paired">You haven't yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
@@ -754,6 +753,7 @@
     <string name="conversations">Conversations</string>
     <string name="nodes">Nodes</string>
     <string name="bottom_nav_settings">Settings</string>
+    <string name="selected">Selected</string>
     <string name="set_your_region">Set your region</string>
     <string name="reply">Reply</string>
     <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
@@ -977,10 +977,10 @@
     <string name="firmware_update_title">Firmware Update</string>
     <string name="firmware_update_checking">Checking for updates...</string>
     <string name="firmware_update_device">Device: %1$s</string>
+    <string name="firmware_update_currently_installed">Currently Installed: %1$s</string>
     <string name="firmware_update_latest">Latest Release: %1$s</string>
     <string name="firmware_update_stable">Stable</string>
     <string name="firmware_update_alpha">Alpha</string>
-    <string name="firmware_update_button">Update Firmware</string>
     <string name="firmware_update_disconnect_warning">Note: This will temporarily disconnect your device during the update.</string>
     <string name="firmware_update_downloading">Downloading firmware... %1$d%</string>
     <string name="firmware_update_error">Error: %1$s</string>
@@ -990,7 +990,7 @@
     <string name="firmware_update_starting_dfu">Starting DFU...</string>
     <string name="firmware_update_updating">Updating... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Unknown hardware model: %1$d</string>
-    <string name="firmware_update_invalid_address">Connected device is not a BLE device or address is unknown (%1$s). DFU requires BLE.</string>
+    <string name="firmware_update_invalid_address">Connected device is not a valid BLE device or address is unknown (%1$s).</string>
     <string name="firmware_update_no_device">No device connected</string>
     <string name="firmware_update_not_found_in_release">Could not find firmware for %1$s in release.</string>
     <string name="firmware_update_extracting">Extracting firmware...</string>
@@ -1007,4 +1007,29 @@
     <string name="firmware_update_disclaimer_text">You are about to flash new firmware to your device. This process carries risks.\n\n• Ensure your device is charged.\n• Keep the device close to your phone.\n• Do not close the app during the update.\n\nVerify you have selected the correct firmware for your hardware.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy says, "Keep your ladder handy!"</string>
     <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Rebooting to DFU...</string>
+    <string name="firmware_update_waiting_for_device">Waiting for DFU device...</string>
+    <string name="firmware_update_copying">Copying firmware...</string>
+    <string name="firmware_update_save_dfu_file">Please save the .uf2 file to your device&apos;s DFU drive.</string>
+    <string name="firmware_update_flashing">Flashing device, please wait...</string>
+    <string name="firmware_update_method_usb">USB File Transfer</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">Update via %1$s</string>
+    <string name="firmware_update_usb_instruction_title">Select DFU USB Drive</string>
+    <string name="firmware_update_usb_instruction_text">Your device has rebooted into DFU mode and should appear as a USB drive (e.g., RAK4631).\n\nWhen the file picker opens, please select the root of that drive to save the firmware file.</string>
+
+    <string name="interval_unset">Unset</string>
+    <string name="interval_always_on">Always On</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
 </resources>

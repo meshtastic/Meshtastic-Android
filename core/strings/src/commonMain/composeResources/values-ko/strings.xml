@@ -79,7 +79,6 @@
     <string name="debug">Debug</string>
     <string name="channel_name">채널명</string>
     <string name="qr_code">QR코드</string>
-    <string name="application_icon">앱아이콘</string>
     <string name="unknown_username">미확인 유저</string>
     <string name="send">보내기</string>
     <string name="warning_not_paired">아직 스마트폰과 Meshtastic 장치와 연결하지 않았습니다. 장치와 연결하고 사용자 이름을 정하세요. \n\n이 오픈소스 응용 프로그램은 개발 중입니다. 문제가 발견되면 포럼: https://github.com/orgs/meshtastic/discussions 을 통해 알려주세요.\n\n 자세한 정보는 웹페이지 - www.meshtastic.org 를 참조하세요.</string>
@@ -574,6 +573,6 @@
     <string name="one_day">24 시간</string>
     <string name="two_days">48 시간</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">펌웨어 업데이트</string>
     <string name="firmware_update_failed">업데이트 실패</string>
+    <string name="interval_unset">해제</string>
 </resources>

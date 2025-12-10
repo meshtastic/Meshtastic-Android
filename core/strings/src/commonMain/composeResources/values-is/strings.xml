@@ -19,7 +19,6 @@
     <!-- Position Config -->
     <string name="channel_name">Heiti rásar</string>
     <string name="qr_code">QR kóði</string>
-    <string name="application_icon">tákn smáforrits</string>
     <string name="unknown_username">Óþekkt notendanafn</string>
     <string name="send">Senda</string>
     <string name="warning_not_paired">Þú hefur ekki parað Meshtastic radíó við þennan síma. Vinsamlegast paraðu búnað og veldu notendnafn.\n\nÞessi opni hugbúnaður er enn í þróun, finnir þú vandamál vinsamlegast búðu til þráð á spjallborðinu okkar: https://github.com/orgs/meshtastic/discussions\n\nFyrir frekari upplýsingar sjá vefsíðu - www.meshtastic.org.</string>
@@ -133,6 +132,6 @@
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">Skilaboð</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Uppfæra fastbúnað</string>
     <string name="firmware_update_failed">Uppfærsla misfórst</string>
+    <string name="interval_unset">Óstillt</string>
 </resources>

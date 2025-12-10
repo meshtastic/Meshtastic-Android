@@ -398,6 +398,7 @@ class MeshService : Service() {
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }.launchIn(serviceScope)
         serviceRepository.serviceAction.onEach(::onServiceAction).launchIn(serviceScope)
         nodeRepository.myNodeInfo
+            .onEach { myNodeInfo = it }
             .flatMapLatest { myNodeEntity ->
                 // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
                 if (myNodeEntity == null) {
@@ -487,20 +488,16 @@ class MeshService : Service() {
     // BEGINNING OF MODEL - FIXME, move elsewhere
     //
 
-    private fun loadCachedNodeDB() = serviceScope.handledLaunch {
-        myNodeInfo = nodeRepository.myNodeInfo.value
-        nodeDBbyNodeNum.putAll(nodeRepository.getNodeDBbyNum().first())
-        // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
-        // device (rather than
-        // this possibly stale hint)
-    }
+    private fun loadCachedNodeDB() =
+        serviceScope.handledLaunch { nodeDBbyNodeNum.putAll(nodeRepository.getNodeDBbyNum().first()) }
 
     /** discard entire node db & message state - used when downloading a new db from the device */
     private fun discardNodeDB() {
         Timber.d("Discarding NodeDB")
         myNodeInfo = null
         nodeDBbyNodeNum.clear()
-        haveNodeDB = false
+        isNodeDbReady = false
+        allowNodeDbWrites = false
         earlyReceivedPackets.clear()
     }
 
@@ -514,8 +511,11 @@ class MeshService : Service() {
     private var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
     private var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
 
-    // True after we've done our initial node db init
-    @Volatile private var haveNodeDB = false
+    // True after we've done our initial node db init, signaling we can process packets immediately
+    @Volatile private var isNodeDbReady = false
+
+    // True when we are allowed to write node updates to the persistent database
+    @Volatile private var allowNodeDbWrites = false
 
     // The database of active nodes, index is the node number
     private val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
@@ -614,7 +614,7 @@ class MeshService : Service() {
         val info = getOrCreateNodeInfo(nodeNum, channel)
         updateFn(info)
 
-        if (info.user.id.isNotEmpty() && haveNodeDB) {
+        if (info.user.id.isNotEmpty() && isNodeDbReady) {
             serviceScope.handledLaunch { nodeRepository.upsert(info) }
         }
 
@@ -1389,7 +1389,7 @@ class MeshService : Service() {
                 }
                 .build()
         Timber.d("[packet]: ${packet.toOneLineString()}")
-        if (haveNodeDB) {
+        if (isNodeDbReady) {
             processReceivedMeshPacket(preparedPacket)
             return
         }
@@ -1856,9 +1856,9 @@ class MeshService : Service() {
     }
 
     /** Convert a protobuf NodeInfo into our model objects and update our node DB */
-    private fun installNodeInfo(info: MeshProtos.NodeInfo) {
+    private fun installNodeInfo(info: MeshProtos.NodeInfo, withBroadcast: Boolean = true) {
         // Just replace/add any entry
-        updateNodeInfo(info.num) {
+        updateNodeInfo(info.num, withBroadcast = withBroadcast) {
             if (info.hasUser()) {
                 // Check if this is a default/unknown user from firmware (node was evicted and re-created)
                 val shouldPreserve = shouldPreserveExistingUser(it.user, info.user)
@@ -1923,6 +1923,43 @@ class MeshService : Service() {
 
         newNodes.add(info)
         serviceRepository.setStatusMessage("Nodes (${newNodes.size})")
+    }
+
+    private fun handleNodeInfoComplete() {
+        Timber.d("NodeInfo complete for nonce $nodeInfoNonce")
+        val packetToSave =
+            MeshLog(
+                uuid = UUID.randomUUID().toString(),
+                message_type = "NodeInfoComplete",
+                received_date = System.currentTimeMillis(),
+                raw_message = nodeInfoNonce.toString(),
+                fromRadio = fromRadio { this.configCompleteId = nodeInfoNonce },
+            )
+        insertMeshLog(packetToSave)
+        if (newNodes.isEmpty()) {
+            Timber.e("Did not receive a valid node info")
+        } else {
+            // Batch update: Update in-memory models first without triggering individual DB writes
+            val entities =
+                newNodes.mapNotNull { info ->
+                    installNodeInfo(info, withBroadcast = false)
+                    nodeDBbyNodeNum[info.num]
+                }
+            newNodes.clear()
+
+            // Perform a single batch DB transaction for all nodes + myNodeInfo
+            serviceScope.handledLaunch { myNodeInfo?.let { nodeRepository.installConfig(it, entities) } }
+
+            // Enable DB writes for future individual updates
+            allowNodeDbWrites = true
+            isNodeDbReady = true
+            flushEarlyReceivedPackets("node_info_complete")
+            sendAnalytics()
+            onHasSettings()
+            connectionStateHolder.setState(ConnectionState.Connected)
+            serviceBroadcasts.broadcastConnection()
+            updateServiceStatusNotification()
+        }
     }
 
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
@@ -2197,35 +2234,6 @@ class MeshService : Service() {
             Timber.d("Heartbeat sent between nonce stages")
         } catch (ex: Exception) {
             Timber.w(ex, "Failed to send heartbeat; proceeding with node-info stage")
-        }
-    }
-
-    private fun handleNodeInfoComplete() {
-        Timber.d("NodeInfo complete for nonce $nodeInfoNonce")
-        val packetToSave =
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "NodeInfoComplete",
-                received_date = System.currentTimeMillis(),
-                raw_message = nodeInfoNonce.toString(),
-                fromRadio = fromRadio { this.configCompleteId = nodeInfoNonce },
-            )
-        insertMeshLog(packetToSave)
-        if (newNodes.isEmpty()) {
-            Timber.e("Did not receive a valid node info")
-        } else {
-            newNodes.forEach(::installNodeInfo)
-            newNodes.clear()
-            // Individual nodes are already upserted to DB via updateNodeInfo->nodeRepository.upsert
-            // Only call installConfig to persist myNodeInfo, not to overwrite all nodes
-            serviceScope.handledLaunch { myNodeInfo?.let { nodeRepository.installConfig(it, emptyList()) } }
-            haveNodeDB = true
-            flushEarlyReceivedPackets("node_info_complete")
-            sendAnalytics()
-            onHasSettings()
-            connectionStateHolder.setState(ConnectionState.Connected)
-            serviceBroadcasts.broadcastConnection()
-            updateServiceStatusNotification()
         }
     }
 
@@ -2752,6 +2760,10 @@ class MeshService : Service() {
                 packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { rebootSeconds = 5 },
                 )
+            }
+
+            override fun rebootToDfu() {
+                packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { enterDfuModeRequest = true })
             }
 
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {

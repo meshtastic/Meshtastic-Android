@@ -33,10 +33,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -479,9 +481,16 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     },
                     selected = isSelected,
                     label = {
-                        if (navSuiteType != NavigationSuiteType.ShortNavigationBarCompact) {
-                            Text(stringResource(destination.label))
-                        }
+                        Text(
+                            text = stringResource(destination.label),
+                            modifier =
+                            if (navSuiteType == NavigationSuiteType.ShortNavigationBarCompact) {
+                                Modifier.width(1.dp)
+                                    .height(1.dp) // hide on phone - min 1x1 or talkback won't see it.
+                            } else {
+                                Modifier
+                            },
+                        )
                     },
                     onClick = {
                         val isRepress = destination == topLevelDestination

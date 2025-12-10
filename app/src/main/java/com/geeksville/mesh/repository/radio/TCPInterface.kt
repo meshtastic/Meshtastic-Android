@@ -41,6 +41,8 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
         const val MAX_RETRIES_ALLOWED = Int.MAX_VALUE
         const val MIN_BACKOFF_MILLIS = 1 * 1000L // 1 second
         const val MAX_BACKOFF_MILLIS = 5 * 60 * 1000L // 5 minutes
+        const val SOCKET_TIMEOUT = 5000
+        const val SOCKET_RETRIES = 18
         const val SERVICE_PORT = NetworkRepository.SERVICE_PORT
     }
 
@@ -106,7 +108,7 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
 
         Socket(InetAddress.getByName(host), port).use { socket ->
             socket.tcpNoDelay = true
-            socket.soTimeout = 500
+            socket.soTimeout = SOCKET_TIMEOUT
             this@TCPInterface.socket = socket
 
             BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
@@ -119,7 +121,7 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
                     backoffDelay = MIN_BACKOFF_MILLIS
 
                     var timeoutCount = 0
-                    while (timeoutCount < 180) {
+                    while (timeoutCount < SOCKET_RETRIES) {
                         try { // close after 90s of inactivity
                             val c = inputStream.read()
                             if (c == -1) {

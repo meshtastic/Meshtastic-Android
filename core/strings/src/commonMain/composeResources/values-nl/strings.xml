@@ -74,7 +74,6 @@
     <string name="debug">Debug</string>
     <string name="channel_name">Kanaalnaam</string>
     <string name="qr_code">QR-code</string>
-    <string name="application_icon">applicatie icon</string>
     <string name="unknown_username">Onbekende Gebruikersnaam</string>
     <string name="send">Verzend</string>
     <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze forum: https://github.com/orgs/meshtastic/discussions\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
@@ -445,6 +444,6 @@
     <string name="one_day">24 Uur</string>
     <string name="two_days">48 Uur</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Programma Updaten</string>
     <string name="firmware_update_failed">Bijwerken mislukt</string>
+    <string name="interval_unset">Terugzetten</string>
 </resources>

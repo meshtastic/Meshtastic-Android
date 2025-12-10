@@ -49,7 +49,12 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
 @Composable
-fun ConnectionsNavIcon(modifier: Modifier = Modifier, connectionState: ConnectionState, deviceType: DeviceType?) {
+fun ConnectionsNavIcon(
+    modifier: Modifier = Modifier,
+    connectionState: ConnectionState,
+    deviceType: DeviceType?,
+    contentDescription: String? = null,
+) {
     val tint = getTint(connectionState)
 
     val (backgroundIcon, connectionTypeIcon) = getIconPair(deviceType = deviceType, connectionState = connectionState)
@@ -58,7 +63,7 @@ fun ConnectionsNavIcon(modifier: Modifier = Modifier, connectionState: Connectio
 
     Icon(
         imageVector = backgroundIcon,
-        contentDescription = null,
+        contentDescription = contentDescription,
         tint = tint,
         modifier =
         modifier.drawWithContent {

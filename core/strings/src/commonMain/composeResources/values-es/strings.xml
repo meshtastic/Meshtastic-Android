@@ -134,7 +134,6 @@
     <string name="debug">Depuración</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="qr_code">Código QR</string>
-    <string name="application_icon">icono de la aplicación</string>
     <string name="unknown_username">Nombre de usuario desconocido</string>
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Aún no ha emparejado una radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publiquelo en el foro: https://github.com/orgs/meshtastic/discussions\n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>
@@ -853,6 +852,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="preserve_favorites">¿Conservar favoritos?</string>
     <string name="usb_devices">Dispositivos USB</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Actualizar el firmware</string>
     <string name="firmware_update_failed">Actualización fallida</string>
+    <string name="interval_unset">Sin configurar</string>
 </resources>

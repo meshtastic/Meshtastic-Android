@@ -66,7 +66,6 @@
     <!-- Position Config -->
     <string name="channel_name">Non kanal</string>
     <string name="qr_code">Kòd QR</string>
-    <string name="application_icon">ikòn aplikasyon an</string>
     <string name="unknown_username">Non itilizatè enkoni</string>
     <string name="send">Voye</string>
     <string name="warning_not_paired">Ou poko konekte ak yon radyo ki konpatib ak Meshtastic sou telefòn sa a. Tanpri konekte yon aparèy epi mete non itilizatè w lan.\n\nSa a se yon aplikasyon piblik ki nan tès Alpha. Si ou gen pwoblèm, tanpri pataje sou fowòm nou an: https://github.com/orgs/meshtastic/discussions\n\nPou plis enfòmasyon, vizite sit wèb nou an - www.meshtastic.org.</string>
@@ -233,6 +232,6 @@
     <string name="one_day">24 Èdtan</string>
     <string name="two_days">48 Èdtan</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Mete ajou mikrolojisyèl</string>
     <string name="firmware_update_failed">Mizajou echwe</string>
+    <string name="interval_unset">Pa konfigire</string>
 </resources>

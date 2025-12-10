@@ -151,7 +151,6 @@
     <string name="debug">Debug</string>
     <string name="channel_name">Csatorna neve</string>
     <string name="qr_code">QR kód</string>
-    <string name="application_icon">alkalmazás ikonja</string>
     <string name="unknown_username">Ismeretlen felhasználónév</string>
     <string name="send">Küldeni</string>
     <string name="warning_not_paired">Még nem párosított egyetlen Meshtastic rádiót sem ehhez a telefonhoz. Kérem pároztasson egyet és állítsa be a felhasználónevet.\n\nEz a szabad forráskódú alkalmazás fejlesztés alatt áll, ha hibát talál kérem írjon a projekt fórumába: https://github.com/orgs/meshtastic/discussions\n\nBővebb információért látogasson el a projekt weboldalára - www.meshtastic.org.</string>
@@ -893,6 +892,6 @@
     <string name="for_more_information_see_our_privacy_policy">További információért lásd az adatvédelmi irányelveinket.</string>
     <string name="unset">Nincs beállítva – 0</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Firmware frissítés</string>
     <string name="firmware_update_failed">A frissítés sikertelen</string>
+    <string name="interval_unset">Nincs beállítva</string>
 </resources>

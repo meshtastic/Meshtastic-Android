@@ -56,7 +56,9 @@
     <string name="routing_error_pki_unknown_pubkey">Nieznany klucz publiczny</string>
     <string name="routing_error_admin_bad_session_key">Nieprawidłowy klucz sesji</string>
     <string name="routing_error_admin_public_key_unauthorized">Nieautoryzowany klucz publiczny</string>
+    <string name="role_client">Klient</string>
     <string name="role_client_desc">Urządzenie samodzielne lub sparowane z aplikacją.</string>
+    <string name="role_client_mute">Klient pasywny</string>
     <string name="role_client_mute_desc">Wyciszenie klienta - To samo, co klient, z wyjątkiem pakietów, które nie przeskakują przez ten węzeł, nie przyczynia się do routingu pakietów dla siatki.</string>
     <string name="role_router_desc">Węzeł infrastruktury do rozszerzenia zasięgu sieci poprzez przekazywanie pakietów. Widoczny na liście węzłów.</string>
     <string name="role_router_client">Router Klienta</string>
@@ -82,7 +84,7 @@
     <string name="rebroadcast_mode_none_desc">Dozwolone wyłącznie dla ról SENSOR, TRACKER i TAK_TRACKER. Spowoduje to zablokowanie wszystkich retransmisji, podobnie jak rola CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoruje niestandardowe pakiety (non-standard portnums) takie jak: TAK, RangeTest, PaxCounter, itp. Przekazuje dalej jedynie standardowe pakiety (standard portnums): NodeInfo, Text, Position, Telemetry oraz Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Traktuj podwójne dotknięcie na obsługiwanych akcelerometrach jako naciśnięcie przycisku użytkownika.</string>
-    <string name="config_device_tripleClickAsAdHocPing_summary">Wyślij pozycję na kanale głównym, gdy przycisk użytkownika jest trzykrotnie kliknięty.</string>
+    <string name="config_device_tripleClickAsAdHocPing_summary">Wyślij lokalizację na kanale głównym, gdy przycisk użytkownika jest trzykrotnie kliknięty.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">Kontroluje miganie LED na urządzeniu. Dla większości urządzeń będzie to sterować jednym z maksymalnie 4 diod LED, ładowarka i diody GPS nie są sterowane.</string>
     <string name="config_device_tzdef_summary">Strefa czasowa dla dat na ekranie urządzenia i dzienniku.</string>
     <string name="config_device_use_phone_tz">Użyj strefy czasowej telefonu</string>
@@ -99,14 +101,15 @@
     <string name="config_network_wifi_enabled_summary">Włączenie WiFi spowoduje wyłączenie bluetootha.</string>
     <string name="config_network_eth_enabled_summary">Włączenie połączenia Ethernet spowoduje wyłączenie bluetootha. Połączania TCP nie są dostępne na urządzeniach Apple.</string>
     <string name="config_network_udp_enabled_summary">Włącz nadawanie pakietów poprzez UDP w lokalnej sieci.</string>
-    <string name="config_position_broadcast_secs_summary">Maksymalny odstęp czasu, jaki może upłynąć bez nadawania pozycji przez węzeł.</string>
+    <string name="config_position_broadcast_secs_summary">Maksymalny odstęp czasu, jaki może upłynąć bez nadawania lokalizacji przez węzeł.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Minimalna zmiana odległości w metrach, którą należy uwzględnić w przypadku inteligentnego pozycjonowania.</string>
     <string name="config_position_gps_update_interval_summary">Jak często powinniśmy próbować uzyskać pozycję GPS (&lt;10 sekund utrzymuje GPS włączony).</string>
+    <string name="config_position_flags_summary">Opcjonalne pola dołączane do danych lokalizacji. Im więcej pól, tym większy rozmiar pakietu, co wydłuża czas transmisji i zwiększa ryzyko jego utraty.</string>
     <string name="config_security_private_key">Używane do tworzenia klucza współdzielonego ze zdalnym urządzeniem.</string>
     <string name="config_security_serial_enabled">Konsola szeregowa przez Stream API.</string>
-    <string name="config_security_debug_log_api_enabled">Wyjście logowania debugowania na żywo nad serwerem, widok i eksport logów urządzenia poprawionego pozycją przez Bluetooth.</string>
+    <string name="config_security_debug_log_api_enabled">Pokaż na żywo logi debugowania przez połączenie szeregowe, podejrzyj i eksportuj logi węzła (bez informacji lokalizacyjnych) przez Bluetooth.</string>
     <!-- Position Config -->
-    <string name="position_packet">Pakiet pozycji</string>
+    <string name="position_packet">Pakiet lokalizacji</string>
     <string name="broadcast_interval">Interwał transmisji</string>
     <string name="smart_position">Inteligentne Pozycjonowanie</string>
     <string name="minimum_interval">Minimalny interwał</string>
@@ -120,7 +123,6 @@
     <string name="debug">Debugowanie</string>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="qr_code">Kod QR</string>
-    <string name="application_icon">ikona aplikacji</string>
     <string name="unknown_username">Nieznana nazwa użytkownika</string>
     <string name="send">Wyślij</string>
     <string name="warning_not_paired">Nie sparowałeś jeszcze urządzenia Meshtastic z tym telefonem. Proszę sparować urządzenie i ustawić swoją nazwę użytkownika.\n\nTa aplikacja open-source jest w fazie rozwoju, jeśli znajdziesz problemy, napisz na naszym forum: https://github.com/orgs/meshtastic/discussions\n\nWięcej informacji znajdziesz na naszej stronie internetowej - www.meshtastic.org.</string>
@@ -327,7 +329,7 @@
     <string name="device_metrics_log">Historia telemetrii</string>
     <string name="node_map">Ślad na mapie</string>
     <string name="position_log">Historia pozycji</string>
-    <string name="last_position_update">Ostatnia aktualizacja pozycji</string>
+    <string name="last_position_update">Ostatnia aktualizacja lokalizacji</string>
     <string name="env_metrics_log">Historia danych otoczenia</string>
     <string name="sig_metrics_log">Historia danych sygnału</string>
     <string name="administration">Zarządzanie</string>
@@ -413,7 +415,7 @@
     <string name="uplink_enabled">Wysył włączony</string>
     <string name="downlink_enabled">Odbiór włączony</string>
     <string name="default_">Domyślny</string>
-    <string name="position_enabled">Pozycjonowanie włączone</string>
+    <string name="position_enabled">Lokalizacja włączona</string>
     <string name="precise_location">Precyzyjna lokalizacja</string>
     <string name="gpio_pin">Pin GPIO</string>
     <string name="type">Typ</string>
@@ -556,7 +558,8 @@
     <string name="two_days">48 Godzin</string>
     <string name="learn_more">Dowiedz się więcej</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Aktualizuj oprogramowanie</string>
     <string name="firmware_update_no_device">Brak podłączonych urządzeń</string>
     <string name="firmware_update_failed">Aktualizacja nie udała się</string>
+    <string name="interval_unset">Nieustawiony</string>
+    <string name="interval_always_on">Zawsze włączone</string>
 </resources>

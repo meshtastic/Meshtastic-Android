@@ -66,7 +66,6 @@
     <!-- Position Config -->
     <string name="channel_name">Emri i kanalit radio</string>
     <string name="qr_code">Kodi QR</string>
-    <string name="application_icon">Ikona e aplikacionit</string>
     <string name="unknown_username">Emri i përdoruesit është i panjohur</string>
     <string name="send">Dërgo</string>
     <string name="warning_not_paired">Ju ende nuk keni lidhur një paisje radio Meshtastic me këtë telefon. Ju lutem lidhni një paisje radio dhe vendosni emrin e përdoruesit.\n\nKy aplikacion është software i lire \"open-source\" dhe në variantin Alpha për testim. Nëse hasni probleme, ju lutem shkruani në çatin e faqes tonë të internetit: https://github.com/orgs/meshtastic/discussions\n\nPër më shumë informacione vizitoni faqen tonë në internet - www.meshtastic.org.</string>
@@ -234,6 +233,6 @@
     <string name="one_day">24 Orë</string>
     <string name="two_days">48 Orë</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Përditëso firmware-n</string>
     <string name="firmware_update_failed">Përditësimi dështoi</string>
+    <string name="interval_unset">I pa konfiguruar</string>
 </resources>

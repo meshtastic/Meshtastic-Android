@@ -73,7 +73,6 @@
     <!-- Position Config -->
     <string name="channel_name">Názov kanála</string>
     <string name="qr_code">QR kód</string>
-    <string name="application_icon">Ikona aplikácie</string>
     <string name="unknown_username">Neznáme užívateľské meno</string>
     <string name="send">Odoslať</string>
     <string name="warning_not_paired">K tomuto telefónu ste ešte nespárovali žiadne zariadenie kompatibilné s Meshtastic. Prosím spárujte zariadenie a nastavte svoje užívateľské meno.\n\nTáto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: https://github.com/orgs/meshtastic/discussions\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org.</string>
@@ -362,6 +361,6 @@
     <string name="one_day">24 Hodín</string>
     <string name="two_days">48 Hodín</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Aktualizácia firmvéru</string>
     <string name="firmware_update_failed">Aktualizácia zlyhala</string>
+    <string name="interval_unset">Nenastavené</string>
 </resources>

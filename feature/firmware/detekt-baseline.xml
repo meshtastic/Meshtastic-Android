@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooGenericExceptionCaught:FirmwareUpdateViewModel.kt$FirmwareUpdateViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:UpdateHandler.kt$FirmwareRetriever$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:UpdateHandler.kt$OtaUpdateHandler$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:UpdateHandler.kt$UsbUpdateHandler$e: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

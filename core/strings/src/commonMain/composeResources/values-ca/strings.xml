@@ -73,7 +73,6 @@
     <!-- Position Config -->
     <string name="channel_name">Nom del canal</string>
     <string name="qr_code">Codi QR</string>
-    <string name="application_icon">icona de l'aplicació</string>
     <string name="unknown_username">Nom d'usuari desconegut</string>
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Encara no has emparellat una ràdio compatible amb Meshtastic amb aquest telèfon. Si us plau emparella un dispositiu i configura el teu nom d'usuari. \n\nAquesta aplicació de codi obert està en desenvolupament. Si hi trobes problemes publica-ho en el nostre fòrum https://github.com/orgs/meshtastic/discussions\n\nPer a més informació visita la nostra pàgina web - www.meshtastic.org.</string>
@@ -202,6 +201,6 @@
     <string name="one_day">24 Hores</string>
     <string name="two_days">48 Hores</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_button">Actualitzar firmware</string>
     <string name="firmware_update_failed">Actualització fallida</string>
+    <string name="interval_unset">No configurat</string>
 </resources>
