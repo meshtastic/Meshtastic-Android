@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>AbsentOrWrongFileLicense:DetektConventionPlugin.kt$.DetektConventionPlugin.kt</ID>
+    <ID>AbsentOrWrongFileLicense:SpotlessConventionPlugin.kt$.SpotlessConventionPlugin.kt</ID>
+    <ID>ChainWrapping:AndroidInstrumentedTests.kt$&amp;&amp;</ID>
+    <ID>EnumNaming:MeshtasticFlavor.kt$FlavorDimension$marketplace</ID>
+    <ID>EnumNaming:MeshtasticFlavor.kt$MeshtasticFlavor$fdroid : MeshtasticFlavor</ID>
+    <ID>EnumNaming:MeshtasticFlavor.kt$MeshtasticFlavor$google : MeshtasticFlavor</ID>
+    <ID>FinalNewline:ProjectExtensions.kt$com.geeksville.mesh.buildlogic.ProjectExtensions.kt</ID>
+    <ID>MagicNumber:AndroidApplicationConventionPlugin.kt$AndroidApplicationConventionPlugin$36</ID>
+    <ID>MagicNumber:AndroidLibraryConventionPlugin.kt$AndroidLibraryConventionPlugin$36</ID>
+    <ID>MagicNumber:KotlinAndroid.kt$21</ID>
+    <ID>MagicNumber:KotlinAndroid.kt$26</ID>
+    <ID>MagicNumber:KotlinAndroid.kt$36</ID>
+    <ID>MagicNumber:Spotless.kt$120</ID>
+    <ID>MaxLineLength:GitVersionValueSource.kt$GitVersionValueSource$throw RuntimeException("Failed to determine git commit count for versionCode. Ensure you have a full git history (not a shallow clone) and .git is present.\nOriginal error: ${e.message}", e)</ID>
+    <ID>NewLineAtEndOfFile:ProjectExtensions.kt$com.geeksville.mesh.buildlogic.ProjectExtensions.kt</ID>
+    <ID>NoBlankLineBeforeRbrace:AndroidApplicationComposeConventionPlugin.kt$AndroidApplicationComposeConventionPlugin$ </ID>
+    <ID>NoBlankLineBeforeRbrace:AndroidLibraryComposeConventionPlugin.kt$AndroidLibraryComposeConventionPlugin$ </ID>
+    <ID>NoConsecutiveBlankLines:MeshtasticFlavor.kt$ </ID>
+    <ID>NoUnusedImports:AndroidApplicationFlavorsConventionPlugin.kt$.AndroidApplicationFlavorsConventionPlugin.kt</ID>
+    <ID>NoUnusedImports:AndroidLibraryConventionPlugin.kt$.AndroidLibraryConventionPlugin.kt</ID>
+    <ID>SpacingAroundParens:MeshtasticFlavor.kt$MeshtasticFlavor.fdroid$)</ID>
+    <ID>TooGenericExceptionCaught:GitVersionValueSource.kt$GitVersionValueSource$e: Exception</ID>
+    <ID>TooGenericExceptionThrown:GitVersionValueSource.kt$GitVersionValueSource$throw RuntimeException("Failed to determine git commit count for versionCode. Ensure you have a full git history (not a shallow clone) and .git is present.\nOriginal error: ${e.message}", e)</ID>
+    <ID>UnusedImports:AndroidApplicationFlavorsConventionPlugin.kt$import com.geeksville.mesh.buildlogic.MeshtasticFlavor</ID>
+    <ID>UnusedImports:AndroidApplicationFlavorsConventionPlugin.kt$import com.geeksville.mesh.buildlogic.libs</ID>
+    <ID>UnusedImports:AndroidApplicationFlavorsConventionPlugin.kt$import org.gradle.kotlin.dsl.apply</ID>
+    <ID>UnusedImports:AndroidApplicationFlavorsConventionPlugin.kt$import org.gradle.kotlin.dsl.dependencies</ID>
+    <ID>UnusedImports:AndroidApplicationFlavorsConventionPlugin.kt$import org.gradle.kotlin.dsl.exclude</ID>
+    <ID>UnusedImports:AndroidLibraryConventionPlugin.kt$import com.geeksville.mesh.buildlogic.libs</ID>
+    <ID>UnusedImports:AndroidLibraryConventionPlugin.kt$import org.gradle.kotlin.dsl.dependencies</ID>
+    <ID>UnusedParameter:AndroidLintConventionPlugin.kt$project: Project</ID>
+  </CurrentIssues>
+</SmellBaseline>

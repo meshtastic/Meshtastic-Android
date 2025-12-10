@@ -18,11 +18,7 @@
 package com.geeksville.mesh.buildlogic
 
 import com.diffplug.gradle.spotless.SpotlessExtension
-import io.gitlab.arturbosch.detekt.Detekt
-import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.named
 
 internal fun Project.configureSpotless(extension: SpotlessExtension) = extension.apply {
     extension.apply {
@@ -31,13 +27,15 @@ internal fun Project.configureSpotless(extension: SpotlessExtension) = extension
             target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
             targetExclude("**/build/**/*.kt")
             ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-            ktlint("1.7.1").setEditorConfigPath(rootProject.file("config/spotless/.editorconfig").path)
+            ktlint(libs.findVersion("ktlint").get().requiredVersion)
+                .setEditorConfigPath(rootProject.file("config/spotless/.editorconfig").path)
             licenseHeaderFile(rootProject.file("config/spotless/copyright.kt"))
         }
         kotlinGradle {
             target("**/*.gradle.kts")
             ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-            ktlint("1.7.1").setEditorConfigPath(rootProject.file("config/spotless/.editorconfig").path)
+            ktlint(libs.findVersion("ktlint").get().requiredVersion)
+                .setEditorConfigPath(rootProject.file("config/spotless/.editorconfig").path)
             licenseHeaderFile(
                 rootProject.file("config/spotless/copyright.kts"),
                 "(^(?![\\/ ]\\*).*$)"
