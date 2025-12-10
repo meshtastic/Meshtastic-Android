@@ -973,4 +973,17 @@
     <string name="firmware_update_usb_instruction_title">Vali DFU USB ketas</string>
     <string name="firmware_update_usb_instruction_text">Teie seade on taaskäivitatud DFU režiimis ja peaks kuvatama USB kettana (nt RAK4631).\n\nKui failivalija avaneb, valige püsivara faili salvestamiseks selle ketta juurkaust.</string>
     <string name="interval_unset">Määramatta</string>
+    <string name="interval_always_on">Alati sees</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 sekund</item>
+        <item quantity="other">%d sekundit</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 minut</item>
+        <item quantity="other">%d minutit</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 tund</item>
+        <item quantity="other">%d tundi</item>
+    </plurals>
 </resources>
