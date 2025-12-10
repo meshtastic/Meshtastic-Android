@@ -22,8 +22,18 @@ jobs:
       - name: Determine last production tag
         id: last_prod_tag
         run: |
-          # Find the most recent tag that looks like a production release (vX.Y.Z)
-          TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-creatordate | head -n 1)
+          # Find the highest semantic version tag of the form vX.Y.Z
+          # and ignore any tags with suffixes like -track.N, -rc.N, etc.
+          TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sed 's/^v//' \
+            | sort -V \
+            | tail -n 1)
+
+          if [ -n "$TAG" ]; then
+            TAG="v$TAG"
+          fi
+
           echo "Found last production tag: $TAG"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
@@ -37,6 +47,21 @@ jobs:
           toTag: ${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save changelog to file
+        if: steps.last_prod_tag.outputs.tag != ''
+        run: |
+          mkdir -p artifacts
+          cat << 'EOF' > artifacts/main-push-changelog.md
+          ${{ steps.changelog.outputs.changelog }}
+          EOF
+
+      - name: Upload changelog artifact
+        if: steps.last_prod_tag.outputs.tag != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-push-changelog
+          path: artifacts/main-push-changelog.md
 
       - name: Print main push summary
         run: |
@@ -52,4 +77,3 @@ jobs:
           else
             echo "No production tag (vX.Y.Z) found. Skipping changelog generation."
           fi
-
