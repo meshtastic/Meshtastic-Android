@@ -29,7 +29,7 @@ jobs:
 
       - name: Generate changelog from last production tag to current
         if: steps.last_prod_tag.outputs.tag != ''
-        uses: mikepenz/release-changelog-builder-action@v5
+        uses: mikepenz/release-changelog-builder-action@v6
         id: changelog
         with:
           configuration: .github/release.yml
