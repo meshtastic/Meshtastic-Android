@@ -77,6 +77,21 @@ fun AdaptiveNodeListScreen(
         }
     }
 
+    LaunchedEffect(scrollToTopEvents) {
+        scrollToTopEvents.collect { event ->
+            if (
+                event is ScrollToTopEvent.NodesTabPressed &&
+                navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail
+            ) {
+                if (navigator.canNavigateBack(backNavigationBehavior)) {
+                    navigator.navigateBack(backNavigationBehavior)
+                } else {
+                    navigator.navigateTo(ListDetailPaneScaffoldRole.List)
+                }
+            }
+        }
+    }
+
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
         value = navigator.scaffoldValue,
