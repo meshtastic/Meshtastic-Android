@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload changelog artifact
         if: steps.last_prod_tag.outputs.tag != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: main-push-changelog
           path: artifacts/main-push-changelog.md
