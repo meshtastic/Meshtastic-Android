@@ -160,7 +160,7 @@ zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", ve
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "31.13.1" }
+android-tools-common = { module = "com.android.tools:common", version = "31.13.2" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.21.0" }
