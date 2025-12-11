@@ -153,10 +153,10 @@ android {
             }
             isMinifyEnabled = true
             isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             isDebuggable = false
         }
     }
-    bundle { language { enableSplit = false } }
 }
 
 secrets {
@@ -164,19 +164,17 @@ secrets {
     propertiesFileName = "secrets.properties"
 }
 
-// workaround for https://github.com/google/ksp/issues/1590
 androidComponents {
     onVariants(selector().all()) { variant ->
         if (variant.name == "fdroidDebug") {
-            variant.applicationId = "com.geeksville.mesh.fdroid.debug"
+            variant.applicationId.set("com.geeksville.mesh.fdroid.debug")
         }
 
         if (variant.name == "googleDebug") {
-            variant.applicationId = "com.geeksville.mesh.google.debug"
+            variant.applicationId.set("com.geeksville.mesh.google.debug")
         }
-    }
-    onVariants(selector().withBuildType("release")) { variant ->
-        if (variant.flavorName == "google") {
+
+        if (variant.name == "googleRelease") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
             val minifyTaskName = "minify${variantNameCapped}WithR8"
             val uploadTaskName = "uploadMapping$variantNameCapped"
@@ -271,20 +269,22 @@ tasks.configureEach {
 
 dokka {
     moduleName.set("Meshtastic App")
-    dokkaSourceSets.main {
-        sourceLink {
-            enableJdkDocumentationLink.set(true)
-            enableKotlinStdLibDocumentationLink.set(true)
-            enableJdkDocumentationLink.set(true)
-            reportUndocumented.set(true)
-            localDirectory.set(file("src/main/java"))
-            remoteUrl("https://github.com/geeksville/Meshtastic-Android/app/src/main/java")
-            remoteLineSuffix.set("#L")
+    dokkaSourceSets.configureEach {
+        if (this.name == "main") {
+            sourceLink {
+                enableJdkDocumentationLink.set(true)
+                enableKotlinStdLibDocumentationLink.set(true)
+                enableJdkDocumentationLink.set(true)
+                reportUndocumented.set(true)
+                localDirectory.set(file("src/main/java"))
+                remoteUrl("https://github.com/geeksville/Meshtastic-Android/app/src/main/java")
+                remoteLineSuffix.set("#L")
+            }
         }
-    }
-    dokkaPublications.html { suppressInheritedMembers.set(true) }
-    dokkaGeneratorIsolation = ProcessIsolation {
-        // Configures heap size
-        maxHeapSize = "6g"
+        dokkaPublications.html { suppressInheritedMembers.set(true) }
+        dokkaGeneratorIsolation = ProcessIsolation {
+            // Configures heap size
+            maxHeapSize = "6g"
+        }
     }
 }

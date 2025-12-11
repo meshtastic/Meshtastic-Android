@@ -27,6 +27,7 @@ android {
         buildConfig = true
         aidl = true
     }
+    testFixtures { enable = true }
     namespace = "org.meshtastic.core.model"
 }
 
@@ -39,6 +40,8 @@ dependencies {
     implementation(libs.timber)
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
+
+    testFixturesImplementation(projects.core.proto)
 
     testImplementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)

@@ -27,7 +27,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         with(target) {
 
             apply(plugin = "com.android.application")
-            apply(plugin = "org.jetbrains.kotlin.android")
             apply(plugin = "meshtastic.android.lint")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
@@ -36,11 +35,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
-                defaultConfig.targetSdk = 36
                 testOptions.animationsDisabled = true
 
                 defaultConfig {
-                    targetSdk = 36
                     testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
                     vectorDrawables.useSupportLibrary = true
                 }
