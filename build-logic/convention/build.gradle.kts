@@ -94,6 +94,10 @@ gradlePlugin {
             id = libs.plugins.meshtastic.kotlinx.serialization.get().pluginId
             implementationClass = "KotlinXSerializationConventionPlugin"
         }
+        register("meshtasticAnalytics") {
+            id = libs.plugins.meshtastic.analytics.get().pluginId
+            implementationClass = "AnalyticsConventionPlugin"
+        }
         register("meshtasticHilt") {
             id = libs.plugins.meshtastic.hilt.get().pluginId
             implementationClass = "HiltConventionPlugin"
