@@ -21,6 +21,8 @@ plugins {
     `kotlin-dsl`
     alias(libs.plugins.android.lint)
     alias(libs.plugins.dependency.analysis)
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.detekt)
 }
 
 group = "com.geeksville.mesh.buildlogic"
@@ -54,6 +56,8 @@ dependencies {
     compileOnly(libs.secrets.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
     compileOnly(libs.truth)
+
+    detektPlugins(libs.detekt.formatting)
 }
 
 tasks {
@@ -63,6 +67,39 @@ tasks {
     }
 }
 
+spotless {
+    ratchetFrom("origin/main")
+    kotlin {
+        target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
+        targetExclude("**/build/**/*.kt")
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
+        ktlint(libs.versions.ktlint.get()).setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
+        licenseHeaderFile(rootProject.file("../config/spotless/copyright.kt"))
+    }
+    kotlinGradle {
+        target("**/*.gradle.kts")
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
+        ktlint(libs.versions.ktlint.get()).setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
+        licenseHeaderFile(
+            rootProject.file("../config/spotless/copyright.kts"),
+            "(^(?![\\/ ]\\*).*$)"
+        )
+    }
+}
+
+detekt {
+    toolVersion = libs.versions.detekt.get()
+    config.setFrom(rootProject.file("../config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
+    baseline = file("detekt-baseline.xml")
+    source.setFrom(
+        files(
+            "src/main/java",
+            "src/main/kotlin",
+        )
+    )
+}
 
 gradlePlugin {
     plugins {
