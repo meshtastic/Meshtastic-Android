@@ -1855,14 +1855,15 @@ class MeshService : Service() {
 
     /**
      * Regenerate the myNodeInfo model. We call this twice. Once after we receive myNodeInfo from the device and again
-     * after we have the node DB (which might allow us a better notion of our HwModel.
+     * after we have the node DB (which might allow us a better notion of our HwModel).
      */
     private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata? = MeshProtos.DeviceMetadata.getDefaultInstance()) {
         val myInfo = rawMyNodeInfo
+        val hasMetadata = metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()
         Timber.i(
             "[MYNODE_REGEN] Called - " +
                 "rawMyNodeInfo: ${if (myInfo != null) "present" else "null"}, " +
-                "metadata: ${if (metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()) "present" else "null/default"}, " +
+                "metadata: ${if (hasMetadata) "present" else "null/default"}, " +
                 "firmwareVersion: ${metadata?.firmwareVersion ?: "null"}, " +
                 "hasWifi: ${metadata?.hasWifi}",
         )

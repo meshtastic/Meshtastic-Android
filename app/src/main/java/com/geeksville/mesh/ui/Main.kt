@@ -543,13 +543,9 @@ private fun VersionChecks(viewModel: UIViewModel) {
                         } else {
                             Timber.i("[FW_CHECK] Firmware version OK - device: $curVer meets requirements")
                         }
-                    } ?: run {
-                        Timber.w("[FW_CHECK] Firmware version is null despite myNodeInfo being present")
-                    }
+                    } ?: run { Timber.w("[FW_CHECK] Firmware version is null despite myNodeInfo being present") }
                 }
-            } ?: run {
-                Timber.d("[FW_CHECK] myNodeInfo is null, skipping firmware check")
-            }
+            } ?: run { Timber.d("[FW_CHECK] myNodeInfo is null, skipping firmware check") }
         } else {
             Timber.d("[FW_CHECK] Not connected (state: $connectionState), skipping firmware check")
         }
