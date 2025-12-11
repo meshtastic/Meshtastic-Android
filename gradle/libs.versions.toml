@@ -213,6 +213,7 @@ room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
 
 # Meshtastic
+meshtastic-analytics = { id = "meshtastic.analytics" }
 meshtastic-android-application = { id = "meshtastic.android.application" }
 meshtastic-android-application-compose = { id = "meshtastic.android.application.compose" }
 meshtastic-android-application-flavors = { id = "meshtastic.android.application.flavors" }
