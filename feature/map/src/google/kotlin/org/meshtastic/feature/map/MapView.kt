@@ -106,6 +106,7 @@ import org.meshtastic.core.strings.position
 import org.meshtastic.core.strings.sats
 import org.meshtastic.core.strings.speed
 import org.meshtastic.core.strings.timestamp
+import org.meshtastic.core.strings.traceroute_endpoint_missing
 import org.meshtastic.core.strings.track_point
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.util.formatPositionTime
@@ -129,6 +130,7 @@ import timber.log.Timber
 import java.text.DateFormat
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 private const val DEG_D = 1e-7
@@ -255,16 +257,12 @@ fun MapView(
         }
     }
 
-    val allNodes by
-        mapViewModel.nodes
-            .map { nodes -> nodes.filter { node -> node.validPosition != null } }
-            .collectAsStateWithLifecycle(listOf())
+    val allNodes by mapViewModel.nodes.collectAsStateWithLifecycle(listOf())
+    val nodesWithPosition = remember(allNodes) { allNodes.filter { node -> node.validPosition != null } }
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
-    val overlayNodeNums = remember(tracerouteOverlay) { tracerouteOverlay?.relatedNodeNums ?: emptySet() }
-
     val filteredNodes =
-        allNodes
+        nodesWithPosition
             .filter { node -> !mapFilterState.onlyFavorites || node.isFavorite || node.num == ourNodeInfo?.num }
             .filter { node ->
                 mapFilterState.lastHeardFilter.seconds == 0L ||
@@ -272,22 +270,57 @@ fun MapView(
                     node.num == ourNodeInfo?.num
             }
 
-    val displayNodes =
-        if (tracerouteOverlay != null) {
-            allNodes.filter { overlayNodeNums.contains(it.num) }
-        } else {
-            filteredNodes
+    val tracerouteNodeLookup = remember(allNodes) { allNodes.associateBy { it.num } }
+    val tracerouteKnownPositions =
+        remember(nodesWithPosition) {
+            nodesWithPosition.associate {
+                it.num to LatLng(it.position.latitudeI * DEG_D, it.position.longitudeI * DEG_D)
+            }
+        }
+    val tracerouteForwardRoutePoints =
+        remember(tracerouteOverlay, tracerouteNodeLookup, tracerouteKnownPositions) {
+            buildTracerouteRoutePoints(
+                route = tracerouteOverlay?.forwardRoute ?: emptyList(),
+                nodeLookup = tracerouteNodeLookup,
+                knownPositions = tracerouteKnownPositions,
+            )
+        }
+    val tracerouteReturnRoutePoints =
+        remember(tracerouteOverlay, tracerouteNodeLookup, tracerouteKnownPositions) {
+            buildTracerouteRoutePoints(
+                route = tracerouteOverlay?.returnRoute ?: emptyList(),
+                nodeLookup = tracerouteNodeLookup,
+                knownPositions = tracerouteKnownPositions,
+            )
+        }
+    val tracerouteDisplayNodes =
+        remember(tracerouteForwardRoutePoints, tracerouteReturnRoutePoints) {
+            (tracerouteForwardRoutePoints + tracerouteReturnRoutePoints)
+                .groupBy { it.node.num }
+                .values
+                .map { pointsForNode -> pointsForNode.firstOrNull { !it.isEstimated } ?: pointsForNode.first() }
         }
 
     val nodeClusterItems =
-        displayNodes.map { node ->
-            val latLng = LatLng(node.position.latitudeI * DEG_D, node.position.longitudeI * DEG_D)
-            NodeClusterItem(
-                node = node,
-                nodePosition = latLng,
-                nodeTitle = "${node.user.shortName} ${formatAgo(node.position.time)}",
-                nodeSnippet = "${node.user.longName}",
-            )
+        if (tracerouteOverlay != null) {
+            tracerouteDisplayNodes.map { point ->
+                NodeClusterItem(
+                    node = point.node,
+                    nodePosition = point.latLng,
+                    nodeTitle = "${point.node.user.shortName} ${formatAgo(point.node.position.time)}",
+                    nodeSnippet = point.node.user.longName,
+                )
+            }
+        } else {
+            filteredNodes.map { node ->
+                val latLng = LatLng(node.position.latitudeI * DEG_D, node.position.longitudeI * DEG_D)
+                NodeClusterItem(
+                    node = node,
+                    nodePosition = latLng,
+                    nodeTitle = "${node.user.shortName} ${formatAgo(node.position.time)}",
+                    nodeSnippet = "${node.user.longName}",
+                )
+            }
         }
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
     val theme by mapViewModel.theme.collectAsStateWithLifecycle()
@@ -304,15 +337,8 @@ fun MapView(
             else -> ComposeMapColorScheme.LIGHT
         }
     val tracerouteForwardPoints =
-        remember(tracerouteOverlay, displayNodes) {
-            val nodeLookup = displayNodes.associateBy { it.num }
-            tracerouteOverlay?.forwardRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
-        }
-    val tracerouteReturnPoints =
-        remember(tracerouteOverlay, displayNodes) {
-            val nodeLookup = displayNodes.associateBy { it.num }
-            tracerouteOverlay?.returnRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
-        }
+        remember(tracerouteForwardRoutePoints) { tracerouteForwardRoutePoints.map { it.latLng } }
+    val tracerouteReturnPoints = remember(tracerouteReturnRoutePoints) { tracerouteReturnRoutePoints.map { it.latLng } }
     val tracerouteHeadingReferencePoints =
         remember(tracerouteForwardPoints, tracerouteReturnPoints) {
             when {
@@ -320,6 +346,14 @@ fun MapView(
                 tracerouteReturnPoints.size >= 2 -> tracerouteReturnPoints
                 else -> emptyList()
             }
+        }
+    val tracerouteEndpointsMissing =
+        remember(tracerouteOverlay, tracerouteForwardRoutePoints) {
+            val startId = tracerouteOverlay?.forwardRoute?.firstOrNull()
+            val endId = tracerouteOverlay?.forwardRoute?.lastOrNull()
+            val hasStart = tracerouteForwardRoutePoints.any { it.node.num == startId && !it.isEstimated }
+            val hasEnd = tracerouteForwardRoutePoints.any { it.node.num == endId && !it.isEstimated }
+            startId != null && endId != null && (!hasStart || !hasEnd)
         }
     val tracerouteForwardOffsetPoints =
         remember(tracerouteForwardPoints, tracerouteHeadingReferencePoints) {
@@ -599,6 +633,16 @@ fun MapView(
                 }
             }
 
+            if (tracerouteEndpointsMissing) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = stringResource(Res.string.traceroute_endpoint_missing),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+
             ScaleBar(
                 cameraPositionState = cameraPositionState,
                 modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 48.dp),
@@ -807,6 +851,56 @@ internal fun Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.l
 private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
 
 private fun Waypoint.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+
+private data class TracerouteRoutePoint(val node: Node, val latLng: LatLng, val isEstimated: Boolean)
+
+private fun buildTracerouteRoutePoints(
+    route: List<Int>,
+    nodeLookup: Map<Int, Node>,
+    knownPositions: Map<Int, LatLng>,
+): List<TracerouteRoutePoint> {
+    if (route.isEmpty()) return emptyList()
+
+    val indexedKnown =
+        route.mapIndexedNotNull { index, nodeNum ->
+            val latLng = knownPositions[nodeNum]
+            latLng?.let { index to TracerouteRoutePoint(nodeLookup[nodeNum] ?: Node(num = nodeNum), it, false) }
+        }
+
+    return route.mapIndexedNotNull { index, nodeNum ->
+        val existingKnown = knownPositions[nodeNum]
+        if (existingKnown != null) {
+            val node = nodeLookup[nodeNum] ?: Node(num = nodeNum)
+            return@mapIndexedNotNull TracerouteRoutePoint(node, existingKnown, false)
+        }
+
+        val previousKnown = indexedKnown.lastOrNull { it.first < index }?.second
+        val nextKnown = indexedKnown.firstOrNull { it.first > index }?.second
+        if (previousKnown != null && nextKnown != null) {
+            val prevIndex = route.indexOf(previousKnown.node.num)
+            val nextIndex = route.indexOf(nextKnown.node.num)
+            if (nextIndex == prevIndex) return@mapIndexedNotNull null
+            val fraction = (index - prevIndex).toDouble() / (nextIndex - prevIndex).toDouble()
+            val interpolatedLatLng = SphericalUtil.interpolate(previousKnown.latLng, nextKnown.latLng, fraction)
+            val baseNode = nodeLookup[nodeNum] ?: Node(num = nodeNum)
+            val nodeWithEstimatedPosition =
+                if (baseNode.validPosition != null) {
+                    baseNode
+                } else {
+                    baseNode.copy(position = interpolatedLatLng.toPosition(time = baseNode.position.time))
+                }
+            TracerouteRoutePoint(nodeWithEstimatedPosition, interpolatedLatLng, true)
+        } else {
+            null
+        }
+    }
+}
+
+private fun LatLng.toPosition(time: Int = 0): Position = Position.newBuilder()
+    .setLatitudeI((latitude / DEG_D).roundToInt())
+    .setLongitudeI((longitude / DEG_D).roundToInt())
+    .setTime(time)
+    .build()
 
 private fun offsetPolyline(
     points: List<LatLng>,

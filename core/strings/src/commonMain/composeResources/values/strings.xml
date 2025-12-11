@@ -407,6 +407,7 @@
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
     <string name="traceroute_outgoing_route">Outgoing route</string>
     <string name="traceroute_return_route">Return route</string>
+    <string name="traceroute_endpoint_missing">Start or destination node has no location; showing available hops only.</string>
     <string name="view_on_map">View on map</string>
     <string name="traceroute_map_no_data">This traceroute does not have any mappable nodes yet.</string>
     <string name="twenty_four_hours">24H</string>

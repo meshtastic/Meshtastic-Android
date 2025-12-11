@@ -118,6 +118,7 @@ import org.meshtastic.core.strings.only_favorites
 import org.meshtastic.core.strings.show_precision_circle
 import org.meshtastic.core.strings.show_waypoints
 import org.meshtastic.core.strings.toggle_my_position
+import org.meshtastic.core.strings.traceroute_endpoint_missing
 import org.meshtastic.core.strings.waypoint_delete
 import org.meshtastic.core.strings.you
 import org.meshtastic.core.ui.component.BasicListItem
@@ -133,6 +134,7 @@ import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.model.TracerouteOutgoingColor
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.map.model.TracerouteReturnColor
+import org.meshtastic.proto.MeshProtos.Position
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
@@ -163,6 +165,7 @@ import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 private fun MapView.updateMarkers(
@@ -333,27 +336,45 @@ fun MapView(
     }
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
+    val nodesWithPosition = remember(nodes) { nodes.filter { it.validPosition != null } }
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
-    val nodeLookup = remember(nodes) { nodes.filter { it.validPosition != null }.associateBy { it.num } }
+    val nodeLookup = remember(nodes) { nodes.associateBy { it.num } }
+    val knownPositions =
+        remember(nodesWithPosition) { nodesWithPosition.associate { it.num to GeoPoint(it.latitude, it.longitude) } }
     val overlayNodeNums = remember(tracerouteOverlay) { tracerouteOverlay?.relatedNodeNums ?: emptySet() }
+    val tracerouteForwardRoutePoints =
+        remember(tracerouteOverlay, nodeLookup, knownPositions) {
+            buildTracerouteRoutePoints(
+                route = tracerouteOverlay?.forwardRoute ?: emptyList(),
+                nodeLookup = nodeLookup,
+                knownPositions = knownPositions,
+            )
+        }
     val nodesForMarkers =
         if (tracerouteOverlay != null) {
-            nodes.filter { overlayNodeNums.contains(it.num) }
+            tracerouteDisplayNodes.map { it.node }
         } else {
-            nodes
+            nodesWithPosition
+        }
+    val tracerouteReturnRoutePoints =
+        remember(tracerouteOverlay, nodeLookup, knownPositions) {
+            buildTracerouteRoutePoints(
+                route = tracerouteOverlay?.returnRoute ?: emptyList(),
+                nodeLookup = nodeLookup,
+                knownPositions = knownPositions,
+            )
+        }
+    val tracerouteDisplayNodes =
+        remember(tracerouteForwardRoutePoints, tracerouteReturnRoutePoints) {
+            (tracerouteForwardRoutePoints + tracerouteReturnRoutePoints)
+                .groupBy { it.node.num }
+                .values
+                .map { points -> points.firstOrNull { !it.isEstimated } ?: points.first() }
         }
     val tracerouteForwardPoints =
-        remember(tracerouteOverlay, nodeLookup) {
-            tracerouteOverlay?.forwardRoute?.mapNotNull {
-                nodeLookup[it]?.let { node -> GeoPoint(node.latitude, node.longitude) }
-            } ?: emptyList()
-        }
+        remember(tracerouteForwardRoutePoints) { tracerouteForwardRoutePoints.map { it.geoPoint } }
     val tracerouteReturnPoints =
-        remember(tracerouteOverlay, nodeLookup) {
-            tracerouteOverlay?.returnRoute?.mapNotNull {
-                nodeLookup[it]?.let { node -> GeoPoint(node.latitude, node.longitude) }
-            } ?: emptyList()
-        }
+        remember(tracerouteReturnRoutePoints) { tracerouteReturnRoutePoints.map { it.geoPoint } }
     val tracerouteHeadingReferencePoints =
         remember(tracerouteForwardPoints, tracerouteReturnPoints) {
             when {
@@ -361,6 +382,14 @@ fun MapView(
                 tracerouteReturnPoints.size >= 2 -> tracerouteReturnPoints
                 else -> emptyList()
             }
+        }
+    val tracerouteEndpointsMissing =
+        remember(tracerouteOverlay, tracerouteForwardRoutePoints) {
+            val startId = tracerouteOverlay?.forwardRoute?.firstOrNull()
+            val endId = tracerouteOverlay?.forwardRoute?.lastOrNull()
+            val hasStart = tracerouteForwardRoutePoints.any { it.node.num == startId && !it.isEstimated }
+            val hasEnd = tracerouteForwardRoutePoints.any { it.node.num == endId && !it.isEstimated }
+            startId != null && endId != null && (!hasStart || !hasEnd)
         }
     val tracerouteForwardOffsetPoints =
         remember(tracerouteForwardPoints, tracerouteHeadingReferencePoints) {
@@ -435,6 +464,15 @@ fun MapView(
                 setOnLongClickListener {
                     navigateToNodeDetails(node.num)
                     true
+                }
+            }
+            if (tracerouteEndpointsMissing) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = stringResource(Res.string.traceroute_endpoint_missing),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
             }
         }
@@ -1089,6 +1127,62 @@ private fun GeoPoint.offsetPoint(headingRad: Double, offsetMeters: Double): GeoP
         lon1 + atan2(sin(headingRad) * sin(distanceByRadius) * cos(lat1), cos(distanceByRadius) - sin(lat1) * sin(lat2))
     return GeoPoint(Math.toDegrees(lat2), Math.toDegrees(lon2))
 }
+
+private data class TracerouteRoutePoint(val node: Node, val geoPoint: GeoPoint, val isEstimated: Boolean)
+
+private fun buildTracerouteRoutePoints(
+    route: List<Int>,
+    nodeLookup: Map<Int, Node>,
+    knownPositions: Map<Int, GeoPoint>,
+): List<TracerouteRoutePoint> {
+    if (route.isEmpty()) return emptyList()
+
+    val knownIndices =
+        route.mapIndexedNotNull { index, nodeNum ->
+            knownPositions[nodeNum]?.let {
+                index to TracerouteRoutePoint(nodeLookup[nodeNum] ?: Node(num = nodeNum), it, false)
+            }
+        }
+
+    return route.mapIndexedNotNull { index, nodeNum ->
+        val existingKnown = knownPositions[nodeNum]
+        if (existingKnown != null) {
+            val node = nodeLookup[nodeNum] ?: Node(num = nodeNum)
+            return@mapIndexedNotNull TracerouteRoutePoint(node, existingKnown, false)
+        }
+
+        val prevKnown = knownIndices.lastOrNull { it.first < index }?.second
+        val nextKnown = knownIndices.firstOrNull { it.first > index }?.second
+
+        if (prevKnown != null && nextKnown != null) {
+            val prevIndex = route.indexOf(prevKnown.node.num)
+            val nextIndex = route.indexOf(nextKnown.node.num)
+            if (nextIndex == prevIndex) return@mapIndexedNotNull null
+            val fraction = (index - prevIndex).toDouble() / (nextIndex - prevIndex).toDouble()
+            val lat =
+                prevKnown.geoPoint.latitude + (nextKnown.geoPoint.latitude - prevKnown.geoPoint.latitude) * fraction
+            val lon =
+                prevKnown.geoPoint.longitude + (nextKnown.geoPoint.longitude - prevKnown.geoPoint.longitude) * fraction
+            val interpolated = GeoPoint(lat, lon)
+            val baseNode = nodeLookup[nodeNum] ?: Node(num = nodeNum)
+            val nodeWithPosition =
+                if (baseNode.validPosition != null) {
+                    baseNode
+                } else {
+                    baseNode.copy(position = interpolated.toPosition(time = baseNode.position.time))
+                }
+            TracerouteRoutePoint(nodeWithPosition, interpolated, true)
+        } else {
+            null
+        }
+    }
+}
+
+private fun GeoPoint.toPosition(time: Int = 0): Position = Position.newBuilder()
+    .setLatitudeI((latitude / DEG_D).roundToInt())
+    .setLongitudeI((longitude / DEG_D).roundToInt())
+    .setTime(time)
+    .build()
 
 private fun offsetPolyline(
     points: List<GeoPoint>,
