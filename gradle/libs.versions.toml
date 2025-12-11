@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "8.13.1"
+agp = "8.13.2"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
