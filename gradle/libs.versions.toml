@@ -91,7 +91,7 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 # Google
 android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.5" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.6.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.7.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
