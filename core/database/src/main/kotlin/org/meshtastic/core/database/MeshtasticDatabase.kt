@@ -78,8 +78,9 @@ import org.meshtastic.core.database.entity.ReactionEntity
         AutoMigration(from = 20, to = 21),
         AutoMigration(from = 21, to = 22),
         AutoMigration(from = 22, to = 23),
+        AutoMigration(from = 23, to = 24),
     ],
-    version = 23,
+    version = 24,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

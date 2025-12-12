@@ -108,7 +108,15 @@ data class ContactSettings(
         get() = System.currentTimeMillis() <= muteUntil
 }
 
-data class Reaction(val replyId: Int, val user: User, val emoji: String, val timestamp: Long)
+data class Reaction(
+    val replyId: Int,
+    val user: User,
+    val emoji: String,
+    val timestamp: Long,
+    val snr: Float,
+    val rssi: Int,
+    val hopsAway: Int,
+)
 
 @Entity(
     tableName = "reactions",
@@ -120,10 +128,20 @@ data class ReactionEntity(
     @ColumnInfo(name = "user_id") val userId: String,
     val emoji: String,
     val timestamp: Long,
+    @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
+    @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
+    @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
 )
 
-private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node) =
-    Reaction(replyId = replyId, user = getNode(userId).user, emoji = emoji, timestamp = timestamp)
+private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node) = Reaction(
+    replyId = replyId,
+    user = getNode(userId).user,
+    emoji = emoji,
+    timestamp = timestamp,
+    snr = snr,
+    rssi = rssi,
+    hopsAway = hopsAway,
+)
 
 private suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node) =
     this.map { it.toReaction(getNode) }
