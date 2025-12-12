@@ -25,12 +25,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.ServiceClient
-import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.concurrent.SequentialJob
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.startService
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
-import kotlinx.coroutines.Job
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import timber.log.Timber
@@ -43,13 +42,11 @@ class MeshServiceClient
 constructor(
     @ActivityContext private val context: Context,
     private val serviceRepository: ServiceRepository,
+    private val serviceSetupJob: SequentialJob,
 ) : ServiceClient<IMeshService>(IMeshService.Stub::asInterface),
     DefaultLifecycleObserver {
 
     private val lifecycleOwner: LifecycleOwner = context as LifecycleOwner
-
-    // TODO Inject this for ease of testing
-    private var serviceSetupJob: Job? = null
 
     init {
         Timber.d("Adding self as LifecycleObserver for $lifecycleOwner")
@@ -59,16 +56,14 @@ constructor(
     // region ServiceClient overrides
 
     override fun onConnected(service: IMeshService) {
-        serviceSetupJob?.cancel()
-        serviceSetupJob =
-            lifecycleOwner.lifecycleScope.handledLaunch {
-                serviceRepository.setMeshService(service)
-                Timber.d("connected to mesh service, connectionState=${serviceRepository.connectionState.value}")
-            }
+        serviceSetupJob.launch(lifecycleOwner.lifecycleScope) {
+            serviceRepository.setMeshService(service)
+            Timber.d("connected to mesh service, connectionState=${serviceRepository.connectionState.value}")
+        }
     }
 
     override fun onDisconnected() {
-        serviceSetupJob?.cancel()
+        serviceSetupJob.cancel()
         serviceRepository.setMeshService(null)
     }
 
