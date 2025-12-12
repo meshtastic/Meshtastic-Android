@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.component
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.exchange_position
 import org.meshtastic.core.strings.node_sort_distance
+import org.meshtastic.core.strings.open_compass
 import org.meshtastic.core.strings.position
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
@@ -84,6 +86,17 @@ fun PositionSection(
             trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
         )
+
+        if (hasValidPosition) {
+            InsetDivider()
+
+            ListItem(
+                text = stringResource(Res.string.open_compass),
+                leadingIcon = Icons.Default.Explore,
+                trailingIcon = null,
+                onClick = { onAction(NodeDetailAction.OpenCompass(node, metricsState.displayUnits)) },
+            )
+        }
 
         // Node Map log
         if (availableLogs.contains(LogsType.NODE_MAP)) {
