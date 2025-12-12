@@ -232,6 +232,7 @@ fun MapView(
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
     tracerouteOverlay: TracerouteOverlay? = null,
+    onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
 ) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
@@ -354,6 +355,11 @@ fun MapView(
                 nodeLookup[it]?.let { node -> GeoPoint(node.latitude, node.longitude) }
             } ?: emptyList()
         }
+    LaunchedEffect(tracerouteOverlay, nodesForMarkers) {
+        if (tracerouteOverlay != null) {
+            onTracerouteMappableCountChanged(nodesForMarkers.size, tracerouteOverlay.relatedNodeNums.size)
+        }
+    }
     val tracerouteHeadingReferencePoints =
         remember(tracerouteForwardPoints, tracerouteReturnPoints) {
             when {

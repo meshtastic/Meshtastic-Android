@@ -52,7 +52,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -62,11 +61,14 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
+import org.meshtastic.core.model.toMessageRes
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.delete
 import org.meshtastic.core.strings.routing_error_no_response
 import org.meshtastic.core.strings.traceroute
@@ -82,6 +84,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshProtos
 import java.text.DateFormat
@@ -100,9 +103,10 @@ fun TracerouteLogScreen(
 
     fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
 
-    data class TracerouteDialog(val message: AnnotatedString, val requestId: Int, val canShowOnMap: Boolean)
+    data class TracerouteDialog(val message: AnnotatedString, val requestId: Int, val overlay: TracerouteOverlay?)
 
     var showDialog by remember { mutableStateOf<TracerouteDialog?>(null) }
+    var errorMessageRes by remember { mutableStateOf<StringResource?>(null) }
 
     if (showDialog != null) {
         val dialogState = showDialog
@@ -110,12 +114,32 @@ fun TracerouteLogScreen(
         SimpleAlertDialog(
             title = Res.string.traceroute,
             text = { SelectionContainer { Text(text = message) } },
-            confirmText = if (dialogState?.canShowOnMap == true) stringResource(Res.string.view_on_map) else null,
+            confirmText = stringResource(Res.string.view_on_map),
             onConfirm = {
-                dialogState?.let { onViewOnMap(it.requestId) }
-                showDialog = null
+                dialogState?.let { dialog ->
+                    val availability =
+                        viewModel.tracerouteMapAvailability(
+                            forwardRoute = dialog.overlay?.forwardRoute.orEmpty(),
+                            returnRoute = dialog.overlay?.returnRoute.orEmpty(),
+                        )
+                    val errorRes = availability.toMessageRes()
+                    if (errorRes == null) {
+                        onViewOnMap(dialog.requestId)
+                    } else {
+                        errorMessageRes = errorRes
+                    }
+                    showDialog = null
+                }
             },
             onDismiss = { showDialog = null },
+        )
+    }
+    errorMessageRes?.let { res ->
+        SimpleAlertDialog(
+            title = Res.string.traceroute,
+            text = { Text(text = stringResource(res)) },
+            dismissText = stringResource(Res.string.close),
+            onDismiss = { errorMessageRes = null },
         )
     }
 
@@ -165,7 +189,14 @@ fun TracerouteLogScreen(
                             res.fromRadio.packet.getTracerouteResponse(::getUsername)?.let { AnnotatedString(it) }
                         }
                     }
-                val canShowOnMap = result != null
+                val overlay =
+                    route?.let {
+                        TracerouteOverlay(
+                            requestId = log.fromRadio.packet.id,
+                            forwardRoute = it.routeList,
+                            returnRoute = it.routeBackList,
+                        )
+                    }
 
                 Box {
                     TracerouteItem(
@@ -183,7 +214,7 @@ fun TracerouteLogScreen(
                                     TracerouteDialog(
                                         message = dialogMessage,
                                         requestId = log.fromRadio.packet.id,
-                                        canShowOnMap = canShowOnMap,
+                                        overlay = overlay,
                                     )
                             }
                         },

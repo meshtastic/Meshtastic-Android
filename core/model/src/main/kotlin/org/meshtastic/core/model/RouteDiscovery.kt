@@ -17,6 +17,10 @@
 
 package org.meshtastic.core.model
 
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.traceroute_endpoint_missing
+import org.meshtastic.core.strings.traceroute_map_no_data
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.RouteDiscovery
 import org.meshtastic.proto.Portnums
@@ -28,11 +32,13 @@ val MeshProtos.MeshPacket.fullRouteDiscovery: RouteDiscovery?
                 runCatching { RouteDiscovery.parseFrom(payload).toBuilder() }
                     .getOrNull()
                     ?.apply {
-                        val fullRoute = listOf(to) + routeList + from
+                        val destinationId = dest.takeIf { it != 0 } ?: this@fullRouteDiscovery.to
+                        val sourceId = source.takeIf { it != 0 } ?: this@fullRouteDiscovery.from
+                        val fullRoute = listOf(destinationId) + routeList + sourceId
                         clearRoute()
                         addAllRoute(fullRoute)
 
-                        val fullRouteBack = listOf(from) + routeBackList + to
+                        val fullRouteBack = listOf(sourceId) + routeBackList + destinationId
                         clearRouteBack()
                         if (hopStart > 0 && snrBackCount > 0) { // otherwise back route is invalid
                             addAllRouteBack(fullRouteBack)
@@ -85,3 +91,36 @@ fun MeshProtos.MeshPacket.getTracerouteResponse(getUser: (nodeNum: Int) -> Strin
 fun MeshProtos.MeshPacket.getFullTracerouteResponse(getUser: (nodeNum: Int) -> String): String? = fullRouteDiscovery
     ?.takeIf { it.routeList.isNotEmpty() && it.routeBackList.isNotEmpty() }
     ?.getTracerouteResponse(getUser)
+
+enum class TracerouteMapAvailability {
+    Ok,
+    MissingEndpoints,
+    NoMappableNodes,
+}
+
+fun evaluateTracerouteMapAvailability(
+    forwardRoute: List<Int>,
+    returnRoute: List<Int>,
+    positionedNodeNums: Set<Int>,
+): TracerouteMapAvailability {
+    if (forwardRoute.isEmpty() && returnRoute.isEmpty()) return TracerouteMapAvailability.NoMappableNodes
+    val endpoints =
+        listOfNotNull(
+            forwardRoute.firstOrNull(),
+            forwardRoute.lastOrNull(),
+            returnRoute.firstOrNull(),
+            returnRoute.lastOrNull(),
+        )
+            .distinct()
+    val missingEndpoint = endpoints.any { !positionedNodeNums.contains(it) }
+    if (missingEndpoint) return TracerouteMapAvailability.MissingEndpoints
+    val relatedNodeNums = (forwardRoute + returnRoute).toSet()
+    val hasAnyMappable = relatedNodeNums.any { positionedNodeNums.contains(it) }
+    return if (hasAnyMappable) TracerouteMapAvailability.Ok else TracerouteMapAvailability.NoMappableNodes
+}
+
+fun TracerouteMapAvailability.toMessageRes(): StringResource? = when (this) {
+    TracerouteMapAvailability.Ok -> null
+    TracerouteMapAvailability.MissingEndpoints -> Res.string.traceroute_endpoint_missing
+    TracerouteMapAvailability.NoMappableNodes -> Res.string.traceroute_map_no_data
+}

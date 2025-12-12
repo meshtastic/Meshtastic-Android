@@ -144,6 +144,7 @@ fun MapView(
     focusedNodeNum: Int? = null,
     nodeTracks: List<Position>? = null,
     tracerouteOverlay: TracerouteOverlay? = null,
+    onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -278,6 +279,11 @@ fun MapView(
         } else {
             filteredNodes
         }
+    LaunchedEffect(tracerouteOverlay, displayNodes) {
+        if (tracerouteOverlay != null) {
+            onTracerouteMappableCountChanged(displayNodes.size, tracerouteOverlay.relatedNodeNums.size)
+        }
+    }
 
     val nodeClusterItems =
         displayNodes.map { node ->

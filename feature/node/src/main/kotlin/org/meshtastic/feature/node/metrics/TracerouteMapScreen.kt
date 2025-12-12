@@ -34,7 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,9 +47,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.traceroute
-import org.meshtastic.core.strings.traceroute_map_no_data
 import org.meshtastic.core.strings.traceroute_outgoing_route
 import org.meshtastic.core.strings.traceroute_return_route
+import org.meshtastic.core.strings.traceroute_showing_nodes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.map.MapView
 import org.meshtastic.feature.map.model.TracerouteOutgoingColor
@@ -76,6 +78,8 @@ fun TracerouteMapScreen(
         }
     val overlayFromService = remember(requestId) { metricsViewModel.getTracerouteOverlay(requestId) }
     val overlay = overlayFromLogs ?: overlayFromService
+    var tracerouteNodesShown by remember { mutableStateOf(0) }
+    var tracerouteNodesTotal by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) { metricsViewModel.clearTracerouteResponse() }
 
     Scaffold(
@@ -91,18 +95,21 @@ fun TracerouteMapScreen(
             )
         },
     ) { paddingValues ->
-        if (overlay?.hasRoutes != true) {
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                Text(
-                    text = stringResource(Res.string.traceroute_map_no_data),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            }
-        } else {
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                MapView(navigateToNodeDetails = {}, tracerouteOverlay = overlay)
-                TracerouteLegend(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp))
-            }
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            MapView(
+                navigateToNodeDetails = {},
+                tracerouteOverlay = overlay,
+                onTracerouteMappableCountChanged = { shown, total ->
+                    tracerouteNodesShown = shown
+                    tracerouteNodesTotal = total
+                },
+            )
+            TracerouteLegend(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp))
+            TracerouteNodeCount(
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                shown = tracerouteNodesShown,
+                total = tracerouteNodesTotal,
+            )
         }
     }
 }
@@ -117,6 +124,17 @@ private fun TracerouteLegend(modifier: Modifier = Modifier) {
             LegendRow(color = TracerouteOutgoingColor, label = stringResource(Res.string.traceroute_outgoing_route))
             LegendRow(color = TracerouteReturnColor, label = stringResource(Res.string.traceroute_return_route))
         }
+    }
+}
+
+@Composable
+private fun TracerouteNodeCount(modifier: Modifier = Modifier, shown: Int, total: Int) {
+    Card(modifier = modifier) {
+        Text(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            text = stringResource(Res.string.traceroute_showing_nodes, shown, total),
+            style = MaterialTheme.typography.labelMedium,
+        )
     }
 }
 

@@ -47,6 +47,8 @@ import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.TracerouteMapAvailability
+import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
@@ -137,6 +139,19 @@ constructor(
     }
 
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
+
+    fun tracerouteMapAvailability(forwardRoute: List<Int>, returnRoute: List<Int>): TracerouteMapAvailability =
+        evaluateTracerouteMapAvailability(
+            forwardRoute = forwardRoute,
+            returnRoute = returnRoute,
+            positionedNodeNums = positionedNodeNums(),
+        )
+
+    fun tracerouteMapAvailability(overlay: TracerouteOverlay): TracerouteMapAvailability =
+        tracerouteMapAvailability(overlay.forwardRoute, overlay.returnRoute)
+
+    fun positionedNodeNums(): Set<Int> =
+        nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet()
 
     init {
         viewModelScope.launch {
