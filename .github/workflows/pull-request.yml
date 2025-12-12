@@ -22,7 +22,7 @@ jobs:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
     uses: ./.github/workflows/reusable-android-test.yml
     with:
-      api_levels: '[35]' # Run only on API 36 for PRs
+      api_levels: '[35]' # Run only on API 35 for PRs
       # upload_artifacts defaults to true, so no need to explicitly set
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
