@@ -41,6 +41,7 @@ import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
 import no.nordicsemi.kotlin.ble.core.Manager
 import org.meshtastic.core.common.hasBluetoothPermission
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.di.ProcessLifecycle
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -56,7 +57,7 @@ constructor(
     private val application: Application,
     private val bluetoothBroadcastReceiverLazy: Lazy<BluetoothBroadcastReceiver>,
     private val dispatchers: CoroutineDispatchers,
-    private val processLifecycle: Lifecycle,
+    @ProcessLifecycle private val processLifecycle: Lifecycle,
     private val centralManager: CentralManager,
 ) {
     private val _state =
