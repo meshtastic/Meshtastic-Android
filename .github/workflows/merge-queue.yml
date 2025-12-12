@@ -24,7 +24,7 @@ jobs:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-android-test.yml
     with:
-      api_levels: '[26, 35]' # Run on both API 26 and 35 for merge queue
+      api_levels: '[32, 35]' # Run on both API 32 and 35 for merge queue
       upload_artifacts: false
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
