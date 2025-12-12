@@ -776,6 +776,8 @@
     <string name="firmware_update_select_file">Изберете локален файл</string>
     <string name="firmware_update_disclaimer_title">Предупреждение за актуализация</string>
     <string name="firmware_update_disclaimer_text">Ще инсталирате нов фърмуер на устройството си. Този процес носи рискове.\n\n• Уверете се, че устройството ви е заредено.\n• Дръжте устройството близо до телефона си.\n• Не затваряйте приложението по време на актуализацията.\n\nУверете се, че сте избрали правилния фърмуер за вашия хардуер.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Чирпи казва, \"Keep your ladder handy!\"</string>
+    <string name="chirpy">Чирпи</string>
     <string name="firmware_update_rebooting">Рестартиране в DFU...</string>
     <string name="firmware_update_waiting_for_device">Изчакване за DFU устройство...</string>
     <string name="firmware_update_copying">Копиране на фърмуера...</string>
