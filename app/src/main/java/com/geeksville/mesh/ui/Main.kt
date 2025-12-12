@@ -244,7 +244,8 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
 
     val traceRouteResponse by uIViewModel.tracerouteResponse.observeAsState()
     var tracerouteMapError by remember { mutableStateOf<StringResource?>(null) }
-    traceRouteResponse?.let { response ->
+    var dismissedTracerouteRequestId by remember { mutableStateOf<Int?>(null) }
+    traceRouteResponse?.takeIf { it.requestId != dismissedTracerouteRequestId }?.let { response ->
         SimpleAlertDialog(
             title = Res.string.traceroute,
             text = {
@@ -261,16 +262,20 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     )
                 val errorRes = availability.toMessageRes()
                 if (errorRes == null) {
+                    dismissedTracerouteRequestId = response.requestId
                     navController.navigate(
                         NodeDetailRoutes.TracerouteMap(response.destinationNodeNum, response.requestId),
                     )
                 } else {
                     tracerouteMapError = errorRes
+                    uIViewModel.clearTracerouteResponse()
                 }
-                uIViewModel.clearTracerouteResponse()
             },
             dismissText = stringResource(Res.string.okay),
-            onDismiss = { uIViewModel.clearTracerouteResponse() },
+            onDismiss = {
+                uIViewModel.clearTracerouteResponse()
+                dismissedTracerouteRequestId = null
+            },
         )
     }
     tracerouteMapError?.let { res ->
