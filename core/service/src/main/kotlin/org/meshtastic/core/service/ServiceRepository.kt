@@ -106,6 +106,18 @@ class ServiceRepository @Inject constructor() {
         setTracerouteResponse(null)
     }
 
+    private val _neighborInfoResponse = MutableStateFlow<String?>(null)
+    val neighborInfoResponse: StateFlow<String?>
+        get() = _neighborInfoResponse
+
+    fun setNeighborInfoResponse(value: String?) {
+        _neighborInfoResponse.value = value
+    }
+
+    fun clearNeighborInfoResponse() {
+        setNeighborInfoResponse(null)
+    }
+
     private val _serviceAction = Channel<ServiceAction>()
     val serviceAction = _serviceAction.receiveAsFlow()
 
