@@ -47,7 +47,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
@@ -78,9 +77,9 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 private const val DIAL_WIDTH_FRACTION = 0.66f
-private const val LABEL_TEXT_SIZE = 64f
 
 @Composable
+@Suppress("LongMethod", "MagicNumber")
 fun CompassSheetContent(
     uiState: CompassUiState,
     onRequestLocationPermission: () -> Unit,
@@ -214,6 +213,7 @@ private fun warningText(warning: CompassWarning): String = when (warning) {
     CompassWarning.NO_LOCATION_FIX -> stringResource(Res.string.compass_no_location_fix)
 }
 @Composable
+@Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
 private fun CompassDial(
     heading: Float?,
     bearing: Float?,
@@ -290,12 +290,7 @@ private fun CompassDial(
             }
 
             // Compass rose center
-            drawCompassRoseCenter(
-                center = center,
-                size = radius * 0.13f,
-                color = compassRoseColor,
-                northColor = northPointerColor
-            )
+        drawCompassRoseCenter(center = center, size = radius * 0.13f, color = compassRoseColor)
 
             // Cardinal labels (moved closer to center)
             val cardinalRadius = radius * 0.48f
@@ -408,7 +403,8 @@ private fun CompassDial(
     }
 }
 
-private fun DrawScope.drawCompassRoseCenter(center: Offset, size: Float, color: Color, northColor: Color) {
+@Suppress("MagicNumber")
+private fun DrawScope.drawCompassRoseCenter(center: Offset, size: Float, color: Color) {
     val path = Path().apply {
         moveTo(center.x, center.y - size)
         lineTo(center.x + size * 0.35f, center.y)
@@ -421,14 +417,15 @@ private fun DrawScope.drawCompassRoseCenter(center: Offset, size: Float, color: 
     drawCircle(color = color, radius = size * 0.25f, center = center)
 }
 
+@Suppress("MagicNumber")
 private fun Float.normalizeDegrees(): Float {
     val normalized = this % 360f
     return if (normalized < 0f) normalized + 360f else normalized
 }
 
-
 @Preview(showBackground = true)
 @Composable
+@Suppress("MagicNumber")
 private fun CompassSheetPreview() {
     AppTheme {
         CompassSheetContent(

@@ -30,7 +30,7 @@ import javax.inject.Inject
 
 private const val ROTATION_MATRIX_SIZE = 9
 private const val ORIENTATION_SIZE = 3
-private const val DEGREES_IN_CIRCLE = 360f
+private const val FULL_CIRCLE_DEGREES = 360f
 
 data class HeadingState(
     val heading: Float? = null, // 0..360 degrees
@@ -93,7 +93,7 @@ class CompassHeadingProvider @Inject constructor(@ApplicationContext private val
 
                     SensorManager.getOrientation(rotationMatrix, orientation)
                     var azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                    val heading = (azimuth + 360) % 360
+                    val heading = (azimuth + FULL_CIRCLE_DEGREES) % FULL_CIRCLE_DEGREES
 
                     trySend(
                         HeadingState(

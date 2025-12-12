@@ -55,6 +55,7 @@ private const val MILLIMETERS_PER_METER = 1000f
 
 @HiltViewModel
 /** Bridges heading + phone location into a single compass UI stream scoped to a target node. */
+@Suppress("TooManyFunctions")
 class CompassViewModel
 @Inject
 constructor(
@@ -188,6 +189,7 @@ constructor(
         return min(diff, FULL_CIRCLE_DEGREES - diff)
     }
 
+    @Suppress("ReturnCount")
     private fun applyTrueNorthCorrection(heading: Float?, locationState: PhoneLocationState): Float? {
         val loc = locationState.location ?: return heading
         val baseHeading = heading ?: return null
@@ -211,6 +213,7 @@ constructor(
         return "${hours}h ${minutes}m ${seconds}s ago"
     }
 
+    @Suppress("ReturnCount")
     private fun calculatePositionalAccuracyMeters(): Float? {
         val position = targetPositionProto ?: return null
         val positionTime = targetPositionTimeSec
@@ -241,6 +244,7 @@ constructor(
         return null
     }
 
+    @Suppress("ReturnCount")
     private fun calculateAngularError(positionalAccuracyMeters: Float?, distanceMeters: Int?): Float? {
         val distance = distanceMeters ?: return null
         val accuracy = positionalAccuracyMeters ?: return null
