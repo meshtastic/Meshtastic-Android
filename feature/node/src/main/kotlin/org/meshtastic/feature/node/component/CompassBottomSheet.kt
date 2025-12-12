@@ -76,7 +76,6 @@ import org.meshtastic.core.strings.last_position_update
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassWarning
-import kotlin.io.path.Path
 import kotlin.math.cos
 import kotlin.math.sin
 
