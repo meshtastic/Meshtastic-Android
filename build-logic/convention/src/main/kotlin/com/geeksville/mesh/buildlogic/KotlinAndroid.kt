@@ -30,6 +30,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.FileInputStream
+import java.util.Properties
 
 /**
  * Configure base Kotlin with Android options
@@ -37,11 +39,18 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
+    val configPropertiesFile = rootProject.file("config.properties")
+    val configProperties = Properties()
+
+    if (configPropertiesFile.exists()) {
+        FileInputStream(configPropertiesFile).use { configProperties.load(it) }
+    }
+
     commonExtension.apply {
-        compileSdk = 36
+        compileSdk = configProperties.get("COMPILE_SDK").toString().toInt()
 
         defaultConfig {
-            minSdk = 26
+            minSdk = configProperties.get("MIN_SDK").toString().toInt()
         }
 
         compileOptions {
