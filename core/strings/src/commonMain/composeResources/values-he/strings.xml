@@ -150,4 +150,5 @@
     <string name="settings">הגדרות</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">העדכון נכשל</string>
+    <string name="interval_unset">לא מוגדר</string>
 </resources>

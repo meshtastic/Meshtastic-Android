@@ -3,9 +3,9 @@
 name: Deploy Documentation
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["main"]
+  schedule:
+    # Runs at 00:00 UTC every Sunday
+    - cron: '0 0 * * 0'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

@@ -258,8 +258,8 @@
     <string name="resend">Erneut senden</string>
     <string name="shutdown">Herunterfahren</string>
     <string name="cant_shutdown">Herunterfahren wird auf diesem Gerät nicht unterstützt</string>
-    <string name="shutdown_warning">:warnung: Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten.</string>
-    <string name="shutdown_critical_node">:Warnung: Dies ist ein kritischer Infrastrukturknoten. Geben Sie den Knotennamen zur Bestätigung ein:</string>
+    <string name="shutdown_warning">:warnung: Dies wird den Knoten ausschalten. Eine physische Interaktion ist nötig, um ihn wieder einzuschalten. </string>
+    <string name="shutdown_critical_node">:Warnung: Dies ist ein kritischer Infrastrukturknoten. Geben Sie den Knotennamen zur Bestätigung ein: </string>
     <string name="shutdown_node_name">Knoten: %1$s</string>
     <string name="shutdown_type_name">Typ: %1$s</string>
     <string name="reboot">Neustarten</string>
@@ -972,4 +972,18 @@
     <string name="firmware_update_method_detail">Update über %1$s</string>
     <string name="firmware_update_usb_instruction_title">DFU USB Laufwerk auswählen</string>
     <string name="firmware_update_usb_instruction_text">Ihr Gerät wurde im DFU Modus neu gestartet und sollte als USB Laufwerk (z. B. RAK4631) angezeigt werden.\nWenn sich die Dateiauswahl öffnet, wählen Sie bitte das Stammverzeichnis dieses Laufwerks aus, um die Firmware Datei zu speichern.</string>
+    <string name="interval_unset">Nicht konfiguriert</string>
+    <string name="interval_always_on">Immer an</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 Sekunde</item>
+        <item quantity="other">%d Sekunden</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 Minute</item>
+        <item quantity="other">%d Minuten</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 Stunde</item>
+        <item quantity="other">%d Stunden</item>
+    </plurals>
 </resources>

@@ -560,4 +560,6 @@
     <!-- Firmware Update -->
     <string name="firmware_update_no_device">Brak podłączonych urządzeń</string>
     <string name="firmware_update_failed">Aktualizacja nie udała się</string>
+    <string name="interval_unset">Nieustawiony</string>
+    <string name="interval_always_on">Zawsze włączone</string>
 </resources>

@@ -253,6 +253,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
             state.selectedIds.toggle(message.uuid)
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         },
+        onDoubleClick = { if (!inSelectionMode) handlers.onSendReaction("👍", message.packetId) },
         onClickChip = handlers.onClickChip,
         onStatusClick = { onShowStatusDialog(message) },
         onReply = { handlers.onReply(message) },

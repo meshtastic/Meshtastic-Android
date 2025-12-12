@@ -41,6 +41,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -69,7 +70,17 @@ fun AdaptiveContactsScreen(
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
     BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) {
-        scope.launch { navigator.navigateBack(backNavigationBehavior) }
+        // Check if we navigated here from another screen (e.g., from Nodes or Map)
+        val previousEntry = navController.previousBackStackEntry
+        val isFromDifferentGraph = previousEntry?.destination?.hasRoute<ContactsRoutes.ContactsGraph>() == false
+
+        if (isFromDifferentGraph) {
+            // Navigate back via NavController to return to the previous screen
+            navController.navigateUp()
+        } else {
+            // Close the detail pane within the adaptive scaffold
+            scope.launch { navigator.navigateBack(backNavigationBehavior) }
+        }
     }
 
     LaunchedEffect(initialContactKey) {
@@ -77,6 +88,22 @@ fun AdaptiveContactsScreen(
             navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, initialContactKey)
         }
     }
+
+    LaunchedEffect(scrollToTopEvents) {
+        scrollToTopEvents.collect { event ->
+            if (
+                event is ScrollToTopEvent.ConversationsTabPressed &&
+                navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail
+            ) {
+                if (navigator.canNavigateBack(backNavigationBehavior)) {
+                    navigator.navigateBack(backNavigationBehavior)
+                } else {
+                    navigator.navigateTo(ListDetailPaneScaffoldRole.List)
+                }
+            }
+        }
+    }
+
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
         value = navigator.scaffoldValue,

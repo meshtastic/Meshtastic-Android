@@ -893,4 +893,5 @@
     <string name="unset">Nincs beállítva – 0</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">A frissítés sikertelen</string>
+    <string name="interval_unset">Nincs beállítva</string>
 </resources>

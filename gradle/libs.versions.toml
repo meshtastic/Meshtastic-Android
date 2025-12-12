@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "8.13.1"
+agp = "8.13.2"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -18,6 +18,7 @@ room = "2.8.4"
 kotlin = "2.2.21"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.9.0"
+ktlint = "1.7.1"
 
 # Google
 hilt = "2.57.2"
@@ -25,11 +26,11 @@ maps-compose = "6.12.2"
 
 # Networking
 ktor = "3.3.3"
-ktorfit = "2.6.5"
+ktorfit = "2.7.1"
 
 # Other
 coil = "3.3.0"
-dd-sdk-android = "3.3.0"
+dd-sdk-android = "3.4.0"
 detekt = "1.23.8"
 devtools-ksp = "2.3.3"
 markdownRenderer = "0.38.1"
@@ -90,7 +91,7 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 # Google
 android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.5" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.6.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.7.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
@@ -159,7 +160,7 @@ zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", ve
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "31.13.1" }
+android-tools-common = { module = "com.android.tools:common", version = "31.13.2" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.21.0" }
@@ -189,7 +190,7 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.3" }
+kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.4" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 
 # Google
@@ -212,6 +213,7 @@ room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
 
 # Meshtastic
+meshtastic-analytics = { id = "meshtastic.analytics" }
 meshtastic-android-application = { id = "meshtastic.android.application" }
 meshtastic-android-application-compose = { id = "meshtastic.android.application.compose" }
 meshtastic-android-application-flavors = { id = "meshtastic.android.application.flavors" }
