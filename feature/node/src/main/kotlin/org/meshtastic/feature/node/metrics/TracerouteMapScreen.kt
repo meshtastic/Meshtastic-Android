@@ -104,12 +104,14 @@ fun TracerouteMapScreen(
                     tracerouteNodesTotal = total
                 },
             )
-            TracerouteLegend(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp))
-            TracerouteNodeCount(
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                shown = tracerouteNodesShown,
-                total = tracerouteNodesTotal,
-            )
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter).padding(TracerouteMapOverlayInsets.bottomCenter),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TracerouteNodeCount(shown = tracerouteNodesShown, total = tracerouteNodesTotal)
+                TracerouteLegend()
+            }
         }
     }
 }

@@ -245,39 +245,41 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val traceRouteResponse by uIViewModel.tracerouteResponse.observeAsState()
     var tracerouteMapError by remember { mutableStateOf<StringResource?>(null) }
     var dismissedTracerouteRequestId by remember { mutableStateOf<Int?>(null) }
-    traceRouteResponse?.takeIf { it.requestId != dismissedTracerouteRequestId }?.let { response ->
-        SimpleAlertDialog(
-            title = Res.string.traceroute,
-            text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(text = annotateTraceroute(response.message))
-                }
-            },
-            confirmText = stringResource(Res.string.view_on_map),
-            onConfirm = {
-                val availability =
-                    uIViewModel.tracerouteMapAvailability(
-                        forwardRoute = response.forwardRoute,
-                        returnRoute = response.returnRoute,
-                    )
-                val errorRes = availability.toMessageRes()
-                if (errorRes == null) {
-                    dismissedTracerouteRequestId = response.requestId
-                    navController.navigate(
-                        NodeDetailRoutes.TracerouteMap(response.destinationNodeNum, response.requestId),
-                    )
-                } else {
-                    tracerouteMapError = errorRes
+    traceRouteResponse
+        ?.takeIf { it.requestId != dismissedTracerouteRequestId }
+        ?.let { response ->
+            SimpleAlertDialog(
+                title = Res.string.traceroute,
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Text(text = annotateTraceroute(response.message))
+                    }
+                },
+                confirmText = stringResource(Res.string.view_on_map),
+                onConfirm = {
+                    val availability =
+                        uIViewModel.tracerouteMapAvailability(
+                            forwardRoute = response.forwardRoute,
+                            returnRoute = response.returnRoute,
+                        )
+                    val errorRes = availability.toMessageRes()
+                    if (errorRes == null) {
+                        dismissedTracerouteRequestId = response.requestId
+                        navController.navigate(
+                            NodeDetailRoutes.TracerouteMap(response.destinationNodeNum, response.requestId),
+                        )
+                    } else {
+                        tracerouteMapError = errorRes
+                        uIViewModel.clearTracerouteResponse()
+                    }
+                },
+                dismissText = stringResource(Res.string.okay),
+                onDismiss = {
                     uIViewModel.clearTracerouteResponse()
-                }
-            },
-            dismissText = stringResource(Res.string.okay),
-            onDismiss = {
-                uIViewModel.clearTracerouteResponse()
-                dismissedTracerouteRequestId = null
-            },
-        )
-    }
+                    dismissedTracerouteRequestId = null
+                },
+            )
+        }
     tracerouteMapError?.let { res ->
         SimpleAlertDialog(
             title = Res.string.traceroute,
