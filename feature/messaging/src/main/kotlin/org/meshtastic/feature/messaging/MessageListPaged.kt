@@ -174,13 +174,13 @@ private fun MessageListPagedContent(
 ) {
     // Calculate unread divider position
     val unreadDividerIndex by
-    remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
-        derivedStateOf {
-            state.firstUnreadMessageUuid?.let { uuid ->
-                (0 until state.messages.itemCount).firstOrNull { index -> state.messages[index]?.uuid == uuid }
+        remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
+            derivedStateOf {
+                state.firstUnreadMessageUuid?.let { uuid ->
+                    (0 until state.messages.itemCount).firstOrNull { index -> state.messages[index]?.uuid == uuid }
+                }
             }
         }
-    }
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
@@ -241,9 +241,9 @@ private fun LazyItemScope.renderPagedChatMessageRow(
 ) {
     val ourNode = state.ourNode ?: return
     val selected by
-    remember(message.uuid, state.selectedIds.value) {
-        derivedStateOf { state.selectedIds.value.contains(message.uuid) }
-    }
+        remember(message.uuid, state.selectedIds.value) {
+            derivedStateOf { state.selectedIds.value.contains(message.uuid) }
+        }
     val node = nodeMap[message.node.num] ?: message.node
 
     MessageItem(
@@ -290,19 +290,19 @@ private fun AutoScrollToBottomPaged(
     itemThreshold: Int = 3,
 ) = with(listState) {
     val shouldStickToBottom by
-    remember(hasUnreadMessages, hasDialogOpen) {
-        derivedStateOf {
-            if (hasDialogOpen) {
-                false
-            } else {
-                val isAtBottom =
-                    firstVisibleItemIndex == 0 &&
+        remember(hasUnreadMessages, hasDialogOpen) {
+            derivedStateOf {
+                if (hasDialogOpen) {
+                    false
+                } else {
+                    val isAtBottom =
+                        firstVisibleItemIndex == 0 &&
                             firstVisibleItemScrollOffset <= UnreadUiDefaults.AUTO_SCROLL_BOTTOM_OFFSET_TOLERANCE
-                val isNearBottom = firstVisibleItemIndex <= itemThreshold
-                isAtBottom || (!hasUnreadMessages && isNearBottom)
+                    val isNearBottom = firstVisibleItemIndex <= itemThreshold
+                    isAtBottom || (!hasUnreadMessages && isNearBottom)
+                }
             }
         }
-    }
 
     val isRefreshing by remember { derivedStateOf { messages.loadState.refresh is LoadState.Loading } }
     var wasPreviouslyRefreshing by remember { mutableStateOf(false) }
@@ -379,14 +379,14 @@ private fun UpdateUnreadCountPaged(
     // Track remote message count to restart effect when remote messages change
     // This fixes race condition when sending/receiving messages during debounce period
     val remoteMessageCount by
-    remember(messages.itemCount) {
-        derivedStateOf {
-            (0 until messages.itemCount).count { i ->
-                val msg = messages[i]
-                msg != null && !msg.fromLocal
+        remember(messages.itemCount) {
+            derivedStateOf {
+                (0 until messages.itemCount).count { i ->
+                    val msg = messages[i]
+                    msg != null && !msg.fromLocal
+                }
             }
         }
-    }
 
     // Mark messages as read after debounce period
     // Handles both scrolling cases and when all unread messages are visible without scrolling
@@ -445,11 +445,11 @@ internal fun MessageStatusDialog(
 ) {
     val (title, text) = message.getStatusStringRes()
     val relayNodeName by
-    remember(message.relayNode, nodes) {
-        derivedStateOf {
-            message.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
+        remember(message.relayNode, nodes) {
+            derivedStateOf {
+                message.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
+            }
         }
-    }
     DeliveryInfo(
         title = title,
         resendOption = resendOption,
