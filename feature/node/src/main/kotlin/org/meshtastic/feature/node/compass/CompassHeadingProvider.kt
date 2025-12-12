@@ -22,8 +22,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.hardware.GeomagneticField
-import android.location.Location
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -43,11 +41,10 @@ data class HeadingState(
 class CompassHeadingProvider @Inject constructor(@ApplicationContext private val context: Context) {
 
     /**
-     * Emits compass heading in degrees. If a location is provided, applies true north correction.
-     *
-     * @param location Optional Location from the phone's location provider.
+     * Emits compass heading in degrees (magnetic). Callers can correct for true north
+     * using the latest location data when available.
      */
-    fun headingUpdates(location: Location? = null): Flow<HeadingState> = callbackFlow {
+    fun headingUpdates(): Flow<HeadingState> = callbackFlow {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         if (sensorManager == null) {
             trySend(HeadingState(hasSensor = false))
@@ -96,18 +93,7 @@ class CompassHeadingProvider @Inject constructor(@ApplicationContext private val
 
                     SensorManager.getOrientation(rotationMatrix, orientation)
                     var azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                    var heading = (azimuth + 360) % 360
-
-                    // True north correction using phone location if available
-                    location?.let { loc ->
-                        val geomagnetic = GeomagneticField(
-                            loc.latitude.toFloat(),
-                            loc.longitude.toFloat(),
-                            loc.altitude.toFloat(),
-                            System.currentTimeMillis()
-                        )
-                        heading = (heading + geomagnetic.declination + 360) % 360
-                    }
+                    val heading = (azimuth + 360) % 360
 
                     trySend(
                         HeadingState(

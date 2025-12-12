@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.compass
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.hardware.GeomagneticField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -117,15 +118,16 @@ constructor(
         val positionalAccuracyMeters = target?.let { calculatePositionalAccuracyMeters() }
         val distanceMeters = calculateDistanceMeters(locationState, target)
         val bearingDegrees = calculateBearing(locationState, target)
+        val trueHeading = applyTrueNorthCorrection(headingState.heading, locationState)
         val distanceText = distanceMeters?.toDistanceString(current.displayUnits)
         val bearingText = bearingDegrees?.let { BEARING_FORMAT.format(it) }
-        val isAligned = isAligned(headingState.heading, bearingDegrees)
+        val isAligned = isAligned(trueHeading, bearingDegrees)
         val lastUpdateText = targetPositionTimeSec?.let { formatElapsed(it) }
         val angularErrorDeg = calculateAngularError(positionalAccuracyMeters, distanceMeters)
         val errorRadiusText = positionalAccuracyMeters?.toInt()?.toDistanceString(current.displayUnits)
 
         return current.copy(
-            heading = headingState.heading,
+            heading = trueHeading,
             bearing = bearingDegrees,
             distanceText = distanceText,
             bearingText = bearingText,
@@ -184,6 +186,19 @@ constructor(
     private fun angularDifference(heading: Float, target: Float): Float {
         val diff = abs(heading - target) % FULL_CIRCLE_DEGREES
         return min(diff, FULL_CIRCLE_DEGREES - diff)
+    }
+
+    private fun applyTrueNorthCorrection(heading: Float?, locationState: PhoneLocationState): Float? {
+        val loc = locationState.location ?: return heading
+        val baseHeading = heading ?: return null
+        val geomagnetic =
+            GeomagneticField(
+                loc.latitude.toFloat(),
+                loc.longitude.toFloat(),
+                loc.altitude.toFloat(),
+                System.currentTimeMillis()
+            )
+        return (baseHeading + geomagnetic.declination + FULL_CIRCLE_DEGREES) % FULL_CIRCLE_DEGREES
     }
 
     private fun formatElapsed(timestampSec: Long): String {

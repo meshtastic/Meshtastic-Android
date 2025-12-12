@@ -77,18 +77,8 @@ import org.meshtastic.feature.node.compass.CompassWarning
 import kotlin.math.cos
 import kotlin.math.sin
 
-private const val TARGET_STROKE_WIDTH = 8f
-private const val TARGET_DOT_RADIUS = 12f
-private const val TARGET_OUTER_OFFSET = 20f
-private const val TARGET_INNER_INSET = 12f
-private const val CANVAS_NORTH_OFFSET_DEGREES = 90.0
 private const val DIAL_WIDTH_FRACTION = 0.66f
-private const val LABEL_RADIUS_OFFSET = 36f
-private const val QUARTER_RADIUS_OFFSET = 18f
 private const val LABEL_TEXT_SIZE = 64f
-private const val QUARTER_TICK_INSET = 24f
-private const val EIGHTH_TICK_INSET = 12f
-private const val QUARTER_TICK_STROKE = 3f
 
 @Composable
 fun CompassSheetContent(
