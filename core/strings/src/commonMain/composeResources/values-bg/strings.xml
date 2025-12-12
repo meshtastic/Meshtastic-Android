@@ -788,4 +788,5 @@
     <string name="firmware_update_usb_instruction_title">Изберете DFU USB устройство</string>
     <string name="interval_unset">Не е зададен</string>
     <string name="interval_always_on">Винаги включен</string>
+    <!-- Compass -->
 </resources>

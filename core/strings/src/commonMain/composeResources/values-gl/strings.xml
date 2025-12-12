@@ -169,4 +169,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualización fallou</string>
     <string name="interval_unset">Sen configurar</string>
+    <!-- Compass -->
 </resources>

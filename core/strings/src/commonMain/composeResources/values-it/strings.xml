@@ -960,4 +960,5 @@
     <string name="firmware_update_usb_instruction_text">Il dispositivo è stato riavviato in modalità DFU e dovrebbe apparire come un disco USB (ad es. RAK4631).\n\nQuando il selettore di file si apre, selezionare la cartella principale (root) dell'unità per salvare il file con il firmware.</string>
     <string name="interval_unset">Non impostato</string>
     <string name="interval_always_on">Sempre Attivo</string>
+    <!-- Compass -->
 </resources>

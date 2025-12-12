@@ -965,4 +965,5 @@
     <string name="chirpy">Chirpy</string>
     <string name="interval_unset">未设置</string>
     <string name="interval_always_on">常亮</string>
+    <!-- Compass -->
 </resources>

@@ -363,4 +363,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Aktualizácia zlyhala</string>
     <string name="interval_unset">Nenastavené</string>
+    <!-- Compass -->
 </resources>

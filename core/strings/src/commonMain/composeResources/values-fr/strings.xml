@@ -983,4 +983,5 @@
         <item quantity="one">1 heure</item>
         <item quantity="other">%d heures</item>
     </plurals>
+    <!-- Compass -->
 </resources>

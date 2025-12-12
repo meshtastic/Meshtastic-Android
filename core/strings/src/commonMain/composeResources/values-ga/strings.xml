@@ -245,4 +245,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Nuacht nuashonraithe</string>
     <string name="interval_unset">Díshocraigh</string>
+    <!-- Compass -->
 </resources>
