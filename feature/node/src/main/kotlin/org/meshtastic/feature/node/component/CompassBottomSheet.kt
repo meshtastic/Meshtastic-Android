@@ -440,14 +440,6 @@ private fun Float.normalizeDegrees(): Float {
 }
 
 
-private fun buildLabelPaint(outline: Color): android.graphics.Paint = android.graphics.Paint().apply {
-    color = outline.toArgb()
-    textSize = LABEL_TEXT_SIZE
-    textAlign = android.graphics.Paint.Align.CENTER
-    isAntiAlias = true
-    typeface = android.graphics.Typeface.create(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun CompassSheetPreview() {
