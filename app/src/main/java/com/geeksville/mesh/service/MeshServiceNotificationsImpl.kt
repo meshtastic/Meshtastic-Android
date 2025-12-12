@@ -284,7 +284,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
     }
 
     override fun showNewNodeSeenNotification(node: NodeEntity) {
-        val notification = createNewNodeSeenNotification(node.user.shortName, node.user.longName)
+        val notification = createNewNodeSeenNotification(node.num, node.user.shortName, node.user.longName)
         notificationManager.notify(node.num, notification)
     }
 
@@ -374,10 +374,10 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
             .build()
     }
 
-    private fun createNewNodeSeenNotification(name: String, message: String?): Notification {
+    private fun createNewNodeSeenNotification(destNum: Int, name: String, message: String?): Notification {
         val title = getString(Res.string.new_node_seen).format(name)
         val builder =
-            commonBuilder(NotificationType.NewNode)
+            commonBuilder(NotificationType.NewNode, createOpenNodeDetailIntent(destNum))
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setAutoCancel(true)
                 .setContentTitle(title)
@@ -463,6 +463,19 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, replyLabel, replyPendingIntent)
             .addRemoteInput(remoteInput)
             .build()
+    }
+
+    private fun createOpenNodeDetailIntent(destNum: Int): PendingIntent {
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/node/$destNum".toUri()
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(destNum, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
     }
 
     private fun commonBuilder(

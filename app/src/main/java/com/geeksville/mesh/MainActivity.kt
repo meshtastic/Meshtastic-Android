@@ -132,7 +132,9 @@ class MainActivity : AppCompatActivity() {
                             onFailure = { lifecycleScope.launch { showToast(Res.string.contact_invalid) } },
                         )
                     } else {
-                        Timber.d("App link data is not a channel set")
+                        Timber.d("Unhandled app link, delegating to navigation: $it")
+                        // Delegate other deep links (e.g., node details) to the composable NavHost
+                        model.setDeepLinkRequested(it)
                     }
                 }
             }
