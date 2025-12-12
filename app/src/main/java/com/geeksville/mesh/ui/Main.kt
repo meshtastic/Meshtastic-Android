@@ -322,27 +322,30 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                                 Box(
                                     modifier =
                                     Modifier.drawWithCache {
+                                        val glowRadius = size.minDimension
+                                        val glowBrush =
+                                            Brush.radialGradient(
+                                                colors =
+                                                listOf(
+                                                    currentGlowColor.copy(alpha = 0.8f),
+                                                    currentGlowColor.copy(alpha = 0.4f),
+                                                    Color.Transparent,
+                                                ),
+                                                center =
+                                                androidx.compose.ui.geometry.Offset(
+                                                    size.width / 2,
+                                                    size.height / 2,
+                                                ),
+                                                radius = glowRadius,
+                                            )
                                         onDrawWithContent {
                                             drawContent()
-                                            if (animatedGlowAlpha.value > 0f) {
-                                                val glowRadius = size.minDimension
+                                            val alpha = animatedGlowAlpha.value
+                                            if (alpha > 0f) {
                                                 drawCircle(
-                                                    brush =
-                                                    Brush.radialGradient(
-                                                        colors =
-                                                        listOf(
-                                                            currentGlowColor.copy(
-                                                                alpha = 0.8f * animatedGlowAlpha.value,
-                                                            ),
-                                                            currentGlowColor.copy(
-                                                                alpha = 0.4f * animatedGlowAlpha.value,
-                                                            ),
-                                                            Color.Transparent,
-                                                        ),
-                                                        center = center,
-                                                        radius = glowRadius,
-                                                    ),
+                                                    brush = glowBrush,
                                                     radius = glowRadius,
+                                                    alpha = alpha,
                                                     blendMode = BlendMode.Screen,
                                                 )
                                             }
