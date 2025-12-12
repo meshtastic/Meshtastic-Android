@@ -43,8 +43,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -61,13 +61,13 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.compass_bearing
 import org.meshtastic.core.strings.compass_bearing_na
 import org.meshtastic.core.strings.compass_distance
-import org.meshtastic.core.strings.compass_uncertainty
-import org.meshtastic.core.strings.compass_uncertainty_unknown
 import org.meshtastic.core.strings.compass_location_disabled
 import org.meshtastic.core.strings.compass_no_location_fix
 import org.meshtastic.core.strings.compass_no_location_permission
 import org.meshtastic.core.strings.compass_no_magnetometer
 import org.meshtastic.core.strings.compass_title
+import org.meshtastic.core.strings.compass_uncertainty
+import org.meshtastic.core.strings.compass_uncertainty_unknown
 import org.meshtastic.core.strings.exchange_position
 import org.meshtastic.core.strings.last_position_update
 import org.meshtastic.core.ui.theme.AppTheme
@@ -106,7 +106,7 @@ fun CompassSheetContent(
             bearing = uiState.bearing,
             angularErrorDeg = uiState.angularErrorDeg,
             modifier = Modifier.fillMaxWidth(DIAL_WIDTH_FRACTION).aspectRatio(1f),
-            markerColor = uiState.targetColor
+            markerColor = uiState.targetColor,
         )
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -212,6 +212,7 @@ private fun warningText(warning: CompassWarning): String = when (warning) {
     CompassWarning.LOCATION_DISABLED -> stringResource(Res.string.compass_location_disabled)
     CompassWarning.NO_LOCATION_FIX -> stringResource(Res.string.compass_no_location_fix)
 }
+
 @Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
 private fun CompassDial(
@@ -242,64 +243,60 @@ private fun CompassDial(
 
         rotate(-currentHeading, center) {
             // Compass circles
-            drawCircle(
-                color = compassRoseColor,
-                radius = radius,
-                center = center,
-                style = Stroke(width = ringStroke)
-            )
+            drawCircle(color = compassRoseColor, radius = radius, center = center, style = Stroke(width = ringStroke))
             drawCircle(
                 color = compassRoseColor.copy(alpha = 0.35f),
                 radius = radius * 0.85f,
                 center = center,
-                style = Stroke(width = 1.dp.toPx())
+                style = Stroke(width = 1.dp.toPx()),
             )
 
             // Tick marks
             for (deg in 0 until 360 step 5) {
                 val isCardinal = deg % 90 == 0
                 val isMajor = deg % 30 == 0
-                val tickLength = when {
-                    isCardinal -> radius * 0.14f
-                    isMajor -> radius * 0.09f
-                    else -> radius * 0.045f
-                }
-                val tickWidth = when {
-                    isCardinal -> 3.dp.toPx()
-                    isMajor -> 2.dp.toPx()
-                    else -> 1.dp.toPx()
-                }
+                val tickLength =
+                    when {
+                        isCardinal -> radius * 0.14f
+                        isMajor -> radius * 0.09f
+                        else -> radius * 0.045f
+                    }
+                val tickWidth =
+                    when {
+                        isCardinal -> 3.dp.toPx()
+                        isMajor -> 2.dp.toPx()
+                        else -> 1.dp.toPx()
+                    }
 
                 val angle = Math.toRadians(deg.toDouble())
-                val outer = Offset(
-                    center.x + radius * sin(angle).toFloat(),
-                    center.y - radius * cos(angle).toFloat()
-                )
-                val inner = Offset(
-                    center.x + (radius - tickLength) * sin(angle).toFloat(),
-                    center.y - (radius - tickLength) * cos(angle).toFloat()
-                )
+                val outer = Offset(center.x + radius * sin(angle).toFloat(), center.y - radius * cos(angle).toFloat())
+                val inner =
+                    Offset(
+                        center.x + (radius - tickLength) * sin(angle).toFloat(),
+                        center.y - (radius - tickLength) * cos(angle).toFloat(),
+                    )
 
                 drawLine(
                     color = if (deg == 0) northPointerColor else tickColor,
                     start = inner,
                     end = outer,
                     strokeWidth = tickWidth,
-                    cap = StrokeCap.Round
+                    cap = StrokeCap.Round,
                 )
             }
 
             // Compass rose center
-        drawCompassRoseCenter(center = center, size = radius * 0.13f, color = compassRoseColor)
+            drawCompassRoseCenter(center = center, size = radius * 0.13f, color = compassRoseColor)
 
             // Cardinal labels (moved closer to center)
             val cardinalRadius = radius * 0.48f
-            val cardinals = listOf(
-                Triple("N", 0, northPointerColor),
-                Triple("E", 90, cardinalColor),
-                Triple("S", 180, cardinalColor),
-                Triple("W", 270, cardinalColor)
-            )
+            val cardinals =
+                listOf(
+                    Triple("N", 0, northPointerColor),
+                    Triple("E", 90, cardinalColor),
+                    Triple("S", 180, cardinalColor),
+                    Triple("W", 270, cardinalColor),
+                )
 
             for ((label, deg, color) in cardinals) {
                 val angle = Math.toRadians(deg.toDouble())
@@ -311,10 +308,7 @@ private fun CompassDial(
                 withTransform({ rotate(currentHeading, Offset(x, y)) }) {
                     drawText(
                         textLayoutResult = layout,
-                        topLeft = Offset(
-                            x - layout.size.width / 2f,
-                            y - layout.size.height / 2f
-                        )
+                        topLeft = Offset(x - layout.size.width / 2f, y - layout.size.height / 2f),
                     )
                 }
             }
@@ -326,18 +320,12 @@ private fun CompassDial(
                 val x = center.x + degRadius * sin(angle).toFloat()
                 val y = center.y - degRadius * cos(angle).toFloat()
 
-                val layout = textMeasurer.measure(
-                    d.toString(),
-                    style = degreeStyle.copy(color = degreeTextColor)
-                )
+                val layout = textMeasurer.measure(d.toString(), style = degreeStyle.copy(color = degreeTextColor))
 
                 withTransform({ rotate(currentHeading, Offset(x, y)) }) {
                     drawText(
                         textLayoutResult = layout,
-                        topLeft = Offset(
-                            x - layout.size.width / 2f,
-                            y - layout.size.height / 2f
-                        )
+                        topLeft = Offset(x - layout.size.width / 2f, y - layout.size.height / 2f),
                     )
                 }
             }
@@ -359,7 +347,7 @@ private fun CompassDial(
                     sweepAngle = sweep,
                     useCenter = true,
                     topLeft = Offset(center.x - arcRadius, center.y - arcRadius),
-                    size = Size(arcRadius * 2, arcRadius * 2)
+                    size = Size(arcRadius * 2, arcRadius * 2),
                 )
 
                 // Cone edge lines for clarity
@@ -369,22 +357,20 @@ private fun CompassDial(
                 val startEnd =
                     Offset(
                         center.x + edgeRadius * sin(startRad).toFloat(),
-                        center.y - edgeRadius * cos(startRad).toFloat()
+                        center.y - edgeRadius * cos(startRad).toFloat(),
                     )
                 val endEnd =
-                    Offset(
-                        center.x + edgeRadius * sin(endRad).toFloat(),
-                        center.y - edgeRadius * cos(endRad).toFloat()
-                    )
+                    Offset(center.x + edgeRadius * sin(endRad).toFloat(), center.y - edgeRadius * cos(endRad).toFloat())
                 drawLine(color = faint, start = center, end = startEnd, strokeWidth = 6f, cap = StrokeCap.Round)
                 drawLine(color = faint, start = center, end = endEnd, strokeWidth = 6f, cap = StrokeCap.Round)
             }
             if (bearingForDraw != null) {
                 val angle = Math.toRadians(bearingForDraw.toDouble())
-                val dot = Offset(
-                    center.x + (radius * 0.95f) * sin(angle).toFloat(),
-                    center.y - (radius * 0.95f) * cos(angle).toFloat()
-                )
+                val dot =
+                    Offset(
+                        center.x + (radius * 0.95f) * sin(angle).toFloat(),
+                        center.y - (radius * 0.95f) * cos(angle).toFloat(),
+                    )
                 drawCircle(color = markerColor, radius = 10.dp.toPx(), center = dot)
             }
         }
@@ -397,7 +383,7 @@ private fun CompassDial(
                 start = center,
                 end = headingEnd,
                 strokeWidth = 6.dp.toPx(),
-                cap = StrokeCap.Round
+                cap = StrokeCap.Round,
             )
         }
     }
@@ -405,13 +391,14 @@ private fun CompassDial(
 
 @Suppress("MagicNumber")
 private fun DrawScope.drawCompassRoseCenter(center: Offset, size: Float, color: Color) {
-    val path = Path().apply {
-        moveTo(center.x, center.y - size)
-        lineTo(center.x + size * 0.35f, center.y)
-        lineTo(center.x, center.y + size * 0.35f)
-        lineTo(center.x - size * 0.35f, center.y)
-        close()
-    }
+    val path =
+        Path().apply {
+            moveTo(center.x, center.y - size)
+            lineTo(center.x + size * 0.35f, center.y)
+            lineTo(center.x, center.y + size * 0.35f)
+            lineTo(center.x - size * 0.35f, center.y)
+            close()
+        }
 
     drawPath(path, color.copy(alpha = 0.5f))
     drawCircle(color = color, radius = size * 0.25f, center = center)

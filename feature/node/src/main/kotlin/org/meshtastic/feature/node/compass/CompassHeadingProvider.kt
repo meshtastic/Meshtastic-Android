@@ -41,8 +41,8 @@ data class HeadingState(
 class CompassHeadingProvider @Inject constructor(@ApplicationContext private val context: Context) {
 
     /**
-     * Emits compass heading in degrees (magnetic). Callers can correct for true north
-     * using the latest location data when available.
+     * Emits compass heading in degrees (magnetic). Callers can correct for true north using the latest location data
+     * when available.
      */
     fun headingUpdates(): Flow<HeadingState> = callbackFlow {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
@@ -69,46 +69,41 @@ class CompassHeadingProvider @Inject constructor(@ApplicationContext private val
         var hasAccel = false
         var hasMagnet = false
 
-        val listener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent) {
-                when (event.sensor.type) {
-                    Sensor.TYPE_ROTATION_VECTOR -> {
-                        SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+        val listener =
+            object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    when (event.sensor.type) {
+                        Sensor.TYPE_ROTATION_VECTOR -> {
+                            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+                        }
+                        Sensor.TYPE_ACCELEROMETER -> {
+                            System.arraycopy(event.values, 0, accelValues, 0, accelValues.size)
+                            hasAccel = true
+                        }
+                        Sensor.TYPE_MAGNETIC_FIELD -> {
+                            System.arraycopy(event.values, 0, magnetValues, 0, magnetValues.size)
+                            hasMagnet = true
+                        }
                     }
-                    Sensor.TYPE_ACCELEROMETER -> {
-                        System.arraycopy(event.values, 0, accelValues, 0, accelValues.size)
-                        hasAccel = true
-                    }
-                    Sensor.TYPE_MAGNETIC_FIELD -> {
-                        System.arraycopy(event.values, 0, magnetValues, 0, magnetValues.size)
-                        hasMagnet = true
+
+                    val ready = rotationSensor != null || (hasAccel && hasMagnet)
+                    if (ready) {
+                        if (rotationSensor == null) {
+                            SensorManager.getRotationMatrix(rotationMatrix, null, accelValues, magnetValues)
+                        }
+
+                        SensorManager.getOrientation(rotationMatrix, orientation)
+                        var azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
+                        val heading = (azimuth + FULL_CIRCLE_DEGREES) % FULL_CIRCLE_DEGREES
+
+                        trySend(HeadingState(heading = heading, hasSensor = true, accuracy = event.accuracy))
                     }
                 }
 
-                val ready = rotationSensor != null || (hasAccel && hasMagnet)
-                if (ready) {
-                    if (rotationSensor == null) {
-                        SensorManager.getRotationMatrix(rotationMatrix, null, accelValues, magnetValues)
-                    }
-
-                    SensorManager.getOrientation(rotationMatrix, orientation)
-                    var azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                    val heading = (azimuth + FULL_CIRCLE_DEGREES) % FULL_CIRCLE_DEGREES
-
-                    trySend(
-                        HeadingState(
-                            heading = heading,
-                            hasSensor = true,
-                            accuracy = event.accuracy
-                        )
-                    )
+                override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+                    // No-op
                 }
             }
-
-            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-                // No-op
-            }
-        }
 
         rotationSensor?.let { sensorManager.registerListener(listener, it, SensorManager.SENSOR_DELAY_UI) }
         if (rotationSensor == null) {

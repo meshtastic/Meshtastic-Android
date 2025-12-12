@@ -17,10 +17,10 @@
 
 package org.meshtastic.feature.node.compass
 
+import android.hardware.GeomagneticField
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import android.hardware.GeomagneticField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,7 +54,6 @@ private const val HUNDRED = 100f
 private const val MILLIMETERS_PER_METER = 1000f
 
 @HiltViewModel
-/** Bridges heading + phone location into a single compass UI stream scoped to a target node. */
 @Suppress("TooManyFunctions")
 class CompassViewModel
 @Inject
@@ -161,10 +160,7 @@ constructor(
             null
         }
 
-    private fun calculateDistanceMeters(
-        locationState: PhoneLocationState,
-        target: Pair<Double, Double>?,
-    ): Int? =
+    private fun calculateDistanceMeters(locationState: PhoneLocationState, target: Pair<Double, Double>?): Int? =
         if (canUseLocation(locationState, target)) {
             val location = locationState.location ?: return null
             val activeTarget = target ?: return null
@@ -198,7 +194,7 @@ constructor(
                 loc.latitude.toFloat(),
                 loc.longitude.toFloat(),
                 loc.altitude.toFloat(),
-                System.currentTimeMillis()
+                System.currentTimeMillis(),
             )
         return (baseHeading + geomagnetic.declination + FULL_CIRCLE_DEGREES) % FULL_CIRCLE_DEGREES
     }
@@ -227,7 +223,8 @@ constructor(
                     sqrt(
                         (position.getHDOP() / HUNDRED).toDouble().pow(2.0) +
                             (position.getVDOP() / HUNDRED).toDouble().pow(2.0),
-                    ).toFloat()
+                    )
+                        .toFloat()
                 position.getHDOP() > 0 -> position.getHDOP() / HUNDRED
                 else -> null
             }

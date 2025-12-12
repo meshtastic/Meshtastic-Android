@@ -228,9 +228,7 @@ private fun CompassSheetHost(
 ) {
     if (showCompassSheet && compassViewModel != null) {
         // Tie sensor lifecycle to the sheet so streams stop as soon as the sheet is dismissed.
-        DisposableEffect(Unit) {
-            onDispose { compassViewModel.stop() }
-        }
+        DisposableEffect(Unit) { onDispose { compassViewModel.stop() } }
 
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
         ModalBottomSheet(
