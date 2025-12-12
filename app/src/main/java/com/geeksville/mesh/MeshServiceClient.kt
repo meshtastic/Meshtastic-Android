@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh
 
-import android.app.Activity
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity.BIND_ABOVE_CLIENT
 import androidx.appcompat.app.AppCompatActivity.BIND_AUTO_CREATE
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -28,6 +28,7 @@ import com.geeksville.mesh.android.ServiceClient
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.startService
+import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.Job
 import org.meshtastic.core.service.IMeshService
@@ -40,18 +41,12 @@ import javax.inject.Inject
 class MeshServiceClient
 @Inject
 constructor(
-    /**
-     * Ideally, this would be broken up into Context and LifecycleOwner. However, ApplicationModule defines its own
-     * LifecycleOwner which overrides the default binding for @ActivityScoped. The solution to this is to add a
-     * qualifier to the LifecycleOwner provider in ApplicationModule.
-     */
-    private val activity: Activity,
+    @ActivityContext private val context: Context,
     private val serviceRepository: ServiceRepository,
 ) : ServiceClient<IMeshService>(IMeshService.Stub::asInterface),
     DefaultLifecycleObserver {
 
-    // TODO Use the default binding for @ActivityScoped
-    private val lifecycleOwner: LifecycleOwner = activity as LifecycleOwner
+    private val lifecycleOwner: LifecycleOwner = context as LifecycleOwner
 
     // TODO Inject this for ease of testing
     private var serviceSetupJob: Job? = null
@@ -106,11 +101,11 @@ constructor(
     private fun bindMeshService() {
         Timber.d("Binding to mesh service!")
         try {
-            MeshService.startService(activity)
+            MeshService.startService(context)
         } catch (ex: Exception) {
             Timber.e("Failed to start service from activity - but ignoring because bind will work: ${ex.message}")
         }
 
-        connect(activity, MeshService.createIntent(activity), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
+        connect(context, MeshService.createIntent(context), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
     }
 }
