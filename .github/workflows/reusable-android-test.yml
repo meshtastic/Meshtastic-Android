@@ -12,7 +12,7 @@ on:
         description: 'JSON array string of API levels to run tests on (e.g., `[35]` or `[26, 35]`)'
         required: false
         type: string
-        default: '[32, 36]' # Default to running both if not specified by caller
+        default: '[32, 35]' # Default to running both if not specified by caller
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
