@@ -254,6 +254,7 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
