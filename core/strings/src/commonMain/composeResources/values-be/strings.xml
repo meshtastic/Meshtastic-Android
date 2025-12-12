@@ -239,4 +239,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_retry">Паспрабаваць яшчэ раз</string>
     <string name="firmware_update_keep_device_close">.</string>
+    <!-- Compass -->
 </resources>

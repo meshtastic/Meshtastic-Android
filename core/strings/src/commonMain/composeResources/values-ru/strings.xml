@@ -966,4 +966,5 @@
     <string name="firmware_update_disclaimer_chirpy_says">Щебетун говорит: «Держите лестницу под рукой!»</string>
     <string name="chirpy">Щебетун</string>
     <string name="interval_unset">Не установлена</string>
+    <!-- Compass -->
 </resources>

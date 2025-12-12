@@ -987,4 +987,5 @@
         <item quantity="one">1 tunti</item>
         <item quantity="other">%d tuntia</item>
     </plurals>
+    <!-- Compass -->
 </resources>

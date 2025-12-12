@@ -255,4 +255,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Atnaujinti nepavyko</string>
     <string name="interval_unset">Nenustatyta</string>
+    <!-- Compass -->
 </resources>

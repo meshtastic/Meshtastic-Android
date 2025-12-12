@@ -203,4 +203,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualització fallida</string>
     <string name="interval_unset">No configurat</string>
+    <!-- Compass -->
 </resources>
