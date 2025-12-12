@@ -50,11 +50,12 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
         title = stringResource(Res.string.range_test),
         onBack = onBack,
         configState = formState,
-        enabled = state.connected,
+        enabled = state.connected && !isPublicPrimaryChannel,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { rangeTest = it }
+            val safeRangeTest = if (isPublicPrimaryChannel && it.enabled) it.copy { this.enabled = false } else it
+            val config = moduleConfig { rangeTest = safeRangeTest }
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -63,7 +64,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 SwitchPreference(
                     title = stringResource(Res.string.range_test_enabled),
                     checked = formState.value.enabled,
-                    enabled = state.connected,
+                    enabled = state.connected && !isPublicPrimaryChannel,
                     onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -72,7 +73,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 DropDownPreference(
                     title = stringResource(Res.string.sender_message_interval_seconds),
                     selectedItem = formState.value.sender.toLong(),
-                    enabled = state.connected,
+                    enabled = state.connected && !isPublicPrimaryChannel,
                     items = rangeItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy { sender = it.toInt() } },
                 )
@@ -80,7 +81,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 SwitchPreference(
                     title = stringResource(Res.string.save_csv_in_storage_esp32_only),
                     checked = formState.value.save,
-                    enabled = state.connected,
+                    enabled = state.connected && !isPublicPrimaryChannel,
                     onCheckedChange = { formState.value = formState.value.copy { save = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
