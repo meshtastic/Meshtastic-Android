@@ -56,6 +56,18 @@ class AnalyticsConventionPlugin : Plugin<Project> {
                     }
                 }
             }
+
+            // Disable Analytics tasks for non-google flavors
+            val analyticsKeywords = listOf("crashlytics", "google", "datadog")
+            tasks.configureEach {
+                val taskName = name.lowercase()
+                val isAnalyticsTask = analyticsKeywords.any { taskName.contains(it) }
+
+                if (isAnalyticsTask && taskName.contains("fdroid")) {
+                    logger.lifecycle("AnalyticsConventionPlugin: Disabling task $name")
+                    enabled = false
+                }
+            }
         }
     }
 }
