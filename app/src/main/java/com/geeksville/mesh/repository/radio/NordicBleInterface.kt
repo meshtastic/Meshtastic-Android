@@ -95,6 +95,11 @@ constructor(
     private val writeMutex = Mutex()
 
     private var peripheral: Peripheral? = null
+    private var connectionStartTime: Long = 0
+    private var packetsReceived: Int = 0
+    private var packetsSent: Int = 0
+    private var bytesReceived: Long = 0
+    private var bytesSent: Long = 0
 
     private var toRadioCharacteristic: RemoteCharacteristic? = null
     private var fromNumCharacteristic: RemoteCharacteristic? = null
@@ -121,7 +126,12 @@ constructor(
     }
 
     private fun dispatchPacket(packet: ByteArray) {
-        Timber.d("[$address] Dispatching packet to service.handleFromRadio()")
+        packetsReceived++
+        bytesReceived += packet.size
+        Timber.d(
+            "[$address] Dispatching packet to service.handleFromRadio() - " +
+                "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)",
+        )
         try {
             service.handleFromRadio(p = packet)
         } catch (t: Throwable) {
@@ -157,14 +167,20 @@ constructor(
     private fun connect() {
         connectionScope.launch {
             try {
+                connectionStartTime = System.currentTimeMillis()
+                Timber.i("[$address] BLE connection attempt started at $connectionStartTime")
+
                 peripheral = retryCall { findAndConnectPeripheral() }
                 peripheral?.let {
+                    val connectionTime = System.currentTimeMillis() - connectionStartTime
+                    Timber.i("[$address] BLE peripheral connected in ${connectionTime}ms")
                     onConnected()
                     observePeripheralChanges()
                     discoverServicesAndSetupCharacteristics(it)
                 }
             } catch (e: Exception) {
-                Timber.e(e, "[$address] Failed to connect to peripheral")
+                val failureTime = System.currentTimeMillis() - connectionStartTime
+                Timber.e(e, "[$address] Failed to connect to peripheral after ${failureTime}ms")
                 service.onDisconnect(BleError.from(e))
             }
         }
@@ -196,21 +212,35 @@ constructor(
 
     private fun observePeripheralChanges() {
         peripheral?.let { p ->
-            p.phy.onEach { phy -> Timber.d("[$address] PHY changed to $phy") }.launchIn(connectionScope)
+            p.phy.onEach { phy -> Timber.i("[$address] BLE PHY changed to $phy") }.launchIn(connectionScope)
+
             p.connectionParameters
-                .onEach { Timber.d("[$address] Connection parameters changed to $it") }
+                .onEach { params -> Timber.i("[$address] BLE connection parameters changed to $params") }
                 .launchIn(connectionScope)
+
             p.state
                 .onEach { state ->
-                    Timber.d("[$address] State changed to $state")
+                    Timber.i("[$address] BLE connection state changed to $state")
                     if (state is ConnectionState.Disconnected) {
+                        val uptime =
+                            if (connectionStartTime > 0) {
+                                System.currentTimeMillis() - connectionStartTime
+                            } else {
+                                0
+                            }
+                        Timber.w(
+                            "[$address] BLE disconnected - Reason: ${state.reason}, " +
+                                "Uptime: ${uptime}ms, " +
+                                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                                "Packets TX: $packetsSent ($bytesSent bytes)",
+                        )
                         service.onDisconnect(BleError.Disconnected(reason = state.reason))
                     }
                 }
                 .launchIn(connectionScope)
         }
         centralManager.state
-            .onEach { state -> Timber.d("CentralManager state changed to $state") }
+            .onEach { state -> Timber.i("[$address] CentralManager state changed to $state") }
             .launchIn(connectionScope)
     }
 
@@ -314,8 +344,15 @@ constructor(
                 throw e
             } catch (e: Exception) {
                 currentAttempt++
-                if (currentAttempt >= RETRY_COUNT) throw e
-                Timber.w(e, "[$address] Operation failed, retrying ($currentAttempt/$RETRY_COUNT)...")
+                if (currentAttempt >= RETRY_COUNT) {
+                    Timber.e(e, "[$address] BLE operation failed after $RETRY_COUNT attempts, giving up")
+                    throw e
+                }
+                Timber.w(
+                    e,
+                    "[$address] BLE operation failed (attempt $currentAttempt/$RETRY_COUNT), " +
+                        "retrying in ${RETRY_DELAY_MS}ms...",
+                )
                 delay(RETRY_DELAY_MS)
             }
         }
@@ -330,7 +367,10 @@ constructor(
      */
     override fun handleSendToRadio(p: ByteArray) {
         toRadioCharacteristic?.let { characteristic ->
-            if (peripheral == null) return@let
+            if (peripheral == null) {
+                Timber.w("[$address] BLE peripheral is null, cannot send packet")
+                return@let
+            }
             connectionScope.launch {
                 writeMutex.withLock {
                     try {
@@ -341,22 +381,43 @@ constructor(
                                 WriteType.WITH_RESPONSE
                             }
                         retryCall {
-                            Timber.d("[$address] Writing packet to toRadioCharacteristic with $writeType")
+                            packetsSent++
+                            bytesSent += p.size
+                            Timber.d(
+                                "[$address] Writing packet #$packetsSent to toRadioCharacteristic with $writeType - " +
+                                    "${p.size} bytes (Total TX: $bytesSent bytes)",
+                            )
                             characteristic.write(p, writeType = writeType)
                         }
                         drainPacketQueueAndDispatch()
                     } catch (e: Exception) {
-                        Timber.e(e, "[$address] Failed to write packet to toRadioCharacteristic")
+                        Timber.e(
+                            e,
+                            "[$address] Failed to write packet to toRadioCharacteristic after " +
+                                "$packetsSent successful writes",
+                        )
                         service.onDisconnect(BleError.from(e))
                     }
                 }
             }
-        } ?: Timber.w("[$address] toRadio unavailable, can't send data")
+        } ?: Timber.w("[$address] toRadio characteristic unavailable, can't send data")
     }
 
     /** Closes the connection to the device. */
     override fun close() {
         runBlocking {
+            val uptime =
+                if (connectionStartTime > 0) {
+                    System.currentTimeMillis() - connectionStartTime
+                } else {
+                    0
+                }
+            Timber.i(
+                "[$address] BLE close() called - " +
+                    "Uptime: ${uptime}ms, " +
+                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                    "Packets TX: $packetsSent ($bytesSent bytes)",
+            )
             connectionScope.cancel()
             peripheral?.disconnect()
             service.onDisconnect(true)
