@@ -619,13 +619,13 @@ fun MapView(
 
     LaunchedEffect(tracerouteOverlay, tracerouteForwardPoints, tracerouteReturnPoints) {
         if (tracerouteOverlay == null || hasCenteredTraceroute) return@LaunchedEffect
-        val allPoints = (tracerouteForwardPoints + tracerouteReturnPoints)
+        val allPoints = (tracerouteForwardPoints + tracerouteReturnPoints).distinct()
         if (allPoints.isNotEmpty()) {
             if (allPoints.size == 1) {
                 map.controller.setCenter(allPoints.first())
-                map.controller.setZoom(13.0)
+                map.controller.setZoom(TRACEROUTE_SINGLE_POINT_ZOOM)
             } else {
-                map.zoomToBoundingBox(BoundingBox.fromGeoPoints(allPoints), true)
+                map.zoomToBoundingBox(BoundingBox.fromGeoPoints(allPoints).zoomIn(-TRACEROUTE_ZOOM_OUT_LEVELS), true)
             }
             hasCenteredTraceroute = true
         }
@@ -1076,6 +1076,8 @@ private fun MapsDialog(
 
 private const val EARTH_RADIUS_METERS = 6_371_000.0
 private const val TRACEROUTE_OFFSET_METERS = 100.0
+private const val TRACEROUTE_SINGLE_POINT_ZOOM = 12.0
+private const val TRACEROUTE_ZOOM_OUT_LEVELS = 0.5
 
 private fun Double.toRad(): Double = Math.toRadians(this)
 

@@ -105,8 +105,10 @@ fun TracerouteMapScreen(
                 },
             )
             Column(
-                modifier = Modifier.align(Alignment.BottomCenter).padding(TracerouteMapOverlayInsets.bottomCenter),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier =
+                Modifier.align(TracerouteMapOverlayInsets.overlayAlignment)
+                    .padding(TracerouteMapOverlayInsets.overlayPadding),
+                horizontalAlignment = TracerouteMapOverlayInsets.contentHorizontalAlignment,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 TracerouteNodeCount(shown = tracerouteNodesShown, total = tracerouteNodesTotal)
