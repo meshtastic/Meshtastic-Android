@@ -376,7 +376,7 @@
     <string name="traceroute_direct">Direct</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 saut</item>
-        <item quantity="other">%d sauts</item>
+        <item quantity="other">%1$d sauts</item>
     </plurals>
     <string name="traceroute_diff">Sauts vers %1$d Sauts retour %2$d</string>
     <string name="twenty_four_hours">24H</string>
