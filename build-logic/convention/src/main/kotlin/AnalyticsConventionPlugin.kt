@@ -58,12 +58,12 @@ class AnalyticsConventionPlugin : Plugin<Project> {
             }
 
             // Disable Analytics tasks for non-google flavors
-            val analyticsKeywords = listOf("crashlytics", "google", "datadog")
+            val analyticsKeywords = listOf("crashlytics", "google", "datadog","buildId")
             tasks.configureEach {
                 val taskName = name.lowercase()
-                val isAnalyticsTask = analyticsKeywords.any { taskName.contains(it) }
+                val isAnalyticsTask = analyticsKeywords.any { taskName.contains(it, ignoreCase = true) }
 
-                if (isAnalyticsTask && taskName.contains("fdroid")) {
+                if (isAnalyticsTask && taskName.contains("fdroid", ignoreCase = true)) {
                     logger.lifecycle("AnalyticsConventionPlugin: Disabling task $name")
                     enabled = false
                 }
