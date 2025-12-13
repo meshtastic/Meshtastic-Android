@@ -48,16 +48,30 @@ constructor(
     override fun connect() {
         val device = serialInterfaceSpec.findSerial(address)
         if (device == null) {
-            Timber.e("Can't find device")
+            Timber.e("[$address] Serial device not found at address")
         } else {
-            Timber.i("Opening $device")
-            val onConnect: () -> Unit = { super.connect() }
+            val connectStart = System.currentTimeMillis()
+            Timber.i("[$address] Opening serial device: $device")
+
+            var packetsReceived = 0
+            var bytesReceived = 0L
+            var connectionStartTime = 0L
+
+            val onConnect: () -> Unit = {
+                connectionStartTime = System.currentTimeMillis()
+                val connectionTime = connectionStartTime - connectStart
+                Timber.i("[$address] Serial device connected in ${connectionTime}ms")
+                super.connect()
+            }
+
             usbRepository
                 .createSerialConnection(
                     device,
                     object : SerialConnectionListener {
                         override fun onMissingPermission() {
-                            Timber.e("Need permissions for port")
+                            Timber.e(
+                                "[$address] Serial connection failed - missing USB permissions for device: $device",
+                            )
                         }
 
                         override fun onConnected() {
@@ -65,13 +79,29 @@ constructor(
                         }
 
                         override fun onDataReceived(bytes: ByteArray) {
-                            Timber.d("Received ${bytes.size} byte(s)")
+                            packetsReceived++
+                            bytesReceived += bytes.size
+                            Timber.d(
+                                "[$address] Serial received packet #$packetsReceived - " +
+                                    "${bytes.size} byte(s) (Total RX: $bytesReceived bytes)",
+                            )
                             bytes.forEach(::readChar)
                         }
 
                         override fun onDisconnected(thrown: Exception?) {
-                            thrown?.let { e -> Timber.e("Serial error: $e") }
-                            Timber.d("$device disconnected")
+                            val uptime =
+                                if (connectionStartTime > 0) {
+                                    System.currentTimeMillis() - connectionStartTime
+                                } else {
+                                    0
+                                }
+                            thrown?.let { e -> Timber.e(e, "[$address] Serial error after ${uptime}ms: ${e.message}") }
+                            Timber.w(
+                                "[$address] Serial device disconnected - " +
+                                    "Device: $device, " +
+                                    "Uptime: ${uptime}ms, " +
+                                    "Packets RX: $packetsReceived ($bytesReceived bytes)",
+                            )
                             onDeviceDisconnect(false)
                         }
                     },
@@ -84,6 +114,12 @@ constructor(
     }
 
     override fun sendBytes(p: ByteArray) {
-        connRef.get()?.sendBytes(p)
+        val conn = connRef.get()
+        if (conn != null) {
+            Timber.d("[$address] Serial sending ${p.size} bytes")
+            conn.sendBytes(p)
+        } else {
+            Timber.w("[$address] Serial connection not available, cannot send ${p.size} bytes")
+        }
     }
 }
