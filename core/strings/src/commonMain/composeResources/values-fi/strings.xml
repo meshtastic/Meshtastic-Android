@@ -974,4 +974,17 @@
     <string name="firmware_update_usb_instruction_text">Laitteesi on käynnistynyt uudelleen DFU-tilaan ja sen pitäisi näkyä USB-asemana (esim. RAK4631).
 \n\nKun tiedostonvalitsin avautuu, valitse kyseisen aseman juurihakemisto tallentaaksesi laiteohjelmistotiedoston.</string>
     <string name="interval_unset">Ei yhdistetty</string>
+    <string name="interval_always_on">Aina päällä</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 sekunti</item>
+        <item quantity="other">%d sekuntia</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 minuutti</item>
+        <item quantity="other">%d minuuttia</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 tunti</item>
+        <item quantity="other">%d tuntia</item>
+    </plurals>
 </resources>

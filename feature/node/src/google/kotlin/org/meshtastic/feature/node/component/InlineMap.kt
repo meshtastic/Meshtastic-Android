@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
@@ -68,7 +67,6 @@ internal fun InlineMap(node: Node, modifier: Modifier = Modifier) {
                 tiltGesturesEnabled = false,
                 zoomGesturesEnabled = false,
             ),
-            googleMapOptionsFactory = { GoogleMapOptions().liteMode(true) },
             cameraPositionState = cameraState,
         ) {
             val precisionMeters = precisionBitsToMeters(node.position.precisionBits)
