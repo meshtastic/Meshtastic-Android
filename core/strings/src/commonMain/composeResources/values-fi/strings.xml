@@ -977,15 +977,15 @@
     <string name="interval_always_on">Aina päällä</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 sekunti</item>
-        <item quantity="other">%d sekuntia</item>
+        <item quantity="other">%1$d sekuntia</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">1 minuutti</item>
-        <item quantity="other">%d minuuttia</item>
+        <item quantity="other">%1$d minuuttia</item>
     </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">1 tunti</item>
-        <item quantity="other">%d tuntia</item>
+        <item quantity="other">%1$d tuntia</item>
     </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompassi</string>

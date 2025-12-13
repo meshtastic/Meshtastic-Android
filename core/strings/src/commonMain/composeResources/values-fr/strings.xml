@@ -973,15 +973,15 @@
     <string name="interval_always_on">En permanence</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 seconde</item>
-        <item quantity="other">%d secondes</item>
+        <item quantity="other">%1$d secondes</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">1 minute</item>
-        <item quantity="other">%d minutes</item>
+        <item quantity="other">%1$d minutes</item>
     </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">1 heure</item>
-        <item quantity="other">%d heures</item>
+        <item quantity="other">%1$d heures</item>
     </plurals>
     <!-- Compass -->
 </resources>
