@@ -559,7 +559,13 @@ class MeshService : Service() {
             hwModel = MeshProtos.HardwareModel.UNSET
         }
 
-        NodeEntity(num = n, user = defaultUser, longName = defaultUser.longName, channel = channel)
+        NodeEntity(
+            num = n,
+            user = defaultUser,
+            longName = defaultUser.longName,
+            shortName = defaultUser.shortName,
+            channel = channel,
+        )
     }
 
     private val hexIdRegex = """!([0-9A-Fa-f]+)""".toRegex()
@@ -1028,6 +1034,9 @@ class MeshService : Service() {
                         "kept='${it.user.longName}' (hwModel=${it.user.hwModel}), " +
                         "skipped default='${p.longName}' (hwModel=UNSET)",
                 )
+                // Ensure denormalized columns are updated from preserved user data
+                it.longName = it.user.longName
+                it.shortName = it.user.shortName
                 // Still update channel and verification status
                 it.channel = channel
                 it.manuallyVerified = manuallyVerified
@@ -1759,6 +1768,9 @@ class MeshService : Service() {
                             "kept='${it.user.longName}' (hwModel=${it.user.hwModel}), " +
                             "skipped default='${info.user.longName}' (hwModel=UNSET)",
                     )
+                    // Ensure denormalized columns are updated from preserved user data
+                    it.longName = it.user.longName
+                    it.shortName = it.user.shortName
                 } else {
                     it.user =
                         info.user.copy {
