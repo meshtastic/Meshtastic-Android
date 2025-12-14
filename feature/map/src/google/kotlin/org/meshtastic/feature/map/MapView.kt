@@ -134,6 +134,7 @@ private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
 private const val DEG_D = 1e-7
 private const val HEADING_DEG = 1e-5
 private const val TRACEROUTE_OFFSET_METERS = 100.0
+private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -398,7 +399,7 @@ fun MapView(
                 } else {
                     val bounds = LatLngBounds.builder()
                     allPoints.forEach { bounds.include(it) }
-                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 120)
+                    CameraUpdateFactory.newLatLngBounds(bounds.build(), TRACEROUTE_BOUNDS_PADDING_PX)
                 }
             try {
                 cameraPositionState.animate(cameraUpdate)
