@@ -536,7 +536,7 @@
     <string name="advanced">Lisäasetukset</string>
     <string name="use_modem_preset">Käytä esiasetusta</string>
     <string name="modem_preset">Esiasetukset</string>
-    <string name="bandwidth">Kaistanlevyes</string>
+    <string name="bandwidth">Kaistanleveys</string>
     <string name="spread_factor">Levennyskerroin (Spread Factor)</string>
     <string name="coding_rate">Koodausnopeus</string>
     <string name="frequency_offset_mhz">Taajuuspoikkeama (MHz)</string>
