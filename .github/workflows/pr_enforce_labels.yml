@@ -24,7 +24,7 @@ jobs:
               pull_number: prNumber,
             });
             const latestLabels = pr.labels.map(label => label.name);
-            const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release'];
+            const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release', 'refactor'];
             const hasRequiredLabel = latestLabels.some(label => requiredLabels.includes(label));
             console.log('Latest labels:', latestLabels);
             if (!hasRequiredLabel) {

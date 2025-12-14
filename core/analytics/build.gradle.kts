@@ -30,28 +30,17 @@ dependencies {
     implementation(libs.androidx.navigation.runtime)
     implementation(libs.timber)
 
-    googleImplementation(libs.dd.sdk.android.compose)
-    googleImplementation(libs.dd.sdk.android.logs)
-    googleImplementation(libs.dd.sdk.android.rum)
-    googleImplementation(libs.dd.sdk.android.session.replay)
-    googleImplementation(libs.dd.sdk.android.session.replay.compose)
-    googleImplementation(libs.dd.sdk.android.timber)
-    googleImplementation(libs.dd.sdk.android.trace)
-    googleImplementation(libs.dd.sdk.android.trace.otel)
-    googleImplementation(platform(libs.firebase.bom))
-    googleImplementation(libs.firebase.analytics)
-    googleImplementation(libs.firebase.crashlytics)
-}
-
-val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
-
-tasks.configureEach {
-    if (
-        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } && name.contains("fdroid", ignoreCase = true)
-    ) {
-        project.logger.lifecycle("Disabling task for F-Droid: $name")
-        enabled = false
-    }
+    googleApi(libs.dd.sdk.android.compose)
+    googleApi(libs.dd.sdk.android.logs)
+    googleApi(libs.dd.sdk.android.rum)
+    googleApi(libs.dd.sdk.android.session.replay)
+    googleApi(libs.dd.sdk.android.session.replay.compose)
+    googleApi(libs.dd.sdk.android.timber)
+    googleApi(libs.dd.sdk.android.trace)
+    googleApi(libs.dd.sdk.android.trace.otel)
+    googleApi(platform(libs.firebase.bom))
+    googleApi(libs.firebase.analytics)
+    googleApi(libs.firebase.crashlytics)
 }
 
 android {

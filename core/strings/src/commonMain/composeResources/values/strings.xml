@@ -1016,7 +1016,6 @@
     <string name="firmware_update_method_detail">Update via %1$s</string>
     <string name="firmware_update_usb_instruction_title">Select DFU USB Drive</string>
     <string name="firmware_update_usb_instruction_text">Your device has rebooted into DFU mode and should appear as a USB drive (e.g., RAK4631).\n\nWhen the file picker opens, please select the root of that drive to save the firmware file.</string>
-
     <string name="interval_unset">Unset</string>
     <string name="interval_always_on">Always On</string>
     <plurals name="plurals_seconds">
@@ -1031,4 +1030,17 @@
         <item quantity="one">1 hour</item>
         <item quantity="other">%1$d hours</item>
     </plurals>
+  
+  <!-- Compass -->
+    <string name="compass_title">Compass</string>
+    <string name="open_compass">Open Compass</string>
+    <string name="compass_distance">Distance: %1$s</string>
+    <string name="compass_bearing">Bearing: %1$s</string>
+    <string name="compass_bearing_na">Bearing: N/A</string>
+    <string name="compass_no_magnetometer">This device does not have a compass sensor. Heading is unavailable.</string>
+    <string name="compass_no_location_permission">Location permission is required to show distance and bearing.</string>
+    <string name="compass_location_disabled">Location provider is disabled. Turn on location services.</string>
+    <string name="compass_no_location_fix">Waiting for a GPS fix to calculate distance and bearing.</string>
+    <string name="compass_uncertainty">Estimated area: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Estimated area: unknown accuracy</string>
 </resources>

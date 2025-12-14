@@ -322,27 +322,30 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                                 Box(
                                     modifier =
                                     Modifier.drawWithCache {
+                                        val glowRadius = size.minDimension
+                                        val glowBrush =
+                                            Brush.radialGradient(
+                                                colors =
+                                                listOf(
+                                                    currentGlowColor.copy(alpha = 0.8f),
+                                                    currentGlowColor.copy(alpha = 0.4f),
+                                                    Color.Transparent,
+                                                ),
+                                                center =
+                                                androidx.compose.ui.geometry.Offset(
+                                                    size.width / 2,
+                                                    size.height / 2,
+                                                ),
+                                                radius = glowRadius,
+                                            )
                                         onDrawWithContent {
                                             drawContent()
-                                            if (animatedGlowAlpha.value > 0f) {
-                                                val glowRadius = size.minDimension
+                                            val alpha = animatedGlowAlpha.value
+                                            if (alpha > 0f) {
                                                 drawCircle(
-                                                    brush =
-                                                    Brush.radialGradient(
-                                                        colors =
-                                                        listOf(
-                                                            currentGlowColor.copy(
-                                                                alpha = 0.8f * animatedGlowAlpha.value,
-                                                            ),
-                                                            currentGlowColor.copy(
-                                                                alpha = 0.4f * animatedGlowAlpha.value,
-                                                            ),
-                                                            Color.Transparent,
-                                                        ),
-                                                        center = center,
-                                                        radius = glowRadius,
-                                                    ),
+                                                    brush = glowBrush,
                                                     radius = glowRadius,
+                                                    alpha = alpha,
                                                     blendMode = BlendMode.Screen,
                                                 )
                                             }
@@ -482,9 +485,21 @@ private fun VersionChecks(viewModel: UIViewModel) {
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo) {
         if (connectionState == ConnectionState.Connected) {
+            Timber.i(
+                "[FW_CHECK] Connection state: $connectionState, " +
+                    "myNodeInfo: ${if (myNodeInfo != null) "present" else "null"}, " +
+                    "firmwareVersion: ${myFirmwareVersion ?: "null"}",
+            )
+
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE && BuildConfig.DEBUG.not()
+                Timber.d(
+                    "[FW_CHECK] App version check - minAppVersion: ${info.minAppVersion}, " +
+                        "currentVersion: ${BuildConfig.VERSION_CODE}, isOld: $isOld",
+                )
+
                 if (isOld) {
+                    Timber.w("[FW_CHECK] App too old - showing update prompt")
                     viewModel.showAlert(
                         getString(Res.string.app_too_old),
                         getString(Res.string.must_update),
@@ -495,9 +510,20 @@ private fun VersionChecks(viewModel: UIViewModel) {
                         },
                     )
                 } else {
-                    myFirmwareVersion?.let {
-                        val curVer = DeviceVersion(it)
+                    myFirmwareVersion?.let { fwVersion ->
+                        val curVer = DeviceVersion(fwVersion)
+                        Timber.i(
+                            "[FW_CHECK] Firmware version comparison - " +
+                                "device: $curVer (raw: $fwVersion), " +
+                                "absoluteMin: ${MeshService.absoluteMinDeviceVersion}, " +
+                                "min: ${MeshService.minDeviceVersion}",
+                        )
+
                         if (curVer < MeshService.absoluteMinDeviceVersion) {
+                            Timber.w(
+                                "[FW_CHECK] Firmware too old - " +
+                                    "device: $curVer < absoluteMin: ${MeshService.absoluteMinDeviceVersion}",
+                            )
                             val title = getString(Res.string.firmware_too_old)
                             val message = getString(Res.string.firmware_old)
                             viewModel.showAlert(
@@ -510,13 +536,21 @@ private fun VersionChecks(viewModel: UIViewModel) {
                                 },
                             )
                         } else if (curVer < MeshService.minDeviceVersion) {
+                            Timber.w(
+                                "[FW_CHECK] Firmware should update - " +
+                                    "device: $curVer < min: ${MeshService.minDeviceVersion}",
+                            )
                             val title = getString(Res.string.should_update_firmware)
                             val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
                             viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
+                        } else {
+                            Timber.i("[FW_CHECK] Firmware version OK - device: $curVer meets requirements")
                         }
-                    }
+                    } ?: run { Timber.w("[FW_CHECK] Firmware version is null despite myNodeInfo being present") }
                 }
-            }
+            } ?: run { Timber.d("[FW_CHECK] myNodeInfo is null, skipping firmware check") }
+        } else {
+            Timber.d("[FW_CHECK] Not connected (state: $connectionState), skipping firmware check")
         }
     }
 }

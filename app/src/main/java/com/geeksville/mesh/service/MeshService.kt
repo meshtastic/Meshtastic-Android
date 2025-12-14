@@ -1860,10 +1860,19 @@ class MeshService : Service() {
 
     /**
      * Regenerate the myNodeInfo model. We call this twice. Once after we receive myNodeInfo from the device and again
-     * after we have the node DB (which might allow us a better notion of our HwModel.
+     * after we have the node DB (which might allow us a better notion of our HwModel).
      */
     private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata? = MeshProtos.DeviceMetadata.getDefaultInstance()) {
         val myInfo = rawMyNodeInfo
+        val hasMetadata = metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()
+        Timber.i(
+            "[MYNODE_REGEN] Called - " +
+                "rawMyNodeInfo: ${if (myInfo != null) "present" else "null"}, " +
+                "metadata: ${if (hasMetadata) "present" else "null/default"}, " +
+                "firmwareVersion: ${metadata?.firmwareVersion ?: "null"}, " +
+                "hasWifi: ${metadata?.hasWifi}",
+        )
+
         if (myInfo != null) {
             val mi =
                 with(myInfo) {
@@ -1888,10 +1897,22 @@ class MeshService : Service() {
                         deviceId = deviceId.toStringUtf8(),
                     )
                 }
+
+            Timber.i(
+                "[MYNODE_REGEN] Created MyNodeEntity - " +
+                    "nodeNum: ${mi.myNodeNum}, " +
+                    "model: ${mi.model}, " +
+                    "firmwareVersion: ${mi.firmwareVersion}, " +
+                    "hasWifi: ${mi.hasWifi}",
+            )
+
             if (metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()) {
                 serviceScope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
             }
             newMyNodeInfo = mi
+            Timber.i("[MYNODE_REGEN] Set newMyNodeInfo (will be committed on configComplete)")
+        } else {
+            Timber.w("[MYNODE_REGEN] rawMyNodeInfo is null, cannot regenerate")
         }
     }
 
@@ -1906,7 +1927,12 @@ class MeshService : Service() {
 
     /** Update MyNodeInfo (called from either new API version or the old one) */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
-        Timber.d("[myInfo] ${myInfo.toPIIString()}")
+        Timber.i(
+            "[MYINFO_RECEIVED] MyNodeInfo received - " +
+                "nodeNum: ${myInfo.myNodeNum}, " +
+                "minAppVersion: ${myInfo.minAppVersion}, " +
+                "PII data: ${myInfo.toPIIString()}",
+        )
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1918,6 +1944,7 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
 
         rawMyNodeInfo = myInfo
+        Timber.i("[MYINFO_RECEIVED] Set rawMyNodeInfo, calling regenMyNodeInfo()")
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
@@ -1930,7 +1957,14 @@ class MeshService : Service() {
 
     /** Update our DeviceMetadata */
     private fun handleMetadata(metadata: MeshProtos.DeviceMetadata) {
-        Timber.d("[deviceMetadata] ${metadata.toPIIString()}")
+        Timber.i(
+            "[METADATA_RECEIVED] DeviceMetadata received - " +
+                "firmwareVersion: ${metadata.firmwareVersion}, " +
+                "hwModel: ${metadata.hwModel}, " +
+                "hasWifi: ${metadata.hasWifi}, " +
+                "hasBluetooth: ${metadata.hasBluetooth}, " +
+                "PII data: ${metadata.toPIIString()}",
+        )
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1941,6 +1975,10 @@ class MeshService : Service() {
             )
         insertMeshLog(packetToSave)
 
+        Timber.i(
+            "[METADATA_RECEIVED] Calling regenMyNodeInfo with metadata - " +
+                "This will update newMyNodeInfo with firmwareVersion: ${metadata.firmwareVersion}",
+        )
         regenMyNodeInfo(metadata)
     }
 
@@ -2094,7 +2132,7 @@ class MeshService : Service() {
     }
 
     private fun handleConfigOnlyComplete() {
-        Timber.d("Config-only complete for nonce $configOnlyNonce")
+        Timber.i("[CONFIG_COMPLETE] Config-only complete for nonce $configOnlyNonce")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -2106,9 +2144,16 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
 
         if (newMyNodeInfo == null) {
-            Timber.e("Did not receive a valid config")
+            Timber.e("[CONFIG_COMPLETE] Did not receive a valid config - newMyNodeInfo is null")
         } else {
+            Timber.i(
+                "[CONFIG_COMPLETE] Committing newMyNodeInfo to myNodeInfo - " +
+                    "firmwareVersion: ${newMyNodeInfo?.firmwareVersion}, " +
+                    "hasWifi: ${newMyNodeInfo?.hasWifi}, " +
+                    "model: ${newMyNodeInfo?.model}",
+            )
             myNodeInfo = newMyNodeInfo
+            Timber.i("[CONFIG_COMPLETE] myNodeInfo committed successfully")
         }
         // Keep BLE awake and allow the firmware to settle before the node-info stage.
         serviceScope.handledLaunch {

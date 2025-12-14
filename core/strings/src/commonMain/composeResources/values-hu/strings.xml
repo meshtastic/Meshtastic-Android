@@ -894,4 +894,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">A frissítés sikertelen</string>
     <string name="interval_unset">Nincs beállítva</string>
+    <!-- Compass -->
 </resources>

@@ -986,4 +986,5 @@
         <item quantity="one">1 tund</item>
         <item quantity="other">%d tundi</item>
     </plurals>
+    <!-- Compass -->
 </resources>

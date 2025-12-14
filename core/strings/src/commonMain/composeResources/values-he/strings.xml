@@ -151,4 +151,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">העדכון נכשל</string>
     <string name="interval_unset">לא מוגדר</string>
+    <!-- Compass -->
 </resources>

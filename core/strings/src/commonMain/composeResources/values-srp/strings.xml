@@ -450,4 +450,5 @@
     <string name="firmware_update_failed">Ажурирање неуспело</string>
     <string name="interval_unset">Уклони</string>
     <string name="interval_always_on">Увек укључен</string>
+    <!-- Compass -->
 </resources>

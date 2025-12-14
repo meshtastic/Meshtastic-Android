@@ -26,7 +26,7 @@
     <string name="node_filter_only_direct">Mostra solamente i nodi diretti</string>
     <string name="node_filter_ignored">Stai visualizzando i nodi ignorati,\nPremi per tornare alla lista dei nodi</string>
     <string name="node_filter_show_details">Mostra dettagli</string>
-    <string name="node_sort_title">Ordina Per</string>
+    <string name="node_sort_title">Ordina per</string>
     <string name="node_sort_button">Opzioni ordinamento nodi</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canale</string>
@@ -102,14 +102,14 @@
     <string name="config_display_auto_screen_carousel_secs_summary">Passa automaticamente alla pagina successiva sullo schermo come un carosello, in base all'intervallo specificato.</string>
     <string name="config_display_compass_north_top_summary">La direzione della bussola sullo schermo all'esterno del cerchio punta sempre a nord.</string>
     <string name="config_display_flip_screen_summary">Capovolgi lo schermo verticalmente.</string>
-    <string name="config_display_units_summary">Unità visualizzate sullo schermo del dispositivo.</string>
+    <string name="config_display_units_summary">Unità di misura visualizzate sullo schermo del dispositivo.</string>
     <string name="config_display_oled_summary">Ignora il rilevamento automatico dello schermo OLED.</string>
     <string name="config_display_displaymode_summary">Sovrascrivi il layout predefinito dello schermo.</string>
     <string name="config_display_heading_bold_summary">Usa il grassetto nelle intestazioni sullo schermo.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">Richiede la presenza di un accelerometro nel dispositivo.</string>
     <string name="config_lora_region_summary">La regione in cui utilizzerai le radio.</string>
     <string name="config_lora_modem_preset_summary">Le preimpostazioni del modem disponibili, la predefinita è Long Fast.</string>
-    <string name="config_lora_hop_limit_summary">Imposta il numero massimo di hop, il predefinito è 3. Aumentare gli hop comporta anche aumentare la congestione e dovrebbe essere utilizzato con attenzione. Con 0 hop, i messaggi non otterranno ACK.</string>
+    <string name="config_lora_hop_limit_summary">Imposta il numero massimo di hop, il predefinito è 3. Aumentare gli hop comporta anche aumentare la congestione e dovrebbe essere utilizzato con attenzione. Con 0 hop, i messaggi non otterranno conferma di ricezione.</string>
     <string name="config_lora_frequency_slot_summary">La frequenza di funzionamento del nodo viene calcolata in base alla regione, alla preimpostazione del modem e a questo campo. Quando è a 0, lo slot viene calcolato automaticamente in base al nome del canale primario e cambierà rispetto allo slot pubblico predefinito. Torna allo slot pubblico predefinito se sono configurati canali primari privati e secondari pubblici.</string>
     <string name="config_network_wifi_enabled_summary">L'attivazione della WiFi disabiliterà la connessione bluetooth con l'app.</string>
     <string name="config_network_eth_enabled_summary">L'attivazione della connessione Ethernet disabiliterà la connessione bluetooth all'app. La connessione al nodo via TCP non è disponibile per i dispositivi Apple.</string>
@@ -120,12 +120,12 @@
     <string name="config_position_gps_update_interval_summary">Quanto spesso si tenterà di recuperare una posizione dal GPS (se &lt;10sec il GPS rimarrà sempre attivo).</string>
     <string name="config_position_flags_summary">Dati facoltativi da includere nei messaggi di posizione. Più campi sono selezionati, più grande sarà il messaggio, che richiederà maggior tempo di trasmissione e aumenterà il rischio di perdita di pacchetti.</string>
     <string name="config_power_is_power_saving_summary">Verranno sospese tutte le funzioni per la maggior parte del tempo. Per i ruoli di tracker e sensor, è inclusa nella sospensione anche la radio lora. Questa configurazione è sconsigliata se il dispositivo viene utilizzato con le app del telefono o se il dispositivo è privo di pulsanti utente.</string>
-    <string name="config_security_public_key">Viene generata a partire dalla chiave pubblica e viene inviata agli altri nodi della mesh per permettere loro di calcolare una chiave segreta condivisa.</string>
-    <string name="config_security_private_key">Usato per creare una chiave condivisa con un dispositivo remoto.</string>
+    <string name="config_security_public_key">Generata a partire dalla chiave pubblica e inviata agli altri nodi della mesh per permettere loro di calcolare una chiave segreta condivisa.</string>
+    <string name="config_security_private_key">Usata per creare una chiave condivisa con un dispositivo remoto.</string>
     <string name="config_security_admin_key">La chiave pubblica che autorizza un nodo a inviare messaggi di amministrazione a questo nodo.</string>
     <string name="config_security_is_managed">Il dispositivo è gestito da un amministratore nella mesh, l'utente non è in grado di accedere a nessuna delle impostazioni del dispositivo.</string>
     <string name="config_security_serial_enabled">Console seriale attraverso la Stream API.</string>
-    <string name="config_security_debug_log_api_enabled">Output live debug logging su seriale, visualizza ed esporta i log di posizione dei dispositivi redatti su Bluetooth.</string>
+    <string name="config_security_debug_log_api_enabled">Produce log di debug in tempo reale su seriale, visualizza ed esporta i log del dispositivo via Bluetooth dopo aver rimosso le informazioni sulla posizione.</string>
     <!-- Position Config -->
     <string name="position_packet">Pacchetto Posizione</string>
     <string name="broadcast_interval">Intervallo Di Trasmissione</string>
@@ -163,7 +163,7 @@
     <string name="pairing_failed_try_again">Abbinamento fallito, effettuare una nuova selezione</string>
     <string name="location_disabled">L'accesso alla posizione è disattivato, non è possibile fornire la posizione al mesh.</string>
     <string name="share">Condividi</string>
-    <string name="new_node_seen">Nuovo nodo scoperto:%1$s</string>
+    <string name="new_node_seen">Nuovo Nodo Ricevuto:%1$s</string>
     <string name="disconnected">Disconnesso</string>
     <string name="device_sleeping">Il dispositivo è inattivo</string>
     <string name="connected_count">Connesso: %1$s online</string>
@@ -275,8 +275,8 @@
     <string name="error">Errore</string>
     <string name="ignore">Ignora</string>
     <string name="remove_ignored">Rimuovi da ignorati</string>
-    <string name="ignore_add">Aggiungere '%1$s' alla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
-    <string name="ignore_remove">Rimuovere '%1$s' dalla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
+    <string name="ignore_add">Aggiungere '%1$s' alla lista degli ignorati?</string>
+    <string name="ignore_remove">Rimuovere '%1$s' dalla lista degli ignorati?</string>
     <string name="map_select_download_region">Seleziona la regione da scaricare</string>
     <string name="map_tile_download_estimate">Stima dei riquadri da scaricare:</string>
     <string name="map_start_download">Inizia download</string>
@@ -296,7 +296,7 @@
     <string name="map_purge_fail">Eliminazione della cache SQL non riuscita, vedere logcat per i dettagli</string>
     <string name="map_cache_manager">Gestione della cache</string>
     <string name="map_download_complete">Scaricamento completato!</string>
-    <string name="map_download_errors">Download completo con %1$d errori</string>
+    <string name="map_download_errors">Download completato con %1$d errori</string>
     <string name="map_cache_tiles">%1$d riquadri della mappa</string>
     <string name="map_subDescription">direzione: %1$d° distanza: %2$s</string>
     <string name="waypoint_edit">Modifica waypoint</string>
@@ -484,7 +484,7 @@
     <string name="role">Ruolo Del Dispositivo</string>
     <string name="button_gpio">GPIO del Pulsante</string>
     <string name="buzzer_gpio">GPIO del Buzzer</string>
-    <string name="rebroadcast_mode">Modalità ritrasmissione</string>
+    <string name="rebroadcast_mode">Modalità Ritrasmissione</string>
     <string name="nodeinfo_broadcast_interval">Intervallo Di Trasmissione Info Nodo</string>
     <string name="double_tap_as_button_press">Doppio tocco come pressione pulsante</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
@@ -531,13 +531,13 @@
     <string name="coding_rate">Coding Rate</string>
     <string name="frequency_offset_mhz">Offset di frequenza (MHz)</string>
     <string name="region_frequency_plan">Regione</string>
-    <string name="hop_limit">Numero di hop</string>
+    <string name="hop_limit">Numero di Hop</string>
     <string name="tx_enabled">Trasmissione Abilitata</string>
-    <string name="tx_power_dbm">Potenza Di Trasmissione</string>
-    <string name="frequency_slot">Slot di frequenza</string>
+    <string name="tx_power_dbm">Potenza di Trasmissione</string>
+    <string name="frequency_slot">Slot di Frequenza</string>
     <string name="override_duty_cycle">Ignora limite di Duty Cycle</string>
     <string name="ignore_incoming">Ignora in arrivo</string>
-    <string name="sx126x_rx_boosted_gain">Guadagno potenziato in Ricezione</string>
+    <string name="sx126x_rx_boosted_gain">Migliora guadagno in Ricezione</string>
     <string name="override_frequency_mhz">Sovrascrivi Frequenza</string>
     <string name="pa_fan_disabled">Ventola PA disabilitata</string>
     <string name="ignore_mqtt">Ignora MQTT</string>
@@ -596,10 +596,10 @@
     <string name="enable_power_saving_mode">Abilita modalità risparmio energetico</string>
     <string name="shutdown_on_power_loss">Spegnimento in mancanza di alimentazione</string>
     <string name="shutdown_on_battery_delay_seconds">Ritardo spegnimento a batteria (secondi)</string>
-    <string name="adc_multiplier_override">Sovrascrivi Moltiplicatore ADC</string>
+    <string name="adc_multiplier_override">Sovrascrivi moltiplicatore ADC</string>
     <string name="adc_multiplier_override_ratio">Sovrascrivi rapporto moltiplicatore ADC</string>
     <string name="wait_for_bluetooth_duration_seconds">Durata attesa Bluetooth</string>
-    <string name="super_deep_sleep_duration_seconds">Durata Super Deep Sleep</string>
+    <string name="super_deep_sleep_duration_seconds">Durata super deep sleep</string>
     <string name="light_sleep_duration_seconds">Durata light sleep</string>
     <string name="minimum_wake_time_seconds">Tempo minimo di risveglio</string>
     <string name="battery_ina_2xx_i2c_address">Indirizzo INA_2XX I2C della batteria</string>
@@ -786,7 +786,7 @@
     <string name="security_icon_help_show_less">Mostra lo stato attuale</string>
     <string name="security_icon_help_dismiss">Annulla</string>
     <string name="confirm_delete_node">Sei sicuro di voler eliminare questo nodo?</string>
-    <string name="forget_connection">Dimentica connessione</string>
+    <string name="forget_connection">Elimina connessione</string>
     <string name="confirm_forget_connection">Sei sicuro di voler eliminare questa connessione?</string>
     <string name="replying_to">Rispondendo a %1$s</string>
     <string name="cancel_reply">Annulla risposta</string>
@@ -959,4 +959,6 @@
     <string name="firmware_update_usb_instruction_title">Selezionare il Disco DFU USB</string>
     <string name="firmware_update_usb_instruction_text">Il dispositivo è stato riavviato in modalità DFU e dovrebbe apparire come un disco USB (ad es. RAK4631).\n\nQuando il selettore di file si apre, selezionare la cartella principale (root) dell'unità per salvare il file con il firmware.</string>
     <string name="interval_unset">Non impostato</string>
+    <string name="interval_always_on">Sempre Attivo</string>
+    <!-- Compass -->
 </resources>

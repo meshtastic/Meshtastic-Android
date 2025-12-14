@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.di.ProcessLifecycle
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,7 +48,7 @@ class UsbRepository
 constructor(
     private val application: Application,
     private val dispatchers: CoroutineDispatchers,
-    private val processLifecycle: Lifecycle,
+    @ProcessLifecycle private val processLifecycle: Lifecycle,
     private val usbBroadcastReceiverLazy: dagger.Lazy<UsbBroadcastReceiver>,
     private val usbManagerLazy: dagger.Lazy<UsbManager?>,
     private val usbSerialProberLazy: dagger.Lazy<UsbSerialProber>,

@@ -18,17 +18,14 @@
 package org.meshtastic.core.model
 
 import com.google.protobuf.ByteString
+import org.meshtastic.core.common.byteArrayOfInts
+import org.meshtastic.core.common.xorHash
 import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ConfigKt.loRaConfig
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.channelSettings
 import java.security.SecureRandom
-
-/** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
-fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
-
-fun xorHash(b: ByteArray) = b.fold(0) { acc, x -> acc xor (x.toInt() and 0xff) }
 
 data class Channel(
     val settings: ChannelProtos.ChannelSettings = default.settings,

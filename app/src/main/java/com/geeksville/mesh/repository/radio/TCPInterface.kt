@@ -44,6 +44,7 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
         const val SOCKET_TIMEOUT = 5000
         const val SOCKET_RETRIES = 18
         const val SERVICE_PORT = NetworkRepository.SERVICE_PORT
+        const val TIMEOUT_LOG_INTERVAL = 5 // Log every Nth timeout
     }
 
     private var retryCount = 1
@@ -52,22 +53,45 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
     private var socket: Socket? = null
     private lateinit var outStream: OutputStream
 
+    private var connectionStartTime: Long = 0
+    private var packetsReceived: Int = 0
+    private var packetsSent: Int = 0
+    private var bytesReceived: Long = 0
+    private var bytesSent: Long = 0
+    private var timeoutEvents: Int = 0
+
     init {
         connect()
     }
 
     override fun sendBytes(p: ByteArray) {
+        packetsSent++
+        bytesSent += p.size
+        Timber.d("[$address] TCP sending packet #$packetsSent - ${p.size} bytes (Total TX: $bytesSent bytes)")
         outStream.write(p)
     }
 
     override fun flushBytes() {
+        Timber.d("[$address] TCP flushing output stream")
         outStream.flush()
     }
 
     override fun onDeviceDisconnect(waitForStopped: Boolean) {
         val s = socket
         if (s != null) {
-            Timber.d("Closing TCP socket")
+            val uptime =
+                if (connectionStartTime > 0) {
+                    System.currentTimeMillis() - connectionStartTime
+                } else {
+                    0
+                }
+            Timber.w(
+                "[$address] TCP disconnecting - " +
+                    "Uptime: ${uptime}ms, " +
+                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                    "Packets TX: $packetsSent ($bytesSent bytes), " +
+                    "Timeout events: $timeoutEvents",
+            )
             s.close()
             socket = null
         }
@@ -80,36 +104,65 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
                 try {
                     startConnect()
                 } catch (ex: IOException) {
-                    Timber.e("IOException in TCP reader: $ex")
+                    val uptime =
+                        if (connectionStartTime > 0) {
+                            System.currentTimeMillis() - connectionStartTime
+                        } else {
+                            0
+                        }
+                    Timber.e(ex, "[$address] TCP IOException after ${uptime}ms - ${ex.message}")
                     onDeviceDisconnect(false)
                 } catch (ex: Throwable) {
+                    val uptime =
+                        if (connectionStartTime > 0) {
+                            System.currentTimeMillis() - connectionStartTime
+                        } else {
+                            0
+                        }
+                    Timber.e(ex, "[$address] TCP exception after ${uptime}ms - ${ex.message}")
                     Exceptions.report(ex, "Exception in TCP reader")
                     onDeviceDisconnect(false)
                 }
 
-                if (retryCount > MAX_RETRIES_ALLOWED) break
+                if (retryCount > MAX_RETRIES_ALLOWED) {
+                    Timber.e("[$address] TCP max retries ($MAX_RETRIES_ALLOWED) exceeded, giving up")
+                    break
+                }
 
-                Timber.d("Reconnect attempt $retryCount in ${backoffDelay / 1000}s")
+                Timber.i(
+                    "[$address] TCP reconnect attempt #$retryCount in ${backoffDelay / 1000}s " +
+                        "(backoff: ${backoffDelay}ms)",
+                )
                 delay(backoffDelay)
 
                 retryCount++
                 backoffDelay = minOf(backoffDelay * 2, MAX_BACKOFF_MILLIS)
             }
-            Timber.d("Exiting TCP reader")
+            Timber.i("[$address] TCP reader exiting")
         }
     }
 
     // Create a socket to make the connection with the server
     private suspend fun startConnect() = withContext(Dispatchers.IO) {
-        Timber.d("TCP connecting to $address")
+        val attemptStart = System.currentTimeMillis()
+        Timber.i("[$address] TCP connection attempt starting...")
 
         val (host, port) =
             address.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: SERVICE_PORT) }
+
+        Timber.d("[$address] Resolving host '$host' and connecting to port $port...")
 
         Socket(InetAddress.getByName(host), port).use { socket ->
             socket.tcpNoDelay = true
             socket.soTimeout = SOCKET_TIMEOUT
             this@TCPInterface.socket = socket
+
+            val connectTime = System.currentTimeMillis() - attemptStart
+            connectionStartTime = System.currentTimeMillis()
+            Timber.i(
+                "[$address] TCP socket connected in ${connectTime}ms - " +
+                    "Local: ${socket.localSocketAddress}, Remote: ${socket.remoteSocketAddress}",
+            )
 
             BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
                 outStream = outputStream
@@ -125,16 +178,32 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
                         try { // close after 90s of inactivity
                             val c = inputStream.read()
                             if (c == -1) {
-                                Timber.w("Got EOF on TCP stream")
+                                Timber.w("[$address] TCP got EOF on stream after $packetsReceived packets received")
                                 break
                             } else {
                                 timeoutCount = 0
+                                packetsReceived++
+                                bytesReceived++
                                 readChar(c.toByte())
                             }
                         } catch (ex: SocketTimeoutException) {
                             timeoutCount++
+                            timeoutEvents++
+                            if (timeoutCount % TIMEOUT_LOG_INTERVAL == 0) {
+                                Timber.d(
+                                    "[$address] TCP socket timeout count: $timeoutCount/$SOCKET_RETRIES " +
+                                        "(total timeouts: $timeoutEvents)",
+                                )
+                            }
                             // Ignore and start another read
                         }
+                    }
+                    if (timeoutCount >= SOCKET_RETRIES) {
+                        val inactivityMs = SOCKET_RETRIES * SOCKET_TIMEOUT
+                        Timber.w(
+                            "[$address] TCP closing connection due to $SOCKET_RETRIES consecutive timeouts " +
+                                "(${inactivityMs}ms of inactivity)",
+                        )
                     }
                 }
             }

@@ -518,4 +518,5 @@
     <string name="firmware_update_taking_a_while">Це може зайняти хвилинку...</string>
     <string name="firmware_update_select_file">Вибрати локальний файл</string>
     <string name="interval_unset">Скинути</string>
+    <!-- Compass -->
 </resources>

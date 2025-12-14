@@ -854,4 +854,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualización fallida</string>
     <string name="interval_unset">Sin configurar</string>
+    <!-- Compass -->
 </resources>

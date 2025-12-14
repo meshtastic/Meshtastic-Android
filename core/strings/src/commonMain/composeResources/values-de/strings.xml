@@ -986,4 +986,16 @@
         <item quantity="one">1 Stunde</item>
         <item quantity="other">%d Stunden</item>
     </plurals>
+    <!-- Compass -->
+    <string name="compass_title">Kompass</string>
+    <string name="open_compass">Kompass öffnen</string>
+    <string name="compass_distance">Entfernung: %1$s</string>
+    <string name="compass_bearing">Kurs: %1$s</string>
+    <string name="compass_bearing_na">Kurs: N/A</string>
+    <string name="compass_no_magnetometer">Dieses Gerät hat keinen Kompass-Sensor. Die Richtung ist nicht verfügbar.</string>
+    <string name="compass_no_location_permission">Standortberechtigung ist erforderlich, um Entfernung und Kurs anzuzeigen.</string>
+    <string name="compass_location_disabled">Standortanbieter ist deaktiviert. Standortdienste einschalten.</string>
+    <string name="compass_no_location_fix">Warten auf eine GPS Position, um Entfernung und Kurs zu berechnen.</string>
+    <string name="compass_uncertainty">Geschätzte Fläche: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Geschätzte Fläche: unbekannte Genauigkeit</string>
 </resources>
