@@ -976,15 +976,15 @@
     <string name="interval_always_on">Immer an</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 Sekunde</item>
-        <item quantity="other">%d Sekunden</item>
+        <item quantity="other">%1$d Sekunden</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">1 Minute</item>
-        <item quantity="other">%d Minuten</item>
+        <item quantity="other">%1$d Minuten</item>
     </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">1 Stunde</item>
-        <item quantity="other">%d Stunden</item>
+        <item quantity="other">%1$d Stunden</item>
     </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompass</string>
