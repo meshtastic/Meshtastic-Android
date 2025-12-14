@@ -108,28 +108,24 @@ fun TracerouteLogScreen(
     var showDialog by remember { mutableStateOf<TracerouteDialog?>(null) }
     var errorMessageRes by remember { mutableStateOf<StringResource?>(null) }
 
-    if (showDialog != null) {
-        val dialogState = showDialog
-        val message = dialogState?.message ?: AnnotatedString("") // Should not be null if dialog is shown
+    showDialog?.let { dialog ->
         SimpleAlertDialog(
             title = Res.string.traceroute,
-            text = { SelectionContainer { Text(text = message) } },
+            text = { SelectionContainer { Text(text = dialog.message) } },
             confirmText = stringResource(Res.string.view_on_map),
             onConfirm = {
-                dialogState?.let { dialog ->
-                    val availability =
-                        viewModel.tracerouteMapAvailability(
-                            forwardRoute = dialog.overlay?.forwardRoute.orEmpty(),
-                            returnRoute = dialog.overlay?.returnRoute.orEmpty(),
-                        )
-                    val errorRes = availability.toMessageRes()
-                    if (errorRes == null) {
-                        onViewOnMap(dialog.requestId)
-                    } else {
-                        errorMessageRes = errorRes
-                    }
-                    showDialog = null
+                val availability =
+                    viewModel.tracerouteMapAvailability(
+                        forwardRoute = dialog.overlay?.forwardRoute.orEmpty(),
+                        returnRoute = dialog.overlay?.returnRoute.orEmpty(),
+                    )
+                val errorRes = availability.toMessageRes()
+                if (errorRes == null) {
+                    onViewOnMap(dialog.requestId)
+                } else {
+                    errorMessageRes = errorRes
                 }
+                showDialog = null
             },
             onDismiss = { showDialog = null },
         )
