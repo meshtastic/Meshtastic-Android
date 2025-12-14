@@ -257,4 +257,6 @@
     <string name="two_days">48 Timer</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Oppdatering feilet</string>
+    <string name="interval_unset">Lås opp</string>
+    <!-- Compass -->
 </resources>

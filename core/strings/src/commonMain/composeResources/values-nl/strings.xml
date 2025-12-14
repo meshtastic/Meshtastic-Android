@@ -445,4 +445,6 @@
     <string name="two_days">48 Uur</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Bijwerken mislukt</string>
+    <string name="interval_unset">Terugzetten</string>
+    <!-- Compass -->
 </resources>

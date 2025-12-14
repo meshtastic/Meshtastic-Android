@@ -536,7 +536,7 @@
     <string name="advanced">Lisäasetukset</string>
     <string name="use_modem_preset">Käytä esiasetusta</string>
     <string name="modem_preset">Esiasetukset</string>
-    <string name="bandwidth">Kaistanlevyes</string>
+    <string name="bandwidth">Kaistanleveys</string>
     <string name="spread_factor">Levennyskerroin (Spread Factor)</string>
     <string name="coding_rate">Koodausnopeus</string>
     <string name="frequency_offset_mhz">Taajuuspoikkeama (MHz)</string>
@@ -973,4 +973,30 @@
     <string name="firmware_update_usb_instruction_title">Valitse DFU USB-asema</string>
     <string name="firmware_update_usb_instruction_text">Laitteesi on käynnistynyt uudelleen DFU-tilaan ja sen pitäisi näkyä USB-asemana (esim. RAK4631).
 \n\nKun tiedostonvalitsin avautuu, valitse kyseisen aseman juurihakemisto tallentaaksesi laiteohjelmistotiedoston.</string>
+    <string name="interval_unset">Ei yhdistetty</string>
+    <string name="interval_always_on">Aina päällä</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 sekunti</item>
+        <item quantity="other">%1$d sekuntia</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 minuutti</item>
+        <item quantity="other">%1$d minuuttia</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 tunti</item>
+        <item quantity="other">%1$d tuntia</item>
+    </plurals>
+    <!-- Compass -->
+    <string name="compass_title">Kompassi</string>
+    <string name="open_compass">Avaa kompassi</string>
+    <string name="compass_distance">Etäisyys: %1$s</string>
+    <string name="compass_bearing">Suunta: %1$s</string>
+    <string name="compass_bearing_na">Suunta: ei saatavilla</string>
+    <string name="compass_no_magnetometer">Tässä laitteessa ei ole kompassianturia. Suunta ei ole käytettävissä.</string>
+    <string name="compass_no_location_permission">Etäisyyden ja suunnan näyttäminen edellyttää sijaintilupaa.</string>
+    <string name="compass_location_disabled">Sijaintipalvelu ei ole käytössä. Kytke sijaintipalvelut päälle.</string>
+    <string name="compass_no_location_fix">Odotetaan GPS-paikannusta etäisyyden ja suunnan laskemiseksi.</string>
+    <string name="compass_uncertainty">Arvioitu alue: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Arvioitu alue: tarkkuus tuntematon</string>
 </resources>

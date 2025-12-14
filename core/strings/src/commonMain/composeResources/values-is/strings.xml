@@ -133,4 +133,6 @@
     <string name="message_input_label">Skilaboð</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Uppfærsla misfórst</string>
+    <string name="interval_unset">Óstillt</string>
+    <!-- Compass -->
 </resources>

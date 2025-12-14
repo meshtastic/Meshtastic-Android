@@ -28,19 +28,20 @@ import androidx.navigation.NavHostController
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -134,11 +135,12 @@ constructor(
     val meshActivity: SharedFlow<MeshActivity> =
         radioInterfaceService.meshActivity.shareIn(viewModelScope, SharingStarted.Eagerly, 0)
 
-    private val scrollToTopEventChannel = Channel<ScrollToTopEvent>(capacity = Channel.CONFLATED)
-    val scrollToTopEventFlow: Flow<ScrollToTopEvent> = scrollToTopEventChannel.receiveAsFlow()
+    private val _scrollToTopEventFlow =
+        MutableSharedFlow<ScrollToTopEvent>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val scrollToTopEventFlow: Flow<ScrollToTopEvent> = _scrollToTopEventFlow.asSharedFlow()
 
     fun emitScrollToTopEvent(event: ScrollToTopEvent) {
-        scrollToTopEventChannel.trySend(event)
+        _scrollToTopEventFlow.tryEmit(event)
     }
 
     data class AlertData(

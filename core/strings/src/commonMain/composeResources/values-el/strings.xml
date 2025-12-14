@@ -206,4 +206,6 @@
     <string name="two_days">48 Ώρες</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Αποτυχία ενημέρωσης</string>
+    <string name="interval_unset">Αναίρεση</string>
+    <!-- Compass -->
 </resources>

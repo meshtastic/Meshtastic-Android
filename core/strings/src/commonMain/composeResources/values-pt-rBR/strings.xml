@@ -728,4 +728,6 @@
     <!-- Firmware Update -->
     <string name="firmware_update_done">Concluído</string>
     <string name="firmware_update_failed">Atualização falhou</string>
+    <string name="interval_unset">Não definido</string>
+    <!-- Compass -->
 </resources>

@@ -234,4 +234,6 @@
     <string name="two_days">48 Orë</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Përditësimi dështoi</string>
+    <string name="interval_unset">I pa konfiguruar</string>
+    <!-- Compass -->
 </resources>

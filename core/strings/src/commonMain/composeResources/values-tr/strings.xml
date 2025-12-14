@@ -580,4 +580,6 @@
     <string name="two_days">48 Saat</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Güncelleme başarısız</string>
+    <string name="interval_unset">Ayarlanmamış</string>
+    <!-- Compass -->
 </resources>

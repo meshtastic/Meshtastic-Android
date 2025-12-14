@@ -189,4 +189,6 @@
     <string name="two_days">48 ساعات</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">التحديث فشل</string>
+    <string name="interval_unset">إلغاء تعيين</string>
+    <!-- Compass -->
 </resources>

@@ -31,6 +31,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.common)
     implementation(projects.core.proto)
     implementation(projects.core.strings)
 

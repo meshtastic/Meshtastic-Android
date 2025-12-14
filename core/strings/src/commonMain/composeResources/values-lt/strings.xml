@@ -254,4 +254,6 @@
     <string name="two_days">48 Valandos</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Atnaujinti nepavyko</string>
+    <string name="interval_unset">Nenustatyta</string>
+    <!-- Compass -->
 </resources>

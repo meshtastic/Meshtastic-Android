@@ -80,6 +80,7 @@ internal fun MessageItem(
     emojis: List<Reaction> = emptyList(),
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
+    onDoubleClick: () -> Unit = {},
     onClickChip: (Node) -> Unit = {},
     onStatusClick: () -> Unit = {},
     onNavigateToOriginalMessage: (Int) -> Unit = {},
@@ -120,7 +121,7 @@ internal fun MessageItem(
                     start = if (!message.fromLocal) 0.dp else 16.dp,
                     end = if (message.fromLocal) 0.dp else 16.dp,
                 )
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick, onDoubleClick = onDoubleClick)
                 .then(messageModifier),
             colors = cardColors,
         ) {

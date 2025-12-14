@@ -244,4 +244,6 @@
     <string name="two_days">48 Uair an chloig</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Nuacht nuashonraithe</string>
+    <string name="interval_unset">Díshocraigh</string>
+    <!-- Compass -->
 </resources>

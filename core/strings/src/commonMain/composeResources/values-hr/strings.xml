@@ -167,4 +167,6 @@
     <string name="two_days">48 Sati</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Ažuriranje neuspjelo</string>
+    <string name="interval_unset">Nepostavljeno</string>
+    <!-- Compass -->
 </resources>

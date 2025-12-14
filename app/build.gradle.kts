@@ -140,13 +140,6 @@ android {
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
-        all {
-            if (name == "google") {
-                apply(plugin = libs.plugins.google.services.get().pluginId)
-                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            }
-        }
-
         named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
         named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
     }
@@ -261,19 +254,9 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
-}
-
-val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
-
-tasks.configureEach {
-    if (
-        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } && name.contains("fdroid", ignoreCase = true)
-    ) {
-        project.logger.lifecycle("Disabling task for F-Droid: $name")
-        enabled = false
-    }
 }
 
 dokka {

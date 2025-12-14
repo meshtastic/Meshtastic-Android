@@ -1,14 +1,6 @@
 name: Android CI (PR)
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - "**.md"
-      - ".idea/**"
-      - ".gitignore"
-      - ".gitmodules"
   pull_request:
     branches:
       - main

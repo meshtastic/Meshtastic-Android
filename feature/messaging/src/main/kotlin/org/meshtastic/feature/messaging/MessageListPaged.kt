@@ -108,6 +108,9 @@ internal fun MessageListPaged(
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { state.selectedIds.value.isNotEmpty() } }
 
+    // Optimization: Pre-calculate map for O(1) lookup in list items to avoid O(N) linear search during scrolling.
+    val nodeMap = remember(state.nodes) { state.nodes.associateBy { it.num } }
+
     var showStatusDialog by remember { mutableStateOf<Message?>(null) }
     showStatusDialog?.let { message ->
         MessageStatusDialog(
@@ -145,6 +148,7 @@ internal fun MessageListPaged(
     MessageListPagedContent(
         listState = listState,
         state = state,
+        nodeMap = nodeMap,
         handlers = handlers,
         inSelectionMode = inSelectionMode,
         coroutineScope = coroutineScope,
@@ -159,6 +163,7 @@ internal fun MessageListPaged(
 private fun MessageListPagedContent(
     listState: LazyListState,
     state: MessageListPagedState,
+    nodeMap: Map<Int, Node>,
     handlers: MessageListHandlers,
     inSelectionMode: Boolean,
     coroutineScope: CoroutineScope,
@@ -185,6 +190,7 @@ private fun MessageListPagedContent(
                     renderPagedChatMessageRow(
                         message = message,
                         state = state,
+                        nodeMap = nodeMap,
                         handlers = handlers,
                         inSelectionMode = inSelectionMode,
                         coroutineScope = coroutineScope,
@@ -224,6 +230,7 @@ private fun MessageListPagedContent(
 private fun LazyItemScope.renderPagedChatMessageRow(
     message: Message,
     state: MessageListPagedState,
+    nodeMap: Map<Int, Node>,
     handlers: MessageListHandlers,
     inSelectionMode: Boolean,
     coroutineScope: CoroutineScope,
@@ -237,10 +244,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
         remember(message.uuid, state.selectedIds.value) {
             derivedStateOf { state.selectedIds.value.contains(message.uuid) }
         }
-    val node by
-        remember(message.node.num, state.nodes) {
-            derivedStateOf { state.nodes.find { it.num == message.node.num } ?: message.node }
-        }
+    val node = nodeMap[message.node.num] ?: message.node
 
     MessageItem(
         modifier = Modifier.animateItem(),
@@ -363,8 +367,8 @@ private fun UpdateUnreadCountPaged(
         val observer =
             androidx.lifecycle.LifecycleEventObserver { _, event ->
                 when (event) {
-                    androidx.lifecycle.Lifecycle.Event.ON_RESUME -> isResumed = true
-                    androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> isResumed = false
+                    Lifecycle.Event.ON_RESUME -> isResumed = true
+                    Lifecycle.Event.ON_PAUSE -> isResumed = false
                     else -> {}
                 }
             }

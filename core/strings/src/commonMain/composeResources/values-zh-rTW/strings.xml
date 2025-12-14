@@ -906,4 +906,6 @@
     <string name="firmware_update_checking">正在檢查更新……</string>
     <string name="firmware_update_done">完成</string>
     <string name="firmware_update_failed">更新失敗</string>
+    <string name="interval_unset">取消設定</string>
+    <!-- Compass -->
 </resources>

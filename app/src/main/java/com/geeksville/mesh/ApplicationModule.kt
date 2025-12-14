@@ -27,6 +27,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.service.MeshServiceNotifications
 import javax.inject.Singleton
 
@@ -37,10 +38,13 @@ interface ApplicationModule {
     @Binds fun bindMeshServiceNotifications(impl: MeshServiceNotificationsImpl): MeshServiceNotifications
 
     companion object {
-        @Provides fun provideProcessLifecycleOwner(): LifecycleOwner = ProcessLifecycleOwner.get()
+        @Provides @ProcessLifecycle
+        fun provideProcessLifecycleOwner(): LifecycleOwner = ProcessLifecycleOwner.get()
 
         @Provides
-        fun provideProcessLifecycle(processLifecycleOwner: LifecycleOwner): Lifecycle = processLifecycleOwner.lifecycle
+        @ProcessLifecycle
+        fun provideProcessLifecycle(@ProcessLifecycle processLifecycleOwner: LifecycleOwner): Lifecycle =
+            processLifecycleOwner.lifecycle
 
         @Singleton
         @Provides
