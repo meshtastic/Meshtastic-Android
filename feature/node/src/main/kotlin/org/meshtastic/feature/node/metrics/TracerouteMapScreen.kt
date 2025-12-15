@@ -51,8 +51,7 @@ import org.meshtastic.core.strings.traceroute_outgoing_route
 import org.meshtastic.core.strings.traceroute_return_route
 import org.meshtastic.core.strings.traceroute_showing_nodes
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.theme.TracerouteOutgoingColor
-import org.meshtastic.core.ui.theme.TracerouteReturnColor
+import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.feature.map.MapView
 import org.meshtastic.feature.map.model.TracerouteOverlay
 
@@ -125,8 +124,11 @@ private fun TracerouteLegend(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            LegendRow(color = TracerouteOutgoingColor, label = stringResource(Res.string.traceroute_outgoing_route))
-            LegendRow(color = TracerouteReturnColor, label = stringResource(Res.string.traceroute_return_route))
+            LegendRow(
+                color = TracerouteColors.OutgoingRoute,
+                label = stringResource(Res.string.traceroute_outgoing_route),
+            )
+            LegendRow(color = TracerouteColors.ReturnRoute, label = stringResource(Res.string.traceroute_return_route))
         }
     }
 }

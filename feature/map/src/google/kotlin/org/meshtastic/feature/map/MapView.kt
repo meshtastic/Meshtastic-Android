@@ -108,8 +108,7 @@ import org.meshtastic.core.strings.speed
 import org.meshtastic.core.strings.timestamp
 import org.meshtastic.core.strings.track_point
 import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.ui.theme.TracerouteOutgoingColor
-import org.meshtastic.core.ui.theme.TracerouteReturnColor
+import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.map.component.ClusterItemsListDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
@@ -451,7 +450,7 @@ fun MapView(
                     Polyline(
                         points = tracerouteForwardOffsetPoints,
                         jointType = JointType.ROUND,
-                        color = TracerouteOutgoingColor,
+                        color = TracerouteColors.OutgoingRoute,
                         width = 9f,
                         zIndex = 1.5f,
                     )
@@ -460,7 +459,7 @@ fun MapView(
                     Polyline(
                         points = tracerouteReturnOffsetPoints,
                         jointType = JointType.ROUND,
-                        color = TracerouteReturnColor,
+                        color = TracerouteColors.ReturnRoute,
                         width = 7f,
                         zIndex = 1.4f,
                     )
@@ -552,7 +551,7 @@ fun MapView(
                     Polyline(
                         points = tracerouteForwardOffsetPoints,
                         jointType = JointType.ROUND,
-                        color = TracerouteOutgoingColor,
+                        color = TracerouteColors.OutgoingRoute,
                         width = 9f,
                         zIndex = 2f,
                     )
@@ -561,7 +560,7 @@ fun MapView(
                     Polyline(
                         points = tracerouteReturnOffsetPoints,
                         jointType = JointType.ROUND,
-                        color = TracerouteReturnColor,
+                        color = TracerouteColors.ReturnRoute,
                         width = 7f,
                         zIndex = 1.5f,
                     )

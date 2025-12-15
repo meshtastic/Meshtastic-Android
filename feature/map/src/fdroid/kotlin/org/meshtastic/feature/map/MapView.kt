@@ -122,8 +122,7 @@ import org.meshtastic.core.strings.waypoint_delete
 import org.meshtastic.core.strings.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.theme.TracerouteOutgoingColor
-import org.meshtastic.core.ui.theme.TracerouteReturnColor
+import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
@@ -603,14 +602,14 @@ fun MapView(
             .takeIf { it.size >= 2 }
             ?.let { points ->
                 traceroutePolylines.add(
-                    buildPolyline(points, TracerouteOutgoingColor.toArgb(), with(density) { 6.dp.toPx() }),
+                    buildPolyline(points, TracerouteColors.OutgoingRoute.toArgb(), with(density) { 6.dp.toPx() }),
                 )
             }
         returnPoints
             .takeIf { it.size >= 2 }
             ?.let { points ->
                 traceroutePolylines.add(
-                    buildPolyline(points, TracerouteReturnColor.toArgb(), with(density) { 5.dp.toPx() }),
+                    buildPolyline(points, TracerouteColors.ReturnRoute.toArgb(), with(density) { 5.dp.toPx() }),
                 )
             }
         overlays.addAll(traceroutePolylines)
