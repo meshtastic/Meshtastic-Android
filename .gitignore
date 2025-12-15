@@ -8,8 +8,6 @@
 *.iml
 
 .gradle
-/.gradle-home
-/.gradle-local
 /local.properties
 .DS_Store
 **/build/**
