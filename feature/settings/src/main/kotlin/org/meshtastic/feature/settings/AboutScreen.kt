@@ -51,6 +51,11 @@ fun AboutScreen(onNavigateUp: () -> Unit) {
         val context = LocalContext.current
         val libraries = Libs.Builder().withContext(context).build()
         LibrariesContainer(
+            showAuthor = true,
+            showVersion = true,
+            showDescription = true,
+            showLicenseBadges = true,
+            showFundingBadges = true,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),

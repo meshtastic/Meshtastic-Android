@@ -16,6 +16,8 @@
  */
 
 import com.geeksville.mesh.buildlogic.GitVersionValueSource
+import com.mikepenz.aboutlibraries.plugin.DuplicateMode
+import com.mikepenz.aboutlibraries.plugin.DuplicateRule
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -281,11 +283,11 @@ dokka {
 }
 
 aboutLibraries {
-    collect {
-        fetchRemoteLicense = true
-        fetchRemoteFunding = true
-    }
     export {
         excludeFields = listOf("generated")
+    }
+    library {
+        duplicationMode = DuplicateMode.MERGE
+        duplicationRule = DuplicateRule.SIMPLE
     }
 }
