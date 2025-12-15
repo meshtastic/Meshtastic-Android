@@ -51,10 +51,10 @@ import org.meshtastic.core.strings.traceroute_outgoing_route
 import org.meshtastic.core.strings.traceroute_return_route
 import org.meshtastic.core.strings.traceroute_showing_nodes
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.theme.TracerouteOutgoingColor
+import org.meshtastic.core.ui.theme.TracerouteReturnColor
 import org.meshtastic.feature.map.MapView
-import org.meshtastic.feature.map.model.TracerouteOutgoingColor
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.feature.map.model.TracerouteReturnColor
 
 @Composable
 fun TracerouteMapScreen(

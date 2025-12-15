@@ -17,8 +17,6 @@
 
 package org.meshtastic.feature.map.model
 
-import androidx.compose.ui.graphics.Color
-
 data class TracerouteOverlay(
     val requestId: Int,
     val forwardRoute: List<Int> = emptyList(),
@@ -29,8 +27,3 @@ data class TracerouteOverlay(
     val hasRoutes: Boolean
         get() = forwardRoute.isNotEmpty() || returnRoute.isNotEmpty()
 }
-
-// High-contrast pair that stays legible on light/dark tiles and for most color-blind users.
-// Use partial alpha so polylines don’t overpower markers/tiles.
-val TracerouteOutgoingColor = Color(0xCCE86A00) // orange @ ~80% opacity
-val TracerouteReturnColor = Color(0xCC0081C7) // cyan @ ~80% opacity

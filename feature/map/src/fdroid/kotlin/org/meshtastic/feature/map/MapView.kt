@@ -122,6 +122,8 @@ import org.meshtastic.core.strings.waypoint_delete
 import org.meshtastic.core.strings.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.theme.TracerouteOutgoingColor
+import org.meshtastic.core.ui.theme.TracerouteReturnColor
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
@@ -130,9 +132,7 @@ import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
-import org.meshtastic.feature.map.model.TracerouteOutgoingColor
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.feature.map.model.TracerouteReturnColor
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint

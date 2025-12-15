@@ -108,6 +108,8 @@ import org.meshtastic.core.strings.speed
 import org.meshtastic.core.strings.timestamp
 import org.meshtastic.core.strings.track_point
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.theme.TracerouteOutgoingColor
+import org.meshtastic.core.ui.theme.TracerouteReturnColor
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.map.component.ClusterItemsListDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
@@ -117,9 +119,7 @@ import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.NodeClusterMarkers
 import org.meshtastic.feature.map.component.WaypointMarkers
 import org.meshtastic.feature.map.model.NodeClusterItem
-import org.meshtastic.feature.map.model.TracerouteOutgoingColor
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.feature.map.model.TracerouteReturnColor
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.MeshProtos.Position
 import org.meshtastic.proto.MeshProtos.Waypoint
