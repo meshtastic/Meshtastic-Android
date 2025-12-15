@@ -40,6 +40,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.FormatPaint
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
@@ -76,7 +77,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.about
 import org.meshtastic.core.strings.analytics_okay
 import org.meshtastic.core.strings.app_settings
 import org.meshtastic.core.strings.app_version
@@ -420,6 +423,14 @@ fun SettingsScreen(
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     intent.data = Uri.fromParts("package", context.packageName, null)
                     settingsLauncher.launch(intent)
+                }
+
+                ListItem(
+                    text = stringResource(Res.string.about),
+                    leadingIcon = Icons.Rounded.Info,
+                    trailingIcon = null,
+                ) {
+                    onNavigate(SettingsRoutes.About)
                 }
 
                 AppVersionButton(

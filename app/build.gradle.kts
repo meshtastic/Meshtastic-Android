@@ -31,6 +31,7 @@ plugins {
     alias(libs.plugins.secrets)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
+    alias(libs.plugins.aboutlibraries)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -276,5 +277,11 @@ dokka {
     dokkaGeneratorIsolation = ProcessIsolation {
         // Configures heap size
         maxHeapSize = "6g"
+    }
+}
+
+aboutLibraries {
+    export {
+        excludeFields = listOf("generated")
     }
 }
