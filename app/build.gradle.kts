@@ -281,6 +281,10 @@ dokka {
 }
 
 aboutLibraries {
+    collect {
+        fetchRemoteLicense = true
+        fetchRemoteFunding = true
+    }
     export {
         excludeFields = listOf("generated")
     }
