@@ -216,7 +216,7 @@
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://meshtastic.org/docs/software/android/installation">docs</a> on this topic.</string>
     <string name="none">None (disable)</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
-    <string name="about">About</string>
+    <string name="acknowledgements">Acknowledgements</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug Panel</string>
