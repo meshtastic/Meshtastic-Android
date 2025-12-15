@@ -283,9 +283,7 @@ dokka {
 }
 
 aboutLibraries {
-    export {
-        excludeFields = listOf("generated")
-    }
+    export { excludeFields = listOf("generated") }
     library {
         duplicationMode = DuplicateMode.MERGE
         duplicationRule = DuplicateRule.SIMPLE

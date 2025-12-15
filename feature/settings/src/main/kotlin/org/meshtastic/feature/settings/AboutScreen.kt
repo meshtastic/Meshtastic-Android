@@ -56,9 +56,7 @@ fun AboutScreen(onNavigateUp: () -> Unit) {
             showDescription = true,
             showLicenseBadges = true,
             showFundingBadges = true,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
             libraries = libraries,
         )
     }
