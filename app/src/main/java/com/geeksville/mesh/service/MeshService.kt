@@ -1367,7 +1367,7 @@ class MeshService : Service() {
 
     private fun getHopsAwayForPacket(packet: MeshPacket): Int =
         if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
-            0 // These don't come with the .hop params, but do not propogate, so they must be 0
+            0 // These don't come with the .hop params, but do not propagate, so they must be 0
         } else if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
             -1
         } else {
