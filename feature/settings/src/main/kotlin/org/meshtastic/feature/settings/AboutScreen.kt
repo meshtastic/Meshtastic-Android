@@ -30,7 +30,7 @@ import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.util.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.about
+import org.meshtastic.core.strings.acknowledgements
 import org.meshtastic.core.ui.component.MainAppBar
 
 @Composable
@@ -38,7 +38,7 @@ fun AboutScreen(onNavigateUp: () -> Unit) {
     Scaffold(
         topBar = {
             MainAppBar(
-                title = stringResource(Res.string.about),
+                title = stringResource(Res.string.acknowledgements),
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 ourNode = null,

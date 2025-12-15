@@ -79,7 +79,7 @@ import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.about
+import org.meshtastic.core.strings.acknowledgements
 import org.meshtastic.core.strings.analytics_okay
 import org.meshtastic.core.strings.app_settings
 import org.meshtastic.core.strings.app_version
@@ -426,7 +426,7 @@ fun SettingsScreen(
                 }
 
                 ListItem(
-                    text = stringResource(Res.string.about),
+                    text = stringResource(Res.string.acknowledgements),
                     leadingIcon = Icons.Rounded.Info,
                     trailingIcon = null,
                 ) {
