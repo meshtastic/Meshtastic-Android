@@ -104,7 +104,6 @@
     <string name="must_update">Applicatie update noodzakelijk in Google Play store (of Github). Deze versie is te oud om te praten met deze radio.</string>
     <string name="none">Geen (uit)</string>
     <string name="meshtastic_service_notifications">Servicemeldingen</string>
-    <string name="about">Over</string>
     <string name="channel_invalid">Deze Kanaal URL is ongeldig en kan niet worden gebruikt</string>
     <string name="debug_panel">Debug-paneel</string>
     <string name="clear">Wis</string>

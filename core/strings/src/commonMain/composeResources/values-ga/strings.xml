@@ -91,7 +91,6 @@
     <string name="must_update">Caithfidh tú an feidhmchlár seo a nuashonrú ón siopa feidhmchláir (nó Github). Tá sé ró-aois chun cumarsáid a dhéanamh leis an firmware raidió seo. Le do thoil, léigh ár <a href="https://meshtastic.org/docs/software/android/installation">doiciméid</a> ar an ábhar seo.</string>
     <string name="none">Ní aon (diúscairt)</string>
     <string name="meshtastic_service_notifications">Fógraí seirbhíse</string>
-    <string name="about">Maidir le</string>
     <string name="channel_invalid">Tá an URL Cainéil seo neamhdhleathach agus ní féidir é a úsáid</string>
     <string name="debug_panel">Painéal Laige</string>
     <string name="clear">Glan</string>

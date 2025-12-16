@@ -190,7 +190,6 @@
     <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Sie ist zu alt, um mit dieser Funkgeräte Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/installation">Dokumentation</a> zu diesem Thema.</string>
     <string name="none">Nichts (deaktiviert)</string>
     <string name="meshtastic_service_notifications">Dienstbenachrichtigungen</string>
-    <string name="about">Über</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
     <string name="contact_invalid">Dieser Kontakt ist ungültig und kann nicht hinzugefügt werden</string>
     <string name="debug_panel">Debug-Ausgaben</string>
@@ -902,7 +901,6 @@
     <string name="device_configuration">Geräteeinstellungen</string>
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <string name="device_telemetry_enabled">Gerätetelemetrie senden</string>
-    <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul für Gerätetelemetrie, um Daten an das Meshtastic Netzwerk zu senden. Dies sind Richtwerte. Bei stark ausgelasteten Netzwerken werden die Übertragungsintervalle automatisch anhand der Anzahl der Knoten die online sind verlängert. Netzwerke mit weniger als 10 Knoten werden auf kürzere Intervalle skaliert.</string>
     <string name="any">Beliebig</string>
     <string name="one_hour">1 Stunde</string>
     <string name="eight_hours">8 Stunden</string>
