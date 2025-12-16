@@ -190,6 +190,7 @@
     <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Sie ist zu alt, um mit dieser Funkgeräte Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/installation">Dokumentation</a> zu diesem Thema.</string>
     <string name="none">Nichts (deaktiviert)</string>
     <string name="meshtastic_service_notifications">Dienstbenachrichtigungen</string>
+    <string name="acknowledgements">Danksagungen</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
     <string name="contact_invalid">Dieser Kontakt ist ungültig und kann nicht hinzugefügt werden</string>
     <string name="debug_panel">Debug-Ausgaben</string>
@@ -378,6 +379,12 @@
         <item quantity="other">%d Sprünge</item>
     </plurals>
     <string name="traceroute_diff">%1$d Sprünge vorwärts %2$d Sprünge zurück</string>
+    <string name="traceroute_outgoing_route">Hinweg</string>
+    <string name="traceroute_return_route">Rückweg</string>
+    <string name="traceroute_endpoint_missing">Traceroute Karte kann nicht angezeigt werden, da der Start- oder Zielknoten über keine Positionsinformationen verfügt.</string>
+    <string name="view_on_map">Auf der Karte anzeigen</string>
+    <string name="traceroute_map_no_data">Dieses Traceroute hat noch keine zuordnungsfähigen Knoten.</string>
+    <string name="traceroute_showing_nodes">Zeige %1$d/%2$d Knoten</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1 Woche</string>
@@ -901,6 +908,7 @@
     <string name="device_configuration">Geräteeinstellungen</string>
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <string name="device_telemetry_enabled">Gerätetelemetrie senden</string>
+    <string name="device_telemetry_enabled_summary">Aktivieren oder deaktivieren Sie die Gerätetelemetrie, um Metriken an das Netzwerk zu senden. Das Intervall ist ein Richtwert. Bei überlasteten Netzwerken werden die Intervalle automatisch anhand der Anzahl der Online Knoten verlängert.</string>
     <string name="any">Beliebig</string>
     <string name="one_hour">1 Stunde</string>
     <string name="eight_hours">8 Stunden</string>
