@@ -22,7 +22,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -113,10 +112,6 @@ internal fun ReactionRow(
 }
 
 private fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
-
-private const val WEIGHT_NAME = 1.0f
-private const val WEIGHT_EMOJI = 0.2f
-private const val WEIGHT_METRICS = 1.0f
 
 @Composable
 internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
