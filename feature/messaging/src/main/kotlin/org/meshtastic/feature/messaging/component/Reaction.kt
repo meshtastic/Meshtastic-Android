@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -54,6 +55,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Reaction
+import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.ui.component.BottomSheetDialog
@@ -169,6 +171,8 @@ internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {
                                 )
                             }
                         }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(text = getShortDateTime(reaction.timestamp), style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
