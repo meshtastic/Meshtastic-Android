@@ -16,6 +16,8 @@
  */
 
 import com.geeksville.mesh.buildlogic.GitVersionValueSource
+import com.mikepenz.aboutlibraries.plugin.DuplicateMode
+import com.mikepenz.aboutlibraries.plugin.DuplicateRule
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -31,6 +33,7 @@ plugins {
     alias(libs.plugins.secrets)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
+    alias(libs.plugins.aboutlibraries)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -276,5 +279,13 @@ dokka {
     dokkaGeneratorIsolation = ProcessIsolation {
         // Configures heap size
         maxHeapSize = "6g"
+    }
+}
+
+aboutLibraries {
+    export { excludeFields = listOf("generated") }
+    library {
+        duplicationMode = DuplicateMode.MERGE
+        duplicationRule = DuplicateRule.SIMPLE
     }
 }

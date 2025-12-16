@@ -29,6 +29,7 @@ ktor = "3.3.3"
 ktorfit = "2.7.1"
 
 # Other
+aboutlibraries = "13.1.0"
 coil = "3.3.0"
 dd-sdk-android = "3.4.0"
 detekt = "1.23.8"
@@ -128,6 +129,7 @@ androidx-test-runner = { module = "androidx.test:runner", version = "1.7.0" }
 junit = { module = "junit:junit", version = "4.13.2" }
 
 # Other
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-core = { module = "io.coil-kt.coil3:coil-network-core", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
@@ -205,6 +207,7 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.
 firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 
 # Other
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.21.0" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

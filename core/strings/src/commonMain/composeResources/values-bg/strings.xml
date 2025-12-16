@@ -788,5 +788,27 @@
     <string name="firmware_update_usb_instruction_title">Изберете DFU USB устройство</string>
     <string name="interval_unset">Не е зададен</string>
     <string name="interval_always_on">Винаги включен</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 секунда</item>
+        <item quantity="other">%1$d секунди</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 минута</item>
+        <item quantity="other">%1$d минути</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 час</item>
+        <item quantity="other">%1$d часа</item>
+    </plurals>
     <!-- Compass -->
+    <string name="compass_title">Компас</string>
+    <string name="compass_distance">Разстояние: %1$s</string>
+    <string name="compass_bearing">Пеленг: %1$s</string>
+    <string name="compass_bearing_na">Пеленг: Няма данни</string>
+    <string name="compass_no_magnetometer">Това устройство няма сензор за компас. Посоката не е налична.</string>
+    <string name="compass_no_location_permission">Необходимо е разрешение за местоположение, за да се покажат разстоянието и пеленгът.</string>
+    <string name="compass_location_disabled">Доставчикът на местоположение е деактивиран. Включете услугите за местоположение.</string>
+    <string name="compass_no_location_fix">Изчакване на GPS сигнал за изчисляване на разстоянието и пеленга.</string>
+    <string name="compass_uncertainty">Приблизителна площ: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Приблизителна площ: неизвестна точност</string>
 </resources>

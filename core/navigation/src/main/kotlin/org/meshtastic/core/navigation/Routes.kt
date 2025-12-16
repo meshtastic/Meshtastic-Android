@@ -148,6 +148,8 @@ object SettingsRoutes {
 
     @Serializable data object DebugPanel : Route
 
+    @Serializable data object About : Route
+
     // endregion
 }
 
