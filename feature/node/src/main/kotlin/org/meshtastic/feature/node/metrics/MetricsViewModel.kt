@@ -124,18 +124,26 @@ constructor(
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
 
     fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
-        tracerouteOverlayCache.value[requestId]?.let {
-            return it
+        val cached = tracerouteOverlayCache.value[requestId]
+        if (cached != null) return cached
+
+        val overlay =
+            serviceRepository.tracerouteResponse.value
+                ?.takeIf { it.requestId == requestId }
+                ?.let { response ->
+                    TracerouteOverlay(
+                        requestId = response.requestId,
+                        forwardRoute = response.forwardRoute,
+                        returnRoute = response.returnRoute,
+                    )
+                }
+                ?.takeIf { it.hasRoutes }
+
+        if (overlay != null) {
+            tracerouteOverlayCache.update { it + (requestId to overlay) }
         }
-        val response = serviceRepository.tracerouteResponse.value ?: return null
-        if (response.requestId != requestId) return null
-        return TracerouteOverlay(
-            requestId = response.requestId,
-            forwardRoute = response.forwardRoute,
-            returnRoute = response.returnRoute,
-        )
-            .takeIf { it.hasRoutes }
-            ?.also { overlay -> tracerouteOverlayCache.update { it + (requestId to overlay) } }
+
+        return overlay
     }
 
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()

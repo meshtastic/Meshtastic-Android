@@ -89,6 +89,8 @@ import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshProtos
 import java.text.DateFormat
 
+private data class TracerouteDialog(val message: AnnotatedString, val requestId: Int, val overlay: TracerouteOverlay?)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod")
 @Composable
@@ -103,41 +105,18 @@ fun TracerouteLogScreen(
 
     fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
 
-    data class TracerouteDialog(val message: AnnotatedString, val requestId: Int, val overlay: TracerouteOverlay?)
-
     var showDialog by remember { mutableStateOf<TracerouteDialog?>(null) }
     var errorMessageRes by remember { mutableStateOf<StringResource?>(null) }
 
-    showDialog?.let { dialog ->
-        SimpleAlertDialog(
-            title = Res.string.traceroute,
-            text = { SelectionContainer { Text(text = dialog.message) } },
-            confirmText = stringResource(Res.string.view_on_map),
-            onConfirm = {
-                val availability =
-                    viewModel.tracerouteMapAvailability(
-                        forwardRoute = dialog.overlay?.forwardRoute.orEmpty(),
-                        returnRoute = dialog.overlay?.returnRoute.orEmpty(),
-                    )
-                val errorRes = availability.toMessageRes()
-                if (errorRes == null) {
-                    onViewOnMap(dialog.requestId)
-                } else {
-                    errorMessageRes = errorRes
-                }
-                showDialog = null
-            },
-            onDismiss = { showDialog = null },
-        )
-    }
-    errorMessageRes?.let { res ->
-        SimpleAlertDialog(
-            title = Res.string.traceroute,
-            text = { Text(text = stringResource(res)) },
-            dismissText = stringResource(Res.string.close),
-            onDismiss = { errorMessageRes = null },
-        )
-    }
+    TracerouteLogDialogs(
+        dialog = showDialog,
+        errorMessageRes = errorMessageRes,
+        viewModel = viewModel,
+        onViewOnMap = onViewOnMap,
+        onShowErrorMessageRes = { errorMessageRes = it },
+        onDismissDialog = { showDialog = null },
+        onDismissError = { errorMessageRes = null },
+    )
 
     Scaffold(
         topBar = {
@@ -205,10 +184,10 @@ fun TracerouteLogScreen(
                                     ?: result?.fromRadio?.packet?.getTracerouteResponse(::getUsername)?.let {
                                         AnnotatedString(it)
                                     }
-                            if (dialogMessage != null) {
+                            dialogMessage?.let {
                                 showDialog =
                                     TracerouteDialog(
-                                        message = dialogMessage,
+                                        message = it,
                                         requestId = log.fromRadio.packet.id,
                                         overlay = overlay,
                                     )
@@ -224,6 +203,44 @@ fun TracerouteLogScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TracerouteLogDialogs(
+    dialog: TracerouteDialog?,
+    errorMessageRes: StringResource?,
+    viewModel: MetricsViewModel,
+    onViewOnMap: (requestId: Int) -> Unit,
+    onShowErrorMessageRes: (StringResource) -> Unit,
+    onDismissDialog: () -> Unit,
+    onDismissError: () -> Unit,
+) {
+    dialog?.let { dialogState ->
+        SimpleAlertDialog(
+            title = Res.string.traceroute,
+            text = { SelectionContainer { Text(text = dialogState.message) } },
+            confirmText = stringResource(Res.string.view_on_map),
+            onConfirm = {
+                val availability =
+                    viewModel.tracerouteMapAvailability(
+                        forwardRoute = dialogState.overlay?.forwardRoute.orEmpty(),
+                        returnRoute = dialogState.overlay?.returnRoute.orEmpty(),
+                    )
+                availability.toMessageRes()?.let(onShowErrorMessageRes) ?: onViewOnMap(dialogState.requestId)
+                onDismissDialog()
+            },
+            onDismiss = onDismissDialog,
+        )
+    }
+
+    errorMessageRes?.let { res ->
+        SimpleAlertDialog(
+            title = Res.string.traceroute,
+            text = { Text(text = stringResource(res)) },
+            dismissText = stringResource(Res.string.close),
+            onDismiss = onDismissError,
+        )
     }
 }
 
