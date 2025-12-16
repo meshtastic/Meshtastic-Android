@@ -141,23 +141,22 @@ internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {
 
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             items(filteredReactions) { reaction ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = reaction.user.longName,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.weight(WEIGHT_NAME),
-                    )
-                    Text(
-                        text = reaction.emoji,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.weight(WEIGHT_EMOJI),
-                    )
-                    Box(modifier = Modifier.weight(WEIGHT_METRICS), contentAlignment = Alignment.CenterEnd) {
-                        if (reaction.snr != 0.0f) {
+                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(text = reaction.user.longName, style = MaterialTheme.typography.titleMedium)
+                        Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 0.dp, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        val isLocalOrPreDbUpdateReaction = (reaction.snr == 0.0f)
+                        if (!isLocalOrPreDbUpdateReaction) {
                             if (reaction.hopsAway == 0) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Snr(reaction.snr)
