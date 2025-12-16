@@ -190,7 +190,7 @@
     <string name="must_update">Vous devez mettre à jour cette application sur l'app store (ou Github). Il est trop vieux pour dialoguer avec le micrologiciel de la radio. Veuillez lire nos  <a href="https://meshtastic.org/docs/software/android/installation"> docs</a> sur ce sujet.</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="meshtastic_service_notifications">Notifications de service</string>
-    <string name="about">A propos</string>
+    <string name="acknowledgements">Remerciements</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="contact_invalid">Ce contact est invalide et ne peut pas être ajouté</string>
     <string name="debug_panel">Panneau de débogage</string>
@@ -899,7 +899,7 @@
     <string name="device_configuration">Configuration de l'appareil</string>
     <string name="remotely_administrating">"[Distant] %1$s"</string>
     <string name="device_telemetry_enabled">Envoyer la télémétrie de l'appareil</string>
-    <string name="device_telemetry_enabled_summary">Activez/désactivez le module de télémétrie de l'appareil pour envoyer des mesures au maillage. Il s'agit de valeurs nominales. Les maillages encombrés s'adapteront automatiquement à des intervalles plus longs en fonction du nombre de nœuds en ligne. Les maillages de moins de 10 nœuds s'adapteront à des intervalles plus rapides.</string>
+    <string name="device_telemetry_enabled_summary">Activez/désactivez le module de télémétrie de l'appareil pour envoyer des mesures (niveau de batterie, qualité du signal...) au maillage. Les maillages encombrés allongeront automatiquement l'intervalle en fonction du nombre de nœuds en ligne.</string>
     <string name="any">N'importe laquelle</string>
     <string name="one_hour">1 Heure</string>
     <string name="eight_hours">8 Heures</string>

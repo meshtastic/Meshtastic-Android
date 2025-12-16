@@ -59,7 +59,6 @@
     <string name="must_update">Potrebno je ažurirati ovu aplikaciju putem Play Storea (ili Githuba). Aplikacija je prestara za komunikaciju s ovim firmwerom radija. Pročitajte našu <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciju</a> o ovoj temi.</string>
     <string name="none">Ništa (onemogućeno)</string>
     <string name="meshtastic_service_notifications">Servisne obavijesti</string>
-    <string name="about">O programu</string>
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti</string>
     <string name="debug_panel">Otklanjanje pogrešaka</string>
     <string name="clear">Očisti</string>

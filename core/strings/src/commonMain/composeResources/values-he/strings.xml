@@ -53,7 +53,6 @@
     <string name="must_update">נדרש להתקין עדכון לאפליקציה זו דרך חנות האפליקציות (או Github). גרסת האפליקציה ישנה מדי בכדי לתקשר עם מכשיר זה. בבקשה קרא <a href="https://meshtastic.org/docs/software/android/installation">מסמכי עזרה</a> בנושא זה.</string>
     <string name="none">לא מחובר (כבוי)</string>
     <string name="meshtastic_service_notifications">התראות שירות</string>
-    <string name="about">אודות</string>
     <string name="channel_invalid">כתובת ערוץ זה אינו תקין ולא ניתן לעשות בו שימוש</string>
     <string name="debug_panel">פאנל דיבאג</string>
     <string name="clear">נקה</string>

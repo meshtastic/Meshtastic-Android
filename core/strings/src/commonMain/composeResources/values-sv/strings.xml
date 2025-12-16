@@ -187,7 +187,6 @@
     <string name="must_update">Du måste uppdatera detta program i app-butiken (eller Github). Det är för gammalt för att prata med denna radioenhet. Läs vår <a href="https://meshtastic.org/docs/software/android/installation">dokumentation</a> i detta ämne.</string>
     <string name="none">Ingen (inaktivera)</string>
     <string name="meshtastic_service_notifications">Tjänsteaviseringar</string>
-    <string name="about">Om</string>
     <string name="channel_invalid">Denna kanal-URL är ogiltig och kan inte användas</string>
     <string name="contact_invalid">Denna kontakt är ogiltig och kan inte läggas till</string>
     <string name="debug_panel">Felsökningspanel</string>

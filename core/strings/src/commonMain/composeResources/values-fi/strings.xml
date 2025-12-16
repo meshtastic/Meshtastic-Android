@@ -190,7 +190,7 @@
     <string name="must_update">Sinun täytyy päivittää tämä sovellus sovelluskaupassa (tai Githubissa). Sovelluksen versio on liian vanha toimimaan tämän radion ohjelmiston kanssa. Ole hyvä ja lue lisää aiheesta <a href="https://meshtastic.org/docs/software/android/installation">dokumenteistamme</a>.</string>
     <string name="none">Ei mitään (ei käytössä)</string>
     <string name="meshtastic_service_notifications">Palveluilmoitukset</string>
-    <string name="about">Tietoja</string>
+    <string name="acknowledgements">Kiitokset</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
     <string name="contact_invalid">Tämä yhteystieto on virheellinen eikä sitä voi lisätä</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
@@ -902,7 +902,7 @@
     <string name="device_configuration">Laitteen asetukset</string>
     <string name="remotely_administrating">"[Etälaite] %1$s"</string>
     <string name="device_telemetry_enabled">Lähetä laitteen telemetriatiedot</string>
-    <string name="device_telemetry_enabled_summary">Ota käyttöön tai poista käytöstä laitteen telemetriamoduuli, joka lähettää mittaustietoja mesh-verkkoon. Arvot ovat nimellisiä. Ruuhkaisissa verkoissa lähetysväliä pidennetään automaattisesti verkossa olevien laitteiden määrän perusteella. Alle 10 laitteen verkoissa lähetysväliä lyhennetään automaattisesti.</string>
+    <string name="device_telemetry_enabled_summary">Ota käyttöön / poista käytöstä laitteen telemetriamoduuli, joka lähettää mittaustietoja mesh-verkkoon. Nämä ovat nimellisiä (oletus) arvoja. Ruuhkautuneissa mesh-verkoissa lähetysväli pitenee automaattisesti verkossa olevien (online) solmujen määrän perusteella.</string>
     <string name="any">Milloin tahansa</string>
     <string name="one_hour">1 tunti</string>
     <string name="eight_hours">8 tuntia</string>

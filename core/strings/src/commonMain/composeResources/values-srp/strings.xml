@@ -150,7 +150,6 @@
     <string name="must_update">Морате ажурирати ову апликацију у продавници апликација (или на Гитхабу). Превише је стара да би могла комуницирати са овим радио фирмвером. Молимо вас да прочитате наша &lt;a href='https://meshtastic.org/docs/software/android/installation'&gt;документа&lt;/a&gt; на ову тему.</string>
     <string name="none">Ништа (онемогућено)</string>
     <string name="meshtastic_service_notifications">Обавештења о услугама</string>
-    <string name="about">О</string>
     <string name="channel_invalid">Ова URL адреса канала је неважећа и не може се користити</string>
     <string name="debug_panel">Панел за отклањање грешака</string>
     <string name="clear">Очисти</string>

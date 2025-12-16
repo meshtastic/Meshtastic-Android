@@ -153,7 +153,6 @@
     <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/installation">документи</a> по тази тема.</string>
     <string name="none">Няма (дезактивирано)</string>
     <string name="meshtastic_service_notifications">Сервизни известия</string>
-    <string name="about">Относно</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="contact_invalid">Този контакт е невалиден и не може да бъде добавен</string>
     <string name="debug_panel">Панел за отстраняване на грешки</string>

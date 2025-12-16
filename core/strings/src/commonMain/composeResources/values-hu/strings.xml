@@ -185,7 +185,6 @@
     <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://meshtastic.org/docs/software/android/installation">docs</a>-ből.</string>
     <string name="none">Egyik sem (letiltás)</string>
     <string name="meshtastic_service_notifications">Szolgáltatás értesítések</string>
-    <string name="about">A programról</string>
     <string name="channel_invalid">Ez a csatorna URL érvénytelen, ezért nem használható.</string>
     <string name="contact_invalid">Ez a névjegy érvénytelen, nem vehető fel</string>
     <string name="debug_panel">Hibakereső panel</string>

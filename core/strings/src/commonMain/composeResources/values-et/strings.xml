@@ -190,7 +190,7 @@
     <string name="must_update">Pead seda rakendust rakenduste poes (või Github) värskendama. See on liiga vana selle raadio püsivara jaoks. Loe selle kohta lisateavet meie <a href="https://meshtastic.org/docs/software/android/installation"> dokumentatsioonist </a>.</string>
     <string name="none">Puudub (pole kasutatud)</string>
     <string name="meshtastic_service_notifications">Teenuse teavitused</string>
-    <string name="about">Teave</string>
+    <string name="acknowledgements">Tänusõnad</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
     <string name="contact_invalid">See kontakt on sobimatu ja seda ei saa lisada</string>
     <string name="debug_panel">Arendaja paneel</string>
@@ -902,7 +902,7 @@
     <string name="device_configuration">Seadme sätted</string>
     <string name="remotely_administrating">"[Kaugjuhtimine] %1$s"</string>
     <string name="device_telemetry_enabled">Saada seadme telemeetria</string>
-    <string name="device_telemetry_enabled_summary">Luba/keela seadme telemeetria andmete saatmine kärgvõrku. Need on nominaalväärtused. Ülekoormatud kärgvõrgu puhul skaleeritakse automaatselt pikemad intervallid võrgus olevate sõlmede arvu põhjal. Alla 10 sõlmega kärgvõrgu puhul skaleeritakse kiiremad intervallid.</string>
+    <string name="device_telemetry_enabled_summary">Luba/keela seadme telemeetriamoodulil andmete saatmine kärgvõrku. Need on nimiväärtused. Ülekoormatud kärgvõrgu puhul skaleeritakse need automaatselt pikemale intervallile olenevalt võrgus olevate sõlmede arvule.</string>
     <string name="any">Kõik</string>
     <string name="one_hour">1 tund</string>
     <string name="eight_hours">8 tundi</string>
