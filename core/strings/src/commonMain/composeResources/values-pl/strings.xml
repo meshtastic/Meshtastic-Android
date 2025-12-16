@@ -160,7 +160,6 @@
     <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub z GitHub, ponieważ aplikacja jest zbyt stara, by skomunikować się z oprogramowaniem zainstalowanym na tym urządzeniu. <a href="https://meshtastic.org/docs/software/android/installation">Więcej informacji (ang.)</a>.</string>
     <string name="none">Brak (wyłącz)</string>
     <string name="meshtastic_service_notifications">Powiadomienia o usługach</string>
-    <string name="about">O aplikacji</string>
     <string name="channel_invalid">Ten adres URL kanału jest nieprawidłowy i nie można go użyć</string>
     <string name="contact_invalid">Ten kontakt jest nieprawidłowy i nie można go dodać</string>
     <string name="debug_panel">Panel debugowania</string>

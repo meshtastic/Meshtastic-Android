@@ -150,7 +150,6 @@
     <string name="must_update">Morate da ažurirate ovu aplikaciju na prodavnici aplikacija (ili Github-u). Previše je stara da bi razgovarala sa ovim radio firmverom. Molimo vas da pročitate naše <a href="https://meshtastic.org/docs/software/android/installation">dokumente</a> o ovoj temi.</string>
     <string name="none">Ništa (onemogućeno)</string>
     <string name="meshtastic_service_notifications">Servisna obaveštenja</string>
-    <string name="about">O nama</string>
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti.</string>
     <string name="debug_panel">Panel za otklanjanje grešaka</string>
     <string name="clear">Očisti</string>

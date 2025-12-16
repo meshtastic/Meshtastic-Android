@@ -188,7 +188,6 @@
     <string name="must_update">您必須在應用商店(或 Github)更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
     <string name="none">無(停用）</string>
     <string name="meshtastic_service_notifications">服務通知</string>
-    <string name="about">關於</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
     <string name="contact_invalid">此聯絡人無效，無法新增</string>
     <string name="debug_panel">除錯面板</string>

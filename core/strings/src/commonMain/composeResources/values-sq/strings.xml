@@ -92,7 +92,6 @@
     <string name="must_update">Duhet të përditësoni këtë aplikacion në dyqanin e aplikacioneve (ose Github). Është shumë i vjetër për të komunikuar me këtë firmware radioje. Ju lutemi lexoni dokumentet tona <a href="https://meshtastic.org/docs/software/android/installation">këtu</a> për këtë temë.</string>
     <string name="none">Asnjë (çaktivizo)</string>
     <string name="meshtastic_service_notifications">Njoftime shërbimi</string>
-    <string name="about">Rreth</string>
     <string name="channel_invalid">Ky URL kanal është i pavlefshëm dhe nuk mund të përdoret</string>
     <string name="debug_panel">Paneli i debug-ut</string>
     <string name="clear">Pastro</string>

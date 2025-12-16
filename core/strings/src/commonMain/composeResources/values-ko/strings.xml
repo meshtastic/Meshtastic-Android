@@ -109,7 +109,6 @@
     <string name="must_update">구글 플레이 스토어 또는 깃허브를 통해서 앱을 업데이트 해야합니다. 앱이 너무 구버전입니다. 이 주제의  <a href="https://meshtastic.org/docs/software/android/installation">docs</a> 를 읽어주세요</string>
     <string name="none">없음 (연결해제)</string>
     <string name="meshtastic_service_notifications">서비스 알림</string>
-    <string name="about">앱에 대하여</string>
     <string name="channel_invalid">이 채널 URL은 유효하지 않으며 사용할 수 없습니다.</string>
     <string name="debug_panel">디버그 패널</string>
     <string name="debug_logs_export">로그 내보내기</string>

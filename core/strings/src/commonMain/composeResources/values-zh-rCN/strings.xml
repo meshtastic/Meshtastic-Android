@@ -190,7 +190,6 @@
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
     <string name="none">无 (停用)</string>
     <string name="meshtastic_service_notifications">服务通知</string>
-    <string name="about">关于</string>
     <string name="channel_invalid">此频道 URL 无效，无法使用</string>
     <string name="contact_invalid">此频道 URL 无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
@@ -901,7 +900,6 @@
     <string name="device_configuration">设备配置</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <string name="device_telemetry_enabled">发送设备远程数据</string>
-    <string name="device_telemetry_enabled_summary">启用/禁用设备遥测模块，以将指标发送至网络。这些是标称值。拥堵的网络会根据在线节点的数量自动调整为更长的间隔。节点少于10个的网络会调整为更快的间隔。</string>
     <string name="any">任意内容</string>
     <string name="one_hour">1 小时</string>
     <string name="eight_hours">8 小时</string>
