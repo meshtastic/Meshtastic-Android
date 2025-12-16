@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -51,8 +52,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Reaction
+import org.meshtastic.core.model.util.getShortDateTime
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.ui.component.BottomSheetDialog
+import org.meshtastic.core.ui.component.Rssi
+import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.MeshProtos
 
@@ -129,15 +136,39 @@ internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {
 
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
-        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             items(filteredReactions) { reaction ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(text = reaction.user.longName, style = MaterialTheme.typography.titleMedium)
-                    Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
+                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(text = reaction.user.longName, style = MaterialTheme.typography.titleMedium)
+                        Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 0.dp, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        val isLocalOrPreDbUpdateReaction = (reaction.snr == 0.0f)
+                        if (!isLocalOrPreDbUpdateReaction) {
+                            if (reaction.hopsAway == 0) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Snr(reaction.snr)
+                                    Rssi(reaction.rssi)
+                                }
+                            } else {
+                                Text(
+                                    text = stringResource(Res.string.hops_away_template, reaction.hopsAway),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(text = getShortDateTime(reaction.timestamp), style = MaterialTheme.typography.labelSmall)
+                    }
                 }
             }
         }
@@ -167,12 +198,18 @@ private fun ReactionRowPreview() {
                     user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
+                    snr = -1.0f,
+                    rssi = -99,
+                    hopsAway = 1,
                 ),
                 Reaction(
                     replyId = 1,
                     user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
+                    snr = -1.0f,
+                    rssi = -99,
+                    hopsAway = 1,
                 ),
             ),
         )

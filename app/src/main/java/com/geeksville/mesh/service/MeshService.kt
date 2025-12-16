@@ -754,6 +754,9 @@ class MeshService : Service() {
                 userId = toNodeID(packet.from),
                 emoji = packet.decoded.payload.toByteArray().decodeToString(),
                 timestamp = System.currentTimeMillis(),
+                snr = packet.rxSnr,
+                rssi = packet.rxRssi,
+                hopsAway = getHopsAwayForPacket(packet),
             )
         packetRepository.get().insertReaction(reaction)
     }
@@ -1377,6 +1380,15 @@ class MeshService : Service() {
         }
     }
 
+    private fun getHopsAwayForPacket(packet: MeshPacket): Int =
+        if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
+            0 // These don't come with the .hop params, but do not propagate, so they must be 0
+        } else if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
+            -1
+        } else {
+            packet.hopStart - packet.hopLimit
+        }
+
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun processReceivedMeshPacket(packet: MeshPacket) {
         val fromNum = packet.from
@@ -1418,14 +1430,7 @@ class MeshService : Service() {
                 it.rssi = packet.rxRssi
 
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
-                it.hopsAway =
-                    if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
-                        0 // These don't come with the .hop params, but do not propogate, so they must be 0
-                    } else if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
-                        -1
-                    } else {
-                        packet.hopStart - packet.hopLimit
-                    }
+                it.hopsAway = getHopsAwayForPacket(packet)
             }
             handleReceivedData(packet)
         }
