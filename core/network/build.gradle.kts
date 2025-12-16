@@ -22,7 +22,6 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
     alias(libs.plugins.protobuf)
-    alias(libs.plugins.ktorfit)
 }
 
 android {
@@ -40,7 +39,6 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktorfit)
     implementation(libs.okhttp3.logging.interceptor)
 
     googleImplementation(libs.dd.sdk.android.okhttp)
