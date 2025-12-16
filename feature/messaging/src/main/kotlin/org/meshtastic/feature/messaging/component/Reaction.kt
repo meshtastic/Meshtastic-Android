@@ -141,7 +141,7 @@ internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {
 
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
-        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             items(filteredReactions) { reaction ->
                 Column(modifier = Modifier.padding(horizontal = 8.dp)) {
                     Row(
