@@ -97,7 +97,6 @@
     <string name="must_update">To aplikacijo morate posodobiti v trgovini Google Play (ali Github). Žal se ne more povezati s tem radiem.</string>
     <string name="none">Brez (onemogoči)</string>
     <string name="meshtastic_service_notifications">Obvestila storitve</string>
-    <string name="about">O programu</string>
     <string name="channel_invalid">Neveljaven kanal</string>
     <string name="debug_panel">Plošča za odpravljanje napak</string>
     <string name="clear">Počisti</string>

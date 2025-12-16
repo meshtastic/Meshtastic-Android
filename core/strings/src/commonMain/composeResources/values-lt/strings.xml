@@ -91,7 +91,6 @@
     <string name="must_update">Urite atnaujinti šią programą programėlių parduotuvėje (arba Github). Ji per sena, kad galėtų bendrauti su šiuo radijo įrangos programinės įrangos versija. Prašome perskaityti mūsų <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciją</a> šia tema.</string>
     <string name="none">Nėra (išjungti)</string>
     <string name="meshtastic_service_notifications">Paslaugos pranešimai</string>
-    <string name="about">Apie</string>
     <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
     <string name="debug_panel">Derinimo skydelis</string>
     <string name="clear">Išvalyti</string>

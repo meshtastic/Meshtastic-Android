@@ -107,7 +107,6 @@
     <string name="must_update">Uygulamayı Google Play store (ya da GitHub)'dan güncelleyin. Bu cihaz ile haberleşmek için uygulama çok eski. İlgili <a href="https://meshtastic.org/docs/software/android/installation"> Dokümantasyon</a>.</string>
     <string name="none">Hiçbiri (kapat)</string>
     <string name="meshtastic_service_notifications">Servis bildirimleri</string>
-    <string name="about">Hakkında</string>
     <string name="channel_invalid">Bu Kanal URL' si geçersiz ve kullanılamaz</string>
     <string name="debug_panel">Hata Ayıklama Paneli</string>
     <string name="debug_filters">Filtreler</string>

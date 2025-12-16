@@ -47,7 +47,6 @@
     <string name="must_update">Trebuie să updatezi această aplicație de pe Google Play  (sau Github). Aplicația este prea veche pentru a comunica cu dispozitivul.</string>
     <string name="none">Niciunul (dezactivat)</string>
     <string name="meshtastic_service_notifications">Notificările serviciului</string>
-    <string name="about">Despre</string>
     <string name="channel_invalid">Acest URL de canal este invalid și nu poate fi folosit</string>
     <string name="debug_panel">Panou debug</string>
     <string name="clear">Șterge</string>
