@@ -216,7 +216,7 @@
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://meshtastic.org/docs/software/android/installation">docs</a> on this topic.</string>
     <string name="none">None (disable)</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
-    <string name="about">About</string>
+    <string name="acknowledgements">Acknowledgements</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug Panel</string>
@@ -945,7 +945,7 @@
     <string name="device_configuration">Device configuration</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <string name="device_telemetry_enabled">Send Device Telemetry</string>
-    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh. These are nominal values. Congested meshes will automatically scale to longer intervals based on number of online nodes. Meshes less than 10 nodes will scale to faster intervals.</string>
+    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh. These are nominal values. Congested meshes will automatically scale to longer intervals based on number of online nodes.</string>
     <string name="any">Any</string>
     <string name="one_hour">1 Hour</string>
     <string name="eight_hours">8 Hours</string>

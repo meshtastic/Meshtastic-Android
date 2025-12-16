@@ -739,6 +739,7 @@
     <string name="modules_unlocked">模組已解鎖</string>
     <string name="modules_already_unlocked">模組已解鎖</string>
     <string name="remote">遠端</string>
+    <string name="node_count_template"></string>
     <string name="react">回應</string>
     <string name="disconnect">中斷連線</string>
     <string name="scanning_bluetooth">正在尋找藍牙裝置…</string>

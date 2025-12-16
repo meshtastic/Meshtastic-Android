@@ -697,6 +697,7 @@
     <string name="conversations">Konversationer</string>
     <string name="nodes">Noder</string>
     <string name="bottom_nav_settings">Inställningar</string>
+    <string name="selected">Vald</string>
     <string name="set_your_region">Ange din region</string>
     <string name="reply">Svara</string>
     <string name="map_reporting_summary">Din nod kommer periodiskt skicka ett okrypterat paket till den konfigurerade MQTT-servern som inkluderar id, kort och långt namn, ungefärlig plats, hårdvarumodell, enhetsroll, mjukvaruversion, LoRa-region, modeminställning och den primära kanalens namn.</string>
@@ -722,6 +723,7 @@
     <string name="modules_unlocked">Modulerna är upplåsta</string>
     <string name="modules_already_unlocked">Modulerna är redan upplåsta</string>
     <string name="remote">Fjärr</string>
+    <string name="node_count_template">(%1$d aktiva / %2$d visas / %3$d totalt)</string>
     <string name="react">Reagera</string>
     <string name="disconnect">Koppla från</string>
     <string name="scanning_bluetooth">Söker efter Bluetooth-enheter…</string>
@@ -912,6 +914,25 @@
     <string name="firmware_update_almost_there">Alldeles snart...</string>
     <string name="firmware_update_taking_a_while">Det här kan ta en stund...</string>
     <string name="firmware_update_select_file">Välj lokal fil</string>
+    <string name="firmware_update_copying">Kopierar fast programvara...</string>
     <string name="interval_unset">Ej inställd</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 sekund</item>
+        <item quantity="other">%1$d sekunder</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 minut</item>
+        <item quantity="other">%1$d minuter</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 timme</item>
+        <item quantity="other">%1$d timmar</item>
+    </plurals>
     <!-- Compass -->
+    <string name="compass_title">Kompass</string>
+    <string name="open_compass">Visa kompass</string>
+    <string name="compass_distance">Avstånd: %1$s</string>
+    <string name="compass_bearing">Riktning: %1$s</string>
+    <string name="compass_bearing_na">Riktning: okänd</string>
+    <string name="compass_no_magnetometer">Denna enhet har ingen kompass. Riktning okänd.</string>
 </resources>

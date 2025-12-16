@@ -984,4 +984,15 @@
         <item quantity="other">%1$d heures</item>
     </plurals>
     <!-- Compass -->
+    <string name="compass_title">Boussole</string>
+    <string name="open_compass">Ouvrir la boussole</string>
+    <string name="compass_distance">Distance : %1$s</string>
+    <string name="compass_bearing">Orientation : %1$s</string>
+    <string name="compass_bearing_na">Orientation : N/A</string>
+    <string name="compass_no_magnetometer">Cet appareil ne dispose pas de boussole. L'orientation n'est pas disponible.</string>
+    <string name="compass_no_location_permission">L'autorisation d'accès à la position est nécessaire pour afficher la distance et l'orientation.</string>
+    <string name="compass_location_disabled">Le fournisseur d'emplacement (GPS) est désactivé. Activez les services de localisation.</string>
+    <string name="compass_no_location_fix">En attente de la réception GPS pour calculer la distance et l'orientation.</string>
+    <string name="compass_uncertainty">Surface estimée : \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Surface estimée : précision inconnue</string>
 </resources>
