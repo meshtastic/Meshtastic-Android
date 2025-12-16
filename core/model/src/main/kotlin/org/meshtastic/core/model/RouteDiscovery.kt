@@ -103,7 +103,6 @@ fun evaluateTracerouteMapAvailability(
     returnRoute: List<Int>,
     positionedNodeNums: Set<Int>,
 ): TracerouteMapAvailability {
-    if (forwardRoute.isEmpty() && returnRoute.isEmpty()) return TracerouteMapAvailability.NoMappableNodes
     val endpoints =
         listOfNotNull(
             forwardRoute.firstOrNull(),
