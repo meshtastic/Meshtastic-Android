@@ -405,6 +405,12 @@
         <item quantity="other">%1$d hops</item>
     </plurals>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
+    <string name="traceroute_outgoing_route">Outgoing route</string>
+    <string name="traceroute_return_route">Return route</string>
+    <string name="traceroute_endpoint_missing">Cannot show traceroute map because the start or destination node has no position information.</string>
+    <string name="view_on_map">View on map</string>
+    <string name="traceroute_map_no_data">This traceroute does not have any mappable nodes yet.</string>
+    <string name="traceroute_showing_nodes">Showing %1$d/%2$d nodes</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1W</string>
@@ -1030,8 +1036,8 @@
         <item quantity="one">1 hour</item>
         <item quantity="other">%1$d hours</item>
     </plurals>
-  
-  <!-- Compass -->
+
+    <!-- Compass -->
     <string name="compass_title">Compass</string>
     <string name="open_compass">Open Compass</string>
     <string name="compass_distance">Distance: %1$s</string>

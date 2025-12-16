@@ -27,6 +27,13 @@ val MeshtasticAlt = Color(0xFF2C2D3C)
 val HyperlinkBlue = Color(0xFF43C3B0)
 val AnnotationColor = Color(0xFF039BE5)
 
+object TracerouteColors {
+    // High-contrast pair that stays legible on light/dark tiles and for most color-blind users.
+    // Use partial alpha so polylines don’t overpower markers/tiles.
+    val OutgoingRoute = Color(0xCCE86A00) // orange @ ~80% opacity
+    val ReturnRoute = Color(0xCC0081C7) // cyan @ ~80% opacity
+}
+
 object IAQColors {
     val IAQExcellent = Color(0xFF00E400)
     val IAQGood = Color(0xFF92D050)

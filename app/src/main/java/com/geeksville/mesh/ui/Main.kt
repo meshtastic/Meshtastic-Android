@@ -106,9 +106,11 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.toMessageRes
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MapRoutes
+import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -117,6 +119,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.app_too_old
 import org.meshtastic.core.strings.bottom_nav_settings
 import org.meshtastic.core.strings.client_notification
+import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.compromised_keys
 import org.meshtastic.core.strings.connected
 import org.meshtastic.core.strings.connecting
@@ -133,6 +136,7 @@ import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.should_update
 import org.meshtastic.core.strings.should_update_firmware
 import org.meshtastic.core.strings.traceroute
+import org.meshtastic.core.strings.view_on_map
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.SimpleAlertDialog
@@ -239,16 +243,49 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     }
 
     val traceRouteResponse by uIViewModel.tracerouteResponse.observeAsState()
-    traceRouteResponse?.let { response ->
+    var tracerouteMapError by remember { mutableStateOf<StringResource?>(null) }
+    var dismissedTracerouteRequestId by remember { mutableStateOf<Int?>(null) }
+    traceRouteResponse
+        ?.takeIf { it.requestId != dismissedTracerouteRequestId }
+        ?.let { response ->
+            SimpleAlertDialog(
+                title = Res.string.traceroute,
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Text(text = annotateTraceroute(response.message))
+                    }
+                },
+                confirmText = stringResource(Res.string.view_on_map),
+                onConfirm = {
+                    val availability =
+                        uIViewModel.tracerouteMapAvailability(
+                            forwardRoute = response.forwardRoute,
+                            returnRoute = response.returnRoute,
+                        )
+                    val errorRes = availability.toMessageRes()
+                    if (errorRes == null) {
+                        dismissedTracerouteRequestId = response.requestId
+                        navController.navigate(
+                            NodeDetailRoutes.TracerouteMap(response.destinationNodeNum, response.requestId),
+                        )
+                    } else {
+                        tracerouteMapError = errorRes
+                        uIViewModel.clearTracerouteResponse()
+                    }
+                },
+                dismissText = stringResource(Res.string.okay),
+                onDismiss = {
+                    uIViewModel.clearTracerouteResponse()
+                    dismissedTracerouteRequestId = null
+                },
+            )
+        }
+    tracerouteMapError?.let { res ->
         SimpleAlertDialog(
             title = Res.string.traceroute,
-            text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text(text = annotateTraceroute(response))
-                }
-            },
-            dismissText = stringResource(Res.string.okay),
-            onDismiss = { uIViewModel.clearTracerouteResponse() },
+            text = { Text(text = stringResource(res)) },
+            dismissText = stringResource(Res.string.close),
+            onDismiss = { tracerouteMapError = null },
         )
     }
     val navSuiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())

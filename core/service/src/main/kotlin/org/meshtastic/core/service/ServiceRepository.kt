@@ -29,6 +29,17 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class TracerouteResponse(
+    val message: String,
+    val destinationNodeNum: Int,
+    val requestId: Int,
+    val forwardRoute: List<Int> = emptyList(),
+    val returnRoute: List<Int> = emptyList(),
+) {
+    val hasOverlay: Boolean
+        get() = forwardRoute.isNotEmpty() || returnRoute.isNotEmpty()
+}
+
 /** Repository class for managing the [IMeshService] instance and connection state */
 @Suppress("TooManyFunctions")
 @Singleton
@@ -94,11 +105,11 @@ class ServiceRepository @Inject constructor() {
         _meshPacketFlow.emit(packet)
     }
 
-    private val _tracerouteResponse = MutableStateFlow<String?>(null)
-    val tracerouteResponse: StateFlow<String?>
+    private val _tracerouteResponse = MutableStateFlow<TracerouteResponse?>(null)
+    val tracerouteResponse: StateFlow<TracerouteResponse?>
         get() = _tracerouteResponse
 
-    fun setTracerouteResponse(value: String?) {
+    fun setTracerouteResponse(value: TracerouteResponse?) {
         _tracerouteResponse.value = value
     }
 

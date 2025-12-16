@@ -47,12 +47,15 @@ import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.TracerouteMapAvailability
+import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.fallback_node_name
 import org.meshtastic.core.ui.util.toPosition
+import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshProtos
@@ -92,6 +95,8 @@ constructor(
 
     private var jobs: Job? = null
 
+    private val tracerouteOverlayCache = MutableStateFlow<Map<Int, TracerouteOverlay>>(emptyMap())
+
     private fun MeshLog.hasValidTraceroute(): Boolean =
         with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
 
@@ -117,6 +122,60 @@ constructor(
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
+
+    fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
+        val cached = tracerouteOverlayCache.value[requestId]
+        if (cached != null) return cached
+
+        val overlay =
+            serviceRepository.tracerouteResponse.value
+                ?.takeIf { it.requestId == requestId }
+                ?.let { response ->
+                    TracerouteOverlay(
+                        requestId = response.requestId,
+                        forwardRoute = response.forwardRoute,
+                        returnRoute = response.returnRoute,
+                    )
+                }
+                ?.takeIf { it.hasRoutes }
+
+        if (overlay != null) {
+            tracerouteOverlayCache.update { it + (requestId to overlay) }
+        }
+
+        return overlay
+    }
+
+    fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
+
+    fun tracerouteMapAvailability(forwardRoute: List<Int>, returnRoute: List<Int>): TracerouteMapAvailability =
+        evaluateTracerouteMapAvailability(
+            forwardRoute = forwardRoute,
+            returnRoute = returnRoute,
+            positionedNodeNums = positionedNodeNums(),
+        )
+
+    fun tracerouteMapAvailability(overlay: TracerouteOverlay): TracerouteMapAvailability =
+        tracerouteMapAvailability(overlay.forwardRoute, overlay.returnRoute)
+
+    fun positionedNodeNums(): Set<Int> =
+        nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet()
+
+    init {
+        viewModelScope.launch {
+            serviceRepository.tracerouteResponse.filterNotNull().collect { response ->
+                val overlay =
+                    TracerouteOverlay(
+                        requestId = response.requestId,
+                        forwardRoute = response.forwardRoute,
+                        returnRoute = response.returnRoute,
+                    )
+                if (overlay.hasRoutes) {
+                    tracerouteOverlayCache.update { it + (response.requestId to overlay) }
+                }
+            }
+        }
+    }
 
     fun clearPosition() = viewModelScope.launch(dispatchers.io) {
         destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }
