@@ -35,7 +35,6 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kotlin.parcelize) apply false
     alias(libs.plugins.kotlin.serialization) apply false
-    alias(libs.plugins.ktorfit) apply false
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.secrets) apply false
     alias(libs.plugins.dependency.analysis)
@@ -107,11 +106,6 @@ dependencyAnalysis {
         bundle("hilt-core") {
             includeDependency("com.google.dagger:hilt-core")
             includeDependency(libs.hilt.android)
-        }
-
-        bundle("ktorfit") {
-            includeDependency("de.jensklingenberg.ktorfit:ktorfit-lib")
-            includeDependency("de.jensklingenberg.ktorfit:ktorfit-annotations")
         }
     }
 
