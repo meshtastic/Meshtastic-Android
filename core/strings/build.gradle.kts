@@ -19,6 +19,7 @@ import com.android.build.api.dsl.androidLibrary
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
