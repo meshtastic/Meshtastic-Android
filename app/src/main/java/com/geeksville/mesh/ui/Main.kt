@@ -22,6 +22,7 @@ package com.geeksville.mesh.ui
 import android.Manifest
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -413,11 +414,14 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                                         }
                                     },
                                 ) {
-                                    Icon(
-                                        imageVector = destination.icon,
-                                        contentDescription = stringResource(destination.label),
-                                        tint = LocalContentColor.current,
-                                    )
+                                    Crossfade(isSelected, label = "BottomBarIcon") { isSelectedState ->
+                                        Icon(
+                                            imageVector = destination.icon,
+                                            contentDescription = stringResource(destination.label),
+                                            tint =
+                                            if (isSelectedState) colorScheme.primary else LocalContentColor.current,
+                                        )
+                                    }
                                 }
                             }
                         }
