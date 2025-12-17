@@ -49,9 +49,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.common)
     implementation(libs.material)
-    implementation(libs.osmbonuspack)
-    implementation(libs.osmdroid.android)
     implementation(libs.timber)
+
+    fdroidImplementation(libs.osmbonuspack)
+    fdroidImplementation(libs.osmdroid.android)
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.maps.compose)

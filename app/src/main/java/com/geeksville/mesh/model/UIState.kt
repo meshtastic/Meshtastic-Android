@@ -52,10 +52,13 @@ import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.TracerouteMapAvailability
+import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.client_notification
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -151,6 +154,14 @@ constructor(
 
     private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
     val currentAlert = _currentAlert.asStateFlow()
+
+    fun tracerouteMapAvailability(forwardRoute: List<Int>, returnRoute: List<Int>): TracerouteMapAvailability =
+        evaluateTracerouteMapAvailability(
+            forwardRoute = forwardRoute,
+            returnRoute = returnRoute,
+            positionedNodeNums =
+            nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet(),
+        )
 
     fun showAlert(
         title: String,
@@ -248,7 +259,7 @@ constructor(
         Timber.d("ViewModel cleared")
     }
 
-    val tracerouteResponse: LiveData<String?>
+    val tracerouteResponse: LiveData<TracerouteResponse?>
         get() = serviceRepository.tracerouteResponse.asLiveData()
 
     fun clearTracerouteResponse() {

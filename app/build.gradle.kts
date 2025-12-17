@@ -16,6 +16,8 @@
  */
 
 import com.geeksville.mesh.buildlogic.GitVersionValueSource
+import com.mikepenz.aboutlibraries.plugin.DuplicateMode
+import com.mikepenz.aboutlibraries.plugin.DuplicateRule
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -31,6 +33,7 @@ plugins {
     alias(libs.plugins.secrets)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
+    alias(libs.plugins.aboutlibraries)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -140,13 +143,6 @@ android {
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
-        all {
-            if (name == "google") {
-                apply(plugin = libs.plugins.google.services.get().pluginId)
-                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            }
-        }
-
         named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
         named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
     }
@@ -261,19 +257,9 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
-}
-
-val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
-
-tasks.configureEach {
-    if (
-        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } && name.contains("fdroid", ignoreCase = true)
-    ) {
-        project.logger.lifecycle("Disabling task for F-Droid: $name")
-        enabled = false
-    }
 }
 
 dokka {
@@ -293,5 +279,13 @@ dokka {
     dokkaGeneratorIsolation = ProcessIsolation {
         // Configures heap size
         maxHeapSize = "6g"
+    }
+}
+
+aboutLibraries {
+    export { excludeFields = listOf("generated") }
+    library {
+        duplicationMode = DuplicateMode.MERGE
+        duplicationRule = DuplicateRule.SIMPLE
     }
 }

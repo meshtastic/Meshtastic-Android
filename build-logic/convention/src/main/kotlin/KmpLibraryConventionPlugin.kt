@@ -28,7 +28,6 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = "org.jetbrains.kotlin.multiplatform")
-            apply(plugin = "org.jetbrains.kotlin.plugin.compose")
             apply(plugin = "com.android.kotlin.multiplatform.library")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")

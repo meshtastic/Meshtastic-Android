@@ -190,7 +190,7 @@
     <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Sie ist zu alt, um mit dieser Funkgeräte Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/installation">Dokumentation</a> zu diesem Thema.</string>
     <string name="none">Nichts (deaktiviert)</string>
     <string name="meshtastic_service_notifications">Dienstbenachrichtigungen</string>
-    <string name="about">Über</string>
+    <string name="acknowledgements">Danksagungen</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
     <string name="contact_invalid">Dieser Kontakt ist ungültig und kann nicht hinzugefügt werden</string>
     <string name="debug_panel">Debug-Ausgaben</string>
@@ -379,6 +379,12 @@
         <item quantity="other">%d Sprünge</item>
     </plurals>
     <string name="traceroute_diff">%1$d Sprünge vorwärts %2$d Sprünge zurück</string>
+    <string name="traceroute_outgoing_route">Hinweg</string>
+    <string name="traceroute_return_route">Rückweg</string>
+    <string name="traceroute_endpoint_missing">Traceroute Karte kann nicht angezeigt werden, da der Start- oder Zielknoten über keine Positionsinformationen verfügt.</string>
+    <string name="view_on_map">Auf der Karte anzeigen</string>
+    <string name="traceroute_map_no_data">Dieses Traceroute hat noch keine zuordnungsfähigen Knoten.</string>
+    <string name="traceroute_showing_nodes">Zeige %1$d/%2$d Knoten</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1 Woche</string>
@@ -902,7 +908,7 @@
     <string name="device_configuration">Geräteeinstellungen</string>
     <string name="remotely_administrating">"[Entfernt] %1$s"</string>
     <string name="device_telemetry_enabled">Gerätetelemetrie senden</string>
-    <string name="device_telemetry_enabled_summary">Aktivieren/Deaktivieren Sie das Modul für Gerätetelemetrie, um Daten an das Meshtastic Netzwerk zu senden. Dies sind Richtwerte. Bei stark ausgelasteten Netzwerken werden die Übertragungsintervalle automatisch anhand der Anzahl der Knoten die online sind verlängert. Netzwerke mit weniger als 10 Knoten werden auf kürzere Intervalle skaliert.</string>
+    <string name="device_telemetry_enabled_summary">Aktivieren oder deaktivieren Sie die Gerätetelemetrie, um Metriken an das Netzwerk zu senden. Das Intervall ist ein Richtwert. Bei überlasteten Netzwerken werden die Intervalle automatisch anhand der Anzahl der Online Knoten verlängert.</string>
     <string name="any">Beliebig</string>
     <string name="one_hour">1 Stunde</string>
     <string name="eight_hours">8 Stunden</string>
@@ -976,14 +982,26 @@
     <string name="interval_always_on">Immer an</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 Sekunde</item>
-        <item quantity="other">%d Sekunden</item>
+        <item quantity="other">%1$d Sekunden</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">1 Minute</item>
-        <item quantity="other">%d Minuten</item>
+        <item quantity="other">%1$d Minuten</item>
     </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">1 Stunde</item>
-        <item quantity="other">%d Stunden</item>
+        <item quantity="other">%1$d Stunden</item>
     </plurals>
+    <!-- Compass -->
+    <string name="compass_title">Kompass</string>
+    <string name="open_compass">Kompass öffnen</string>
+    <string name="compass_distance">Entfernung: %1$s</string>
+    <string name="compass_bearing">Kurs: %1$s</string>
+    <string name="compass_bearing_na">Kurs: N/A</string>
+    <string name="compass_no_magnetometer">Dieses Gerät hat keinen Kompass-Sensor. Die Richtung ist nicht verfügbar.</string>
+    <string name="compass_no_location_permission">Standortberechtigung ist erforderlich, um Entfernung und Kurs anzuzeigen.</string>
+    <string name="compass_location_disabled">Standortanbieter ist deaktiviert. Standortdienste einschalten.</string>
+    <string name="compass_no_location_fix">Warten auf eine GPS Position, um Entfernung und Kurs zu berechnen.</string>
+    <string name="compass_uncertainty">Geschätzte Fläche: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Geschätzte Fläche: unbekannte Genauigkeit</string>
 </resources>

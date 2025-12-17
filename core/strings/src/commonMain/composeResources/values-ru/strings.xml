@@ -190,7 +190,6 @@
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
     <string name="none">Нет (выключить)</string>
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
-    <string name="about">О приложении</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
     <string name="contact_invalid">Контакт недопустим и не может быть добавлен</string>
     <string name="debug_panel">Панель отладки</string>
@@ -905,7 +904,6 @@
     <string name="device_configuration">Настройки устройства</string>
     <string name="remotely_administrating">"[Удалённо] %1$s"</string>
     <string name="device_telemetry_enabled">Отправлять телеметрию устройства</string>
-    <string name="device_telemetry_enabled_summary">Включить/отключить телеметрический модуль устройства для отправки метрик в сеть. Это номинальные значения. Перегруженные сети автоматически масштабируются до более длительных интервалов в зависимости от количества подключенных узлов. Сети, где менее 10 узлов, масштабируются до более быстрых интервалов.</string>
     <string name="any">Любой</string>
     <string name="one_hour">1 час</string>
     <string name="eight_hours">8 часов</string>
@@ -966,4 +964,5 @@
     <string name="firmware_update_disclaimer_chirpy_says">Щебетун говорит: «Держите лестницу под рукой!»</string>
     <string name="chirpy">Щебетун</string>
     <string name="interval_unset">Не установлена</string>
+    <!-- Compass -->
 </resources>

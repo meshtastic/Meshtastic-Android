@@ -39,6 +39,7 @@ import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.ConfigProtos
 import javax.inject.Inject
+import kotlin.Boolean
 
 @HiltViewModel
 class NodeListViewModel
@@ -66,21 +67,33 @@ constructor(
     private val nodeSortOption = nodeFilterPreferences.nodeSortOption
 
     private val _nodeFilterText = savedStateHandle.getStateFlow(KEY_FILTER_TEXT, "")
-    private val includeUnknown = nodeFilterPreferences.includeUnknown
-    private val excludeInfrastructure = nodeFilterPreferences.excludeInfrastructure
-    private val onlyOnline = nodeFilterPreferences.onlyOnline
-    private val onlyDirect = nodeFilterPreferences.onlyDirect
-    private val showIgnored = nodeFilterPreferences.showIgnored
+
+    private val filterToggles =
+        combine(
+            nodeFilterPreferences.includeUnknown,
+            nodeFilterPreferences.excludeInfrastructure,
+            nodeFilterPreferences.onlyOnline,
+            nodeFilterPreferences.onlyDirect,
+            nodeFilterPreferences.showIgnored,
+        ) { includeUnknown, excludeInfrastructure, onlyOnline, onlyDirect, showIgnored ->
+            NodeFilterToggles(
+                includeUnknown = includeUnknown,
+                excludeInfrastructure = excludeInfrastructure,
+                onlyOnline = onlyOnline,
+                onlyDirect = onlyDirect,
+                showIgnored = showIgnored,
+            )
+        }
 
     private val nodeFilter: Flow<NodeFilterState> =
-        combine(_nodeFilterText, includeUnknown, excludeInfrastructure, onlyOnline, onlyDirect, showIgnored) { values ->
+        combine(_nodeFilterText, filterToggles) { filterText, filterToggles ->
             NodeFilterState(
-                filterText = values[0] as String,
-                includeUnknown = values[1] as Boolean,
-                excludeInfrastructure = values[2] as Boolean,
-                onlyOnline = values[3] as Boolean,
-                onlyDirect = values[4] as Boolean,
-                showIgnored = values[5] as Boolean,
+                filterText = filterText,
+                includeUnknown = filterToggles.includeUnknown,
+                excludeInfrastructure = filterToggles.excludeInfrastructure,
+                onlyOnline = filterToggles.onlyOnline,
+                onlyDirect = filterToggles.onlyDirect,
+                showIgnored = filterToggles.showIgnored,
             )
         }
     val nodesUiState: StateFlow<NodesUiState> =
@@ -107,7 +120,7 @@ constructor(
                     )
                     .map { list ->
                         list
-                            .filter { filter.showIgnored || !it.isIgnored }
+                            .filter { node -> node.isIgnored == filter.showIgnored }
                             .filter { node ->
                                 if (filter.excludeInfrastructure) {
                                     val role = node.user.role
@@ -164,6 +177,14 @@ data class NodesUiState(
 
 data class NodeFilterState(
     val filterText: String = "",
+    val includeUnknown: Boolean = false,
+    val excludeInfrastructure: Boolean = false,
+    val onlyOnline: Boolean = false,
+    val onlyDirect: Boolean = false,
+    val showIgnored: Boolean = false,
+)
+
+data class NodeFilterToggles(
     val includeUnknown: Boolean = false,
     val excludeInfrastructure: Boolean = false,
     val onlyOnline: Boolean = false,

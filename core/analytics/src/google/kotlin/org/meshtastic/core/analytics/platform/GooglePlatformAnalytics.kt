@@ -102,7 +102,15 @@ constructor(
                 .setBundleWithTraceEnabled(true)
                 .setBundleWithRumEnabled(true)
                 .build()
-        Timber.plant(DatadogTree(datadogLogger), CrashlyticsTree(), DebugTree())
+        buildList {
+            add(DatadogTree(datadogLogger))
+            add(CrashlyticsTree())
+            if (BuildConfig.DEBUG) {
+                add(DebugTree())
+            }
+        }
+            .forEach(Timber::plant)
+
         // Initial consent state
         updateAnalyticsConsent(analyticsPrefs.analyticsAllowed)
 

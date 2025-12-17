@@ -103,7 +103,6 @@
     <string name="must_update">アプリが古く、デバイスと通信ができません。アプリストアまたはGithubでアプリを更新してください。詳細は<a href="https://meshtastic.org/docs/software/android/installation">こちら</a> に記載されています。</string>
     <string name="none">なし (切断)</string>
     <string name="meshtastic_service_notifications">通知サービス</string>
-    <string name="about">概要</string>
     <string name="channel_invalid">このチャンネルURLは無効なため使用できません。</string>
     <string name="debug_panel">デバッグ</string>
     <string name="clear">削除</string>
@@ -550,4 +549,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">更新失敗</string>
     <string name="interval_unset">削除</string>
+    <!-- Compass -->
 </resources>

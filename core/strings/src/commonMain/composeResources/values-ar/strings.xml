@@ -76,7 +76,6 @@
     <string name="connected_sleeping">تم الاتصال بالراديو، إلا أن الجهاز في وضعية السكون</string>
     <string name="app_too_old">مطلوب تحديث التطبيق</string>
     <string name="meshtastic_service_notifications">خدمة الإشعارات</string>
-    <string name="about">حول</string>
     <string name="clear">مسح</string>
     <string name="firmware_too_old">يجب عليك التحديث.</string>
     <string name="okay">حسنا</string>
@@ -190,4 +189,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">التحديث فشل</string>
     <string name="interval_unset">إلغاء تعيين</string>
+    <!-- Compass -->
 </resources>

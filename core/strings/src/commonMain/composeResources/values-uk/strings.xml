@@ -106,7 +106,6 @@
     <string name="must_update">Ви повинні оновити цю програму в App Store (або Github). Він занадто старий, щоб спілкуватися з цією прошивкою радіо. Будь ласка, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацію</a> у вказаній темі.</string>
     <string name="none">Відсутнє (вимкнуте)</string>
     <string name="meshtastic_service_notifications">Сервісні сповіщення</string>
-    <string name="about">Про</string>
     <string name="channel_invalid">URL-адреса цього каналу недійсна та не може бути використана</string>
     <string name="debug_panel">Панель налагодження</string>
     <string name="debug_logs_export">Експортувати журнали</string>
@@ -518,4 +517,5 @@
     <string name="firmware_update_taking_a_while">Це може зайняти хвилинку...</string>
     <string name="firmware_update_select_file">Вибрати локальний файл</string>
     <string name="interval_unset">Скинути</string>
+    <!-- Compass -->
 </resources>

@@ -190,7 +190,7 @@
     <string name="must_update">Vous devez mettre à jour cette application sur l'app store (ou Github). Il est trop vieux pour dialoguer avec le micrologiciel de la radio. Veuillez lire nos  <a href="https://meshtastic.org/docs/software/android/installation"> docs</a> sur ce sujet.</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="meshtastic_service_notifications">Notifications de service</string>
-    <string name="about">A propos</string>
+    <string name="acknowledgements">Remerciements</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="contact_invalid">Ce contact est invalide et ne peut pas être ajouté</string>
     <string name="debug_panel">Panneau de débogage</string>
@@ -376,7 +376,7 @@
     <string name="traceroute_direct">Direct</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 saut</item>
-        <item quantity="other">%d sauts</item>
+        <item quantity="other">%1$d sauts</item>
     </plurals>
     <string name="traceroute_diff">Sauts vers %1$d Sauts retour %2$d</string>
     <string name="twenty_four_hours">24H</string>
@@ -899,7 +899,7 @@
     <string name="device_configuration">Configuration de l'appareil</string>
     <string name="remotely_administrating">"[Distant] %1$s"</string>
     <string name="device_telemetry_enabled">Envoyer la télémétrie de l'appareil</string>
-    <string name="device_telemetry_enabled_summary">Activez/désactivez le module de télémétrie de l'appareil pour envoyer des mesures au maillage. Il s'agit de valeurs nominales. Les maillages encombrés s'adapteront automatiquement à des intervalles plus longs en fonction du nombre de nœuds en ligne. Les maillages de moins de 10 nœuds s'adapteront à des intervalles plus rapides.</string>
+    <string name="device_telemetry_enabled_summary">Activez/désactivez le module de télémétrie de l'appareil pour envoyer des mesures (niveau de batterie, qualité du signal...) au maillage. Les maillages encombrés allongeront automatiquement l'intervalle en fonction du nombre de nœuds en ligne.</string>
     <string name="any">N'importe laquelle</string>
     <string name="one_hour">1 Heure</string>
     <string name="eight_hours">8 Heures</string>
@@ -973,14 +973,26 @@
     <string name="interval_always_on">En permanence</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 seconde</item>
-        <item quantity="other">%d secondes</item>
+        <item quantity="other">%1$d secondes</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">1 minute</item>
-        <item quantity="other">%d minutes</item>
+        <item quantity="other">%1$d minutes</item>
     </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">1 heure</item>
-        <item quantity="other">%d heures</item>
+        <item quantity="other">%1$d heures</item>
     </plurals>
+    <!-- Compass -->
+    <string name="compass_title">Boussole</string>
+    <string name="open_compass">Ouvrir la boussole</string>
+    <string name="compass_distance">Distance : %1$s</string>
+    <string name="compass_bearing">Orientation : %1$s</string>
+    <string name="compass_bearing_na">Orientation : N/A</string>
+    <string name="compass_no_magnetometer">Cet appareil ne dispose pas de boussole. L'orientation n'est pas disponible.</string>
+    <string name="compass_no_location_permission">L'autorisation d'accès à la position est nécessaire pour afficher la distance et l'orientation.</string>
+    <string name="compass_location_disabled">Le fournisseur d'emplacement (GPS) est désactivé. Activez les services de localisation.</string>
+    <string name="compass_no_location_fix">En attente de la réception GPS pour calculer la distance et l'orientation.</string>
+    <string name="compass_uncertainty">Surface estimée : \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Surface estimée : précision inconnue</string>
 </resources>

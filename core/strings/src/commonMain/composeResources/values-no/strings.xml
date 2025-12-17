@@ -97,7 +97,6 @@
     <string name="must_update">Du må oppdatere denne applikasjonen på Google Play store (eller Github). Den er for gammel til å snakke med denne radioen.</string>
     <string name="none">Ingen (slå av)</string>
     <string name="meshtastic_service_notifications">Tjeneste meldinger</string>
-    <string name="about">Om</string>
     <string name="channel_invalid">Denne kanall URL er ugyldig og kan ikke benyttes</string>
     <string name="debug_panel">Feilsøkningspanel</string>
     <string name="clear">Tøm</string>
@@ -258,4 +257,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Oppdatering feilet</string>
     <string name="interval_unset">Lås opp</string>
+    <!-- Compass -->
 </resources>

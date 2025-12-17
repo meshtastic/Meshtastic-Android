@@ -190,7 +190,7 @@
     <string name="must_update">Pead seda rakendust rakenduste poes (või Github) värskendama. See on liiga vana selle raadio püsivara jaoks. Loe selle kohta lisateavet meie <a href="https://meshtastic.org/docs/software/android/installation"> dokumentatsioonist </a>.</string>
     <string name="none">Puudub (pole kasutatud)</string>
     <string name="meshtastic_service_notifications">Teenuse teavitused</string>
-    <string name="about">Teave</string>
+    <string name="acknowledgements">Tänusõnad</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
     <string name="contact_invalid">See kontakt on sobimatu ja seda ei saa lisada</string>
     <string name="debug_panel">Arendaja paneel</string>
@@ -379,6 +379,12 @@
         <item quantity="other">%d hüppet</item>
     </plurals>
     <string name="traceroute_diff">%1$d hüpet sõlmeni, %2$d hüpet tagasi</string>
+    <string name="traceroute_outgoing_route">Marsruut välja</string>
+    <string name="traceroute_return_route">Marsruut sisse</string>
+    <string name="traceroute_endpoint_missing">Marsruutimise kaarti ei saa kuvada, kuna algus- või sihtkoha sõlmel puudub asukohateave.</string>
+    <string name="view_on_map">Vaata kaardil</string>
+    <string name="traceroute_map_no_data">Sellel marsruudil pole veel ühtegi kaardil nähtavat sõlme.</string>
+    <string name="traceroute_showing_nodes">Kuvatakse %1$d/%2$d sõlme</string>
     <string name="twenty_four_hours">24T</string>
     <string name="forty_eight_hours">48T</string>
     <string name="one_week">1N</string>
@@ -902,7 +908,7 @@
     <string name="device_configuration">Seadme sätted</string>
     <string name="remotely_administrating">"[Kaugjuhtimine] %1$s"</string>
     <string name="device_telemetry_enabled">Saada seadme telemeetria</string>
-    <string name="device_telemetry_enabled_summary">Luba/keela seadme telemeetria andmete saatmine kärgvõrku. Need on nominaalväärtused. Ülekoormatud kärgvõrgu puhul skaleeritakse automaatselt pikemad intervallid võrgus olevate sõlmede arvu põhjal. Alla 10 sõlmega kärgvõrgu puhul skaleeritakse kiiremad intervallid.</string>
+    <string name="device_telemetry_enabled_summary">Luba/keela seadme telemeetriamoodulil andmete saatmine kärgvõrku. Need on nimiväärtused. Ülekoormatud kärgvõrgu puhul skaleeritakse need automaatselt pikemale intervallile olenevalt võrgus olevate sõlmede arvule.</string>
     <string name="any">Kõik</string>
     <string name="one_hour">1 tund</string>
     <string name="eight_hours">8 tundi</string>
@@ -919,7 +925,7 @@
     <string name="unset">Tühistatud - 0</string>
     <string name="relayed_by">Vahendab: %1$s</string>
     <plurals name="relays">
-        <item quantity="one">Kuulsin %1$d releed</item>
+        <item quantity="one">Kuulsin %1$d vahendajat</item>
         <item quantity="other">Kuuldi %1$d vahendajat</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
@@ -986,4 +992,16 @@
         <item quantity="one">1 tund</item>
         <item quantity="other">%d tundi</item>
     </plurals>
+    <!-- Compass -->
+    <string name="compass_title">Kompass</string>
+    <string name="open_compass">Ava kompass</string>
+    <string name="compass_distance">Kaugus: %1$s</string>
+    <string name="compass_bearing">Suund: %1$s</string>
+    <string name="compass_bearing_na">Suund: N/A</string>
+    <string name="compass_no_magnetometer">Sellel seadmel pole kompassiandurit. Suund pole saadaval.</string>
+    <string name="compass_no_location_permission">Kauguse ja suuna kuvamiseks on vaja asukoha luba.</string>
+    <string name="compass_location_disabled">Asukoha jagamine on keelatud. Lülitage asukohateenused sisse.</string>
+    <string name="compass_no_location_fix">Ootan GPSi signaali, et arvutada vahemaa ja suund.</string>
+    <string name="compass_uncertainty">Hinnanguline piirkond: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Hinnanguline piirkond: täpsus teadmata</string>
 </resources>

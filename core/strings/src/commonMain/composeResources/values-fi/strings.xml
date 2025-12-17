@@ -190,7 +190,7 @@
     <string name="must_update">Sinun täytyy päivittää tämä sovellus sovelluskaupassa (tai Githubissa). Sovelluksen versio on liian vanha toimimaan tämän radion ohjelmiston kanssa. Ole hyvä ja lue lisää aiheesta <a href="https://meshtastic.org/docs/software/android/installation">dokumenteistamme</a>.</string>
     <string name="none">Ei mitään (ei käytössä)</string>
     <string name="meshtastic_service_notifications">Palveluilmoitukset</string>
-    <string name="about">Tietoja</string>
+    <string name="acknowledgements">Kiitokset</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
     <string name="contact_invalid">Tämä yhteystieto on virheellinen eikä sitä voi lisätä</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
@@ -379,6 +379,12 @@
         <item quantity="other">%d hyppyä</item>
     </plurals>
     <string name="traceroute_diff">Reititettyjä hyppyjä %1$d, joista %2$d hyppyä takaisin</string>
+    <string name="traceroute_outgoing_route">Lähtevä reitti</string>
+    <string name="traceroute_return_route">Palaava reitti</string>
+    <string name="traceroute_endpoint_missing">Traceroute-karttaa ei voida näyttää, koska lähtö- tai kohdelaitteella ei ole sijaintitietoja.</string>
+    <string name="view_on_map">Näytä kartalla</string>
+    <string name="traceroute_map_no_data">Tässä traceroutessa ei ole vielä yhtään kartalle sijoitettavaa laitetta.</string>
+    <string name="traceroute_showing_nodes">Näytetään %1$d/%2$d laitetta</string>
     <string name="twenty_four_hours">24t</string>
     <string name="forty_eight_hours">48t</string>
     <string name="one_week">1vko</string>
@@ -536,7 +542,7 @@
     <string name="advanced">Lisäasetukset</string>
     <string name="use_modem_preset">Käytä esiasetusta</string>
     <string name="modem_preset">Esiasetukset</string>
-    <string name="bandwidth">Kaistanlevyes</string>
+    <string name="bandwidth">Kaistanleveys</string>
     <string name="spread_factor">Levennyskerroin (Spread Factor)</string>
     <string name="coding_rate">Koodausnopeus</string>
     <string name="frequency_offset_mhz">Taajuuspoikkeama (MHz)</string>
@@ -902,7 +908,7 @@
     <string name="device_configuration">Laitteen asetukset</string>
     <string name="remotely_administrating">"[Etälaite] %1$s"</string>
     <string name="device_telemetry_enabled">Lähetä laitteen telemetriatiedot</string>
-    <string name="device_telemetry_enabled_summary">Ota käyttöön tai poista käytöstä laitteen telemetriamoduuli, joka lähettää mittaustietoja mesh-verkkoon. Arvot ovat nimellisiä. Ruuhkaisissa verkoissa lähetysväliä pidennetään automaattisesti verkossa olevien laitteiden määrän perusteella. Alle 10 laitteen verkoissa lähetysväliä lyhennetään automaattisesti.</string>
+    <string name="device_telemetry_enabled_summary">Ota käyttöön / poista käytöstä laitteen telemetriamoduuli, joka lähettää mittaustietoja mesh-verkkoon. Nämä ovat nimellisiä (oletus) arvoja. Ruuhkautuneissa mesh-verkoissa lähetysväli pitenee automaattisesti verkossa olevien (online) solmujen määrän perusteella.</string>
     <string name="any">Milloin tahansa</string>
     <string name="one_hour">1 tunti</string>
     <string name="eight_hours">8 tuntia</string>
@@ -977,14 +983,26 @@
     <string name="interval_always_on">Aina päällä</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 sekunti</item>
-        <item quantity="other">%d sekuntia</item>
+        <item quantity="other">%1$d sekuntia</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">1 minuutti</item>
-        <item quantity="other">%d minuuttia</item>
+        <item quantity="other">%1$d minuuttia</item>
     </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">1 tunti</item>
-        <item quantity="other">%d tuntia</item>
+        <item quantity="other">%1$d tuntia</item>
     </plurals>
+    <!-- Compass -->
+    <string name="compass_title">Kompassi</string>
+    <string name="open_compass">Avaa kompassi</string>
+    <string name="compass_distance">Etäisyys: %1$s</string>
+    <string name="compass_bearing">Suunta: %1$s</string>
+    <string name="compass_bearing_na">Suunta: ei saatavilla</string>
+    <string name="compass_no_magnetometer">Tässä laitteessa ei ole kompassianturia. Suunta ei ole käytettävissä.</string>
+    <string name="compass_no_location_permission">Etäisyyden ja suunnan näyttäminen edellyttää sijaintilupaa.</string>
+    <string name="compass_location_disabled">Sijaintipalvelu ei ole käytössä. Kytke sijaintipalvelut päälle.</string>
+    <string name="compass_no_location_fix">Odotetaan GPS-paikannusta etäisyyden ja suunnan laskemiseksi.</string>
+    <string name="compass_uncertainty">Arvioitu alue: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Arvioitu alue: tarkkuus tuntematon</string>
 </resources>

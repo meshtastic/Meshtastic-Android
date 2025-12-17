@@ -64,7 +64,6 @@
     <string name="must_update">Debe actualizar esta aplicación na tenda (ou Github).  É moi vella para falar con este firmware de radio. Por favor lea a nosa <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> neste tema.</string>
     <string name="none">Ningún (desactivado)</string>
     <string name="meshtastic_service_notifications">Notificacións de servizo</string>
-    <string name="about">Acerca de</string>
     <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
     <string name="debug_panel">Panel de depuración</string>
     <string name="debug_filters">Filtros</string>
@@ -169,4 +168,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualización fallou</string>
     <string name="interval_unset">Sen configurar</string>
+    <!-- Compass -->
 </resources>
