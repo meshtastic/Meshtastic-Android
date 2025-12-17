@@ -16,10 +16,13 @@
  */
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.kover)
 }
 
-android { namespace = "org.meshtastic.core.common" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    androidLibrary { namespace = "org.meshtastic.core.common" }
 
-dependencies { implementation(libs.androidx.core.ktx) }
+    sourceSets { androidMain.dependencies { implementation(libs.androidx.core.ktx) } }
+}
