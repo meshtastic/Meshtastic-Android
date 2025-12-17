@@ -152,7 +152,7 @@ internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        val isLocalOrPreDbUpdateReaction = (reaction.snr == 0.0f)
+                        val isLocalOrPreDbUpdateReaction = (reaction.rssi == 0)
                         if (!isLocalOrPreDbUpdateReaction) {
                             if (reaction.hopsAway == 0) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
