@@ -27,6 +27,9 @@ class HiltConventionPlugin : Plugin<Project> {
             apply(plugin = "com.google.devtools.ksp")
 
             dependencies {
+                // fixme: remove when hilt supports kotlin 2.3.x
+                "ksp"(libs.findLibrary("kotlin-metadata-jvm").get())
+
                 "ksp"(libs.findLibrary("hilt.compiler").get())
                 "implementation"(libs.findLibrary("hilt-android").get())
             }
