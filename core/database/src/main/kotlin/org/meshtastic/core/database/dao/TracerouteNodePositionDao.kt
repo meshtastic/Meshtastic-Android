@@ -31,8 +31,8 @@ interface TracerouteNodePositionDao {
     fun getByLogUuid(logUuid: String): Flow<List<TracerouteNodePositionEntity>>
 
     @Query("DELETE FROM traceroute_node_position WHERE log_uuid = :logUuid")
-    fun deleteByLogUuid(logUuid: String)
+    suspend fun deleteByLogUuid(logUuid: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(entities: List<TracerouteNodePositionEntity>)
+    suspend fun insertAll(entities: List<TracerouteNodePositionEntity>)
 }
