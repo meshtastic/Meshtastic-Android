@@ -22,7 +22,7 @@ ktlint = "1.7.1"
 
 # Google
 hilt = "2.57.2"
-maps-compose = "6.12.2"
+maps-compose = "7.0.0"
 
 # Networking
 ktor = "3.3.3"
