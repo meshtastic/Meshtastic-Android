@@ -15,20 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.gradle.api.Plugin
+package org.meshtastic.buildlogic
+
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.dependencies
-import org.meshtastic.buildlogic.libs
+import org.gradle.api.artifacts.VersionCatalog
+import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.kotlin.dsl.getByType
+import java.io.FileInputStream
+import java.util.Properties
 
-class KotlinXSerializationConventionPlugin : Plugin<Project> {
-    override fun apply(target: Project) {
-        with(target) {
-            apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
+val Project.libs
+    get(): VersionCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
-            dependencies {
-                "implementation"(libs.findLibrary("kotlinx-serialization-core").get())
-            }
+val Project.configProperties: Properties
+    get() {
+        val properties = Properties()
+        val propertiesFile = rootProject.file("config.properties")
+        if (propertiesFile.exists()) {
+            FileInputStream(propertiesFile).use { properties.load(it) }
         }
+        return properties
     }
-}

@@ -15,9 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.geeksville.mesh.buildlogic.GitVersionValueSource
+import com.android.build.api.dsl.ApplicationExtension
 import com.mikepenz.aboutlibraries.plugin.DuplicateMode
 import com.mikepenz.aboutlibraries.plugin.DuplicateRule
+import org.meshtastic.buildlogic.GitVersionValueSource
+import org.meshtastic.buildlogic.configProperties
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -43,16 +45,8 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
-val configPropertiesFile = rootProject.file("config.properties")
-val configProperties = Properties()
-
-if (configPropertiesFile.exists()) {
-    FileInputStream(configPropertiesFile).use { configProperties.load(it) }
-}
-
-android {
+configure<ApplicationExtension> {
     namespace = configProperties.getProperty("APPLICATION_ID")
-    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
 
     signingConfigs {
         create("release") {
@@ -64,8 +58,6 @@ android {
     }
     defaultConfig {
         applicationId = configProperties.getProperty("APPLICATION_ID")
-        minSdk = configProperties.getProperty("MIN_SDK").toInt()
-        targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
 
         val vcOffset = configProperties.getProperty("VERSION_CODE_OFFSET")?.toInt() ?: 0
         println("Version code offset: $vcOffset")
@@ -167,7 +159,6 @@ secrets {
     propertiesFileName = "secrets.properties"
 }
 
-// workaround for https://github.com/google/ksp/issues/1590
 androidComponents {
     onVariants(selector().all()) { variant ->
         if (variant.name == "fdroidDebug") {

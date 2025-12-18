@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.buildlogic
+package org.meshtastic.buildlogic
 
 import com.diffplug.gradle.spotless.SpotlessExtension
 import org.gradle.api.Project
