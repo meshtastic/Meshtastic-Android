@@ -20,12 +20,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.android.lint)
-    alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
 }
 
-group = "com.geeksville.mesh.buildlogic"
+group = "org.meshtastic.buildlogic"
 
 // Configure the build-logic plugins to target JDK 21
 // This matches the JDK used to build the project, and is not related to what is running on device.
@@ -156,6 +155,11 @@ gradlePlugin {
         register("kmpLibrary") {
             id = libs.plugins.meshtastic.kmp.library.get().pluginId
             implementationClass = "KmpLibraryConventionPlugin"
+        }
+
+        register("root") {
+            id = libs.plugins.meshtastic.root.get().pluginId
+            implementationClass = "RootConventionPlugin"
         }
 
     }

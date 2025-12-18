@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.buildlogic
+package org.meshtastic.buildlogic
 
 /*
  * Copyright (c) 2025 Meshtastic LLC
@@ -37,6 +37,7 @@ package com.geeksville.mesh.buildlogic
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.process.ExecOperations
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 abstract class GitVersionValueSource : ValueSource<String, GitVersionValueSource.Params> {
@@ -45,7 +46,7 @@ abstract class GitVersionValueSource : ValueSource<String, GitVersionValueSource
     abstract val execOperations: ExecOperations
 
     override fun obtain(): String {
-        val output = java.io.ByteArrayOutputStream()
+        val output = ByteArrayOutputStream()
         return try {
             execOperations.exec {
                 commandLine("git", "rev-list", "--count", "HEAD")

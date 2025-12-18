@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.android.build.api.dsl.androidLibrary
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import java.io.FileInputStream
-import java.util.Properties
+import org.meshtastic.buildlogic.configProperties
 
 class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -31,20 +31,11 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.kotlin.multiplatform.library")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
-            apply(plugin = "com.autonomousapps.dependency-analysis")
-
-            val configPropertiesFile = rootProject.file("config.properties")
-            val configProperties = Properties()
-
-            if (configPropertiesFile.exists()) {
-                FileInputStream(configPropertiesFile).use { configProperties.load(it) }
-            }
 
             extensions.configure<KotlinMultiplatformExtension> {
-                @Suppress("UnstableApiUsage")
-                androidLibrary {
-                    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
-                    minSdk = configProperties.getProperty("MIN_SDK").toInt()
+                (this as ExtensionAware).extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
+                    compileSdk = this@with.configProperties.getProperty("COMPILE_SDK").toInt()
+                    minSdk = this@with.configProperties.getProperty("MIN_SDK").toInt()
                 }
             }
         }

@@ -17,18 +17,11 @@
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.dependencies
-import org.meshtastic.buildlogic.libs
+import org.meshtastic.buildlogic.configureGraphTasks
 
-class KotlinXSerializationConventionPlugin : Plugin<Project> {
+class RootConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        with(target) {
-            apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
-
-            dependencies {
-                "implementation"(libs.findLibrary("kotlinx-serialization-core").get())
-            }
-        }
+        require(target.path == ":")
+        target.subprojects { configureGraphTasks() }
     }
 }

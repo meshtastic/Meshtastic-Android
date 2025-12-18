@@ -16,15 +16,10 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.geeksville.mesh.buildlogic.MeshtasticFlavor
-import com.geeksville.mesh.buildlogic.configureFlavors
-import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.exclude
+import org.meshtastic.buildlogic.configureFlavors
 
 class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
