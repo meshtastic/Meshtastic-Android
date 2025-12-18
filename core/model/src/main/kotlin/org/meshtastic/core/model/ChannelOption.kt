@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.core.model
 
 import org.jetbrains.compose.resources.StringResource
@@ -22,6 +24,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.label_long_fast
 import org.meshtastic.core.strings.label_long_moderate
 import org.meshtastic.core.strings.label_long_slow
+import org.meshtastic.core.strings.label_long_turbo
 import org.meshtastic.core.strings.label_medium_fast
 import org.meshtastic.core.strings.label_medium_slow
 import org.meshtastic.core.strings.label_short_fast
@@ -306,13 +309,28 @@ enum class RegionInfo(
 }
 
 enum class ChannelOption(val modemPreset: ModemPreset, val labelRes: StringResource, val bandwidth: Float) {
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, Res.string.label_very_long_slow, .0625f),
-    LONG_FAST(ModemPreset.LONG_FAST, Res.string.label_long_fast, .250f),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, Res.string.label_long_moderate, .125f),
-    LONG_SLOW(ModemPreset.LONG_SLOW, Res.string.label_long_slow, .125f),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, Res.string.label_medium_fast, .250f),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, Res.string.label_medium_slow, .250f),
-    SHORT_TURBO(ModemPreset.SHORT_TURBO, Res.string.label_short_turbo, bandwidth = .500f),
-    SHORT_FAST(ModemPreset.SHORT_FAST, Res.string.label_short_fast, .250f),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, Res.string.label_short_slow, .250f),
+    // Grouped by range and speed for better readability
+    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, Res.string.label_very_long_slow, 0.0625f),
+    LONG_TURBO(ModemPreset.LONG_TURBO, Res.string.label_long_turbo, 0.500f),
+    LONG_FAST(ModemPreset.LONG_FAST, Res.string.label_long_fast, 0.250f),
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, Res.string.label_long_moderate, 0.125f),
+    LONG_SLOW(ModemPreset.LONG_SLOW, Res.string.label_long_slow, 0.125f),
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, Res.string.label_medium_fast, 0.250f),
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, Res.string.label_medium_slow, 0.250f),
+    SHORT_FAST(ModemPreset.SHORT_FAST, Res.string.label_short_fast, 0.250f),
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, Res.string.label_short_slow, 0.250f),
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, Res.string.label_short_turbo, 0.500f),
+    ;
+
+    companion object {
+        /** The default channel option for new configurations. */
+        val DEFAULT = LONG_FAST
+
+        /** Finds the ChannelOption corresponding to the given ModemPreset. Returns null if no match is found. */
+        fun from(modemPreset: ModemPreset?): ChannelOption? {
+            if (modemPreset == null) return null
+            // The `entries` property is preferred over `values()` since Kotlin 1.9
+            return entries.find { it.modemPreset == modemPreset }
+        }
+    }
 }
