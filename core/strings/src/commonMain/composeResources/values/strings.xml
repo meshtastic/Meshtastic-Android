@@ -130,6 +130,7 @@
 
     <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="label_long_fast">Long Range - Fast</string>
+    <string name="label_long_turbo">Long Range - Turbo</string>
     <string name="label_long_moderate">Long Range - Moderate</string>
     <string name="label_long_slow">Long Range - Slow</string>
     <string name="label_medium_fast">Medium Range - Fast</string>
