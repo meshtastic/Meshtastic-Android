@@ -17,7 +17,8 @@
 
 package org.meshtastic.core.model
 
-import junit.framework.Assert.assertNotNull
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 
@@ -36,7 +37,6 @@ class ChannelOptionTest {
         val unmappedPresets =
             ModemPreset.entries.filter {
                 // UNRECOGNIZED is a system-generated value for forward compatibility.
-                // UNSET is a valid state but doesn't have a specific channel configuration.
                 it != ModemPreset.UNRECOGNIZED
             }
 
@@ -51,5 +51,31 @@ class ChannelOptionTest {
                 channelOption,
             )
         }
+    }
+
+    /**
+     * This test ensures that there are no extra entries in `ChannelOption` that don't correspond to a valid
+     * `ModemPreset`.
+     *
+     * If this test fails, it means a `ModemPreset` was removed from the protobufs, and you must remove the
+     * corresponding entry from the `ChannelOption` enum.
+     */
+    @Test
+    fun `ensure no extra mappings exist in ChannelOption`() {
+        val protoPresets = ModemPreset.entries.filter { it != ModemPreset.UNRECOGNIZED }.toSet()
+        val mappedPresets = ChannelOption.entries.map { it.modemPreset }.toSet()
+
+        assertEquals(
+            "The set of ModemPresets in protobufs does not match the set of ModemPresets mapped in ChannelOption. " +
+                "Check for removed presets in protobufs or duplicate mappings in ChannelOption.",
+            protoPresets,
+            mappedPresets,
+        )
+
+        assertEquals(
+            "Each ChannelOption must map to a unique ModemPreset.",
+            protoPresets.size,
+            ChannelOption.entries.size,
+        )
     }
 }
