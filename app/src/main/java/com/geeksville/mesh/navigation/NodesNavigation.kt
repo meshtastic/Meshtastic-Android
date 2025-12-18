@@ -141,8 +141,14 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, scrollToTo
             TracerouteLogScreen(
                 viewModel = metricsViewModel,
                 onNavigateUp = navController::navigateUp,
-                onViewOnMap = { requestId ->
-                    navController.navigate(NodeDetailRoutes.TracerouteMap(args.destNum, requestId))
+                onViewOnMap = { requestId, responseLogUuid ->
+                    navController.navigate(
+                        NodeDetailRoutes.TracerouteMap(
+                            destNum = args.destNum,
+                            requestId = requestId,
+                            logUuid = responseLogUuid,
+                        ),
+                    )
                 },
             )
         }
@@ -166,6 +172,7 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, scrollToTo
             TracerouteMapScreen(
                 metricsViewModel = metricsViewModel,
                 requestId = args.requestId,
+                logUuid = args.logUuid,
                 onNavigateUp = navController::navigateUp,
             )
         }

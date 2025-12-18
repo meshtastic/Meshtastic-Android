@@ -78,7 +78,7 @@ object NodeDetailRoutes {
 
     @Serializable data class TracerouteLog(val destNum: Int) : Route
 
-    @Serializable data class TracerouteMap(val destNum: Int, val requestId: Int) : Route
+    @Serializable data class TracerouteMap(val destNum: Int, val requestId: Int, val logUuid: String? = null) : Route
 
     @Serializable data class HostMetricsLog(val destNum: Int) : Route
 

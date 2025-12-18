@@ -64,6 +64,7 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
@@ -147,6 +148,8 @@ class MeshService : Service() {
 
     @Inject lateinit var meshLogRepository: Lazy<MeshLogRepository>
 
+    @Inject lateinit var tracerouteSnapshotRepository: TracerouteSnapshotRepository
+
     @Inject lateinit var radioInterfaceService: RadioInterfaceService
 
     @Inject lateinit var locationRepository: LocationRepository
@@ -176,6 +179,7 @@ class MeshService : Service() {
     @Inject lateinit var analytics: PlatformAnalytics
 
     private val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
+    private val logUuidByPacketId = ConcurrentHashMap<Int, String>()
 
     companion object {
 
@@ -826,6 +830,7 @@ class MeshService : Service() {
                 // that is not shared'
                 var shouldBroadcast = !fromUs
 
+                val logUuid = logUuidByPacketId[packet.id]
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                         if (data.replyId != 0 && data.emoji == 0) {
@@ -939,6 +944,27 @@ class MeshService : Service() {
                         val full = packet.getFullTracerouteResponse(::getUserName)
                         if (full != null) {
                             val requestId = packet.decoded.requestId
+                            if (logUuid != null) {
+                                serviceScope.handledLaunch {
+                                    val forwardRoute = routeDiscovery?.routeList.orEmpty()
+                                    val returnRoute = routeDiscovery?.routeBackList.orEmpty()
+                                    val routeNodeNums = (forwardRoute + returnRoute).distinct()
+                                    val nodeDbByNum = nodeRepository.nodeDBbyNum.value
+                                    val snapshotPositions =
+                                        routeNodeNums
+                                            .mapNotNull { nodeNum ->
+                                                val position =
+                                                    nodeDbByNum[nodeNum]?.validPosition ?: return@mapNotNull null
+                                                nodeNum to position
+                                            }
+                                            .toMap()
+                                    tracerouteSnapshotRepository.upsertSnapshotPositions(
+                                        logUuid = logUuid,
+                                        requestId = requestId,
+                                        positions = snapshotPositions,
+                                    )
+                                }
+                            }
                             val start = tracerouteStartTimes.remove(requestId)
                             val responseText =
                                 if (start != null) {
@@ -960,6 +986,7 @@ class MeshService : Service() {
                                     requestId = requestId,
                                     forwardRoute = routeDiscovery?.routeList.orEmpty(),
                                     returnRoute = routeDiscovery?.routeBackList.orEmpty(),
+                                    logUuid = logUuid,
                                 ),
                             )
                         }
@@ -1441,7 +1468,9 @@ class MeshService : Service() {
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
                 it.hopsAway = getHopsAwayForPacket(packet)
             }
+            logUuidByPacketId[packet.id] = packetToSave.uuid
             handleReceivedData(packet)
+            logUuidByPacketId.remove(packet.id)
         }
     }
 

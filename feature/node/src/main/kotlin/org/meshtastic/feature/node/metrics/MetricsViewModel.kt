@@ -43,6 +43,7 @@ import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -87,6 +88,7 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeRepository: NodeRepository,
+    private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
 ) : ViewModel() {
@@ -145,6 +147,8 @@ constructor(
 
         return overlay
     }
+
+    fun tracerouteSnapshotPositions(logUuid: String) = tracerouteSnapshotRepository.getSnapshotPositions(logUuid)
 
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
 

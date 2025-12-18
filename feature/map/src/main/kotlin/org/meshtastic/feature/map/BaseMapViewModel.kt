@@ -42,6 +42,7 @@ import org.meshtastic.core.strings.one_day
 import org.meshtastic.core.strings.one_hour
 import org.meshtastic.core.strings.two_days
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -68,7 +69,7 @@ sealed class LastHeardFilter(val seconds: Long, val label: StringResource) {
 @Suppress("TooManyFunctions")
 abstract class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,
-    nodeRepository: NodeRepository,
+    private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
 ) : ViewModel() {
@@ -117,6 +118,12 @@ abstract class BaseMapViewModel(
     }
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
+
+    fun getNodeByNum(nodeNum: Int): Node? = nodeRepository.nodeDBbyNum.value[nodeNum]
+
+    fun getUser(nodeNum: Int): MeshProtos.User = nodeRepository.getUser(nodeNum)
+
+    fun getNodeOrFallback(nodeNum: Int): Node = getNodeByNum(nodeNum) ?: Node(num = nodeNum, user = getUser(nodeNum))
 
     val isConnected =
         serviceRepository.connectionState.map { it.isConnected() }.stateInWhileSubscribed(initialValue = false)
@@ -195,4 +202,48 @@ abstract class BaseMapViewModel(
                     lastHeardTrackFilter.value,
                 ),
             )
+}
+
+data class TracerouteNodeSelection(
+    val overlayNodeNums: Set<Int>,
+    val nodesForMarkers: List<Node>,
+    val nodeLookup: Map<Int, Node>,
+)
+
+fun BaseMapViewModel.tracerouteNodeSelection(
+    tracerouteOverlay: TracerouteOverlay?,
+    tracerouteNodePositions: Map<Int, MeshProtos.Position>,
+    nodes: List<Node>,
+): TracerouteNodeSelection {
+    val overlayNodeNums = tracerouteOverlay?.relatedNodeNums ?: emptySet()
+    val tracerouteSnapshotNodes =
+        if (tracerouteOverlay == null || tracerouteNodePositions.isEmpty()) {
+            emptyList()
+        } else {
+            tracerouteNodePositions.map { (nodeNum, position) -> getNodeOrFallback(nodeNum).copy(position = position) }
+        }
+
+    val nodesForMarkers =
+        if (tracerouteOverlay != null) {
+            if (tracerouteSnapshotNodes.isNotEmpty()) {
+                tracerouteSnapshotNodes.filter { overlayNodeNums.contains(it.num) }
+            } else {
+                nodes.filter { overlayNodeNums.contains(it.num) }
+            }
+        } else {
+            nodes
+        }
+
+    val nodesForLookup =
+        if (tracerouteSnapshotNodes.isNotEmpty()) {
+            tracerouteSnapshotNodes
+        } else {
+            nodes.filter { it.validPosition != null }
+        }
+
+    return TracerouteNodeSelection(
+        overlayNodeNums = overlayNodeNums,
+        nodesForMarkers = nodesForMarkers,
+        nodeLookup = nodesForLookup.associateBy { it.num },
+    )
 }

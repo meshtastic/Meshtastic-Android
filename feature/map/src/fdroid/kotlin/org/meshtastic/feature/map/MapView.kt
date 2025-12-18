@@ -132,6 +132,7 @@ import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.proto.MeshProtos.Position
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
@@ -231,6 +232,7 @@ fun MapView(
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
     tracerouteOverlay: TracerouteOverlay? = null,
+    tracerouteNodePositions: Map<Int, Position> = emptyMap(),
     onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
 ) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
@@ -334,14 +336,17 @@ fun MapView(
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
-    val nodeLookup = remember(nodes) { nodes.filter { it.validPosition != null }.associateBy { it.num } }
-    val overlayNodeNums = remember(tracerouteOverlay) { tracerouteOverlay?.relatedNodeNums ?: emptySet() }
-    val nodesForMarkers =
-        if (tracerouteOverlay != null) {
-            nodes.filter { overlayNodeNums.contains(it.num) }
-        } else {
-            nodes
+    val tracerouteSelection =
+        remember(tracerouteOverlay, tracerouteNodePositions, nodes) {
+            mapViewModel.tracerouteNodeSelection(
+                tracerouteOverlay = tracerouteOverlay,
+                tracerouteNodePositions = tracerouteNodePositions,
+                nodes = nodes,
+            )
         }
+    val overlayNodeNums = tracerouteSelection.overlayNodeNums
+    val nodeLookup = tracerouteSelection.nodeLookup
+    val nodesForMarkers = tracerouteSelection.nodesForMarkers
     val tracerouteForwardPoints =
         remember(tracerouteOverlay, nodeLookup) {
             tracerouteOverlay?.forwardRoute?.mapNotNull {
