@@ -82,15 +82,25 @@ data class Packet(
     companion object {
         const val RELAY_NODE_SUFFIX_MASK = 0xFF
 
-        fun getRelayNode(relayNodeId: Int, nodes: List<Node>): Node? {
+        fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
-            val candidateRelayNodes = nodes.filter { (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix }
+
+            val candidateRelayNodes = nodes.filter {
+                it.lastHeard != 0 && (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
+            }
+
             val closestRelayNode =
                 if (candidateRelayNodes.size == 1) {
                     candidateRelayNodes.first()
                 } else {
                     candidateRelayNodes.minByOrNull { it.hopsAway }
                 }
+
+            if (closestRelayNode?.num == ourNodeNum) {
+                // it's us, useless to return relay node for ourselves
+                return null
+            }
+
             return closestRelayNode
         }
     }

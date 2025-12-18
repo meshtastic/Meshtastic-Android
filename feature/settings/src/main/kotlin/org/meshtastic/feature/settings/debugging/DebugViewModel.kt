@@ -297,7 +297,10 @@ constructor(
         val placeholder = "___RELAY_NODE___"
 
         if (relayNode != 0) {
-            Packet.getRelayNode(relayNode, nodeRepository.nodeDBbyNum.value.values.toList())?.let { node ->
+            val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
+            val nodeList = nodeRepository.nodeDBbyNum.value.values.toList()
+
+            Packet.getRelayNode(relayNode, nodeList, myNodeNum)?.let { node ->
                 val relayId = node.user.id
                 val relayName = node.user.longName
                 val regex = Regex("""\brelay_node: ${relayNode.toUInt()}\b""")

@@ -116,6 +116,7 @@ internal fun MessageListPaged(
         MessageStatusDialog(
             message = message,
             nodes = state.nodes,
+            ourNode = state.ourNode,
             resendOption = message.status?.equals(MessageStatus.ERROR) ?: false,
             onResend = {
                 handlers.onDeleteMessages(listOf(message.uuid))
@@ -439,6 +440,7 @@ internal fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
 internal fun MessageStatusDialog(
     message: Message,
     nodes: List<Node>,
+    ourNode: Node?,
     resendOption: Boolean,
     onResend: () -> Unit,
     onDismiss: () -> Unit,
@@ -447,7 +449,9 @@ internal fun MessageStatusDialog(
     val relayNodeName by
         remember(message.relayNode, nodes) {
             derivedStateOf {
-                message.relayNode?.let { relayNodeId -> Packet.getRelayNode(relayNodeId, nodes)?.user?.longName }
+                message.relayNode?.let { relayNodeId ->
+                    Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.longName
+                }
             }
         }
     DeliveryInfo(
