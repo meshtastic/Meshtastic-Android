@@ -330,6 +330,7 @@
         <item quantity="other">%d отскока</item>
     </plurals>
     <string name="traceroute_diff">Отскоци към %1$d Отскоци на връщане %2$d</string>
+    <string name="traceroute_showing_nodes">Показване на %1$d/%2$d възела</string>
     <string name="twenty_four_hours">24Ч</string>
     <string name="forty_eight_hours">48Ч</string>
     <string name="one_week">1С</string>

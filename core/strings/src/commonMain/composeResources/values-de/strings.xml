@@ -113,6 +113,7 @@
     <string name="config_lora_frequency_slot_summary">Die Betriebsfrequenz Ihres Knotens wird basierend auf der Region, dem Modem Preset und diesem Feld berechnet. Wenn \"0\", wird der Slot automatisch auf der Grundlage des primären Kanalnamens berechnet. Wenn ein privater als Primär- und öffentliche als Sekundärkanäle konfiguriert sind, kann es sein, dass sie keinen Empfang auf den öffentlichen haben, wenn diese sich auf einem anderen Slot befinden. Stellen Sie in diesem Fall den richtigen Slot fest ein, statt die Automatik (0) übernehmen zu lassen.</string>
     <string name="label_very_long_slow">Sehr hohe Reichweite - Langsam</string>
     <string name="label_long_fast">Hohe Reichweite - Schnell</string>
+    <string name="label_long_turbo">Hohe Reichweite - Turbo</string>
     <string name="label_long_moderate">Hohe Reichweite - Mäßig</string>
     <string name="label_long_slow">Hohe Reichweite - Langsam</string>
     <string name="label_medium_fast">Mittlere Reichweite - Schnell</string>
