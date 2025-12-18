@@ -85,9 +85,8 @@ data class Packet(
         fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
 
-            val candidateRelayNodes = nodes.filter {
-                it.lastHeard != 0 && (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
-            }
+            val candidateRelayNodes =
+                nodes.filter { it.lastHeard != 0 && (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix }
 
             val closestRelayNode =
                 if (candidateRelayNodes.size == 1) {
