@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 import com.android.build.api.dsl.ApplicationExtension
-import com.geeksville.mesh.buildlogic.FlavorDimension
-import com.geeksville.mesh.buildlogic.MeshtasticFlavor
+import org.meshtastic.buildlogic.FlavorDimension
+import org.meshtastic.buildlogic.MeshtasticFlavor
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)

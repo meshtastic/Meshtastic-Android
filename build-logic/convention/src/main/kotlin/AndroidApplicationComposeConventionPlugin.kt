@@ -16,11 +16,11 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.geeksville.mesh.buildlogic.configureAndroidCompose
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.meshtastic.buildlogic.configureAndroidCompose
 
 class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {

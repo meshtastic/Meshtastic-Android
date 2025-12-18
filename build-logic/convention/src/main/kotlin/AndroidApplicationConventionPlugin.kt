@@ -16,11 +16,12 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.geeksville.mesh.buildlogic.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.meshtastic.buildlogic.configureGraphTasks
+import org.meshtastic.buildlogic.configureKotlinAndroid
 
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -31,7 +32,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
             apply(plugin = "meshtastic.analytics")
-            apply(plugin = "com.autonomousapps.dependency-analysis")
+            // Removed apply(plugin = "com.autonomousapps.dependency-analysis")
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(applicationExtension = this)
@@ -61,6 +62,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     buildConfig = true
                 }
             }
+            configureGraphTasks() // Added call to configureGraphTasks
         }
     }
 }

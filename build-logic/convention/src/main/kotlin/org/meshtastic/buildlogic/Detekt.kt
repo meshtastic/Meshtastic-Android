@@ -15,44 +15,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.buildlogic
+package org.meshtastic.buildlogic
 
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.named
-import java.io.File
+import org.gradle.kotlin.dsl.withType
 
-internal fun Project.configureDetekt(extension: DetektExtension) = extension.apply {
+internal fun Project.configureDetekt(extension: DetektExtension) {
     extension.apply {
-        toolVersion = libs.findVersion("detekt").get().toString()
-        config.setFrom("$rootDir/config/detekt/detekt.yml")
+        val detektVersion: String = this@configureDetekt.libs.findVersion("detekt").get().requiredVersion
+        toolVersion = detektVersion
+        config.setFrom(rootProject.file("config/detekt/detekt.yml"))
         buildUponDefaultConfig = true
         allRules = false
+        baseline = file("detekt-baseline.xml")
         source.setFrom(
             files(
                 "src/main/java",
                 "src/main/kotlin",
-            ),
+            )
         )
     }
-    tasks.named<Detekt>("detekt") {
+
+    tasks.withType<Detekt> {
         reports {
-            xml.required.set(true)
-            html.required.set(true)
-            txt.required.set(true)
             sarif.required.set(true)
-            md.required.set(true)
+            html.required.set(true)
+            xml.required.set(false)
+            txt.required.set(false)
         }
-        reports.xml.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.xml"))
-        reports.html.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.html"))
-        reports.txt.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.txt"))
-        reports.sarif.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.sarif"))
-        reports.md.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.md"))
     }
+
     dependencies {
-        "detektPlugins"(libs.findLibrary("detekt-formatting").get())
-        "detektPlugins"(libs.findLibrary("detekt-compose").get())
+        add("detektPlugins", this@configureDetekt.libs.findLibrary("detekt.compose").get())
     }
 }

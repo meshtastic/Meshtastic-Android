@@ -208,7 +208,7 @@ firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 # Other
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.21.0" }
-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
+# Removed dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
 protobuf = { id = "com.google.protobuf", version = "0.9.6" }

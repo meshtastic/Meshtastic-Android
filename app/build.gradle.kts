@@ -16,9 +16,10 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.geeksville.mesh.buildlogic.GitVersionValueSource
 import com.mikepenz.aboutlibraries.plugin.DuplicateMode
 import com.mikepenz.aboutlibraries.plugin.DuplicateRule
+import org.meshtastic.buildlogic.GitVersionValueSource
+import org.meshtastic.buildlogic.configProperties
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -44,16 +45,8 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
-val configPropertiesFile = rootProject.file("config.properties")
-val configProperties = Properties()
-
-if (configPropertiesFile.exists()) {
-    FileInputStream(configPropertiesFile).use { configProperties.load(it) }
-}
-
 configure<ApplicationExtension> {
     namespace = configProperties.getProperty("APPLICATION_ID")
-    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
 
     signingConfigs {
         create("release") {
@@ -65,8 +58,6 @@ configure<ApplicationExtension> {
     }
     defaultConfig {
         applicationId = configProperties.getProperty("APPLICATION_ID")
-        minSdk = configProperties.getProperty("MIN_SDK").toInt()
-        targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
 
         val vcOffset = configProperties.getProperty("VERSION_CODE_OFFSET")?.toInt() ?: 0
         println("Version code offset: $vcOffset")
@@ -86,7 +77,7 @@ configure<ApplicationExtension> {
         buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${configProperties.getProperty("ABS_MIN_FW_VERSION")}\"")
         // We have to list all translated languages here,
         // because some of our libs have bogus languages that google play
-        // doesn't like and we need to strip them (gr)
+        // doesn\'t like and we need to strip them (gr)
         @Suppress("UnstableApiUsage")
         androidResources.localeFilters.addAll(
             listOf(

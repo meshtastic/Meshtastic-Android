@@ -17,13 +17,14 @@
 
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
-import com.geeksville.mesh.buildlogic.configureFlavors
-import com.geeksville.mesh.buildlogic.configureKotlinAndroid
-import com.geeksville.mesh.buildlogic.disableUnnecessaryAndroidTests
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.meshtastic.buildlogic.configureFlavors
+import org.meshtastic.buildlogic.configureGraphTasks
+import org.meshtastic.buildlogic.configureKotlinAndroid
+import org.meshtastic.buildlogic.disableUnnecessaryAndroidTests
 
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -32,7 +33,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.android.lint")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
-            apply(plugin = "com.autonomousapps.dependency-analysis")
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(libraryExtension = this)
@@ -43,6 +43,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             extensions.configure<LibraryAndroidComponentsExtension> {
                 disableUnnecessaryAndroidTests(target)
             }
+            configureGraphTasks() // Added call to configureGraphTasks
         }
     }
 }

@@ -16,12 +16,12 @@
  */
 
 import com.diffplug.gradle.spotless.SpotlessExtension
-import com.geeksville.mesh.buildlogic.configureSpotless
-import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.getByType
+import org.meshtastic.buildlogic.configureSpotless
+import org.meshtastic.buildlogic.libs
 
 class SpotlessConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {

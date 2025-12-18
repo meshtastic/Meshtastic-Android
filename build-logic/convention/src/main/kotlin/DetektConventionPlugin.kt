@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.geeksville.mesh.buildlogic.configureDetekt
-import com.geeksville.mesh.buildlogic.libs
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.getByType
+import org.meshtastic.buildlogic.configureDetekt
+import org.meshtastic.buildlogic.libs
 
 class DetektConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {

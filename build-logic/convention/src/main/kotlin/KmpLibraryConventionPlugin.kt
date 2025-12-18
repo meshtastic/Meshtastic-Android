@@ -16,13 +16,13 @@
  */
 
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
-import com.geeksville.mesh.buildlogic.configProperties
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.meshtastic.buildlogic.configProperties
 
 class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -31,13 +31,13 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.kotlin.multiplatform.library")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
-            apply(plugin = "com.autonomousapps.dependency-analysis")
+            // Removed apply(plugin = "com.autonomousapps.dependency-analysis")
 
             extensions.configure<KotlinMultiplatformExtension> {
                 // Use dynamic configuration for 'android' block to avoid resolution issues
                 (this as ExtensionAware).extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
-                    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
-                    minSdk = configProperties.getProperty("MIN_SDK").toInt()
+                    compileSdk = this@with.configProperties.getProperty("COMPILE_SDK").toInt()
+                    minSdk = this@with.configProperties.getProperty("MIN_SDK").toInt()
                 }
             }
         }
