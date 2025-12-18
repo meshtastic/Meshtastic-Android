@@ -1,4 +1,4 @@
-# `${projectPath.get()}`
+# `:app`
 
 ## Module dependency graph
 
