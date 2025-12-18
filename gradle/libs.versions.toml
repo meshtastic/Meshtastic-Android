@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "8.13.2"
+agp = "9.0.0-rc01"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -41,7 +41,7 @@ protobuf = "4.33.2"
 [libraries]
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.1" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
@@ -184,13 +184,11 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
-android-library = { id = "com.android.library", version.ref = "agp" }
 android-lint = { id = "com.android.lint", version.ref = "agp" }
 
 # Jetbrains
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version = "1.9.3" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }

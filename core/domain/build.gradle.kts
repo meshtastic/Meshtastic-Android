@@ -36,17 +36,21 @@ import com.android.build.api.dsl.LibraryExtension
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.hilt)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.kover)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.datastore" }
+configure<LibraryExtension> { namespace = "org.meshtastic.core.domain" }
 
 dependencies {
+    implementation(projects.core.common)
+    implementation(projects.core.data)
+    implementation(projects.core.database)
+    implementation(projects.core.model)
     implementation(projects.core.proto)
 
-    implementation(libs.androidx.datastore)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.javax.inject)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.timber)
+
+    testImplementation(libs.junit)
+    testImplementation(testFixtures(projects.core.model))
 }

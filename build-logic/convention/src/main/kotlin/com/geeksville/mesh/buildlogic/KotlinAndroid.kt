@@ -17,7 +17,8 @@
 
 package com.geeksville.mesh.buildlogic
 
-import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
@@ -30,29 +31,43 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.FileInputStream
-import java.util.Properties
 
 /**
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    applicationExtension: ApplicationExtension? = null,
+    libraryExtension: LibraryExtension? = null,
 ) {
-    val configPropertiesFile = rootProject.file("config.properties")
-    val configProperties = Properties()
 
-    if (configPropertiesFile.exists()) {
-        FileInputStream(configPropertiesFile).use { configProperties.load(it) }
+    val compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+    val minSdk = configProperties.getProperty("MIN_SDK").toInt()
+    val targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
+
+    applicationExtension?.apply {
+        this.compileSdk = compileSdk
+        defaultConfig {
+            this.minSdk = minSdk
+            this.targetSdk = targetSdk
+        }
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_21
+            targetCompatibility = JavaVersion.VERSION_21
+            isCoreLibraryDesugaringEnabled = true
+        }
     }
 
-    commonExtension.apply {
-        compileSdk = configProperties.get("COMPILE_SDK").toString().toInt()
-
+    libraryExtension?.apply {
+        this.compileSdk = compileSdk
         defaultConfig {
-            minSdk = configProperties.get("MIN_SDK").toString().toInt()
+            this.minSdk = minSdk
         }
-
+        testOptions {
+            this.targetSdk = targetSdk
+        }
+        lint {
+            this.targetSdk = targetSdk
+        }
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_21
             targetCompatibility = JavaVersion.VERSION_21

@@ -23,6 +23,7 @@ include(
     ":core:database",
     ":core:datastore",
     ":core:di",
+    ":core:domain",
     ":core:model",
     ":core:navigation",
     ":core:network",

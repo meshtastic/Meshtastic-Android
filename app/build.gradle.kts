@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.geeksville.mesh.buildlogic.GitVersionValueSource
 import com.mikepenz.aboutlibraries.plugin.DuplicateMode
 import com.mikepenz.aboutlibraries.plugin.DuplicateRule
@@ -50,7 +51,7 @@ if (configPropertiesFile.exists()) {
     FileInputStream(configPropertiesFile).use { configProperties.load(it) }
 }
 
-android {
+configure<ApplicationExtension> {
     namespace = configProperties.getProperty("APPLICATION_ID")
     compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
 
@@ -156,10 +157,10 @@ android {
             }
             isMinifyEnabled = true
             isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             isDebuggable = false
         }
     }
-    bundle { language { enableSplit = false } }
 }
 
 secrets {
@@ -167,19 +168,17 @@ secrets {
     propertiesFileName = "secrets.properties"
 }
 
-// workaround for https://github.com/google/ksp/issues/1590
 androidComponents {
     onVariants(selector().all()) { variant ->
         if (variant.name == "fdroidDebug") {
-            variant.applicationId = "com.geeksville.mesh.fdroid.debug"
+            variant.applicationId.set("com.geeksville.mesh.fdroid.debug")
         }
 
         if (variant.name == "googleDebug") {
-            variant.applicationId = "com.geeksville.mesh.google.debug"
+            variant.applicationId.set("com.geeksville.mesh.google.debug")
         }
-    }
-    onVariants(selector().withBuildType("release")) { variant ->
-        if (variant.flavorName == "google") {
+
+        if (variant.name == "googleRelease") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
             val minifyTaskName = "minify${variantNameCapped}WithR8"
             val uploadTaskName = "uploadMapping$variantNameCapped"
@@ -190,7 +189,11 @@ androidComponents {
     }
 }
 
-project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}") }
+project.afterEvaluate {
+    logger.lifecycle(
+        "Version code is set to: ${extensions.getByType<ApplicationExtension>().defaultConfig.versionCode}",
+    )
+}
 
 dependencies {
     implementation(projects.core.analytics)
@@ -262,25 +265,27 @@ dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
-dokka {
-    moduleName.set("Meshtastic App")
-    dokkaSourceSets.main {
-        sourceLink {
-            enableJdkDocumentationLink.set(true)
-            enableKotlinStdLibDocumentationLink.set(true)
-            enableJdkDocumentationLink.set(true)
-            reportUndocumented.set(true)
-            localDirectory.set(file("src/main/java"))
-            remoteUrl("https://github.com/geeksville/Meshtastic-Android/app/src/main/java")
-            remoteLineSuffix.set("#L")
-        }
-    }
-    dokkaPublications.html { suppressInheritedMembers.set(true) }
-    dokkaGeneratorIsolation = ProcessIsolation {
-        // Configures heap size
-        maxHeapSize = "6g"
-    }
-}
+// dokka {
+//    moduleName.set("Meshtastic App")
+//    dokkaSourceSets.configureEach {
+//        if (this.name == "main") {
+//            sourceLink {
+//                enableJdkDocumentationLink.set(true)
+//                enableKotlinStdLibDocumentationLink.set(true)
+//                enableJdkDocumentationLink.set(true)
+//                reportUndocumented.set(true)
+//                localDirectory.set(file("src/main/java"))
+//                remoteUrl("https://github.com/geeksville/Meshtastic-Android/app/src/main/java")
+//                remoteLineSuffix.set("#L")
+//            }
+//        }
+//        dokkaPublications.html { suppressInheritedMembers.set(true) }
+//        dokkaGeneratorIsolation = ProcessIsolation {
+//            // Configures heap size
+//            maxHeapSize = "6g"
+//        }
+//    }
+// }
 
 aboutLibraries {
     export { excludeFields = listOf("generated") }

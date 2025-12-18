@@ -28,21 +28,21 @@ class AndroidLintConventionPlugin : Plugin<Project> {
         with(target) {
             when {
                 pluginManager.hasPlugin("com.android.application") ->
-                    configure<ApplicationExtension> { lint { configure(project) } }
+                    configure<ApplicationExtension> { lint { configure() } }
 
                 pluginManager.hasPlugin("com.android.library") ->
-                    configure<LibraryExtension> { lint { configure(project) } }
+                    configure<LibraryExtension> { lint { configure() } }
 
                 else -> {
                     apply(plugin = "com.android.lint")
-                    configure<Lint> { configure(project) }
+                    configure<Lint> { configure() }
                 }
             }
         }
     }
 }
 
-private fun Lint.configure(project: Project) {
+private fun Lint.configure() {
     xmlReport = true
     sarifReport = true
     checkDependencies = true

@@ -17,7 +17,9 @@
 
 package com.geeksville.mesh.buildlogic
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.configure
@@ -28,22 +30,26 @@ import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginE
  * Configure Compose-specific options
  */
 internal fun Project.configureAndroidCompose(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
-    commonExtension.apply {
+    (commonExtension as? ApplicationExtension)?.apply {
         buildFeatures {
             compose = true
         }
-
-        dependencies {
-            val bom = libs.findLibrary("androidx-compose-bom").get()
-            "implementation"(platform(bom))
-            "androidTestImplementation"(platform(bom))
-            "implementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
-            "implementation"(libs.findLibrary("androidx-compose-runtime").get())
-            "runtimeOnly"(libs.findLibrary("androidx-compose-runtime-tracing").get())
-            "debugImplementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
+    }
+    (commonExtension as? LibraryExtension)?.apply {
+        buildFeatures {
+            compose = true
         }
+    }
+
+    dependencies {
+        val bom = libs.findLibrary("androidx-compose-bom").get()
+        "implementation"(platform(bom))
+        "androidTestImplementation"(platform(bom))
+        "implementation"(libs.findLibrary("androidx-compose-runtime").get())
+        "runtimeOnly"(libs.findLibrary("androidx-compose-runtime-tracing").get())
+        "debugImplementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
     }
 
     extensions.configure<ComposeCompilerGradlePluginExtension> {
