@@ -289,7 +289,7 @@
     <string name="map_select_download_region">Sélectionnez la région de téléchargement</string>
     <string name="map_tile_download_estimate">Estimation du téléchargement de tuiles :</string>
     <string name="map_start_download">Commencer le téléchargement</string>
-    <string name="exchange_position">Échanger la position</string>
+    <string name="exchange_position">Demander / envoyer la position</string>
     <string name="close">Fermer</string>
     <string name="radio_configuration">Réglages de l'appareil</string>
     <string name="module_settings">Réglages du module</string>
@@ -349,7 +349,7 @@
     <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement.</string>
     <string name="encryption_error">Non-concordance de clé publique</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d'usine ou à une autre action intentionnelle.</string>
-    <string name="exchange_userinfo">Échanger les informations utilisateur</string>
+    <string name="exchange_userinfo">Demander / envoyer les informations du nœud</string>
     <string name="meshtastic_new_nodes_notifications">Notifications de nouveaux nœuds</string>
     <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>
@@ -379,6 +379,12 @@
         <item quantity="other">%1$d sauts</item>
     </plurals>
     <string name="traceroute_diff">Sauts vers %1$d Sauts retour %2$d</string>
+    <string name="traceroute_outgoing_route">Route aller</string>
+    <string name="traceroute_return_route">Route retour</string>
+    <string name="traceroute_endpoint_missing">Impossible d'afficher la carte traceroute car le noeud de départ ou de destination n'a pas d'informations de position.</string>
+    <string name="view_on_map">Afficher sur la carte</string>
+    <string name="traceroute_map_no_data">Ce traceroute n'a pas encore de nœuds cartographiables.</string>
+    <string name="traceroute_showing_nodes">Affichage des nœuds %1$d/%2$d</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1S</string>
