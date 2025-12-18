@@ -180,6 +180,7 @@ class MeshService : Service() {
 
     private val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
     private val logUuidByPacketId = ConcurrentHashMap<Int, String>()
+    private val logInsertJobByPacketId = ConcurrentHashMap<Int, Job>()
 
     companion object {
 
@@ -831,6 +832,7 @@ class MeshService : Service() {
                 var shouldBroadcast = !fromUs
 
                 val logUuid = logUuidByPacketId[packet.id]
+                val logInsertJob = logInsertJobByPacketId[packet.id]
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                         if (data.replyId != 0 && data.emoji == 0) {
@@ -946,6 +948,7 @@ class MeshService : Service() {
                             val requestId = packet.decoded.requestId
                             if (logUuid != null) {
                                 serviceScope.handledLaunch {
+                                    logInsertJob?.join()
                                     val forwardRoute = routeDiscovery?.routeList.orEmpty()
                                     val returnRoute = routeDiscovery?.routeBackList.orEmpty()
                                     val routeNodeNums = (forwardRoute + returnRoute).distinct()
@@ -1439,7 +1442,7 @@ class MeshService : Service() {
                     portNum = packet.decoded.portnumValue,
                     fromRadio = fromRadio { this.packet = packet },
                 )
-            insertMeshLog(packetToSave)
+            val logInsertJob = insertMeshLog(packetToSave)
 
             serviceScope.handledLaunch { serviceRepository.emitMeshPacket(packet) }
 
@@ -1468,19 +1471,22 @@ class MeshService : Service() {
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
                 it.hopsAway = getHopsAwayForPacket(packet)
             }
+            logInsertJobByPacketId[packet.id] = logInsertJob
             logUuidByPacketId[packet.id] = packetToSave.uuid
-            handleReceivedData(packet)
-            logUuidByPacketId.remove(packet.id)
+            try {
+                handleReceivedData(packet)
+            } finally {
+                logUuidByPacketId.remove(packet.id)
+                logInsertJobByPacketId.remove(packet.id)
+            }
         }
     }
 
-    private fun insertMeshLog(packetToSave: MeshLog) {
-        serviceScope.handledLaunch {
-            // Do not log, because might contain PII
-            // info("insert: ${packetToSave.message_type} =
-            // ${packetToSave.raw_message.toOneLineString()}")
-            meshLogRepository.get().insert(packetToSave)
-        }
+    private fun insertMeshLog(packetToSave: MeshLog): Job = serviceScope.handledLaunch {
+        // Do not log, because might contain PII
+        // info("insert: ${packetToSave.message_type} =
+        // ${packetToSave.raw_message.toOneLineString()}")
+        meshLogRepository.get().insert(packetToSave)
     }
 
     private fun setLocalConfig(config: ConfigProtos.Config) {
