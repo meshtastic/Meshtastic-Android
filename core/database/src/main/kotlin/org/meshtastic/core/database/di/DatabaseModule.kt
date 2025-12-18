@@ -29,6 +29,7 @@ import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.dao.QuickChatActionDao
+import org.meshtastic.core.database.dao.TracerouteNodePositionDao
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -51,4 +52,8 @@ class DatabaseModule {
 
     @Provides
     fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao = database.firmwareReleaseDao()
+
+    @Provides
+    fun provideTracerouteNodePositionDao(database: MeshtasticDatabase): TracerouteNodePositionDao =
+        database.tracerouteNodePositionDao()
 }

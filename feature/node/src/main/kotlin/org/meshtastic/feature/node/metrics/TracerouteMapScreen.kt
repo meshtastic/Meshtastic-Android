@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.strings.Res
@@ -54,37 +55,59 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.feature.map.MapView
 import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.proto.MeshProtos
 
 @Composable
 fun TracerouteMapScreen(
     metricsViewModel: MetricsViewModel = hiltViewModel(),
     requestId: Int,
+    logUuid: String? = null,
     onNavigateUp: () -> Unit,
 ) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
-    val nodeTitle = state.node?.user?.longName ?: stringResource(Res.string.traceroute)
-    val routeDiscovery =
-        state.tracerouteResults
-            .find { it.fromRadio.packet.decoded.requestId == requestId }
-            ?.fromRadio
-            ?.packet
-            ?.fullRouteDiscovery
+    val snapshotPositions by
+        remember(logUuid) {
+            logUuid?.let(metricsViewModel::tracerouteSnapshotPositions)
+                ?: flowOf(emptyMap<Int, MeshProtos.Position>())
+        }
+            .collectAsStateWithLifecycle(emptyMap<Int, MeshProtos.Position>())
+    val tracerouteResult =
+        if (logUuid != null) {
+            state.tracerouteResults.find { it.uuid == logUuid }
+        } else {
+            state.tracerouteResults.find { it.fromRadio.packet.decoded.requestId == requestId }
+        }
+    val routeDiscovery = tracerouteResult?.fromRadio?.packet?.fullRouteDiscovery
     val overlayFromLogs =
-        remember(routeDiscovery) {
-            routeDiscovery?.let {
-                TracerouteOverlay(requestId = requestId, forwardRoute = it.routeList, returnRoute = it.routeBackList)
-            }
+        remember(routeDiscovery, requestId) {
+            routeDiscovery?.let { TracerouteOverlay(requestId, it.routeList, it.routeBackList) }
         }
     val overlayFromService = remember(requestId) { metricsViewModel.getTracerouteOverlay(requestId) }
     val overlay = overlayFromLogs ?: overlayFromService
-    var tracerouteNodesShown by remember { mutableStateOf(0) }
-    var tracerouteNodesTotal by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) { metricsViewModel.clearTracerouteResponse() }
 
+    TracerouteMapScaffold(
+        title = state.node?.user?.longName ?: stringResource(Res.string.traceroute),
+        overlay = overlay,
+        snapshotPositions = snapshotPositions,
+        onNavigateUp = onNavigateUp,
+    )
+}
+
+@Composable
+private fun TracerouteMapScaffold(
+    title: String,
+    overlay: TracerouteOverlay?,
+    snapshotPositions: Map<Int, MeshProtos.Position>,
+    onNavigateUp: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var tracerouteNodesShown by remember { mutableStateOf(0) }
+    var tracerouteNodesTotal by remember { mutableStateOf(0) }
     Scaffold(
         topBar = {
             MainAppBar(
-                title = nodeTitle,
+                title = title,
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -94,10 +117,11 @@ fun TracerouteMapScreen(
             )
         },
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(modifier = modifier.fillMaxSize().padding(paddingValues)) {
             MapView(
                 navigateToNodeDetails = {},
                 tracerouteOverlay = overlay,
+                tracerouteNodePositions = snapshotPositions,
                 onTracerouteMappableCountChanged = { shown, total ->
                     tracerouteNodesShown = shown
                     tracerouteNodesTotal = total

@@ -267,7 +267,11 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     if (errorRes == null) {
                         dismissedTracerouteRequestId = response.requestId
                         navController.navigate(
-                            NodeDetailRoutes.TracerouteMap(response.destinationNodeNum, response.requestId),
+                            NodeDetailRoutes.TracerouteMap(
+                                destNum = response.destinationNodeNum,
+                                requestId = response.requestId,
+                                logUuid = response.logUuid,
+                            ),
                         )
                     } else {
                         tracerouteMapError = errorRes

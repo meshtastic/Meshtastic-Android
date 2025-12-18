@@ -35,6 +35,7 @@ data class TracerouteResponse(
     val requestId: Int,
     val forwardRoute: List<Int> = emptyList(),
     val returnRoute: List<Int> = emptyList(),
+    val logUuid: String? = null,
 ) {
     val hasOverlay: Boolean
         get() = forwardRoute.isNotEmpty() || returnRoute.isNotEmpty()

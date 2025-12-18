@@ -64,6 +64,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.toMessageRes
@@ -89,7 +90,12 @@ import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshProtos
 import java.text.DateFormat
 
-private data class TracerouteDialog(val message: AnnotatedString, val requestId: Int, val overlay: TracerouteOverlay?)
+private data class TracerouteDialog(
+    val message: AnnotatedString,
+    val requestId: Int,
+    val responseLogUuid: String,
+    val overlay: TracerouteOverlay?,
+)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod")
@@ -98,7 +104,7 @@ fun TracerouteLogScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     onNavigateUp: () -> Unit,
-    onViewOnMap: (requestId: Int) -> Unit = {},
+    onViewOnMap: (requestId: Int, responseLogUuid: String) -> Unit = { _, _ -> },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) }
@@ -185,10 +191,12 @@ fun TracerouteLogScreen(
                                         AnnotatedString(it)
                                     }
                             dialogMessage?.let {
+                                val responseLogUuid = result?.uuid ?: return@combinedClickable
                                 showDialog =
                                     TracerouteDialog(
                                         message = it,
                                         requestId = log.fromRadio.packet.id,
+                                        responseLogUuid = responseLogUuid,
                                         overlay = overlay,
                                     )
                             }
@@ -211,23 +219,34 @@ private fun TracerouteLogDialogs(
     dialog: TracerouteDialog?,
     errorMessageRes: StringResource?,
     viewModel: MetricsViewModel,
-    onViewOnMap: (requestId: Int) -> Unit,
+    onViewOnMap: (requestId: Int, responseLogUuid: String) -> Unit,
     onShowErrorMessageRes: (StringResource) -> Unit,
     onDismissDialog: () -> Unit,
     onDismissError: () -> Unit,
 ) {
     dialog?.let { dialogState ->
+        val snapshotPositionsFlow =
+            remember(dialogState.responseLogUuid) { viewModel.tracerouteSnapshotPositions(dialogState.responseLogUuid) }
+        val snapshotPositions by snapshotPositionsFlow.collectAsStateWithLifecycle(emptyMap<Int, MeshProtos.Position>())
         SimpleAlertDialog(
             title = Res.string.traceroute,
             text = { SelectionContainer { Text(text = dialogState.message) } },
             confirmText = stringResource(Res.string.view_on_map),
             onConfirm = {
+                val positionedNodeNums =
+                    if (snapshotPositions.isNotEmpty()) {
+                        snapshotPositions.keys
+                    } else {
+                        viewModel.positionedNodeNums()
+                    }
                 val availability =
-                    viewModel.tracerouteMapAvailability(
+                    evaluateTracerouteMapAvailability(
                         forwardRoute = dialogState.overlay?.forwardRoute.orEmpty(),
                         returnRoute = dialogState.overlay?.returnRoute.orEmpty(),
+                        positionedNodeNums = positionedNodeNums,
                     )
-                availability.toMessageRes()?.let(onShowErrorMessageRes) ?: onViewOnMap(dialogState.requestId)
+                availability.toMessageRes()?.let(onShowErrorMessageRes)
+                    ?: onViewOnMap(dialogState.requestId, dialogState.responseLogUuid)
                 onDismissDialog()
             },
             onDismiss = onDismissDialog,

@@ -144,6 +144,7 @@ fun MapView(
     focusedNodeNum: Int? = null,
     nodeTracks: List<Position>? = null,
     tracerouteOverlay: TracerouteOverlay? = null,
+    tracerouteNodePositions: Map<Int, Position> = emptyMap(),
     onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
@@ -262,7 +263,14 @@ fun MapView(
             .collectAsStateWithLifecycle(listOf())
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
-    val overlayNodeNums = remember(tracerouteOverlay) { tracerouteOverlay?.relatedNodeNums ?: emptySet() }
+    val tracerouteSelection =
+        remember(tracerouteOverlay, tracerouteNodePositions, allNodes) {
+            mapViewModel.tracerouteNodeSelection(
+                tracerouteOverlay = tracerouteOverlay,
+                tracerouteNodePositions = tracerouteNodePositions,
+                nodes = allNodes,
+            )
+        }
 
     val filteredNodes =
         allNodes
@@ -275,7 +283,7 @@ fun MapView(
 
     val displayNodes =
         if (tracerouteOverlay != null) {
-            allNodes.filter { overlayNodeNums.contains(it.num) }
+            tracerouteSelection.nodesForMarkers
         } else {
             filteredNodes
         }
