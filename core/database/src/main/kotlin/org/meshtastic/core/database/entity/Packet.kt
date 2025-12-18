@@ -86,7 +86,11 @@ data class Packet(
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
 
             val candidateRelayNodes =
-                nodes.filter { it.lastHeard != 0 && (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix }
+                nodes.filter {
+                    it.num != ourNodeNum &&
+                        it.lastHeard != 0 &&
+                        (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
+                }
 
             val closestRelayNode =
                 if (candidateRelayNodes.size == 1) {
@@ -94,11 +98,6 @@ data class Packet(
                 } else {
                     candidateRelayNodes.minByOrNull { it.hopsAway }
                 }
-
-            if (closestRelayNode?.num == ourNodeNum) {
-                // it's us, useless to return relay node for ourselves
-                return null
-            }
 
             return closestRelayNode
         }

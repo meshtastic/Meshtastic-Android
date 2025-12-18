@@ -447,7 +447,7 @@ internal fun MessageStatusDialog(
 ) {
     val (title, text) = message.getStatusStringRes()
     val relayNodeName by
-        remember(message.relayNode, nodes) {
+        remember(message.relayNode, nodes, ourNode) {
             derivedStateOf {
                 message.relayNode?.let { relayNodeId ->
                     Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.longName
