@@ -183,6 +183,11 @@ private fun MessageListPagedContent(
             }
         }
 
+    // Disable animations during scroll to prevent jank/stutter
+    val enableAnimations by remember {
+        derivedStateOf { !listState.isScrollInProgress }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
@@ -199,11 +204,14 @@ private fun MessageListPagedContent(
                         listState = listState,
                         onShowStatusDialog = onShowStatusDialog,
                         onShowReactions = onShowReactions,
+                        enableAnimations = enableAnimations,
                     )
 
                     // Show unread divider after the first unread message
                     if (state.hasUnreadMessages && unreadDividerIndex == index) {
-                        UnreadMessagesDivider(modifier = Modifier.animateItem())
+                        UnreadMessagesDivider(
+                            modifier = if (enableAnimations) Modifier.animateItem() else Modifier
+                        )
                     }
                 }
             }
@@ -239,6 +247,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     listState: LazyListState,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
+    enableAnimations: Boolean,
 ) {
     val ourNode = state.ourNode ?: return
     val selected by
@@ -248,7 +257,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     val node = nodeMap[message.node.num] ?: message.node
 
     MessageItem(
-        modifier = Modifier.animateItem(),
+        modifier = if (enableAnimations) Modifier.animateItem() else Modifier,
         node = node,
         ourNode = ourNode,
         message = message,
@@ -305,32 +314,14 @@ private fun AutoScrollToBottomPaged(
             }
         }
 
-    val isRefreshing by remember { derivedStateOf { messages.loadState.refresh is LoadState.Loading } }
-    var wasPreviouslyRefreshing by remember { mutableStateOf(false) }
-
-    // Maintain scroll position during and after refresh
-    LaunchedEffect(isRefreshing, shouldStickToBottom) {
-        if (!shouldStickToBottom) return@LaunchedEffect
-
-        if (isRefreshing) {
-            wasPreviouslyRefreshing = true
-            if (!isScrollInProgress && messages.itemCount > 0) {
-                scrollToItem(0)
-            }
-        } else if (wasPreviouslyRefreshing) {
-            wasPreviouslyRefreshing = false
-            if (messages.itemCount > 0) {
-                scrollToItem(0)
-            }
-        }
-    }
-
-    // Normal auto-scroll for new messages (when not refreshing)
-    if (shouldStickToBottom && !isRefreshing) {
-        LaunchedEffect(messages.itemCount) {
-            if (!isScrollInProgress && messages.itemCount > 0) {
-                scrollToItem(0)
-            }
+    // Consolidated scroll logic to prevent race conditions
+    // Fixes issue where multiple scroll operations could trigger simultaneously
+    // by unifying all scroll triggers into a single LaunchedEffect
+    LaunchedEffect(messages.itemCount) {
+        // Scroll to bottom when new messages arrive and user is already at/near bottom
+        // Don't check isScrollInProgress to ensure auto-scroll works reliably
+        if (shouldStickToBottom && messages.itemCount > 0) {
+            scrollToItem(0)
         }
     }
 }
@@ -379,13 +370,11 @@ private fun UpdateUnreadCountPaged(
 
     // Track remote message count to restart effect when remote messages change
     // This fixes race condition when sending/receiving messages during debounce period
+    // Optimized: Use itemSnapshotList instead of iterating through indices
     val remoteMessageCount by
         remember(messages.itemCount) {
             derivedStateOf {
-                (0 until messages.itemCount).count { i ->
-                    val msg = messages[i]
-                    msg != null && !msg.fromLocal
-                }
+                messages.itemSnapshotList.items.count { !it.fromLocal }
             }
         }
 
