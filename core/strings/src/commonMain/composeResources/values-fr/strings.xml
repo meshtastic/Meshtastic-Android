@@ -40,7 +40,7 @@
     <string name="unrecognized">Non reconnu</string>
     <string name="message_status_enroute">En attente d'accusé de réception</string>
     <string name="message_status_queued">En file d'attente pour l'envoi</string>
-    <string name="routing_error_none">Confirmé</string>
+    <string name="routing_error_none">Entendu par un autre nœud (mais pas forcément par le destinataire)</string>
     <string name="routing_error_no_route">Pas de routage</string>
     <string name="routing_error_got_nak">Accusé de réception négatif</string>
     <string name="routing_error_timeout">Délai dépassé</string>
@@ -281,7 +281,7 @@
     <string name="permission_missing_31">Meshtastic a besoin des autorisations \"Périphériques à proximité\" activées pour trouver et se connecter à des appareils via Bluetooth. Vous pouvez désactiver la lorsque la localisation n'est pas utilisée.</string>
     <string name="direct_message">Message direct</string>
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
-    <string name="delivery_confirmed">Réception confirmée</string>
+    <string name="delivery_confirmed">Réception confirmée par le destinataire</string>
     <string name="error">Erreur</string>
     <string name="ignore">Ignorer</string>
     <string name="remove_ignored">Supprimer des ignorés</string>
@@ -924,7 +924,7 @@
     <string name="relayed_by">Relayé par : %1$s</string>
     <plurals name="relays">
         <item quantity="one">Entendu le relai %1$d</item>
-        <item quantity="other">Entendu les relais %1$d</item>
+        <item quantity="other">Entendu par %1$d relais</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s est généralement livré avec un chargeur d'amorçage qui ne prend pas en charge les mises à jour via Bluetooth (OTA ou Over The Air). Vous devrez peut-être flasher un chargeur d'amorçage compatible OTA via USB avant de flasher OTA.</string>
     <string name="learn_more">En savoir plus</string>
