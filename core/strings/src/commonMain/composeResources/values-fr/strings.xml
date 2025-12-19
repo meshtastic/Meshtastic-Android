@@ -113,6 +113,7 @@
     <string name="config_lora_frequency_slot_summary">La fréquence de fonctionnement de votre nœud est calculée en fonction de la région, du préréglage du modem et de ce champ. Lorsque la valeur vaut 0, le slot est automatiquement calculé en fonction du nom du canal principal et sera différent de l'emplacement public par défaut. Revient à l'emplacement public par défaut si les canaux privés primaires et publics secondaires sont configurés.</string>
     <string name="label_very_long_slow">Très longue portée - Lent</string>
     <string name="label_long_fast">Longue portée-Rapide</string>
+    <string name="label_long_turbo">Longue portée - Turbo</string>
     <string name="label_long_moderate">Longue portée - Modérée</string>
     <string name="label_long_slow">Longue portée - Lent</string>
     <string name="label_medium_fast">Portée moyenne - Rapide</string>
