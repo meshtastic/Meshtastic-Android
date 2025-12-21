@@ -48,12 +48,19 @@ constructor(
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
+    private val _lastRequestNeighborsTime = MutableStateFlow<Long?>(null)
+    val lastRequestNeighborsTime: StateFlow<Long?> = _lastRequestNeighborsTime.asStateFlow()
+
     fun handleNodeMenuAction(action: NodeMenuAction) {
         when (action) {
             is NodeMenuAction.Remove -> removeNode(action.node.num)
             is NodeMenuAction.Ignore -> ignoreNode(action.node)
             is NodeMenuAction.Favorite -> favoriteNode(action.node)
             is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
+            is NodeMenuAction.RequestNeighborInfo -> {
+                requestNeighborInfo(action.node.num)
+                _lastRequestNeighborsTime.value = System.currentTimeMillis()
+            }
             is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
             is NodeMenuAction.TraceRoute -> {
                 requestTraceroute(action.node.num)
@@ -107,6 +114,16 @@ constructor(
             serviceRepository.meshService?.requestUserInfo(destNum)
         } catch (ex: RemoteException) {
             Timber.e("Request NodeInfo error: ${ex.message}")
+        }
+    }
+
+    private fun requestNeighborInfo(destNum: Int) {
+        Timber.i("Requesting NeighborInfo for '$destNum'")
+        try {
+            val packetId = serviceRepository.meshService?.packetId ?: return
+            serviceRepository.meshService?.requestNeighborInfo(packetId, destNum)
+        } catch (ex: RemoteException) {
+            Timber.e("Request NeighborInfo error: ${ex.message}")
         }
     }
 

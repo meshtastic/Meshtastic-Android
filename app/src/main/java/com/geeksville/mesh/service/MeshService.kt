@@ -179,6 +179,9 @@ class MeshService : Service() {
     @Inject lateinit var analytics: PlatformAnalytics
 
     private val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
+    private val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
+
+    @Volatile private var lastNeighborInfo: MeshProtos.NeighborInfo? = null
     private val logUuidByPacketId = ConcurrentHashMap<Int, String>()
     private val logInsertJobByPacketId = ConcurrentHashMap<Int, Job>()
 
@@ -240,6 +243,8 @@ class MeshService : Service() {
         private const val DEFAULT_HISTORY_RETURN_WINDOW_MINUTES = 60 * 24
         private const val DEFAULT_HISTORY_RETURN_MAX_MESSAGES = 100
         private const val MAX_EARLY_PACKET_BUFFER = 128
+
+        private const val NEIGHBOR_RQ_COOLDOWN = 3 * 60 * 1000L // ms
 
         @VisibleForTesting
         internal fun buildStoreForwardHistoryRequest(
@@ -304,6 +309,8 @@ class MeshService : Service() {
     private val batteryPercentCriticalThreshold = 5
     private val batteryPercentCooldownSeconds = 1500
     private val batteryPercentCooldowns: HashMap<Int, Long> = HashMap()
+
+    private val oneHour = 3600
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -991,6 +998,138 @@ class MeshService : Service() {
                                     returnRoute = routeDiscovery?.routeBackList.orEmpty(),
                                     logUuid = logUuid,
                                 ),
+                            )
+                        }
+                    }
+
+                    Portnums.PortNum.NEIGHBORINFO_APP_VALUE -> {
+                        val requestId = packet.decoded.requestId
+                        Timber.d("Processing NEIGHBORINFO_APP packet with requestId: $requestId")
+                        val start = neighborInfoStartTimes.remove(requestId)
+                        Timber.d("Found start time for requestId $requestId: $start")
+
+                        val info =
+                            runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
+
+                        // Store the last neighbor info from our connected radio
+                        if (info != null && packet.from == myInfo.myNodeNum) {
+                            lastNeighborInfo = info
+                            Timber.d("Stored last neighbor info from connected radio")
+                        }
+
+                        // Only show response if packet is addressed to us and we sent a request in the last 3 minutes
+                        val isAddressedToUs = packet.to == myInfo.myNodeNum
+                        val isRecentRequest =
+                            start != null && (System.currentTimeMillis() - start) < NEIGHBOR_RQ_COOLDOWN
+
+                        if (isAddressedToUs && isRecentRequest) {
+                            val formatted =
+                                if (info != null) {
+                                    val fmtNode: (Int) -> String = { nodeNum ->
+                                        val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                        val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                        val nodeId = "!%08x".format(nodeNum)
+                                        if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                                    }
+                                    buildString {
+                                        appendLine("NeighborInfo:")
+                                        appendLine("node_id: ${fmtNode(info.nodeId)}")
+                                        appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
+                                        appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+                                        if (info.neighborsCount > 0) {
+                                            appendLine("neighbors:")
+                                            info.neighborsList.forEach { n ->
+                                                appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // Fallback to raw string if parsing fails
+                                    String(data.payload.toByteArray())
+                                }
+
+                            val response =
+                                if (start != null) {
+                                    val elapsedMs = System.currentTimeMillis() - start
+                                    val seconds = elapsedMs / 1000.0
+                                    Timber.i("Neighbor info $requestId complete in $seconds s")
+                                    "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
+                                } else {
+                                    Timber.w("No start time found for neighbor info requestId: $requestId")
+                                    formatted
+                                }
+                            serviceRepository.setNeighborInfoResponse(response)
+                        } else {
+                            Timber.d(
+                                "Neighbor info response filtered: ToUs=%s, isRecentRequest=%s",
+                                isAddressedToUs,
+                                isRecentRequest,
+                            )
+                        }
+                    }
+
+                    Portnums.PortNum.NEIGHBORINFO_APP_VALUE -> {
+                        val requestId = packet.decoded.requestId
+                        Timber.d("Processing NEIGHBORINFO_APP packet with requestId: $requestId")
+                        val start = neighborInfoStartTimes.remove(requestId)
+                        Timber.d("Found start time for requestId $requestId: $start")
+
+                        val info =
+                            runCatching { MeshProtos.NeighborInfo.parseFrom(data.payload.toByteArray()) }.getOrNull()
+
+                        // Store the last neighbor info from our connected radio
+                        if (info != null && packet.from == myInfo.myNodeNum) {
+                            lastNeighborInfo = info
+                            Timber.d("Stored last neighbor info from connected radio")
+                        }
+
+                        // Only show response if packet is addressed to us and we sent a request in the last 3 minutes
+                        val isAddressedToUs = packet.to == myInfo.myNodeNum
+                        val isRecentRequest =
+                            start != null && (System.currentTimeMillis() - start) < NEIGHBOR_RQ_COOLDOWN
+
+                        if (isAddressedToUs && isRecentRequest) {
+                            val formatted =
+                                if (info != null) {
+                                    val fmtNode: (Int) -> String = { nodeNum ->
+                                        val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                        val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                        val nodeId = "!%08x".format(nodeNum)
+                                        if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                                    }
+                                    buildString {
+                                        appendLine("NeighborInfo:")
+                                        appendLine("node_id: ${fmtNode(info.nodeId)}")
+                                        appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
+                                        appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+                                        if (info.neighborsCount > 0) {
+                                            appendLine("neighbors:")
+                                            info.neighborsList.forEach { n ->
+                                                appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // Fallback to raw string if parsing fails
+                                    String(data.payload.toByteArray())
+                                }
+
+                            val response =
+                                if (start != null) {
+                                    val elapsedMs = System.currentTimeMillis() - start
+                                    val seconds = elapsedMs / 1000.0
+                                    Timber.i("Neighbor info $requestId complete in $seconds s")
+                                    "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
+                                } else {
+                                    Timber.w("No start time found for neighbor info requestId: $requestId")
+                                    formatted
+                                }
+                            serviceRepository.setNeighborInfoResponse(response)
+                        } else {
+                            Timber.d(
+                                "Neighbor info response filtered: isToUs=%s, isRecent=%s",
+                                isAddressedToUs,
+                                isRecentRequest,
                             )
                         }
                     }
@@ -2644,6 +2783,45 @@ class MeshService : Service() {
                             portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
                             wantResponse = true
                             payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
+                        },
+                    )
+                }
+            }
+
+            override fun requestNeighborInfo(requestId: Int, destNum: Int) = toRemoteExceptions {
+                if (destNum != myNodeNum) {
+                    neighborInfoStartTimes[requestId] = System.currentTimeMillis()
+                    // Always send the neighbor info from our connected radio (myNodeNum), not request from destNum
+                    val neighborInfoToSend =
+                        lastNeighborInfo
+                            ?: run {
+                                // If we don't have it, send dummy/interceptable data
+                                Timber.d("No stored neighbor info from connected radio, sending dummy data")
+                                MeshProtos.NeighborInfo.newBuilder()
+                                    .setNodeId(myNodeNum)
+                                    .setLastSentById(myNodeNum)
+                                    .setNodeBroadcastIntervalSecs(oneHour)
+                                    .addNeighbors(
+                                        MeshProtos.Neighbor.newBuilder()
+                                            .setNodeId(0) // Dummy node ID that can be intercepted
+                                            .setSnr(0f)
+                                            .setLastRxTime(currentSecond())
+                                            .setNodeBroadcastIntervalSecs(oneHour)
+                                            .build(),
+                                    )
+                                    .build()
+                            }
+
+                    // Send the neighbor info from our connected radio to the destination
+                    packetHandler.sendToRadio(
+                        newMeshPacketTo(destNum).buildMeshPacket(
+                            wantAck = true,
+                            id = requestId,
+                            channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                        ) {
+                            portnumValue = Portnums.PortNum.NEIGHBORINFO_APP_VALUE
+                            payload = neighborInfoToSend.toByteString()
+                            wantResponse = true
                         },
                     )
                 }

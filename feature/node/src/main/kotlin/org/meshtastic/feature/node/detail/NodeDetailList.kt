@@ -74,6 +74,7 @@ fun NodeDetailContent(
     ourNode: Node?,
     metricsState: MetricsState,
     lastTracerouteTime: Long?,
+    lastRequestNeighborsTime: Long?,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
     onSaveNotes: (nodeNum: Int, notes: String) -> Unit,
@@ -87,6 +88,7 @@ fun NodeDetailContent(
     NodeDetailList(
         node = node,
         lastTracerouteTime = lastTracerouteTime,
+        lastRequestNeighborsTime = lastRequestNeighborsTime,
         ourNode = ourNode,
         metricsState = metricsState,
         onAction = { action ->
@@ -108,6 +110,7 @@ fun NodeDetailContent(
 fun NodeDetailList(
     node: Node,
     lastTracerouteTime: Long?,
+    lastRequestNeighborsTime: Long?,
     ourNode: Node?,
     metricsState: MetricsState,
     onAction: (NodeDetailAction) -> Unit,
@@ -165,6 +168,7 @@ fun NodeDetailList(
         DeviceActions(
             isLocal = metricsState.isLocal,
             lastTracerouteTime = lastTracerouteTime,
+            lastRequestNeighborsTime = lastRequestNeighborsTime,
             node = node,
             onAction = onAction,
         )
@@ -263,6 +267,7 @@ private fun NodeDetailsPreview(@PreviewParameter(NodePreviewParameterProvider::c
             node = node,
             ourNode = node,
             lastTracerouteTime = null,
+            lastRequestNeighborsTime = null,
             metricsState = MetricsState.Companion.Empty,
             availableLogs = emptySet(),
             onAction = {},

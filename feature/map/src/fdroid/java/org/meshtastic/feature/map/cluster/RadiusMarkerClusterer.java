@@ -125,10 +125,10 @@ public class RadiusMarkerClusterer extends MarkerClusterer {
         
         Iterator<MarkerWithLabel> it = mClonedMarkers.iterator();
         while (it.hasNext()) {
-            MarkerWithLabel neighbour = it.next();
-            double distance = clusterPosition.distanceToAsDouble(neighbour.getPosition());
+            MarkerWithLabel neighbor = it.next();
+            double distance = clusterPosition.distanceToAsDouble(neighbor.getPosition());
             if (distance <= mRadiusInMeters) {
-                cluster.add(neighbour);
+                cluster.add(neighbor);
                 it.remove();
             }
         }
