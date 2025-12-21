@@ -2760,7 +2760,7 @@ class MeshService : Service() {
                 }
             }
 
-            override fun requestNeighbourInfo(requestId: Int, destNum: Int) = toRemoteExceptions {
+            override fun requestNeighborInfo(requestId: Int, destNum: Int) = toRemoteExceptions {
                 if (destNum != myNodeNum) {
                     neighborInfoStartTimes[requestId] = System.currentTimeMillis()
                     // Always send the neighbor info from our connected radio (myNodeNum), not request from destNum

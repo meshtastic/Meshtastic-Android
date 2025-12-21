@@ -54,7 +54,7 @@ constructor(
             is NodeMenuAction.Ignore -> ignoreNode(action.node)
             is NodeMenuAction.Favorite -> favoriteNode(action.node)
             is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
-            is NodeMenuAction.RequestNeighbourInfo -> requestNeighbourInfo(action.node.num)
+            is NodeMenuAction.RequestNeighborInfo -> requestNeighborInfo(action.node.num)
             is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
             is NodeMenuAction.TraceRoute -> {
                 requestTraceroute(action.node.num)
@@ -111,13 +111,13 @@ constructor(
         }
     }
 
-    private fun requestNeighbourInfo(destNum: Int) {
-        Timber.i("Requesting NeighbourInfo for '$destNum'")
+    private fun requestNeighborInfo(destNum: Int) {
+        Timber.i("Requesting NeighborInfo for '$destNum'")
         try {
             val packetId = serviceRepository.meshService?.packetId ?: return
-            serviceRepository.meshService?.requestNeighbourInfo(packetId, destNum)
+            serviceRepository.meshService?.requestNeighborInfo(packetId, destNum)
         } catch (ex: RemoteException) {
-            Timber.e("Request NeighbourInfo error: ${ex.message}")
+            Timber.e("Request NeighborInfo error: ${ex.message}")
         }
     }
 

@@ -96,7 +96,7 @@ sealed class NodeMenuAction {
 
     data class RequestUserInfo(val node: Node) : NodeMenuAction()
 
-    data class RequestNeighbourInfo(val node: Node) : NodeMenuAction()
+    data class RequestNeighborInfo(val node: Node) : NodeMenuAction()
 
     data class RequestPosition(val node: Node) : NodeMenuAction()
 
