@@ -742,7 +742,7 @@
     <string name="import_known_shared_contact_text">Warning: This contact is known, importing will overwrite the previous contact information.</string>
     <string name="public_key_changed">Public Key Changed</string>
     <string name="import_label">Import</string>
-    <string name="request_neighbor_info">Request NeighborInfo</string>
+    <string name="request_neighbor_info">Request NeighborInfo (2.7.15+)</string>
     <string name="request_metadata">Request Metadata</string>
     <string name="actions">Actions</string>
     <string name="firmware">Firmware</string>

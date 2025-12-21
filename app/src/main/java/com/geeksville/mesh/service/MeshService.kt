@@ -244,6 +244,8 @@ class MeshService : Service() {
         private const val DEFAULT_HISTORY_RETURN_MAX_MESSAGES = 100
         private const val MAX_EARLY_PACKET_BUFFER = 128
 
+        private const val NEIGHBOR_RQ_COOLDOWN = 3 * 60 * 1000L // ms
+
         @VisibleForTesting
         internal fun buildStoreForwardHistoryRequest(
             lastRequest: Int,
@@ -1017,7 +1019,8 @@ class MeshService : Service() {
 
                         // Only show response if packet is addressed to us and we sent a request in the last 3 minutes
                         val isAddressedToUs = packet.to == myInfo.myNodeNum
-                        val isRecentRequest = start != null && (System.currentTimeMillis() - start) < 180000L
+                        val isRecentRequest =
+                            start != null && (System.currentTimeMillis() - start) < NEIGHBOR_RQ_COOLDOWN
 
                         if (isAddressedToUs && isRecentRequest) {
                             val formatted =
@@ -1057,7 +1060,11 @@ class MeshService : Service() {
                                 }
                             serviceRepository.setNeighborInfoResponse(response)
                         } else {
-                            Timber.d("Neighbor info response filtered: isAddressedToUs=$isAddressedToUs, isRecentRequest=$isRecentRequest")
+                            Timber.d(
+                                "Neighbor info response filtered: ToUs=%s, isRecentRequest=%s",
+                                isAddressedToUs,
+                                isRecentRequest,
+                            )
                         }
                     }
 
@@ -1078,7 +1085,8 @@ class MeshService : Service() {
 
                         // Only show response if packet is addressed to us and we sent a request in the last 3 minutes
                         val isAddressedToUs = packet.to == myInfo.myNodeNum
-                        val isRecentRequest = start != null && (System.currentTimeMillis() - start) < 180000L
+                        val isRecentRequest =
+                            start != null && (System.currentTimeMillis() - start) < NEIGHBOR_RQ_COOLDOWN
 
                         if (isAddressedToUs && isRecentRequest) {
                             val formatted =
@@ -1118,7 +1126,11 @@ class MeshService : Service() {
                                 }
                             serviceRepository.setNeighborInfoResponse(response)
                         } else {
-                            Timber.d("Neighbor info response filtered: isAddressedToUs=$isAddressedToUs, isRecentRequest=$isRecentRequest")
+                            Timber.d(
+                                "Neighbor info response filtered: isToUs=%s, isRecent=%s",
+                                isAddressedToUs,
+                                isRecentRequest,
+                            )
                         }
                     }
 
