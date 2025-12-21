@@ -50,6 +50,7 @@ import org.meshtastic.feature.node.model.NodeDetailAction
 fun DeviceActions(
     node: Node,
     lastTracerouteTime: Long?,
+    lastRequestNeighborsTime: Long?,
     onAction: (NodeDetailAction) -> Unit,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
@@ -81,7 +82,12 @@ fun DeviceActions(
         )
         if (!isLocal) {
             InsetDivider()
-            RemoteDeviceActions(node = node, lastTracerouteTime = lastTracerouteTime, onAction = onAction)
+            RemoteDeviceActions(
+                node = node,
+                lastTracerouteTime = lastTracerouteTime,
+                lastRequestNeighborsTime = lastRequestNeighborsTime,
+                onAction = onAction,
+            )
         }
 
         InsetDivider()
