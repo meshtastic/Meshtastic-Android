@@ -55,7 +55,6 @@
     <string name="must_update">Πρέπει να ενημερώσετε την εφαρμογή μέσω Google Play store (ή Github). Είναι πολύ παλαιά ώστε να συνδεθεί με το radio.</string>
     <string name="none">Κανένα (απενεργοποιημένο)</string>
     <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας</string>
-    <string name="about">Σχετικά</string>
     <string name="channel_invalid">Αυτό το κανάλι URL δεν είναι ορθό και δεν μπορεί να χρησιμοποιηθεί</string>
     <string name="debug_panel">Πίνακας αποσφαλμάτωσης</string>
     <string name="clear">Καθαρό, Εκκαθάριση,</string>
@@ -207,4 +206,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Αποτυχία ενημέρωσης</string>
     <string name="interval_unset">Αναίρεση</string>
+    <!-- Compass -->
 </resources>

@@ -19,6 +19,7 @@ package org.meshtastic.core.data.repository
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
@@ -38,6 +40,7 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.MeshProtos
@@ -49,15 +52,17 @@ import javax.inject.Singleton
 class NodeRepository
 @Inject
 constructor(
-    processLifecycle: Lifecycle,
+    @ProcessLifecycle processLifecycle: Lifecycle,
     private val nodeInfoReadDataSource: NodeInfoReadDataSource,
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
 ) {
     init {
         // Backfill denormalized name columns for existing nodes on startup
-        processLifecycle.coroutineScope.launchWhenCreated {
-            withContext(dispatchers.io) { nodeInfoWriteDataSource.backfillDenormalizedNames() }
+        processLifecycle.coroutineScope.launch {
+            processLifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                withContext(dispatchers.io) { nodeInfoWriteDataSource.backfillDenormalizedNames() }
+            }
         }
     }
 

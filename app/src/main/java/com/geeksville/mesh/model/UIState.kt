@@ -28,19 +28,20 @@ import androidx.navigation.NavHostController
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -51,10 +52,13 @@ import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.TracerouteMapAvailability
+import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.client_notification
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -131,11 +135,12 @@ constructor(
     val meshActivity: SharedFlow<MeshActivity> =
         radioInterfaceService.meshActivity.shareIn(viewModelScope, SharingStarted.Eagerly, 0)
 
-    private val scrollToTopEventChannel = Channel<ScrollToTopEvent>(capacity = Channel.CONFLATED)
-    val scrollToTopEventFlow: Flow<ScrollToTopEvent> = scrollToTopEventChannel.receiveAsFlow()
+    private val _scrollToTopEventFlow =
+        MutableSharedFlow<ScrollToTopEvent>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val scrollToTopEventFlow: Flow<ScrollToTopEvent> = _scrollToTopEventFlow.asSharedFlow()
 
     fun emitScrollToTopEvent(event: ScrollToTopEvent) {
-        scrollToTopEventChannel.trySend(event)
+        _scrollToTopEventFlow.tryEmit(event)
     }
 
     data class AlertData(
@@ -149,6 +154,14 @@ constructor(
 
     private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
     val currentAlert = _currentAlert.asStateFlow()
+
+    fun tracerouteMapAvailability(forwardRoute: List<Int>, returnRoute: List<Int>): TracerouteMapAvailability =
+        evaluateTracerouteMapAvailability(
+            forwardRoute = forwardRoute,
+            returnRoute = returnRoute,
+            positionedNodeNums =
+            nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet(),
+        )
 
     fun showAlert(
         title: String,
@@ -246,7 +259,7 @@ constructor(
         Timber.d("ViewModel cleared")
     }
 
-    val tracerouteResponse: LiveData<String?>
+    val tracerouteResponse: LiveData<TracerouteResponse?>
         get() = serviceRepository.tracerouteResponse.asLiveData()
 
     fun clearTracerouteResponse() {

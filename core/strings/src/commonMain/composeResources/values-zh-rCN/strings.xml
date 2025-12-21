@@ -190,7 +190,6 @@
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
     <string name="none">无 (停用)</string>
     <string name="meshtastic_service_notifications">服务通知</string>
-    <string name="about">关于</string>
     <string name="channel_invalid">此频道 URL 无效，无法使用</string>
     <string name="contact_invalid">此频道 URL 无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
@@ -726,6 +725,7 @@
     <string name="conversations">对话</string>
     <string name="nodes">节点</string>
     <string name="bottom_nav_settings">设置</string>
+    <string name="selected">选择</string>
     <string name="set_your_region">设置您的地区</string>
     <string name="reply">回复</string>
     <string name="map_reporting_summary">您的节点将定期向配置的MQTT服务器发送一个未加密的地图报告数据包，这包括id、长和短的名称， 大致位置、硬件型号、角色、固件版本、LoRa区域、调制解调器预设和主频道名称。</string>
@@ -900,7 +900,6 @@
     <string name="device_configuration">设备配置</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <string name="device_telemetry_enabled">发送设备远程数据</string>
-    <string name="device_telemetry_enabled_summary">启用/禁用设备遥测模块，以将指标发送至网络。这些是标称值。拥堵的网络会根据在线节点的数量自动调整为更长的间隔。节点少于10个的网络会调整为更快的间隔。</string>
     <string name="any">任意内容</string>
     <string name="one_hour">1 小时</string>
     <string name="eight_hours">8 小时</string>
@@ -929,6 +928,7 @@
     <string name="firmware_update_title">固件更新</string>
     <string name="firmware_update_checking">正在检查更新…</string>
     <string name="firmware_update_device">设备: %1$s</string>
+    <string name="firmware_update_currently_installed">目前已安装: %1$s</string>
     <string name="firmware_update_latest">最新版本： %1$s</string>
     <string name="firmware_update_stable">稳定的</string>
     <string name="firmware_update_alpha">Alpha</string>
@@ -941,6 +941,7 @@
     <string name="firmware_update_starting_dfu">正在启动 DFU...</string>
     <string name="firmware_update_updating">更新中...%1$s%</string>
     <string name="firmware_update_unknown_hardware">未知硬件型号: %1$d</string>
+    <string name="firmware_update_invalid_address">连接的设备不是BLE设备，或者地址未知（%1$s）。DFU需要BLE设备或模块支持。</string>
     <string name="firmware_update_no_device">设备未连接</string>
     <string name="firmware_update_not_found_in_release">未找到 %1$s 的固件。</string>
     <string name="firmware_update_extracting">正在提取固件...</string>
@@ -963,6 +964,37 @@
 请确认你已为你的硬件选择了正确的固件。</string>
     <string name="firmware_update_disclaimer_chirpy_says">请提前备份旧版本固件及降级教程，以备更新失败时恢复设备</string>
     <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">正在重启到 DFU……</string>
+    <string name="firmware_update_waiting_for_device">正在等待 DDFU 设备...</string>
+    <string name="firmware_update_copying">正在复制固件...</string>
+    <string name="firmware_update_save_dfu_file">请将 .uf2 文件保存到您的设备&apos;s DFU 驱动器。</string>
+    <string name="firmware_update_flashing">正在刷入设备，请稍候...</string>
+    <string name="firmware_update_method_usb">USB文件传输</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">更新到%1$s</string>
+    <string name="firmware_update_usb_instruction_title">选择 DFU USB 驱动器</string>
+    <string name="firmware_update_usb_instruction_text">您的设备已经重启到 DFU 模式并应显示为 USB 驱动器(如RAK4631)。\n\n当文件选择器打开时，请选择该驱动器的根目录来保存固件文件。</string>
     <string name="interval_unset">未设置</string>
     <string name="interval_always_on">常亮</string>
+    <plurals name="plurals_seconds">
+        <item quantity="other">%1$d 秒</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="other">%1$d 分钟</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="other">%1$d 小时</item>
+    </plurals>
+    <!-- Compass -->
+    <string name="compass_title">指南针</string>
+    <string name="open_compass">打开指南针...</string>
+    <string name="compass_distance">距离: %1$s</string>
+    <string name="compass_bearing">方位信息: %1$s</string>
+    <string name="compass_bearing_na">方位信息: N/A</string>
+    <string name="compass_no_magnetometer">此设备没有指南针传感器。方向信息不可用</string>
+    <string name="compass_no_location_permission">此设备没有指南针传感器。方向信息不可用</string>
+    <string name="compass_location_disabled">位置提供程序已禁用。请开启位置服务。</string>
+    <string name="compass_no_location_fix">等待GPS定位以计算距离和方位</string>
+    <string name="compass_uncertainty">估计区域: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">估计区域：精度未知</string>
 </resources>

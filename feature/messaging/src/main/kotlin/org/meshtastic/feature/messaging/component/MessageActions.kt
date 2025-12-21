@@ -18,6 +18,7 @@
 package org.meshtastic.feature.messaging.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
@@ -75,18 +76,20 @@ private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
 private fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
     AnimatedVisibility(visible = fromLocal) {
         IconButton(onClick = onStatusClick) {
-            Icon(
-                imageVector =
-                when (status) {
-                    MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                    MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                    MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                    MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                    MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                    else -> Icons.TwoTone.Warning
-                },
-                contentDescription = stringResource(Res.string.message_delivery_status),
-            )
+            Crossfade(targetState = status, label = "MessageStatusIcon") { currentStatus ->
+                Icon(
+                    imageVector =
+                    when (currentStatus) {
+                        MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+                        MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+                        MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                        MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+                        MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                        else -> Icons.TwoTone.Warning
+                    },
+                    contentDescription = stringResource(Res.string.message_delivery_status),
+                )
+            }
         }
     }
 

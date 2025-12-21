@@ -101,7 +101,6 @@
     <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://meshtastic.org/docs/software/android/installation">Meshtastic docs</a>.</string>
     <string name="none">Žiaden (zakázať)</string>
     <string name="meshtastic_service_notifications">Notifikácie zo služby</string>
-    <string name="about">O aplikácii</string>
     <string name="channel_invalid">URL adresa tohoto kanála nie je platná a nedá sa použiť</string>
     <string name="debug_panel">Debug okno</string>
     <string name="clear">Zmazať</string>
@@ -363,4 +362,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Aktualizácia zlyhala</string>
     <string name="interval_unset">Nenastavené</string>
+    <!-- Compass -->
 </resources>

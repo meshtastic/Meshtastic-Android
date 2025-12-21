@@ -171,7 +171,6 @@
     <string name="must_update">Debe actualizar esta aplicación en la tienda de aplicaciones (o en Github). Es demasiado vieja para comunicarse con este firmware de radio. Por favor, lea nuestra <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> sobre este tema.</string>
     <string name="none">Ninguno (desactivado)</string>
     <string name="meshtastic_service_notifications">Notificaciones de servicio</string>
-    <string name="about">Acerca de</string>
     <string name="channel_invalid">La URL de este canal no es válida y no puede utilizarse</string>
     <string name="contact_invalid">Este contacto no es válido y no se puede agregar</string>
     <string name="debug_panel">Panel de depuración</string>
@@ -836,7 +835,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="secondary_channel_position_feature">Deshabilitar la posición en el canal principal permite las emisiones de posición periódica en el primer canal secundario con la posición habilitada, de lo contrario se requiere una solicitud de posición manual.</string>
     <string name="device_configuration">Configuración del dispositivo</string>
     <string name="device_telemetry_enabled">Enviar telemetría del dispositivo</string>
-    <string name="device_telemetry_enabled_summary">Activar/Desactivar el módulo de telemetría del dispositivo para enviar métricas a la malla. Estos son valores nominales. Las mallas congestionadas escalarán automáticamente a intervalos más largos basados en el número de nodos en línea. Mallas con menos de 10 nodos escalarán a intervalos más rápidos.</string>
     <string name="any">Cualquiera</string>
     <string name="one_hour">1 hora</string>
     <string name="eight_hours">8 horas</string>
@@ -854,4 +852,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualización fallida</string>
     <string name="interval_unset">Sin configurar</string>
+    <!-- Compass -->
 </resources>

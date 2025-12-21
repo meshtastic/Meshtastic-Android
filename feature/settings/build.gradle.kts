@@ -37,6 +37,7 @@ dependencies {
     implementation(projects.core.strings)
     implementation(projects.core.ui)
 
+    implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.compose.material.iconsExtended)

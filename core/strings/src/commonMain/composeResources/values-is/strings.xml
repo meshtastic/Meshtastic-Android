@@ -45,7 +45,6 @@
     <string name="must_update">Þú verður að uppfæra þetta smáforrit í app store (eða Github). Það er of gamalt til að geta talað við fastbúnað þessa radíó. Vinsamlegast lestu <a href="https://meshtastic.org/docs/software/android/installation">leiðbeiningar </a> okkar um þetta mál.</string>
     <string name="none">Ekkert (Afvirkjað)</string>
     <string name="meshtastic_service_notifications">Tilkynningar um þjónustu</string>
-    <string name="about">Um smáforrit</string>
     <string name="channel_invalid">Þetta rásar URL er ógilt og ónothæft</string>
     <string name="debug_panel">Villuleitarborð</string>
     <string name="clear">Hreinsa</string>
@@ -134,4 +133,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Uppfærsla misfórst</string>
     <string name="interval_unset">Óstillt</string>
+    <!-- Compass -->
 </resources>

@@ -24,6 +24,10 @@ repo:
 bugfix:
   - head-branch: [^fix, ^bug, ^Fix, ^FIX, ^Bug, ^BUG]
 
+# Add `refactor` label to any PR where the head branch name contains `refactor` or `Refactor` as the prefix.
+refactor:
+  - head-branch: [^refactor, ^Refactor]
+
 # our fallback - bug except repo, feat, or automated pipelines
 # bug_fallthrough:
 # - all:

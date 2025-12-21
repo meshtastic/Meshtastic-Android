@@ -188,7 +188,6 @@
     <string name="must_update">您必須在應用商店(或 Github)更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
     <string name="none">無(停用）</string>
     <string name="meshtastic_service_notifications">服務通知</string>
-    <string name="about">關於</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
     <string name="contact_invalid">此聯絡人無效，無法新增</string>
     <string name="debug_panel">除錯面板</string>
@@ -739,6 +738,7 @@
     <string name="modules_unlocked">模組已解鎖</string>
     <string name="modules_already_unlocked">模組已解鎖</string>
     <string name="remote">遠端</string>
+    <string name="node_count_template"></string>
     <string name="react">回應</string>
     <string name="disconnect">中斷連線</string>
     <string name="scanning_bluetooth">正在尋找藍牙裝置…</string>
@@ -907,4 +907,5 @@
     <string name="firmware_update_done">完成</string>
     <string name="firmware_update_failed">更新失敗</string>
     <string name="interval_unset">取消設定</string>
+    <!-- Compass -->
 </resources>

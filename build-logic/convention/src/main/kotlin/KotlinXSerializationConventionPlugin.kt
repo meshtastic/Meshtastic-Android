@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.dependencies
+import org.meshtastic.buildlogic.libs
 
 class KotlinXSerializationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {

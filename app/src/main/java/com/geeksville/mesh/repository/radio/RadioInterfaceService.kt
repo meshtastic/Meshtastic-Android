@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState
@@ -71,7 +72,7 @@ constructor(
     private val dispatchers: CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
     private val networkRepository: NetworkRepository,
-    private val processLifecycle: Lifecycle,
+    @ProcessLifecycle private val processLifecycle: Lifecycle,
     private val radioPrefs: RadioPrefs,
     private val interfaceFactory: InterfaceFactory,
     private val analytics: PlatformAnalytics,

@@ -55,6 +55,26 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
 
+      - name: AVD cache
+        uses: actions/cache@v5
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
       - name: Run Android Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2
         env:
@@ -63,9 +83,10 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradlew :app:connectedFdroidDebugAndroidTest :app:connectedGoogleDebugAndroidTest --configuration-cache --scan && ( killall -INT crashpad_handler || true )
+
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/test-results-action@v1
@@ -73,7 +94,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Upload Test Results
         if: ${{ inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: android-test-reports-api-${{ matrix.api-level }}
           path: app/build/outputs/androidTest-results/

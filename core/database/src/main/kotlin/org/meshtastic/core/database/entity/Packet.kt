@@ -82,15 +82,23 @@ data class Packet(
     companion object {
         const val RELAY_NODE_SUFFIX_MASK = 0xFF
 
-        fun getRelayNode(relayNodeId: Int, nodes: List<Node>): Node? {
+        fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
-            val candidateRelayNodes = nodes.filter { (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix }
+
+            val candidateRelayNodes =
+                nodes.filter {
+                    it.num != ourNodeNum &&
+                        it.lastHeard != 0 &&
+                        (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
+                }
+
             val closestRelayNode =
                 if (candidateRelayNodes.size == 1) {
                     candidateRelayNodes.first()
                 } else {
                     candidateRelayNodes.minByOrNull { it.hopsAway }
                 }
+
             return closestRelayNode
         }
     }
@@ -108,7 +116,15 @@ data class ContactSettings(
         get() = System.currentTimeMillis() <= muteUntil
 }
 
-data class Reaction(val replyId: Int, val user: User, val emoji: String, val timestamp: Long)
+data class Reaction(
+    val replyId: Int,
+    val user: User,
+    val emoji: String,
+    val timestamp: Long,
+    val snr: Float,
+    val rssi: Int,
+    val hopsAway: Int,
+)
 
 @Entity(
     tableName = "reactions",
@@ -120,10 +136,20 @@ data class ReactionEntity(
     @ColumnInfo(name = "user_id") val userId: String,
     val emoji: String,
     val timestamp: Long,
+    @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
+    @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
+    @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
 )
 
-private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node) =
-    Reaction(replyId = replyId, user = getNode(userId).user, emoji = emoji, timestamp = timestamp)
+private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node) = Reaction(
+    replyId = replyId,
+    user = getNode(userId).user,
+    emoji = emoji,
+    timestamp = timestamp,
+    snr = snr,
+    rssi = rssi,
+    hopsAway = hopsAway,
+)
 
 private suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node) =
     this.map { it.toReaction(getNode) }

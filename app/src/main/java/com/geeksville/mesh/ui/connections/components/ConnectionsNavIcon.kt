@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.connections.components
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Cached
@@ -61,20 +62,22 @@ fun ConnectionsNavIcon(
 
     val foregroundPainter = connectionTypeIcon?.let { rememberVectorPainter(it) }
 
-    Icon(
-        imageVector = backgroundIcon,
-        contentDescription = contentDescription,
-        tint = tint,
-        modifier =
-        modifier.drawWithContent {
-            drawContent()
-            foregroundPainter?.let {
-                @Suppress("MagicNumber")
-                val badgeSize = size.width * .45f
-                with(it) { draw(Size(badgeSize, badgeSize), colorFilter = ColorFilter.tint(tint)) }
-            }
-        },
-    )
+    Crossfade(targetState = backgroundIcon, label = "ConnectionIcon") {
+        Icon(
+            imageVector = it,
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier =
+            modifier.drawWithContent {
+                drawContent()
+                foregroundPainter?.let {
+                    @Suppress("MagicNumber")
+                    val badgeSize = size.width * .45f
+                    with(it) { draw(Size(badgeSize, badgeSize), colorFilter = ColorFilter.tint(tint)) }
+                }
+            },
+        )
+    }
 }
 
 @Composable

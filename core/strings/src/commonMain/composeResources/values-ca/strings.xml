@@ -99,7 +99,6 @@
     <string name="must_update">Has d'actualitzar aquesta aplicació a la app store (o Github). És massa antiga per comunicar-se amb aquest firmware de la ràdio. Si us plau llegeix el nostre <a href="https://meshtastic.org/docs/software/android/installation">docs</a> sobre aquesta temàtica.</string>
     <string name="none">Cap (desactivat)</string>
     <string name="meshtastic_service_notifications">Notificacions de servei</string>
-    <string name="about">Sobre</string>
     <string name="channel_invalid">La URL d'aquest canal és invàlida i no es pot fer servir</string>
     <string name="debug_panel">Panell de depuració</string>
     <string name="clear">Netejar</string>
@@ -203,4 +202,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualització fallida</string>
     <string name="interval_unset">No configurat</string>
+    <!-- Compass -->
 </resources>

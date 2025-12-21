@@ -64,6 +64,7 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
@@ -80,6 +81,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.toOneLineString
@@ -92,6 +94,7 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.connected_count
 import org.meshtastic.core.strings.connecting
@@ -145,6 +148,8 @@ class MeshService : Service() {
 
     @Inject lateinit var meshLogRepository: Lazy<MeshLogRepository>
 
+    @Inject lateinit var tracerouteSnapshotRepository: TracerouteSnapshotRepository
+
     @Inject lateinit var radioInterfaceService: RadioInterfaceService
 
     @Inject lateinit var locationRepository: LocationRepository
@@ -177,6 +182,8 @@ class MeshService : Service() {
     private val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
 
     @Volatile private var lastNeighborInfo: MeshProtos.NeighborInfo? = null
+    private val logUuidByPacketId = ConcurrentHashMap<Int, String>()
+    private val logInsertJobByPacketId = ConcurrentHashMap<Int, Job>()
 
     companion object {
 
@@ -564,7 +571,13 @@ class MeshService : Service() {
             hwModel = MeshProtos.HardwareModel.UNSET
         }
 
-        NodeEntity(num = n, user = defaultUser, longName = defaultUser.longName, channel = channel)
+        NodeEntity(
+            num = n,
+            user = defaultUser,
+            longName = defaultUser.longName,
+            shortName = defaultUser.shortName,
+            channel = channel,
+        )
     }
 
     private val hexIdRegex = """!([0-9A-Fa-f]+)""".toRegex()
@@ -757,6 +770,9 @@ class MeshService : Service() {
                 userId = toNodeID(packet.from),
                 emoji = packet.decoded.payload.toByteArray().decodeToString(),
                 timestamp = System.currentTimeMillis(),
+                snr = packet.rxSnr,
+                rssi = packet.rxRssi,
+                hopsAway = getHopsAwayForPacket(packet),
             )
         packetRepository.get().insertReaction(reaction)
     }
@@ -820,6 +836,8 @@ class MeshService : Service() {
                 // that is not shared'
                 var shouldBroadcast = !fromUs
 
+                val logUuid = logUuidByPacketId[packet.id]
+                val logInsertJob = logInsertJobByPacketId[packet.id]
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                         if (data.replyId != 0 && data.emoji == 0) {
@@ -929,11 +947,34 @@ class MeshService : Service() {
 
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
                         Timber.d("Received TRACEROUTE_APP from $fromId")
+                        val routeDiscovery = packet.fullRouteDiscovery
                         val full = packet.getFullTracerouteResponse(::getUserName)
                         if (full != null) {
                             val requestId = packet.decoded.requestId
+                            if (logUuid != null) {
+                                serviceScope.handledLaunch {
+                                    logInsertJob?.join()
+                                    val forwardRoute = routeDiscovery?.routeList.orEmpty()
+                                    val returnRoute = routeDiscovery?.routeBackList.orEmpty()
+                                    val routeNodeNums = (forwardRoute + returnRoute).distinct()
+                                    val nodeDbByNum = nodeRepository.nodeDBbyNum.value
+                                    val snapshotPositions =
+                                        routeNodeNums
+                                            .mapNotNull { nodeNum ->
+                                                val position =
+                                                    nodeDbByNum[nodeNum]?.validPosition ?: return@mapNotNull null
+                                                nodeNum to position
+                                            }
+                                            .toMap()
+                                    tracerouteSnapshotRepository.upsertSnapshotPositions(
+                                        logUuid = logUuid,
+                                        requestId = requestId,
+                                        positions = snapshotPositions,
+                                    )
+                                }
+                            }
                             val start = tracerouteStartTimes.remove(requestId)
-                            val response =
+                            val responseText =
                                 if (start != null) {
                                     val elapsedMs = System.currentTimeMillis() - start
                                     val seconds = elapsedMs / 1000.0
@@ -942,7 +983,20 @@ class MeshService : Service() {
                                 } else {
                                     full
                                 }
-                            serviceRepository.setTracerouteResponse(response)
+                            val destination =
+                                routeDiscovery?.routeList?.firstOrNull()
+                                    ?: routeDiscovery?.routeBackList?.lastOrNull()
+                                    ?: 0
+                            serviceRepository.setTracerouteResponse(
+                                TracerouteResponse(
+                                    message = responseText,
+                                    destinationNodeNum = destination,
+                                    requestId = requestId,
+                                    forwardRoute = routeDiscovery?.routeList.orEmpty(),
+                                    returnRoute = routeDiscovery?.routeBackList.orEmpty(),
+                                    logUuid = logUuid,
+                                ),
+                            )
                         }
                     }
 
@@ -1139,6 +1193,9 @@ class MeshService : Service() {
                         "kept='${it.user.longName}' (hwModel=${it.user.hwModel}), " +
                         "skipped default='${p.longName}' (hwModel=UNSET)",
                 )
+                // Ensure denormalized columns are updated from preserved user data
+                it.longName = it.user.longName
+                it.shortName = it.user.shortName
                 // Still update channel and verification status
                 it.channel = channel
                 it.manuallyVerified = manuallyVerified
@@ -1473,6 +1530,15 @@ class MeshService : Service() {
         }
     }
 
+    private fun getHopsAwayForPacket(packet: MeshPacket): Int =
+        if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
+            0 // These don't come with the .hop params, but do not propagate, so they must be 0
+        } else if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
+            -1
+        } else {
+            packet.hopStart - packet.hopLimit
+        }
+
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun processReceivedMeshPacket(packet: MeshPacket) {
         val fromNum = packet.from
@@ -1487,7 +1553,7 @@ class MeshService : Service() {
                     portNum = packet.decoded.portnumValue,
                     fromRadio = fromRadio { this.packet = packet },
                 )
-            insertMeshLog(packetToSave)
+            val logInsertJob = insertMeshLog(packetToSave)
 
             serviceScope.handledLaunch { serviceRepository.emitMeshPacket(packet) }
 
@@ -1514,26 +1580,24 @@ class MeshService : Service() {
                 it.rssi = packet.rxRssi
 
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
-                it.hopsAway =
-                    if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
-                        0 // These don't come with the .hop params, but do not propogate, so they must be 0
-                    } else if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
-                        -1
-                    } else {
-                        packet.hopStart - packet.hopLimit
-                    }
+                it.hopsAway = getHopsAwayForPacket(packet)
             }
-            handleReceivedData(packet)
+            logInsertJobByPacketId[packet.id] = logInsertJob
+            logUuidByPacketId[packet.id] = packetToSave.uuid
+            try {
+                handleReceivedData(packet)
+            } finally {
+                logUuidByPacketId.remove(packet.id)
+                logInsertJobByPacketId.remove(packet.id)
+            }
         }
     }
 
-    private fun insertMeshLog(packetToSave: MeshLog) {
-        serviceScope.handledLaunch {
-            // Do not log, because might contain PII
-            // info("insert: ${packetToSave.message_type} =
-            // ${packetToSave.raw_message.toOneLineString()}")
-            meshLogRepository.get().insert(packetToSave)
-        }
+    private fun insertMeshLog(packetToSave: MeshLog): Job = serviceScope.handledLaunch {
+        // Do not log, because might contain PII
+        // info("insert: ${packetToSave.message_type} =
+        // ${packetToSave.raw_message.toOneLineString()}")
+        meshLogRepository.get().insert(packetToSave)
     }
 
     private fun setLocalConfig(config: ConfigProtos.Config) {
@@ -1870,6 +1934,9 @@ class MeshService : Service() {
                             "kept='${it.user.longName}' (hwModel=${it.user.hwModel}), " +
                             "skipped default='${info.user.longName}' (hwModel=UNSET)",
                     )
+                    // Ensure denormalized columns are updated from preserved user data
+                    it.longName = it.user.longName
+                    it.shortName = it.user.shortName
                 } else {
                     it.user =
                         info.user.copy {
@@ -1966,10 +2033,19 @@ class MeshService : Service() {
 
     /**
      * Regenerate the myNodeInfo model. We call this twice. Once after we receive myNodeInfo from the device and again
-     * after we have the node DB (which might allow us a better notion of our HwModel.
+     * after we have the node DB (which might allow us a better notion of our HwModel).
      */
     private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata? = MeshProtos.DeviceMetadata.getDefaultInstance()) {
         val myInfo = rawMyNodeInfo
+        val hasMetadata = metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()
+        Timber.i(
+            "[MYNODE_REGEN] Called - " +
+                "rawMyNodeInfo: ${if (myInfo != null) "present" else "null"}, " +
+                "metadata: ${if (hasMetadata) "present" else "null/default"}, " +
+                "firmwareVersion: ${metadata?.firmwareVersion ?: "null"}, " +
+                "hasWifi: ${metadata?.hasWifi}",
+        )
+
         if (myInfo != null) {
             val mi =
                 with(myInfo) {
@@ -1994,10 +2070,22 @@ class MeshService : Service() {
                         deviceId = deviceId.toStringUtf8(),
                     )
                 }
+
+            Timber.i(
+                "[MYNODE_REGEN] Created MyNodeEntity - " +
+                    "nodeNum: ${mi.myNodeNum}, " +
+                    "model: ${mi.model}, " +
+                    "firmwareVersion: ${mi.firmwareVersion}, " +
+                    "hasWifi: ${mi.hasWifi}",
+            )
+
             if (metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()) {
                 serviceScope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
             }
             newMyNodeInfo = mi
+            Timber.i("[MYNODE_REGEN] Set newMyNodeInfo (will be committed on configComplete)")
+        } else {
+            Timber.w("[MYNODE_REGEN] rawMyNodeInfo is null, cannot regenerate")
         }
     }
 
@@ -2012,7 +2100,12 @@ class MeshService : Service() {
 
     /** Update MyNodeInfo (called from either new API version or the old one) */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
-        Timber.d("[myInfo] ${myInfo.toPIIString()}")
+        Timber.i(
+            "[MYINFO_RECEIVED] MyNodeInfo received - " +
+                "nodeNum: ${myInfo.myNodeNum}, " +
+                "minAppVersion: ${myInfo.minAppVersion}, " +
+                "PII data: ${myInfo.toPIIString()}",
+        )
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -2024,6 +2117,7 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
 
         rawMyNodeInfo = myInfo
+        Timber.i("[MYINFO_RECEIVED] Set rawMyNodeInfo, calling regenMyNodeInfo()")
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
@@ -2036,7 +2130,14 @@ class MeshService : Service() {
 
     /** Update our DeviceMetadata */
     private fun handleMetadata(metadata: MeshProtos.DeviceMetadata) {
-        Timber.d("[deviceMetadata] ${metadata.toPIIString()}")
+        Timber.i(
+            "[METADATA_RECEIVED] DeviceMetadata received - " +
+                "firmwareVersion: ${metadata.firmwareVersion}, " +
+                "hwModel: ${metadata.hwModel}, " +
+                "hasWifi: ${metadata.hasWifi}, " +
+                "hasBluetooth: ${metadata.hasBluetooth}, " +
+                "PII data: ${metadata.toPIIString()}",
+        )
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -2047,6 +2148,10 @@ class MeshService : Service() {
             )
         insertMeshLog(packetToSave)
 
+        Timber.i(
+            "[METADATA_RECEIVED] Calling regenMyNodeInfo with metadata - " +
+                "This will update newMyNodeInfo with firmwareVersion: ${metadata.firmwareVersion}",
+        )
         regenMyNodeInfo(metadata)
     }
 
@@ -2200,7 +2305,7 @@ class MeshService : Service() {
     }
 
     private fun handleConfigOnlyComplete() {
-        Timber.d("Config-only complete for nonce $configOnlyNonce")
+        Timber.i("[CONFIG_COMPLETE] Config-only complete for nonce $configOnlyNonce")
         val packetToSave =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -2212,9 +2317,16 @@ class MeshService : Service() {
         insertMeshLog(packetToSave)
 
         if (newMyNodeInfo == null) {
-            Timber.e("Did not receive a valid config")
+            Timber.e("[CONFIG_COMPLETE] Did not receive a valid config - newMyNodeInfo is null")
         } else {
+            Timber.i(
+                "[CONFIG_COMPLETE] Committing newMyNodeInfo to myNodeInfo - " +
+                    "firmwareVersion: ${newMyNodeInfo?.firmwareVersion}, " +
+                    "hasWifi: ${newMyNodeInfo?.hasWifi}, " +
+                    "model: ${newMyNodeInfo?.model}",
+            )
             myNodeInfo = newMyNodeInfo
+            Timber.i("[CONFIG_COMPLETE] myNodeInfo committed successfully")
         }
         // Keep BLE awake and allow the firmware to settle before the node-info stage.
         serviceScope.handledLaunch {

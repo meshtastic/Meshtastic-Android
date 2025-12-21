@@ -135,7 +135,6 @@
     <string name="must_update">Tem de atualizar esta aplicação no Google Play (ou Github). A versão é muito antiga para ser possível falar com este rádio.</string>
     <string name="none">Nenhum (desabilitado)</string>
     <string name="meshtastic_service_notifications">Notificações de serviço</string>
-    <string name="about">Sobre</string>
     <string name="channel_invalid">O Link Deste Canal é inválido e não pode ser usado</string>
     <string name="debug_panel">Painel de depuração</string>
     <string name="clear">Limpar</string>
@@ -566,4 +565,5 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Atualização falhou</string>
     <string name="interval_unset">Não Definido</string>
+    <!-- Compass -->
 </resources>

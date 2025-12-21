@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
 
@@ -78,19 +78,24 @@ jobs:
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
+      - name: Update Graphs
+        run: ./gradlew graphUpdate
+        continue-on-error: true
+
       - name: Create Pull Request if changes occurred
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           commit-message: |
-            chore: Scheduled updates (Firmware, Hardware, Translations)
+            chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
 
             Automated updates for:
             - Firmware releases list
             - Device hardware list
             - Crowdin source string uploads
             - Crowdin translation downloads
-          title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
+            - Module dependency graphs
+          title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)'
           body: |
             This PR includes automated updates from the scheduled workflow:
 
@@ -98,6 +103,7 @@ jobs:
             - Updated `device_hardware.json` from the Meshtastic API (if changed).
             - Source strings were uploaded to Crowdin.
             - Latest translations were downloaded from Crowdin (if available).
+            - Updated module dependency graphs in README.md files (if changed).
 
             Please review the changes.
           branch: 'scheduled-updates'

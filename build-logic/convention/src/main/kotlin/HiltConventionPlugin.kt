@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.dependencies
+import org.meshtastic.buildlogic.libs
 
 class HiltConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -27,6 +27,9 @@ class HiltConventionPlugin : Plugin<Project> {
             apply(plugin = "com.google.devtools.ksp")
 
             dependencies {
+                // fixme: remove when hilt supports kotlin 2.3.x
+                "ksp"(libs.findLibrary("kotlin-metadata-jvm").get())
+
                 "ksp"(libs.findLibrary("hilt.compiler").get())
                 "implementation"(libs.findLibrary("hilt-android").get())
             }

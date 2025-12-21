@@ -108,7 +108,6 @@
     <string name="must_update">Será necessário atualizar este aplicativo no Google Play (ou Github). Versão muito antiga para comunicar com o firmware do rádio.  Favor consultar <a href="https://meshtastic.org/docs/software/android/installation">docs</a>.</string>
     <string name="none">Nenhum (desabilitado)</string>
     <string name="meshtastic_service_notifications">Notificações de serviço</string>
-    <string name="about">Sobre</string>
     <string name="channel_invalid">Este link de canal é inválido e não pode ser usado</string>
     <string name="debug_panel">Painel de depuração</string>
     <string name="debug_decoded_payload">Pacote Decodificado:</string>
@@ -729,4 +728,5 @@
     <string name="firmware_update_done">Concluído</string>
     <string name="firmware_update_failed">Atualização falhou</string>
     <string name="interval_unset">Não definido</string>
+    <!-- Compass -->
 </resources>

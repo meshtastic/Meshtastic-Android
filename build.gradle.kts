@@ -35,13 +35,12 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kotlin.parcelize) apply false
     alias(libs.plugins.kotlin.serialization) apply false
-    alias(libs.plugins.ktorfit) apply false
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.secrets) apply false
-    alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.kover)
     alias(libs.plugins.spotless) apply false
+    alias(libs.plugins.meshtastic.root)
 }
 
 
@@ -95,32 +94,4 @@ dependencies {
     kover(projects.feature.map)
     kover(projects.feature.node)
     kover(projects.feature.settings)
-}
-
-dependencyAnalysis {
-    structure {
-        ignoreKtx(true)
-
-        // Hilt Android is required by the Hilt plugin, but isn't directly used in many cases. Group
-        // these dependencies together so warnings aren't triggered. If neither of these are being
-        // used, the module likely shouldn't be applying the Hilt plugin.
-        bundle("hilt-core") {
-            includeDependency("com.google.dagger:hilt-core")
-            includeDependency(libs.hilt.android)
-        }
-
-        bundle("ktorfit") {
-            includeDependency("de.jensklingenberg.ktorfit:ktorfit-lib")
-            includeDependency("de.jensklingenberg.ktorfit:ktorfit-annotations")
-        }
-    }
-
-    issues {
-        all {
-            onUnusedDependencies {
-                severity("fail")
-                exclude("androidx.compose.ui:ui-test-manifest")
-            }
-        }
-    }
 }

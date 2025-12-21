@@ -40,7 +40,7 @@
     <string name="unrecognized">Non reconnu</string>
     <string name="message_status_enroute">En attente d'accusé de réception</string>
     <string name="message_status_queued">En file d'attente pour l'envoi</string>
-    <string name="routing_error_none">Confirmé</string>
+    <string name="routing_error_none">Entendu par un autre nœud (mais pas forcément par le destinataire)</string>
     <string name="routing_error_no_route">Pas de routage</string>
     <string name="routing_error_got_nak">Accusé de réception négatif</string>
     <string name="routing_error_timeout">Délai dépassé</string>
@@ -113,6 +113,7 @@
     <string name="config_lora_frequency_slot_summary">La fréquence de fonctionnement de votre nœud est calculée en fonction de la région, du préréglage du modem et de ce champ. Lorsque la valeur vaut 0, le slot est automatiquement calculé en fonction du nom du canal principal et sera différent de l'emplacement public par défaut. Revient à l'emplacement public par défaut si les canaux privés primaires et publics secondaires sont configurés.</string>
     <string name="label_very_long_slow">Très longue portée - Lent</string>
     <string name="label_long_fast">Longue portée-Rapide</string>
+    <string name="label_long_turbo">Longue portée - Turbo</string>
     <string name="label_long_moderate">Longue portée - Modérée</string>
     <string name="label_long_slow">Longue portée - Lent</string>
     <string name="label_medium_fast">Portée moyenne - Rapide</string>
@@ -190,7 +191,7 @@
     <string name="must_update">Vous devez mettre à jour cette application sur l'app store (ou Github). Il est trop vieux pour dialoguer avec le micrologiciel de la radio. Veuillez lire nos  <a href="https://meshtastic.org/docs/software/android/installation"> docs</a> sur ce sujet.</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="meshtastic_service_notifications">Notifications de service</string>
-    <string name="about">A propos</string>
+    <string name="acknowledgements">Remerciements</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="contact_invalid">Ce contact est invalide et ne peut pas être ajouté</string>
     <string name="debug_panel">Panneau de débogage</string>
@@ -280,7 +281,7 @@
     <string name="permission_missing_31">Meshtastic a besoin des autorisations \"Périphériques à proximité\" activées pour trouver et se connecter à des appareils via Bluetooth. Vous pouvez désactiver la lorsque la localisation n'est pas utilisée.</string>
     <string name="direct_message">Message direct</string>
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
-    <string name="delivery_confirmed">Réception confirmée</string>
+    <string name="delivery_confirmed">Réception confirmée par le destinataire</string>
     <string name="error">Erreur</string>
     <string name="ignore">Ignorer</string>
     <string name="remove_ignored">Supprimer des ignorés</string>
@@ -289,7 +290,7 @@
     <string name="map_select_download_region">Sélectionnez la région de téléchargement</string>
     <string name="map_tile_download_estimate">Estimation du téléchargement de tuiles :</string>
     <string name="map_start_download">Commencer le téléchargement</string>
-    <string name="exchange_position">Échanger la position</string>
+    <string name="exchange_position">Demander / envoyer la position</string>
     <string name="close">Fermer</string>
     <string name="radio_configuration">Réglages de l'appareil</string>
     <string name="module_settings">Réglages du module</string>
@@ -349,7 +350,7 @@
     <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement.</string>
     <string name="encryption_error">Non-concordance de clé publique</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d'usine ou à une autre action intentionnelle.</string>
-    <string name="exchange_userinfo">Échanger les informations utilisateur</string>
+    <string name="exchange_userinfo">Demander / envoyer les informations du nœud</string>
     <string name="meshtastic_new_nodes_notifications">Notifications de nouveaux nœuds</string>
     <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>
@@ -376,9 +377,15 @@
     <string name="traceroute_direct">Direct</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 saut</item>
-        <item quantity="other">%d sauts</item>
+        <item quantity="other">%1$d sauts</item>
     </plurals>
     <string name="traceroute_diff">Sauts vers %1$d Sauts retour %2$d</string>
+    <string name="traceroute_outgoing_route">Route aller</string>
+    <string name="traceroute_return_route">Route retour</string>
+    <string name="traceroute_endpoint_missing">Impossible d'afficher la carte traceroute car le noeud de départ ou de destination n'a pas d'informations de position.</string>
+    <string name="view_on_map">Afficher sur la carte</string>
+    <string name="traceroute_map_no_data">Ce traceroute n'a pas encore de nœuds cartographiables.</string>
+    <string name="traceroute_showing_nodes">Affichage des nœuds %1$d/%2$d</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1S</string>
@@ -709,7 +716,7 @@
     <string name="import_known_shared_contact_text">Avertissement : Ce contact est connu, l'importation écrasera les informations précédentes.</string>
     <string name="public_key_changed">Clé publique modifiée</string>
     <string name="import_label">Importer</string>
-    <string name="request_metadata">Récupérer les métadonnées</string>
+    <string name="request_metadata">Récupérer les informations du firmware/métadonnées</string>
     <string name="actions">Actions</string>
     <string name="firmware">Micrologiciel</string>
     <string name="use_12h_format">Utiliser le format horaire 12h</string>
@@ -899,7 +906,7 @@
     <string name="device_configuration">Configuration de l'appareil</string>
     <string name="remotely_administrating">"[Distant] %1$s"</string>
     <string name="device_telemetry_enabled">Envoyer la télémétrie de l'appareil</string>
-    <string name="device_telemetry_enabled_summary">Activez/désactivez le module de télémétrie de l'appareil pour envoyer des mesures au maillage. Il s'agit de valeurs nominales. Les maillages encombrés s'adapteront automatiquement à des intervalles plus longs en fonction du nombre de nœuds en ligne. Les maillages de moins de 10 nœuds s'adapteront à des intervalles plus rapides.</string>
+    <string name="device_telemetry_enabled_summary">Activez/désactivez le module de télémétrie de l'appareil pour envoyer des mesures (niveau de batterie, qualité du signal...) au maillage. Les maillages encombrés allongeront automatiquement l'intervalle en fonction du nombre de nœuds en ligne.</string>
     <string name="any">N'importe laquelle</string>
     <string name="one_hour">1 Heure</string>
     <string name="eight_hours">8 Heures</string>
@@ -917,7 +924,7 @@
     <string name="relayed_by">Relayé par : %1$s</string>
     <plurals name="relays">
         <item quantity="one">Entendu le relai %1$d</item>
-        <item quantity="other">Entendu les relais %1$d</item>
+        <item quantity="other">Entendu par %1$d relais</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s est généralement livré avec un chargeur d'amorçage qui ne prend pas en charge les mises à jour via Bluetooth (OTA ou Over The Air). Vous devrez peut-être flasher un chargeur d'amorçage compatible OTA via USB avant de flasher OTA.</string>
     <string name="learn_more">En savoir plus</string>
@@ -971,4 +978,28 @@
     <string name="firmware_update_usb_instruction_text">Votre appareil a redémarré en mode DFU et devrait apparaître comme une clé USB (par exemple, RAK4631).\n\nLorsque le sélecteur de fichier s'ouvre, veuillez sélectionner la racine de ce lecteur pour enregistrer le fichier firmware.</string>
     <string name="interval_unset">Désactivé</string>
     <string name="interval_always_on">En permanence</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 seconde</item>
+        <item quantity="other">%1$d secondes</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 heure</item>
+        <item quantity="other">%1$d heures</item>
+    </plurals>
+    <!-- Compass -->
+    <string name="compass_title">Boussole</string>
+    <string name="open_compass">Ouvrir la boussole</string>
+    <string name="compass_distance">Distance : %1$s</string>
+    <string name="compass_bearing">Orientation : %1$s</string>
+    <string name="compass_bearing_na">Orientation : N/A</string>
+    <string name="compass_no_magnetometer">Cet appareil ne dispose pas de boussole. L'orientation n'est pas disponible.</string>
+    <string name="compass_no_location_permission">L'autorisation d'accès à la position est nécessaire pour afficher la distance et l'orientation.</string>
+    <string name="compass_location_disabled">Le fournisseur d'emplacement (GPS) est désactivé. Activez les services de localisation.</string>
+    <string name="compass_no_location_fix">En attente de la réception GPS pour calculer la distance et l'orientation.</string>
+    <string name="compass_uncertainty">Surface estimée : \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Surface estimée : précision inconnue</string>
 </resources>
