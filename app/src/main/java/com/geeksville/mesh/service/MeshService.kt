@@ -1015,42 +1015,50 @@ class MeshService : Service() {
                             Timber.d("Stored last neighbor info from connected radio")
                         }
 
-                        val formatted =
-                            if (info != null) {
-                                val fmtNode: (Int) -> String = { nodeNum ->
-                                    val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-                                    val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
-                                    val nodeId = "!%08x".format(nodeNum)
-                                    if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
-                                }
-                                buildString {
-                                    appendLine("NeighborInfo:")
-                                    appendLine("node_id: ${fmtNode(info.nodeId)}")
-                                    appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
-                                    appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
-                                    if (info.neighborsCount > 0) {
-                                        appendLine("neighbors:")
-                                        info.neighborsList.forEach { n ->
-                                            appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                        // Only show response if packet is addressed to us and we sent a request in the last 3 minutes
+                        val isAddressedToUs = packet.to == myInfo.myNodeNum
+                        val isRecentRequest = start != null && (System.currentTimeMillis() - start) < 180000L
+
+                        if (isAddressedToUs && isRecentRequest) {
+                            val formatted =
+                                if (info != null) {
+                                    val fmtNode: (Int) -> String = { nodeNum ->
+                                        val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                        val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                        val nodeId = "!%08x".format(nodeNum)
+                                        if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                                    }
+                                    buildString {
+                                        appendLine("NeighborInfo:")
+                                        appendLine("node_id: ${fmtNode(info.nodeId)}")
+                                        appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
+                                        appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+                                        if (info.neighborsCount > 0) {
+                                            appendLine("neighbors:")
+                                            info.neighborsList.forEach { n ->
+                                                appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                                            }
                                         }
                                     }
+                                } else {
+                                    // Fallback to raw string if parsing fails
+                                    String(data.payload.toByteArray())
                                 }
-                            } else {
-                                // Fallback to raw string if parsing fails
-                                String(data.payload.toByteArray())
-                            }
 
-                        val response =
-                            if (start != null) {
-                                val elapsedMs = System.currentTimeMillis() - start
-                                val seconds = elapsedMs / 1000.0
-                                Timber.i("Neighbor info $requestId complete in $seconds s")
-                                "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
-                            } else {
-                                Timber.w("No start time found for neighbor info requestId: $requestId")
-                                formatted
-                            }
-                        serviceRepository.setNeighborInfoResponse(response)
+                            val response =
+                                if (start != null) {
+                                    val elapsedMs = System.currentTimeMillis() - start
+                                    val seconds = elapsedMs / 1000.0
+                                    Timber.i("Neighbor info $requestId complete in $seconds s")
+                                    "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
+                                } else {
+                                    Timber.w("No start time found for neighbor info requestId: $requestId")
+                                    formatted
+                                }
+                            serviceRepository.setNeighborInfoResponse(response)
+                        } else {
+                            Timber.d("Neighbor info response filtered: isAddressedToUs=$isAddressedToUs, isRecentRequest=$isRecentRequest")
+                        }
                     }
 
                     Portnums.PortNum.NEIGHBORINFO_APP_VALUE -> {
@@ -1068,42 +1076,50 @@ class MeshService : Service() {
                             Timber.d("Stored last neighbor info from connected radio")
                         }
 
-                        val formatted =
-                            if (info != null) {
-                                val fmtNode: (Int) -> String = { nodeNum ->
-                                    val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-                                    val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
-                                    val nodeId = "!%08x".format(nodeNum)
-                                    if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
-                                }
-                                buildString {
-                                    appendLine("NeighborInfo:")
-                                    appendLine("node_id: ${fmtNode(info.nodeId)}")
-                                    appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
-                                    appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
-                                    if (info.neighborsCount > 0) {
-                                        appendLine("neighbors:")
-                                        info.neighborsList.forEach { n ->
-                                            appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                        // Only show response if packet is addressed to us and we sent a request in the last 3 minutes
+                        val isAddressedToUs = packet.to == myInfo.myNodeNum
+                        val isRecentRequest = start != null && (System.currentTimeMillis() - start) < 180000L
+
+                        if (isAddressedToUs && isRecentRequest) {
+                            val formatted =
+                                if (info != null) {
+                                    val fmtNode: (Int) -> String = { nodeNum ->
+                                        val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
+                                        val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+                                        val nodeId = "!%08x".format(nodeNum)
+                                        if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
+                                    }
+                                    buildString {
+                                        appendLine("NeighborInfo:")
+                                        appendLine("node_id: ${fmtNode(info.nodeId)}")
+                                        appendLine("last_sent_by_id: ${fmtNode(info.lastSentById)}")
+                                        appendLine("node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
+                                        if (info.neighborsCount > 0) {
+                                            appendLine("neighbors:")
+                                            info.neighborsList.forEach { n ->
+                                                appendLine("  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}")
+                                            }
                                         }
                                     }
+                                } else {
+                                    // Fallback to raw string if parsing fails
+                                    String(data.payload.toByteArray())
                                 }
-                            } else {
-                                // Fallback to raw string if parsing fails
-                                String(data.payload.toByteArray())
-                            }
 
-                        val response =
-                            if (start != null) {
-                                val elapsedMs = System.currentTimeMillis() - start
-                                val seconds = elapsedMs / 1000.0
-                                Timber.i("Neighbor info $requestId complete in $seconds s")
-                                "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
-                            } else {
-                                Timber.w("No start time found for neighbor info requestId: $requestId")
-                                formatted
-                            }
-                        serviceRepository.setNeighborInfoResponse(response)
+                            val response =
+                                if (start != null) {
+                                    val elapsedMs = System.currentTimeMillis() - start
+                                    val seconds = elapsedMs / 1000.0
+                                    Timber.i("Neighbor info $requestId complete in $seconds s")
+                                    "$formatted\n\nDuration: ${"%.1f".format(seconds)} s"
+                                } else {
+                                    Timber.w("No start time found for neighbor info requestId: $requestId")
+                                    formatted
+                                }
+                            serviceRepository.setNeighborInfoResponse(response)
+                        } else {
+                            Timber.d("Neighbor info response filtered: isAddressedToUs=$isAddressedToUs, isRecentRequest=$isRecentRequest")
+                        }
                     }
 
                     else -> Timber.d("No custom processing needed for ${data.portnumValue} from $fromId")
