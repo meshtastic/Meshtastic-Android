@@ -184,9 +184,7 @@ private fun MessageListPagedContent(
         }
 
     // Disable animations during scroll to prevent jank/stutter
-    val enableAnimations by remember {
-        derivedStateOf { !listState.isScrollInProgress }
-    }
+    val enableAnimations by remember { derivedStateOf { !listState.isScrollInProgress } }
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
@@ -209,9 +207,7 @@ private fun MessageListPagedContent(
 
                     // Show unread divider after the first unread message
                     if (state.hasUnreadMessages && unreadDividerIndex == index) {
-                        UnreadMessagesDivider(
-                            modifier = if (enableAnimations) Modifier.animateItem() else Modifier
-                        )
+                        UnreadMessagesDivider(modifier = if (enableAnimations) Modifier.animateItem() else Modifier)
                     }
                 }
             }
@@ -385,11 +381,7 @@ private fun UpdateUnreadCountPaged(
     // This fixes race condition when sending/receiving messages during debounce period
     // Optimized: Use itemSnapshotList instead of iterating through indices
     val remoteMessageCount by
-        remember(messages.itemCount) {
-            derivedStateOf {
-                messages.itemSnapshotList.items.count { !it.fromLocal }
-            }
-        }
+        remember(messages.itemCount) { derivedStateOf { messages.itemSnapshotList.items.count { !it.fromLocal } } }
 
     // Mark messages as read after debounce period
     // Handles both scrolling cases and when all unread messages are visible without scrolling
