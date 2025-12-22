@@ -37,28 +37,18 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
-import org.meshtastic.core.analytics.DataPair
-import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.data.repository.RadioConfigRepository
-import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.ModuleConfigProtos
-import org.meshtastic.proto.Portnums
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -68,10 +58,6 @@ class MeshService : Service() {
     @Inject lateinit var radioInterfaceService: RadioInterfaceService
 
     @Inject lateinit var serviceRepository: ServiceRepository
-
-    @Inject lateinit var databaseManager: DatabaseManager
-
-    @Inject lateinit var meshPrefs: MeshPrefs
 
     @Inject lateinit var connectionStateHolder: ConnectionStateHandler
 
@@ -90,10 +76,6 @@ class MeshService : Service() {
     @Inject lateinit var connectionManager: MeshConnectionManager
 
     @Inject lateinit var serviceNotifications: MeshServiceNotifications
-
-    @Inject lateinit var dataHandler: MeshDataHandler
-
-    @Inject lateinit var analytics: PlatformAnalytics
 
     @Inject lateinit var radioConfigRepository: RadioConfigRepository
 
@@ -115,7 +97,7 @@ class MeshService : Service() {
         fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
 
         fun actionReceived(portNum: Int): String {
-            val portType = Portnums.PortNum.forNumber(portNum)
+            val portType = org.meshtastic.proto.Portnums.PortNum.forNumber(portNum)
             val portStr = portType?.toString() ?: portNum.toString()
             return actionReceived(portStr)
         }
@@ -203,7 +185,7 @@ class MeshService : Service() {
     private val binder =
         object : IMeshService.Stub() {
             override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
-                updateLastAddress(deviceAddr)
+                router.actionHandler.handleUpdateLastAddress(deviceAddr)
                 radioInterfaceService.setDeviceAddress(deviceAddr)
             }
 
@@ -228,20 +210,15 @@ class MeshService : Service() {
             }
 
             override fun setRemoteOwner(id: Int, payload: ByteArray) = toRemoteExceptions {
-                val u = MeshProtos.User.parseFrom(payload)
-                commandSender.sendAdmin(myNodeNum, id) { setOwner = u }
+                router.actionHandler.handleSetRemoteOwner(id, payload, myNodeNum)
             }
 
             override fun getRemoteOwner(id: Int, destNum: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, id, wantResponse = true) { getOwnerRequest = true }
+                router.actionHandler.handleGetRemoteOwner(id, destNum)
             }
 
             override fun send(p: DataPacket) = toRemoteExceptions {
-                commandSender.sendData(p)
-                serviceBroadcasts.broadcastMessageStatus(p)
-                dataHandler.rememberDataPacket(p, myNodeNum, false)
-                val bytes = p.bytes ?: ByteArray(0)
-                analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
+                router.actionHandler.handleSend(p, myNodeNum)
             }
 
             override fun getConfig(): ByteArray = toRemoteExceptions {
@@ -251,68 +228,51 @@ class MeshService : Service() {
             }
 
             override fun setConfig(payload: ByteArray) = toRemoteExceptions {
-                val c = ConfigProtos.Config.parseFrom(payload)
-                commandSender.sendAdmin(myNodeNum) { setConfig = c }
+                router.actionHandler.handleSetConfig(payload, myNodeNum)
             }
 
             override fun setRemoteConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
-                val c = ConfigProtos.Config.parseFrom(payload)
-                commandSender.sendAdmin(num, id) { setConfig = c }
+                router.actionHandler.handleSetRemoteConfig(id, num, payload)
             }
 
             override fun getRemoteConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, id, wantResponse = true) {
-                    if (config == AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE) {
-                        getDeviceMetadataRequest = true
-                    } else {
-                        getConfigRequestValue = config
-                    }
-                }
+                router.actionHandler.handleGetRemoteConfig(id, destNum, config)
             }
 
             override fun setModuleConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
-                val c = ModuleConfigProtos.ModuleConfig.parseFrom(payload)
-                commandSender.sendAdmin(num, id) { setModuleConfig = c }
+                router.actionHandler.handleSetModuleConfig(id, num, payload)
             }
 
             override fun getModuleConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, id, wantResponse = true) { getModuleConfigRequestValue = config }
+                router.actionHandler.handleGetModuleConfig(id, destNum, config)
             }
 
             override fun setRingtone(destNum: Int, ringtone: String) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum) { setRingtoneMessage = ringtone }
+                router.actionHandler.handleSetRingtone(destNum, ringtone)
             }
 
             override fun getRingtone(id: Int, destNum: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, id, wantResponse = true) { getRingtoneRequest = true }
+                router.actionHandler.handleGetRingtone(id, destNum)
             }
 
             override fun setCannedMessages(destNum: Int, messages: String) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum) { setCannedMessageModuleMessages = messages }
+                router.actionHandler.handleSetCannedMessages(destNum, messages)
             }
 
             override fun getCannedMessages(id: Int, destNum: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, id, wantResponse = true) {
-                    getCannedMessageModuleMessagesRequest = true
-                }
+                router.actionHandler.handleGetCannedMessages(id, destNum)
             }
 
             override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
-                if (payload != null) {
-                    val c = ChannelProtos.Channel.parseFrom(payload)
-                    commandSender.sendAdmin(myNodeNum) { setChannel = c }
-                }
+                router.actionHandler.handleSetChannel(payload, myNodeNum)
             }
 
             override fun setRemoteChannel(id: Int, num: Int, payload: ByteArray?) = toRemoteExceptions {
-                if (payload != null) {
-                    val c = ChannelProtos.Channel.parseFrom(payload)
-                    commandSender.sendAdmin(num, id) { setChannel = c }
-                }
+                router.actionHandler.handleSetRemoteChannel(id, num, payload)
             }
 
             override fun getRemoteChannel(id: Int, destNum: Int, index: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, id, wantResponse = true) { getChannelRequest = index + 1 }
+                router.actionHandler.handleGetRemoteChannel(id, destNum, index)
             }
 
             override fun beginEditSettings() = toRemoteExceptions {
@@ -340,8 +300,7 @@ class MeshService : Service() {
             }
 
             override fun removeByNodenum(requestId: Int, nodeNum: Int) = toRemoteExceptions {
-                nodeManager.removeByNodenum(nodeNum)
-                commandSender.sendAdmin(myNodeNum, requestId) { removeByNodenum = nodeNum }
+                router.actionHandler.handleRemoveByNodenum(nodeNum, requestId, myNodeNum)
             }
 
             override fun requestUserInfo(destNum: Int) = toRemoteExceptions {
@@ -351,19 +310,7 @@ class MeshService : Service() {
             }
 
             override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
-                if (destNum != myNodeNum) {
-                    val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
-                    val currentPosition =
-                        when {
-                            provideLocation && position.isValid() -> position
-                            else ->
-                                nodeManager.nodeDBbyNodeNum[myNodeNum]
-                                    ?.position
-                                    ?.let { Position(it) }
-                                    ?.takeIf { it.isValid() }
-                        }
-                    currentPosition?.let { commandSender.requestPosition(destNum, it) }
-                }
+                router.actionHandler.handleRequestPosition(destNum, position, myNodeNum)
             }
 
             override fun setFixedPosition(destNum: Int, position: Position) = toRemoteExceptions {
@@ -375,11 +322,11 @@ class MeshService : Service() {
             }
 
             override fun requestShutdown(requestId: Int, destNum: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, requestId) { shutdownSeconds = 5 }
+                router.actionHandler.handleRequestShutdown(requestId, destNum)
             }
 
             override fun requestReboot(requestId: Int, destNum: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, requestId) { rebootSeconds = 5 }
+                router.actionHandler.handleRequestReboot(requestId, destNum)
             }
 
             override fun rebootToDfu() = toRemoteExceptions {
@@ -387,31 +334,16 @@ class MeshService : Service() {
             }
 
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, requestId) { factoryResetDevice = 1 }
+                router.actionHandler.handleRequestFactoryReset(requestId, destNum)
             }
 
             override fun requestNodedbReset(requestId: Int, destNum: Int, preserveFavorites: Boolean) =
                 toRemoteExceptions {
-                    commandSender.sendAdmin(destNum, requestId) { nodedbReset = preserveFavorites }
+                    router.actionHandler.handleRequestNodedbReset(requestId, destNum, preserveFavorites)
                 }
 
             override fun getDeviceConnectionStatus(requestId: Int, destNum: Int) = toRemoteExceptions {
-                commandSender.sendAdmin(destNum, requestId, wantResponse = true) {
-                    getDeviceConnectionStatusRequest = true
-                }
+                router.actionHandler.handleGetDeviceConnectionStatus(requestId, destNum)
             }
         }
-
-    private fun updateLastAddress(deviceAddr: String?) {
-        val currentAddr = meshPrefs.deviceAddress
-        if (deviceAddr != currentAddr) {
-            meshPrefs.deviceAddress = deviceAddr
-            serviceScope.handledLaunch {
-                nodeManager.clear()
-                databaseManager.switchActiveDatabase(deviceAddr)
-                serviceNotifications.clearNotifications()
-                nodeManager.loadCachedNodeDB()
-            }
-        }
-    }
 }

@@ -23,15 +23,27 @@ import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.meshtastic.core.analytics.DataPair
+import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.PacketRepository
+import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.prefs.mesh.MeshPrefs
+import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
+import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.ChannelProtos
+import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.ModuleConfigProtos
 import org.meshtastic.proto.Portnums
 import org.meshtastic.proto.user
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Suppress("LongParameterList", "TooManyFunctions")
 @Singleton
 class MeshActionHandler
 @Inject
@@ -39,8 +51,18 @@ constructor(
     private val nodeManager: MeshNodeManager,
     private val commandSender: MeshCommandSender,
     private val packetRepository: Lazy<PacketRepository>,
+    private val serviceBroadcasts: MeshServiceBroadcasts,
+    private val dataHandler: MeshDataHandler,
+    private val analytics: PlatformAnalytics,
+    private val meshPrefs: MeshPrefs,
+    private val databaseManager: DatabaseManager,
+    private val serviceNotifications: MeshServiceNotifications,
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    companion object {
+        private const val DEFAULT_REBOOT_DELAY = 5
+    }
 
     fun onServiceAction(action: ServiceAction) {
         ignoreException {
@@ -128,5 +150,143 @@ constructor(
                 isLicensed = u.isLicensed
             },
         )
+    }
+
+    fun handleSend(p: DataPacket, myNodeNum: Int) {
+        commandSender.sendData(p)
+        serviceBroadcasts.broadcastMessageStatus(p)
+        dataHandler.rememberDataPacket(p, myNodeNum, false)
+        val bytes = p.bytes ?: ByteArray(0)
+        analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
+    }
+
+    fun handleRequestPosition(destNum: Int, position: Position, myNodeNum: Int) {
+        if (destNum != myNodeNum) {
+            val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
+            val currentPosition =
+                when {
+                    provideLocation && position.isValid() -> position
+                    else ->
+                        nodeManager.nodeDBbyNodeNum[myNodeNum]
+                            ?.position
+                            ?.let { Position(it) }
+                            ?.takeIf { it.isValid() }
+                }
+            currentPosition?.let { commandSender.requestPosition(destNum, it) }
+        }
+    }
+
+    fun handleRemoveByNodenum(nodeNum: Int, requestId: Int, myNodeNum: Int) {
+        nodeManager.removeByNodenum(nodeNum)
+        commandSender.sendAdmin(myNodeNum, requestId) { removeByNodenum = nodeNum }
+    }
+
+    fun handleSetRemoteOwner(id: Int, payload: ByteArray, myNodeNum: Int) {
+        val u = MeshProtos.User.parseFrom(payload)
+        commandSender.sendAdmin(myNodeNum, id) { setOwner = u }
+    }
+
+    fun handleGetRemoteOwner(id: Int, destNum: Int) {
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { getOwnerRequest = true }
+    }
+
+    fun handleSetConfig(payload: ByteArray, myNodeNum: Int) {
+        val c = ConfigProtos.Config.parseFrom(payload)
+        commandSender.sendAdmin(myNodeNum) { setConfig = c }
+    }
+
+    fun handleSetRemoteConfig(id: Int, num: Int, payload: ByteArray) {
+        val c = ConfigProtos.Config.parseFrom(payload)
+        commandSender.sendAdmin(num, id) { setConfig = c }
+    }
+
+    fun handleGetRemoteConfig(id: Int, destNum: Int, config: Int) {
+        commandSender.sendAdmin(destNum, id, wantResponse = true) {
+            if (config == AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE) {
+                getDeviceMetadataRequest = true
+            } else {
+                getConfigRequestValue = config
+            }
+        }
+    }
+
+    fun handleSetModuleConfig(id: Int, num: Int, payload: ByteArray) {
+        val c = ModuleConfigProtos.ModuleConfig.parseFrom(payload)
+        commandSender.sendAdmin(num, id) { setModuleConfig = c }
+    }
+
+    fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { getModuleConfigRequestValue = config }
+    }
+
+    fun handleSetRingtone(destNum: Int, ringtone: String) {
+        commandSender.sendAdmin(destNum) { setRingtoneMessage = ringtone }
+    }
+
+    fun handleGetRingtone(id: Int, destNum: Int) {
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { getRingtoneRequest = true }
+    }
+
+    fun handleSetCannedMessages(destNum: Int, messages: String) {
+        commandSender.sendAdmin(destNum) { setCannedMessageModuleMessages = messages }
+    }
+
+    fun handleGetCannedMessages(id: Int, destNum: Int) {
+        commandSender.sendAdmin(destNum, id, wantResponse = true) {
+            getCannedMessageModuleMessagesRequest = true
+        }
+    }
+
+    fun handleSetChannel(payload: ByteArray?, myNodeNum: Int) {
+        if (payload != null) {
+            val c = ChannelProtos.Channel.parseFrom(payload)
+            commandSender.sendAdmin(myNodeNum) { setChannel = c }
+        }
+    }
+
+    fun handleSetRemoteChannel(id: Int, num: Int, payload: ByteArray?) {
+        if (payload != null) {
+            val c = ChannelProtos.Channel.parseFrom(payload)
+            commandSender.sendAdmin(num, id) { setChannel = c }
+        }
+    }
+
+    fun handleGetRemoteChannel(id: Int, destNum: Int, index: Int) {
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { getChannelRequest = index + 1 }
+    }
+
+    fun handleRequestShutdown(requestId: Int, destNum: Int) {
+        commandSender.sendAdmin(destNum, requestId) { shutdownSeconds = DEFAULT_REBOOT_DELAY }
+    }
+
+    fun handleRequestReboot(requestId: Int, destNum: Int) {
+        commandSender.sendAdmin(destNum, requestId) { rebootSeconds = DEFAULT_REBOOT_DELAY }
+    }
+
+    fun handleRequestFactoryReset(requestId: Int, destNum: Int) {
+        commandSender.sendAdmin(destNum, requestId) { factoryResetDevice = 1 }
+    }
+
+    fun handleRequestNodedbReset(requestId: Int, destNum: Int, preserveFavorites: Boolean) {
+        commandSender.sendAdmin(destNum, requestId) { nodedbReset = preserveFavorites }
+    }
+
+    fun handleGetDeviceConnectionStatus(requestId: Int, destNum: Int) {
+        commandSender.sendAdmin(destNum, requestId, wantResponse = true) {
+            getDeviceConnectionStatusRequest = true
+        }
+    }
+
+    fun handleUpdateLastAddress(deviceAddr: String?) {
+        val currentAddr = meshPrefs.deviceAddress
+        if (deviceAddr != currentAddr) {
+            meshPrefs.deviceAddress = deviceAddr
+            scope.handledLaunch {
+                nodeManager.clear()
+                databaseManager.switchActiveDatabase(deviceAddr)
+                serviceNotifications.clearNotifications()
+                nodeManager.loadCachedNodeDB()
+            }
+        }
     }
 }
