@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -110,9 +110,9 @@ class MeshService : Service() {
         const val ACTION_MESH_CONNECTED = "com.geeksville.mesh.MESH_CONNECTED"
         const val ACTION_MESSAGE_STATUS = "com.geeksville.mesh.MESSAGE_STATUS"
 
-        private const val prefix = "com.geeksville.mesh"
+        private const val PREFIX = "com.geeksville.mesh"
 
-        fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
+        fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
 
         fun actionReceived(portNum: Int): String {
             val portType = Portnums.PortNum.forNumber(portNum)
@@ -332,9 +332,7 @@ class MeshService : Service() {
             override fun connectionState(): String = connectionStateHolder.connectionState.value.toString()
 
             override fun startProvideLocation() {
-                locationManager.start {
-                    commandSender.sendPosition(it)
-                }
+                locationManager.start { commandSender.sendPosition(it) }
             }
 
             override fun stopProvideLocation() {

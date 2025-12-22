@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -63,21 +63,26 @@ constructor(
                 is ServiceAction.Reaction -> {
                     val channel = action.contactKey[0].digitToInt()
                     val destId = action.contactKey.substring(1)
-                    val dataPacket = org.meshtastic.core.model.DataPacket(
-                        to = destId,
-                        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                        bytes = action.emoji.encodeToByteArray(),
-                        channel = channel,
-                        replyId = action.replyId,
-                        wantAck = false,
-                    )
+                    val dataPacket =
+                        org.meshtastic.core.model.DataPacket(
+                            to = destId,
+                            dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                            bytes = action.emoji.encodeToByteArray(),
+                            channel = channel,
+                            replyId = action.replyId,
+                            wantAck = false,
+                        )
                     commandSender.sendData(dataPacket)
-                    rememberReaction(action, myNodeNum)
+                    rememberReaction(action)
                 }
                 is ServiceAction.ImportContact -> {
                     val verifiedContact = action.contact.toBuilder().setManuallyVerified(true).build()
                     commandSender.sendAdmin(myNodeNum) { addContact = verifiedContact }
-                    nodeManager.handleReceivedUser(verifiedContact.nodeNum, verifiedContact.user, manuallyVerified = true)
+                    nodeManager.handleReceivedUser(
+                        verifiedContact.nodeNum,
+                        verifiedContact.user,
+                        manuallyVerified = true,
+                    )
                 }
                 is ServiceAction.SendContact -> {
                     commandSender.sendAdmin(myNodeNum) { addContact = action.contact }
@@ -89,17 +94,18 @@ constructor(
         }
     }
 
-    private fun rememberReaction(action: ServiceAction.Reaction, myNodeNum: Int) {
+    private fun rememberReaction(action: ServiceAction.Reaction) {
         scope.handledLaunch {
-            val reaction = ReactionEntity(
-                replyId = action.replyId,
-                userId = DataPacket.ID_LOCAL,
-                emoji = action.emoji,
-                timestamp = System.currentTimeMillis(),
-                snr = 0f,
-                rssi = 0,
-                hopsAway = 0,
-            )
+            val reaction =
+                ReactionEntity(
+                    replyId = action.replyId,
+                    userId = DataPacket.ID_LOCAL,
+                    emoji = action.emoji,
+                    timestamp = System.currentTimeMillis(),
+                    snr = 0f,
+                    rssi = 0,
+                    hopsAway = 0,
+                )
             packetRepository.get().insertReaction(reaction)
         }
     }
@@ -113,11 +119,14 @@ constructor(
                 isLicensed = u.isLicensed
             }
         }
-        nodeManager.handleReceivedUser(myNodeNum, user {
-            id = u.id
-            longName = u.longName
-            shortName = u.shortName
-            isLicensed = u.isLicensed
-        })
+        nodeManager.handleReceivedUser(
+            myNodeNum,
+            user {
+                id = u.id
+                longName = u.longName
+                shortName = u.shortName
+                isLicensed = u.isLicensed
+            },
+        )
     }
 }

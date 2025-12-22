@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -55,13 +55,9 @@ constructor(
     private val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
 
     init {
-        radioConfigRepository.localConfigFlow
-            .onEach { _localConfig.value = it }
-            .launchIn(scope)
+        radioConfigRepository.localConfigFlow.onEach { _localConfig.value = it }.launchIn(scope)
 
-        radioConfigRepository.moduleConfigFlow
-            .onEach { _moduleConfig.value = it }
-            .launchIn(scope)
+        radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(scope)
     }
 
     fun handleDeviceConfig(config: ConfigProtos.Config) {

@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -39,6 +39,7 @@ import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.Portnums
 import org.meshtastic.proto.position
 import timber.log.Timber
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
@@ -54,7 +55,7 @@ class MeshCommandSender
 constructor(
     private val packetHandler: PacketHandler?,
     private val nodeManager: MeshNodeManager?,
-    private val connectionStateHolder: MeshServiceConnectionStateHolder?,
+    private val connectionStateHolder: ConnectionStateHandler?,
     private val radioConfigRepository: RadioConfigRepository?,
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -73,24 +74,13 @@ constructor(
             Portnums.PortNum.WAYPOINT_APP_VALUE,
         )
 
-    companion object {
-        private const val PACKET_ID_MASK = 0xffffffffL
-        private const val PACKET_ID_SHIFT_BITS = 32
-        private const val TIME_MS_TO_S = 1000L
-    }
-
     init {
-        radioConfigRepository?.localConfigFlow
-            ?.onEach { localConfig.value = it }
-            ?.launchIn(scope)
+        radioConfigRepository?.localConfigFlow?.onEach { localConfig.value = it }?.launchIn(scope)
 
-        radioConfigRepository?.channelSetFlow
-            ?.onEach { channelSet.value = it }
-            ?.launchIn(scope)
+        radioConfigRepository?.channelSetFlow?.onEach { channelSet.value = it }?.launchIn(scope)
     }
 
-    @VisibleForTesting
-    internal constructor() : this(null, null, null, null)
+    @VisibleForTesting internal constructor() : this(null, null, null, null)
 
     fun getCurrentPacketId(): Long = currentPacketId.get()
 
@@ -108,13 +98,19 @@ constructor(
 
     private fun getAdminChannelIndex(toNum: Int): Int {
         val myNum = nodeManager?.myNodeNum ?: return 0
-        val myNode = nodeManager?.nodeDBbyNodeNum?.get(myNum)
-        val destNode = nodeManager?.nodeDBbyNodeNum?.get(toNum)
+        val myNode = nodeManager.nodeDBbyNodeNum[myNum]
+        val destNode = nodeManager.nodeDBbyNodeNum[toNum]
 
-        if (myNum == toNum) return 0
-        if (myNode?.hasPKC == true && destNode?.hasPKC == true) return DataPacket.PKC_CHANNEL_INDEX
-
-        return channelSet.value.settingsList.indexOfFirst { it.name.equals("admin", ignoreCase = true) }.coerceAtLeast(0)
+        val adminChannelIndex =
+            when {
+                myNum == toNum -> 0
+                myNode?.hasPKC == true && destNode?.hasPKC == true -> DataPacket.PKC_CHANNEL_INDEX
+                else ->
+                    channelSet.value.settingsList
+                        .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
+                        .coerceAtLeast(0)
+            }
+        return adminChannelIndex
     }
 
     fun sendData(p: DataPacket) {
@@ -130,7 +126,7 @@ constructor(
         if (connectionStateHolder?.connectionState?.value == ConnectionState.Connected) {
             try {
                 sendNow(p)
-            } catch (ex: Exception) {
+            } catch (ex: IOException) {
                 Timber.e(ex, "Error sending message, so enqueueing")
                 enqueueForSending(p)
             }
@@ -167,7 +163,7 @@ constructor(
             try {
                 sendNow(p)
                 sentPackets.add(p)
-            } catch (ex: Exception) {
+            } catch (ex: IOException) {
                 Timber.e(ex, "Error sending queued message:")
             }
         }
@@ -191,12 +187,12 @@ constructor(
         Timber.d("Sending our position/time to=$idNum ${Position(pos)}")
 
         if (!localConfig.value.position.fixedPosition) {
-            nodeManager?.handleReceivedPosition(myNum, myNum, pos)
+            nodeManager.handleReceivedPosition(myNum, myNum, pos)
         }
 
         packetHandler?.sendToRadio(
             newMeshPacketTo(idNum).buildMeshPacket(
-                channel = if (destNum == null) 0 else nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+                channel = if (destNum == null) 0 else nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
                 priority = MeshPacket.Priority.BACKGROUND,
             ) {
                 portnumValue = Portnums.PortNum.POSITION_APP_VALUE
@@ -271,12 +267,15 @@ constructor(
     internal fun resolveNodeNum(toId: String): Int = when (toId) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
         else -> {
-            val numericNum = if (toId.startsWith("!")) {
-                toId.substring(1).toLongOrNull(16)?.toInt()
-            } else {
-                null
-            }
-            numericNum ?: nodeManager?.nodeDBbyID?.get(toId)?.num ?: throw IllegalArgumentException("Unknown node ID $toId")
+            val numericNum =
+                if (toId.startsWith(NODE_ID_PREFIX)) {
+                    toId.substring(1).toLongOrNull(HEX_RADIX)?.toInt()
+                } else {
+                    null
+                }
+            numericNum
+                ?: nodeManager?.nodeDBbyID?.get(toId)?.num
+                ?: throw IllegalArgumentException("Unknown node ID $toId")
         }
     }
 
@@ -315,13 +314,30 @@ constructor(
         id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
         wantResponse: Boolean = false,
         initFn: AdminProtos.AdminMessage.Builder.() -> Unit,
-    ): MeshPacket = buildMeshPacket(id = id, wantAck = true, channel = getAdminChannelIndex(to), priority = MeshPacket.Priority.RELIABLE) {
-        this.wantResponse = wantResponse
-        portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
-        payload = AdminProtos.AdminMessage.newBuilder()
-            .apply(initFn)
-            .setSessionPasskey(sessionPasskey.get())
-            .build()
-            .toByteString()
+    ): MeshPacket =
+        buildMeshPacket(
+            id = id,
+            wantAck = true,
+            channel = getAdminChannelIndex(to),
+            priority = MeshPacket.Priority.RELIABLE,
+        ) {
+            this.wantResponse = wantResponse
+            portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
+            payload =
+                AdminProtos.AdminMessage.newBuilder()
+                    .apply(initFn)
+                    .setSessionPasskey(sessionPasskey.get())
+                    .build()
+                    .toByteString()
+        }
+
+    companion object {
+        private const val PACKET_ID_MASK = 0xffffffffL
+        private const val PACKET_ID_SHIFT_BITS = 32
+        private const val TIME_MS_TO_S = 1000L
+
+        private const val ADMIN_CHANNEL_NAME = "admin"
+        private const val NODE_ID_PREFIX = "!"
+        private const val HEX_RADIX = 16
     }
 }

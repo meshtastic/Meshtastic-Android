@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -48,10 +48,7 @@ class MeshDataMapperTest {
     fun `toNodeID returns user ID from node database`() {
         val nodeNum = 123
         val userId = "!0000007b" // hex for 123
-        nodeManager.nodeDBbyNodeNum[nodeNum] = NodeEntity(
-            num = nodeNum,
-            user = user { id = userId }
-        )
+        nodeManager.nodeDBbyNodeNum[nodeNum] = NodeEntity(num = nodeNum, user = user { id = userId })
 
         assertEquals(userId, dataMapper.toNodeID(nodeNum))
     }
@@ -72,16 +69,22 @@ class MeshDataMapperTest {
     @Test
     fun `toDataPacket correctly maps protobuf to DataPacket`() {
         val payload = "Hello".encodeToByteArray()
-        val packet = MeshProtos.MeshPacket.newBuilder().apply {
-            from = 1
-            to = 2
-            id = 12345
-            rxTime = 1600000000
-            decoded = MeshProtos.Data.newBuilder().apply {
-                portnumValue = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
-                setPayload(ByteString.copyFrom(payload))
-            }.build()
-        }.build()
+        val packet =
+            MeshProtos.MeshPacket.newBuilder()
+                .apply {
+                    from = 1
+                    to = 2
+                    id = 12345
+                    rxTime = 1600000000
+                    decoded =
+                        MeshProtos.Data.newBuilder()
+                            .apply {
+                                portnumValue = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
+                                setPayload(ByteString.copyFrom(payload))
+                            }
+                            .build()
+                }
+                .build()
 
         val dataPacket = dataMapper.toDataPacket(packet)
 

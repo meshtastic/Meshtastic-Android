@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -30,6 +30,7 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.MeshProtos
 import timber.log.Timber
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,7 +43,7 @@ constructor(
     private val connectionManager: MeshConnectionManager,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val connectionStateHolder: MeshServiceConnectionStateHolder,
+    private val connectionStateHolder: ConnectionStateHandler,
     private val serviceBroadcasts: MeshServiceBroadcasts,
     private val analytics: PlatformAnalytics,
     private val commandSender: MeshCommandSender,
@@ -54,7 +55,8 @@ constructor(
     private val wantConfigDelay = 100L
 
     private val newNodes = mutableListOf<MeshProtos.NodeInfo>()
-    val newNodeCount: Int get() = newNodes.size
+    val newNodeCount: Int
+        get() = newNodes.size
 
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
     private var newMyNodeInfo: MyNodeEntity? = null
@@ -87,9 +89,11 @@ constructor(
 
     private fun sendHeartbeat() {
         try {
-            packetHandler.sendToRadio(MeshProtos.ToRadio.newBuilder().apply { heartbeat = MeshProtos.Heartbeat.getDefaultInstance() })
+            packetHandler.sendToRadio(
+                MeshProtos.ToRadio.newBuilder().apply { heartbeat = MeshProtos.Heartbeat.getDefaultInstance() },
+            )
             Timber.d("Heartbeat sent between nonce stages")
-        } catch (ex: Exception) {
+        } catch (ex: IOException) {
             Timber.w(ex, "Failed to send heartbeat; proceeding with node-info stage")
         }
     }

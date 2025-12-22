@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -61,10 +61,7 @@ class MeshCommandSenderTest {
     fun `resolveNodeNum handles custom node ID from database`() {
         val nodeNum = 456
         val userId = "custom_id"
-        nodeManager.nodeDBbyNodeNum[nodeNum] = NodeEntity(
-            num = nodeNum,
-            user = user { id = userId }
-        )
+        nodeManager.nodeDBbyNodeNum[nodeNum] = NodeEntity(num = nodeNum, user = user { id = userId })
 
         assertEquals(nodeNum, commandSender.resolveNodeNum(userId))
     }

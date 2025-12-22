@@ -36,34 +36,65 @@ class FakeNodeInfoReadDataSource : NodeInfoReadDataSource {
     val nodes = MutableStateFlow<Map<Int, NodeWithRelations>>(emptyMap())
 
     override fun myNodeInfoFlow(): Flow<MyNodeEntity?> = myNodeInfo
+
     override fun nodeDBbyNumFlow(): Flow<Map<Int, NodeWithRelations>> = nodes
-    override fun getNodesFlow(sort: String, filter: String, includeUnknown: Boolean, hopsAwayMax: Int, lastHeardMin: Int): Flow<List<NodeWithRelations>> = flowOf(emptyList())
+
+    override fun getNodesFlow(
+        sort: String,
+        filter: String,
+        includeUnknown: Boolean,
+        hopsAwayMax: Int,
+        lastHeardMin: Int,
+    ): Flow<List<NodeWithRelations>> = flowOf(emptyList())
+
     override suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> = emptyList()
+
     override suspend fun getUnknownNodes(): List<NodeEntity> = emptyList()
 }
 
 class FakeNodeInfoWriteDataSource : NodeInfoWriteDataSource {
     override suspend fun upsert(node: NodeEntity) {}
+
     override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {}
+
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {}
+
     override suspend fun deleteNode(num: Int) {}
+
     override suspend fun deleteNodes(nodeNums: List<Int>) {}
+
     override suspend fun deleteMetadata(num: Int) {}
+
     override suspend fun upsert(metadata: MetadataEntity) {}
+
     override suspend fun setNodeNotes(num: Int, notes: String) {}
+
     override suspend fun backfillDenormalizedNames() {}
 }
 
 class FakeMeshServiceNotifications : MeshServiceNotifications {
     override fun clearNotifications() {}
+
     override fun initChannels() {}
-    override fun updateServiceStateNotification(summaryString: String?, telemetry: TelemetryProtos.Telemetry?): Notification = null as Notification
+
+    override fun updateServiceStateNotification(
+        summaryString: String?,
+        telemetry: TelemetryProtos.Telemetry?,
+    ): Notification = null as Notification
+
     override fun updateMessageNotification(contactKey: String, name: String, message: String, isBroadcast: Boolean) {}
+
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {}
+
     override fun showNewNodeSeenNotification(node: NodeEntity) {}
+
     override fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {}
+
     override fun showClientNotification(clientNotification: MeshProtos.ClientNotification) {}
+
     override fun cancelMessageNotification(contactKey: String) {}
+
     override fun cancelLowBatteryNotification(node: NodeEntity) {}
+
     override fun clearClientNotification(notification: MeshProtos.ClientNotification) {}
 }

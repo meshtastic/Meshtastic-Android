@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -49,18 +49,17 @@ class MeshMessageProcessor
 @Inject
 constructor(
     private val nodeManager: MeshNodeManager,
-    private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val router: MeshRouter,
-    private val mqttManager: MeshMqttManager,
+    private val fromRadioPacketHandler: FromRadioPacketHandler,
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val logUuidByPacketId = ConcurrentHashMap<Int, String>()
     private val logInsertJobByPacketId = ConcurrentHashMap<Int, Job>()
 
     private val earlyReceivedPackets = ArrayDeque<MeshPacket>()
-    private val MAX_EARLY_PACKET_BUFFER = 128
+    private val maxEarlyPacketBuffer = 128
 
     fun start() {
         nodeManager.isNodeDbReady
@@ -78,12 +77,12 @@ constructor(
                 if (proto.payloadVariantCase == PayloadVariantCase.PAYLOADVARIANT_NOT_SET) {
                     Timber.w("Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=${bytes.toHexString()}")
                 }
-                handleFromRadio(proto, myNodeNum)
+                fromRadioPacketHandler.handleFromRadio(proto, myNodeNum)
             }
             .onFailure { primaryException ->
                 runCatching {
                     val logRecord = MeshProtos.LogRecord.parseFrom(bytes)
-                    handleLogRecord(logRecord)
+                    fromRadioPacketHandler.handleFromRadio(fromRadio { this.logRecord = logRecord }, myNodeNum)
                 }
                     .onFailure { _ ->
                         Timber.e(
@@ -95,98 +94,7 @@ constructor(
             }
     }
 
-    @Suppress("CyclomaticComplexMethod")
-    private fun handleFromRadio(proto: MeshProtos.FromRadio, myNodeNum: Int?) {
-        when (proto.payloadVariantCase) {
-            PayloadVariantCase.PACKET -> handleReceivedMeshPacket(proto.packet, myNodeNum)
-            PayloadVariantCase.MY_INFO -> router.configFlowManager.handleMyInfo(proto.myInfo)
-            PayloadVariantCase.METADATA -> router.configFlowManager.handleLocalMetadata(proto.metadata)
-            PayloadVariantCase.NODE_INFO -> {
-                router.configFlowManager.handleNodeInfo(proto.nodeInfo)
-                serviceRepository.setStatusMessage("Nodes (${router.configFlowManager.newNodeCount})")
-            }
-            PayloadVariantCase.CONFIG_COMPLETE_ID ->
-                router.configFlowManager.handleConfigComplete(proto.configCompleteId)
-            PayloadVariantCase.MQTTCLIENTPROXYMESSAGE ->
-                mqttManager.handleMqttProxyMessage(proto.mqttClientProxyMessage)
-            PayloadVariantCase.QUEUESTATUS -> packetHandler.handleQueueStatus(proto.queueStatus)
-            PayloadVariantCase.CONFIG -> router.configHandler.handleDeviceConfig(proto.config)
-            PayloadVariantCase.MODULECONFIG -> router.configHandler.handleModuleConfig(proto.moduleConfig)
-            PayloadVariantCase.CHANNEL -> router.configHandler.handleChannel(proto.channel)
-            PayloadVariantCase.CLIENTNOTIFICATION -> {
-                serviceRepository.setClientNotification(proto.clientNotification)
-                packetHandler.removeResponse(proto.clientNotification.replyId, complete = false)
-            }
-            PayloadVariantCase.LOG_RECORD -> handleLogRecord(proto.logRecord)
-            PayloadVariantCase.REBOOTED -> handleRebooted(proto.rebooted)
-            PayloadVariantCase.XMODEMPACKET -> handleXmodemPacket(proto.xmodemPacket)
-            PayloadVariantCase.DEVICEUICONFIG -> handleDeviceUiConfig(proto.deviceuiConfig)
-            PayloadVariantCase.FILEINFO -> handleFileInfo(proto.fileInfo)
-            else -> Timber.d("Processor handling ${proto.payloadVariantCase}")
-        }
-    }
-
-    private fun handleLogRecord(logRecord: MeshProtos.LogRecord) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "LogRecord",
-                received_date = System.currentTimeMillis(),
-                raw_message = logRecord.toString(),
-                fromRadio = fromRadio { this.logRecord = logRecord },
-            ),
-        )
-    }
-
-    private fun handleRebooted(rebooted: Boolean) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "Rebooted",
-                received_date = System.currentTimeMillis(),
-                raw_message = rebooted.toString(),
-                fromRadio = fromRadio { this.rebooted = rebooted },
-            ),
-        )
-    }
-
-    private fun handleXmodemPacket(xmodemPacket: org.meshtastic.proto.XmodemProtos.XModem) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "XmodemPacket",
-                received_date = System.currentTimeMillis(),
-                raw_message = xmodemPacket.toString(),
-                fromRadio = fromRadio { this.xmodemPacket = xmodemPacket },
-            ),
-        )
-    }
-
-    private fun handleDeviceUiConfig(deviceUiConfig: org.meshtastic.proto.DeviceUIProtos.DeviceUIConfig) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "DeviceUIConfig",
-                received_date = System.currentTimeMillis(),
-                raw_message = deviceUiConfig.toString(),
-                fromRadio = fromRadio { this.deviceuiConfig = deviceUiConfig },
-            ),
-        )
-    }
-
-    private fun handleFileInfo(fileInfo: MeshProtos.FileInfo) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "FileInfo",
-                received_date = System.currentTimeMillis(),
-                raw_message = fileInfo.toString(),
-                fromRadio = fromRadio { this.fileInfo = fileInfo },
-            ),
-        )
-    }
-
-    private fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
+    fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
         val rxTime =
             if (packet.rxTime == 0) (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt() else packet.rxTime
         val preparedPacket = packet.toBuilder().setRxTime(rxTime).build()
@@ -196,7 +104,7 @@ constructor(
         } else {
             synchronized(earlyReceivedPackets) {
                 val queueSize = earlyReceivedPackets.size
-                if (queueSize >= MAX_EARLY_PACKET_BUFFER) {
+                if (queueSize >= maxEarlyPacketBuffer) {
                     val dropped = earlyReceivedPackets.removeFirst()
                     historyLog(Log.WARN) {
                         val portLabel =
@@ -217,18 +125,21 @@ constructor(
                     } else {
                         "unknown"
                     }
-                historyLog { "queueEarlyPacket size=${earlyReceivedPackets.size} id=${preparedPacket.id} port=$portLabel" }
+                historyLog {
+                    "queueEarlyPacket size=${earlyReceivedPackets.size} id=${preparedPacket.id} port=$portLabel"
+                }
             }
         }
     }
 
     private fun flushEarlyReceivedPackets(reason: String) {
-        val packets = synchronized(earlyReceivedPackets) {
-            if (earlyReceivedPackets.isEmpty()) return
-            val list = earlyReceivedPackets.toList()
-            earlyReceivedPackets.clear()
-            list
-        }
+        val packets =
+            synchronized(earlyReceivedPackets) {
+                if (earlyReceivedPackets.isEmpty()) return
+                val list = earlyReceivedPackets.toList()
+                earlyReceivedPackets.clear()
+                list
+            }
         historyLog { "replayEarlyPackets reason=$reason count=${packets.size}" }
         val myNodeNum = nodeManager.myNodeNum
         packets.forEach { processReceivedMeshPacket(it, myNodeNum) }

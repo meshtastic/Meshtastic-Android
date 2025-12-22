@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -65,13 +65,10 @@ constructor(
     var myNodeNum: Int? = null
 
     companion object {
-        private const val DEFAULT_MESSAGE_TIMEOUT_MS = 300000
-        private const val MAX_CHANNELS = 8
         private const val TIME_MS_TO_S = 1000L
     }
 
-    @VisibleForTesting
-    internal constructor() : this(null, null, null)
+    @VisibleForTesting internal constructor() : this(null, null, null)
 
     fun loadCachedNodeDB() {
         scope.handledLaunch {
@@ -213,10 +210,11 @@ constructor(
                     entity.longName = entity.user.longName
                     entity.shortName = entity.user.shortName
                 } else {
-                    entity.user = info.user.copy {
-                        if (isLicensed) clearPublicKey()
-                        if (info.viaMqtt) longName = "$longName (MQTT)"
-                    }
+                    entity.user =
+                        info.user.copy {
+                            if (isLicensed) clearPublicKey()
+                            if (info.viaMqtt) longName = "$longName (MQTT)"
+                        }
                     entity.longName = entity.user.longName
                     entity.shortName = entity.user.shortName
                 }

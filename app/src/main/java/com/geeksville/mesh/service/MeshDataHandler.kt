@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -84,66 +84,80 @@ constructor(
             Portnums.PortNum.WAYPOINT_APP_VALUE,
         )
 
-    private val batteryPercentUnsupported = 0.0
-    private val batteryPercentLowThreshold = 20
-    private val batteryPercentLowDivisor = 5
-    private val batteryPercentCriticalThreshold = 5
-    private val batteryPercentCooldownSeconds = 1500
-    private val batteryPercentCooldowns = ConcurrentHashMap<Int, Long>()
-
     fun handleReceivedData(packet: MeshPacket, myNodeNum: Int) {
-        val data = packet.decoded
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
         val fromUs = myNodeNum == packet.from
         dataPacket.status = MessageStatus.RECEIVED
 
-        var shouldBroadcast = !fromUs
-
-        when (data.portnumValue) {
-            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> handleTextMessage(packet, dataPacket, myNodeNum)
-            Portnums.PortNum.ALERT_APP_VALUE -> rememberDataPacket(dataPacket, myNodeNum)
-            Portnums.PortNum.WAYPOINT_APP_VALUE -> {
-                val u = MeshProtos.Waypoint.parseFrom(data.payload)
-                if (u.lockedTo != 0 && u.lockedTo != packet.from) return
-                val currentSecond = (System.currentTimeMillis() / 1000).toInt()
-                rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond)
-            }
-            Portnums.PortNum.POSITION_APP_VALUE -> {
-                val p = MeshProtos.Position.parseFrom(data.payload)
-                nodeManager.handleReceivedPosition(packet.from, myNodeNum, p, dataPacket.time)
-            }
-            Portnums.PortNum.NODEINFO_APP_VALUE -> if (!fromUs) handleNodeInfo(packet)
-            Portnums.PortNum.TELEMETRY_APP_VALUE -> handleTelemetry(packet, dataPacket, myNodeNum)
-            Portnums.PortNum.ROUTING_APP_VALUE -> {
-                shouldBroadcast = true
-                handleRouting(packet, dataPacket)
-            }
-            Portnums.PortNum.PAXCOUNTER_APP_VALUE -> {
-                val p = PaxcountProtos.Paxcount.parseFrom(data.payload)
-                nodeManager.handleReceivedPaxcounter(packet.from, p)
-                shouldBroadcast = false
-            }
-            Portnums.PortNum.STORE_FORWARD_APP_VALUE -> {
-                val u = StoreAndForwardProtos.StoreAndForward.parseFrom(data.payload)
-                handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
-                shouldBroadcast = false
-            }
-            Portnums.PortNum.ADMIN_APP_VALUE -> {
-                handleAdminMessage(packet, myNodeNum)
-                shouldBroadcast = false
-            }
-            Portnums.PortNum.RANGE_TEST_APP_VALUE,
-            Portnums.PortNum.DETECTION_SENSOR_APP_VALUE,
-            -> {
-                val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
-                rememberDataPacket(u, myNodeNum)
-            }
-        }
+        val shouldBroadcast = handleDataPacket(packet, dataPacket, myNodeNum, fromUs)
 
         if (shouldBroadcast) {
             serviceBroadcasts.broadcastReceivedData(dataPacket)
         }
         analytics.track("num_data_receive", DataPair("num_data_receive", 1))
+    }
+
+    private fun handleDataPacket(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int, fromUs: Boolean): Boolean {
+        var shouldBroadcast = !fromUs
+        when (packet.decoded.portnumValue) {
+            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> handleTextMessage(packet, dataPacket, myNodeNum)
+            Portnums.PortNum.ALERT_APP_VALUE -> rememberDataPacket(dataPacket, myNodeNum)
+            Portnums.PortNum.WAYPOINT_APP_VALUE -> handleWaypoint(packet, dataPacket, myNodeNum)
+            Portnums.PortNum.POSITION_APP_VALUE -> handlePosition(packet, dataPacket, myNodeNum)
+            Portnums.PortNum.NODEINFO_APP_VALUE -> if (!fromUs) handleNodeInfo(packet)
+            Portnums.PortNum.TELEMETRY_APP_VALUE -> handleTelemetry(packet, dataPacket, myNodeNum)
+            Portnums.PortNum.ROUTING_APP_VALUE -> {
+                handleRouting(packet, dataPacket)
+                shouldBroadcast = true
+            }
+
+            Portnums.PortNum.PAXCOUNTER_APP_VALUE -> {
+                handlePaxCounter(packet)
+                shouldBroadcast = false
+            }
+
+            Portnums.PortNum.STORE_FORWARD_APP_VALUE -> {
+                handleStoreAndForward(packet, dataPacket, myNodeNum)
+                shouldBroadcast = false
+            }
+
+            Portnums.PortNum.ADMIN_APP_VALUE -> {
+                handleAdminMessage(packet, myNodeNum)
+                shouldBroadcast = false
+            }
+
+            Portnums.PortNum.RANGE_TEST_APP_VALUE,
+            Portnums.PortNum.DETECTION_SENSOR_APP_VALUE,
+            -> handleRangeTest(dataPacket, myNodeNum)
+        }
+        return shouldBroadcast
+    }
+
+    private fun handleRangeTest(dataPacket: DataPacket, myNodeNum: Int) {
+        val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
+        rememberDataPacket(u, myNodeNum)
+    }
+
+    private fun handleStoreAndForward(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
+        val u = StoreAndForwardProtos.StoreAndForward.parseFrom(packet.decoded.payload)
+        handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
+    }
+
+    private fun handlePaxCounter(packet: MeshPacket) {
+        val p = PaxcountProtos.Paxcount.parseFrom(packet.decoded.payload)
+        nodeManager.handleReceivedPaxcounter(packet.from, p)
+    }
+
+    private fun handlePosition(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
+        val p = MeshProtos.Position.parseFrom(packet.decoded.payload)
+        nodeManager.handleReceivedPosition(packet.from, myNodeNum, p, dataPacket.time)
+    }
+
+    private fun handleWaypoint(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
+        val u = MeshProtos.Waypoint.parseFrom(packet.decoded.payload)
+        if (u.lockedTo != 0 && u.lockedTo != packet.from) return
+        val currentSecond = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt()
+        rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond)
     }
 
     private fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int) {
@@ -154,8 +168,10 @@ constructor(
             when (u.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE ->
                     configHandler.handleDeviceConfig(u.getConfigResponse)
+
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE ->
                     configHandler.handleChannel(u.getChannelResponse)
+
                 else -> {}
             }
         }
@@ -203,8 +219,8 @@ constructor(
                     nodeEntity.deviceTelemetry = t
                     if (fromNum == myNodeNum || (isRemote && nodeEntity.isFavorite)) {
                         if (
-                            t.deviceMetrics.voltage > batteryPercentUnsupported &&
-                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
+                            t.deviceMetrics.voltage > BATTERY_PERCENT_UNSUPPORTED &&
+                            t.deviceMetrics.batteryLevel <= BATTERY_PERCENT_LOW_THRESHOLD
                         ) {
                             if (shouldBatteryNotificationShow(fromNum, t, myNodeNum)) {
                                 serviceNotifications.showOrUpdateLowBatteryNotification(nodeEntity, isRemote)
@@ -217,6 +233,7 @@ constructor(
                         }
                     }
                 }
+
                 t.hasEnvironmentMetrics() -> nodeEntity.environmentTelemetry = t
                 t.hasPowerMetrics() -> nodeEntity.powerTelemetry = t
             }
@@ -228,20 +245,20 @@ constructor(
         var shouldDisplay = false
         var forceDisplay = false
         when {
-            t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> {
+            t.deviceMetrics.batteryLevel <= BATTERY_PERCENT_CRITICAL_THRESHOLD -> {
                 shouldDisplay = true
                 forceDisplay = true
             }
 
-            t.deviceMetrics.batteryLevel == batteryPercentLowThreshold -> shouldDisplay = true
-            t.deviceMetrics.batteryLevel.mod(batteryPercentLowDivisor) == 0 && !isRemote -> shouldDisplay = true
+            t.deviceMetrics.batteryLevel == BATTERY_PERCENT_LOW_THRESHOLD -> shouldDisplay = true
+            t.deviceMetrics.batteryLevel.mod(BATTERY_PERCENT_LOW_DIVISOR) == 0 && !isRemote -> shouldDisplay = true
 
             isRemote -> shouldDisplay = true
         }
         if (shouldDisplay) {
-            val now = System.currentTimeMillis() / 1000
+            val now = System.currentTimeMillis() / MILLISECONDS_IN_SECOND
             if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
-            if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds || forceDisplay) {
+            if ((now - batteryPercentCooldowns[fromNum]!!) >= BATTERY_PERCENT_COOLDOWN_SECONDS || forceDisplay) {
                 batteryPercentCooldowns[fromNum] = now
                 return true
             }
@@ -286,7 +303,11 @@ constructor(
         }
     }
 
-    private fun handleReceivedStoreAndForward(dataPacket: DataPacket, s: StoreAndForwardProtos.StoreAndForward, myNodeNum: Int) {
+    private fun handleReceivedStoreAndForward(
+        dataPacket: DataPacket,
+        s: StoreAndForwardProtos.StoreAndForward,
+        myNodeNum: Int,
+    ) {
         Timber.d("StoreAndForward: ${s.variantCase} ${s.rr} from ${dataPacket.from}")
         val transport = currentTransport()
         val lastRequest =
@@ -316,7 +337,7 @@ constructor(
                 val text =
                     """
                     Total messages: ${s.history.historyMessages}
-                    History window: ${s.history.window / 60000} min
+                    History window: ${s.history.window.milliseconds.inWholeMinutes} min
                     Last request: ${s.history.lastRequest}
                 """
                         .trimIndent()
@@ -398,6 +419,7 @@ constructor(
                 Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
                 Portnums.PortNum.WAYPOINT_APP_VALUE ->
                     getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
+
                 else -> return
             }
         serviceNotifications.updateMessageNotification(
@@ -419,7 +441,7 @@ constructor(
                 rssi = packet.rxRssi,
                 hopsAway =
                 if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
-                    -1
+                    HOPS_AWAY_UNAVAILABLE
                 } else {
                     packet.hopStart - packet.hopLimit
                 },
@@ -449,5 +471,17 @@ constructor(
         } else {
             timber.log(priority, msg)
         }
+    }
+
+    companion object {
+        private const val MILLISECONDS_IN_SECOND = 1000L
+        private const val HOPS_AWAY_UNAVAILABLE = -1
+
+        private const val BATTERY_PERCENT_UNSUPPORTED = 0.0
+        private const val BATTERY_PERCENT_LOW_THRESHOLD = 20
+        private const val BATTERY_PERCENT_LOW_DIVISOR = 5
+        private const val BATTERY_PERCENT_CRITICAL_THRESHOLD = 5
+        private const val BATTERY_PERCENT_COOLDOWN_SECONDS = 1500
+        private val batteryPercentCooldowns = ConcurrentHashMap<Int, Long>()
     }
 }

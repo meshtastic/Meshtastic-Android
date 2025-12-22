@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -62,17 +62,19 @@ class MeshNodeManagerTest {
     fun `getMyNodeInfo returns info from nodeDB when available`() {
         val myNum = 123
         nodeManager.myNodeNum = myNum
-        val myNode = NodeEntity(
-            num = myNum,
-            user = user {
-                id = "!0000007b"
-                longName = "My Node"
-                shortName = "MY"
-                hwModel = MeshProtos.HardwareModel.TBEAM
-            }
-        )
+        val myNode =
+            NodeEntity(
+                num = myNum,
+                user =
+                user {
+                    id = "!0000007b"
+                    longName = "My Node"
+                    shortName = "MY"
+                    hwModel = MeshProtos.HardwareModel.TBEAM
+                },
+            )
         nodeManager.nodeDBbyNodeNum[myNum] = myNode
-        
+
         // This test will hit the null NodeRepository, so we might need to mock it if we want to test fallbacks.
         // But since we set myNodeNum and nodeDBbyNodeNum, it should return from memory if we are careful.
         // Actually getMyNodeInfo calls nodeRepository.myNodeInfo.value if memory lookup fails.
@@ -83,9 +85,9 @@ class MeshNodeManagerTest {
         nodeManager.myNodeNum = 123
         nodeManager.nodeDBbyNodeNum[1] = NodeEntity(num = 1)
         nodeManager.isNodeDbReady.value = true
-        
+
         nodeManager.clear()
-        
+
         assertNull(nodeManager.myNodeNum)
         assertTrue(nodeManager.nodeDBbyNodeNum.isEmpty())
         assertFalse(nodeManager.isNodeDbReady.value)

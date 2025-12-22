@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -48,14 +48,15 @@ import org.meshtastic.proto.TelemetryProtos
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @Singleton
 class MeshConnectionManager
 @Inject
 constructor(
     private val radioInterfaceService: RadioInterfaceService,
-    private val connectionStateHolder: MeshServiceConnectionStateHolder,
+    private val connectionStateHolder: ConnectionStateHandler,
     private val serviceBroadcasts: MeshServiceBroadcasts,
     private val serviceNotifications: MeshServiceNotifications,
     private val uiPrefs: UiPrefs,
@@ -74,9 +75,6 @@ constructor(
     private var locationRequestsJob: Job? = null
     private var connectTimeMsec = 0L
 
-    private val configOnlyNonce = 69420
-    private val nodeInfoNonce = 69421
-
     fun init() {
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
@@ -89,9 +87,7 @@ constructor(
                             .shouldProvideNodeLocation(myNodeEntity.myNodeNum)
                             .onEach { shouldProvide ->
                                 if (shouldProvide) {
-                                    locationManager.start { pos ->
-                                        commandSender.sendPosition(pos)
-                                    }
+                                    locationManager.start { pos -> commandSender.sendPosition(pos) }
                                 } else {
                                     locationManager.stop()
                                 }
@@ -111,7 +107,8 @@ constructor(
             val effectiveState =
                 when (newState) {
                     is ConnectionState.Connected -> ConnectionState.Connected
-                    is ConnectionState.DeviceSleep -> if (lsEnabled) ConnectionState.DeviceSleep else ConnectionState.Disconnected
+                    is ConnectionState.DeviceSleep ->
+                        if (lsEnabled) ConnectionState.DeviceSleep else ConnectionState.Disconnected
                     is ConnectionState.Connecting -> ConnectionState.Connecting
                     is ConnectionState.Disconnected -> ConnectionState.Disconnected
                 }
@@ -153,16 +150,19 @@ constructor(
             val now = System.currentTimeMillis()
             val duration = now - connectTimeMsec
             connectTimeMsec = 0L
-            analytics.track("connected_seconds", DataPair("connected_seconds", duration / 1000.0))
+            analytics.track(
+                EVENT_CONNECTED_SECONDS,
+                DataPair(EVENT_CONNECTED_SECONDS, duration / MILLISECONDS_IN_SECOND),
+            )
         }
 
         sleepTimeout =
             scope.handledLaunch {
                 try {
                     val localConfig = radioConfigRepository.localConfigFlow.first()
-                    val timeout = (localConfig.power?.lsSecs ?: 0) + 30
+                    val timeout = (localConfig.power?.lsSecs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
                     Timber.d("Waiting for sleeping device, timeout=$timeout secs")
-                    delay(timeout * 1000L)
+                    delay(timeout.seconds)
                     Timber.w("Device timeout out, setting disconnected")
                     onConnectionChanged(ConnectionState.Disconnected)
                 } catch (_: CancellationException) {
@@ -180,21 +180,21 @@ constructor(
         mqttManager.stop()
 
         analytics.track(
-            "mesh_disconnect",
-            DataPair("num_nodes", nodeManager.nodeDBbyNodeNum.size),
-            DataPair("num_online", nodeManager.nodeDBbyNodeNum.values.count { it.isOnline }),
+            EVENT_MESH_DISCONNECT,
+            DataPair(KEY_NUM_NODES, nodeManager.nodeDBbyNodeNum.size),
+            DataPair(KEY_NUM_ONLINE, nodeManager.nodeDBbyNodeNum.values.count { it.isOnline }),
         )
-        analytics.track("num_nodes", DataPair("num_nodes", nodeManager.nodeDBbyNodeNum.size))
+        analytics.track(EVENT_NUM_NODES, DataPair(KEY_NUM_NODES, nodeManager.nodeDBbyNodeNum.size))
 
         serviceBroadcasts.broadcastConnection()
     }
 
     fun startConfigOnly() {
-        packetHandler.sendToRadio(ToRadio.newBuilder().apply { wantConfigId = configOnlyNonce })
+        packetHandler.sendToRadio(ToRadio.newBuilder().apply { wantConfigId = CONFIG_ONLY_NONCE })
     }
 
     fun startNodeInfoOnly() {
-        packetHandler.sendToRadio(ToRadio.newBuilder().apply { wantConfigId = nodeInfoNonce })
+        packetHandler.sendToRadio(ToRadio.newBuilder().apply { wantConfigId = NODE_INFO_NONCE })
     }
 
     fun onHasSettings() {
@@ -216,16 +216,18 @@ constructor(
         }
 
         // Set time
-        commandSender.sendAdmin(myNodeNum) { setTimeOnly = (System.currentTimeMillis() / 1000).toInt() }
+        commandSender.sendAdmin(myNodeNum) {
+            setTimeOnly = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt()
+        }
     }
 
     private fun reportConnection() {
         val myNode = nodeManager.getMyNodeInfo()
-        val radioModel = DataPair("radio_model", myNode?.model ?: "unknown")
+        val radioModel = DataPair(KEY_RADIO_MODEL, myNode?.model ?: "unknown")
         analytics.track(
-            "mesh_connect",
-            DataPair("num_nodes", nodeManager.nodeDBbyNodeNum.size),
-            DataPair("num_online", nodeManager.nodeDBbyNodeNum.values.count { it.isOnline }),
+            EVENT_MESH_CONNECT,
+            DataPair(KEY_NUM_NODES, nodeManager.nodeDBbyNodeNum.size),
+            DataPair(KEY_NUM_ONLINE, nodeManager.nodeDBbyNodeNum.values.count { it.isOnline }),
             radioModel,
         )
     }
@@ -237,11 +239,29 @@ constructor(
     fun updateStatusNotification(telemetry: TelemetryProtos.Telemetry? = null): Notification {
         val summary =
             when (connectionStateHolder.connectionState.value) {
-                is ConnectionState.Connected -> getString(Res.string.connected_count).format(nodeManager.nodeDBbyNodeNum.values.count { it.isOnline })
+                is ConnectionState.Connected ->
+                    getString(Res.string.connected_count)
+                        .format(nodeManager.nodeDBbyNodeNum.values.count { it.isOnline })
                 is ConnectionState.Disconnected -> getString(Res.string.disconnected)
                 is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
                 is ConnectionState.Connecting -> getString(Res.string.connecting)
             }
         return serviceNotifications.updateServiceStateNotification(summary, telemetry = telemetry)
+    }
+
+    companion object {
+        private const val CONFIG_ONLY_NONCE = 69420
+        private const val NODE_INFO_NONCE = 69421
+        private const val MILLISECONDS_IN_SECOND = 1000.0
+        private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
+
+        private const val EVENT_CONNECTED_SECONDS = "connected_seconds"
+        private const val EVENT_MESH_DISCONNECT = "mesh_disconnect"
+        private const val EVENT_NUM_NODES = "num_nodes"
+        private const val EVENT_MESH_CONNECT = "mesh_connect"
+
+        private const val KEY_NUM_NODES = "num_nodes"
+        private const val KEY_NUM_ONLINE = "num_online"
+        private const val KEY_RADIO_MODEL = "radio_model"
     }
 }

@@ -74,7 +74,7 @@ constructor(
         val responseText =
             if (start != null) {
                 val elapsedMs = System.currentTimeMillis() - start
-                val seconds = elapsedMs / 1000.0
+                val seconds = elapsedMs / MILLISECONDS_IN_SECOND
                 Timber.i("Traceroute $requestId complete in $seconds s")
                 String.format(Locale.US, "%s\n\nDuration: %.1f s", full, seconds)
             } else {
@@ -94,5 +94,9 @@ constructor(
                 logUuid = logUuid,
             ),
         )
+    }
+
+    companion object {
+        private const val MILLISECONDS_IN_SECOND = 1000.0
     }
 }

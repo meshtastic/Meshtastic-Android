@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -41,7 +41,11 @@ class StoreForwardHistoryRequestTest {
     @Test
     fun `buildStoreForwardHistoryRequest omits non-positive parameters`() {
         val request =
-            MeshHistoryManager.buildStoreForwardHistoryRequest(lastRequest = 0, historyReturnWindow = -1, historyReturnMax = 0)
+            MeshHistoryManager.buildStoreForwardHistoryRequest(
+                lastRequest = 0,
+                historyReturnWindow = -1,
+                historyReturnMax = 0,
+            )
 
         assertEquals(StoreAndForwardProtos.StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
         assertEquals(0, request.history.lastRequest)

@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  自 <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.geeksville.mesh.service
@@ -94,10 +94,11 @@ constructor(
         }
 
         val lastRequest = meshPrefs.getStoreForwardLastRequest(address)
-        val (window, max) = resolveHistoryRequestParameters(
-            storeForwardConfig?.historyReturnWindow ?: 0,
-            storeForwardConfig?.historyReturnMax ?: 0
-        )
+        val (window, max) =
+            resolveHistoryRequestParameters(
+                storeForwardConfig?.historyReturnWindow ?: 0,
+                storeForwardConfig?.historyReturnMax ?: 0,
+            )
 
         val request = buildStoreForwardHistoryRequest(lastRequest, window, max)
 
