@@ -35,7 +35,7 @@ class MeshServiceBroadcasts
 @Inject
 constructor(
     @ApplicationContext private val context: Context,
-    private val connectionStateHolder: MeshServiceConnectionStateHolder,
+    private val connectionStateHolder: ConnectionStateHandler,
     private val serviceRepository: ServiceRepository,
 ) {
     // A mapping of receiver class name to package name - used for explicit broadcasts

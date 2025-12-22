@@ -73,7 +73,7 @@ class MeshService : Service() {
 
     @Inject lateinit var meshPrefs: MeshPrefs
 
-    @Inject lateinit var connectionStateHolder: MeshServiceConnectionStateHolder
+    @Inject lateinit var connectionStateHolder: ConnectionStateHandler
 
     @Inject lateinit var packetHandler: PacketHandler
 

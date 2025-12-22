@@ -54,7 +54,7 @@ constructor(
     private val serviceBroadcasts: MeshServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val connectionStateHolder: MeshServiceConnectionStateHolder,
+    private val connectionStateHolder: ConnectionStateHandler,
 ) {
 
     companion object {
