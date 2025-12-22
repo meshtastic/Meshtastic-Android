@@ -299,7 +299,11 @@ private fun AutoScrollToBottomPaged(
     hasDialogOpen: Boolean = false,
     itemThreshold: Int = 3,
 ) = with(listState) {
-    val shouldStickToBottom by
+    // Cache whether we were at the bottom - only update when not actively scrolling
+    // This prevents stuttering while still tracking position for auto-scroll
+    var cachedAtBottom by remember { mutableStateOf(true) }
+
+    val isCurrentlyAtBottom by
         remember(hasUnreadMessages, hasDialogOpen) {
             derivedStateOf {
                 if (hasDialogOpen) {
@@ -314,14 +318,23 @@ private fun AutoScrollToBottomPaged(
             }
         }
 
+    // Update cached position only when scroll is idle to prevent stuttering
+    LaunchedEffect(isScrollInProgress) {
+        if (!isScrollInProgress) {
+            cachedAtBottom = isCurrentlyAtBottom
+        }
+    }
+
     // Consolidated scroll logic to prevent race conditions
     // Fixes issue where multiple scroll operations could trigger simultaneously
     // by unifying all scroll triggers into a single LaunchedEffect
     LaunchedEffect(messages.itemCount) {
-        // Scroll to bottom when new messages arrive and user is already at/near bottom
-        // Don't check isScrollInProgress to ensure auto-scroll works reliably
-        if (shouldStickToBottom && messages.itemCount > 0) {
+        // Use cached position (captured when scroll was idle) to decide if we should auto-scroll
+        // This prevents race conditions where new message renders before we check position
+        if (cachedAtBottom && messages.itemCount > 0) {
             scrollToItem(0)
+            // Update cache immediately after scrolling
+            cachedAtBottom = true
         }
     }
 }
