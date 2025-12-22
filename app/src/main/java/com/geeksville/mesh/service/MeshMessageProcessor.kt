@@ -52,7 +52,7 @@ constructor(
     private val serviceRepository: ServiceRepository,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val router: MeshRouter,
-    private val fromRadioPacketHandler: FromRadioPacketHandler,
+    private val fromRadioDispatcher: FromRadioPacketHandler,
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val logUuidByPacketId = ConcurrentHashMap<Int, String>()
@@ -77,12 +77,12 @@ constructor(
                 if (proto.payloadVariantCase == PayloadVariantCase.PAYLOADVARIANT_NOT_SET) {
                     Timber.w("Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=${bytes.toHexString()}")
                 }
-                fromRadioPacketHandler.handleFromRadio(proto, myNodeNum)
+                processFromRadio(proto, myNodeNum)
             }
             .onFailure { primaryException ->
                 runCatching {
                     val logRecord = MeshProtos.LogRecord.parseFrom(bytes)
-                    fromRadioPacketHandler.handleFromRadio(fromRadio { this.logRecord = logRecord }, myNodeNum)
+                    processFromRadio(fromRadio { this.logRecord = logRecord }, myNodeNum)
                 }
                     .onFailure { _ ->
                         Timber.e(
@@ -92,6 +92,39 @@ constructor(
                         )
                     }
             }
+    }
+
+    private fun processFromRadio(proto: MeshProtos.FromRadio, myNodeNum: Int?) {
+        // Audit log every incoming variant
+        logVariant(proto)
+
+        if (proto.payloadVariantCase == PayloadVariantCase.PACKET) {
+            handleReceivedMeshPacket(proto.packet, myNodeNum)
+        } else {
+            fromRadioDispatcher.handleFromRadio(proto)
+        }
+    }
+
+    private fun logVariant(proto: MeshProtos.FromRadio) {
+        val (type, message) =
+            when (proto.payloadVariantCase) {
+                PayloadVariantCase.LOG_RECORD -> "LogRecord" to proto.logRecord.toString()
+                PayloadVariantCase.REBOOTED -> "Rebooted" to proto.rebooted.toString()
+                PayloadVariantCase.XMODEMPACKET -> "XmodemPacket" to proto.xmodemPacket.toString()
+                PayloadVariantCase.DEVICEUICONFIG -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
+                PayloadVariantCase.FILEINFO -> "FileInfo" to proto.fileInfo.toString()
+                else -> return // Other variants (Config, NodeInfo, etc.) are handled by dispatcher but not necessarily logged as raw strings here
+            }
+
+        insertMeshLog(
+            MeshLog(
+                uuid = UUID.randomUUID().toString(),
+                message_type = type,
+                received_date = System.currentTimeMillis(),
+                raw_message = message,
+                fromRadio = proto,
+            ),
+        )
     }
 
     fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
@@ -183,7 +216,7 @@ constructor(
             }
 
             try {
-                if (packet.decoded.portnumValue == org.meshtastic.proto.Portnums.PortNum.TRACEROUTE_APP_VALUE) {
+                if (packet.decoded.portnumValue == Portnums.PortNum.TRACEROUTE_APP_VALUE) {
                     router.tracerouteHandler.handleTraceroute(packet, log.uuid, logJob)
                 } else {
                     router.dataHandler.handleReceivedData(packet, myNum)

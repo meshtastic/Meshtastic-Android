@@ -17,22 +17,16 @@
 
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.concurrent.handledLaunch
-import dagger.Lazy
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import org.meshtastic.core.data.repository.MeshLogRepository
-import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.fromRadio
 import timber.log.Timber
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Dispatches non-packet [MeshProtos.FromRadio] variants to their respective handlers.
+ * This class is stateless and handles routing for config, metadata, and specialized system messages.
+ */
 @Singleton
 class FromRadioPacketHandler
 @Inject
@@ -41,17 +35,10 @@ constructor(
     private val router: MeshRouter,
     private val mqttManager: MeshMqttManager,
     private val packetHandler: PacketHandler,
-    private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val messageProcessor: Lazy<MeshMessageProcessor>,
 ) {
-
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
     @Suppress("CyclomaticComplexMethod")
-    fun handleFromRadio(proto: MeshProtos.FromRadio, myNodeNum: Int?) {
+    fun handleFromRadio(proto: MeshProtos.FromRadio) {
         when (proto.payloadVariantCase) {
-            MeshProtos.FromRadio.PayloadVariantCase.PACKET ->
-                messageProcessor.get().handleReceivedMeshPacket(proto.packet, myNodeNum)
             MeshProtos.FromRadio.PayloadVariantCase.MY_INFO -> router.configFlowManager.handleMyInfo(proto.myInfo)
             MeshProtos.FromRadio.PayloadVariantCase.METADATA ->
                 router.configFlowManager.handleLocalMetadata(proto.metadata)
@@ -72,74 +59,16 @@ constructor(
                 serviceRepository.setClientNotification(proto.clientNotification)
                 packetHandler.removeResponse(proto.clientNotification.replyId, complete = false)
             }
-            MeshProtos.FromRadio.PayloadVariantCase.LOG_RECORD -> handleLogRecord(proto.logRecord)
-            MeshProtos.FromRadio.PayloadVariantCase.REBOOTED -> handleRebooted(proto.rebooted)
-            MeshProtos.FromRadio.PayloadVariantCase.XMODEMPACKET -> handleXmodemPacket(proto.xmodemPacket)
-            MeshProtos.FromRadio.PayloadVariantCase.DEVICEUICONFIG -> handleDeviceUiConfig(proto.deviceuiConfig)
-            MeshProtos.FromRadio.PayloadVariantCase.FILEINFO -> handleFileInfo(proto.fileInfo)
-            else -> Timber.d("Processor handling ${proto.payloadVariantCase}")
+            // Logging-only variants are handled by MeshMessageProcessor before dispatching here
+            MeshProtos.FromRadio.PayloadVariantCase.PACKET,
+            MeshProtos.FromRadio.PayloadVariantCase.LOG_RECORD,
+            MeshProtos.FromRadio.PayloadVariantCase.REBOOTED,
+            MeshProtos.FromRadio.PayloadVariantCase.XMODEMPACKET,
+            MeshProtos.FromRadio.PayloadVariantCase.DEVICEUICONFIG,
+            MeshProtos.FromRadio.PayloadVariantCase.FILEINFO,
+            -> { /* No specialized routing needed here */ }
+
+            else -> Timber.d("Dispatcher ignoring ${proto.payloadVariantCase}")
         }
     }
-
-    private fun handleLogRecord(logRecord: MeshProtos.LogRecord) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "LogRecord",
-                received_date = System.currentTimeMillis(),
-                raw_message = logRecord.toString(),
-                fromRadio = fromRadio { this.logRecord = logRecord },
-            ),
-        )
-    }
-
-    private fun handleRebooted(rebooted: Boolean) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "Rebooted",
-                received_date = System.currentTimeMillis(),
-                raw_message = rebooted.toString(),
-                fromRadio = fromRadio { this.rebooted = rebooted },
-            ),
-        )
-    }
-
-    private fun handleXmodemPacket(xmodemPacket: org.meshtastic.proto.XmodemProtos.XModem) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "XmodemPacket",
-                received_date = System.currentTimeMillis(),
-                raw_message = xmodemPacket.toString(),
-                fromRadio = fromRadio { this.xmodemPacket = xmodemPacket },
-            ),
-        )
-    }
-
-    private fun handleDeviceUiConfig(deviceUiConfig: org.meshtastic.proto.DeviceUIProtos.DeviceUIConfig) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "DeviceUIConfig",
-                received_date = System.currentTimeMillis(),
-                raw_message = deviceUiConfig.toString(),
-                fromRadio = fromRadio { this.deviceuiConfig = deviceUiConfig },
-            ),
-        )
-    }
-
-    private fun handleFileInfo(fileInfo: MeshProtos.FileInfo) {
-        insertMeshLog(
-            MeshLog(
-                uuid = UUID.randomUUID().toString(),
-                message_type = "FileInfo",
-                received_date = System.currentTimeMillis(),
-                raw_message = fileInfo.toString(),
-                fromRadio = fromRadio { this.fileInfo = fileInfo },
-            ),
-        )
-    }
-
-    private fun insertMeshLog(log: MeshLog): Job = scope.handledLaunch { meshLogRepository.get().insert(log) }
 }
