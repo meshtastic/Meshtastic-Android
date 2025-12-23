@@ -62,7 +62,13 @@ data class PacketEntity(
 @Suppress("ConstructorParameterNaming")
 @Entity(
     tableName = "packet",
-    indices = [Index(value = ["myNodeNum"]), Index(value = ["port_num"]), Index(value = ["contact_key"])],
+    indices =
+    [
+        Index(value = ["myNodeNum"]),
+        Index(value = ["port_num"]),
+        Index(value = ["contact_key"]),
+        Index(value = ["contact_key", "port_num", "received_time"]),
+    ],
 )
 data class Packet(
     @PrimaryKey(autoGenerate = true) val uuid: Long,
