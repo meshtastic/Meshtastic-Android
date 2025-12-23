@@ -373,11 +373,18 @@ class MeshService : Service() {
 
                 else -> return
             }
+
         serviceNotifications.updateMessageNotification(
             contactKey,
             getSenderName(dataPacket),
             message,
             isBroadcast = dataPacket.to == DataPacket.ID_BROADCAST,
+            channelName =
+            if (dataPacket.to == DataPacket.ID_BROADCAST) {
+                channelSet.settingsList[dataPacket.channel].name
+            } else {
+                null
+            },
         )
     }
 
