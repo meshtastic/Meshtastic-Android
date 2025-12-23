@@ -96,7 +96,17 @@ data class MetadataEntity(
 )
 
 @Suppress("MagicNumber")
-@Entity(tableName = "nodes")
+@Entity(
+    tableName = "nodes",
+    indices = [
+        Index(value = ["last_heard"]),
+        Index(value = ["short_name"]),
+        Index(value = ["long_name"]),
+        Index(value = ["hops_away"]),
+        Index(value = ["is_favorite"]),
+        Index(value = ["last_heard", "is_favorite"]),
+    ]
+)
 data class NodeEntity(
     @PrimaryKey(autoGenerate = false) val num: Int, // This is immutable, and used as a key
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var user: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
