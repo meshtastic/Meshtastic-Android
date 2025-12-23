@@ -716,6 +716,7 @@
     <string name="import_known_shared_contact_text">Warnung: Dieser Kontakt ist bekannt, beim Importieren werden die vorherigen Kontaktinformationen überschreiben.</string>
     <string name="public_key_changed">Öffentlicher Schlüssel geändert</string>
     <string name="import_label">Importieren</string>
+    <string name="request_neighbor_info">Nachbarinfo anfordern (2.7.15+)</string>
     <string name="request_metadata">Metadaten anfordern</string>
     <string name="actions">Aktionen</string>
     <string name="firmware">Firmware</string>

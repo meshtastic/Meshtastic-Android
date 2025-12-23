@@ -716,6 +716,7 @@
     <string name="import_known_shared_contact_text">Varoitus: Kontakti on jo olemassa, tuonti ylikirjoittaa aiemmat tiedot.</string>
     <string name="public_key_changed">Julkinen avain vaihdettu</string>
     <string name="import_label">Tuo</string>
+    <string name="request_neighbor_info">Pyydä naapuritieto (2.7.15+)</string>
     <string name="request_metadata">Pyydä metatiedot</string>
     <string name="actions">Toiminnot</string>
     <string name="firmware">Laiteohjelmisto</string>
