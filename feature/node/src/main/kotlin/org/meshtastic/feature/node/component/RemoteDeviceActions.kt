@@ -32,7 +32,12 @@ import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 @Composable
-internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction: (NodeDetailAction) -> Unit) {
+internal fun RemoteDeviceActions(
+    node: Node,
+    lastTracerouteTime: Long?,
+    lastRequestNeighborsTime: Long?,
+    onAction: (NodeDetailAction) -> Unit,
+) {
     if (!node.isEffectivelyUnmessageable) {
         ListItem(
             text = stringResource(Res.string.direct_message),
@@ -56,5 +61,9 @@ internal fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction
     TracerouteButton(
         lastTracerouteTime = lastTracerouteTime,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },
+    )
+    RequestNeighborsButton(
+        lastRequestNeighborsTime = lastRequestNeighborsTime,
+        onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestNeighborInfo(node))) },
     )
 }

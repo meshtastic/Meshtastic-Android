@@ -716,6 +716,7 @@
     <string name="import_known_shared_contact_text">Hoiatus: See kontakt on olemas, importimine kirjutab eelmise kontakti kirje üle.</string>
     <string name="public_key_changed">Avalik võti muudetud</string>
     <string name="import_label">Lae</string>
+    <string name="request_neighbor_info">Naabriinfo päring (2.7.15+)</string>
     <string name="request_metadata">Küsi metainfot</string>
     <string name="actions">Toimingud</string>
     <string name="firmware">Püsivara</string>

@@ -716,6 +716,7 @@
     <string name="import_known_shared_contact_text">Varoitus: Kontakti on jo olemassa, tuonti ylikirjoittaa aiemmat tiedot.</string>
     <string name="public_key_changed">Julkinen avain vaihdettu</string>
     <string name="import_label">Tuo</string>
+    <string name="request_neighbor_info">Pyydä naapuritieto (2.7.15+)</string>
     <string name="request_metadata">Pyydä metatiedot</string>
     <string name="actions">Toiminnot</string>
     <string name="firmware">Laiteohjelmisto</string>
@@ -931,8 +932,8 @@
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="learn_more">Lue lisää</string>
-    <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -moduulille valmistajan &apos; DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial -komentoa yhdessä annetun bootloaderin .zip-tiedoston kanssa). Pelkän .uf2-tiedoston kopioiminen ei päivitä bootloaderia.</string>
-    <string name="dont_show_again_for_device">Älä näytä &apos; enää tälle laitteelle</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -moduulille valmistajan DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial -komentoa yhdessä annetun bootloaderin .zip-tiedoston kanssa). Pelkän .uf2-tiedoston kopioiminen ei päivitä bootloaderia.</string>
+    <string name="dont_show_again_for_device">Älä näytä enää tälle laitteelle</string>
     <string name="preserve_favorites">Säilytä suosikit?</string>
     <string name="usb_devices">USB-laitteet</string>
     <!-- Firmware Update -->
@@ -972,7 +973,7 @@
     <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
     <string name="firmware_update_waiting_for_device">Odottaa DFU-laitetta...</string>
     <string name="firmware_update_copying">Kopioidaan laiteohjainta...</string>
-    <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi&apos; DFU-asemaan.</string>
+    <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi DFU-asemaan.</string>
     <string name="firmware_update_flashing">Ohjelmoidaan laitetta. Odota...</string>
     <string name="firmware_update_method_usb">USB-tiedonsiirto</string>
     <string name="firmware_update_method_ble">BLE OTA</string>

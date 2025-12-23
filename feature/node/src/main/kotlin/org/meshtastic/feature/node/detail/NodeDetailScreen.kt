@@ -56,6 +56,7 @@ fun NodeDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val lastTracerouteTime by nodeDetailViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
+    val lastRequestNeighborsTime by nodeDetailViewModel.lastRequestNeighborsTime.collectAsStateWithLifecycle()
     val ourNode by nodeDetailViewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
     val availableLogs by
@@ -100,6 +101,7 @@ fun NodeDetailScreen(
                 ourNode = ourNode,
                 metricsState = state,
                 lastTracerouteTime = lastTracerouteTime,
+                lastRequestNeighborsTime = lastRequestNeighborsTime,
                 availableLogs = availableLogs,
                 onAction = { action ->
                     handleNodeAction(
