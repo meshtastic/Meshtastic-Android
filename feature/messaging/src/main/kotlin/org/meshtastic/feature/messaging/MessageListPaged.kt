@@ -183,6 +183,9 @@ private fun MessageListPagedContent(
             }
         }
 
+    // Disable animations during scroll to prevent jank/stutter
+    val enableAnimations by remember { derivedStateOf { !listState.isScrollInProgress } }
+
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
@@ -199,11 +202,12 @@ private fun MessageListPagedContent(
                         listState = listState,
                         onShowStatusDialog = onShowStatusDialog,
                         onShowReactions = onShowReactions,
+                        enableAnimations = enableAnimations,
                     )
 
                     // Show unread divider after the first unread message
                     if (state.hasUnreadMessages && unreadDividerIndex == index) {
-                        UnreadMessagesDivider(modifier = Modifier.animateItem())
+                        UnreadMessagesDivider(modifier = if (enableAnimations) Modifier.animateItem() else Modifier)
                     }
                 }
             }
@@ -239,6 +243,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     listState: LazyListState,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
+    enableAnimations: Boolean,
 ) {
     val ourNode = state.ourNode ?: return
     val selected by
@@ -248,7 +253,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     val node = nodeMap[message.node.num] ?: message.node
 
     MessageItem(
-        modifier = Modifier.animateItem(),
+        modifier = if (enableAnimations) Modifier.animateItem() else Modifier,
         node = node,
         ourNode = ourNode,
         message = message,
@@ -290,7 +295,11 @@ private fun AutoScrollToBottomPaged(
     hasDialogOpen: Boolean = false,
     itemThreshold: Int = 3,
 ) = with(listState) {
-    val shouldStickToBottom by
+    // Cache whether we were at the bottom - only update when not actively scrolling
+    // This prevents stuttering while still tracking position for auto-scroll
+    var cachedAtBottom by remember { mutableStateOf(true) }
+
+    val isCurrentlyAtBottom by
         remember(hasUnreadMessages, hasDialogOpen) {
             derivedStateOf {
                 if (hasDialogOpen) {
@@ -305,32 +314,23 @@ private fun AutoScrollToBottomPaged(
             }
         }
 
-    val isRefreshing by remember { derivedStateOf { messages.loadState.refresh is LoadState.Loading } }
-    var wasPreviouslyRefreshing by remember { mutableStateOf(false) }
-
-    // Maintain scroll position during and after refresh
-    LaunchedEffect(isRefreshing, shouldStickToBottom) {
-        if (!shouldStickToBottom) return@LaunchedEffect
-
-        if (isRefreshing) {
-            wasPreviouslyRefreshing = true
-            if (!isScrollInProgress && messages.itemCount > 0) {
-                scrollToItem(0)
-            }
-        } else if (wasPreviouslyRefreshing) {
-            wasPreviouslyRefreshing = false
-            if (messages.itemCount > 0) {
-                scrollToItem(0)
-            }
+    // Update cached position only when scroll is idle to prevent stuttering
+    LaunchedEffect(isScrollInProgress) {
+        if (!isScrollInProgress) {
+            cachedAtBottom = isCurrentlyAtBottom
         }
     }
 
-    // Normal auto-scroll for new messages (when not refreshing)
-    if (shouldStickToBottom && !isRefreshing) {
-        LaunchedEffect(messages.itemCount) {
-            if (!isScrollInProgress && messages.itemCount > 0) {
-                scrollToItem(0)
-            }
+    // Consolidated scroll logic to prevent race conditions
+    // Fixes issue where multiple scroll operations could trigger simultaneously
+    // by unifying all scroll triggers into a single LaunchedEffect
+    LaunchedEffect(messages.itemCount) {
+        // Use cached position (captured when scroll was idle) to decide if we should auto-scroll
+        // This prevents race conditions where new message renders before we check position
+        if (cachedAtBottom && messages.itemCount > 0) {
+            scrollToItem(0)
+            // Update cache immediately after scrolling
+            cachedAtBottom = true
         }
     }
 }
@@ -379,15 +379,9 @@ private fun UpdateUnreadCountPaged(
 
     // Track remote message count to restart effect when remote messages change
     // This fixes race condition when sending/receiving messages during debounce period
+    // Optimized: Use itemSnapshotList instead of iterating through indices
     val remoteMessageCount by
-        remember(messages.itemCount) {
-            derivedStateOf {
-                (0 until messages.itemCount).count { i ->
-                    val msg = messages[i]
-                    msg != null && !msg.fromLocal
-                }
-            }
-        }
+        remember(messages.itemCount) { derivedStateOf { messages.itemSnapshotList.items.count { !it.fromLocal } } }
 
     // Mark messages as read after debounce period
     // Handles both scrolling cases and when all unread messages are visible without scrolling
