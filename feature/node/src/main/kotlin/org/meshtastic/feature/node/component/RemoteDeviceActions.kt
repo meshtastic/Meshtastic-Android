@@ -17,21 +17,26 @@
 
 package org.meshtastic.feature.node.component
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.Message
 import androidx.compose.material.icons.filled.AreaChart
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.direct_message
 import org.meshtastic.core.strings.exchange_userinfo
 import org.meshtastic.core.strings.request_telemetry
-import org.meshtastic.core.ui.component.InsetDivider
-import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 @Composable
 internal fun RemoteDeviceActions(
@@ -40,44 +45,31 @@ internal fun RemoteDeviceActions(
     lastRequestNeighborsTime: Long?,
     onAction: (NodeDetailAction) -> Unit,
 ) {
-    if (!node.isEffectivelyUnmessageable) {
-        ListItem(
-            text = stringResource(Res.string.direct_message),
-            leadingIcon = Icons.AutoMirrored.TwoTone.Message,
-            trailingIcon = null,
-            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
+    FlowRow(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        AssistChip(
+            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
+            label = { Text(stringResource(Res.string.exchange_userinfo)) },
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, Modifier.size(18.dp)) },
         )
 
-        InsetDivider()
+        TracerouteChip(
+            lastTracerouteTime = lastTracerouteTime,
+            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },
+        )
+
+        RequestNeighborsChip(
+            lastRequestNeighborsTime = lastRequestNeighborsTime,
+            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestNeighborInfo(node))) },
+        )
+
+        AssistChip(
+            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestTelemetry(node))) },
+            label = { Text(stringResource(Res.string.request_telemetry)) },
+            leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+        )
     }
-
-    ListItem(
-        text = stringResource(Res.string.exchange_userinfo),
-        leadingIcon = Icons.Default.Person,
-        trailingIcon = null,
-        onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
-    )
-
-    InsetDivider()
-
-    TracerouteButton(
-        lastTracerouteTime = lastTracerouteTime,
-        onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },
-    )
-
-    InsetDivider()
-
-    RequestNeighborsButton(
-        lastRequestNeighborsTime = lastRequestNeighborsTime,
-        onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestNeighborInfo(node))) },
-    )
-
-    InsetDivider()
-
-    ListItem(
-        text = stringResource(Res.string.request_telemetry),
-        leadingIcon = Icons.Default.AreaChart, // Using Person icon as placeholder/shared icon pattern
-        trailingIcon = null,
-        onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestTelemetry(node))) },
-    )
 }

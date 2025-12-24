@@ -155,15 +155,9 @@ fun NodeDetailList(
 
     Column(
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).focusable(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        if (metricsState.deviceHardware != null) {
-            DeviceDetailsSection(metricsState)
-        }
-
         NodeDetailsSection(node)
-
-        NotesSection(node = node, onSaveNotes = onSaveNotes)
 
         DeviceActions(
             isLocal = metricsState.isLocal,
@@ -191,7 +185,13 @@ fun NodeDetailList(
             },
         )
 
+        if (metricsState.deviceHardware != null) {
+            DeviceDetailsSection(metricsState)
+        }
+
         MetricsSection(node, metricsState, availableLogs, onAction)
+
+        NotesSection(node = node, onSaveNotes = onSaveNotes)
 
         if (!metricsState.isManaged) {
             AdministrationSection(

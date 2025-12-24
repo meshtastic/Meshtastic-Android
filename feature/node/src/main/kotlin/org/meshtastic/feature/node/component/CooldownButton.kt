@@ -23,8 +23,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.twotone.Mediation
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -69,6 +72,30 @@ fun TracerouteButton(
 }
 
 @Composable
+fun TracerouteChip(lastTracerouteTime: Long?, onClick: () -> Unit) {
+    val progress = remember { Animatable(0f) }
+
+    LaunchedEffect(lastTracerouteTime) {
+        val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
+        if (timeSinceLast < COOL_DOWN_TIME_MS) {
+            val remainingTime = COOL_DOWN_TIME_MS - timeSinceLast
+            progress.snapTo(remainingTime / COOL_DOWN_TIME_MS.toFloat())
+            progress.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
+            )
+        }
+    }
+
+    CooldownChip(
+        text = stringResource(Res.string.traceroute),
+        leadingIcon = Icons.Default.Route,
+        progress = progress.value,
+        onClick = onClick,
+    )
+}
+
+@Composable
 fun RequestNeighborsButton(
     text: String = stringResource(Res.string.request_neighbor_info),
     lastRequestNeighborsTime: Long?,
@@ -89,6 +116,30 @@ fun RequestNeighborsButton(
     }
 
     CooldownButton(text = text, leadingIcon = Icons.TwoTone.Mediation, progress = progress.value, onClick = onClick)
+}
+
+@Composable
+fun RequestNeighborsChip(lastRequestNeighborsTime: Long?, onClick: () -> Unit) {
+    val progress = remember { Animatable(0f) }
+
+    LaunchedEffect(lastRequestNeighborsTime) {
+        val timeSinceLast = System.currentTimeMillis() - (lastRequestNeighborsTime ?: 0)
+        if (timeSinceLast < REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS) {
+            val remainingTime = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS - timeSinceLast
+            progress.snapTo(remainingTime / REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS.toFloat())
+            progress.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
+            )
+        }
+    }
+
+    CooldownChip(
+        text = stringResource(Res.string.request_neighbor_info),
+        leadingIcon = Icons.TwoTone.Mediation,
+        progress = progress.value,
+        onClick = onClick,
+    )
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -120,8 +171,40 @@ private fun CooldownButton(text: String, leadingIcon: ImageVector, progress: Flo
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun CooldownChip(text: String, leadingIcon: ImageVector, progress: Float, onClick: () -> Unit) {
+    val isCoolingDown = progress > 0f
+    val stroke = Stroke(width = with(LocalDensity.current) { 1.dp.toPx() }, cap = StrokeCap.Round)
+
+    AssistChip(
+        onClick = { if (!isCoolingDown) onClick() },
+        label = { Text(text) },
+        enabled = !isCoolingDown,
+        leadingIcon = {
+            if (isCoolingDown) {
+                CircularWavyProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.size(18.dp),
+                    stroke = stroke,
+                    trackStroke = stroke,
+                    wavelength = 6.dp,
+                )
+            } else {
+                Icon(leadingIcon, contentDescription = null, modifier = Modifier.size(18.dp))
+            }
+        },
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun TracerouteButtonPreview() {
     AppTheme { CooldownButton(text = "Traceroute", leadingIcon = Icons.Default.Route, progress = .6f, onClick = {}) }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TracerouteChipPreview() {
+    AppTheme { CooldownChip(text = "Traceroute", leadingIcon = Icons.Default.Route, progress = .6f, onClick = {}) }
 }
