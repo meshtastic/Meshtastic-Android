@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.Message
+import androidx.compose.material.icons.filled.AreaChart
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
@@ -26,6 +27,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.direct_message
 import org.meshtastic.core.strings.exchange_userinfo
+import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -62,8 +64,20 @@ internal fun RemoteDeviceActions(
         lastTracerouteTime = lastTracerouteTime,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },
     )
+
+    InsetDivider()
+
     RequestNeighborsButton(
         lastRequestNeighborsTime = lastRequestNeighborsTime,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestNeighborInfo(node))) },
+    )
+
+    InsetDivider()
+
+    ListItem(
+        text = stringResource(Res.string.request_telemetry),
+        leadingIcon = Icons.Default.AreaChart, // Using Person icon as placeholder/shared icon pattern
+        trailingIcon = null,
+        onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestTelemetry(node))) },
     )
 }

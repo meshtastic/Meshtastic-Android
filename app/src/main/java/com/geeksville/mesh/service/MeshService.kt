@@ -2926,5 +2926,23 @@ class MeshService : Service() {
                     },
                 )
             }
+
+            override fun requestTelemetry(requestId: Int, destNum: Int) = toRemoteExceptions {
+                if (destNum != myNodeNum) {
+                    val telemetryRequest = telemetry {
+                        deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
+                    }
+                    packetHandler.sendToRadio(
+                        newMeshPacketTo(destNum).buildMeshPacket(
+                            id = requestId,
+                            channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                        ) {
+                            portnumValue = Portnums.PortNum.TELEMETRY_APP_VALUE
+                            payload = telemetryRequest.toByteString()
+                            wantResponse = true
+                        },
+                    )
+                }
+            }
         }
 }

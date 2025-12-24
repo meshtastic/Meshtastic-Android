@@ -62,6 +62,7 @@ constructor(
                 _lastRequestNeighborsTime.value = System.currentTimeMillis()
             }
             is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
+            is NodeMenuAction.RequestTelemetry -> requestTelemetry(action.node.num)
             is NodeMenuAction.TraceRoute -> {
                 requestTraceroute(action.node.num)
                 _lastTraceRouteTime.value = System.currentTimeMillis()
@@ -133,6 +134,16 @@ constructor(
             serviceRepository.meshService?.requestPosition(destNum, position)
         } catch (ex: RemoteException) {
             Timber.e("Request position error: ${ex.message}")
+        }
+    }
+
+    private fun requestTelemetry(destNum: Int) {
+        Timber.i("Requesting telemetry for '$destNum'")
+        try {
+            val packetId = serviceRepository.meshService?.packetId ?: return
+            serviceRepository.meshService?.requestTelemetry(packetId, destNum)
+        } catch (ex: RemoteException) {
+            Timber.e("Request telemetry error: ${ex.message}")
         }
     }
 
