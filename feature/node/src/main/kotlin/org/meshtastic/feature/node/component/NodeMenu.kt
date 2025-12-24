@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.component
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.favorite
 import org.meshtastic.core.strings.favorite_add
@@ -100,7 +101,7 @@ sealed class NodeMenuAction {
 
     data class RequestPosition(val node: Node) : NodeMenuAction()
 
-    data class RequestTelemetry(val node: Node) : NodeMenuAction()
+    data class RequestTelemetry(val node: Node, val type: TelemetryType) : NodeMenuAction()
 
     data class TraceRoute(val node: Node) : NodeMenuAction()
 

@@ -181,5 +181,5 @@ interface IMeshService {
     void getDeviceConnectionStatus(in int requestId, in int destNum);
 
     /// Send request for telemetry to nodeNum
-    void requestTelemetry(in int requestId, in int destNum);
+    void requestTelemetry(in int requestId, in int destNum, in int type);
 }

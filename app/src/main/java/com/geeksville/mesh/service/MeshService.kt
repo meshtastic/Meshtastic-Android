@@ -81,6 +81,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
 import org.meshtastic.core.model.util.anonymize
@@ -2927,10 +2928,22 @@ class MeshService : Service() {
                 )
             }
 
-            override fun requestTelemetry(requestId: Int, destNum: Int) = toRemoteExceptions {
+            override fun requestTelemetry(requestId: Int, destNum: Int, type: Int) = toRemoteExceptions {
                 if (destNum != myNodeNum) {
                     val telemetryRequest = telemetry {
-                        deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
+                        when (type) {
+                            TelemetryType.ENVIRONMENT.ordinal ->
+                                environmentMetrics = TelemetryProtos.EnvironmentMetrics.getDefaultInstance()
+                            TelemetryType.AIR_QUALITY.ordinal ->
+                                airQualityMetrics = TelemetryProtos.AirQualityMetrics.getDefaultInstance()
+                            TelemetryType.POWER.ordinal ->
+                                powerMetrics = TelemetryProtos.PowerMetrics.getDefaultInstance()
+                            TelemetryType.LOCAL_STATS.ordinal ->
+                                localStats = TelemetryProtos.LocalStats.getDefaultInstance()
+                            TelemetryType.DEVICE.ordinal ->
+                                deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
+                            else -> deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
+                        }
                     }
                     packetHandler.sendToRadio(
                         newMeshPacketTo(destNum).buildMeshPacket(

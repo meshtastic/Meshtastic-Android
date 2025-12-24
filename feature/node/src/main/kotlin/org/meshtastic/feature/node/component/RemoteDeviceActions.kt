@@ -33,12 +33,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.exchange_userinfo
-import org.meshtastic.core.strings.request_telemetry
+import org.meshtastic.core.strings.request_air_quality_metrics
+import org.meshtastic.core.strings.request_device_metrics
+import org.meshtastic.core.strings.request_environment_metrics
+import org.meshtastic.core.strings.request_local_stats
+import org.meshtastic.core.strings.request_power_metrics
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
+@Suppress("LongMethod")
 internal fun RemoteDeviceActions(
     node: Node,
     lastTracerouteTime: Long?,
@@ -67,8 +73,58 @@ internal fun RemoteDeviceActions(
         )
 
         AssistChip(
-            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestTelemetry(node))) },
-            label = { Text(stringResource(Res.string.request_telemetry)) },
+            onClick = {
+                onAction(
+                    NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestTelemetry(node, TelemetryType.DEVICE)),
+                )
+            },
+            label = { Text(stringResource(Res.string.request_device_metrics)) },
+            leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+        )
+
+        AssistChip(
+            onClick = {
+                onAction(
+                    NodeDetailAction.HandleNodeMenuAction(
+                        NodeMenuAction.RequestTelemetry(node, TelemetryType.ENVIRONMENT),
+                    ),
+                )
+            },
+            label = { Text(stringResource(Res.string.request_environment_metrics)) },
+            leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+        )
+
+        AssistChip(
+            onClick = {
+                onAction(
+                    NodeDetailAction.HandleNodeMenuAction(
+                        NodeMenuAction.RequestTelemetry(node, TelemetryType.AIR_QUALITY),
+                    ),
+                )
+            },
+            label = { Text(stringResource(Res.string.request_air_quality_metrics)) },
+            leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+        )
+
+        AssistChip(
+            onClick = {
+                onAction(
+                    NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestTelemetry(node, TelemetryType.POWER)),
+                )
+            },
+            label = { Text(stringResource(Res.string.request_power_metrics)) },
+            leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+        )
+
+        AssistChip(
+            onClick = {
+                onAction(
+                    NodeDetailAction.HandleNodeMenuAction(
+                        NodeMenuAction.RequestTelemetry(node, TelemetryType.LOCAL_STATS),
+                    ),
+                )
+            },
+            label = { Text(stringResource(Res.string.request_local_stats)) },
             leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
         )
     }
