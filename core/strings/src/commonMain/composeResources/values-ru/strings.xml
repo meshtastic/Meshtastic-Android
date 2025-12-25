@@ -712,7 +712,6 @@
     <string name="import_known_shared_contact_text">Внимание: Данный контакт уже существует, импорт перезапишет ранее известную информацию о нём.</string>
     <string name="public_key_changed">Публичный ключ изменён</string>
     <string name="import_label">Импортировать</string>
-    <string name="request_metadata">Запросить метаданные</string>
     <string name="actions">Действия</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Использовать 12-часовой формат времени</string>

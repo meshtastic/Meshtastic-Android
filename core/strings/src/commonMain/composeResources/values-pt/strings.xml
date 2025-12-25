@@ -534,7 +534,6 @@
     <string name="import_known_shared_contact_text">Aviso: Este contacto é conhecido, importar irá escrever por cima da informação anterior.</string>
     <string name="public_key_changed">Chave Pública Mudou</string>
     <string name="import_label">Importar</string>
-    <string name="request_metadata">Pedir Metadados</string>
     <string name="actions">Ações</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Usar formato de relógio 12h</string>

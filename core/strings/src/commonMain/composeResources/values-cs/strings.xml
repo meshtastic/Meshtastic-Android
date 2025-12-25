@@ -618,7 +618,6 @@
     <string name="unmonitored_or_infrastructure">Nesledované nebo infrastruktura</string>
     <string name="import_known_shared_contact_text">Upozornění: Tento kontakt je znám, import přepíše předchozí kontaktní informace.</string>
     <string name="public_key_changed">Veřejný klíč změněn</string>
-    <string name="request_metadata">Vyžádat metadata</string>
     <string name="actions">Akce</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Použít 12h formát hodin</string>

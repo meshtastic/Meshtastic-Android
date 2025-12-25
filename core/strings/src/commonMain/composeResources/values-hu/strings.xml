@@ -690,7 +690,6 @@
     <string name="import_known_shared_contact_text">Figyelmeztetés: Ez a kapcsolat már létezik, az importálás felülírja a korábbi kapcsolati adatokat.</string>
     <string name="public_key_changed">Nyilvános kulcs megváltozott</string>
     <string name="import_label">Importálás</string>
-    <string name="request_metadata">Metaadatok lekérése</string>
     <string name="actions">Műveletek</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">12 órás időformátum használata</string>

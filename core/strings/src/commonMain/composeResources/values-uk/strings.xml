@@ -405,7 +405,6 @@
     <string name="notes">Нотатки</string>
     <string name="public_key_changed">Відкритий ключ змінено</string>
     <string name="import_label">Імпортувати</string>
-    <string name="request_metadata">Запитати метадані</string>
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Використовувати 12-г формат часу</string>

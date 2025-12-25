@@ -679,7 +679,7 @@
     <string name="import_known_shared_contact_text">Varning: Denna kontakt är känd, en import kommer att skriva över tidigare kontaktuppgifter.</string>
     <string name="public_key_changed">Publik nyckel har ändrats</string>
     <string name="import_label">Importera</string>
-    <string name="request_metadata">Begär metadata</string>
+    <string name="request_device_metrics">Enhetens mätvärden</string>
     <string name="actions">Åtgärder</string>
     <string name="firmware">Fast programvara</string>
     <string name="use_12h_format">Använd 12-timmarsformat</string>
