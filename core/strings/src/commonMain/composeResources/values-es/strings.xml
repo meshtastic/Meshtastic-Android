@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="node_filter_title">Filtrar por</string>
     <string name="node_filter_include_unknown">Incluir desconocidos</string>
+    <string name="node_filter_exclude_infrastructure">Excluir infraestructura</string>
     <string name="node_filter_only_online">Ocultar nodos desconectados</string>
     <string name="node_filter_only_direct">Mostrar sólo nodos directos</string>
     <string name="node_filter_ignored">Estás viendo nodos ignorados, Prensa para volver a la lista de nodos.</string>
@@ -35,6 +36,7 @@
     <string name="node_sort_via_mqtt">vía MQTT</string>
     <string name="via_mqtt">vía MQTT</string>
     <string name="node_sort_via_favorite">vía Favorita</string>
+    <string name="node_filter_show_ignored">Solo mostrar nodos ignorados</string>
     <string name="unrecognized">No reconocido</string>
     <string name="message_status_enroute">Esperando ser reconocido</string>
     <string name="message_status_queued">En cola para enviar</string>
