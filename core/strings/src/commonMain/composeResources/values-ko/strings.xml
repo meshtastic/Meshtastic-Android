@@ -520,7 +520,6 @@
     <string name="import_known_shared_contact_text">경고: 이 연락처는 이미 등록되어 있습니다. 내려받으면 이전 연락처 정보가 덮어쓰어질 수 있습니다.</string>
     <string name="public_key_changed">공개 키 변경됨</string>
     <string name="import_label">불러오기</string>
-    <string name="request_metadata">메타데이터 요청</string>
     <string name="actions">작업</string>
     <string name="firmware">펌웨어</string>
     <string name="use_12h_format">12시간제 보기</string>

@@ -716,8 +716,7 @@
     <string name="import_known_shared_contact_text">Avertissement : Ce contact est connu, l'importation écrasera les informations précédentes.</string>
     <string name="public_key_changed">Clé publique modifiée</string>
     <string name="import_label">Importer</string>
-    <string name="request_neighbor_info">Demander des informations de voisinage (2.7.15+)</string>
-    <string name="request_metadata">Récupérer les informations du firmware/métadonnées</string>
+    <string name="request_device_metrics">Métriques de l’appareil</string>
     <string name="actions">Actions</string>
     <string name="firmware">Micrologiciel</string>
     <string name="use_12h_format">Utiliser le format horaire 12h</string>

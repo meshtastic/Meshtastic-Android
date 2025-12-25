@@ -696,7 +696,6 @@
     <string name="import_known_shared_contact_text">警告:聯絡人已存在，匯入將會覆蓋先前的聯絡人資訊。</string>
     <string name="public_key_changed">公鑰已變更</string>
     <string name="import_label">匯入</string>
-    <string name="request_metadata">請求詮釋資料 (Metadata)</string>
     <string name="actions">動作</string>
     <string name="firmware">韌體</string>
     <string name="use_12h_format">使用12小時制</string>

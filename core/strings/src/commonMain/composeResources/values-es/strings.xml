@@ -678,7 +678,6 @@ Rango de Valores 0 - 500.</string>
     <string name="import_known_shared_contact_text">Advertencia: Este contacto ya es conocido, importar sobrescribirá la información anterior del contacto.</string>
     <string name="public_key_changed">Contraseña pública cambiada</string>
     <string name="import_label">Importar</string>
-    <string name="request_metadata">Pedir metadatos</string>
     <string name="actions">Acciones</string>
     <string name="firmware">Software</string>
     <string name="use_12h_format">Utilizar el formato de 12h para el reloj</string>

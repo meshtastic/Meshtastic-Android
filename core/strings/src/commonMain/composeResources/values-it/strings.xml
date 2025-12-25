@@ -698,7 +698,8 @@
     <string name="import_known_shared_contact_text">Attenzione: Questo contatto è noto, l'importazione sovrascriverà le informazioni di contatto precedenti.</string>
     <string name="public_key_changed">Chiave Pubblica Modificata</string>
     <string name="import_label">Importa</string>
-    <string name="request_metadata">Richiedi Metadati</string>
+    <string name="request_device_metrics">Metriche Dispositivo</string>
+    <string name="request_environment_metrics">Metriche Ambientali</string>
     <string name="actions">Azioni</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Usa formato orologio 12h</string>
