@@ -21,6 +21,7 @@
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="node_filter_title">Filtrar por</string>
     <string name="node_filter_include_unknown">Incluir desconocidos</string>
+    <string name="node_filter_exclude_infrastructure">Excluir infraestructura</string>
     <string name="node_filter_only_online">Ocultar nodos desconectados</string>
     <string name="node_filter_only_direct">Mostrar sólo nodos directos</string>
     <string name="node_filter_ignored">Estás viendo nodos ignorados, Prensa para volver a la lista de nodos.</string>
@@ -35,6 +36,7 @@
     <string name="node_sort_via_mqtt">vía MQTT</string>
     <string name="via_mqtt">vía MQTT</string>
     <string name="node_sort_via_favorite">vía Favorita</string>
+    <string name="node_filter_show_ignored">Solo mostrar nodos ignorados</string>
     <string name="unrecognized">No reconocido</string>
     <string name="message_status_enroute">Esperando ser reconocido</string>
     <string name="message_status_queued">En cola para enviar</string>
@@ -76,9 +78,11 @@
     <string name="role_lost_and_found_desc">Transmite regularmente la ubicación como mensaje al canal predeterminado para asistir en la recuperación del dispositivo.</string>
     <string name="role_tak_tracker">Rastreador TAK</string>
     <string name="role_tak_tracker_desc">Permite la transmisión automática TAK PLI y reduce las transmisiones rutinarias.</string>
+    <string name="role_router_late">Router tardío</string>
     <string name="role_router_late_desc">Nodo de infraestructura que permite la retransmisión de paquetes una vez posterior a los demás modos, asegurando cobertura adicional a los grupos locales. Es visible en la lista de nodos.</string>
     <string name="rebroadcast_mode_all">Todos</string>
     <string name="rebroadcast_mode_all_desc">Si está en nuestro canal privado o desde otra red con los mismos parámetros lora, retransmite cualquier mensaje observado.</string>
+    <string name="rebroadcast_mode_all_skip_decoding">Todos omitir decodificación</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Igual al comportamiento que TODOS pero omite la decodificación de paquetes y simplemente los retransmite. Sólo disponible en el rol repetidor. Establecer esto en cualquier otro rol dará como resultado TODOS los comportamientos.</string>
     <string name="rebroadcast_mode_local_only">Solo locales</string>
     <string name="rebroadcast_mode_local_only_desc">Ignora mensajes observados desde mallas foráneas que están abiertas o que no pueden descifrar. Solo retransmite mensajes en los nodos locales principales / canales secundarios.</string>
@@ -86,6 +90,7 @@
     <string name="rebroadcast_mode_known_only_desc">Ignora los mensajes recibidos de redes externas como LOCAL ONLY, pero ignora también mensajes de nodos que no están ya en la lista de nodos conocidos.</string>
     <string name="rebroadcast_mode_none">Ninguna</string>
     <string name="rebroadcast_mode_none_desc">Solo permitido para los roles SENSOR, TRACKER y TAK_TRACKER, esto inhibirá todas las retransmisiones, no a diferencia del rol de CLIENT_MUTE.</string>
+    <string name="rebroadcast_mode_core_portnums_only">Solo números de puerto principales</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignora paquetes de puertos no estándar, tales como los TAK, Test de Rango (Rangetest), Contador de paquetes (Pax), etc. Solo retransmite paquetes que vengan de puertos estándar como: Información de Nodo (NodeInfo), Mensajes de texto, Posición, telemetría y Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Trate un doble toque en acelerómetros soportados como una pulsación de botón de usuario.</string>
     <string name="config_device_tripleClickAsAdHocPing_summary">Envía la posición al canal primario cuando el botón de usuario se presiona tres veces.</string>
@@ -103,19 +108,38 @@
     <string name="config_display_heading_bold_summary">Encabezado del texto de la pantalla en negrita.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">Requiere que haya un acelerómetro en su dispositivo.</string>
     <string name="config_lora_region_summary">La región donde utilizará su radio.</string>
+    <string name="config_lora_modem_preset_summary">Preajustes de módem disponibles, el predeterminado es Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Establece el número máximo de saltos, por defecto 3. Aumentar saltos también incrementa la congestión y debe ser utilizado con cuidado. 0 saltos de difusión no obtendrán ACKs.</string>
     <string name="config_lora_frequency_slot_summary">La frecuencia de funcionamiento de su nodo se calcula en base a la región, el preajuste del módem y este campo. Cuando es 0, la ranura se calcula automáticamente basándose en el nombre del canal principal y cambiará de la rama pública predeterminada. Cambie a la ranura pública por defecto si se configuran los canales privados primarios y públicos secundarios.</string>
+
+    <string name="label_very_long_slow">Muy largo alcance - Lento</string>
+    <string name="label_long_fast">Largo alcance - Rápido</string>
+    <string name="label_long_turbo">Largo alcance - Turbo</string>
+    <string name="label_long_moderate">Largo alcance - Moderado</string>
+    <string name="label_long_slow">Largo alcance - Lento</string>
+    <string name="label_medium_fast">Alcance medio - Rápido</string>
+    <string name="label_medium_slow">Alcance medio - Lento</string>
+    <string name="label_short_turbo">Corto alcance - Turbo</string>
+    <string name="label_short_fast">Corto alcance - Rápido</string>
+    <string name="label_short_slow">Corto alcance - Lento</string>
+
     <string name="config_network_wifi_enabled_summary">Habilitar WiFi desactivará la conexión bluetooth a la aplicación.</string>
     <string name="config_network_eth_enabled_summary">Habilitar Ethernet desactivará la conexión bluetooth a la aplicación. Las conexiones TCP no están disponibles en dispositivos Apple.</string>
     <string name="config_network_udp_enabled_summary">Habilitar paquetes de difusión vía UDP en la red local.</string>
     <string name="config_position_broadcast_secs_summary">El intervalo máximo que puede transcurrir sin que un nodo transmita una posición.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">La máxima velocidad a la que se enviarán las actualizaciones de posición si se ha cumplido la distancia mínima.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">La distancia mínima de cambio en metros que se tendrá en cuenta para una transmisión inteligente de posición.</string>
+    <string name="config_position_gps_update_interval_summary">Con qué frecuencia debemos intentar obtener una posición GPS (&lt;10seg mantiene el GPS encendido).</string>
     <string name="config_position_flags_summary">Campos opcionales a incluir al ensamblar mensajes de posición. Cuantos más campos se incluyan, mayor será el tamaño del mensaje, lo que provocará un mayor tiempo de transmisión y un mayor riesgo de pérdida de paquetes.</string>
     <string name="config_power_is_power_saving_summary">La opción dormirá todo lo posible; los roles de rastreador y sensores y también incluirá la radio LoRa. No uses esta configuración si quieres utilizar tu dispositivo con las aplicaciones del teléfono o si estás usando un dispositivo sin botón de usuario.</string>
+
+    <string name="config_security_public_key">Generado a partir de tu clave pública y enviado a otros nodos en la malla para permitirles calcular una clave secreta compartida.</string>
     <string name="config_security_private_key">Utilizado para crear una clave compartida con un dispositivo remoto.</string>
     <string name="config_security_admin_key">Clave pública autorizada para enviar mensajes de administración a este nodo.</string>
     <string name="config_security_is_managed">Dispositivo gestionado por administrador de la malla, el usuario no puede acceder a las configuraciones del dispositivo.</string>
+    <string name="config_security_serial_enabled">Consola serial a través de la API de Stream.</string>
+    <string name="config_security_debug_log_api_enabled">Salida de registro de depuración en vivo a través de serial, ver y exportar registros del dispositivo con ubicación eliminada a través de Bluetooth.</string>
+
     <!-- Position Config -->
     <string name="position_packet">Paquetes de posición</string>
     <string name="broadcast_interval">Intervalo de transmisión</string>
@@ -171,6 +195,7 @@
     <string name="must_update">Debe actualizar esta aplicación en la tienda de aplicaciones (o en Github). Es demasiado vieja para comunicarse con este firmware de radio. Por favor, lea nuestra <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> sobre este tema.</string>
     <string name="none">Ninguno (desactivado)</string>
     <string name="meshtastic_service_notifications">Notificaciones de servicio</string>
+    <string name="acknowledgements">Agradecimientos</string>
     <string name="channel_invalid">La URL de este canal no es válida y no puede utilizarse</string>
     <string name="contact_invalid">Este contacto no es válido y no se puede agregar</string>
     <string name="debug_panel">Panel de depuración</string>
@@ -178,6 +203,7 @@
     <string name="debug_logs_export">Exportar registros</string>
     <string name="debug_export_cancelled">Exportación cancelada</string>
     <string name="debug_export_success">%1$d logs exportados</string>
+    <string name="debug_export_failed">Error al escribir el archivo de registro: %1$s</string>
     <string name="debug_filters">Filtros</string>
     <string name="debug_active_filters">Filtros activos</string>
     <string name="debug_default_search">Buscar en registros…</string>
@@ -237,6 +263,10 @@
     <string name="resend">Reenviar</string>
     <string name="shutdown">Apagar</string>
     <string name="cant_shutdown">Apagado no compatible con este dispositivo</string>
+    <string name="shutdown_warning">⚠️ Esto APAGARÁ el nodo. Se requerirá interacción física para volver a encenderlo.</string>
+    <string name="shutdown_critical_node">⚠️ Este es un nodo de infraestructura crítico. Escribe el nombre del nodo para confirmar:</string>
+    <string name="shutdown_node_name">Nodo: %1$s</string>
+    <string name="shutdown_type_name">Tipo: %1$s</string>
     <string name="reboot">Reiniciar</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Mostrar Introducción</string>
@@ -248,6 +278,7 @@
     <string name="quick_chat_instant">Envía instantáneo</string>
     <string name="quick_chat_show">Mostrar menú rápido de chat</string>
     <string name="quick_chat_hide">Ocultar menú rápido de chat</string>
+    <string name="quick_chat_show_label">Mostrar chat rápido</string>
     <string name="factory_reset">Restablecer los valores de fábrica</string>
     <string name="bluetooth_disabled">Bluetooth está deshabilitado. Por favor, actívalo en la configuración de tu dispositivo.</string>
     <string name="open_settings">Abrir ajustes</string>
@@ -299,6 +330,7 @@
     <string name="mute_status_unmuted">No silenciado</string>
     <string name="mute_status_muted_for_days">Silenciado por %1d días, %.1f horas</string>
     <string name="mute_status_muted_for_hours">Silenciado por %.1f horas</string>
+    <string name="mute_status_label">Estado de silencio</string>
     <string name="replace">Reemplazar</string>
     <string name="wifi_qr_code_scan">Escanear código QR WiFi</string>
     <string name="wifi_qr_code_error">Formato de código QR de credencial wifi inválido</string>
@@ -317,7 +349,9 @@
     <string name="ch_util_definition">Utilización del canal actual, incluyendo TX, RX bien formado y RX mal formado (ruido similar).</string>
     <string name="air_util_definition">Porcentaje de tiempo de transmisión utilizado en la última hora.</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Significados de las claves de cifrado</string>
     <string name="encryption_psk">Clave compartida</string>
+    <string name="encryption_psk_text">Solo se pueden enviar/recibir mensajes de canal. Los mensajes directos requieren la función de infraestructura de clave pública en firmware 2.5+.</string>
     <string name="encryption_pkc">Cifrado de Clave Pública</string>
     <string name="encryption_pkc_text">Los mensajes directos están utilizando la nueva infraestructura de clave pública para el cifrado.</string>
     <string name="encryption_error">Clave pública no coincide</string>
@@ -353,6 +387,12 @@ Rango de Valores 0 - 500.</string>
         <item quantity="other">%d saltos</item>
     </plurals>
     <string name="traceroute_diff">Salta hacia %1$d Salta de vuelta %2$d</string>
+    <string name="traceroute_outgoing_route">Ruta de salida</string>
+    <string name="traceroute_return_route">Ruta de retorno</string>
+    <string name="traceroute_endpoint_missing">No se puede mostrar el mapa de traceroute porque el nodo de inicio o destino no tiene información de posición.</string>
+    <string name="view_on_map">Ver en el mapa</string>
+    <string name="traceroute_map_no_data">Este traceroute no tiene ningún nodo mapeable todavía.</string>
+    <string name="traceroute_showing_nodes">Mostrando %1$d/%2$d nodos</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1Semana</string>
@@ -449,9 +489,11 @@ Rango de Valores 0 - 500.</string>
     <string name="generate_input_event_on_cw">Hacer una acción al girar en sentido de las agujas del reloj</string>
     <string name="generate_input_event_on_ccw">Hacer una acción al girar en sentido contrario a las agujas del reloj</string>
     <string name="up_down_select_input_enabled">Arriba/Abajo/Seleccionar Activado</string>
+    <string name="allow_input_source">Permitir fuente de entrada</string>
     <string name="send_bell">Mandar campana 🔔</string>
     <string name="messages">Mensajes</string>
     <string name="device_db_cache_limit">Límite de caché DB del dispositivo</string>
+    <string name="device_db_cache_limit_summary">Máximo de bases de datos de dispositivos para mantener en este teléfono</string>
     <string name="detection_sensor_config">Configuración del sensor detector</string>
     <string name="detection_sensor_enabled">Sensor detector activado</string>
     <string name="minimum_broadcast_seconds">Tiempo mínimo de transmisión (segundos)</string>
@@ -499,8 +541,9 @@ Rango de Valores 0 - 500.</string>
     <string name="use_pwm_buzzer">Utilizar buzzer PWM</string>
     <string name="output_vibra_gpio">Salida vibratoria (pin GPIO)</string>
     <string name="output_duration_milliseconds">Duración en las salidas (milisegundos)</string>
-    <string name="nag_timeout_seconds"></string>
+    <string name="nag_timeout_seconds">Tiempo de espera de recordatorio (segundos)</string>
     <string name="ringtone">Tono de notificación</string>
+    <string name="play">Reproducir</string>
     <string name="use_i2s_as_buzzer">Utilizar el Buzzer como uno I2S</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Opciones</string>
@@ -582,6 +625,7 @@ Rango de Valores 0 - 500.</string>
     <string name="wait_for_bluetooth_duration_seconds">Esperar Bluetooth durante</string>
     <string name="super_deep_sleep_duration_seconds">Duración del sueño súper profundo</string>
     <string name="light_sleep_duration_seconds">Duración de sueño ligero</string>
+    <string name="minimum_wake_time_seconds">Tiempo mínimo de actividad</string>
     <string name="battery_ina_2xx_i2c_address">Dirección I2C del INA_2xx para la batería</string>
     <string name="range_test_config">Configuración del test de alcance</string>
     <string name="range_test_enabled">Test de alcance activado</string>
@@ -612,6 +656,7 @@ Rango de Valores 0 - 500.</string>
     <string name="heartbeat">Pulso de vida</string>
     <string name="number_of_records">Número de registros</string>
     <string name="history_return_max">Historial máximo devuelto</string>
+    <string name="history_return_window">Ventana de retorno del historial</string>
     <string name="server">Servidor</string>
     <string name="telemetry_config">Configuración de la telemetría</string>
     <string name="device_metrics_update_interval_seconds">Intervalo actualización de métricas del dispositivo</string>
@@ -678,6 +723,14 @@ Rango de Valores 0 - 500.</string>
     <string name="import_known_shared_contact_text">Advertencia: Este contacto ya es conocido, importar sobrescribirá la información anterior del contacto.</string>
     <string name="public_key_changed">Contraseña pública cambiada</string>
     <string name="import_label">Importar</string>
+    <string name="request">Solicitar</string>
+    <string name="request_neighbor_info">NeighborInfo (2.7.15+)</string>
+    <string name="request_telemetry">Solicitar telemetría</string>
+    <string name="request_device_metrics">Métricas del dispositivo</string>
+    <string name="request_environment_metrics">Métricas ambientales</string>
+    <string name="request_air_quality_metrics">Métricas de calidad del aire</string>
+    <string name="request_power_metrics">Métricas de energía</string>
+    <string name="request_local_stats">Estadísticas locales</string>
     <string name="request_metadata">Pedir metadatos</string>
     <string name="actions">Acciones</string>
     <string name="firmware">Software</string>
@@ -695,6 +748,7 @@ Rango de Valores 0 - 500.</string>
     <string name="conversations">Conversaciones</string>
     <string name="nodes">Nodos</string>
     <string name="bottom_nav_settings">Ajustes</string>
+    <string name="selected">Seleccionado</string>
     <string name="set_your_region">Introduzca su región</string>
     <string name="reply">Respuesta</string>
     <string name="map_reporting_summary">Tu nodo enviará periódicamente un paquete de posición sin cifrar en el mapa al servidor MQTT configurado. Esto incluye id, nombre largo y corto, ubicación aproximada, modelo de hardware, rol, versión del firmware, región LoRa, pre-ajuste del módem y nombre del canal principal.</string>
@@ -706,12 +760,14 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="should_update_firmware">Se recomienda encarecidamente actualizar el software.</string>
     <string name="should_update">Para beneficiarse de los parches y de las funciones nuevas, por favor, actualiza el firmware del nodo. \n\nÚltima versión estable:%1$s</string>
     <string name="expires">Caduca</string>
+    <string name="time">Hora</string>
     <string name="date">Fecha</string>
     <string name="map_filter">Filtro de mapa\n</string>
     <string name="only_favorites">Solo favoritos</string>
     <string name="show_waypoints">Mostrar marcas de posición</string>
     <string name="show_precision_circle">Mostrar circuitos de precisión</string>
-    <string name="compromised_keys">Las claves se han visto comprometidas, selecciona OK para generar de nuevo.</string>
+    <string name="client_notification">Notificación del cliente</string>
+    <string name="compromised_keys">Claves comprometidas detectadas, selecciona OK para regenerar.</string>
     <string name="regenerate_private_key">Regenerar clave privada</string>
     <string name="regenerate_keys_confirmation">¿Estás seguro de querer regenerar tu clave privada?\n\nLos nodos que hayan intercambiado previamente las claves con este nodo tendrán que quitar ese nodo y volver a intercambiar las claves para poder reanudar la comunicación segura.</string>
     <string name="export_keys">Exportar claves</string>
@@ -719,6 +775,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="modules_unlocked">Módulos desbloqueados</string>
     <string name="modules_already_unlocked">Módulos ya desbloqueados</string>
     <string name="remote">Remoto</string>
+    <string name="node_count_template">(%1$d en línea / %2$d mostrados / %3$d total)</string>
     <string name="react">Reaccionar</string>
     <string name="disconnect">Desconectar</string>
     <string name="scanning_bluetooth">Buscando dispositivos Bluetooth…</string>
@@ -757,12 +814,24 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="security_icon_help_show_less">Mostrar estado actual</string>
     <string name="security_icon_help_dismiss">Descartar</string>
     <string name="confirm_delete_node">¿Sguro que desea eliminar este nodo?</string>
+    <string name="security_icon_badge_warning_description">Insignia de advertencia</string>
+    <string name="overflow_menu">Menú adicional</string>
+    <string name="security_icon_insecure_no_precise">Canal inseguro, no preciso</string>
+    <string name="security_icon_help_title_all">Significados de seguridad del canal</string>
+    <string name="security_icon_help_show_all">Mostrar todos los significados</string>
+    <string name="forget_connection">Olvidar conexión</string>
+    <string name="confirm_forget_connection">¿Estás seguro de que quieres olvidar esta conexión?</string>
     <string name="replying_to">Respondiendo a %1$s</string>
     <string name="cancel_reply">Cancelar respuesta</string>
     <string name="delete_messages_title">¿Eliminar mensajes?</string>
     <string name="clear_selection">Limpiar selección</string>
     <string name="message_input_label">Mensaje</string>
     <string name="type_a_message">Escribe un mensaje</string>
+    <string name="pax_metrics_log">Registro de métricas PAX</string>
+    <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">No hay registros de métricas PAX disponibles.</string>
+    <string name="routing_error_rate_limit_exceeded">Límite de tasa excedido. Por favor, inténtalo de nuevo más tarde.</string>
+    <string name="view_release">Ver versión</string>
     <string name="wifi_devices">Dispositivos WiFi</string>
     <string name="ble_devices">Dispositivos BLE</string>
     <string name="bluetooth_paired_devices">Dispositivos emparejados</string>
@@ -782,12 +851,24 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="create_your_own_networks">Crea tus propias redes</string>
     <string name="track_and_share_locations">Rastrear y comparte ubicaciones</string>
     <string name="share_your_location_in_real_time">Comparte tu ubicación en tiempo real y mantén tu grupo coordinado con las características integradas del GPS.</string>
+    <string name="communicate_off_the_grid">Comunícate fuera de la red con tus amigos y comunidad sin servicio celular.</string>
+    <string name="easily_set_up_private_mesh_networks">Configura fácilmente redes mesh privadas para una comunicación segura y confiable en áreas remotas.</string>
     <string name="app_notifications">Notificaciones de la app</string>
     <string name="incoming_messages">Mensajes entrantes</string>
     <string name="new_nodes">Nuevos nodos</string>
     <string name="notifications_for_newly_discovered_nodes">Notificaciones para nodos recién descubiertos.</string>
+    <string name="notifications_for_channel_and_direct_messages">Notificaciones para mensajes de canal y directos.</string>
     <string name="low_battery">Batería baja</string>
+    <string name="notifications_for_low_battery_alerts">Notificaciones para alertas de batería baja del dispositivo conectado.</string>
     <string name="configure_notification_permissions">Configurar permisos de notificación</string>
+    <string name="critical_alerts_description">Los paquetes seleccionados como críticos ignorarán el interruptor de silencio y la configuración de No Molestar en el centro de notificaciones del sistema operativo.</string>
+    <string name="critical_alerts_dnd_request_text">Para asegurarte de recibir alertas críticas, como
+        mensajes SOS, incluso cuando tu dispositivo está en modo \"No Molestar\", necesitas otorgar un permiso especial. Por favor, habilita esto en la configuración de notificaciones.
+    </string>
+    <string name="mesh_map_location">Ubicación en el mapa mesh</string>
+    <string name="mesh_map_location_description">Habilita el punto de ubicación azul para tu teléfono en el mapa de la malla.</string>
+    <string name="distance_measurements">Mediciones de distancia</string>
+    <string name="distance_measurements_description">Muestra la distancia entre tu teléfono y otros nodos Meshtastic posicionados.</string>
     <string name="phone_location">Ubicación del teléfono</string>
     <string name="phone_location_description">Meshtastic utiliza la ubicación de tu teléfono para habilitar varias características. Puedes actualizar los permisos de ubicación en cualquier momento desde la configuración.</string>
     <string name="share_location">Compartir ubicación</string>
@@ -804,6 +885,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="notification_permissions_description">Meshtastic utiliza las notificaciones para mantenerte actualizado sobre nuevos mensajes y otros eventos importantes. Puedes actualizar tus permisos de notificación en cualquier momento desde la configuración.</string>
     <string name="next">Siguiente</string>
     <string name="grant_permissions">Otorgar permisos</string>
+    <string name="nodes_queued_for_deletion">%1$d nodos en cola para eliminación:</string>
     <string name="clean_node_database_description">Precaución: Esto elimina los nodos de las bases de datos en la aplicación y en el dispositivo.\nLas selecciones son aditivas.</string>
     <string name="connecting_to_device">Conectándose al dispositivo</string>
     <string name="map_type_normal">Normal</string>
@@ -826,15 +908,25 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="url_cannot_be_empty">URL no puede estar vacío.</string>
     <string name="url_must_contain_placeholders">La URL debe contener marcadores de posición.</string>
     <string name="url_template">Plantilla de URL</string>
+    <string name="manage_custom_tile_sources">Administrar fuentes de mosaicos personalizadas</string>
+    <string name="add_custom_tile_source">Agregar fuente de mosaicos personalizada</string>
+    <string name="no_custom_tile_sources_found">No se encontraron fuentes de mosaicos personalizadas</string>
+    <string name="edit_custom_tile_source">Editar fuente de mosaicos personalizada</string>
+    <string name="delete_custom_tile_source">Eliminar fuente de mosaicos personalizada</string>
+    <string name="track_point">punto de seguimiento</string>
+    <string name="app_settings">Aplicación</string>
     <string name="app_version">Versión</string>
     <string name="channel_features">Características del canal</string>
     <string name="location_sharing">Compartir ubicación</string>
     <string name="periodic_position_broadcast">Transmisión periódica de posición</string>
     <string name="uplink_feature_description">Los mensajes de la malla se enviarán a la internet pública a través de la puerta de enlace configurada de cualquier nodo.</string>
+    <string name="downlink_feature_description">Los mensajes de una puerta de enlace de internet pública se reenvían a la malla local. Debido a la política de cero saltos, el tráfico del servidor MQTT predeterminado no se propagará más allá de este dispositivo.</string>
     <string name="icon_meanings">Significado de los iconos</string>
     <string name="secondary_channel_position_feature">Deshabilitar la posición en el canal principal permite las emisiones de posición periódica en el primer canal secundario con la posición habilitada, de lo contrario se requiere una solicitud de posición manual.</string>
     <string name="device_configuration">Configuración del dispositivo</string>
     <string name="device_telemetry_enabled">Enviar telemetría del dispositivo</string>
+    <string name="device_telemetry_enabled_summary">Habilitar/Deshabilitar el módulo de telemetría del dispositivo para enviar métricas a la malla. Estos son valores nominales. Las mallas congestionadas se ajustarán automáticamente a intervalos más largos según el número de nodos en línea.</string>
+    <string name="remotely_administrating">"[Remoto] %1$s"</string>
     <string name="any">Cualquiera</string>
     <string name="one_hour">1 hora</string>
     <string name="eight_hours">8 horas</string>
@@ -846,11 +938,89 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="system_settings">Ajustes del sistema</string>
     <string name="no_local_stats">No hay estadísticas disponibles</string>
     <string name="analytics_notice">Se recopilan analíticas de uso para ayudarnos a mejorar la aplicación Android (¡gracias!), recibiremos información anónima sobre el comportamiento del usuario. Esto incluye reportes de fallos, pantallas utilizadas en la aplicación, etc.</string>
+    <string name="analytics_platforms">"Plataformas de analíticas: "</string>
     <string name="for_more_information_see_our_privacy_policy">Para más información, consulte nuestra política de privacidad.</string>
+    <string name="unset">Sin configurar - 0</string>
+    <string name="relayed_by">Retransmitido por: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Escuchado %1$d Relay</item>
+        <item quantity="other">Escuchados %1$d Relays</item>
+    </plurals>
     <string name="preserve_favorites">¿Conservar favoritos?</string>
     <string name="usb_devices">Dispositivos USB</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">Actualización de firmware</string>
+    <string name="firmware_update_checking">Buscando actualizaciones...</string>
+    <string name="firmware_update_device">Dispositivo: %1$s</string>
+    <string name="firmware_update_currently_installed">Instalado actualmente: %1$s</string>
+    <string name="firmware_update_latest">Última versión: %1$s</string>
+    <string name="firmware_update_stable">Estable</string>
+    <string name="firmware_update_alpha">Alfa</string>
+    <string name="firmware_update_disconnect_warning">Nota: Esto desconectará temporalmente tu dispositivo durante la actualización.</string>
+    <string name="firmware_update_downloading">Descargando firmware... %1$d%</string>
+    <string name="firmware_update_error">Error: %1$s</string>
+    <string name="firmware_update_retry">Reintentar</string>
+    <string name="firmware_update_success">¡Actualización exitosa!</string>
+    <string name="firmware_update_done">Hecho</string>
+    <string name="firmware_update_starting_dfu">Iniciando DFU...</string>
+    <string name="firmware_update_updating">Actualizando... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Modelo de hardware desconocido: %1$d</string>
+    <string name="firmware_update_invalid_address">El dispositivo conectado no es un dispositivo BLE válido o la dirección es desconocida (%1$s).</string>
+    <string name="firmware_update_no_device">No hay dispositivo conectado</string>
+    <string name="firmware_update_not_found_in_release">No se pudo encontrar firmware para %1$s en la versión.</string>
+    <string name="firmware_update_extracting">Extrayendo firmware...</string>
+    <string name="firmware_update_starting_service">Desconectando para iniciar servicio DFU...</string>
     <string name="firmware_update_failed">Actualización fallida</string>
+    <string name="firmware_update_hang_tight">Espera un momento, estamos trabajando en ello...</string>
+    <string name="firmware_update_keep_device_close">Mantén tu dispositivo cerca de tu teléfono.</string>
+    <string name="firmware_update_do_not_close">No cierres la aplicación.</string>
+    <string name="firmware_update_almost_there">Casi listo...</string>
+    <string name="firmware_update_taking_a_while">Esto puede tardar un minuto...</string>
+    <string name="firmware_update_select_file">Seleccionar archivo local</string>
+    <string name="firmware_update_unknown_release">Versión remota desconocida</string>
+    <string name="firmware_update_disclaimer_title">Advertencia de actualización</string>
+    <string name="firmware_update_disclaimer_text">Estás a punto de instalar un nuevo firmware en tu dispositivo. Este proceso conlleva riesgos.\\n\\n• Asegúrate de que tu dispositivo esté cargado.\\n• Mantén el dispositivo cerca de tu teléfono.\\n• No cierres la aplicación durante la actualización.\\n\\nVerifica que has seleccionado el firmware correcto para tu hardware.</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy dice: \"¡Mantén tu escalera a mano!\"</string>
+    <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Reiniciando a DFU...</string>
+    <string name="firmware_update_waiting_for_device">Esperando dispositivo DFU...</string>
+    <string name="firmware_update_copying">Copiando firmware...</string>
+    <string name="firmware_update_save_dfu_file">Por favor, guarda el archivo .uf2 en la unidad DFU de tu dispositivo.</string>
+    <string name="firmware_update_flashing">Instalando en el dispositivo, por favor espera...</string>
+    <string name="firmware_update_method_usb">Transferencia de archivos USB</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">Actualizar vía %1$s</string>
+    <string name="firmware_update_usb_instruction_title">Seleccionar unidad USB DFU</string>
+    <string name="firmware_update_usb_instruction_text">Tu dispositivo se ha reiniciado en modo DFU y debería aparecer como una unidad USB (por ejemplo, RAK4631).\\n\\nCuando se abra el selector de archivos, por favor selecciona la raíz de esa unidad para guardar el archivo de firmware.</string>
+    <string name="firmware_update_usb_bootloader_warning">%1$s generalmente viene con un bootloader que no soporta actualizaciones OTA. Es posible que necesites instalar un bootloader compatible con OTA por USB antes de actualizar por OTA.</string>
+    <string name="learn_more">Más información</string>
+    <string name="firmware_update_rak4631_bootloader_hint">Para RAK WisBlock RAK4631, usa la herramienta DFU serial del fabricante (por ejemplo, adafruit-nrfutil dfu serial con el archivo .zip del bootloader proporcionado). Copiar solo el archivo .uf2 no actualizará el bootloader.</string>
+    <string name="dont_show_again_for_device">No mostrar de nuevo para este dispositivo</string>
     <string name="interval_unset">Sin configurar</string>
+    <string name="interval_always_on">Siempre encendido</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 segundo</item>
+        <item quantity="other">%1$d segundos</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 minuto</item>
+        <item quantity="other">%1$d minutos</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 hora</item>
+        <item quantity="other">%1$d horas</item>
+    </plurals>
+
     <!-- Compass -->
+    <string name="compass_title">Brújula</string>
+    <string name="open_compass">Abrir brújula</string>
+    <string name="compass_distance">Distancia: %1$s</string>
+    <string name="compass_bearing">Rumbo: %1$s</string>
+    <string name="compass_bearing_na">Rumbo: N/D</string>
+    <string name="compass_no_magnetometer">Este dispositivo no tiene sensor de brújula. El rumbo no está disponible.</string>
+    <string name="compass_no_location_permission">Se requiere permiso de ubicación para mostrar distancia y rumbo.</string>
+    <string name="compass_location_disabled">El proveedor de ubicación está deshabilitado. Activa los servicios de ubicación.</string>
+    <string name="compass_no_location_fix">Esperando una señal GPS para calcular distancia y rumbo.</string>
+    <string name="compass_uncertainty">Área estimada: ±%1$s (±%2$s)</string>
+    <string name="compass_uncertainty_unknown">Área estimada: precisión desconocida</string>
 </resources>
