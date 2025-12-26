@@ -17,7 +17,9 @@
 
 package org.meshtastic.buildlogic
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
@@ -30,34 +32,29 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.FileInputStream
-import java.util.Properties
 
 /**
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
-    val configPropertiesFile = rootProject.file("config.properties")
-    val configProperties = Properties()
-
-    if (configPropertiesFile.exists()) {
-        FileInputStream(configPropertiesFile).use { configProperties.load(it) }
-    }
 
     commonExtension.apply {
-        compileSdk = configProperties.get("COMPILE_SDK").toString().toInt()
-
-        defaultConfig {
-            minSdk = configProperties.get("MIN_SDK").toString().toInt()
+        defaultConfig.apply {
+            compileSdk = configProperties["COMPILE_SDK"].toString().toInt()
+            minSdk = configProperties["MIN_SDK"].toString().toInt()
         }
-
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_21
-            targetCompatibility = JavaVersion.VERSION_21
-            isCoreLibraryDesugaringEnabled = true
-        }
+    }
+    (commonExtension as? ApplicationExtension)?.compileOptions?.apply {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+        isCoreLibraryDesugaringEnabled = true
+    }
+    (commonExtension as? LibraryExtension)?.compileOptions?.apply {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+        isCoreLibraryDesugaringEnabled = true
     }
 
     configureKotlin<KotlinAndroidProjectExtension>()
