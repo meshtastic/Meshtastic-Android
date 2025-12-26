@@ -31,7 +31,13 @@ interface MeshServiceNotifications {
 
     fun updateServiceStateNotification(summaryString: String?, telemetry: TelemetryProtos.Telemetry?): Notification
 
-    fun updateMessageNotification( contactKey: String, name: String, message: String, isBroadcast: Boolean, channelName: String?)
+    fun updateMessageNotification(
+        contactKey: String,
+        name: String,
+        message: String,
+        isBroadcast: Boolean,
+        channelName: String?,
+    )
 
     fun showAlertNotification(contactKey: String, name: String, alert: String)
 

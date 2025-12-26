@@ -271,7 +271,13 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         return notification
     }
 
-    override fun updateMessageNotification( contactKey: String, name: String, message: String, isBroadcast: Boolean, channelName: String?) {
+    override fun updateMessageNotification(
+        contactKey: String,
+        name: String,
+        message: String,
+        isBroadcast: Boolean,
+        channelName: String?,
+    ) {
         val notification = createMessageNotification(contactKey, name, message, isBroadcast, channelName)
         // Use a consistent, unique ID for each message conversation.
         notificationManager.notify(contactKey.hashCode(), notification)
@@ -345,12 +351,11 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         val builder = commonBuilder(type, createOpenMessageIntent(contactKey))
 
         val person = Person.Builder().setName(name).build()
-        var style = NotificationCompat.MessagingStyle(person)
-        if (channelName != null) {
-            style = style.setGroupConversation(true).setConversationTitle(channelName)
-        }
-
-        style = style.addMessage(message, System.currentTimeMillis(), person)
+        val style =
+            NotificationCompat.MessagingStyle(person)
+                .setGroupConversation(channelName != null)
+                .setConversationTitle(channelName)
+                .addMessage(message, System.currentTimeMillis(), person)
 
         builder
             .setCategory(Notification.CATEGORY_MESSAGE)
