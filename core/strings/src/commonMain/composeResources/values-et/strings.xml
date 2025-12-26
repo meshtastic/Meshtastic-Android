@@ -274,6 +274,7 @@
     <string name="quick_chat_instant">Saada kohe</string>
     <string name="quick_chat_show">Kuva kiirsõnumite valik</string>
     <string name="quick_chat_hide">Peida kiirsõnumite valik</string>
+    <string name="quick_chat_show_label">Näita kiirvestlust</string>
     <string name="factory_reset">Tehasesätted</string>
     <string name="bluetooth_disabled">Sinihammas keelatud. Luba see sätetes.</string>
     <string name="open_settings">Ava seaded</string>
@@ -325,6 +326,7 @@
     <string name="mute_status_unmuted">Mitte vaigistatud</string>
     <string name="mute_status_muted_for_days">Vaigistatud %1d päeva, %.1f tundi</string>
     <string name="mute_status_muted_for_hours">Vaigistatud %.1f tundi</string>
+    <string name="mute_status_label">Vaigistatud olek</string>
     <string name="replace">Asenda</string>
     <string name="wifi_qr_code_scan">Skaneeri WiFi QR kood</string>
     <string name="wifi_qr_code_error">Vigane WiFi tõendi QR koodi vorming</string>
@@ -716,6 +718,15 @@
     <string name="import_known_shared_contact_text">Hoiatus: See kontakt on olemas, importimine kirjutab eelmise kontakti kirje üle.</string>
     <string name="public_key_changed">Avalik võti muudetud</string>
     <string name="import_label">Lae</string>
+    <string name="request">Taotlus</string>
+    <string name="request_neighbor_info">Naabriinfo (2.7.15+)</string>
+    <string name="request_telemetry">Taotle telemeetriat</string>
+    <string name="request_device_metrics">Seadme mõõdikud</string>
+    <string name="request_environment_metrics">Keskkonnamõõdikud</string>
+    <string name="request_air_quality_metrics">Õhukvaliteedi mõõdikud</string>
+    <string name="request_power_metrics">Võimsusnäitajad</string>
+    <string name="request_local_stats">Kohalik statistika</string>
+    <string name="request_metadata">Metaandmed</string>
     <string name="actions">Toimingud</string>
     <string name="firmware">Püsivara</string>
     <string name="use_12h_format">Kasuta 12 tunni formaati</string>
