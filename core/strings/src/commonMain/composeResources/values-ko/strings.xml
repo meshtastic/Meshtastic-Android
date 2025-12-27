@@ -19,6 +19,7 @@
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">필터</string>
     <string name="desc_node_filter_clear">노드 필터 지우기</string>
+    <string name="node_filter_title">필터</string>
     <string name="node_filter_include_unknown">미확인 노드 포함</string>
     <string name="node_filter_only_online">오프라인 노드 숨기기</string>
     <string name="node_filter_only_direct">직접 연결된 노드만 보기</string>
@@ -70,6 +71,7 @@
     <string name="rebroadcast_mode_known_only_desc">LOCAL_ONLY와 유사하게 외부 메쉬에서 관찰된 메시지를 무시하지만, 추가적으로 알려진 목록에 없는 노드의 메시지도 무시합니다.</string>
     <string name="rebroadcast_mode_none">없음</string>
     <string name="rebroadcast_mode_none_desc">SENSOR, TRACKER 및 TAK_TRACKER role에서만 허용되며 CLIENT_MUTE role과 마찬가지로 모든 재브로드캐스트를 금지합니다.</string>
+    <string name="rebroadcast_mode_core_portnums_only">핵심 포트 번호만 허용</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">TAK, RangeTest, PaxCounter 등과 같은 비표준 포트 번호의 패킷을 무시합니다. NodeInfo, Text, Position, Telemetry 및 Routing과 같은 표준 포트 번호가 있는 패킷만 재브로드캐스트.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">가속도계가 있는 장치를 두 번 탭하여 사용자 버튼과 동일한 동작.</string>
     <string name="config_device_ledHeartbeatEnabled_summary">장치에서 깜빡이는 LED를 제어합니다. 대부분 장치의 경우 최대 4개의 LED 중 하나를 제어할 수 있지만 충전 상태 LED와 GPS 상태 LED는 제어할 수 없습니다.</string>
@@ -520,7 +522,6 @@
     <string name="import_known_shared_contact_text">경고: 이 연락처는 이미 등록되어 있습니다. 내려받으면 이전 연락처 정보가 덮어쓰어질 수 있습니다.</string>
     <string name="public_key_changed">공개 키 변경됨</string>
     <string name="import_label">불러오기</string>
-    <string name="request_metadata">메타데이터 요청</string>
     <string name="actions">작업</string>
     <string name="firmware">펌웨어</string>
     <string name="use_12h_format">12시간제 보기</string>

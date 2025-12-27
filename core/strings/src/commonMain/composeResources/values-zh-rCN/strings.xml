@@ -708,7 +708,8 @@
     <string name="import_known_shared_contact_text">警告：此联系人已知，导入将覆盖之前的联系人信息。</string>
     <string name="public_key_changed">公钥已更改</string>
     <string name="import_label">导入</string>
-    <string name="request_metadata">请求元数据</string>
+    <string name="request_device_metrics">设备指标</string>
+    <string name="request_environment_metrics">传感器指标</string>
     <string name="actions">操作</string>
     <string name="firmware">固件</string>
     <string name="use_12h_format">使用 12 小时制格式</string>

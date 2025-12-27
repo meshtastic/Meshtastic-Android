@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.feature.node.component.NodeMenuAction
@@ -62,6 +63,7 @@ constructor(
                 _lastRequestNeighborsTime.value = System.currentTimeMillis()
             }
             is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
+            is NodeMenuAction.RequestTelemetry -> requestTelemetry(action.node.num, action.type)
             is NodeMenuAction.TraceRoute -> {
                 requestTraceroute(action.node.num)
                 _lastTraceRouteTime.value = System.currentTimeMillis()
@@ -133,6 +135,16 @@ constructor(
             serviceRepository.meshService?.requestPosition(destNum, position)
         } catch (ex: RemoteException) {
             Timber.e("Request position error: ${ex.message}")
+        }
+    }
+
+    private fun requestTelemetry(destNum: Int, type: TelemetryType) {
+        Timber.i("Requesting telemetry for '$destNum'")
+        try {
+            val packetId = serviceRepository.meshService?.packetId ?: return
+            serviceRepository.meshService?.requestTelemetry(packetId, destNum, type.ordinal)
+        } catch (ex: RemoteException) {
+            Timber.e("Request telemetry error: ${ex.message}")
         }
     }
 

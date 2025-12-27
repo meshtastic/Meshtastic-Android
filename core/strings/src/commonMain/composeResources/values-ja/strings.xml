@@ -506,7 +506,6 @@
     <string name="import_known_shared_contact_text">警告: この連絡先は登録済です。インポートすると以前の連絡先情報が上書きされます。</string>
     <string name="public_key_changed">公開鍵が変更されました</string>
     <string name="import_label">インポート</string>
-    <string name="request_metadata">メタデータのリクエスト</string>
     <string name="actions">アクション</string>
     <string name="firmware">ファームウェア</string>
     <string name="use_12h_format">12時間の時計形式を使用</string>

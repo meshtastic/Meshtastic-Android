@@ -428,7 +428,6 @@
     <string name="unmessageable">Niet berichtbaar</string>
     <string name="public_key_changed">Publieke sleutel gewijzigd</string>
     <string name="import_label">Importeer</string>
-    <string name="request_metadata">Metadata opvragen</string>
     <string name="actions">Acties</string>
     <string name="firmware">Firmware</string>
     <string name="bottom_nav_settings">Instellingen</string>

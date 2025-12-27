@@ -527,7 +527,6 @@
     <string name="import_known_shared_contact_text">Uyarı: Bu kişi biliniyor, içe aktarma işlemi önceki kişi bilgilerini üzerine yazacaktır.</string>
     <string name="public_key_changed">Açık Anahtar Değiştirildi</string>
     <string name="import_label">İçeri aktar</string>
-    <string name="request_metadata">İstek Meta Verisi</string>
     <string name="actions">işlemler</string>
     <string name="firmware">Yazılım</string>
     <string name="use_12h_format">12h saat formatını kullan</string>

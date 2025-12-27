@@ -274,6 +274,7 @@
     <string name="quick_chat_instant">Sofort senden</string>
     <string name="quick_chat_show">Schnell-Chat Menü anzeigen</string>
     <string name="quick_chat_hide">Schnell-Chat-Menü ausblenden</string>
+    <string name="quick_chat_show_label">Schnellchat anzeigen</string>
     <string name="factory_reset">Auf Werkseinstellungen zurücksetzen</string>
     <string name="bluetooth_disabled">Bluetooth ist deaktiviert. Bitte aktivieren Sie es in Ihren Geräteeinstellungen.</string>
     <string name="open_settings">Einstellungen öffnen</string>
@@ -325,6 +326,7 @@
     <string name="mute_status_unmuted">Nicht stumm</string>
     <string name="mute_status_muted_for_days">Stumm für %1d Tage, %.1f Stunden</string>
     <string name="mute_status_muted_for_hours">Stumm für %.1f Stunden</string>
+    <string name="mute_status_label">Stummschalten</string>
     <string name="replace">Ersetzen</string>
     <string name="wifi_qr_code_scan">WiFi QR-Code scannen</string>
     <string name="wifi_qr_code_error">Ungültiges QR-Code-Format für WiFi-Berechtigung</string>
@@ -716,7 +718,15 @@
     <string name="import_known_shared_contact_text">Warnung: Dieser Kontakt ist bekannt, beim Importieren werden die vorherigen Kontaktinformationen überschreiben.</string>
     <string name="public_key_changed">Öffentlicher Schlüssel geändert</string>
     <string name="import_label">Importieren</string>
-    <string name="request_metadata">Metadaten anfordern</string>
+    <string name="request">Anfordern</string>
+    <string name="request_neighbor_info">Nachbarinfo (2.7.15+)</string>
+    <string name="request_telemetry">Telemetrie anfordern</string>
+    <string name="request_device_metrics">Gerätedaten</string>
+    <string name="request_environment_metrics">Umweltdaten</string>
+    <string name="request_air_quality_metrics">Luftqualität</string>
+    <string name="request_power_metrics">Energiedaten</string>
+    <string name="request_local_stats">Lokale Statistik</string>
+    <string name="request_metadata">Metadaten</string>
     <string name="actions">Aktionen</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">12h Uhrformat verwenden</string>

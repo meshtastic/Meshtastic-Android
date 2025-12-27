@@ -37,29 +37,38 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.formatAgo
+import org.meshtastic.core.model.util.metersIn
+import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.strings.last_position_update
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import timber.log.Timber
 import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LinkedCoordinatesItem(node: Node) {
+fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.METRIC) {
     val context = LocalContext.current
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
 
     val ago = formatAgo(node.position.time)
     val coordinates = GPSFormat.toDec(node.latitude, node.longitude)
+    val elevationText =
+        node.validPosition?.altitude?.let { altitude ->
+            val suffix = stringResource(Res.string.elevation_suffix)
+            " • ${altitude.metersIn(displayUnits).toString(displayUnits)} $suffix"
+        } ?: ""
 
     BasicListItem(
         text = stringResource(Res.string.last_position_update),
         leadingIcon = Icons.Default.LocationOn,
-        supportingText = "$ago • $coordinates",
+        supportingText = "$ago • $coordinates$elevationText",
         trailingContent = Icons.AutoMirrored.Rounded.KeyboardArrowRight.icon(),
         onClick = {
             val label = URLEncoder.encode(node.user.longName, "utf-8")

@@ -81,6 +81,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
 import org.meshtastic.core.model.util.anonymize
@@ -373,11 +374,18 @@ class MeshService : Service() {
 
                 else -> return
             }
+
         serviceNotifications.updateMessageNotification(
             contactKey,
             getSenderName(dataPacket),
             message,
             isBroadcast = dataPacket.to == DataPacket.ID_BROADCAST,
+            channelName =
+            if (dataPacket.to == DataPacket.ID_BROADCAST) {
+                channelSet.settingsList[dataPacket.channel].name
+            } else {
+                null
+            },
         )
     }
 
@@ -2925,6 +2933,36 @@ class MeshService : Service() {
                         getDeviceConnectionStatusRequest = true
                     },
                 )
+            }
+
+            override fun requestTelemetry(requestId: Int, destNum: Int, type: Int) = toRemoteExceptions {
+                if (destNum != myNodeNum) {
+                    val telemetryRequest = telemetry {
+                        when (type) {
+                            TelemetryType.ENVIRONMENT.ordinal ->
+                                environmentMetrics = TelemetryProtos.EnvironmentMetrics.getDefaultInstance()
+                            TelemetryType.AIR_QUALITY.ordinal ->
+                                airQualityMetrics = TelemetryProtos.AirQualityMetrics.getDefaultInstance()
+                            TelemetryType.POWER.ordinal ->
+                                powerMetrics = TelemetryProtos.PowerMetrics.getDefaultInstance()
+                            TelemetryType.LOCAL_STATS.ordinal ->
+                                localStats = TelemetryProtos.LocalStats.getDefaultInstance()
+                            TelemetryType.DEVICE.ordinal ->
+                                deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
+                            else -> deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
+                        }
+                    }
+                    packetHandler.sendToRadio(
+                        newMeshPacketTo(destNum).buildMeshPacket(
+                            id = requestId,
+                            channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                        ) {
+                            portnumValue = Portnums.PortNum.TELEMETRY_APP_VALUE
+                            payload = telemetryRequest.toByteString()
+                            wantResponse = true
+                        },
+                    )
+                }
             }
         }
 }

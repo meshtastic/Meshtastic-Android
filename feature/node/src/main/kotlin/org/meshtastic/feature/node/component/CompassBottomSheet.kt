@@ -68,6 +68,7 @@ import org.meshtastic.core.strings.compass_no_magnetometer
 import org.meshtastic.core.strings.compass_title
 import org.meshtastic.core.strings.compass_uncertainty
 import org.meshtastic.core.strings.compass_uncertainty_unknown
+import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.strings.exchange_position
 import org.meshtastic.core.strings.last_position_update
 import org.meshtastic.core.ui.theme.AppTheme
@@ -121,14 +122,27 @@ fun CompassSheetContent(
                         ?: stringResource(Res.string.compass_bearing_na),
                     style = MaterialTheme.typography.bodyLarge,
                 )
-                Text(
-                    text =
-                    uiState.errorRadiusText?.let { radius ->
-                        val angle = uiState.angularErrorDeg?.let { "%.0f°".format(it) } ?: "?"
-                        stringResource(Res.string.compass_uncertainty, radius, angle)
-                    } ?: stringResource(Res.string.compass_uncertainty_unknown),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text =
+                        uiState.errorRadiusText?.let { radius ->
+                            val angle = uiState.angularErrorDeg?.let { "%.0f°".format(it) } ?: "?"
+                            stringResource(Res.string.compass_uncertainty, radius, angle)
+                        } ?: stringResource(Res.string.compass_uncertainty_unknown),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    uiState.targetAltitude?.let { altitude ->
+                        ElevationInfo(
+                            altitude = altitude,
+                            system = uiState.displayUnits,
+                            suffix = stringResource(Res.string.elevation_suffix),
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
             }
         }
 
