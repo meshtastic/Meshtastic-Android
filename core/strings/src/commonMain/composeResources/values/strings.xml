@@ -16,7 +16,7 @@
   -->
 
 <resources>
-    // Language tags native names (not available via .getDisplayLanguage)
+    <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fr_HT" translatable="false">Kreyòl ayisyen</string>
     <string name="pt_BR" translatable="false">Português do Brasil</string>
     <string name="zh_CN" translatable="false">简体中文</string>
@@ -513,6 +513,9 @@
     <string name="messages">Messages</string>
     <string name="device_db_cache_limit">Device DB cache limit</string>
     <string name="device_db_cache_limit_summary">Max device databases to keep on this phone</string>
+    <string name="log_retention_days">MeshLog retention period</string>
+    <string name="log_retention_days_summary">Choose how long to keep logs. Select Never to keep all logs.</string>
+    <string name="log_retention_never">Never delete logs</string>
     <string name="detection_sensor_config">Detection Sensor Config</string>
     <string name="detection_sensor_enabled">Detection Sensor enabled</string>
     <string name="minimum_broadcast_seconds">Minimum broadcast (seconds)</string>

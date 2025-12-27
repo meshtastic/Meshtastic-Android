@@ -37,6 +37,8 @@ import org.meshtastic.core.prefs.map.MapTileProviderPrefs
 import org.meshtastic.core.prefs.map.MapTileProviderPrefsImpl
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.mesh.MeshPrefsImpl
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefsImpl
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.RadioPrefsImpl
 import org.meshtastic.core.prefs.ui.UiPrefs
@@ -83,6 +85,10 @@ internal annotation class RadioSharedPreferences
 @Retention(AnnotationRetention.BINARY)
 internal annotation class UiSharedPreferences
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+internal annotation class MeshLogSharedPreferences
+
 @Suppress("TooManyFunctions")
 @InstallIn(SingletonComponent::class)
 @Module
@@ -99,6 +105,8 @@ interface PrefsModule {
     @Binds fun bindMapTileProviderPrefs(mapTileProviderPrefsImpl: MapTileProviderPrefsImpl): MapTileProviderPrefs
 
     @Binds fun bindMeshPrefs(meshPrefsImpl: MeshPrefsImpl): MeshPrefs
+
+    @Binds fun bindMeshLogPrefs(meshLogPrefsImpl: MeshLogPrefsImpl): MeshLogPrefs
 
     @Binds fun bindRadioPrefs(radioPrefsImpl: RadioPrefsImpl): RadioPrefs
 
@@ -159,5 +167,11 @@ interface PrefsModule {
         @UiSharedPreferences
         fun provideUiSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+
+        @Provides
+        @Singleton
+        @MeshLogSharedPreferences
+        fun provideMeshLogSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("meshlog-prefs", Context.MODE_PRIVATE)
     }
 }

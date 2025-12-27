@@ -93,6 +93,9 @@ import org.meshtastic.core.strings.export_data_csv
 import org.meshtastic.core.strings.import_configuration
 import org.meshtastic.core.strings.intro_show
 import org.meshtastic.core.strings.location_disabled
+import org.meshtastic.core.strings.log_retention_days
+import org.meshtastic.core.strings.log_retention_days_summary
+import org.meshtastic.core.strings.log_retention_never
 import org.meshtastic.core.strings.modules_already_unlocked
 import org.meshtastic.core.strings.modules_unlocked
 import org.meshtastic.core.strings.preferences_language
@@ -364,6 +367,24 @@ fun SettingsScreen(
                     onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
                     summary = stringResource(Res.string.device_db_cache_limit_summary),
                 )
+
+                // MeshLog retention period (App setting)
+                val retentionDays = settingsViewModel.meshLogRetentionDays.collectAsStateWithLifecycle().value
+                @Suppress("MagicNumber")
+                val retentionItems =
+                    listOf(0L to stringResource(Res.string.log_retention_never)) +
+                        listOf(1, 7, 14, 30, 60, 90, 180, 365).map { days ->
+                            days.toLong() to if (days == 1) "1 day" else "$days days"
+                        }
+                DropDownPreference(
+                    title = stringResource(Res.string.log_retention_days),
+                    enabled = true,
+                    items = retentionItems,
+                    selectedItem = retentionDays.toLong(),
+                    onItemSelected = { selected -> settingsViewModel.setMeshLogRetentionDays(selected.toInt()) },
+                    summary = stringResource(Res.string.log_retention_days_summary),
+                )
+
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
                 val nodeName = ourNode?.user?.shortName ?: ""
 
