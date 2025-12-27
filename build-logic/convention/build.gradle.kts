@@ -40,6 +40,9 @@ kotlin {
 }
 
 dependencies {
+    // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
+    implementation(files(libs.javaClass.protectionDomain.codeSource.location))
+
     compileOnly(libs.android.gradleApiPlugin)
     compileOnly(libs.serialization.gradlePlugin)
     compileOnly(libs.android.tools.common)

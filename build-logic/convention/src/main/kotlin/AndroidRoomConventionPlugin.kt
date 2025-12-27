@@ -22,6 +22,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.meshtastic.buildlogic.library
 import org.meshtastic.buildlogic.libs
 
 class AndroidRoomConventionPlugin : Plugin<Project> {
@@ -43,9 +44,9 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
-                "implementation"(libs.findLibrary("androidx.room.runtime").get())
-                "ksp"(libs.findLibrary("androidx.room.compiler").get())
-                "androidTestImplementation"(libs.findLibrary("androidx-room-testing").get())
+                "implementation"(libs.library("androidx.room.runtime"))
+                "ksp"(libs.library("androidx.room.compiler"))
+                "androidTestImplementation"(libs.library("androidx-room-testing"))
             }
         }
     }

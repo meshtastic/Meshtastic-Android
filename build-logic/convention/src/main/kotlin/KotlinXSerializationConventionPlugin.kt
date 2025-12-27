@@ -19,6 +19,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.dependencies
+import org.meshtastic.buildlogic.library
 import org.meshtastic.buildlogic.libs
 
 class KotlinXSerializationConventionPlugin : Plugin<Project> {
@@ -27,7 +28,7 @@ class KotlinXSerializationConventionPlugin : Plugin<Project> {
             apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
             dependencies {
-                "implementation"(libs.findLibrary("kotlinx-serialization-core").get())
+                "implementation"(libs.library("kotlinx-serialization-core"))
             }
         }
     }
