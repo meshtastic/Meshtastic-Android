@@ -145,6 +145,14 @@ constructor(
     suspend fun deleteLogs(nodeNum: Int, portNum: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteLogs(nodeNum, portNum) }
 
+    @Suppress("MagicNumber")
+    suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
+        if (retentionDays <= 0) return@withContext
+
+        val cutoffTimestamp = System.currentTimeMillis() - (retentionDays * 24 * 60 * 60 * 1000L)
+        dbManager.currentDb.value.meshLogDao().deleteOlderThan(cutoffTimestamp)
+    }
+
     companion object {
         private const val MAX_ITEMS = 500
         private const val MAX_MESH_PACKETS = 10000

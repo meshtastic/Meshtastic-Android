@@ -47,6 +47,8 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefsImpl
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
@@ -82,6 +84,7 @@ constructor(
     private val databaseManager: DatabaseManager,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val radioPrefs: RadioPrefs,
+    private val meshLogPrefs: MeshLogPrefs,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
@@ -138,6 +141,16 @@ constructor(
     fun setDbCacheLimit(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
         databaseManager.setCacheLimit(clamped)
+    }
+
+    // MeshLog retention period (bounded by MeshLogPrefsImpl constants)
+    private val _meshLogRetentionDays = MutableStateFlow(meshLogPrefs.retentionDays)
+    val meshLogRetentionDays: StateFlow<Int> = _meshLogRetentionDays.asStateFlow()
+
+    fun setMeshLogRetentionDays(days: Int) {
+        val clamped = days.coerceIn(MeshLogPrefsImpl.MIN_RETENTION_DAYS, MeshLogPrefsImpl.MAX_RETENTION_DAYS)
+        meshLogPrefs.retentionDays = clamped
+        _meshLogRetentionDays.value = clamped
     }
 
     fun setProvideLocation(value: Boolean) {

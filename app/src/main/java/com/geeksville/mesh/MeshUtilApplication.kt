@@ -18,17 +18,25 @@
 package com.geeksville.mesh
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.geeksville.mesh.worker.MeshLogCleanupWorker
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 /**
  * The main application class for Meshtastic.
@@ -38,16 +46,40 @@ import timber.log.Timber
  * user preferences.
  */
 @HiltAndroidApp
-class MeshUtilApplication : Application() {
+class MeshUtilApplication : Application(), Configuration.Provider {
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
     override fun onCreate() {
         super.onCreate()
         initializeMaps(this)
+
+        // Schedule periodic MeshLog cleanup
+        scheduleMeshLogCleanup()
+
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
         CoroutineScope(Dispatchers.Default).launch {
             entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress)
         }
     }
+
+    private fun scheduleMeshLogCleanup() {
+        val cleanupRequest =
+            PeriodicWorkRequestBuilder<MeshLogCleanupWorker>(
+                repeatInterval = 24,
+                repeatIntervalTimeUnit = TimeUnit.HOURS,
+            )
+                .build()
+
+        WorkManager.getInstance(this)
+            .enqueueUniquePeriodicWork(MeshLogCleanupWorker.WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, cleanupRequest)
+    }
+
+    override val workManagerConfiguration: Configuration
+        get() =
+            Configuration.Builder()
+                .setWorkerFactory(workerFactory)
+                .build()
 }
 
 @EntryPoint
