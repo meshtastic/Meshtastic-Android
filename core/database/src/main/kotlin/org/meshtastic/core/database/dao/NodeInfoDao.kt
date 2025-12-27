@@ -91,12 +91,14 @@ interface NodeInfoDao {
         val isPublicKeyMatchingOrExistingIsEmpty =
             existingNode.user.publicKey == incomingNode.publicKey || existingNode.user.publicKey.isEmpty
 
+        val isPlaceholder = incomingNode.user.hwModel == MeshProtos.HardwareModel.UNSET
+
         return if (isPublicKeyMatchingOrExistingIsEmpty) {
             // Keys match or existing key was empty: trust the incoming node data completely.
             // This allows for legitimate updates to user info and other fields.
             val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
-            val resolvedLongName = incomingNode.longName ?: existingNode.longName
-            val resolvedShortName = incomingNode.shortName ?: existingNode.shortName
+            val resolvedLongName = if (isPlaceholder) null else incomingNode.longName ?: existingNode.longName
+            val resolvedShortName = if (isPlaceholder) null else incomingNode.shortName ?: existingNode.shortName
             incomingNode.copy(notes = resolvedNotes, longName = resolvedLongName, shortName = resolvedShortName)
         } else {
             existingNode.copy(
