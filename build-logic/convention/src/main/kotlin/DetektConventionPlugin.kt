@@ -23,12 +23,13 @@ import org.gradle.kotlin.dsl.getByType
 import org.meshtastic.buildlogic.configureDetekt
 import org.meshtastic.buildlogic.configureKotlinJvm
 import org.meshtastic.buildlogic.libs
+import org.meshtastic.buildlogic.plugin
 
 class DetektConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             configureKotlinJvm()
-            apply(plugin = libs.findPlugin("detekt").get().get().pluginId)
+            apply(plugin = libs.plugin("detekt").get().pluginId)
             val extension = extensions.getByType<DetektExtension>()
             configureDetekt(extension)
         }

@@ -23,19 +23,21 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.meshtastic.buildlogic.configProperties
+import org.meshtastic.buildlogic.libs
+import org.meshtastic.buildlogic.plugin
 
 class KmpLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            apply(plugin = "org.jetbrains.kotlin.multiplatform")
-            apply(plugin = "com.android.kotlin.multiplatform.library")
+            apply(plugin = libs.plugin("kotlin-multiplatform").get().pluginId)
+            apply(plugin = libs.plugin("android-kotlin-multiplatform-library").get().pluginId)
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
 
             extensions.configure<KotlinMultiplatformExtension> {
                 (this as ExtensionAware).extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
-                    compileSdk = this@with.configProperties.getProperty("COMPILE_SDK").toInt()
-                    minSdk = this@with.configProperties.getProperty("MIN_SDK").toInt()
+                    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+                    minSdk = configProperties.getProperty("MIN_SDK").toInt()
                 }
             }
         }

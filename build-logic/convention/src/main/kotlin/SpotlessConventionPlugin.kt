@@ -23,12 +23,13 @@ import org.gradle.kotlin.dsl.getByType
 import org.meshtastic.buildlogic.configureKotlinJvm
 import org.meshtastic.buildlogic.configureSpotless
 import org.meshtastic.buildlogic.libs
+import org.meshtastic.buildlogic.plugin
 
 class SpotlessConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             configureKotlinJvm()
-            apply(plugin = libs.findPlugin("spotless").get().get().pluginId)
+            apply(plugin = libs.plugin("spotless").get().pluginId)
             val extension = extensions.getByType<SpotlessExtension>()
             configureSpotless(extension)
         }

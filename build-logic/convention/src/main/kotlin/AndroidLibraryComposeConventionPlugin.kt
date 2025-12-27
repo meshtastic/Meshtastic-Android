@@ -21,15 +21,16 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.meshtastic.buildlogic.configureAndroidCompose
+import org.meshtastic.buildlogic.libs
+import org.meshtastic.buildlogic.plugin
 
 class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            apply(plugin = "org.jetbrains.kotlin.plugin.compose")
+            apply(plugin = libs.plugin("compose-compiler").get().pluginId)
             extensions.configure<CommonExtension> {
                 configureAndroidCompose(this)
             }
         }
     }
-
 }

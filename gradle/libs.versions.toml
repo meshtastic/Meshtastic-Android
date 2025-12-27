@@ -98,6 +98,7 @@ guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "hilt" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }

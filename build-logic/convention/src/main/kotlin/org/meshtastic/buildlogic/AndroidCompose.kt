@@ -36,13 +36,13 @@ internal fun Project.configureAndroidCompose(
     (commonExtension as? LibraryExtension)?.buildFeatures?.compose = true
 
     dependencies {
-        val bom = libs.findLibrary("androidx-compose-bom").get()
+        val bom = libs.library("androidx-compose-bom")
         "implementation"(platform(bom))
         "androidTestImplementation"(platform(bom))
-        "implementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
-        "implementation"(libs.findLibrary("androidx-compose-runtime").get())
-        "runtimeOnly"(libs.findLibrary("androidx-compose-runtime-tracing").get())
-        "debugImplementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
+        "implementation"(libs.library("androidx-compose-ui-tooling"))
+        "implementation"(libs.library("androidx-compose-runtime"))
+        "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
+        "debugImplementation"(libs.library("androidx-compose-ui-tooling"))
     }
 
     extensions.configure<ComposeCompilerGradlePluginExtension> {

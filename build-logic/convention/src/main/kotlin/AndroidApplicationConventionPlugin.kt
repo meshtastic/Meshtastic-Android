@@ -34,11 +34,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
-                defaultConfig.targetSdk = 36
                 testOptions.animationsDisabled = true
 
                 defaultConfig {
-                    targetSdk = 36
                     testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
                     vectorDrawables.useSupportLibrary = true
                 }

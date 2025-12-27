@@ -17,6 +17,7 @@
 
 package org.meshtastic.buildlogic
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -39,10 +40,15 @@ internal fun Project.configureKotlinAndroid(
 ) {
 
     commonExtension.apply {
+        compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+
         defaultConfig.apply {
-            compileSdk = configProperties["COMPILE_SDK"].toString().toInt()
-            minSdk = configProperties["MIN_SDK"].toString().toInt()
+            minSdk = configProperties.getProperty("MIN_SDK").toInt()
+            if (commonExtension is ApplicationExtension) {
+                commonExtension.defaultConfig.targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
+            }
         }
+
         compileOptions.apply {
             sourceCompatibility = JavaVersion.VERSION_21
             targetCompatibility = JavaVersion.VERSION_21
@@ -53,7 +59,7 @@ internal fun Project.configureKotlinAndroid(
     configureKotlin<KotlinAndroidProjectExtension>()
 
     dependencies {
-        "coreLibraryDesugaring"(libs.findLibrary("android.desugarJdkLibs").get())
+        "coreLibraryDesugaring"(libs.library("android.desugarJdkLibs"))
     }
 }
 
