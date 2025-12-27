@@ -18,20 +18,26 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
-import org.meshtastic.buildlogic.configureKotlinMultiplatform
+import org.gradle.kotlin.dsl.configure
+import org.jetbrains.compose.ComposeExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
-class KmpLibraryConventionPlugin : Plugin<Project> {
+class KmpLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            apply(plugin = libs.plugin("kotlin-multiplatform").get().pluginId)
-            apply(plugin = libs.plugin("android-kotlin-multiplatform-library").get().pluginId)
-            apply(plugin = "meshtastic.android.lint")
-            apply(plugin = "meshtastic.detekt")
-            apply(plugin = "meshtastic.spotless")
+            apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
+            apply(plugin = libs.plugin("compose-compiler").get().pluginId)
 
-            configureKotlinMultiplatform()
+            val compose = extensions.getByType(ComposeExtension::class.java)
+            extensions.configure<KotlinMultiplatformExtension> {
+                sourceSets.getByName("commonMain").dependencies {
+                    implementation(compose.dependencies.runtime)
+                    // API because consuming modules will usually need the resource types
+                    api(compose.dependencies.components.resources)
+                }
+            }
         }
     }
 }

@@ -17,24 +17,12 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.compose.multiplatform)
-    alias(libs.plugins.compose.compiler)
+    id("meshtastic.kmp.library.compose")
 }
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    androidLibrary {
-        namespace = "org.meshtastic.core.strings"
-        androidResources.enable = true
-    }
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            // API because consuming modules will always need this dependency
-            api(compose.components.resources)
-        }
-    }
+    androidLibrary { androidResources.enable = true }
 }
 
 compose.resources {

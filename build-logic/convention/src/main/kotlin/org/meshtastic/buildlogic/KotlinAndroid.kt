@@ -76,6 +76,12 @@ internal fun Project.configureKotlinMultiplatform() {
             extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
                 compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
                 minSdk = configProperties.getProperty("MIN_SDK").toInt()
+                
+                // Set the namespace automatically if not already set
+                if (namespace == null) {
+                    val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
+                    namespace = "org.meshtastic.$pkg"
+                }
             }
         }
     }

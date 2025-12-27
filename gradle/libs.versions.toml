@@ -20,6 +20,9 @@ kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.9.0"
 ktlint = "1.7.1"
 
+# Compose Multiplatform
+compose-multiplatform = "1.9.3"
+
 # Google
 hilt = "2.57.2"
 maps-compose = "7.0.0"
@@ -72,7 +75,6 @@ androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
 
 # AndroidX Compose
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.12.01" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
@@ -134,6 +136,7 @@ junit = { module = "junit:junit", version = "4.13.2" }
 
 # Other
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-core = { module = "io.coil-kt.coil3:coil-network-core", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
@@ -170,6 +173,7 @@ android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", versi
 android-tools-common = { module = "com.android.tools:common", version = "31.13.2" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.21.0" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.3" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
@@ -232,5 +236,6 @@ meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-hilt = { id = "meshtastic.hilt" }
 meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
 meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
+meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }
 meshtastic-root = { id = "meshtastic.root" }
 meshtastic-spotless = { id = "meshtastic.spotless" }
