@@ -19,17 +19,20 @@ package org.meshtastic.buildlogic
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
@@ -61,6 +64,23 @@ internal fun Project.configureKotlinAndroid(
     dependencies {
         "coreLibraryDesugaring"(libs.library("android.desugarJdkLibs"))
     }
+}
+
+/**
+ * Configure Kotlin Multiplatform options
+ */
+internal fun Project.configureKotlinMultiplatform() {
+    extensions.configure<KotlinMultiplatformExtension> {
+        // Configure the Android target if the plugin is applied
+        pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+            extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
+                compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+                minSdk = configProperties.getProperty("MIN_SDK").toInt()
+            }
+        }
+    }
+
+    configureKotlin<KotlinMultiplatformExtension>()
 }
 
 /**

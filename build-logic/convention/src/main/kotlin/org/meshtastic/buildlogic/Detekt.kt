@@ -28,12 +28,18 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
     config.setFrom("$rootDir/config/detekt/detekt.yml")
     buildUponDefaultConfig = true
     allRules = false
+    
+    // Default sources
     source.setFrom(
         files(
             "src/main/java",
             "src/main/kotlin",
+            "src/commonMain/kotlin",
+            "src/androidMain/kotlin",
+            "src/jvmMain/kotlin",
         ),
     )
+
     tasks.named<Detekt>("detekt") {
         reports {
             xml.required.set(true)

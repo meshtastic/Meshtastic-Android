@@ -15,14 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.configure
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.meshtastic.buildlogic.configProperties
+import org.meshtastic.buildlogic.configureKotlinMultiplatform
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
@@ -34,12 +30,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
 
-            extensions.configure<KotlinMultiplatformExtension> {
-                (this as ExtensionAware).extensions.configure<KotlinMultiplatformAndroidLibraryTarget>("android") {
-                    compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
-                    minSdk = configProperties.getProperty("MIN_SDK").toInt()
-                }
-            }
+            configureKotlinMultiplatform()
         }
     }
 }
