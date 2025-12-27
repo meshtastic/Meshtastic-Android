@@ -51,10 +51,13 @@ interface NodeInfoDao {
         incomingNode.publicKey = incomingNode.user.publicKey
 
         // Populate denormalized name columns from the User protobuf for search functionality
-        // Only populate if the user is not a placeholder (hwModel != UNSET)
+        // Only populate if the user is not a placeholder (hwModel != UNSET); otherwise keep them null
         if (incomingNode.user.hwModel != MeshProtos.HardwareModel.UNSET) {
             incomingNode.longName = incomingNode.user.longName
             incomingNode.shortName = incomingNode.user.shortName
+        } else {
+            incomingNode.longName = null
+            incomingNode.shortName = null
         }
 
         val existingNodeEntity = getNodeByNum(incomingNode.num)?.node
@@ -92,7 +95,9 @@ interface NodeInfoDao {
             // Keys match or existing key was empty: trust the incoming node data completely.
             // This allows for legitimate updates to user info and other fields.
             val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
-            incomingNode.copy(notes = resolvedNotes)
+            val resolvedLongName = incomingNode.longName ?: existingNode.longName
+            val resolvedShortName = incomingNode.shortName ?: existingNode.shortName
+            incomingNode.copy(notes = resolvedNotes, longName = resolvedLongName, shortName = resolvedShortName)
         } else {
             existingNode.copy(
                 lastHeard = incomingNode.lastHeard,
