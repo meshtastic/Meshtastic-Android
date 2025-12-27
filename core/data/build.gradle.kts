@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.paging)
 
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.core.location.altitude)
     implementation(libs.androidx.paging.common)
