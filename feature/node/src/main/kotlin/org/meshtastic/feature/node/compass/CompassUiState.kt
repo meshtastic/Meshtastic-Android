@@ -45,4 +45,5 @@ data class CompassUiState(
     val isAligned: Boolean = false,
     val hasTargetPosition: Boolean = true,
     val displayUnits: DisplayUnits = DisplayUnits.METRIC,
+    val targetAltitude: Int? = null,
 )

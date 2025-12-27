@@ -87,6 +87,7 @@ constructor(
                 hasTargetPosition = targetPos != null,
                 displayUnits = displayUnits,
                 positionTimeSec = targetPositionTimeSec,
+                targetAltitude = node.validPosition?.altitude,
             )
         }
 

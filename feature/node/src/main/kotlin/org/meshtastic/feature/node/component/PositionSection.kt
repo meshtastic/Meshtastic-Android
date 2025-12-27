@@ -93,7 +93,7 @@ fun PositionSection(
 
             if (hasValidPosition) {
                 PositionMap(node, distance)
-                LinkedCoordinatesItem(node)
+                LinkedCoordinatesItem(node, metricsState.displayUnits)
                 Spacer(Modifier.height(8.dp))
             }
 
