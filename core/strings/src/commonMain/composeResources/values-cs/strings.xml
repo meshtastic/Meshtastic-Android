@@ -320,6 +320,10 @@
         <item quantity="other">%d skoků</item>
     </plurals>
     <string name="traceroute_diff">Skok směrem k %1$d Skok zpět do %2$d</string>
+    <string name="traceroute_outgoing_route">Odchozí trasa</string>
+    <string name="traceroute_return_route">Zpáteční trasa</string>
+    <string name="view_on_map">Zobrazit na mapě</string>
+    <string name="traceroute_showing_nodes">Zobrazuji %1$d/%2$d uzlů</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1T</string>
@@ -618,7 +622,13 @@
     <string name="unmonitored_or_infrastructure">Nesledované nebo infrastruktura</string>
     <string name="import_known_shared_contact_text">Upozornění: Tento kontakt je znám, import přepíše předchozí kontaktní informace.</string>
     <string name="public_key_changed">Veřejný klíč změněn</string>
-    <string name="request_metadata">Vyžádat metadata</string>
+    <string name="request">Vyžádání informací</string>
+    <string name="request_telemetry">Vyžádat telemetrii</string>
+    <string name="request_device_metrics">Metriky zařízení</string>
+    <string name="request_environment_metrics">Metriky prostředí</string>
+    <string name="request_air_quality_metrics">Metriky kvality ovzduší</string>
+    <string name="request_power_metrics">Metriky napájení</string>
+    <string name="request_local_stats">Lokální statistiky</string>
     <string name="actions">Akce</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Použít 12h formát hodin</string>
@@ -832,4 +842,13 @@
     <string name="firmware_update_method_detail">Aktualizovat přes %1$s</string>
     <string name="interval_unset">Zrušit nastavení</string>
     <!-- Compass -->
+    <string name="compass_title">Kompas</string>
+    <string name="open_compass">Otevřít kompas</string>
+    <string name="compass_distance">Vzdálenost: %1$s</string>
+    <string name="compass_bearing">Směr: %1$s</string>
+    <string name="compass_bearing_na">Směr: N/A</string>
+    <string name="compass_no_magnetometer">Toto zařízení nemá kompasový senzor. Směr není k dispozici.</string>
+    <string name="compass_no_location_permission">Pro zobrazení vzdálenosti a směru je vyžadováno oprávnění k poloze.</string>
+    <string name="compass_location_disabled">Poskytovatel polohy je vypnutý. Zapněte služby určování polohy.</string>
+    <string name="compass_no_location_fix">Čekám na GPS signál pro výpočet vzdálenosti a směru.</string>
 </resources>

@@ -17,34 +17,55 @@
 
 package org.meshtastic.feature.node.component
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.outlined.VolumeMute
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.QrCode2
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.actions
+import org.meshtastic.core.strings.direct_message
 import org.meshtastic.core.strings.favorite
 import org.meshtastic.core.strings.ignore
 import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.share_contact
-import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
-import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.node.model.NodeDetailAction
+import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
 @Composable
 fun DeviceActions(
@@ -73,50 +94,124 @@ fun DeviceActions(
         onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
         onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
     )
-    TitledCard(title = stringResource(Res.string.actions), modifier = modifier) {
-        ListItem(
-            text = stringResource(Res.string.share_contact),
-            leadingIcon = Icons.Rounded.QrCode2,
-            trailingIcon = null,
-            onClick = { onAction(NodeDetailAction.ShareContact) },
-        )
-        if (!isLocal) {
-            InsetDivider()
-            RemoteDeviceActions(
+
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        Column(modifier = Modifier.padding(vertical = 12.dp)) {
+            Text(
+                text = stringResource(Res.string.actions),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            )
+
+            PrimaryActionsRow(node, isLocal, onAction, onFavoriteClick = { displayFavoriteDialog = true })
+
+            if (!isLocal) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                )
+
+                RemoteDeviceActions(
+                    node = node,
+                    lastTracerouteTime = lastTracerouteTime,
+                    lastRequestNeighborsTime = lastRequestNeighborsTime,
+                    onAction = onAction,
+                )
+            }
+
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            )
+
+            ManagementActions(
                 node = node,
-                lastTracerouteTime = lastTracerouteTime,
-                lastRequestNeighborsTime = lastRequestNeighborsTime,
-                onAction = onAction,
+                onIgnoreClick = { displayIgnoreDialog = true },
+                onRemoveClick = { displayRemoveDialog = true },
             )
         }
+    }
+}
 
-        InsetDivider()
+@Composable
+private fun PrimaryActionsRow(
+    node: Node,
+    isLocal: Boolean,
+    onAction: (NodeDetailAction) -> Unit,
+    onFavoriteClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (!node.isEffectivelyUnmessageable && !isLocal) {
+            Button(
+                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.large,
+                colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Message, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(Res.string.direct_message))
+            }
+        }
 
-        SwitchListItem(
-            text = stringResource(Res.string.favorite),
-            leadingIcon = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-            leadingIconTint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
-            checked = node.isFavorite,
-            onClick = { displayFavoriteDialog = true },
-        )
+        OutlinedButton(
+            onClick = { onAction(NodeDetailAction.ShareContact) },
+            modifier = if (node.isEffectivelyUnmessageable || isLocal) Modifier.weight(1f) else Modifier,
+            shape = MaterialTheme.shapes.large,
+        ) {
+            Icon(Icons.Rounded.QrCode2, contentDescription = null)
+            if (node.isEffectivelyUnmessageable || isLocal) {
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(Res.string.share_contact))
+            }
+        }
 
-        InsetDivider()
+        IconToggleButton(checked = node.isFavorite, onCheckedChange = { onFavoriteClick() }) {
+            Icon(
+                imageVector = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                contentDescription = stringResource(Res.string.favorite),
+                tint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
+            )
+        }
+    }
+}
 
+@Composable
+private fun ManagementActions(node: Node, onIgnoreClick: () -> Unit, onRemoveClick: () -> Unit) {
+    Column {
         SwitchListItem(
             text = stringResource(Res.string.ignore),
             leadingIcon =
-            if (node.isIgnored) Icons.AutoMirrored.Outlined.VolumeMute else Icons.AutoMirrored.Default.VolumeUp,
+            if (node.isIgnored) {
+                Icons.AutoMirrored.Outlined.VolumeMute
+            } else {
+                Icons.AutoMirrored.Default.VolumeUp
+            },
             checked = node.isIgnored,
-            onClick = { displayIgnoreDialog = true },
+            onClick = onIgnoreClick,
         )
-
-        InsetDivider()
 
         ListItem(
             text = stringResource(Res.string.remove),
             leadingIcon = Icons.Rounded.Delete,
             trailingIcon = null,
-            onClick = { displayRemoveDialog = true },
+            textColor = MaterialTheme.colorScheme.error,
+            leadingIconTint = MaterialTheme.colorScheme.error,
+            onClick = onRemoveClick,
         )
     }
 }

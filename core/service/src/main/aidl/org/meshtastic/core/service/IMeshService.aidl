@@ -179,4 +179,7 @@ interface IMeshService {
 
     /// Request device connection status from the radio
     void getDeviceConnectionStatus(in int requestId, in int destNum);
+
+    /// Send request for telemetry to nodeNum
+    void requestTelemetry(in int requestId, in int destNum, in int type);
 }

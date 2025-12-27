@@ -19,8 +19,10 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,7 +30,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.twotone.Verified
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,12 +45,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.device
 import org.meshtastic.core.strings.hardware
@@ -52,7 +58,6 @@ import org.meshtastic.core.strings.supported
 import org.meshtastic.core.strings.supported_by_community
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.model.MetricsState
@@ -61,53 +66,77 @@ import org.meshtastic.feature.node.model.MetricsState
 fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
     val node = state.node ?: return
     val deviceHardware = state.deviceHardware ?: return
-    val hwModelName = deviceHardware.displayName
-    val isSupported = deviceHardware.activelySupported
-    TitledCard(stringResource(Res.string.device), modifier = modifier) {
-        Spacer(modifier = Modifier.height(16.dp))
 
-        Box(
-            modifier =
-            Modifier.align(Alignment.CenterHorizontally)
-                .size(100.dp)
-                .clip(CircleShape)
-                .background(color = Color(node.colors.second).copy(alpha = .5f), shape = CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(containerColor = colorScheme.surfaceContainerHigh),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        Column(modifier = Modifier.padding(vertical = 16.dp)) {
+            Text(
+                text = stringResource(Res.string.device),
+                style = MaterialTheme.typography.titleMedium,
+                color = colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                DeviceAvatar(node.colors.second.toLong(), deviceHardware)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            InsetDivider()
+
+            ListItem(
+                text = stringResource(Res.string.hardware),
+                leadingIcon = Icons.Default.Router,
+                supportingText = deviceHardware.displayName,
+                copyable = true,
+                trailingIcon = null,
+            )
+
+            InsetDivider()
+
+            SupportStatusItem(deviceHardware.activelySupported)
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        InsetDivider()
-
-        ListItem(
-            text = stringResource(Res.string.hardware),
-            leadingIcon = Icons.Default.Router,
-            supportingText = hwModelName,
-            copyable = true,
-            trailingIcon = null,
-        )
-
-        InsetDivider()
-
-        ListItem(
-            text =
-            if (isSupported) {
-                stringResource(Res.string.supported)
-            } else {
-                stringResource(Res.string.supported_by_community)
-            },
-            leadingIcon =
-            if (isSupported) {
-                Icons.TwoTone.Verified
-            } else {
-                ImageVector.vectorResource(org.meshtastic.feature.node.R.drawable.unverified)
-            },
-            leadingIconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
-            trailingIcon = null,
-        )
     }
+}
+
+@Composable
+private fun DeviceAvatar(bgColor: Long, deviceHardware: DeviceHardware) {
+    Box(
+        modifier =
+        Modifier.size(100.dp)
+            .clip(CircleShape)
+            .background(color = Color(bgColor).copy(alpha = .5f), shape = CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
+    }
+}
+
+@Composable
+private fun SupportStatusItem(isSupported: Boolean) {
+    ListItem(
+        text =
+        if (isSupported) {
+            stringResource(Res.string.supported)
+        } else {
+            stringResource(Res.string.supported_by_community)
+        },
+        leadingIcon =
+        if (isSupported) {
+            Icons.TwoTone.Verified
+        } else {
+            ImageVector.vectorResource(org.meshtastic.feature.node.R.drawable.unverified)
+        },
+        leadingIconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
+        trailingIcon = null,
+    )
 }
 
 @Composable

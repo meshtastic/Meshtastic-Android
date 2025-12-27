@@ -181,7 +181,7 @@
     <string name="ip_port">Port :</string>
     <string name="connected">Connecté</string>
     <string name="connected_to">Connecté à la radio (%1$s)</string>
-    <string name="connection_status">Connections actuelles :</string>
+    <string name="connection_status">Connexions actuelles :</string>
     <string name="wifi_ip">IP WiFi :</string>
     <string name="ethernet_ip">IP Ethernet :</string>
     <string name="connecting">Connexion en cours</string>
@@ -382,7 +382,7 @@
     <string name="traceroute_diff">Sauts vers %1$d Sauts retour %2$d</string>
     <string name="traceroute_outgoing_route">Route aller</string>
     <string name="traceroute_return_route">Route retour</string>
-    <string name="traceroute_endpoint_missing">Impossible d'afficher la carte traceroute car le noeud de départ ou de destination n'a pas d'informations de position.</string>
+    <string name="traceroute_endpoint_missing">Impossible d'afficher la carte traceroute car le nœud</string>
     <string name="view_on_map">Afficher sur la carte</string>
     <string name="traceroute_map_no_data">Ce traceroute n'a pas encore de nœuds cartographiables.</string>
     <string name="traceroute_showing_nodes">Affichage des nœuds %1$d/%2$d</string>
@@ -716,7 +716,7 @@
     <string name="import_known_shared_contact_text">Avertissement : Ce contact est connu, l'importation écrasera les informations précédentes.</string>
     <string name="public_key_changed">Clé publique modifiée</string>
     <string name="import_label">Importer</string>
-    <string name="request_metadata">Récupérer les informations du firmware/métadonnées</string>
+    <string name="request_device_metrics">Métriques de l’appareil</string>
     <string name="actions">Actions</string>
     <string name="firmware">Micrologiciel</string>
     <string name="use_12h_format">Utiliser le format horaire 12h</string>

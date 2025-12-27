@@ -113,6 +113,7 @@
     <string name="config_lora_frequency_slot_summary">Рабочая частота вашего узла рассчитывается на основе региона, настроек модема и этого поля. При значении 0 интервал автоматически рассчитывается на основе названия основного канала и изменяется с публичного интервала по умолчанию. Вернитесь к публичному интервалу по умолчанию, если настроены частный основной и общедоступный дополнительный каналы.</string>
     <string name="label_very_long_slow">Очень большая дальность - Медленный</string>
     <string name="label_long_fast">Большая дальность - Быстрый</string>
+    <string name="label_long_turbo">Большая дальность - Турбо</string>
     <string name="label_long_moderate">Большая дальность - Умеренно</string>
     <string name="label_long_slow">Большая дальность - Медленный</string>
     <string name="label_medium_fast">Средняя дальность - Быстрый</string>
@@ -190,6 +191,7 @@
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
     <string name="none">Нет (выключить)</string>
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
+    <string name="acknowledgements">Подтверждения</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
     <string name="contact_invalid">Контакт недопустим и не может быть добавлен</string>
     <string name="debug_panel">Панель отладки</string>
@@ -274,6 +276,7 @@
     <string name="quick_chat_instant">Мгновенная отправка</string>
     <string name="quick_chat_show">Показать меню быстрого чата</string>
     <string name="quick_chat_hide">Скрыть меню быстрого чата</string>
+    <string name="quick_chat_show_label">Показать быстрый чат</string>
     <string name="factory_reset">Сброс настроек к заводским настройкам</string>
     <string name="bluetooth_disabled">Bluetooth отключен. Пожалуйста, включите его в настройках вашего устройства.</string>
     <string name="open_settings">Открыть настройки</string>
@@ -325,6 +328,7 @@
     <string name="mute_status_unmuted">Не заглушен</string>
     <string name="mute_status_muted_for_days">Заглушен на %1d дней, %.1f часов</string>
     <string name="mute_status_muted_for_hours">Заглушен на %.1f часов</string>
+    <string name="mute_status_label">Состояние заглушки</string>
     <string name="replace">Заменить</string>
     <string name="wifi_qr_code_scan">Сканировать QR-код WiFi</string>
     <string name="wifi_qr_code_error">Неверный формат QR-кода WiFi</string>
@@ -382,6 +386,12 @@
         <item quantity="other">%d Узлов</item>
     </plurals>
     <string name="traceroute_diff">Узлов к %1$d Узлов назад от%2$d</string>
+    <string name="traceroute_outgoing_route">Исходящий маршрут</string>
+    <string name="traceroute_return_route">Обратный маршрут</string>
+    <string name="traceroute_endpoint_missing">Не удается отобразить карту трассировки, поскольку начальный или конечный узел не содержит информации о местоположении.</string>
+    <string name="view_on_map">Показать на карте</string>
+    <string name="traceroute_map_no_data">В этой трассировке маршрута пока нет отображаемых узлов.</string>
+    <string name="traceroute_showing_nodes">Показаны %1$d/%2$d нод</string>
     <string name="twenty_four_hours">24ч</string>
     <string name="forty_eight_hours">48ч</string>
     <string name="one_week">1нед</string>
@@ -712,7 +722,14 @@
     <string name="import_known_shared_contact_text">Внимание: Данный контакт уже существует, импорт перезапишет ранее известную информацию о нём.</string>
     <string name="public_key_changed">Публичный ключ изменён</string>
     <string name="import_label">Импортировать</string>
-    <string name="request_metadata">Запросить метаданные</string>
+    <string name="request">Запрос</string>
+    <string name="request_neighbor_info">NeighborInfo (2.7.15+)</string>
+    <string name="request_telemetry">Запрос телеметрии</string>
+    <string name="request_device_metrics">Метрики устройства</string>
+    <string name="request_environment_metrics">Метрики окружения</string>
+    <string name="request_power_metrics">Метрики мощности</string>
+    <string name="request_local_stats">Локальная статистика</string>
+    <string name="request_metadata">Метаданные</string>
     <string name="actions">Действия</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Использовать 12-часовой формат времени</string>
@@ -729,6 +746,7 @@
     <string name="conversations">Разговоры</string>
     <string name="nodes">Узлы</string>
     <string name="bottom_nav_settings">Настройки</string>
+    <string name="selected">Выбрано</string>
     <string name="set_your_region">Установите ваш регион</string>
     <string name="reply">Ответить</string>
     <string name="map_reporting_summary">Ваш узел будет периодически отправлять незашифрованный пакет отчёта карты на настроенный MQTT-сервер, что включает ID, полное и краткое имя, примерное местоположение, модель аппаратного обеспечения, роль, версия прошивки, регион LoRa, режим работы передатчика и имя основного канала.</string>
@@ -904,6 +922,7 @@
     <string name="device_configuration">Настройки устройства</string>
     <string name="remotely_administrating">"[Удалённо] %1$s"</string>
     <string name="device_telemetry_enabled">Отправлять телеметрию устройства</string>
+    <string name="device_telemetry_enabled_summary">Включите/выключите модуль телеметрии устройства, чтобы отправлять показатели в сеть. Это номинальные значения. Перегруженные сети будут автоматически масштабироваться на более длительные интервалы в зависимости от количества подключенных узлов.</string>
     <string name="any">Любой</string>
     <string name="one_hour">1 час</string>
     <string name="eight_hours">8 часов</string>
@@ -935,6 +954,7 @@
     <string name="firmware_update_title">Обновление прошивки</string>
     <string name="firmware_update_checking">Проверка обновлений...</string>
     <string name="firmware_update_device">Устройство: %1$s</string>
+    <string name="firmware_update_currently_installed">Текущая версия: %1$s</string>
     <string name="firmware_update_latest">Самая свежая версия: %1$s</string>
     <string name="firmware_update_stable">Стабильная</string>
     <string name="firmware_update_alpha">Альфа</string>
@@ -947,6 +967,7 @@
     <string name="firmware_update_starting_dfu">Запуск прошивки...</string>
     <string name="firmware_update_updating">Обновление... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Неизвестная модель оборудования: %1$d</string>
+    <string name="firmware_update_invalid_address">Подключенное устройство не является допустимым BLE устройством или адрес неизвестен (%1$s).</string>
     <string name="firmware_update_no_device">Нет подключенных устройств</string>
     <string name="firmware_update_not_found_in_release">Не удалось найти в версии прошивку для %1$s.</string>
     <string name="firmware_update_extracting">Извлечение прошивки...</string>
@@ -963,6 +984,46 @@
     <string name="firmware_update_disclaimer_text">Вы собираетесь прошить ваше устройство. Этот процесс сопряжен с риском.\n\n• Убедитесь, что устройство заряжено.\n• Держите устройство рядом с телефоном.\n• Не закрывайте приложение во время обновления.\n\nУдостоверьтесь, что вы выбрали подходящую прошивку для вашего устройства.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Щебетун говорит: «Держите лестницу под рукой!»</string>
     <string name="chirpy">Щебетун</string>
+    <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
+    <string name="firmware_update_waiting_for_device">Ожидание DFU устройства...</string>
+    <string name="firmware_update_copying">Копирование прошивки...</string>
+    <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на вашем устройств&apos;с DFU.</string>
+    <string name="firmware_update_flashing">Прошивка устройства, подождите...</string>
+    <string name="firmware_update_method_usb">Передача файлов через USB</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_detail">Обновить через %1$s</string>
+    <string name="firmware_update_usb_instruction_title">Выберите DFU USB-диск</string>
+    <string name="firmware_update_usb_instruction_text">Ваше устройство перезагрузилось в режим DFU и должно отображаться как USB-накопитель (например, RAK4631).\n\nКогда откроется окно выбора файлов, пожалуйста, выберите корневой каталог этого диска, чтобы сохранить файл прошивки.</string>
     <string name="interval_unset">Не установлена</string>
+    <string name="interval_always_on">Всегда включено</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">секунда</item>
+        <item quantity="few">секунд</item>
+        <item quantity="many">секунды</item>
+        <item quantity="other">секунды</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">минута</item>
+        <item quantity="few">минут</item>
+        <item quantity="many">минуты</item>
+        <item quantity="other">минуты</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">час</item>
+        <item quantity="few">часов</item>
+        <item quantity="many">часа</item>
+        <item quantity="other">часы</item>
+    </plurals>
     <!-- Compass -->
+    <string name="compass_title">Компас</string>
+    <string name="open_compass">Открыть компас</string>
+    <string name="compass_distance">Расстояние: %1$s</string>
+    <string name="compass_bearing">Граница: %1$s</string>
+    <string name="compass_bearing_na">Граница: Н/А</string>
+    <string name="compass_no_magnetometer">Это устройство не оснащено датчиком компаса. Курс недоступен.</string>
+    <string name="compass_no_location_permission">Для отображения расстояния и пеленга требуется разрешение на определение местоположения.</string>
+    <string name="compass_location_disabled">Поставщик услуг определения местоположения отключен. Включите службы определения местоположения.</string>
+    <string name="compass_no_location_fix">Ждем сигнала GPS, чтобы рассчитать расстояние и азимут.</string>
+    <string name="compass_uncertainty">Предполагаемая площадь: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Предполагаемая площадь: точность неизвестна</string>
 </resources>

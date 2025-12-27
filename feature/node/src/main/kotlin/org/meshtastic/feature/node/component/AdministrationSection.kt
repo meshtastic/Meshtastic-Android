@@ -17,15 +17,23 @@
 
 package org.meshtastic.feature.node.component
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ForkLeft
 import androidx.compose.material.icons.filled.Icecream
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
@@ -44,7 +52,6 @@ import org.meshtastic.core.strings.remote_admin
 import org.meshtastic.core.strings.request_metadata
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -53,7 +60,6 @@ import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.proto.MeshProtos
 
-@Suppress("LongMethod")
 @Composable
 fun AdministrationSection(
     node: Node,
@@ -62,31 +68,77 @@ fun AdministrationSection(
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    TitledCard(stringResource(Res.string.administration), modifier = modifier) {
-        ListItem(
-            text = stringResource(Res.string.request_metadata),
-            leadingIcon = Icons.Default.Memory,
-            trailingIcon = null,
-            onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
-        )
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        Column(modifier = Modifier.padding(vertical = 16.dp)) {
+            AdministrationHeader()
 
-        InsetDivider()
+            ListItem(
+                text = stringResource(Res.string.request_metadata),
+                leadingIcon = Icons.Default.Memory,
+                trailingIcon = null,
+                onClick = {
+                    onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num)))
+                },
+            )
 
-        ListItem(
-            text = stringResource(Res.string.remote_admin),
-            leadingIcon = Icons.Default.Settings,
-            enabled = metricsState.isLocal || node.metadata != null,
-        ) {
-            onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
+            InsetDivider()
+
+            ListItem(
+                text = stringResource(Res.string.remote_admin),
+                leadingIcon = Icons.Default.Settings,
+                enabled = metricsState.isLocal || node.metadata != null,
+            ) {
+                onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
+            }
         }
     }
+
     val firmwareVersion = node.metadata?.firmwareVersion
     val firmwareEdition = metricsState.firmwareEdition
     if (firmwareVersion != null || (firmwareEdition != null && metricsState.isLocal)) {
-        TitledCard(stringResource(Res.string.firmware)) {
-            firmwareEdition?.let {
+        FirmwareSection(metricsState, firmwareEdition, firmwareVersion, onFirmwareSelect)
+    }
+}
+
+@Composable
+private fun AdministrationHeader() {
+    Text(
+        text = stringResource(Res.string.administration),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+    )
+}
+
+@Composable
+private fun FirmwareSection(
+    metricsState: MetricsState,
+    firmwareEdition: MeshProtos.FirmwareEdition?,
+    firmwareVersion: String?,
+    onFirmwareSelect: (FirmwareRelease) -> Unit,
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = MaterialTheme.shapes.extraLarge,
+    ) {
+        Column(modifier = Modifier.padding(vertical = 16.dp)) {
+            Text(
+                text = stringResource(Res.string.firmware),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+
+            firmwareEdition?.let { edition ->
                 val icon =
-                    when (it) {
+                    when (edition) {
                         MeshProtos.FirmwareEdition.VANILLA -> Icons.Default.Icecream
                         else -> Icons.Default.ForkLeft
                     }
@@ -94,55 +146,66 @@ fun AdministrationSection(
                 ListItem(
                     text = stringResource(Res.string.firmware_edition),
                     leadingIcon = icon,
-                    supportingText = it.name,
+                    supportingText = edition.name,
                     copyable = true,
                     trailingIcon = null,
                 )
             }
-            firmwareVersion?.let { firmwareVersion ->
-                val latestStable = metricsState.latestStableFirmware
-                val latestAlpha = metricsState.latestAlphaFirmware
 
-                val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
-                val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
-
-                InsetDivider()
-
-                ListItem(
-                    text = stringResource(Res.string.installed_firmware_version),
-                    leadingIcon = Icons.Default.Memory,
-                    supportingText = firmwareVersion.substringBeforeLast("."),
-                    copyable = true,
-                    leadingIconTint = statusColor,
-                    trailingIcon = null,
-                )
-
-                InsetDivider()
-
-                ListItem(
-                    text = stringResource(Res.string.latest_stable_firmware),
-                    leadingIcon = Icons.Default.Memory,
-                    supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
-                    copyable = true,
-                    leadingIconTint = MaterialTheme.colorScheme.StatusGreen,
-                    trailingIcon = null,
-                    onClick = { onFirmwareSelect(latestStable) },
-                )
-
-                InsetDivider()
-
-                ListItem(
-                    text = stringResource(Res.string.latest_alpha_firmware),
-                    leadingIcon = Icons.Default.Memory,
-                    supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
-                    copyable = true,
-                    leadingIconTint = MaterialTheme.colorScheme.StatusYellow,
-                    trailingIcon = null,
-                    onClick = { onFirmwareSelect(latestAlpha) },
-                )
+            firmwareVersion?.let { version ->
+                FirmwareVersionItems(metricsState, version, firmwareEdition != null, onFirmwareSelect)
             }
         }
     }
+}
+
+@Composable
+private fun FirmwareVersionItems(
+    metricsState: MetricsState,
+    version: String,
+    hasEdition: Boolean,
+    onFirmwareSelect: (FirmwareRelease) -> Unit,
+) {
+    val latestStable = metricsState.latestStableFirmware
+    val latestAlpha = metricsState.latestAlphaFirmware
+
+    val deviceVersion = DeviceVersion(version.substringBeforeLast("."))
+    val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
+
+    if (hasEdition) InsetDivider()
+
+    ListItem(
+        text = stringResource(Res.string.installed_firmware_version),
+        leadingIcon = Icons.Default.Memory,
+        supportingText = version.substringBeforeLast("."),
+        copyable = true,
+        leadingIconTint = statusColor,
+        trailingIcon = null,
+    )
+
+    InsetDivider()
+
+    ListItem(
+        text = stringResource(Res.string.latest_stable_firmware),
+        leadingIcon = Icons.Default.Memory,
+        supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
+        copyable = true,
+        leadingIconTint = MaterialTheme.colorScheme.StatusGreen,
+        trailingIcon = null,
+        onClick = { onFirmwareSelect(latestStable) },
+    )
+
+    InsetDivider()
+
+    ListItem(
+        text = stringResource(Res.string.latest_alpha_firmware),
+        leadingIcon = Icons.Default.Memory,
+        supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
+        copyable = true,
+        leadingIconTint = MaterialTheme.colorScheme.StatusYellow,
+        trailingIcon = null,
+        onClick = { onFirmwareSelect(latestAlpha) },
+    )
 }
 
 @Composable

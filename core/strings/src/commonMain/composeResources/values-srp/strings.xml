@@ -419,6 +419,9 @@
     <string name="primary">Примарни</string>
     <string name="secondary">Секундарни</string>
     <string name="notes">Белешке</string>
+    <string name="request_device_metrics">Метрика уређаја</string>
+    <string name="request_environment_metrics">Метрике сензора</string>
+    <string name="request_power_metrics">Мерни подаци о снази</string>
     <string name="actions">Акције</string>
     <string name="firmware">Фирмвер</string>
     <string name="map">Мапа меша</string>

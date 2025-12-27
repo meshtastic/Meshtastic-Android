@@ -300,6 +300,7 @@
     <string name="quick_chat_instant">Instantly send</string>
     <string name="quick_chat_show">Show quick chat menu</string>
     <string name="quick_chat_hide">Hide quick chat menu</string>
+    <string name="quick_chat_show_label">Show quick chat</string>
     <string name="factory_reset">Factory reset</string>
     <string name="bluetooth_disabled">Bluetooth is disabled. Please enable it in your device settings.</string>
     <string name="open_settings">Open settings</string>
@@ -351,6 +352,7 @@
     <string name="mute_status_unmuted">Not muted</string>
     <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
     <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
+    <string name="mute_status_label">Mute status</string>
     <string name="replace">Replace</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
@@ -745,8 +747,15 @@
     <string name="import_known_shared_contact_text">Warning: This contact is known, importing will overwrite the previous contact information.</string>
     <string name="public_key_changed">Public Key Changed</string>
     <string name="import_label">Import</string>
-    <string name="request_neighbor_info">Request NeighborInfo (2.7.15+)</string>
-    <string name="request_metadata">Request Metadata</string>
+    <string name="request">Request</string>
+    <string name="request_neighbor_info">NeighborInfo (2.7.15+)</string>
+    <string name="request_telemetry">Request Telemetry</string>
+    <string name="request_device_metrics">Device Metrics</string>
+    <string name="request_environment_metrics">Environment Metrics</string>
+    <string name="request_air_quality_metrics">Air-Quality Metrics</string>
+    <string name="request_power_metrics">Power Metrics</string>
+    <string name="request_local_stats">Local Stats</string>
+    <string name="request_metadata">Metadata</string>
     <string name="actions">Actions</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Use 12h clock format</string>

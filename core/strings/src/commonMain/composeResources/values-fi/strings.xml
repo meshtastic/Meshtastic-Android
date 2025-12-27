@@ -274,6 +274,7 @@
     <string name="quick_chat_instant">Lähetä välittömästi</string>
     <string name="quick_chat_show">Näytä pikaviestivalikko</string>
     <string name="quick_chat_hide">Piilota pikaviestivalikko</string>
+    <string name="quick_chat_show_label">Näytä pikaviesti</string>
     <string name="factory_reset">Palauta tehdasasetukset</string>
     <string name="bluetooth_disabled">Bluetooth on pois käytöstä. Ota se käyttöön laitteen asetuksista.</string>
     <string name="open_settings">Avaa asetukset</string>
@@ -325,6 +326,7 @@
     <string name="mute_status_unmuted">Ei mykistetty</string>
     <string name="mute_status_muted_for_days">Mykistetty %1d päivää ja %.1f tuntia</string>
     <string name="mute_status_muted_for_hours">Mykistetty %.1f tuntia</string>
+    <string name="mute_status_label">Mykistä tilaviestit</string>
     <string name="replace">Korvaa</string>
     <string name="wifi_qr_code_scan">Skannaa WiFi QR-koodi</string>
     <string name="wifi_qr_code_error">WiFi-verkon käyttöoikeustiedoissa on virheellinen QR-koodin muoto</string>
@@ -716,7 +718,15 @@
     <string name="import_known_shared_contact_text">Varoitus: Kontakti on jo olemassa, tuonti ylikirjoittaa aiemmat tiedot.</string>
     <string name="public_key_changed">Julkinen avain vaihdettu</string>
     <string name="import_label">Tuo</string>
-    <string name="request_metadata">Pyydä metatiedot</string>
+    <string name="request">Pyyntö</string>
+    <string name="request_neighbor_info">Naapuritieto (2.7.15+)</string>
+    <string name="request_telemetry">Pyydä telemetriatiedot</string>
+    <string name="request_device_metrics">Laitteen mittausloki</string>
+    <string name="request_environment_metrics">Ympäristöarvot</string>
+    <string name="request_air_quality_metrics">Ilmanlaatuarvot</string>
+    <string name="request_power_metrics">Virranhallinnan arvot</string>
+    <string name="request_local_stats">Paikalliset tilastot</string>
+    <string name="request_metadata">Metatiedot</string>
     <string name="actions">Toiminnot</string>
     <string name="firmware">Laiteohjelmisto</string>
     <string name="use_12h_format">Käytä 12 tunnin kelloa</string>
