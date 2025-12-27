@@ -300,6 +300,20 @@ class NodeInfoDaoTest {
     }
 
     @Test
+    fun testUnknownNodesKeepNamesNullAndRemainFiltered() = runBlocking {
+        val updatedUnknownNode = unknownNode.copy(longName = "Should be cleared", shortName = "SHOULD")
+
+        nodeInfoDao.upsert(updatedUnknownNode)
+
+        val storedUnknown = nodeInfoDao.getNodeByNum(updatedUnknownNode.num)!!.node
+        assertEquals(null, storedUnknown.longName)
+        assertEquals(null, storedUnknown.shortName)
+
+        val nodes = getNodes(includeUnknown = false)
+        assertFalse(nodes.any { it.num == updatedUnknownNode.num })
+    }
+
+    @Test
     fun testOfflineNodesIncludedByDefault() = runBlocking {
         val nodes = getNodes()
         assertTrue(nodes.any { it.lastHeard < onlineTimeThreshold() })
