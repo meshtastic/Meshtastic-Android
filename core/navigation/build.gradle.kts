@@ -41,4 +41,6 @@ plugins {
 
 configure<LibraryExtension> { namespace = "org.meshtastic.core.navigation" }
 
-dependencies {}
+dependencies {
+    implementation(libs.kotlinx.serialization.core)
+}

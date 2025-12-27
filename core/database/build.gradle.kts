@@ -57,6 +57,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
 
+    ksp(libs.androidx.room.compiler)
+
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
 }
