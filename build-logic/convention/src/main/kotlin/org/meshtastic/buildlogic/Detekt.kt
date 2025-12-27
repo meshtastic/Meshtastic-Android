@@ -22,7 +22,6 @@ import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.named
-import java.io.File
 
 internal fun Project.configureDetekt(extension: DetektExtension) = extension.apply {
     toolVersion = libs.version("detekt")
@@ -43,11 +42,12 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
             sarif.required.set(true)
             md.required.set(true)
         }
-        reports.xml.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.xml"))
-        reports.html.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.html"))
-        reports.txt.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.txt"))
-        reports.sarif.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.sarif"))
-        reports.md.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.md"))
+        // Use project-specific build directory for reports to avoid conflicts
+        reports.xml.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.xml"))
+        reports.html.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.html"))
+        reports.txt.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.txt"))
+        reports.sarif.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.sarif"))
+        reports.md.outputLocation.set(layout.buildDirectory.file("reports/detekt/detekt.md"))
     }
     dependencies {
         "detektPlugins"(libs.library("detekt-formatting"))
