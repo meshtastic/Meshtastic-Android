@@ -17,43 +17,42 @@
 
 package org.meshtastic.buildlogic
 
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.FileInputStream
-import java.util.Properties
 
 /**
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
-    val configPropertiesFile = rootProject.file("config.properties")
-    val configProperties = Properties()
-
-    if (configPropertiesFile.exists()) {
-        FileInputStream(configPropertiesFile).use { configProperties.load(it) }
-    }
 
     commonExtension.apply {
-        compileSdk = configProperties.get("COMPILE_SDK").toString().toInt()
+        compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
 
-        defaultConfig {
-            minSdk = configProperties.get("MIN_SDK").toString().toInt()
+        defaultConfig.apply {
+            minSdk = configProperties.getProperty("MIN_SDK").toInt()
+            if (commonExtension is ApplicationExtension) {
+                commonExtension.defaultConfig.targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
+            }
         }
 
-        compileOptions {
+        compileOptions.apply {
             sourceCompatibility = JavaVersion.VERSION_21
             targetCompatibility = JavaVersion.VERSION_21
             isCoreLibraryDesugaringEnabled = true
@@ -63,8 +62,31 @@ internal fun Project.configureKotlinAndroid(
     configureKotlin<KotlinAndroidProjectExtension>()
 
     dependencies {
-        "coreLibraryDesugaring"(libs.findLibrary("android.desugarJdkLibs").get())
+        "coreLibraryDesugaring"(libs.library("android.desugarJdkLibs"))
     }
+}
+
+/**
+ * Configure Kotlin Multiplatform options
+ */
+internal fun Project.configureKotlinMultiplatform() {
+    extensions.configure<KotlinMultiplatformExtension> {
+        // Configure the Android target if the plugin is applied
+        pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
+            extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
+                compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
+                minSdk = configProperties.getProperty("MIN_SDK").toInt()
+                
+                // Set the namespace automatically if not already set
+                if (namespace == null) {
+                    val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
+                    namespace = "org.meshtastic.$pkg"
+                }
+            }
+        }
+    }
+
+    configureKotlin<KotlinMultiplatformExtension>()
 }
 
 /**

@@ -24,6 +24,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.meshtastic.buildlogic.libs
+import org.meshtastic.buildlogic.plugin
 
 class AnalyticsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -33,9 +35,9 @@ class AnalyticsConventionPlugin : Plugin<Project> {
                     productFlavors {
                         all {
                             if (name == "google") {
-                                apply(plugin = "com.google.gms.google-services")
-                                apply(plugin = "com.google.firebase.crashlytics")
-                                apply(plugin = "com.datadoghq.dd-sdk-android-gradle-plugin")
+                                apply(plugin = libs.plugin("google-services").get().pluginId)
+                                apply(plugin = libs.plugin("firebase-crashlytics").get().pluginId)
+                                apply(plugin = libs.plugin("datadog").get().pluginId)
                             }
                         }
                     }
@@ -58,7 +60,7 @@ class AnalyticsConventionPlugin : Plugin<Project> {
             }
 
             // Disable Analytics tasks for non-google flavors
-            val analyticsKeywords = listOf("crashlytics", "google", "datadog","buildId")
+            val analyticsKeywords = listOf("crashlytics", "google", "datadog", "buildId")
             tasks.configureEach {
                 val taskName = name.lowercase()
                 val isAnalyticsTask = analyticsKeywords.any { taskName.contains(it, ignoreCase = true) }

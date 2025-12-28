@@ -22,7 +22,7 @@ plugins {
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    androidLibrary { namespace = "org.meshtastic.core.common" }
+    androidLibrary {}
 
     sourceSets { androidMain.dependencies { implementation(libs.androidx.core.ktx) } }
 }
