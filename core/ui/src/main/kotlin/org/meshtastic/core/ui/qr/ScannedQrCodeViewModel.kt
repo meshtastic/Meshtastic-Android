@@ -20,6 +20,7 @@ package org.meshtastic.core.ui.qr
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.RadioConfigRepository
@@ -32,7 +33,6 @@ import org.meshtastic.proto.ConfigProtos.Config
 import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.config
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,7 +61,7 @@ constructor(
         try {
             serviceRepository.meshService?.setChannel(channel.toByteArray())
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Set channel error")
+            Logger.e(ex) { "Set channel error" }
         }
     }
 
@@ -70,7 +70,7 @@ constructor(
         try {
             serviceRepository.meshService?.setConfig(config.toByteArray())
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Set config error")
+            Logger.e(ex) { "Set config error" }
         }
     }
 }

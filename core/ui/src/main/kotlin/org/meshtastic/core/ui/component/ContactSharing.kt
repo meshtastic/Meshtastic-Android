@@ -43,6 +43,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -65,7 +66,6 @@ import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
-import timber.log.Timber
 import java.net.MalformedURLException
 
 /**
@@ -90,7 +90,7 @@ fun AddContactFAB(
                     try {
                         uri.toSharedContact()
                     } catch (ex: MalformedURLException) {
-                        Timber.e("URL was malformed: ${ex.message}")
+                        Logger.e { "URL was malformed: ${ex.message}" }
                         null
                     }
                 if (sharedContact != null) {
@@ -102,7 +102,7 @@ fun AddContactFAB(
     sharedContact?.let { SharedContactDialog(sharedContact = it, onDismiss = { onSharedContactRequested(null) }) }
 
     fun zxingScan() {
-        Timber.d("Starting zxing QR code scanner")
+        Logger.d { "Starting zxing QR code scanner" }
         val zxingScan = ScanOptions()
         zxingScan.setCameraId(CAMERA_ID)
         zxingScan.setPrompt("")
@@ -115,9 +115,9 @@ fun AddContactFAB(
 
     LaunchedEffect(cameraPermissionState.status) {
         if (cameraPermissionState.status.isGranted) {
-            Timber.d("Camera permission granted")
+            Logger.d { "Camera permission granted" }
         } else {
-            Timber.d("Camera permission denied")
+            Logger.d { "Camera permission denied" }
         }
     }
 
@@ -193,7 +193,7 @@ val Uri.qrCode: Bitmap?
             val barcodeEncoder = BarcodeEncoder()
             barcodeEncoder.createBitmap(bitMatrix)
         } catch (ex: WriterException) {
-            Timber.e("URL was too complex to render as barcode: ${ex.message}")
+            Logger.e { "URL was too complex to render as barcode: ${ex.message}" }
             null
         }
 

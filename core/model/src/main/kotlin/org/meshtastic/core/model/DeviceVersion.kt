@@ -17,7 +17,7 @@
 
 package org.meshtastic.core.model
 
-import timber.log.Timber
+import co.touchlab.kermit.Logger
 
 /** Provide structured access to parse and compare device version strings */
 data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
@@ -28,7 +28,7 @@ data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
             try {
                 verStringToInt(asString)
             } catch (e: Exception) {
-                Timber.w("Exception while parsing version '$asString', assuming version 0")
+                Logger.w { "Exception while parsing version '$asString', assuming version 0" }
                 0
             }
 

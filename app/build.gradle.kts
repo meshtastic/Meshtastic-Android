@@ -234,7 +234,7 @@ dependencies {
     implementation("androidx.hilt:hilt-work:1.2.0")
     ksp("androidx.hilt:hilt-compiler:1.2.0")
     implementation(libs.accompanist.permissions)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     implementation(libs.nordic)
 
@@ -257,7 +257,7 @@ dependencies {
 
 dokka {
     moduleName.set("Meshtastic App")
-    dokkaSourceSets.main {
+    dokkaSourceSets.register("main") {
         sourceLink {
             enableJdkDocumentationLink.set(true)
             enableKotlinStdLibDocumentationLink.set(true)

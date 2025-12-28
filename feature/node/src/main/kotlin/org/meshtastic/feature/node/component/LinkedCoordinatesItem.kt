@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.core.net.toUri
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
@@ -47,7 +48,6 @@ import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import timber.log.Timber
 import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -82,7 +82,7 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.
                     coroutineScope.launch { context.showToast("No application available to open this location!") }
                 }
             } catch (ex: ActivityNotFoundException) {
-                Timber.d("Failed to open geo intent: $ex")
+                Logger.d { "Failed to open geo intent: $ex" }
             }
         },
         onLongClick = {

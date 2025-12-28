@@ -23,20 +23,20 @@ import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.worker.MeshLogCleanupWorker
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 /**
  * The main application class for Meshtastic.
@@ -46,7 +46,9 @@ import java.util.concurrent.TimeUnit
  * user preferences.
  */
 @HiltAndroidApp
-class MeshUtilApplication : Application(), Configuration.Provider {
+class MeshUtilApplication :
+    Application(),
+    Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
@@ -76,10 +78,7 @@ class MeshUtilApplication : Application(), Configuration.Provider {
     }
 
     override val workManagerConfiguration: Configuration
-        get() =
-            Configuration.Builder()
-                .setWorkerFactory(workerFactory)
-                .build()
+        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 }
 
 @EntryPoint
@@ -93,7 +92,7 @@ interface AppEntryPoint {
 fun logAssert(executeReliableWrite: Boolean) {
     if (!executeReliableWrite) {
         val ex = AssertionError("Assertion failed")
-        Timber.e(ex)
+        Logger.e(ex) { "logAssert" }
         throw ex
     }
 }

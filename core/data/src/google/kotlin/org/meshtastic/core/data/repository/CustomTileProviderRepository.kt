@@ -17,6 +17,7 @@
 
 package org.meshtastic.core.data.repository
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,10 +27,8 @@ import kotlinx.serialization.json.Json
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.map.MapTileProviderPrefs
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.collections.plus
 
 interface CustomTileProviderRepository {
     fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>>
@@ -88,7 +87,7 @@ constructor(
             try {
                 customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
             } catch (e: SerializationException) {
-                Timber.e(e, "Error deserializing tile providers")
+                Logger.e(e) { "Error deserializing tile providers" }
                 customTileProvidersStateFlow.value = emptyList()
             }
         } else {
@@ -102,7 +101,7 @@ constructor(
                 val jsonString = json.encodeToString(providers)
                 mapTileProviderPrefs.customTileProviders = jsonString
             } catch (e: SerializationException) {
-                Timber.e(e, "Error serializing tile providers")
+                Logger.e(e) { "Error serializing tile providers" }
             }
         }
     }

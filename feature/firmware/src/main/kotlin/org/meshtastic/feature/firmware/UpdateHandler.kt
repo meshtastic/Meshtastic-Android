@@ -19,6 +19,7 @@ package org.meshtastic.feature.firmware
 
 import android.content.Context
 import android.net.Uri
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -26,7 +27,6 @@ import no.nordicsemi.android.dfu.DfuServiceInitiator
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
-import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 
@@ -81,7 +81,7 @@ class FirmwareRetriever @Inject constructor(private val fileHandler: FirmwareFil
                     return it
                 }
             } catch (e: Exception) {
-                Timber.w(e, "Direct download for $filename failed, falling back to release zip")
+                Logger.w(e) { "Direct download for $filename failed, falling back to release zip" }
             }
         }
 
@@ -141,7 +141,7 @@ constructor(
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        Timber.e(e)
+        Logger.e(e) { "OTA Update failed" }
         updateState(FirmwareUpdateState.Error(e.message ?: "OTA Update failed"))
         null
     }
@@ -214,7 +214,7 @@ constructor(
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        Timber.e(e)
+        Logger.e(e) { "USB Update failed" }
         updateState(FirmwareUpdateState.Error(e.message ?: "USB Update failed"))
         null
     }

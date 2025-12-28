@@ -18,13 +18,13 @@
 package org.meshtastic.core.datastore
 
 import androidx.datastore.core.DataStore
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ChannelProtos.Channel
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.ConfigProtos
-import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,7 +36,7 @@ class ChannelSetDataSource @Inject constructor(private val channelSetStore: Data
         channelSetStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
-                Timber.e("Error reading DeviceConfig settings: ${exception.message}")
+                Logger.e { "Error reading DeviceConfig settings: ${exception.message}" }
                 emit(ChannelSet.getDefaultInstance())
             } else {
                 throw exception

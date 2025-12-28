@@ -2,18 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ComposableParamOrder:AlertDialogs.kt$SimpleAlertDialog</ID>
-    <ID>ComposableParamOrder:EditBase64Preference.kt$EditBase64Preference</ID>
-    <ID>ComposableParamOrder:EditTextPreference.kt$EditTextPreference</ID>
-    <ID>ComposableParamOrder:MainAppBar.kt$MainAppBar</ID>
-    <ID>ComposableParamOrder:MaterialBatteryInfo.kt$MaterialBatteryInfo</ID>
-    <ID>ComposableParamOrder:NodeChip.kt$NodeChip</ID>
-    <ID>ComposableParamOrder:NodeKeyStatusIcon.kt$NodeKeyStatusIcon</ID>
-    <ID>ComposableParamOrder:SignalInfo.kt$SignalInfo</ID>
-    <ID>ComposableParamOrder:SwitchPreference.kt$SwitchPreference</ID>
-    <ID>ContentSlotReused:AdaptiveTwoPane.kt$second</ID>
-    <ID>LambdaParameterEventTrailing:ContactSharing.kt$onSharedContactRequested</ID>
-    <ID>LambdaParameterEventTrailing:MainAppBar.kt$onClickChip</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$0xff</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$16</ID>
     <ID>MagicNumber:EditIPv4Preference.kt$24</ID>
@@ -22,47 +10,5 @@
     <ID>MagicNumber:EditListPreference.kt$12345</ID>
     <ID>MagicNumber:EditListPreference.kt$67890</ID>
     <ID>MagicNumber:LazyColumnDragAndDropDemo.kt$50</ID>
-    <ID>ModifierMissing:AdaptiveTwoPane.kt$AdaptiveTwoPane</ID>
-    <ID>ModifierMissing:ChannelItem.kt$ChannelItem</ID>
-    <ID>ModifierMissing:ChannelSelection.kt$ChannelSelection</ID>
-    <ID>ModifierMissing:ContactSharing.kt$SharedContactDialog</ID>
-    <ID>ModifierMissing:EmojiPicker.kt$EmojiPicker</ID>
-    <ID>ModifierMissing:EmojiPicker.kt$EmojiPickerDialog</ID>
-    <ID>ModifierMissing:IndoorAirQuality.kt$IndoorAirQuality</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt$LoraSignalIndicator</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt$Rssi</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt$Snr</ID>
-    <ID>ModifierMissing:LoraSignalIndicator.kt$SnrAndRssi</ID>
-    <ID>ModifierMissing:PreferenceDivider.kt$PreferenceDivider</ID>
-    <ID>ModifierMissing:SecurityIcon.kt$SecurityIcon</ID>
-    <ID>ModifierMissing:SharedContactDialog.kt$SharedContactDialog</ID>
-    <ID>ModifierMissing:SimpleAlertDialog.kt$SimpleAlertDialog</ID>
-    <ID>ModifierMissing:SlidingSelector.kt$OptionLabel</ID>
-    <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt$modifier = modifier.fillMaxWidth().padding(all = 16.dp)</ID>
-    <ID>ModifierNotUsedAtRoot:TextDividerPreference.kt$modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)</ID>
-    <ID>ModifierReused:PreferenceCategory.kt$Card(modifier = modifier.padding(bottom = 8.dp)) { Column( modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp), horizontalAlignment = Alignment.CenterHorizontally, ) { ProvideTextStyle(MaterialTheme.typography.bodyLarge) { content() } } }</ID>
-    <ID>ModifierReused:PreferenceCategory.kt$Text( text, modifier = modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp, end = 16.dp), style = MaterialTheme.typography.titleLarge, )</ID>
-    <ID>ModifierReused:TextDividerPreference.kt$Card(modifier = modifier.fillMaxWidth()) { Row(modifier = modifier.fillMaxWidth().padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)) } } }</ID>
-    <ID>ModifierReused:TextDividerPreference.kt$Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End))</ID>
-    <ID>ModifierReused:TextDividerPreference.kt$Row(modifier = modifier.fillMaxWidth().padding(all = 16.dp), verticalAlignment = Alignment.CenterVertically) { Text( text = title, style = MaterialTheme.typography.bodyLarge, color = if (!enabled) { MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) } else { Color.Unspecified }, ) if (trailingIcon != null) { Icon(trailingIcon, "trailingIcon", modifier = modifier.fillMaxWidth().wrapContentWidth(Alignment.End)) } }</ID>
-    <ID>MultipleEmitters:PreferenceCategory.kt$PreferenceCategory</ID>
-    <ID>ParameterNaming:BitwisePreference.kt$onItemSelected</ID>
-    <ID>ParameterNaming:ChannelSelection.kt$onSelected</ID>
-    <ID>ParameterNaming:ContactSharing.kt$onSharedContactRequested</ID>
-    <ID>ParameterNaming:DropDownPreference.kt$onItemSelected</ID>
-    <ID>ParameterNaming:EditIPv4Preference.kt$onValueChanged</ID>
-    <ID>ParameterNaming:EditListPreference.kt$onValuesChanged</ID>
-    <ID>ParameterNaming:EditPasswordPreference.kt$onValueChanged</ID>
-    <ID>ParameterNaming:EditTextPreference.kt$onValueChanged</ID>
-    <ID>ParameterNaming:PositionPrecisionPreference.kt$onValueChanged</ID>
-    <ID>ParameterNaming:PreferenceFooter.kt$onNegativeClicked</ID>
-    <ID>ParameterNaming:PreferenceFooter.kt$onPositiveClicked</ID>
-    <ID>ParameterNaming:SlidingSelector.kt$onOptionSelected</ID>
-    <ID>PreviewPublic:IndoorAirQuality.kt$IAQScalePreview</ID>
-    <ID>PreviewPublic:LazyColumnDragAndDropDemo.kt$LazyColumnDragAndDropDemo</ID>
-    <ID>PreviewPublic:MaterialBatteryInfo.kt$MaterialBatteryInfoPreview</ID>
-    <ID>PreviewPublic:SignalInfo.kt$SignalInfoPreview</ID>
-    <ID>PreviewPublic:SignalInfo.kt$SignalInfoSelfPreview</ID>
-    <ID>PreviewPublic:SignalInfo.kt$SignalInfoSimplePreview</ID>
   </CurrentIssues>
 </SmellBaseline>

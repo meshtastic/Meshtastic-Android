@@ -25,19 +25,24 @@ import javax.inject.Singleton
 
 interface MeshLogPrefs {
     var retentionDays: Int
+
+    companion object {
+        const val RETENTION_DAYS_KEY = "meshlog_retention_days"
+        const val DEFAULT_RETENTION_DAYS = 30
+        const val MIN_RETENTION_DAYS = -1 // -1 == keep last hour
+        const val MAX_RETENTION_DAYS = 365
+        const val NEVER_CLEAR_RETENTION_DAYS = 0
+        const val ONE_HOUR_RETENTION_DAYS = -1
+    }
 }
 
 @Singleton
 class MeshLogPrefsImpl @Inject constructor(@MeshLogSharedPreferences private val prefs: SharedPreferences) :
     MeshLogPrefs {
     override var retentionDays: Int by
-        PrefDelegate(prefs = prefs, key = RETENTION_DAYS_KEY, defaultValue = DEFAULT_RETENTION_DAYS)
-
-    companion object {
-        private const val RETENTION_DAYS_KEY = "meshlog_retention_days"
-        const val DEFAULT_RETENTION_DAYS = 30
-        const val MIN_RETENTION_DAYS = 0
-        const val MAX_RETENTION_DAYS = 365
-        const val NEVER_CLEAR_RETENTION_DAYS = 0
-    }
+        PrefDelegate(
+            prefs = prefs,
+            key = MeshLogPrefs.RETENTION_DAYS_KEY,
+            defaultValue = MeshLogPrefs.DEFAULT_RETENTION_DAYS,
+        )
 }

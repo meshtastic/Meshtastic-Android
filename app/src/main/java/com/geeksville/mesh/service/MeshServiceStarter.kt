@@ -20,8 +20,8 @@ package com.geeksville.mesh.service
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import android.os.Build
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import timber.log.Timber
 
 // / Helper function to start running our service
 fun MeshService.Companion.startService(context: Context) {
@@ -33,14 +33,14 @@ fun MeshService.Companion.startService(context: Context) {
     // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
     // listening for the bluetooth packets arriving from the radio. And when they arrive forward them
     // to Signal or whatever.
-    Timber.i("Trying to start service debug=${BuildConfig.DEBUG}")
+    Logger.i { "Trying to start service debug=${BuildConfig.DEBUG}" }
 
     val intent = createIntent(context)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         try {
             context.startForegroundService(intent)
         } catch (ex: ForegroundServiceStartNotAllowedException) {
-            Timber.e("Unable to start service: ${ex.message}")
+            Logger.e { "Unable to start service: ${ex.message}" }
         }
     } else {
         context.startForegroundService(intent)

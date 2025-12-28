@@ -40,10 +40,16 @@ constructor(
     @Suppress("TooGenericExceptionCaught")
     override suspend fun doWork(): Result = try {
         val retentionDays = meshLogPrefs.retentionDays
-        if (retentionDays <= 0) {
+        if (retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) {
             Timber.i("MeshLogCleanupWorker: Skipping cleanup because retention is set to never delete")
         } else {
-            Timber.d("MeshLogCleanupWorker: Cleaning logs older than $retentionDays days")
+            val retentionLabel =
+                if (retentionDays == MeshLogPrefs.ONE_HOUR_RETENTION_DAYS) {
+                    "1 hour"
+                } else {
+                    "$retentionDays days"
+                }
+            Timber.d("MeshLogCleanupWorker: Cleaning logs older than $retentionLabel")
             meshLogRepository.deleteLogsOlderThan(retentionDays)
             Timber.i("MeshLogCleanupWorker: Successfully cleaned old MeshLog entries")
         }

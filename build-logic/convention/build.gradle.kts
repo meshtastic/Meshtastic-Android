@@ -40,10 +40,14 @@ kotlin {
 }
 
 dependencies {
+    // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
+    implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
+
     compileOnly(libs.android.gradleApiPlugin)
     compileOnly(libs.serialization.gradlePlugin)
     compileOnly(libs.android.tools.common)
     compileOnly(libs.compose.gradlePlugin)
+    compileOnly(libs.compose.multiplatform.gradlePlugin)
     compileOnly(libs.datadog.gradlePlugin)
     compileOnly(libs.detekt.gradlePlugin)
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
@@ -103,62 +107,67 @@ detekt {
 gradlePlugin {
     plugins {
         register("androidApplication") {
-            id = libs.plugins.meshtastic.android.application.asProvider().get().pluginId
+            id = "meshtastic.android.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
         register("androidFlavors") {
-            id = libs.plugins.meshtastic.android.application.flavors.get().pluginId
+            id = "meshtastic.android.application.flavors"
             implementationClass = "AndroidApplicationFlavorsConventionPlugin"
         }
         register("androidLibrary") {
-            id = libs.plugins.meshtastic.android.library.asProvider().get().pluginId
+            id = "meshtastic.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
         }
         register("androidLint") {
-            id = libs.plugins.meshtastic.android.lint.get().pluginId
+            id = "meshtastic.android.lint"
             implementationClass = "AndroidLintConventionPlugin"
         }
         register("androidLibraryCompose") {
-            id = libs.plugins.meshtastic.android.library.compose.get().pluginId
+            id = "meshtastic.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
         }
         register("androidApplicationCompose") {
-            id = libs.plugins.meshtastic.android.application.compose.get().pluginId
+            id = "meshtastic.android.application.compose"
             implementationClass = "AndroidApplicationComposeConventionPlugin"
         }
         register("kotlinXSerialization") {
-            id = libs.plugins.meshtastic.kotlinx.serialization.get().pluginId
+            id = "meshtastic.kotlinx.serialization"
             implementationClass = "KotlinXSerializationConventionPlugin"
         }
         register("meshtasticAnalytics") {
-            id = libs.plugins.meshtastic.analytics.get().pluginId
+            id = "meshtastic.analytics"
             implementationClass = "AnalyticsConventionPlugin"
         }
         register("meshtasticHilt") {
-            id = libs.plugins.meshtastic.hilt.get().pluginId
+            id = "meshtastic.hilt"
             implementationClass = "HiltConventionPlugin"
         }
         register("meshtasticDetekt") {
-            id = libs.plugins.meshtastic.detekt.get().pluginId
+            id = "meshtastic.detekt"
             implementationClass = "DetektConventionPlugin"
         }
         register("androidRoom") {
-            id = libs.plugins.meshtastic.android.room.get().pluginId
+            id = "meshtastic.android.room"
             implementationClass = "AndroidRoomConventionPlugin"
         }
 
         register("meshtasticSpotless") {
-            id = libs.plugins.meshtastic.spotless.get().pluginId
+            id = "meshtastic.spotless"
             implementationClass = "SpotlessConventionPlugin"
         }
 
         register("kmpLibrary") {
-            id = libs.plugins.meshtastic.kmp.library.get().pluginId
+            id = "meshtastic.kmp.library"
             implementationClass = "KmpLibraryConventionPlugin"
         }
 
+        register("kmpLibraryCompose") {
+            id = "meshtastic.kmp.library.compose"
+            implementationClass = "KmpLibraryComposeConventionPlugin"
+        }
+
         register("root") {
-            id = libs.plugins.meshtastic.root.get().pluginId
+            id = "meshtastic.root"
             implementationClass = "RootConventionPlugin"
         }
 

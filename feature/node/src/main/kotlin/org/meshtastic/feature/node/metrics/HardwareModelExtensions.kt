@@ -17,8 +17,8 @@
 
 package org.meshtastic.feature.node.metrics
 
+import co.touchlab.kermit.Logger
 import org.meshtastic.proto.MeshProtos
-import timber.log.Timber
 
 /**
  * Safely extracts the hardware model number from a HardwareModel enum.
@@ -34,6 +34,6 @@ import timber.log.Timber
 fun MeshProtos.HardwareModel.safeNumber(fallbackValue: Int = -1): Int = try {
     this.number
 } catch (e: IllegalArgumentException) {
-    Timber.w("Unknown hardware model enum value: $this, using fallback value: $fallbackValue")
+    Logger.w { "Unknown hardware model enum value: $this, using fallback value: $fallbackValue" }
     fallbackValue
 }

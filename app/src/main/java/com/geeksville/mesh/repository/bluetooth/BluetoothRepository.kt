@@ -22,6 +22,7 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.repository.radio.BleConstants.BLE_NAME_PATTERN
 import com.geeksville.mesh.repository.radio.BleConstants.BTM_SERVICE_UUID
 import com.geeksville.mesh.util.registerReceiverCompat
@@ -42,7 +43,6 @@ import no.nordicsemi.kotlin.ble.core.Manager
 import org.meshtastic.core.common.hasBluetoothPermission
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -112,7 +112,7 @@ constructor(
                     .onStart { _isScanning.value = true }
                     .onCompletion { _isScanning.value = false }
                     .catch { ex ->
-                        Timber.w(ex, "Bluetooth scan failed")
+                        Logger.w(ex) { "Bluetooth scan failed" }
                         _isScanning.value = false
                     }
                     .collect { peripheral ->
@@ -158,7 +158,7 @@ constructor(
             )
 
         _state.emit(newState)
-        Timber.d("Detected our bluetooth access=$newState")
+        Logger.d { "Detected our bluetooth access=$newState" }
     }
 
     @SuppressLint("MissingPermission")

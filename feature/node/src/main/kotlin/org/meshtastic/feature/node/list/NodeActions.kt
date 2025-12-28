@@ -18,13 +18,13 @@
 package org.meshtastic.feature.node.list
 
 import android.os.RemoteException
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
-import timber.log.Timber
 import javax.inject.Inject
 
 class NodeActions
@@ -37,7 +37,7 @@ constructor(
         try {
             serviceRepository.onServiceAction(ServiceAction.Favorite(node))
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Favorite node error")
+            Logger.e(ex) { "Favorite node error" }
         }
     }
 
@@ -45,18 +45,18 @@ constructor(
         try {
             serviceRepository.onServiceAction(ServiceAction.Ignore(node))
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Ignore node error")
+            Logger.e(ex) { "Ignore node error" }
         }
     }
 
     suspend fun removeNode(nodeNum: Int) = withContext(Dispatchers.IO) {
-        Timber.i("Removing node '$nodeNum'")
+        Logger.i { "Removing node '$nodeNum'" }
         try {
             val packetId = serviceRepository.meshService?.packetId ?: return@withContext
             serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
             nodeRepository.deleteNode(nodeNum)
         } catch (ex: RemoteException) {
-            Timber.e("Remove node error: ${ex.message}")
+            Logger.e { "Remove node error: ${ex.message}" }
         }
     }
 }

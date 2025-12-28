@@ -18,6 +18,7 @@
 package org.meshtastic.core.database
 
 import androidx.room.TypeConverter
+import co.touchlab.kermit.Logger
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.serialization.json.Json
@@ -25,7 +26,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.TelemetryProtos
-import timber.log.Timber
 
 @Suppress("TooManyFunctions")
 class Converters {
@@ -45,7 +45,7 @@ class Converters {
     fun bytesToFromRadio(bytes: ByteArray): MeshProtos.FromRadio = try {
         MeshProtos.FromRadio.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex, "bytesToFromRadio TypeConverter error")
+        Logger.e(ex) { "bytesToFromRadio TypeConverter error" }
         MeshProtos.FromRadio.getDefaultInstance()
     }
 
@@ -55,7 +55,7 @@ class Converters {
     fun bytesToUser(bytes: ByteArray): MeshProtos.User = try {
         MeshProtos.User.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex, "bytesToUser TypeConverter error")
+        Logger.e(ex) { "bytesToUser TypeConverter error" }
         MeshProtos.User.getDefaultInstance()
     }
 
@@ -65,7 +65,7 @@ class Converters {
     fun bytesToPosition(bytes: ByteArray): MeshProtos.Position = try {
         MeshProtos.Position.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex, "bytesToPosition TypeConverter error")
+        Logger.e(ex) { "bytesToPosition TypeConverter error" }
         MeshProtos.Position.getDefaultInstance()
     }
 
@@ -75,7 +75,7 @@ class Converters {
     fun bytesToTelemetry(bytes: ByteArray): TelemetryProtos.Telemetry = try {
         TelemetryProtos.Telemetry.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex, "bytesToTelemetry TypeConverter error")
+        Logger.e(ex) { "bytesToTelemetry TypeConverter error" }
         TelemetryProtos.Telemetry.newBuilder().build() // Return an empty Telemetry object
     }
 
@@ -85,7 +85,7 @@ class Converters {
     fun bytesToPaxcounter(bytes: ByteArray): PaxcountProtos.Paxcount = try {
         PaxcountProtos.Paxcount.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex, "bytesToPaxcounter TypeConverter error")
+        Logger.e(ex) { "bytesToPaxcounter TypeConverter error" }
         PaxcountProtos.Paxcount.getDefaultInstance()
     }
 
@@ -95,7 +95,7 @@ class Converters {
     fun bytesToMetadata(bytes: ByteArray): MeshProtos.DeviceMetadata = try {
         MeshProtos.DeviceMetadata.parseFrom(bytes)
     } catch (ex: InvalidProtocolBufferException) {
-        Timber.e(ex, "bytesToMetadata TypeConverter error")
+        Logger.e(ex) { "bytesToMetadata TypeConverter error" }
         MeshProtos.DeviceMetadata.getDefaultInstance()
     }
 

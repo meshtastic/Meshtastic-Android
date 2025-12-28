@@ -94,7 +94,7 @@
     <string name="config_network_udp_enabled_summary">Ativar a transmissão de pacotes via UDP através da rede local.</string>
     <string name="config_position_broadcast_secs_summary">O intervalo máximo que pode decorrer sem que um nó transmita a sua posição.</string>
     <!-- Position Config -->
-    <string name="broadcast_interval">Intervalo de Difusão</string>
+    <string name="broadcast_interval">Intervalo de difusão</string>
     <string name="smart_position">Posição Inteligente</string>
     <string name="minimum_interval">Intervalo Mínimo</string>
     <string name="minimum_distance">Distância Mínima</string>

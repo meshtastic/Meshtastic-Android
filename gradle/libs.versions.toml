@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "8.13.2"
+agp = "9.0.0-rc01"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -19,6 +19,9 @@ kotlin = "2.3.0"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.9.0"
 ktlint = "1.7.1"
+
+# Compose Multiplatform
+compose-multiplatform = "1.9.3"
 
 # Google
 hilt = "2.57.2"
@@ -41,7 +44,7 @@ protobuf = "4.33.2"
 [libraries]
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.2" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
@@ -54,6 +57,7 @@ androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", v
 androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version = "1.3.0" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
+androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-navigation-common = { module = "androidx.navigation:navigation-common", version.ref = "navigation" }
@@ -71,7 +75,6 @@ androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
 
 # AndroidX Compose
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.12.01" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
@@ -97,6 +100,7 @@ guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
+hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "hilt" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
@@ -132,6 +136,7 @@ junit = { module = "junit:junit", version = "4.13.2" }
 
 # Other
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-core = { module = "io.coil-kt.coil3:coil-network-core", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
@@ -159,7 +164,8 @@ osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" 
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
 streamsupport-minifuture = { module = "net.sourceforge.streamsupport:streamsupport-minifuture", version = "1.7.4" }
-timber = { module = "com.jakewharton.timber:timber", version = "5.0.1" }
+    kermit = { module = "co.touchlab:kermit", version = "2.0.8" }
+
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version = "4.3.0" }
 
@@ -168,6 +174,7 @@ android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", versi
 android-tools-common = { module = "com.android.tools:common", version = "31.13.2" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.21.0" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.3" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
@@ -184,7 +191,6 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
-android-library = { id = "com.android.library", version.ref = "agp" }
 android-lint = { id = "com.android.lint", version.ref = "agp" }
 
 # Jetbrains
@@ -231,5 +237,6 @@ meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-hilt = { id = "meshtastic.hilt" }
 meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
 meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
+meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }
 meshtastic-root = { id = "meshtastic.root" }
 meshtastic-spotless = { id = "meshtastic.spotless" }

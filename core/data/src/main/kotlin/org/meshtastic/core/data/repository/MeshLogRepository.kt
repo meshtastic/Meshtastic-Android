@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.Portnums
@@ -147,9 +148,14 @@ constructor(
 
     @Suppress("MagicNumber")
     suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
-        if (retentionDays <= 0) return@withContext
+        if (retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) return@withContext
 
-        val cutoffTimestamp = System.currentTimeMillis() - (retentionDays * 24 * 60 * 60 * 1000L)
+        val cutoffTimestamp =
+            if (retentionDays == MeshLogPrefs.ONE_HOUR_RETENTION_DAYS) {
+                System.currentTimeMillis() - (60 * 60 * 1000L)
+            } else {
+                System.currentTimeMillis() - (retentionDays * 24 * 60 * 60 * 1000L)
+            }
         dbManager.currentDb.value.meshLogDao().deleteOlderThan(cutoffTimestamp)
     }
 

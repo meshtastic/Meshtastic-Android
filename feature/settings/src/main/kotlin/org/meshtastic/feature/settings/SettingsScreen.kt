@@ -370,9 +370,10 @@ fun SettingsScreen(
 
                 // MeshLog retention period (App setting)
                 val retentionDays = settingsViewModel.meshLogRetentionDays.collectAsStateWithLifecycle().value
+
                 @Suppress("MagicNumber")
                 val retentionItems =
-                    listOf(0L to stringResource(Res.string.log_retention_never)) +
+                    listOf((-1L) to "1 hour", 0L to stringResource(Res.string.log_retention_never)) +
                         listOf(1, 7, 14, 30, 60, 90, 180, 365).map { days ->
                             days.toLong() to if (days == 1) "1 day" else "$days days"
                         }

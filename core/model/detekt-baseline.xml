@@ -2,30 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>MagicNumber:Channel.kt$0xff</ID>
-    <ID>MagicNumber:ChannelOption.kt$.03125f</ID>
-    <ID>MagicNumber:ChannelOption.kt$.0625f</ID>
-    <ID>MagicNumber:ChannelOption.kt$.203125f</ID>
-    <ID>MagicNumber:ChannelOption.kt$.40625f</ID>
-    <ID>MagicNumber:ChannelOption.kt$.8125f</ID>
-    <ID>MagicNumber:ChannelOption.kt$1.6250f</ID>
-    <ID>MagicNumber:ChannelOption.kt$1000f</ID>
-    <ID>MagicNumber:ChannelOption.kt$1600</ID>
-    <ID>MagicNumber:ChannelOption.kt$200</ID>
-    <ID>MagicNumber:ChannelOption.kt$3.25f</ID>
-    <ID>MagicNumber:ChannelOption.kt$31</ID>
-    <ID>MagicNumber:ChannelOption.kt$400</ID>
-    <ID>MagicNumber:ChannelOption.kt$5</ID>
-    <ID>MagicNumber:ChannelOption.kt$62</ID>
-    <ID>MagicNumber:ChannelOption.kt$800</ID>
-    <ID>MagicNumber:ChannelOption.kt$ChannelOption.LONG_FAST$.250f</ID>
-    <ID>MagicNumber:ChannelOption.kt$ChannelOption.LONG_MODERATE$.125f</ID>
-    <ID>MagicNumber:ChannelOption.kt$ChannelOption.LONG_SLOW$.125f</ID>
-    <ID>MagicNumber:ChannelOption.kt$ChannelOption.MEDIUM_FAST$.250f</ID>
-    <ID>MagicNumber:ChannelOption.kt$ChannelOption.MEDIUM_SLOW$.250f</ID>
-    <ID>MagicNumber:ChannelOption.kt$ChannelOption.SHORT_FAST$.250f</ID>
-    <ID>MagicNumber:ChannelOption.kt$ChannelOption.SHORT_SLOW$.250f</ID>
-    <ID>MagicNumber:ChannelOption.kt$ChannelOption.VERY_LONG_SLOW$.0625f</ID>
     <ID>MagicNumber:ChannelSet.kt$40</ID>
     <ID>MagicNumber:ChannelSet.kt$960</ID>
     <ID>SwallowedException:ChannelSet.kt$ex: Throwable</ID>

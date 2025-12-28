@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh.repository.radio
 
-import timber.log.Timber
+import co.touchlab.kermit.Logger
 
 /**
  * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP
@@ -41,7 +41,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : I
     private var packetLen = 0
 
     override fun close() {
-        Timber.d("Closing stream for good")
+        Logger.d { "Closing stream for good" }
         onDeviceDisconnect(true)
     }
 
@@ -90,7 +90,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : I
         when (val c = b.toInt().toChar()) {
             '\r' -> {} // ignore
             '\n' -> {
-                Timber.d("DeviceLog: $debugLineBuf")
+                Logger.d { "DeviceLog: $debugLineBuf" }
                 debugLineBuf.clear()
             }
             else -> debugLineBuf.append(c)
@@ -104,7 +104,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : I
         var nextPtr = ptr + 1
 
         fun lostSync() {
-            Timber.e("Lost protocol sync")
+            Logger.e { "Lost protocol sync" }
             nextPtr = 0
         }
 

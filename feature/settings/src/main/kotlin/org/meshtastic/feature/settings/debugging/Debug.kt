@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -96,7 +97,6 @@ import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
-import timber.log.Timber
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
@@ -408,7 +408,7 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
         } catch (e: IOException) {
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
-            Timber.w(e, "Error:IOException ")
+            Logger.w(e) { "Error:IOException" }
         }
     }
 

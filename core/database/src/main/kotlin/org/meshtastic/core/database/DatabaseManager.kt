@@ -21,6 +21,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,7 +34,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -106,7 +106,7 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         // One-time cleanup: remove legacy DB if present and not active
         managerScope.launch(Dispatchers.IO) { cleanupLegacyDbIfNeeded(activeDbName = dbName) }
 
-        Timber.i("Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}")
+        Logger.i { "Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}" }
     }
 
     /** Execute [block] with the current DB instance. */
@@ -138,26 +138,28 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         // Only enforce the limit over device-specific DBs; exclude legacy and default DBs
         val deviceDbs =
             all.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
-        Timber.d(
-            "LRU check: limit=%d, active=%s, deviceDbs=%s",
-            limit,
-            anonymizeDbName(activeDbName),
-            deviceDbs.joinToString(", ") { anonymizeDbName(it) },
-        )
+        Logger.d {
+            "LRU check: limit=$limit, active=${anonymizeDbName(
+                activeDbName,
+            )}, deviceDbs=${deviceDbs.joinToString(", ") {
+                anonymizeDbName(it)
+            }}"
+        }
         if (deviceDbs.size <= limit) return
         val usageSnapshot = deviceDbs.associateWith { lastUsed(it) }
-        Timber.d(
-            "LRU lastUsed(ms): %s",
-            usageSnapshot.entries.joinToString(", ") { (name, ts) -> "${anonymizeDbName(name)}=$ts" },
-        )
+        Logger.d {
+            "LRU lastUsed(ms): ${usageSnapshot.entries.joinToString(", ") { (name, ts) ->
+                "${anonymizeDbName(name)}=$ts"
+            }}"
+        }
         val victims = selectEvictionVictims(deviceDbs, activeDbName, limit, usageSnapshot)
-        Timber.i("LRU victims: %s", victims.joinToString(", ") { anonymizeDbName(it) })
+        Logger.i { "LRU victims: ${victims.joinToString(", ") { anonymizeDbName(it) }}" }
         victims.forEach { name ->
             runCatching { dbCache.remove(name)?.close() }
-                .onFailure { Timber.w(it, "Failed to close database %s", name) }
+                .onFailure { Logger.w(it) { "Failed to close database $name" } }
             app.deleteDatabase(name)
             prefs.edit().remove(lastUsedKey(name)).apply()
-            Timber.i("Evicted cached DB ${anonymizeDbName(name)}")
+            Logger.i { "Evicted cached DB ${anonymizeDbName(name)}" }
         }
     }
 
@@ -186,12 +188,12 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         val legacyFile = getDbFile(app, legacy)
         if (legacyFile != null) {
             runCatching { dbCache.remove(legacy)?.close() }
-                .onFailure { Timber.w(it, "Failed to close legacy database %s before deletion", legacy) }
+                .onFailure { Logger.w(it) { "Failed to close legacy database $legacy before deletion" } }
             val deleted = app.deleteDatabase(legacy)
             if (deleted) {
-                Timber.i("Deleted legacy DB ${anonymizeDbName(legacy)}")
+                Logger.i { "Deleted legacy DB ${anonymizeDbName(legacy)}" }
             } else {
-                Timber.w("Attempted to delete legacy DB %s but deleteDatabase returned false", legacy)
+                Logger.w { "Attempted to delete legacy DB $legacy but deleteDatabase returned false" }
             }
         }
         prefs.edit().putBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, true).apply()

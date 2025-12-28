@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh.concurrent
 
-import timber.log.Timber
+import co.touchlab.kermit.Logger
 
 /**
  * Sometimes when starting services we face situations where messages come in that require computation but we can't do
@@ -36,7 +36,7 @@ class DeferredExecution {
 
     // / run all work in the queue and clear it to be ready to accept new work
     fun run() {
-        Timber.d("Running deferred execution numjobs=${queue.size}")
+        Logger.d { "Running deferred execution numjobs=${queue.size}" }
         queue.forEach { it() }
         queue.clear()
     }

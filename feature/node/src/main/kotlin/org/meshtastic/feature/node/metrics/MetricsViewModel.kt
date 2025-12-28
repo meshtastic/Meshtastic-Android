@@ -23,6 +23,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,7 +64,6 @@ import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.Portnums
 import org.meshtastic.proto.Portnums.PortNum
-import timber.log.Timber
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -343,16 +343,16 @@ constructor(
                             }
                     }
 
-                    Timber.d("MetricsViewModel created")
+                    Logger.d { "MetricsViewModel created" }
                 } else {
-                    Timber.d("MetricsViewModel: destNum is null, skipping metrics flows initialization.")
+                    Logger.d { "MetricsViewModel: destNum is null, skipping metrics flows initialization." }
                 }
             }
     }
 
     override fun onCleared() {
         super.onCleared()
-        Timber.d("MetricsViewModel cleared")
+        Logger.d { "MetricsViewModel cleared" }
     }
 
     fun setTimeFrame(timeFrame: TimeFrame) {
@@ -395,7 +395,7 @@ constructor(
                     }
                 }
             } catch (ex: FileNotFoundException) {
-                Timber.e(ex, "Can't write file error")
+                Logger.e(ex) { "Can't write file error" }
             }
         }
 }

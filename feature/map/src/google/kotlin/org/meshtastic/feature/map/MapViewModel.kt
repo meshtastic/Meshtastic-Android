@@ -21,6 +21,7 @@ import android.app.Application
 import android.net.Uri
 import androidx.core.net.toFile
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -56,7 +57,6 @@ import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ConfigProtos
-import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -200,7 +200,7 @@ constructor(
     fun selectCustomTileProvider(config: CustomTileProviderConfig?) {
         if (config != null) {
             if (!isValidTileUrlTemplate(config.urlTemplate)) {
-                Timber.tag("MapViewModel").w("Attempted to select invalid URL template: ${config.urlTemplate}")
+                Logger.withTag("MapViewModel").w("Attempted to select invalid URL template: ${config.urlTemplate}")
                 _selectedCustomTileProviderUrl.value = null
                 googleMapsPrefs.selectedCustomTileUrl = null
                 return
@@ -224,7 +224,8 @@ constructor(
 
     fun createUrlTileProvider(urlString: String): TileProvider? {
         if (!isValidTileUrlTemplate(urlString)) {
-            Timber.tag("MapViewModel").e("Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
+            Logger.withTag("MapViewModel")
+                .e("Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
             return null
         }
         return object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
@@ -237,7 +238,7 @@ constructor(
                 return try {
                     URL(formattedUrl)
                 } catch (e: MalformedURLException) {
-                    Timber.tag("MapViewModel").e(e, "Malformed URL: $formattedUrl")
+                    Logger.withTag("MapViewModel").e(e) { "Malformed URL: $formattedUrl" }
                     null
                 }
             }
@@ -290,7 +291,7 @@ constructor(
             try {
                 _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
             } catch (e: IllegalArgumentException) {
-                Timber.e(e, "Invalid saved Google Map type: $savedGoogleMapTypeName")
+                Logger.e(e) { "Invalid saved Google Map type: $savedGoogleMapTypeName" }
                 _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
                 googleMapsPrefs.selectedGoogleMapType = null
             }
@@ -335,14 +336,14 @@ constructor(
                             }
                         _mapLayers.value = loadedItems
                         if (loadedItems.isNotEmpty()) {
-                            Timber.tag("MapViewModel").i("Loaded ${loadedItems.size} persisted map layers.")
+                            Logger.withTag("MapViewModel").i("Loaded ${loadedItems.size} persisted map layers.")
                         }
                     }
                 } else {
-                    Timber.tag("MapViewModel").i("Map layers directory does not exist. No layers loaded.")
+                    Logger.withTag("MapViewModel").i("Map layers directory does not exist. No layers loaded.")
                 }
             } catch (e: Exception) {
-                Timber.tag("MapViewModel").e(e, "Error loading persisted map layers")
+                Logger.withTag("MapViewModel").e(e) { "Error loading persisted map layers" }
                 _mapLayers.value = emptyList()
             }
         }
@@ -367,7 +368,7 @@ constructor(
                 }
 
             if (layerType == null) {
-                Timber.tag("MapViewModel").e("Unsupported map layer file type: $extension")
+                Logger.withTag("MapViewModel").e("Unsupported map layer file type: $extension")
                 return@launch
             }
 
@@ -384,7 +385,7 @@ constructor(
                 val newItem = MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType)
                 _mapLayers.value = _mapLayers.value + newItem
             } else {
-                Timber.tag("MapViewModel").e("Failed to copy file to internal storage.")
+                Logger.withTag("MapViewModel").e("Failed to copy file to internal storage.")
             }
         }
     }
@@ -402,7 +403,7 @@ constructor(
             inputStream?.use { input -> outputStream.use { output -> input.copyTo(output) } }
             Uri.fromFile(outputFile)
         } catch (e: IOException) {
-            Timber.tag("MapViewModel").e(e, "Error copying file to internal storage")
+            Logger.withTag("MapViewModel").e(e) { "Error copying file to internal storage" }
             null
         }
     }
@@ -453,7 +454,7 @@ constructor(
                     file.delete()
                 }
             } catch (e: Exception) {
-                Timber.tag("MapViewModel").e(e, "Error deleting file from internal storage")
+                Logger.withTag("MapViewModel").e(e) { "Error deleting file from internal storage" }
             }
         }
     }
@@ -465,7 +466,7 @@ constructor(
             try {
                 application.contentResolver.openInputStream(uriToLoad)
             } catch (_: Exception) {
-                Timber.d("MapViewModel: Error opening InputStream from URI: $uriToLoad")
+                Logger.d { "MapViewModel: Error opening InputStream from URI: $uriToLoad" }
                 null
             }
         }
@@ -480,7 +481,7 @@ constructor(
                 LayerType.GEOJSON -> loadGeoJsonLayerIfNeeded(layerItem, map)
             }
         } catch (e: Exception) {
-            Timber.tag("MapViewModel").e(e, "Error loading map layer for ${layerItem.uri}")
+            Logger.withTag("MapViewModel").e(e) { "Error loading map layer for ${layerItem.uri}" }
         }
     }
 
