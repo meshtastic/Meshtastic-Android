@@ -19,14 +19,13 @@
 
 package org.meshtastic.core.ui.timezone
 
-import java.time.DayOfWeek
 import java.time.Instant
-import java.time.LocalDateTime
+import java.time.Year
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoField
-import java.time.temporal.WeekFields
+import java.time.zone.ZoneOffsetTransitionRule
 import java.util.Locale
 import kotlin.math.abs
 
@@ -34,101 +33,117 @@ import kotlin.math.abs
  * Generates a POSIX time zone string from a [ZoneId]. Uses the specification found
  * [here](https://www.postgresql.org/docs/current/datetime-posix-timezone-specs.html).
  */
+@Suppress("ReturnCount")
 fun ZoneId.toPosixString(): String {
-    val now = Instant.now()
-    val upcomingTransition = rules.nextTransition(now)
+    val rules = this.rules
 
-    // No upcoming transition means this time zone does not support DST.
-    if (upcomingTransition == null) {
-        with(now.asZonedDateTime()) {
-            return "${timeZoneShortName()}${formattedOffsetString()}"
-        }
+    if (rules.isFixedOffset || rules.transitionRules.size < 2) {
+        val now = Instant.now()
+        val zdt = ZonedDateTime.ofInstant(now, this)
+        return "${formatAbbreviation(zdt.timeZoneShortName())}${formatPosixOffset(zdt.offset)}"
     }
 
-    val upcomingInstant = upcomingTransition.instant
-    val followingTransition = rules.nextTransition(upcomingInstant)
+    val springRule = rules.transitionRules.firstOrNull { it.offsetAfter.totalSeconds > it.offsetBefore.totalSeconds }
+    val fallRule = rules.transitionRules.firstOrNull { it.offsetAfter.totalSeconds < it.offsetBefore.totalSeconds }
 
-    val (stdTransition, dstTransition) =
-        if (rules.isDaylightSavings(upcomingInstant)) {
-            followingTransition to upcomingTransition
-        } else {
-            upcomingTransition to followingTransition
-        }
-
-    val stdDate = stdTransition.instant.asZonedDateTime()
-    val dstDate = dstTransition.instant.asZonedDateTime()
+    if (springRule == null || fallRule == null) {
+        val now = Instant.now()
+        val zdt = ZonedDateTime.ofInstant(now, this)
+        return "${formatAbbreviation(zdt.timeZoneShortName())}${formatPosixOffset(zdt.offset)}"
+    }
 
     return buildString {
-        append(stdDate.timeZoneShortName())
-        append(stdDate.formattedOffsetString())
-        append(dstDate.timeZoneShortName())
+        val stdAbbrev = getTransitionAbbreviation(this@toPosixString, fallRule)
+        val dstAbbrev = getTransitionAbbreviation(this@toPosixString, springRule)
 
-        // Don't append the DST offset if it is only 1 hour off.
+        append(formatAbbreviation(stdAbbrev))
+        append(formatPosixOffset(springRule.offsetBefore))
+        append(formatAbbreviation(dstAbbrev))
+
         @Suppress("MagicNumber")
-        if (abs(stdDate.offset.totalSeconds - dstDate.offset.totalSeconds) != 3600) {
-            append(dstDate.formattedOffsetString())
+        if (springRule.offsetAfter.totalSeconds - springRule.offsetBefore.totalSeconds != 3600) {
+            append(formatPosixOffset(springRule.offsetAfter))
         }
 
-        append(dstTransition.dateTimeBefore.transitionRuleString())
-        append(stdTransition.dateTimeBefore.transitionRuleString())
+        append(formatTransitionRule(springRule))
+        append(formatTransitionRule(fallRule))
     }
 }
 
-/** Returns the time zone short. e.g. "EST" or "EDT". */
 private fun ZonedDateTime.timeZoneShortName(): String {
     val formatter = DateTimeFormatter.ofPattern("zzz", Locale.ENGLISH)
     val shortName = format(formatter)
     return if (shortName.startsWith("GMT")) "GMT" else shortName
 }
 
-/**
- * Returns the time zone offset string with the format "<HOURS>:<MINUTES>:<SECONDS>". Minutes and seconds are only shown
- * if they are non-zero.
- */
-@Suppress("MagicNumber")
-private fun ZonedDateTime.formattedOffsetString(): String {
-    val offsetSeconds = -offset.totalSeconds
+private fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
 
+private fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionRule): String {
+    val transition = rule.createTransition(Year.now().value)
+    return ZonedDateTime.ofInstant(transition.instant, zone).timeZoneShortName()
+}
+
+@Suppress("MagicNumber")
+private fun formatPosixOffset(offset: ZoneOffset): String {
+    val offsetSeconds = -offset.totalSeconds
     val hours = offsetSeconds / 3600
     val remainingSeconds = abs(offsetSeconds) % 3600
     val minutes = remainingSeconds / 60
     val seconds = remainingSeconds % 60
 
     return buildString {
+        if (offsetSeconds < 0 && hours == 0) append("-")
         append(hours)
-        appendMinSec(minutes = minutes, seconds = seconds) { ":%02d".format(Locale.ENGLISH, it) }
-    }
-}
-
-/**
- * Returns a transition rule string with the format
- * ",M<MONTH>.<WEEK_OF_MONTH>.<DAY_OF_WEEK>/<HOURS>:<MINUTES>:<SECONDS>". Time is omitted if it is 2:00:00, since that
- * is the spec default. Otherwise, append time with non-zero values.
- */
-@Suppress("MagicNumber")
-private fun LocalDateTime.transitionRuleString() = buildString {
-    val weekOfMonth = get(ChronoField.ALIGNED_WEEK_OF_MONTH)
-    val dayOfWeek = get(WeekFields.of(DayOfWeek.SUNDAY, 7).dayOfWeek()) - 1
-    append(",M$monthValue.$weekOfMonth.$dayOfWeek")
-
-    when {
-        // No-op for spec default
-        hour == 2 && minute == 0 && second == 0 -> Unit
-        else -> {
-            append("/$hour")
-            appendMinSec(minutes = minute, seconds = second) { ":$it" }
+        if (minutes != 0 || seconds != 0) {
+            append(":%02d".format(Locale.ENGLISH, minutes))
+            if (seconds != 0) {
+                append(":%02d".format(Locale.ENGLISH, seconds))
+            }
         }
     }
 }
 
-private inline fun StringBuilder.appendMinSec(minutes: Int, seconds: Int, format: (Int) -> String) {
-    if (minutes != 0 || seconds != 0) {
-        // This covers both "30m:30s" and "00m:30s"
-        append(format(minutes))
-        // This prevents "30m:00s"
-        if (seconds != 0) append(format(seconds))
+@Suppress("MagicNumber")
+private fun formatTransitionRule(rule: ZoneOffsetTransitionRule): String {
+    val month = rule.month.value
+    val dayOfWeek = rule.dayOfWeek.value % 7
+    val dayIndicator = rule.dayOfMonthIndicator
+
+    val occurrence =
+        when {
+            dayIndicator < 0 -> 5
+            dayIndicator > rule.month.length(false) - 7 -> 5
+            else -> ((dayIndicator - 1) / 7) + 1
+        }
+
+    val wallTime: java.time.LocalTime =
+        when (rule.timeDefinition) {
+            ZoneOffsetTransitionRule.TimeDefinition.UTC ->
+                rule.localTime.plusSeconds(rule.offsetBefore.totalSeconds.toLong())
+
+            ZoneOffsetTransitionRule.TimeDefinition.STANDARD -> {
+                if (rule.offsetAfter.totalSeconds > rule.offsetBefore.totalSeconds) {
+                    rule.localTime
+                } else {
+                    rule.localTime.plusSeconds(
+                        (rule.offsetBefore.totalSeconds - rule.offsetAfter.totalSeconds).toLong(),
+                    )
+                }
+            }
+
+            else -> rule.localTime
+        }
+
+    return buildString {
+        append(",M$month.$occurrence.$dayOfWeek")
+        if (wallTime.hour != 2 || wallTime.minute != 0 || wallTime.second != 0) {
+            append("/${wallTime.hour}")
+            if (wallTime.minute != 0 || wallTime.second != 0) {
+                append(":%02d".format(Locale.ENGLISH, wallTime.minute))
+                if (wallTime.second != 0) {
+                    append(":%02d".format(Locale.ENGLISH, wallTime.second))
+                }
+            }
+        }
     }
 }
-
-context(zoneId: ZoneId)
-private fun Instant.asZonedDateTime() = ZonedDateTime.ofInstant(this, zoneId)
