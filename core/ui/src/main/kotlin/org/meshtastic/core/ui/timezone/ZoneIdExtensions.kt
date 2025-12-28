@@ -37,14 +37,14 @@ import kotlin.math.abs
 fun ZoneId.toPosixString(): String {
     val rules = this.rules
 
-    if (rules.isFixedOffset || rules.transitionRules.size < 2) {
+    if (rules.isFixedOffset || rules.transitionRules.isEmpty()) {
         val now = Instant.now()
         val zdt = ZonedDateTime.ofInstant(now, this)
         return "${formatAbbreviation(zdt.timeZoneShortName())}${formatPosixOffset(zdt.offset)}"
     }
 
-    val springRule = rules.transitionRules.firstOrNull { it.offsetAfter.totalSeconds > it.offsetBefore.totalSeconds }
-    val fallRule = rules.transitionRules.firstOrNull { it.offsetAfter.totalSeconds < it.offsetBefore.totalSeconds }
+    val springRule = rules.transitionRules.lastOrNull { it.offsetAfter.totalSeconds > it.offsetBefore.totalSeconds }
+    val fallRule = rules.transitionRules.lastOrNull { it.offsetAfter.totalSeconds < it.offsetBefore.totalSeconds }
 
     if (springRule == null || fallRule == null) {
         val now = Instant.now()
