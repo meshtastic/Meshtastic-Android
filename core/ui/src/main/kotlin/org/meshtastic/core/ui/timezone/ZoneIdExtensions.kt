@@ -117,7 +117,7 @@ internal fun formatTransitionRule(rule: ZoneOffsetTransitionRule): String {
             else -> ((dayIndicator - 1) / 7) + 1
         }
 
-    val wallTime: java.time.LocalTime =
+    val wallTime =
         when (rule.timeDefinition) {
             ZoneOffsetTransitionRule.TimeDefinition.UTC ->
                 rule.localTime.plusSeconds(rule.offsetBefore.totalSeconds.toLong())
