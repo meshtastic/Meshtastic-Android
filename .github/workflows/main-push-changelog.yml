@@ -51,10 +51,8 @@ jobs:
       - name: Save changelog to file
         if: steps.last_prod_tag.outputs.tag != ''
         run: |
-          mkdir -p artifacts
-          cat << 'EOF' > artifacts/main-push-changelog.md
-          ${{ steps.changelog.outputs.changelog }}
-          EOF
+            mkdir -p artifacts
+            echo "${{ steps.changelog.outputs.changelog }}" > artifacts/main-push-changelog.md
 
       - name: Upload changelog artifact
         if: steps.last_prod_tag.outputs.tag != ''
