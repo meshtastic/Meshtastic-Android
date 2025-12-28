@@ -255,7 +255,7 @@ dependencies {
 
 dokka {
     moduleName.set("Meshtastic App")
-    dokkaSourceSets.main {
+    dokkaSourceSets.register("main") {
         sourceLink {
             enableJdkDocumentationLink.set(true)
             enableKotlinStdLibDocumentationLink.set(true)

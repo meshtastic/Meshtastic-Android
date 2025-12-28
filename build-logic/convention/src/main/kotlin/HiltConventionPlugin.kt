@@ -19,6 +19,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.dependencies
+import org.meshtastic.buildlogic.library
 import org.meshtastic.buildlogic.libs
 
 class HiltConventionPlugin : Plugin<Project> {
@@ -28,16 +29,16 @@ class HiltConventionPlugin : Plugin<Project> {
 
             dependencies {
                 // fixme: remove when hilt supports kotlin 2.3.x
-                "ksp"(libs.findLibrary("kotlin-metadata-jvm").get())
+                "ksp"(libs.library("kotlin-metadata-jvm"))
 
-                "ksp"(libs.findLibrary("hilt.compiler").get())
-                "implementation"(libs.findLibrary("hilt-android").get())
+                "ksp"(libs.library("hilt.compiler"))
+                "implementation"(libs.library("hilt-android"))
             }
 
             // Add support for Jvm Module, base on org.jetbrains.kotlin.jvm
             pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
                 dependencies {
-                    "implementation"(libs.findLibrary("hilt.core").get())
+                    "implementation"(libs.library("hilt-core"))
                 }
             }
 
