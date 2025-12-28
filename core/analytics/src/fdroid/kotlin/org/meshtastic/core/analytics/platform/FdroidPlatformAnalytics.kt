@@ -19,9 +19,10 @@ package org.meshtastic.core.analytics.platform
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import org.meshtastic.core.analytics.BuildConfig
 import org.meshtastic.core.analytics.DataPair
-import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -34,16 +35,17 @@ class FdroidPlatformAnalytics @Inject constructor() : PlatformAnalytics {
         // In debug builds we attach a DebugTree for convenient local logging, but
         // release builds rely on system logging only.
         if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-            Timber.i("F-Droid platform no-op analytics initialized (DebugTree planted).")
+            Logger.setMinSeverity(Severity.Debug)
+            Logger.i { "F-Droid platform no-op analytics initialized (Debug mode }." }
         } else {
-            Timber.i("F-Droid platform no-op analytics initialized.")
+            Logger.setMinSeverity(Severity.Info)
+            Logger.i { "F-Droid platform no-op analytics initialized." }
         }
     }
 
     override fun setDeviceAttributes(firmwareVersion: String, model: String) {
         // No-op for F-Droid
-        Timber.d("Set device attributes called: firmwareVersion=$firmwareVersion, deviceHardware=$model")
+        Logger.d { "Set device attributes called: firmwareVersion=$firmwareVersion, deviceHardware=$model" }
     }
 
     @Composable
@@ -51,7 +53,7 @@ class FdroidPlatformAnalytics @Inject constructor() : PlatformAnalytics {
         // No-op for F-Droid, but we can log navigation if needed for debugging
         if (BuildConfig.DEBUG) {
             navController.addOnDestinationChangedListener { _, destination, _ ->
-                Timber.d("Navigation changed to: ${destination.route}")
+                Logger.d { "Navigation changed to: ${destination.route}" }
             }
         }
     }
@@ -60,6 +62,6 @@ class FdroidPlatformAnalytics @Inject constructor() : PlatformAnalytics {
         get() = false
 
     override fun track(event: String, vararg properties: DataPair) {
-        Timber.d("Track called: event=$event, properties=${properties.toList()}")
+        Logger.d { "Track called: event=$event, properties=${properties.toList()}" }
     }
 }

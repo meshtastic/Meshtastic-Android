@@ -18,11 +18,11 @@
 package org.meshtastic.core.datastore
 
 import androidx.datastore.core.DataStore
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig
-import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,7 +34,7 @@ class ModuleConfigDataSource @Inject constructor(private val moduleConfigStore: 
         moduleConfigStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
-                Timber.e("Error reading LocalModuleConfig settings: ${exception.message}")
+                Logger.e { "Error reading LocalModuleConfig settings: ${exception.message}" }
                 emit(LocalModuleConfig.getDefaultInstance())
             } else {
                 throw exception
@@ -53,7 +53,7 @@ class ModuleConfigDataSource @Inject constructor(private val moduleConfigStore: 
             if (localField != null) {
                 builder.setField(localField, value)
             } else {
-                Timber.e("Error writing LocalModuleConfig settings: ${config.payloadVariantCase}")
+                Logger.e { "Error writing LocalModuleConfig settings: ${config.payloadVariantCase}" }
             }
         }
         builder.build()

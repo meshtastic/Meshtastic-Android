@@ -62,7 +62,7 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.zxing.core)
     implementation(libs.zxing.android.embedded)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

@@ -17,6 +17,7 @@
 
 package org.meshtastic.core.data.repository
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
@@ -26,7 +27,6 @@ import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -68,7 +68,7 @@ constructor(
         // This gives the UI something to show immediately.
         val cachedRelease = localDataSource.getLatestRelease(releaseType)
         cachedRelease?.let {
-            Timber.d("Emitting cached firmware for $releaseType (isStale=${it.isStale()})")
+            Logger.d { "Emitting cached firmware for $releaseType (isStale=${it.isStale()})" }
             emit(it.asExternalModel())
         }
 
@@ -84,7 +84,7 @@ constructor(
         // The `distinctUntilChanged()` operator on the collector side will prevent
         // re-emitting the same data if the cache wasn't actually updated.
         val finalRelease = localDataSource.getLatestRelease(releaseType)
-        Timber.d("Emitting final firmware for $releaseType from cache.")
+        Logger.d { "Emitting final firmware for $releaseType from cache." }
         emit(finalRelease?.asExternalModel())
     }
 
@@ -98,7 +98,7 @@ constructor(
     private suspend fun updateCacheFromSources() {
         val remoteFetchSuccess =
             runCatching {
-                Timber.d("Fetching fresh firmware releases from remote API.")
+                Logger.d { "Fetching fresh firmware releases from remote API." }
                 val networkReleases = remoteDataSource.getFirmwareReleases()
 
                 // The API fetches all release types, so we cache them all at once.
@@ -109,13 +109,13 @@ constructor(
 
         // If remote fetch failed, try the JSON fallback as a last resort.
         if (!remoteFetchSuccess) {
-            Timber.w("Remote fetch failed, attempting to cache from bundled JSON.")
+            Logger.w { "Remote fetch failed, attempting to cache from bundled JSON." }
             runCatching {
                 val jsonReleases = jsonDataSource.loadFirmwareReleaseFromJsonAsset()
                 localDataSource.insertFirmwareReleases(jsonReleases.releases.stable, FirmwareReleaseType.STABLE)
                 localDataSource.insertFirmwareReleases(jsonReleases.releases.alpha, FirmwareReleaseType.ALPHA)
             }
-                .onFailure { Timber.w("Failed to cache from JSON: ${it.message}") }
+                .onFailure { Logger.w { "Failed to cache from JSON: ${it.message}" } }
         }
     }
 

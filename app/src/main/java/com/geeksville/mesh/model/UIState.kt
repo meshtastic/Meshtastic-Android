@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -67,7 +68,6 @@ import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.MeshProtos
-import timber.log.Timber
 import javax.inject.Inject
 
 // Given a human name, strip out the first letter of the first three words and return that as the
@@ -212,7 +212,7 @@ constructor(
             }
             .launchIn(viewModelScope)
 
-        Timber.d("ViewModel created")
+        Logger.d { "ViewModel created" }
     }
 
     private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
@@ -222,7 +222,7 @@ constructor(
     fun setSharedContactRequested(url: Uri, onFailure: () -> Unit) {
         runCatching { _sharedContactRequested.value = url.toSharedContact() }
             .onFailure { ex ->
-                Timber.e(ex, "Shared contact error")
+                Logger.e(ex) { "Shared contact error" }
                 onFailure()
             }
     }
@@ -243,7 +243,7 @@ constructor(
     fun requestChannelUrl(url: Uri, onFailure: () -> Unit) =
         runCatching { _requestChannelSet.value = url.toChannelSet() }
             .onFailure { ex ->
-                Timber.e(ex, "Channel url error")
+                Logger.e(ex) { "Channel url error" }
                 onFailure()
             }
 
@@ -256,7 +256,7 @@ constructor(
 
     override fun onCleared() {
         super.onCleared()
-        Timber.d("ViewModel cleared")
+        Logger.d { "ViewModel cleared" }
     }
 
     val tracerouteResponse: LiveData<TracerouteResponse?>

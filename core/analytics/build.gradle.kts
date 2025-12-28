@@ -46,7 +46,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.navigation.runtime)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     googleApi(libs.dd.sdk.android.compose)
     googleApi(libs.dd.sdk.android.logs)

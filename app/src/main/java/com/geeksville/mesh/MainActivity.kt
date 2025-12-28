@@ -40,6 +40,7 @@ import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,7 +54,6 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.intro.AppIntroductionScreen
-import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -118,27 +118,27 @@ class MainActivity : AppCompatActivity() {
         when (appLinkAction) {
             Intent.ACTION_VIEW -> {
                 appLinkData?.let {
-                    Timber.d("App link data: $it")
+                    Logger.d { "App link data: $it" }
                     if (it.path?.startsWith("/e/") == true || it.path?.startsWith("/E/") == true) {
-                        Timber.d("App link data is a channel set")
+                        Logger.d { "App link data is a channel set" }
                         model.requestChannelUrl(
                             url = it,
                             onFailure = { lifecycleScope.launch { showToast(Res.string.channel_invalid) } },
                         )
                     } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
-                        Timber.d("App link data is a shared contact")
+                        Logger.d { "App link data is a shared contact" }
                         model.setSharedContactRequested(
                             url = it,
                             onFailure = { lifecycleScope.launch { showToast(Res.string.contact_invalid) } },
                         )
                     } else {
-                        Timber.d("App link data is not a channel set")
+                        Logger.d { "App link data is not a channel set" }
                     }
                 }
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                Timber.d("USB device attached")
+                Logger.d { "USB device attached" }
                 showSettingsPage()
             }
 
@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             else -> {
-                Timber.w("Unexpected action $appLinkAction")
+                Logger.w { "Unexpected action $appLinkAction" }
             }
         }
     }

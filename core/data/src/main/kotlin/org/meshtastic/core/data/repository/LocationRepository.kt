@@ -27,6 +27,7 @@ import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
 import androidx.core.location.altitude.AltitudeConverterCompat
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
@@ -34,7 +35,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -68,7 +68,7 @@ constructor(
                 try {
                     AltitudeConverterCompat.addMslAltitudeToLocation(context, location)
                 } catch (e: Exception) {
-                    Timber.e(e, "addMslAltitudeToLocation() failed")
+                    Logger.e(e) { "addMslAltitudeToLocation() failed" }
                 }
             }
             // info("New location: $location")
@@ -85,9 +85,9 @@ constructor(
             }
         }
 
-        Timber.i(
-            "Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m",
-        )
+        Logger.i {
+            "Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m"
+        }
         _receivingLocationUpdates.value = true
         analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
@@ -106,7 +106,7 @@ constructor(
         }
 
         awaitClose {
-            Timber.i("Stopping location requests")
+            Logger.i { "Stopping location requests" }
             _receivingLocationUpdates.value = false
             analytics.track("location_stop")
 

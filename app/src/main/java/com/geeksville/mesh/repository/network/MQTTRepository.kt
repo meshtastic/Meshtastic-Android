@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.repository.network
 
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.util.ignoreException
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.channels.awaitClose
@@ -36,7 +37,6 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.proto.MeshProtos.MqttClientProxyMessage
 import org.meshtastic.proto.mqttClientProxyMessage
-import timber.log.Timber
 import java.net.URI
 import java.security.SecureRandom
 import javax.inject.Inject
@@ -70,7 +70,7 @@ constructor(
     private var mqttClient: MqttAsyncClient? = null
 
     fun disconnect() {
-        Timber.i("MQTT Disconnected")
+        Logger.i { "MQTT Disconnected" }
         mqttClient?.apply {
             ignoreException { disconnect() }
             close(true)
@@ -110,7 +110,7 @@ constructor(
         val callback =
             object : MqttCallbackExtended {
                 override fun connectComplete(reconnect: Boolean, serverURI: String) {
-                    Timber.i("MQTT connectComplete: $serverURI reconnect: $reconnect")
+                    Logger.i { "MQTT connectComplete: $serverURI reconnect: $reconnect" }
                     channelSet.subscribeList
                         .ifEmpty {
                             return
@@ -123,7 +123,7 @@ constructor(
                 }
 
                 override fun connectionLost(cause: Throwable) {
-                    Timber.i("MQTT connectionLost cause: $cause")
+                    Logger.i { "MQTT connectionLost cause: $cause" }
                     if (cause is IllegalArgumentException) close(cause)
                 }
 
@@ -138,7 +138,7 @@ constructor(
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                    Timber.i("MQTT deliveryComplete messageId: ${token?.messageId}")
+                    Logger.i { "MQTT deliveryComplete messageId: ${token?.messageId}" }
                 }
             }
 
@@ -161,15 +161,15 @@ constructor(
 
     private fun subscribe(topic: String) {
         mqttClient?.subscribe(topic, DEFAULT_QOS)
-        Timber.i("MQTT Subscribed to topic: $topic")
+        Logger.i { "MQTT Subscribed to topic: $topic" }
     }
 
     fun publish(topic: String, data: ByteArray, retained: Boolean) {
         try {
             val token = mqttClient?.publish(topic, data, DEFAULT_QOS, retained)
-            Timber.i("MQTT Publish messageId: ${token?.messageId}")
+            Logger.i { "MQTT Publish messageId: ${token?.messageId}" }
         } catch (ex: Exception) {
-            Timber.e("MQTT Publish error: ${ex.message}")
+            Logger.e { "MQTT Publish error: ${ex.message}" }
         }
     }
 }

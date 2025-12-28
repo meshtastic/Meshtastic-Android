@@ -21,11 +21,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,9 +43,9 @@ class BootloaderWarningDataSource @Inject constructor(private val dataStore: Dat
             runCatching { Json.decodeFromString<List<String>>(jsonString).toSet() }
                 .onFailure { e ->
                     if (e is IllegalArgumentException || e is SerializationException) {
-                        Timber.w(e, "Failed to parse dismissed bootloader warning addresses, resetting preference")
+                        Logger.w(e) { "Failed to parse dismissed bootloader warning addresses, resetting preference" }
                     } else {
-                        Timber.w(e, "Unexpected error while parsing dismissed bootloader warning addresses")
+                        Logger.w(e) { "Unexpected error while parsing dismissed bootloader warning addresses" }
                     }
                 }
                 .getOrDefault(emptySet())

@@ -17,6 +17,7 @@
 
 package org.meshtastic.core.service
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +26,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -66,7 +66,7 @@ class ServiceRepository @Inject constructor() {
         get() = _clientNotification
 
     fun setClientNotification(notification: MeshProtos.ClientNotification?) {
-        Timber.e(notification?.message.orEmpty())
+        Logger.e { notification?.message.orEmpty() }
 
         _clientNotification.value = notification
     }
@@ -80,7 +80,7 @@ class ServiceRepository @Inject constructor() {
         get() = _errorMessage
 
     fun setErrorMessage(text: String) {
-        Timber.e(text)
+        Logger.e { text }
         _errorMessage.value = text
     }
 

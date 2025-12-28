@@ -24,6 +24,7 @@ import android.os.RemoteException
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
@@ -49,7 +50,6 @@ import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.meshtastic
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import timber.log.Timber
 import javax.inject.Inject
 
 // ... (DeviceListEntry sealed class remains the same) ...
@@ -164,13 +164,13 @@ constructor(
 
     init {
         serviceRepository.statusMessage.onEach { errorText.value = it }.launchIn(viewModelScope)
-        Timber.d("BTScanModel created")
+        Logger.d { "BTScanModel created" }
     }
 
     override fun onCleared() {
         super.onCleared()
         bluetoothRepository.stopScan()
-        Timber.d("BTScanModel cleared")
+        Logger.d { "BTScanModel cleared" }
     }
 
     fun setErrorText(text: String) {
@@ -178,7 +178,7 @@ constructor(
     }
 
     fun stopScan() {
-        Timber.d("stopping scan")
+        Logger.d { "stopping scan" }
         bluetoothRepository.stopScan()
     }
 
@@ -187,7 +187,7 @@ constructor(
     }
 
     fun startScan() {
-        Timber.d("starting ble scan")
+        Logger.d { "starting ble scan" }
         bluetoothRepository.startScan()
     }
 
@@ -195,24 +195,24 @@ constructor(
         try {
             serviceRepository.meshService?.let { service -> MeshService.changeDeviceAddress(context, service, address) }
         } catch (ex: RemoteException) {
-            Timber.e(ex, "changeDeviceSelection failed, probably it is shutting down")
+            Logger.e(ex) { "changeDeviceSelection failed, probably it is shutting down" }
         }
     }
 
     /** Initiates the bonding process and connects to the device upon success. */
     private fun requestBonding(entry: DeviceListEntry.Ble) {
-        Timber.i("Starting bonding for ${entry.peripheral.address.anonymize}")
+        Logger.i { "Starting bonding for ${entry.peripheral.address.anonymize}" }
         viewModelScope.launch {
             @Suppress("TooGenericExceptionCaught")
             try {
                 bluetoothRepository.bond(entry.peripheral)
-                Timber.i("Bonding complete for ${entry.peripheral.address.anonymize}, selecting device...")
+                Logger.i { "Bonding complete for ${entry.peripheral.address.anonymize}, selecting device..." }
                 changeDeviceAddress(entry.fullAddress)
             } catch (ex: SecurityException) {
-                Timber.e(ex, "Bonding failed for ${entry.peripheral.address.anonymize} Permissions not granted")
+                Logger.e(ex) { "Bonding failed for ${entry.peripheral.address.anonymize} Permissions not granted" }
                 serviceRepository.setErrorMessage("Bonding failed: ${ex.message} Permissions not granted")
             } catch (ex: Exception) {
-                Timber.e(ex, "Bonding failed for ${entry.peripheral.address.anonymize}")
+                Logger.e(ex) { "Bonding failed for ${entry.peripheral.address.anonymize}" }
                 serviceRepository.setErrorMessage("Bonding failed: ${ex.message}")
             }
         }
@@ -223,10 +223,10 @@ constructor(
             .requestPermission(it.driver.device)
             .onEach { granted ->
                 if (granted) {
-                    Timber.i("User approved USB access")
+                    Logger.i { "User approved USB access" }
                     changeDeviceAddress(it.fullAddress)
                 } else {
-                    Timber.e("USB permission denied for device ${it.address}")
+                    Logger.e { "USB permission denied for device ${it.address}" }
                 }
             }
             .launchIn(viewModelScope)

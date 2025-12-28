@@ -17,12 +17,12 @@
 
 package com.geeksville.mesh.repository.radio
 
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.repository.usb.SerialConnection
 import com.geeksville.mesh.repository.usb.SerialConnectionListener
 import com.geeksville.mesh.repository.usb.UsbRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicReference
 
 /** An interface that assumes we are talking to a meshtastic device via USB serial */
@@ -48,10 +48,10 @@ constructor(
     override fun connect() {
         val device = serialInterfaceSpec.findSerial(address)
         if (device == null) {
-            Timber.e("[$address] Serial device not found at address")
+            Logger.e { "[$address] Serial device not found at address" }
         } else {
             val connectStart = System.currentTimeMillis()
-            Timber.i("[$address] Opening serial device: $device")
+            Logger.i { "[$address] Opening serial device: $device" }
 
             var packetsReceived = 0
             var bytesReceived = 0L
@@ -60,7 +60,7 @@ constructor(
             val onConnect: () -> Unit = {
                 connectionStartTime = System.currentTimeMillis()
                 val connectionTime = connectionStartTime - connectStart
-                Timber.i("[$address] Serial device connected in ${connectionTime}ms")
+                Logger.i { "[$address] Serial device connected in ${connectionTime}ms" }
                 super.connect()
             }
 
@@ -69,9 +69,9 @@ constructor(
                     device,
                     object : SerialConnectionListener {
                         override fun onMissingPermission() {
-                            Timber.e(
-                                "[$address] Serial connection failed - missing USB permissions for device: $device",
-                            )
+                            Logger.e {
+                                "[$address] Serial connection failed - missing USB permissions for device: $device"
+                            }
                         }
 
                         override fun onConnected() {
@@ -81,10 +81,10 @@ constructor(
                         override fun onDataReceived(bytes: ByteArray) {
                             packetsReceived++
                             bytesReceived += bytes.size
-                            Timber.d(
+                            Logger.d {
                                 "[$address] Serial received packet #$packetsReceived - " +
-                                    "${bytes.size} byte(s) (Total RX: $bytesReceived bytes)",
-                            )
+                                    "${bytes.size} byte(s) (Total RX: $bytesReceived bytes)"
+                            }
                             bytes.forEach(::readChar)
                         }
 
@@ -95,13 +95,15 @@ constructor(
                                 } else {
                                     0
                                 }
-                            thrown?.let { e -> Timber.e(e, "[$address] Serial error after ${uptime}ms: ${e.message}") }
-                            Timber.w(
+                            thrown?.let { e ->
+                                Logger.e(e) { "[$address] Serial error after ${uptime}ms: ${e.message}" }
+                            }
+                            Logger.w {
                                 "[$address] Serial device disconnected - " +
                                     "Device: $device, " +
                                     "Uptime: ${uptime}ms, " +
-                                    "Packets RX: $packetsReceived ($bytesReceived bytes)",
-                            )
+                                    "Packets RX: $packetsReceived ($bytesReceived bytes)"
+                            }
                             onDeviceDisconnect(false)
                         }
                     },
@@ -116,10 +118,10 @@ constructor(
     override fun sendBytes(p: ByteArray) {
         val conn = connRef.get()
         if (conn != null) {
-            Timber.d("[$address] Serial sending ${p.size} bytes")
+            Logger.d { "[$address] Serial sending ${p.size} bytes" }
             conn.sendBytes(p)
         } else {
-            Timber.w("[$address] Serial connection not available, cannot send ${p.size} bytes")
+            Logger.w { "[$address] Serial connection not available, cannot send ${p.size} bytes" }
         }
     }
 }

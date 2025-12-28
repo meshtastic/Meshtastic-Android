@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.repository.radio
 
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.getInitials
 import com.google.protobuf.ByteString
@@ -38,7 +39,6 @@ import org.meshtastic.proto.config
 import org.meshtastic.proto.deviceMetadata
 import org.meshtastic.proto.fromRadio
 import org.meshtastic.proto.queueStatus
-import timber.log.Timber
 import kotlin.random.Random
 
 private val defaultLoRaConfig =
@@ -71,7 +71,7 @@ constructor(
     private val packetIdSequence = generateSequence { currentPacketId++ }.iterator()
 
     init {
-        Timber.i("Starting the mock interface")
+        Logger.i { "Starting the mock interface" }
         service.onConnect() // Tell clients they can use the API
     }
 
@@ -86,7 +86,7 @@ constructor(
             data != null && data.portnum == Portnums.PortNum.ADMIN_APP ->
                 handleAdminPacket(pr, AdminProtos.AdminMessage.parseFrom(data.payload))
             pr.hasPacket() && pr.packet.wantAck -> sendFakeAck(pr)
-            else -> Timber.i("Ignoring data sent to mock interface $pr")
+            else -> Logger.i { "Ignoring data sent to mock interface $pr" }
         }
     }
 
@@ -108,12 +108,12 @@ constructor(
                     }
                 }
 
-            else -> Timber.i("Ignoring admin sent to mock interface $d")
+            else -> Logger.i { "Ignoring admin sent to mock interface $d" }
         }
     }
 
     override fun close() {
-        Timber.i("Closing the mock interface")
+        Logger.i { "Closing the mock interface" }
     }
 
     // / Generate a fake text message from a node
@@ -297,7 +297,7 @@ constructor(
     }
 
     private fun sendConfigResponse(configId: Int) {
-        Timber.d("Sending mock config response")
+        Logger.d { "Sending mock config response" }
 
         // / Generate a fake node info entry
         @Suppress("MagicNumber")

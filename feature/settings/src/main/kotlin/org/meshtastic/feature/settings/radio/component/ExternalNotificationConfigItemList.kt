@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.advanced
@@ -79,7 +80,6 @@ import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
-import timber.log.Timber
 import java.io.File
 
 private const val MAX_RINGTONE_SIZE = 230
@@ -116,7 +116,7 @@ fun ExternalNotificationConfigScreen(
                         }
                     }
                 } catch (e: Exception) {
-                    Timber.e(e, "Error importing ringtone")
+                    Logger.e(e) { "Error importing ringtone" }
                     Toast.makeText(context, "Error importing: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -308,7 +308,7 @@ fun ExternalNotificationConfigScreen(
                                             tempFile.delete()
                                         }
                                     } catch (e: Exception) {
-                                        Timber.e(e, "Failed to play ringtone")
+                                        Logger.e(e) { "Failed to play ringtone" }
                                     }
                                 },
                                 enabled = state.connected,

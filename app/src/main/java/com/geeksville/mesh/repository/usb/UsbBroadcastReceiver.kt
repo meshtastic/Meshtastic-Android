@@ -23,9 +23,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.util.exceptionReporter
 import com.geeksville.mesh.util.getParcelableExtraCompat
-import timber.log.Timber
 import javax.inject.Inject
 
 /** A helper class to call onChanged when bluetooth is enabled or disabled or when permissions are changed. */
@@ -44,15 +44,15 @@ class UsbBroadcastReceiver @Inject constructor(private val usbRepository: UsbRep
 
         when (intent.action) {
             UsbManager.ACTION_USB_DEVICE_DETACHED -> {
-                Timber.d("USB device '$deviceName' was detached")
+                Logger.d { "USB device '$deviceName' was detached" }
                 usbRepository.refreshState()
             }
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                Timber.d("USB device '$deviceName' was attached")
+                Logger.d { "USB device '$deviceName' was attached" }
                 usbRepository.refreshState()
             }
             UsbManager.EXTRA_PERMISSION_GRANTED -> {
-                Timber.d("USB device '$deviceName' was granted permission")
+                Logger.d { "USB device '$deviceName' was granted permission" }
                 usbRepository.refreshState()
             }
         }

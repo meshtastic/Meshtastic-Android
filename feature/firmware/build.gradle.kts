@@ -64,7 +64,7 @@ dependencies {
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.collections.immutable)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     implementation(libs.nordic)
     implementation(libs.nordic.dfu)

@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import co.touchlab.kermit.Logger
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -40,7 +41,6 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
-import timber.log.Timber
 
 @SuppressLint("WakelockTimeout")
 private fun PowerManager.WakeLock.safeAcquire() {
@@ -48,9 +48,9 @@ private fun PowerManager.WakeLock.safeAcquire() {
         try {
             acquire()
         } catch (e: SecurityException) {
-            Timber.e("WakeLock permission exception: ${e.message}")
+            Logger.e { "WakeLock permission exception: ${e.message}" }
         } catch (e: IllegalStateException) {
-            Timber.e("WakeLock acquire() exception: ${e.message}")
+            Logger.e { "WakeLock acquire() exception: ${e.message}" }
         }
     }
 }
@@ -60,7 +60,7 @@ private fun PowerManager.WakeLock.safeRelease() {
         try {
             release()
         } catch (e: IllegalStateException) {
-            Timber.e("WakeLock release() exception: ${e.message}")
+            Logger.e { "WakeLock release() exception: ${e.message}" }
         }
     }
 }

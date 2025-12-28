@@ -19,6 +19,7 @@ package org.meshtastic.feature.firmware
 
 import android.content.Context
 import android.net.Uri
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +28,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.meshtastic.core.model.DeviceHardware
-import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -57,7 +57,7 @@ constructor(
             }
             tempDir.mkdirs()
         }
-            .onFailure { e -> Timber.w(e, "Failed to cleanup temp directory") }
+            .onFailure { e -> Logger.w(e) { "Failed to cleanup temp directory" } }
     }
 
     suspend fun checkUrlExists(url: String): Boolean = withContext(Dispatchers.IO) {
@@ -65,7 +65,7 @@ constructor(
         try {
             client.newCall(request).execute().use { response -> response.isSuccessful }
         } catch (e: IOException) {
-            Timber.w(e, "Failed to check URL existence: $url")
+            Logger.w(e) { "Failed to check URL existence: $url" }
             false
         }
     }
@@ -77,12 +77,12 @@ constructor(
                 try {
                     client.newCall(request).execute()
                 } catch (e: IOException) {
-                    Timber.w(e, "Download failed for $url")
+                    Logger.w(e) { "Download failed for $url" }
                     return@withContext null
                 }
 
             if (!response.isSuccessful) {
-                Timber.w("Download failed: ${response.code} for $url")
+                Logger.w { "Download failed: ${response.code} for $url" }
                 return@withContext null
             }
 
@@ -167,7 +167,7 @@ constructor(
                     }
                 }
             } catch (e: IOException) {
-                Timber.w(e, "Failed to extract firmware from URI")
+                Logger.w(e) { "Failed to extract firmware from URI" }
                 return@withContext null
             }
             matchingEntries.minByOrNull { it.first.name.length }?.second

@@ -76,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -156,7 +157,6 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import timber.log.Timber
 import java.io.File
 import java.text.DateFormat
 import kotlin.math.abs
@@ -170,7 +170,7 @@ private fun MapView.updateMarkers(
     waypointMarkers: List<MarkerWithLabel>,
     nodeClusterer: RadiusMarkerClusterer,
 ) {
-    Timber.d("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
+    Logger.d { "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints" }
     overlays.removeAll { it is MarkerWithLabel }
     // overlays.addAll(nodeMarkers + waypointMarkers)
     overlays.addAll(waypointMarkers)
@@ -271,7 +271,7 @@ fun MapView(
 
     fun loadOnlineTileSourceBase(): ITileSource {
         val id = mapViewModel.mapStyleId
-        Timber.d("mapStyleId from prefs: $id")
+        Logger.d { "mapStyleId from prefs: $id" }
         return CustomTileSource.getTileSource(id).also {
             zoomLevelMax = it.maximumZoomLevel.toDouble()
             showDownloadButton = if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
@@ -295,11 +295,11 @@ fun MapView(
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
-            Timber.d("Telling user we need location turned on for MyLocationNewOverlay")
+            Logger.d { "Telling user we need location turned on for MyLocationNewOverlay" }
             scope.launch { context.showToast(Res.string.location_disabled) }
             return
         }
-        Timber.d("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
+        Logger.d { "user clicked MyLocationNewOverlay ${myLocationOverlay == null}" }
         if (myLocationOverlay == null) {
             myLocationOverlay =
                 MyLocationNewOverlay(this).apply {
@@ -454,15 +454,15 @@ fun MapView(
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(com.meshtastic.core.strings.getString(Res.string.waypoint_delete))
         builder.setNeutralButton(com.meshtastic.core.strings.getString(Res.string.cancel)) { _, _ ->
-            Timber.d("User canceled marker delete dialog")
+            Logger.d { "User canceled marker delete dialog" }
         }
         builder.setNegativeButton(com.meshtastic.core.strings.getString(Res.string.delete_for_me)) { _, _ ->
-            Timber.d("User deleted waypoint ${waypoint.id} for me")
+            Logger.d { "User deleted waypoint ${waypoint.id} for me" }
             mapViewModel.deleteWaypoint(waypoint.id)
         }
         if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             builder.setPositiveButton(com.meshtastic.core.strings.getString(Res.string.delete_for_everyone)) { _, _ ->
-                Timber.d("User deleted waypoint ${waypoint.id} for everyone")
+                Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
                 mapViewModel.sendWaypoint(waypoint.copy { expire = 1 })
                 mapViewModel.deleteWaypoint(waypoint.id)
             }
@@ -485,7 +485,7 @@ fun MapView(
 
     fun showMarkerLongPressDialog(id: Int) {
         performHapticFeedback()
-        Timber.d("marker long pressed id=$id")
+        Logger.d { "marker long pressed id=$id" }
         val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
         if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
@@ -691,9 +691,9 @@ fun MapView(
                 ),
             )
         } catch (ex: TileSourcePolicyException) {
-            Timber.d("Tile source does not allow archiving: ${ex.message}")
+            Logger.d { "Tile source does not allow archiving: ${ex.message}" }
         } catch (ex: Exception) {
-            Timber.d("Tile source exception: ${ex.message}")
+            Logger.d { "Tile source exception: ${ex.message}" }
         }
     }
 
@@ -897,7 +897,7 @@ fun MapView(
         EditWaypointDialog(
             waypoint = showEditWaypointDialog ?: return, // Safe call
             onSendClicked = { waypoint ->
-                Timber.d("User clicked send waypoint ${waypoint.id}")
+                Logger.d { "User clicked send waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
                 mapViewModel.sendWaypoint(
                     waypoint.copy {
@@ -910,12 +910,12 @@ fun MapView(
                 )
             },
             onDeleteClicked = { waypoint ->
-                Timber.d("User clicked delete waypoint ${waypoint.id}")
+                Logger.d { "User clicked delete waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
                 showDeleteMarkerDialog(waypoint)
             },
             onDismissRequest = {
-                Timber.d("User clicked cancel marker edit dialog")
+                Logger.d { "User clicked cancel marker edit dialog" }
                 showEditWaypointDialog = null
             },
         )

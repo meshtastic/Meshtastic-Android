@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -50,7 +51,6 @@ import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig.Role
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.sharedContact
-import timber.log.Timber
 import javax.inject.Inject
 
 private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
@@ -198,7 +198,7 @@ constructor(
         try {
             serviceRepository.onServiceAction(ServiceAction.Favorite(node))
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Favorite node error")
+            Logger.e(ex) { "Favorite node error" }
         }
     }
 
@@ -211,7 +211,7 @@ constructor(
             }
             serviceRepository.onServiceAction(ServiceAction.SendContact(contact = contact))
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Send shared contact error")
+            Logger.e(ex) { "Send shared contact error" }
         }
     }
 
@@ -219,7 +219,7 @@ constructor(
         try {
             serviceRepository.meshService?.send(p)
         } catch (ex: RemoteException) {
-            Timber.e("Send DataPacket error: ${ex.message}")
+            Logger.e { "Send DataPacket error: ${ex.message}" }
         }
     }
 }

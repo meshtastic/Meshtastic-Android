@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.detail
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,6 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.feature.node.component.NodeMenuAction
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -77,20 +77,20 @@ constructor(
         try {
             nodeRepository.setNodeNotes(nodeNum, notes)
         } catch (ex: java.io.IOException) {
-            Timber.e("Set node notes IO error: ${ex.message}")
+            Logger.e { "Set node notes IO error: ${ex.message}" }
         } catch (ex: java.sql.SQLException) {
-            Timber.e("Set node notes SQL error: ${ex.message}")
+            Logger.e { "Set node notes SQL error: ${ex.message}" }
         }
     }
 
     private fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
-        Timber.i("Removing node '$nodeNum'")
+        Logger.i { "Removing node '$nodeNum'" }
         try {
             val packetId = serviceRepository.meshService?.packetId ?: return@launch
             serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
             nodeRepository.deleteNode(nodeNum)
         } catch (ex: RemoteException) {
-            Timber.e("Remove node error: ${ex.message}")
+            Logger.e { "Remove node error: ${ex.message}" }
         }
     }
 
@@ -98,7 +98,7 @@ constructor(
         try {
             serviceRepository.onServiceAction(ServiceAction.Ignore(node))
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Ignore node error")
+            Logger.e(ex) { "Ignore node error" }
         }
     }
 
@@ -106,55 +106,55 @@ constructor(
         try {
             serviceRepository.onServiceAction(ServiceAction.Favorite(node))
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Favorite node error")
+            Logger.e(ex) { "Favorite node error" }
         }
     }
 
     private fun requestUserInfo(destNum: Int) {
-        Timber.i("Requesting UserInfo for '$destNum'")
+        Logger.i { "Requesting UserInfo for '$destNum'" }
         try {
             serviceRepository.meshService?.requestUserInfo(destNum)
         } catch (ex: RemoteException) {
-            Timber.e("Request NodeInfo error: ${ex.message}")
+            Logger.e { "Request NodeInfo error: ${ex.message}" }
         }
     }
 
     private fun requestNeighborInfo(destNum: Int) {
-        Timber.i("Requesting NeighborInfo for '$destNum'")
+        Logger.i { "Requesting NeighborInfo for '$destNum'" }
         try {
             val packetId = serviceRepository.meshService?.packetId ?: return
             serviceRepository.meshService?.requestNeighborInfo(packetId, destNum)
         } catch (ex: RemoteException) {
-            Timber.e("Request NeighborInfo error: ${ex.message}")
+            Logger.e { "Request NeighborInfo error: ${ex.message}" }
         }
     }
 
     private fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
-        Timber.i("Requesting position for '$destNum'")
+        Logger.i { "Requesting position for '$destNum'" }
         try {
             serviceRepository.meshService?.requestPosition(destNum, position)
         } catch (ex: RemoteException) {
-            Timber.e("Request position error: ${ex.message}")
+            Logger.e { "Request position error: ${ex.message}" }
         }
     }
 
     private fun requestTelemetry(destNum: Int, type: TelemetryType) {
-        Timber.i("Requesting telemetry for '$destNum'")
+        Logger.i { "Requesting telemetry for '$destNum'" }
         try {
             val packetId = serviceRepository.meshService?.packetId ?: return
             serviceRepository.meshService?.requestTelemetry(packetId, destNum, type.ordinal)
         } catch (ex: RemoteException) {
-            Timber.e("Request telemetry error: ${ex.message}")
+            Logger.e { "Request telemetry error: ${ex.message}" }
         }
     }
 
     private fun requestTraceroute(destNum: Int) {
-        Timber.i("Requesting traceroute for '$destNum'")
+        Logger.i { "Requesting traceroute for '$destNum'" }
         try {
             val packetId = serviceRepository.meshService?.packetId ?: return
             serviceRepository.meshService?.requestTraceroute(packetId, destNum)
         } catch (ex: RemoteException) {
-            Timber.e("Request traceroute error: ${ex.message}")
+            Logger.e { "Request traceroute error: ${ex.message}" }
         }
     }
 }

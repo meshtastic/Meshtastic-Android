@@ -18,6 +18,7 @@
 package com.geeksville.mesh
 
 import android.app.Application
+import co.touchlab.kermit.Logger
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -28,7 +29,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
-import timber.log.Timber
 
 /**
  * The main application class for Meshtastic.
@@ -61,7 +61,7 @@ interface AppEntryPoint {
 fun logAssert(executeReliableWrite: Boolean) {
     if (!executeReliableWrite) {
         val ex = AssertionError("Assertion failed")
-        Timber.e(ex)
+        Logger.e(ex) { "logAssert" }
         throw ex
     }
 }

@@ -67,7 +67,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.common)
     implementation(libs.material)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     fdroidImplementation(libs.osmbonuspack)
     fdroidImplementation(libs.osmdroid.android)
