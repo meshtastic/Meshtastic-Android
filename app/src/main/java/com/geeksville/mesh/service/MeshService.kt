@@ -23,7 +23,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
@@ -477,14 +476,10 @@ class MeshService : Service() {
                 this,
                 SERVICE_NOTIFY_ID,
                 notification,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    if (hasLocationPermission()) {
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
-                    } else {
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-                    }
+                if (hasLocationPermission()) {
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
                 } else {
-                    0 // No specific type needed for older Android versions
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
                 },
             )
         } catch (ex: Exception) {
@@ -1359,7 +1354,7 @@ class MeshService : Service() {
         val failure =
             when {
                 address == null -> "no_active_address"
-                myNodeNum == null -> "no_my_node"
+                myNodeInfo == null -> "no_my_node"
                 else -> null
             }
         if (failure != null) {
@@ -1368,7 +1363,7 @@ class MeshService : Service() {
         }
 
         val safeAddress = address!!
-        val myNum = myNodeNum!!
+        val myNum = myNodeNum
         val storeForwardConfig = moduleConfig.storeForward
         val lastRequest = meshPrefs.getStoreForwardLastRequest(safeAddress)
         val (window, max) =

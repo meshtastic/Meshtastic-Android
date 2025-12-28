@@ -18,8 +18,6 @@
 package com.geeksville.mesh.ui.connections
 
 import android.net.InetAddresses
-import android.os.Build
-import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,12 +91,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ConfigProtos
 
-fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-    @Suppress("DEPRECATION")
-    this != null && Patterns.IP_ADDRESS.matcher(this).matches()
-} else {
-    InetAddresses.isNumericAddress(this.toString())
-}
+fun String?.isIPAddress(): Boolean = InetAddresses.isNumericAddress(this.toString())
 
 /**
  * Composable screen for managing device connections (BLE, TCP, USB). It handles permission requests for location and
