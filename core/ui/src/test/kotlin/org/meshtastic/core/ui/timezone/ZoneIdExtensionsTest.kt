@@ -20,6 +20,7 @@ package org.meshtastic.core.ui.timezone
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 class ZoneIdExtensionsTest {
 
@@ -34,7 +35,7 @@ class ZoneIdExtensionsTest {
                 "US/Mountain" to "MST7MDT,M3.2.0,M11.1.0",
                 "US/Central" to "CST6CDT,M3.2.0,M11.1.0",
                 "US/Eastern" to "EST5EDT,M3.2.0,M11.1.0",
-                "America/Sao_Paulo" to "GMT3",
+                "America/Sao_Paulo" to "BRT3",
                 "UTC" to "UTC0",
                 "Europe/London" to "GMT0BST,M3.5.0/1,M10.5.0",
                 "Europe/Lisbon" to "WET0WEST,M3.5.0/1,M10.5.0",
@@ -51,5 +52,20 @@ class ZoneIdExtensionsTest {
             )
 
         zoneMap.forEach { (tz, expected) -> assertEquals(expected, ZoneId.of(tz).toPosixString()) }
+    }
+
+    @Test
+    fun `test formatAbbreviation`() {
+        assertEquals("PST", formatAbbreviation("PST"))
+        assertEquals("<GMT-8>", formatAbbreviation("GMT-8"))
+    }
+
+    @Test
+    fun `test formatPosixOffset`() {
+        assertEquals("8", formatPosixOffset(ZoneOffset.ofHours(-8)))
+        assertEquals("-1", formatPosixOffset(ZoneOffset.ofHours(1)))
+        assertEquals("-5:30", formatPosixOffset(ZoneOffset.ofHoursMinutes(5, 30)))
+        assertEquals("0", formatPosixOffset(ZoneOffset.ofHours(0)))
+        assertEquals("-0:30", formatPosixOffset(ZoneOffset.ofTotalSeconds(30 * 60)))
     }
 }

@@ -70,21 +70,21 @@ fun ZoneId.toPosixString(): String {
     }
 }
 
-private fun ZonedDateTime.timeZoneShortName(): String {
+internal fun ZonedDateTime.timeZoneShortName(): String {
     val formatter = DateTimeFormatter.ofPattern("zzz", Locale.ENGLISH)
     val shortName = format(formatter)
     return if (shortName.startsWith("GMT")) "GMT" else shortName
 }
 
-private fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
+internal fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
 
-private fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionRule): String {
+internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionRule): String {
     val transition = rule.createTransition(Year.now().value)
     return ZonedDateTime.ofInstant(transition.instant, zone).timeZoneShortName()
 }
 
 @Suppress("MagicNumber")
-private fun formatPosixOffset(offset: ZoneOffset): String {
+internal fun formatPosixOffset(offset: ZoneOffset): String {
     val offsetSeconds = -offset.totalSeconds
     val hours = offsetSeconds / 3600
     val remainingSeconds = abs(offsetSeconds) % 3600
@@ -104,7 +104,7 @@ private fun formatPosixOffset(offset: ZoneOffset): String {
 }
 
 @Suppress("MagicNumber")
-private fun formatTransitionRule(rule: ZoneOffsetTransitionRule): String {
+internal fun formatTransitionRule(rule: ZoneOffsetTransitionRule): String {
     val month = rule.month.value
     val dayOfWeek = rule.dayOfWeek.value % 7
     val dayIndicator = rule.dayOfMonthIndicator
