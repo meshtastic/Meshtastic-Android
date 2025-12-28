@@ -69,19 +69,24 @@ fun AdaptiveContactsScreen(
     val scope = rememberCoroutineScope()
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
-    BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) {
+    val handleBack: () -> Unit = {
+        val currentEntry = navController.currentBackStackEntry
+        val isContactsRoute = currentEntry?.destination?.hasRoute<ContactsRoutes.Contacts>() == true
+
         // Check if we navigated here from another screen (e.g., from Nodes or Map)
         val previousEntry = navController.previousBackStackEntry
         val isFromDifferentGraph = previousEntry?.destination?.hasRoute<ContactsRoutes.ContactsGraph>() == false
 
-        if (isFromDifferentGraph) {
-            // Navigate back via NavController to return to the previous screen
+        if (isFromDifferentGraph && !isContactsRoute) {
+            // Navigate back via NavController to return to the previous screen (e.g. Node Details)
             navController.navigateUp()
         } else {
             // Close the detail pane within the adaptive scaffold
             scope.launch { navigator.navigateBack(backNavigationBehavior) }
         }
     }
+
+    BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) { handleBack() }
 
     LaunchedEffect(initialContactKey) {
         if (initialContactKey != null) {
@@ -135,7 +140,7 @@ fun AdaptiveContactsScreen(
                             message = if (contactKey == initialContactKey) initialMessage else "",
                             navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                             navigateToQuickChatOptions = { navController.navigate(ContactsRoutes.QuickChat) },
-                            onNavigateBack = { scope.launch { navigator.navigateBack(backNavigationBehavior) } },
+                            onNavigateBack = handleBack,
                         )
                     }
                 } ?: PlaceholderScreen()

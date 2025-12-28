@@ -69,12 +69,15 @@ fun AdaptiveNodeListScreen(
     val scope = rememberCoroutineScope()
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
-    BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) {
+    val handleBack: () -> Unit = {
+        val currentEntry = navController.currentBackStackEntry
+        val isNodesRoute = currentEntry?.destination?.hasRoute<NodesRoutes.Nodes>() == true
+
         // Check if we navigated here from another screen (e.g., from Messages or Map)
         val previousEntry = navController.previousBackStackEntry
         val isFromDifferentGraph = previousEntry?.destination?.hasRoute<NodesRoutes.NodesGraph>() == false
 
-        if (isFromDifferentGraph) {
+        if (isFromDifferentGraph && !isNodesRoute) {
             // Navigate back via NavController to return to the previous screen
             navController.navigateUp()
         } else {
@@ -82,6 +85,8 @@ fun AdaptiveNodeListScreen(
             scope.launch { navigator.navigateBack(backNavigationBehavior) }
         }
     }
+
+    BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) { handleBack() }
 
     LaunchedEffect(initialNodeId) {
         if (initialNodeId != null) {
@@ -132,7 +137,7 @@ fun AdaptiveNodeListScreen(
                             nodeId = nodeId,
                             navigateToMessages = onNavigateToMessages,
                             onNavigate = { route -> navController.navigate(route) },
-                            onNavigateUp = { scope.launch { navigator.navigateBack(backNavigationBehavior) } },
+                            onNavigateUp = handleBack,
                         )
                     }
                 } ?: PlaceholderScreen()
