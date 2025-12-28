@@ -20,7 +20,6 @@
 package org.meshtastic.core.ui.timezone
 
 import java.time.Instant
-import java.time.Year
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -28,6 +27,8 @@ import java.time.format.DateTimeFormatter
 import java.time.zone.ZoneOffsetTransitionRule
 import java.util.Locale
 import kotlin.math.abs
+
+private const val REFERENCE_YEAR = 2025
 
 /**
  * Generates a POSIX time zone string from a [ZoneId]. Uses the specification found
@@ -79,7 +80,7 @@ internal fun ZonedDateTime.timeZoneShortName(): String {
 internal fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
 
 internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionRule): String {
-    val transition = rule.createTransition(Year.now().value)
+    val transition = rule.createTransition(REFERENCE_YEAR)
     return ZonedDateTime.ofInstant(transition.instant, zone).timeZoneShortName()
 }
 
