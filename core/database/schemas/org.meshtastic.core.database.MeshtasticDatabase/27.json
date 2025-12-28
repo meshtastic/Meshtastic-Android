@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 27,
-    "identityHash": "c031565d4da3a9b51edb57ed4b581cd6",
+    "identityHash": "a611a78449a23102b9c316eb98a458e1",
     "entities": [
       {
         "tableName": "my_node",
@@ -404,6 +404,17 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_packet_contact_key` ON `${TABLE_NAME}` (`contact_key`)"
+          },
+          {
+            "name": "index_packet_contact_key_port_num_received_time",
+            "unique": false,
+            "columnNames": [
+              "contact_key",
+              "port_num",
+              "received_time"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_packet_contact_key_port_num_received_time` ON `${TABLE_NAME}` (`contact_key`, `port_num`, `received_time`)"
           }
         ]
       },
@@ -887,7 +898,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c031565d4da3a9b51edb57ed4b581cd6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a611a78449a23102b9c316eb98a458e1')"
     ]
   }
 }
