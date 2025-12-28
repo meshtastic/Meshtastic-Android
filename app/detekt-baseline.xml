@@ -5,11 +5,6 @@
     <ID>CommentSpacing:BLEException.kt$BLEConnectionClosing$/// Our interface is being shut down</ID>
     <ID>CommentSpacing:Constants.kt$/// a bool true means we expect this condition to continue until, false means device might come back</ID>
     <ID>CommentSpacing:Coroutines.kt$/// Wrap launch with an exception handler, FIXME, move into a utility lib</ID>
-    <ID>ComposableParamOrder:Channel.kt$ChannelScreen</ID>
-    <ID>ComposableParamOrder:Channel.kt$EditChannelUrl</ID>
-    <ID>ComposableParamOrder:ConnectionsNavIcon.kt$ConnectionsNavIcon</ID>
-    <ID>ComposableParamOrder:EmptyStateContent.kt$EmptyStateContent</ID>
-    <ID>ComposableParamOrder:Share.kt$ShareScreen</ID>
     <ID>CyclomaticComplexMethod:BleError.kt$BleError.Companion$fun from(exception: Throwable): BleError</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>CyclomaticComplexMethod:SettingsNavigation.kt$@Suppress("LongMethod") fun NavGraphBuilder.settingsGraph(navController: NavHostController)</ID>
@@ -32,10 +27,9 @@
     <ID>FinalNewline:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
     <ID>FinalNewline:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
-    <ID>LambdaParameterEventTrailing:Channel.kt$onConfirm</ID>
-    <ID>LambdaParameterInRestartableEffect:Channel.kt$onConfirm</ID>
     <ID>LargeClass:MeshService.kt$MeshService : Service</ID>
     <ID>LongMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
+    <ID>LongMethod:TCPInterface.kt$TCPInterface$private suspend fun startConnect()</ID>
     <ID>MagicNumber:Contacts.kt$7</ID>
     <ID>MagicNumber:Contacts.kt$8</ID>
     <ID>MagicNumber:MQTTRepository.kt$MQTTRepository$512</ID>
@@ -60,27 +54,15 @@
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$4</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$8</ID>
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$1000</ID>
-    <ID>MagicNumber:TCPInterface.kt$TCPInterface$180</ID>
-    <ID>MagicNumber:TCPInterface.kt$TCPInterface$500</ID>
     <ID>MagicNumber:UIState.kt$4</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$"Config complete id mismatch: received=$configCompleteId expected one of [$configOnlyNonce,$nodeInfoNonce]"</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService$"Neighbor info response filtered: ToUs=$isAddressedToUs, isRecentRequest=$isRecentRequest"</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$"setOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed isUnmessagable: $isUnmessagable"</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService.&lt;no name provided&gt;$"sendData dest=${p.to}, id=${p.id} &lt;- ${bytes.size} bytes (connectionState=${connectionStateHolder.connectionState.value})"</ID>
     <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found fromNum: ${fromNumCharacteristic?.uuid}, ${fromNumCharacteristic?.instanceId}"</ID>
     <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found fromRadio: ${fromRadioCharacteristic?.uuid}, ${fromRadioCharacteristic?.instanceId}"</ID>
     <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found logRadio: ${logRadioCharacteristic?.uuid}, ${logRadioCharacteristic?.instanceId}"</ID>
     <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found toRadio: ${toRadioCharacteristic?.uuid}, ${toRadioCharacteristic?.instanceId}"</ID>
-    <ID>ModifierClickableOrder:Channel.kt$clickable(onClick = onClick)</ID>
-    <ID>ModifierMissing:BLEDevices.kt$BLEDevices</ID>
-    <ID>ModifierMissing:Channel.kt$ChannelScreen</ID>
-    <ID>ModifierMissing:Contacts.kt$ContactListView</ID>
-    <ID>ModifierMissing:Contacts.kt$ContactsScreen</ID>
-    <ID>ModifierMissing:Contacts.kt$SelectionToolbar</ID>
-    <ID>ModifierMissing:EmptyStateContent.kt$EmptyStateContent</ID>
-    <ID>ModifierMissing:Main.kt$MainScreen</ID>
-    <ID>ModifierMissing:NetworkDevices.kt$NetworkDevices</ID>
-    <ID>ModifierMissing:Share.kt$ShareScreen</ID>
-    <ID>MutableStateAutoboxing:Contacts.kt$mutableStateOf(2)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>NewLineAtEndOfFile:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
@@ -106,11 +88,6 @@
     <ID>NoEmptyClassBody:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>NoSemicolons:DateUtils.kt$DateUtils$;</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
-    <ID>ParameterNaming:Contacts.kt$onDeleteSelected</ID>
-    <ID>ParameterNaming:Contacts.kt$onMuteSelected</ID>
-    <ID>ParameterNaming:UsbDevices.kt$onDeviceSelected</ID>
-    <ID>PreviewPublic:Channel.kt$ModemPresetInfoPreview</ID>
-    <ID>PreviewPublic:EmptyStateContent.kt$EmptyStateContentPreview</ID>
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
     <ID>SwallowedException:NsdManager.kt$ex: IllegalArgumentException</ID>
@@ -138,6 +115,5 @@
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModel</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
-    <ID>ViewModelForwarding:Main.kt$VersionChecks(uIViewModel)</ID>
   </CurrentIssues>
 </SmellBaseline>

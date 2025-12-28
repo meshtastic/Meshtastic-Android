@@ -87,6 +87,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -133,7 +134,6 @@ import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.copy
-import timber.log.Timber
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel
@@ -209,7 +209,7 @@ fun ChannelScreen(
         }
 
     fun zxingScan() {
-        Timber.d("Starting zxing QR code scanner")
+        Logger.d { "Starting zxing QR code scanner" }
         val zxingScan = ScanOptions()
         zxingScan.setCameraId(0)
         zxingScan.setPrompt("")
@@ -236,7 +236,7 @@ fun ChannelScreen(
             viewModel.setChannels(newChannelSet)
             // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
         } catch (ex: RemoteException) {
-            Timber.e(ex, "ignoring channel problem")
+            Logger.e(ex) { "ignoring channel problem" }
 
             channelSet = channels // Throw away user edits
 
@@ -264,7 +264,7 @@ fun ChannelScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        Timber.d("Switching back to default channel")
+                        Logger.d { "Switching back to default channel" }
                         installSettings(
                             Channel.default.settings,
                             Channel.default.loraConfig.copy {

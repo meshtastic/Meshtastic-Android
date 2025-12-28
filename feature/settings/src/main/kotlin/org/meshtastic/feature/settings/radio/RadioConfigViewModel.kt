@@ -31,6 +31,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import co.touchlab.kermit.Logger
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +81,6 @@ import org.meshtastic.proto.Portnums
 import org.meshtastic.proto.config
 import org.meshtastic.proto.deviceProfile
 import org.meshtastic.proto.moduleConfig
-import timber.log.Timber
 import java.io.FileOutputStream
 import javax.inject.Inject
 
@@ -179,7 +179,7 @@ constructor(
             }
             .launchIn(viewModelScope)
 
-        Timber.d("RadioConfigViewModel created")
+        Logger.d { "RadioConfigViewModel created" }
     }
 
     private val myNodeInfo: StateFlow<MyNodeEntity?>
@@ -205,7 +205,7 @@ constructor(
 
     override fun onCleared() {
         super.onCleared()
-        Timber.d("RadioConfigViewModel cleared")
+        Logger.d { "RadioConfigViewModel cleared" }
     }
 
     private fun request(destNum: Int, requestAction: suspend (IMeshService, Int, Int) -> Unit, errorMessage: String) =
@@ -227,7 +227,7 @@ constructor(
                         }
                     }
                 } catch (ex: RemoteException) {
-                    Timber.e("$errorMessage: ${ex.message}")
+                    Logger.e { "$errorMessage: ${ex.message}" }
                 }
             }
         }
@@ -422,7 +422,7 @@ constructor(
         try {
             meshService?.setFixedPosition(destNum, position)
         } catch (ex: RemoteException) {
-            Timber.e("Set fixed position error: ${ex.message}")
+            Logger.e { "Set fixed position error: ${ex.message}" }
         }
     }
 
@@ -436,7 +436,7 @@ constructor(
                 onResult(protobuf)
             }
         } catch (ex: Exception) {
-            Timber.e("Import DeviceProfile error: ${ex.message}")
+            Logger.e { "Import DeviceProfile error: ${ex.message}" }
             sendError(ex.customMessage)
         }
     }
@@ -452,7 +452,7 @@ constructor(
             }
             setResponseStateSuccess()
         } catch (ex: Exception) {
-            Timber.e("Can't write file error: ${ex.message}")
+            Logger.e { "Can't write file error: ${ex.message}" }
             sendError(ex.customMessage)
         }
     }
@@ -491,7 +491,7 @@ constructor(
                 setResponseStateSuccess()
             } catch (ex: Exception) {
                 val errorMessage = "Can't write security keys JSON error: ${ex.message}"
-                Timber.e(errorMessage)
+                Logger.e { errorMessage }
                 sendError(ex.customMessage)
             }
         }
@@ -514,7 +514,7 @@ constructor(
             try {
                 setChannels(channelUrl)
             } catch (ex: Exception) {
-                Timber.e(ex, "DeviceProfile channel import error")
+                Logger.e(ex) { "DeviceProfile channel import error" }
                 sendError(ex.customMessage)
             }
         }
@@ -656,7 +656,7 @@ constructor(
 
         if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
             val parsed = MeshProtos.Routing.parseFrom(data.payload)
-            Timber.d(debugMsg.format(parsed.errorReason.name))
+            Logger.d { debugMsg.format(parsed.errorReason.name) }
             if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
                 sendError(getStringResFrom(parsed.errorReasonValue))
             } else if (packet.from == destNum && route.isEmpty()) {
@@ -670,7 +670,7 @@ constructor(
         }
         if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
-            Timber.d(debugMsg.format(parsed.payloadVariantCase.name))
+            Logger.d { debugMsg.format(parsed.payloadVariantCase.name) }
             if (destNum != packet.from) {
                 sendError("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}.")
                 return
@@ -744,7 +744,7 @@ constructor(
                     incrementCompleted()
                 }
 
-                else -> Timber.d("No custom processing needed for ${parsed.payloadVariantCase}")
+                else -> Logger.d { "No custom processing needed for ${parsed.payloadVariantCase}" }
             }
 
             if (AdminRoute.entries.any { it.name == route }) {

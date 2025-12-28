@@ -58,7 +58,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.paging.compose)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

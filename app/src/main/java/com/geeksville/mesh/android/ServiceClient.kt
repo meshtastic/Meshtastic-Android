@@ -23,10 +23,9 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.IInterface
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.util.exceptionReporter
-import timber.log.Timber
 import java.io.Closeable
-import java.lang.IllegalArgumentException
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -73,14 +72,14 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
                 // Some phones seem to ahve a race where if you unbind and quickly rebind bindService returns false.
                 // Try
                 // a short sleep to see if that helps
-                Timber.e("Needed to use the second bind attempt hack")
+                Logger.e { "Needed to use the second bind attempt hack" }
                 Thread.sleep(500) // was 200ms, but received an autobug from a Galaxy Note4, android 6.0.1
                 if (!c.bindService(intent, connection, flags)) {
                     throw BindFailedException()
                 }
             }
         } else {
-            Timber.w("Ignoring rebind attempt for service")
+            Logger.w { "Ignoring rebind attempt for service" }
         }
     }
 
@@ -90,7 +89,7 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
             context?.unbindService(connection)
         } catch (ex: IllegalArgumentException) {
             // Autobugs show this can generate an illegal arg exception for "service not registered" during reinstall?
-            Timber.w("Ignoring error in ServiceClient.close, probably harmless")
+            Logger.w { "Ignoring error in ServiceClient.close, probably harmless" }
         }
         serviceP = null
         context = null
@@ -116,7 +115,7 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
                     // If we start to close a service, it seems that there is a possibility a onServiceConnected event
                     // is the queue
                     // for us.  Be careful not to process that stale event
-                    Timber.w("A service connected while we were closing it, ignoring")
+                    Logger.w { "A service connected while we were closing it, ignoring" }
                 }
             }
 

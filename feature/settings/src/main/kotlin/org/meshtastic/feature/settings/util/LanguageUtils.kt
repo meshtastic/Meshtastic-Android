@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalResources
 import androidx.core.os.LocaleListCompat
+import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.fr_HT
@@ -30,7 +31,6 @@ import org.meshtastic.core.strings.pt_BR
 import org.meshtastic.core.strings.zh_CN
 import org.meshtastic.core.strings.zh_TW
 import org.xmlpull.v1.XmlPullParser
-import timber.log.Timber
 import java.util.Locale
 
 object LanguageUtils {
@@ -69,7 +69,7 @@ object LanguageUtils {
                             }
                         }
                     } catch (e: Exception) {
-                        Timber.e("Error parsing locale_config.xml: ${e.message}")
+                        Logger.e { "Error parsing locale_config.xml: ${e.message}" }
                     }
                 }
             }

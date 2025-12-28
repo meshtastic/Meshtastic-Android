@@ -26,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
+import co.touchlab.kermit.LogWriter
+import co.touchlab.kermit.Severity
 import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
 import com.datadog.android.compose.ExperimentalTrackingApi
@@ -43,7 +45,6 @@ import com.datadog.android.rum.tracking.AcceptAllNavDestinations
 import com.datadog.android.sessionreplay.SessionReplay
 import com.datadog.android.sessionreplay.SessionReplayConfiguration
 import com.datadog.android.sessionreplay.compose.ComposeExtensionSupport
-import com.datadog.android.timber.DatadogTree
 import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
 import com.datadog.android.trace.opentelemetry.DatadogOpenTelemetry
@@ -61,10 +62,8 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.BuildConfig
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
-import timber.log.Timber
-import timber.log.Timber.DebugTree
-import timber.log.Timber.Tree
 import javax.inject.Inject
+import co.touchlab.kermit.Logger as KermitLogger
 
 /**
  * Google Play Services specific implementation of [PlatformAnalytics]. This helper initializes and manages Firebase and
@@ -102,14 +101,15 @@ constructor(
                 .setBundleWithTraceEnabled(true)
                 .setBundleWithRumEnabled(true)
                 .build()
-        buildList {
-            add(DatadogTree(datadogLogger))
-            add(CrashlyticsTree())
+        val writers = buildList {
+            add(DatadogLogWriter(datadogLogger))
+            add(CrashlyticsLogWriter())
             if (BuildConfig.DEBUG) {
-                add(DebugTree())
+                add(co.touchlab.kermit.LogcatWriter())
             }
         }
-            .forEach(Timber::plant)
+        KermitLogger.setLogWriters(writers)
+        KermitLogger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Debug else Severity.Info)
 
         // Initial consent state
         updateAnalyticsConsent(analyticsPrefs.analyticsAllowed)
@@ -177,10 +177,10 @@ constructor(
      */
     fun updateAnalyticsConsent(allowed: Boolean) {
         if (!isPlatformServicesAvailable || isInTestLab) {
-            Timber.i("Analytics not available or in test lab, consent update skipped.")
+            KermitLogger.i { "Analytics not available or in test lab, consent update skipped." }
             return
         }
-        Timber.i(if (allowed) "Analytics enabled" else "Analytics disabled")
+        KermitLogger.i { if (allowed) "Analytics enabled" else "Analytics disabled" }
 
         Datadog.setTrackingConsent(if (allowed) TrackingConsent.GRANTED else TrackingConsent.NOT_GRANTED)
         Firebase.crashlytics.isCrashlyticsCollectionEnabled = allowed
@@ -221,27 +221,42 @@ constructor(
     override val isPlatformServicesAvailable: Boolean
         get() = isGooglePlayAvailable && isDatadogAvailable
 
-    private class CrashlyticsTree : Tree() {
+    private class CrashlyticsLogWriter : LogWriter() {
         companion object {
             private const val KEY_PRIORITY = "priority"
             private const val KEY_TAG = "tag"
             private const val KEY_MESSAGE = "message"
         }
 
-        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+        override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
             if (!Firebase.crashlytics.isCrashlyticsCollectionEnabled) return
 
             Firebase.crashlytics.setCustomKeys {
-                key(KEY_PRIORITY, priority)
-                key(KEY_TAG, tag ?: "No Tag")
+                key(KEY_PRIORITY, severity.ordinal)
+                key(KEY_TAG, tag)
                 key(KEY_MESSAGE, message)
             }
 
-            if (t == null) {
+            if (throwable == null) {
                 Firebase.crashlytics.recordException(Exception(message))
             } else {
-                Firebase.crashlytics.recordException(t)
+                Firebase.crashlytics.recordException(throwable)
             }
+        }
+    }
+
+    private class DatadogLogWriter(private val datadogLogger: Logger) : LogWriter() {
+        override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+            val datadogPriority =
+                when (severity) {
+                    Severity.Verbose -> android.util.Log.VERBOSE
+                    Severity.Debug -> android.util.Log.DEBUG
+                    Severity.Info -> android.util.Log.INFO
+                    Severity.Warn -> android.util.Log.WARN
+                    Severity.Error -> android.util.Log.ERROR
+                    Severity.Assert -> android.util.Log.ASSERT
+                }
+            datadogLogger.log(datadogPriority, message, throwable, mapOf("tag" to tag))
         }
     }
 
@@ -263,7 +278,7 @@ constructor(
                 is String -> bundle.putString(it.name, it.value as String?) // Explicitly handle String
                 else -> bundle.putString(it.name, it.value.toString()) // Fallback for other types
             }
-            Timber.tag(TAG).d("Analytics: track $event (${it.name} : ${it.value})")
+            KermitLogger.withTag(TAG).d { "Analytics: track $event (${it.name} : ${it.value})" }
         }
         Firebase.analytics.logEvent(event, bundle)
     }

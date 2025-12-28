@@ -21,6 +21,7 @@ import android.net.Uri
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +40,6 @@ import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.config
 import org.meshtastic.proto.copy
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -80,7 +80,7 @@ constructor(
 
     fun requestChannelUrl(url: Uri, onError: () -> Unit) = runCatching { _requestChannelSet.value = url.toChannelSet() }
         .onFailure { ex ->
-            Timber.e(ex, "Channel url error")
+            Logger.e(ex) { "Channel url error" }
             onError()
         }
 
@@ -101,7 +101,7 @@ constructor(
         try {
             serviceRepository.meshService?.setChannel(channel.toByteArray())
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Set channel error")
+            Logger.e(ex) { "Set channel error" }
         }
     }
 
@@ -110,7 +110,7 @@ constructor(
         try {
             serviceRepository.meshService?.setConfig(config.toByteArray())
         } catch (ex: RemoteException) {
-            Timber.e(ex, "Set config error")
+            Logger.e(ex) { "Set config error" }
         }
     }
 

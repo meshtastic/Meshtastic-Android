@@ -77,7 +77,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -88,6 +87,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.UIViewModel
@@ -157,7 +157,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.feature.node.metrics.annotateTraceroute
 import org.meshtastic.proto.MeshProtos
-import timber.log.Timber
 
 enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
     Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -610,7 +609,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     LaunchedEffect(connectionState, firmwareEdition) {
         if (connectionState == ConnectionState.Connected) {
             firmwareEdition?.let { edition ->
-                Timber.d("FirmwareEdition: ${edition.name}")
+                Logger.d { "FirmwareEdition: ${edition.name}" }
                 when (edition) {
                     MeshProtos.FirmwareEdition.VANILLA -> {
                         // Handle any specific logic for VANILLA firmware edition if needed
@@ -627,21 +626,21 @@ private fun VersionChecks(viewModel: UIViewModel) {
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo) {
         if (connectionState == ConnectionState.Connected) {
-            Timber.i(
+            Logger.i {
                 "[FW_CHECK] Connection state: $connectionState, " +
                     "myNodeInfo: ${if (myNodeInfo != null) "present" else "null"}, " +
-                    "firmwareVersion: ${myFirmwareVersion ?: "null"}",
-            )
+                    "firmwareVersion: ${myFirmwareVersion ?: "null"}"
+            }
 
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE && BuildConfig.DEBUG.not()
-                Timber.d(
+                Logger.d {
                     "[FW_CHECK] App version check - minAppVersion: ${info.minAppVersion}, " +
-                        "currentVersion: ${BuildConfig.VERSION_CODE}, isOld: $isOld",
-                )
+                        "currentVersion: ${BuildConfig.VERSION_CODE}, isOld: $isOld"
+                }
 
                 if (isOld) {
-                    Timber.w("[FW_CHECK] App too old - showing update prompt")
+                    Logger.w { "[FW_CHECK] App too old - showing update prompt" }
                     viewModel.showAlert(
                         getString(Res.string.app_too_old),
                         getString(Res.string.must_update),
@@ -654,18 +653,18 @@ private fun VersionChecks(viewModel: UIViewModel) {
                 } else {
                     myFirmwareVersion?.let { fwVersion ->
                         val curVer = DeviceVersion(fwVersion)
-                        Timber.i(
+                        Logger.i {
                             "[FW_CHECK] Firmware version comparison - " +
                                 "device: $curVer (raw: $fwVersion), " +
                                 "absoluteMin: ${MeshService.absoluteMinDeviceVersion}, " +
-                                "min: ${MeshService.minDeviceVersion}",
-                        )
+                                "min: ${MeshService.minDeviceVersion}"
+                        }
 
                         if (curVer < MeshService.absoluteMinDeviceVersion) {
-                            Timber.w(
+                            Logger.w {
                                 "[FW_CHECK] Firmware too old - " +
-                                    "device: $curVer < absoluteMin: ${MeshService.absoluteMinDeviceVersion}",
-                            )
+                                    "device: $curVer < absoluteMin: ${MeshService.absoluteMinDeviceVersion}"
+                            }
                             val title = getString(Res.string.firmware_too_old)
                             val message = getString(Res.string.firmware_old)
                             viewModel.showAlert(
@@ -678,21 +677,21 @@ private fun VersionChecks(viewModel: UIViewModel) {
                                 },
                             )
                         } else if (curVer < MeshService.minDeviceVersion) {
-                            Timber.w(
+                            Logger.w {
                                 "[FW_CHECK] Firmware should update - " +
-                                    "device: $curVer < min: ${MeshService.minDeviceVersion}",
-                            )
+                                    "device: $curVer < min: ${MeshService.minDeviceVersion}"
+                            }
                             val title = getString(Res.string.should_update_firmware)
                             val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
                             viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
                         } else {
-                            Timber.i("[FW_CHECK] Firmware version OK - device: $curVer meets requirements")
+                            Logger.i { "[FW_CHECK] Firmware version OK - device: $curVer meets requirements" }
                         }
-                    } ?: run { Timber.w("[FW_CHECK] Firmware version is null despite myNodeInfo being present") }
+                    } ?: run { Logger.w { "[FW_CHECK] Firmware version is null despite myNodeInfo being present" } }
                 }
-            } ?: run { Timber.d("[FW_CHECK] myNodeInfo is null, skipping firmware check") }
+            } ?: run { Logger.d { "[FW_CHECK] myNodeInfo is null, skipping firmware check" } }
         } else {
-            Timber.d("[FW_CHECK] Not connected (state: $connectionState), skipping firmware check")
+            Logger.d { "[FW_CHECK] Not connected (state: $connectionState), skipping firmware check" }
         }
     }
 }

@@ -62,7 +62,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.common)
-    implementation(libs.timber)
+    implementation(libs.kermit)
     implementation(libs.coil)
     implementation(libs.markdown.renderer.android)
     implementation(libs.markdown.renderer.m3)

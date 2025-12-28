@@ -26,6 +26,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
@@ -72,7 +73,6 @@ import org.meshtastic.core.strings.firmware_update_starting_service
 import org.meshtastic.core.strings.firmware_update_unknown_hardware
 import org.meshtastic.core.strings.firmware_update_updating
 import org.meshtastic.core.strings.unknown
-import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 
@@ -169,7 +169,7 @@ constructor(
                 }
                     .onFailure { e ->
                         if (e is CancellationException) throw e
-                        Timber.e(e)
+                        Logger.e(e) { "Error checking for updates" }
                         _state.value = FirmwareUpdateState.Error(e.message ?: "Unknown error")
                     }
             }
@@ -224,13 +224,13 @@ constructor(
 
                 _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_flashing))
                 withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { waitForDeviceDetach(context).first() }
-                    ?: Timber.w("Timed out waiting for device to detach, assuming success")
+                    ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
                 _state.value = FirmwareUpdateState.Success
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Timber.e(e)
+                Logger.e(e) { "Error saving DFU file" }
                 _state.value = FirmwareUpdateState.Error(e.message ?: getString(Res.string.firmware_update_failed))
             } finally {
                 cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
@@ -279,7 +279,7 @@ constructor(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    Timber.e(e)
+                    Logger.e(e) { "Error starting update from file" }
                     _state.value = FirmwareUpdateState.Error(e.message ?: "Local update failed")
                 }
             }
@@ -345,7 +345,7 @@ private fun cleanupTemporaryFiles(fileHandler: FirmwareFileHandler, tempFirmware
         tempFirmwareFile?.takeIf { it.exists() }?.delete()
         fileHandler.cleanupAllTemporaryFiles()
     }
-        .onFailure { e -> Timber.w(e, "Failed to cleanup temp files") }
+        .onFailure { e -> Logger.w(e) { "Failed to cleanup temp files" } }
     return null
 }
 

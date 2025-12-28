@@ -27,7 +27,7 @@ interface Continuation<in T> {
     fun resumeWithException(ex: Throwable) = try {
         resume(Result.failure(ex))
     } catch (ex: Throwable) {
-        // Timber.e("Ignoring $ex while resuming, because we are the ones who threw it")
+        // Logger.e { "Ignoring $ex while resuming because we are the ones who threw it" }
         throw ex
     }
 }

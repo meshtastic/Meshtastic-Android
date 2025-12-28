@@ -21,6 +21,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -29,7 +30,6 @@ import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
 import org.meshtastic.core.datastore.model.RecentAddress
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,11 +46,11 @@ class RecentAddressesDataSource @Inject constructor(private val dataStore: DataS
                 try {
                     Json.decodeFromString<List<RecentAddress>>(jsonString)
                 } catch (e: IllegalArgumentException) {
-                    Timber.w("Could not parse recent addresses, falling back to legacy parsing: ${e.message}")
+                    Logger.w { "Could not parse recent addresses, falling back to legacy parsing: ${e.message}" }
                     // Fallback to legacy parsing
                     parseLegacyRecentAddresses(jsonString)
                 } catch (e: SerializationException) {
-                    Timber.w("Could not parse recent addresses, falling back to legacy parsing: ${e.message}")
+                    Logger.w { "Could not parse recent addresses, falling back to legacy parsing: ${e.message}" }
                     // Fallback to legacy parsing
                     parseLegacyRecentAddresses(jsonString)
                 }
@@ -73,7 +73,7 @@ class RecentAddressesDataSource @Inject constructor(private val dataStore: DataS
                 }
                 else -> {
                     // Unknown format, log or handle as an error if necessary
-                    Timber.w("Unknown item type in recent IP addresses: $item")
+                    Logger.w { "Unknown item type in recent IP addresses: $item" }
                     null
                 }
             }

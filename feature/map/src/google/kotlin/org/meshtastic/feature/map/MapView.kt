@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -124,7 +125,6 @@ import org.meshtastic.proto.MeshProtos.Position
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
-import timber.log.Timber
 import java.text.DateFormat
 import kotlin.math.abs
 import kotlin.math.max
@@ -219,7 +219,7 @@ fun MapView(
                             try {
                                 cameraPositionState.animate(cameraUpdate)
                             } catch (e: IllegalStateException) {
-                                Timber.d("Error animating camera to location: ${e.message}")
+                                Logger.d { "Error animating camera to location: ${e.message}" }
                             }
                         }
                     }
@@ -239,14 +239,14 @@ fun MapView(
             try {
                 @Suppress("MissingPermission")
                 fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-                Timber.d("Started location tracking")
+                Logger.d { "Started location tracking" }
             } catch (e: SecurityException) {
-                Timber.d("Location permission not available: ${e.message}")
+                Logger.d { "Location permission not available: ${e.message}" }
                 isLocationTrackingEnabled = false
             }
         } else {
             fusedLocationClient.removeLocationUpdates(locationCallback)
-            Timber.d("Stopped location tracking")
+            Logger.d { "Stopped location tracking" }
         }
     }
 
@@ -412,7 +412,7 @@ fun MapView(
                 cameraPositionState.animate(cameraUpdate)
                 hasCenteredTraceroute = true
             } catch (e: IllegalStateException) {
-                Timber.d("Error centering traceroute overlay: ${e.message}")
+                Logger.d { "Error centering traceroute overlay: ${e.message}" }
             }
         }
     }
@@ -548,7 +548,7 @@ fun MapView(
                                         CameraUpdateFactory.newLatLngBounds(bounds.build(), 100),
                                     )
                                 }
-                                Timber.d("Cluster clicked! $cluster")
+                                Logger.d { "Cluster clicked! $cluster" }
                             }
                             true
                         },
@@ -679,9 +679,9 @@ fun MapView(
                                 val currentPosition = cameraPositionState.position
                                 val newCameraPosition = CameraPosition.Builder(currentPosition).bearing(0f).build()
                                 cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
-                                Timber.d("Oriented map to north")
+                                Logger.d { "Oriented map to north" }
                             } catch (e: IllegalStateException) {
-                                Timber.d("Error orienting map to north: ${e.message}")
+                                Logger.d { "Error orienting map to north: ${e.message}" }
                             }
                         }
                     }
@@ -715,7 +715,7 @@ fun MapView(
 internal fun convertIntToEmoji(unicodeCodePoint: Int): String = try {
     String(Character.toChars(unicodeCodePoint))
 } catch (e: IllegalArgumentException) {
-    Timber.w(e, "Invalid unicode code point: $unicodeCodePoint")
+    Logger.w(e) { "Invalid unicode code point: $unicodeCodePoint" }
     "\uD83D\uDCCD"
 }
 

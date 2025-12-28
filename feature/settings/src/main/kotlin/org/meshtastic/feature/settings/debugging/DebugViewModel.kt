@@ -20,6 +20,7 @@ package org.meshtastic.feature.settings.debugging
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
@@ -44,7 +45,6 @@ import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
 import org.meshtastic.proto.StoreAndForwardProtos
 import org.meshtastic.proto.TelemetryProtos
-import timber.log.Timber
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
@@ -237,7 +237,7 @@ constructor(
     }
 
     init {
-        Timber.d("DebugViewModel created")
+        Logger.d { "DebugViewModel created" }
         viewModelScope.launch {
             combine(searchManager.searchText, filterManager.filteredLogs) { searchText, logs ->
                 searchManager.findSearchMatches(searchText, logs)
@@ -250,7 +250,7 @@ constructor(
 
     override fun onCleared() {
         super.onCleared()
-        Timber.d("DebugViewModel cleared")
+        Logger.d { "DebugViewModel cleared" }
     }
 
     private fun toUiState(databaseLogs: List<MeshLog>) = databaseLogs

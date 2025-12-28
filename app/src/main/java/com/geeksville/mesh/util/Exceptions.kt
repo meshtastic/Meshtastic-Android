@@ -19,7 +19,7 @@ package com.geeksville.mesh.util
 
 import android.os.RemoteException
 import android.util.Log
-import timber.log.Timber
+import co.touchlab.kermit.Logger
 
 object Exceptions {
     // / Set in Application.onCreate
@@ -31,10 +31,9 @@ object Exceptions {
      * After reporting return
      */
     fun report(exception: Throwable, tag: String? = null, message: String? = null) {
-        Timber.e(
-            exception,
-            "Exceptions.report: $tag $message",
-        ) // print the message to the log _before_ telling the crash reporter
+        Logger.e(exception) {
+            "Exceptions.report: $tag $message"
+        } // print the message to the log _before_ telling the crash reporter
         reporter?.let { r -> r(exception, tag, message) }
     }
 }
@@ -58,7 +57,7 @@ fun ignoreException(silent: Boolean = false, inner: () -> Unit) {
         inner()
     } catch (ex: Throwable) {
         // DO NOT THROW users expect we have fully handled/discarded the exception
-        if (!silent) Timber.e("ignoring exception", ex)
+        if (!silent) Logger.e(ex) { "ignoring exception" }
     }
 }
 

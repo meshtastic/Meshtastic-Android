@@ -61,5 +61,5 @@ dependencies {
     implementation(libs.androidx.core.location.altitude)
     implementation(libs.androidx.paging.common)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 }

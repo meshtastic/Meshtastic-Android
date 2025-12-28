@@ -32,12 +32,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import co.touchlab.kermit.Logger
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
-import timber.log.Timber
 
 private const val INTERVAL_MILLIS = 10000L
 
@@ -66,11 +66,11 @@ fun LocationPermissionsHandler(onPermissionResult: (Boolean) -> Unit) {
     val locationSettingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                Timber.d("Location settings changed by user.")
+                Logger.d { "Location settings changed by user." }
                 // User has enabled location services or improved accuracy.
                 onPermissionResult(true) // Settings are now adequate, and permission was already granted.
             } else {
-                Timber.d("Location settings change cancelled by user.")
+                Logger.d { "Location settings change cancelled by user." }
                 // User chose not to change settings. The permission itself is still granted,
                 // but the experience might be degraded. For the purpose of enabling map features,
                 // we consider this as success if the core permission is there.
@@ -111,7 +111,7 @@ fun LocationPermissionsHandler(onPermissionResult: (Boolean) -> Unit) {
             val task = client.checkLocationSettings(builder.build())
 
             task.addOnSuccessListener {
-                Timber.d("Location settings are satisfied.")
+                Logger.d { "Location settings are satisfied." }
                 onPermissionResult(true) // Permission granted and settings are good
             }
 
@@ -122,11 +122,11 @@ fun LocationPermissionsHandler(onPermissionResult: (Boolean) -> Unit) {
                         locationSettingsLauncher.launch(intentSenderRequest)
                         // Result of this launch will be handled by locationSettingsLauncher's callback
                     } catch (sendEx: ActivityNotFoundException) {
-                        Timber.d("Error launching location settings resolution ${sendEx.message}.")
+                        Logger.d { "Error launching location settings resolution ${sendEx.message}." }
                         onPermissionResult(true) // Permission is granted, but settings dialog failed. Proceed.
                     }
                 } else {
-                    Timber.d("Location settings are not satisfiable.${exception.message}")
+                    Logger.d { "Location settings are not satisfiable.${exception.message}" }
                     onPermissionResult(true) // Permission is granted, but settings not ideal. Proceed.
                 }
             }

@@ -17,6 +17,7 @@
 
 package org.meshtastic.core.data.repository
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
@@ -27,7 +28,6 @@ import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,45 +59,40 @@ constructor(
     @Suppress("LongMethod")
     suspend fun getDeviceHardwareByModel(hwModel: Int, forceRefresh: Boolean = false): Result<DeviceHardware?> =
         withContext(Dispatchers.IO) {
-            Timber.d(
-                "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=%d, forceRefresh=%b)",
-                hwModel,
-                forceRefresh,
-            )
+            Logger.d {
+                "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel, forceRefresh=$forceRefresh)"
+            }
 
             val quirks = loadQuirks()
 
             if (forceRefresh) {
-                Timber.d("DeviceHardwareRepository: forceRefresh=true, clearing local device hardware cache")
+                Logger.d { "DeviceHardwareRepository: forceRefresh=true, clearing local device hardware cache" }
                 localDataSource.deleteAllDeviceHardware()
             } else {
                 // 1. Attempt to retrieve from cache first
                 val cachedEntity = localDataSource.getByHwModel(hwModel)
                 if (cachedEntity != null && !cachedEntity.isStale()) {
-                    Timber.d("DeviceHardwareRepository: using fresh cached device hardware for hwModel=%d", hwModel)
+                    Logger.d { "DeviceHardwareRepository: using fresh cached device hardware for hwModel=$hwModel" }
                     return@withContext Result.success(
                         applyBootloaderQuirk(hwModel, cachedEntity.asExternalModel(), quirks),
                     )
                 }
-                Timber.d("DeviceHardwareRepository: no fresh cache for hwModel=%d, attempting remote fetch", hwModel)
+                Logger.d { "DeviceHardwareRepository: no fresh cache for hwModel=$hwModel, attempting remote fetch" }
             }
 
             // 2. Fetch from remote API
             runCatching {
-                Timber.d("DeviceHardwareRepository: fetching device hardware from remote API")
+                Logger.d { "DeviceHardwareRepository: fetching device hardware from remote API" }
                 val remoteHardware = remoteDataSource.getAllDeviceHardware()
-                Timber.d(
-                    "DeviceHardwareRepository: remote API returned %d device hardware entries",
-                    remoteHardware.size,
-                )
+                Logger.d {
+                    "DeviceHardwareRepository: remote API returned ${remoteHardware.size} device hardware entries"
+                }
 
                 localDataSource.insertAllDeviceHardware(remoteHardware)
                 val fromDb = localDataSource.getByHwModel(hwModel)?.asExternalModel()
-                Timber.d(
-                    "DeviceHardwareRepository: lookup after remote fetch for hwModel=%d %s",
-                    hwModel,
-                    if (fromDb != null) "succeeded" else "returned null",
-                )
+                Logger.d {
+                    "DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel ${if (fromDb != null) "succeeded" else "returned null"}"
+                }
                 fromDb
             }
                 .onSuccess {
@@ -105,57 +100,48 @@ constructor(
                     return@withContext Result.success(applyBootloaderQuirk(hwModel, it, quirks))
                 }
                 .onFailure { e ->
-                    Timber.w(
-                        e,
-                        "DeviceHardwareRepository: failed to fetch device hardware from server for hwModel=%d",
-                        hwModel,
-                    )
+                    Logger.w(e) {
+                        "DeviceHardwareRepository: failed to fetch device hardware from server for hwModel=$hwModel"
+                    }
 
                     // 3. Attempt to use stale cache as a fallback, but only if it looks complete.
                     val staleEntity = localDataSource.getByHwModel(hwModel)
                     if (staleEntity != null && !staleEntity.isIncomplete()) {
-                        Timber.d("DeviceHardwareRepository: using stale cached device hardware for hwModel=%d", hwModel)
+                        Logger.d { "DeviceHardwareRepository: using stale cached device hardware for hwModel=$hwModel" }
                         return@withContext Result.success(
                             applyBootloaderQuirk(hwModel, staleEntity.asExternalModel(), quirks),
                         )
                     }
 
                     // 4. Fallback to bundled JSON if cache is empty or incomplete
-                    Timber.d(
-                        "DeviceHardwareRepository: cache %s for hwModel=%d, falling back to bundled JSON asset",
-                        if (staleEntity == null) "empty" else "incomplete",
-                        hwModel,
-                    )
+                    Logger.d {
+                        "DeviceHardwareRepository: cache ${if (staleEntity == null) "empty" else "incomplete"} for hwModel=$hwModel, falling back to bundled JSON asset"
+                    }
                     return@withContext loadFromBundledJson(hwModel, quirks)
                 }
         }
 
     private suspend fun loadFromBundledJson(hwModel: Int, quirks: List<BootloaderOtaQuirk>): Result<DeviceHardware?> =
         runCatching {
-            Timber.d("DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=%d", hwModel)
+            Logger.d { "DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=$hwModel" }
             val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
-            Timber.d(
-                "DeviceHardwareRepository: bundled JSON returned %d device hardware entries",
-                jsonHardware.size,
-            )
+            Logger.d {
+                "DeviceHardwareRepository: bundled JSON returned ${jsonHardware.size} device hardware entries"
+            }
 
             localDataSource.insertAllDeviceHardware(jsonHardware)
             val base = localDataSource.getByHwModel(hwModel)?.asExternalModel()
-            Timber.d(
-                "DeviceHardwareRepository: lookup after JSON load for hwModel=%d %s",
-                hwModel,
-                if (base != null) "succeeded" else "returned null",
-            )
+            Logger.d {
+                "DeviceHardwareRepository: lookup after JSON load for hwModel=$hwModel ${if (base != null) "succeeded" else "returned null"}"
+            }
 
             applyBootloaderQuirk(hwModel, base, quirks)
         }
             .also { result ->
                 result.exceptionOrNull()?.let { e ->
-                    Timber.e(
-                        e,
-                        "DeviceHardwareRepository: failed to load device hardware from bundled JSON for hwModel=%d",
-                        hwModel,
-                    )
+                    Logger.e(e) {
+                        "DeviceHardwareRepository: failed to load device hardware from bundled JSON for hwModel=$hwModel"
+                    }
                 }
             }
 
@@ -174,7 +160,7 @@ constructor(
 
     private fun loadQuirks(): List<BootloaderOtaQuirk> {
         val quirks = bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset()
-        Timber.d("DeviceHardwareRepository: loaded %d bootloader quirks", quirks.size)
+        Logger.d { "DeviceHardwareRepository: loaded ${quirks.size} bootloader quirks" }
         return quirks
     }
 
@@ -186,17 +172,11 @@ constructor(
         if (base == null) return null
 
         val quirk = quirks.firstOrNull { it.hwModel == hwModel }
-        Timber.d(
-            "DeviceHardwareRepository: applyBootloaderQuirk for hwModel=%d, quirk found=%b",
-            hwModel,
-            quirk != null,
-        )
+        Logger.d { "DeviceHardwareRepository: applyBootloaderQuirk for hwModel=$hwModel, quirk found=${quirk != null}" }
         return if (quirk != null) {
-            Timber.d(
-                "DeviceHardwareRepository: applying quirk: requiresBootloaderUpgradeForOta=%b, infoUrl=%s",
-                quirk.requiresBootloaderUpgradeForOta,
-                quirk.infoUrl,
-            )
+            Logger.d {
+                "DeviceHardwareRepository: applying quirk: requiresBootloaderUpgradeForOta=${quirk.requiresBootloaderUpgradeForOta}, infoUrl=${quirk.infoUrl}"
+            }
             base.copy(
                 requiresBootloaderUpgradeForOta = quirk.requiresBootloaderUpgradeForOta,
                 bootloaderInfoUrl = quirk.infoUrl,

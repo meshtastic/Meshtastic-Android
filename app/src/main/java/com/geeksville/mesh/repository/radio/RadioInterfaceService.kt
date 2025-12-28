@@ -21,6 +21,7 @@ import android.app.Application
 import android.provider.Settings
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
@@ -50,7 +51,6 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.MeshProtos
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -141,7 +141,7 @@ constructor(
     fun keepAlive(now: Long = System.currentTimeMillis()) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             if (radioIf is SerialInterface) {
-                Timber.i("Sending ToRadio heartbeat")
+                Logger.i { "Sending ToRadio heartbeat" }
                 val heartbeat =
                     MeshProtos.ToRadio.newBuilder().setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
                 handleSendToRadio(heartbeat.toByteArray())
@@ -206,7 +206,7 @@ constructor(
     }
 
     private fun broadcastConnectionChanged(newState: ConnectionState) {
-        Timber.d("Broadcasting connection state change to $newState")
+        Logger.d { "Broadcasting connection state change to $newState" }
         processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionState.emit(newState) }
     }
 
@@ -223,7 +223,7 @@ constructor(
                 receivedPacketsLog.write(p)
                 receivedPacketsLog.flush()
             } catch (t: Throwable) {
-                Timber.w(t, "Failed to write receive log in handleFromRadio")
+                Logger.w(t) { "Failed to write receive log in handleFromRadio" }
             }
         }
 
@@ -231,13 +231,13 @@ constructor(
             keepAlive(System.currentTimeMillis())
         }
 
-        // ignoreException { Timber.d("FromRadio: ${MeshProtos.FromRadio.parseFrom(p)}") }
+        // ignoreException { Logger.d { "FromRadio: ${MeshProtos.FromRadio.parseFrom(p }}" } }
 
         try {
             processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
             emitReceiveActivity()
         } catch (t: Throwable) {
-            Timber.e(t, "RadioInterfaceService.handleFromRadio failed while emitting data")
+            Logger.e(t) { "RadioInterfaceService.handleFromRadio failed while emitting data" }
         }
     }
 
@@ -262,13 +262,13 @@ constructor(
     /** Start our configured interface (if it isn't already running) */
     private fun startInterface() {
         if (radioIf !is NopInterface) {
-            Timber.w("Can't start interface - $radioIf is already running")
+            Logger.w { "Can't start interface - $radioIf is already running" }
         } else {
             val address = getBondedDeviceAddress()
             if (address == null) {
-                Timber.w("No bonded mesh radio, can't start interface")
+                Logger.w { "No bonded mesh radio, can't start interface" }
             } else {
-                Timber.i("Starting radio ${address.anonymize}")
+                Logger.i { "Starting radio ${address.anonymize}" }
                 isStarted = true
 
                 if (logSends) {
@@ -285,7 +285,7 @@ constructor(
 
     private fun stopInterface() {
         val r = radioIf
-        Timber.i("stopping interface $r")
+        Logger.i { "stopping interface $r" }
         isStarted = false
         radioIf = interfaceFactory.nopInterface
         r.close()
@@ -314,7 +314,7 @@ constructor(
      */
     private fun setBondedDeviceAddress(address: String?): Boolean =
         if (getBondedDeviceAddress() == address && isStarted && _connectionState.value == ConnectionState.Connected) {
-            Timber.w("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
+            Logger.w { "Ignoring setBondedDevice ${address.anonymize}, because we are already using that device" }
             false
         } else {
             // Record that this use has configured a new radio
@@ -325,7 +325,7 @@ constructor(
 
             // The device address "n" can be used to mean none
 
-            Timber.d("Setting bonded device to ${address.anonymize}")
+            Logger.d { "Setting bonded device to ${address.anonymize}" }
 
             // Stores the address if non-null, otherwise removes the pref
             radioPrefs.devAddr = address
@@ -366,14 +366,14 @@ constructor(
         // Use tryEmit for SharedFlow as it's non-blocking
         val emitted = _meshActivity.tryEmit(MeshActivity.Send)
         if (!emitted) {
-            Timber.d("MeshActivity.Send event was not emitted due to buffer overflow or no collectors")
+            Logger.d { "MeshActivity.Send event was not emitted due to buffer overflow or no collectors" }
         }
     }
 
     private fun emitReceiveActivity() {
         val emitted = _meshActivity.tryEmit(MeshActivity.Receive)
         if (!emitted) {
-            Timber.d("MeshActivity.Receive event was not emitted due to buffer overflow or no collectors")
+            Logger.d { "MeshActivity.Receive event was not emitted due to buffer overflow or no collectors" }
         }
     }
 }

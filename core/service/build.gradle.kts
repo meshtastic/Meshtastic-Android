@@ -46,5 +46,5 @@ dependencies {
     implementation(projects.core.proto)
     implementation(libs.javax.inject)
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 }

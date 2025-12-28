@@ -21,6 +21,7 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,7 +58,6 @@ import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.Portnums
-import timber.log.Timber
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -287,7 +287,7 @@ constructor(
                     }
                 }
             } catch (ex: FileNotFoundException) {
-                Timber.e("Can't write file error: ${ex.message}")
+                Logger.e { "Can't write file error: ${ex.message}" }
             }
         }
     }

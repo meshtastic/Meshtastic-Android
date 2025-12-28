@@ -232,7 +232,7 @@ dependencies {
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.accompanist.permissions)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     implementation(libs.nordic)
 

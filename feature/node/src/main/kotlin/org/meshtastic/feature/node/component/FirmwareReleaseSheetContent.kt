@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import co.touchlab.kermit.Logger
 import com.mikepenz.markdown.m3.Markdown
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -50,7 +51,6 @@ import org.meshtastic.core.strings.download
 import org.meshtastic.core.strings.error_no_app_to_handle_link
 import org.meshtastic.core.strings.view_release
 import org.meshtastic.core.ui.util.showToast
-import timber.log.Timber
 
 @Composable
 fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modifier = Modifier) {
@@ -72,7 +72,7 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
                         scope.launch { context.showToast(Res.string.error_no_app_to_handle_link) }
-                        Timber.e(e)
+                        Logger.e(e) { "Failed to handle release page URL" }
                     }
                 },
                 modifier = Modifier.weight(1f),
@@ -88,7 +88,7 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
                         scope.launch { context.showToast(Res.string.error_no_app_to_handle_link) }
-                        Timber.e(e)
+                        Logger.e(e) { "Failed to handle release zip URL" }
                     }
                 },
                 modifier = Modifier.weight(1f),

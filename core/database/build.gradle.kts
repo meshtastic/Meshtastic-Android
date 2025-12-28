@@ -55,7 +55,7 @@ dependencies {
 
     implementation(libs.androidx.room.paging)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.timber)
+    implementation(libs.kermit)
 
     ksp(libs.androidx.room.compiler)
 

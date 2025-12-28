@@ -18,11 +18,11 @@
 package com.geeksville.mesh.repository.usb
 
 import android.hardware.usb.UsbManager
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.util.SerialInputOutputManager
-import timber.log.Timber
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -40,7 +40,7 @@ internal class SerialConnectionImpl(
 
     override fun sendBytes(bytes: ByteArray) {
         ioRef.get()?.let {
-            Timber.d("writing ${bytes.size} byte(s)")
+            Logger.d { "writing ${bytes.size} byte(s }" }
             it.writeAsync(bytes)
         }
     }
@@ -54,7 +54,7 @@ internal class SerialConnectionImpl(
 
             // Allow a short amount of time for the manager to quit (so the port can be cleanly closed)
             if (waitForStopped) {
-                Timber.d("Waiting for USB manager to stop...")
+                Logger.d { "Waiting for USB manager to stop..." }
                 closedLatch.await(1, TimeUnit.SECONDS)
             }
         }
@@ -80,7 +80,7 @@ internal class SerialConnectionImpl(
         port.dtr = true
         port.rts = true
 
-        Timber.d("Starting serial reader thread")
+        Logger.d { "Starting serial reader thread" }
         val io =
             SerialInputOutputManager(
                 port,

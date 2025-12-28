@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger
 import com.geeksville.mesh.model.DeviceListEntry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
@@ -58,7 +59,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.TelemetryProtos
-import timber.log.Timber
 import kotlin.time.Duration.Companion.seconds
 
 private const val RSSI_DELAY = 10
@@ -81,13 +81,13 @@ fun CurrentlyConnectedInfo(
                     rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.peripheral.readRssi() }
                     delay(RSSI_DELAY.seconds)
                 } catch (e: PeripheralNotConnectedException) {
-                    Timber.e(e, "Failed to read RSSI ${e.message}")
+                    Logger.e(e) { "Failed to read RSSI ${e.message}" }
                     break
                 } catch (e: OperationFailedException) {
-                    Timber.e(e, "Failed to read RSSI ${e.message}")
+                    Logger.e(e) { "Failed to read RSSI ${e.message}" }
                     break
                 } catch (e: SecurityException) {
-                    Timber.e(e, "Failed to read RSSI ${e.message}")
+                    Logger.e(e) { "Failed to read RSSI ${e.message}" }
                     break
                 }
             }
