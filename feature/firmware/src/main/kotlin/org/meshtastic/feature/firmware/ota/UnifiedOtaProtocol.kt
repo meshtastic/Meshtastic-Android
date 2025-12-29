@@ -105,9 +105,10 @@ interface UnifiedOtaProtocol {
      *
      * @param sizeBytes Total firmware size in bytes
      * @param sha256Hash SHA-256 hash of the firmware (64 hex characters)
+     * @param onStatus Optional callback to report status changes (e.g., "Erasing...")
      * @return Success if device accepts and is ready, error otherwise
      */
-    suspend fun startOta(sizeBytes: Long, sha256Hash: String): Result<Unit>
+    suspend fun startOta(sizeBytes: Long, sha256Hash: String, onStatus: (String) -> Unit = {}): Result<Unit>
 
     /**
      * Stream firmware binary data to the device.
