@@ -76,7 +76,7 @@ constructor(
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "Nordic DFU Update failed" }
             updateState(FirmwareUpdateState.Error(e.message ?: "Nordic DFU Update failed"))
             null

@@ -18,7 +18,6 @@
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -208,9 +207,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
                 Logger.d { "WiFi OTA: Received response: $response" }
                 response
             }
-        } catch (e: SocketTimeoutException) {
-            throw OtaProtocolException.Timeout("Timeout waiting for response after ${timeoutMs}ms")
-        } catch (e: CancellationException) {
+        } catch (@Suppress("SwallowedException") e: SocketTimeoutException) {
             throw OtaProtocolException.Timeout("Timeout waiting for response after ${timeoutMs}ms")
         }
     }
@@ -218,6 +215,9 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
     companion object {
         const val DEFAULT_PORT = 3232
         const val RECOMMENDED_CHUNK_SIZE = 1024 // Larger than BLE
+        private const val RECEIVE_BUFFER_SIZE = 1024
+        private const val DISCOVERY_TIMEOUT_DEFAULT = 3000L
+        private const val BROADCAST_ADDRESS = "255.255.255.255"
 
         // Timeouts
         private const val CONNECTION_TIMEOUT_MS = 5_000
@@ -230,51 +230,51 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         /**
          * Discover ESP32 devices on the local network via UDP broadcast.
          *
-         * @param timeoutMs How long to wait for responses
          * @return List of discovered device IP addresses
          */
-        suspend fun discoverDevices(timeoutMs: Long = 3000): List<String> = withContext(Dispatchers.IO) {
-            val devices = mutableListOf<String>()
+        suspend fun discoverDevices(timeoutMs: Long = DISCOVERY_TIMEOUT_DEFAULT): List<String> =
+            withContext(Dispatchers.IO) {
+                val devices = mutableListOf<String>()
 
-            runCatching {
-                DatagramSocket().use { socket ->
-                    socket.broadcast = true
-                    socket.soTimeout = timeoutMs.toInt()
+                runCatching {
+                    DatagramSocket().use { socket ->
+                        socket.broadcast = true
+                        socket.soTimeout = timeoutMs.toInt()
 
-                    // Send discovery broadcast
-                    val discoveryMessage = "MESHTASTIC_OTA_DISCOVERY\n".toByteArray()
-                    val broadcastAddress = InetAddress.getByName("255.255.255.255")
-                    val packet =
-                        DatagramPacket(discoveryMessage, discoveryMessage.size, broadcastAddress, DEFAULT_PORT)
-                    socket.send(packet)
-                    Logger.d { "WiFi OTA: Sent discovery broadcast" }
+                        // Send discovery broadcast
+                        val discoveryMessage = "MESHTASTIC_OTA_DISCOVERY\n".toByteArray()
+                        val broadcastAddress = InetAddress.getByName(BROADCAST_ADDRESS)
+                        val packet =
+                            DatagramPacket(discoveryMessage, discoveryMessage.size, broadcastAddress, DEFAULT_PORT)
+                        socket.send(packet)
+                        Logger.d { "WiFi OTA: Sent discovery broadcast" }
 
-                    // Listen for responses
-                    val receiveBuffer = ByteArray(1024)
-                    val startTime = System.currentTimeMillis()
+                        // Listen for responses
+                        val receiveBuffer = ByteArray(RECEIVE_BUFFER_SIZE)
+                        val startTime = System.currentTimeMillis()
 
-                    while (System.currentTimeMillis() - startTime < timeoutMs) {
-                        try {
-                            val receivePacket = DatagramPacket(receiveBuffer, receiveBuffer.size)
-                            socket.receive(receivePacket)
+                        while (System.currentTimeMillis() - startTime < timeoutMs) {
+                            try {
+                                val receivePacket = DatagramPacket(receiveBuffer, receiveBuffer.size)
+                                socket.receive(receivePacket)
 
-                            val response = String(receivePacket.data, 0, receivePacket.length).trim()
-                            if (response.startsWith("MESHTASTIC_OTA")) {
-                                val deviceIp = receivePacket.address.hostAddress
-                                if (deviceIp != null && !devices.contains(deviceIp)) {
-                                    devices.add(deviceIp)
-                                    Logger.i { "WiFi OTA: Discovered device at $deviceIp" }
+                                val response = String(receivePacket.data, 0, receivePacket.length).trim()
+                                if (response.startsWith("MESHTASTIC_OTA")) {
+                                    val deviceIp = receivePacket.address.hostAddress
+                                    if (deviceIp != null && !devices.contains(deviceIp)) {
+                                        devices.add(deviceIp)
+                                        Logger.i { "WiFi OTA: Discovered device at $deviceIp" }
+                                    }
                                 }
+                            } catch (@Suppress("SwallowedException") e: SocketTimeoutException) {
+                                break
                             }
-                        } catch (e: SocketTimeoutException) {
-                            break
                         }
                     }
                 }
-            }
-                .onFailure { e -> Logger.e(e) { "WiFi OTA: Discovery failed" } }
+                    .onFailure { e -> Logger.e(e) { "WiFi OTA: Discovery failed" } }
 
-            devices
-        }
+                devices
+            }
     }
 }

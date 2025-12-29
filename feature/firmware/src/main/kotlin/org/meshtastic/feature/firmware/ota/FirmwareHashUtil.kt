@@ -24,6 +24,8 @@ import java.security.MessageDigest
 /** Utility functions for firmware hash calculation and verification. */
 object FirmwareHashUtil {
 
+    private const val BUFFER_SIZE = 8192
+
     /**
      * Calculate SHA-256 hash of a file.
      *
@@ -41,7 +43,7 @@ object FirmwareHashUtil {
     fun calculateSha256Bytes(file: File): ByteArray {
         val digest = MessageDigest.getInstance("SHA-256")
         FileInputStream(file).use { fis ->
-            val buffer = ByteArray(8192)
+            val buffer = ByteArray(BUFFER_SIZE)
             var bytesRead: Int
             while (fis.read(buffer).also { bytesRead = it } != -1) {
                 digest.update(buffer, 0, bytesRead)

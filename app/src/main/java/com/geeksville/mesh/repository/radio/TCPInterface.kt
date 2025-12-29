@@ -214,7 +214,7 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
                 }
                 onDeviceDisconnect(false)
             }
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "[$address] Error connecting to $host:$port" }
             throw e
         }
