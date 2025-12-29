@@ -197,54 +197,57 @@ constructor(
                         )
                 } else if (radioPrefs.isBle()) {
                     // Route based on device architecture
-                    tempFirmwareFile = when {
-                        isEsp32Architecture(currentState.deviceHardware.architecture) -> {
-                            // Use ESP32 Unified OTA
-                            esp32OtaUpdateHandler.startBleUpdate(
-                                release = release,
-                                hardware = currentState.deviceHardware,
-                                address = currentState.address,
-                                updateState = { _state.value = it },
-                            )
-                        }
-                        else -> {
-                            // Use Nordic DFU for nRF52840 and other devices
-                            otaUpdateHandler.startUpdate(
-                                release = release,
-                                hardware = currentState.deviceHardware,
-                                address = currentState.address,
-                                updateState = { _state.value = it },
-                                notFoundMsg =
-                                getString(
-                                    Res.string.firmware_update_not_found_in_release,
-                                    currentState.deviceHardware.displayName,
-                                ),
-                                startingMsg = getString(Res.string.firmware_update_starting_service),
-                            )
-                        }
-                    }
-                } else if (radioPrefs.isTcp()) {
-                    // WiFi/TCP connection - use unified OTA for ESP32 devices
-                    tempFirmwareFile = when {
-                        isEsp32Architecture(currentState.deviceHardware.architecture) -> {
-                            val deviceIp = extractIpFromAddress(currentState.address)
-                            if (deviceIp != null) {
-                                esp32OtaUpdateHandler.startWifiUpdate(
+                    tempFirmwareFile =
+                        when {
+                            isEsp32Architecture(currentState.deviceHardware.architecture) -> {
+                                // Use ESP32 Unified OTA
+                                esp32OtaUpdateHandler.startBleUpdate(
                                     release = release,
                                     hardware = currentState.deviceHardware,
-                                    deviceIp = deviceIp,
+                                    address = currentState.address,
                                     updateState = { _state.value = it },
                                 )
-                            } else {
-                                _state.value = FirmwareUpdateState.Error("Invalid TCP address: ${currentState.address}")
+                            }
+                            else -> {
+                                // Use Nordic DFU for nRF52840 and other devices
+                                otaUpdateHandler.startUpdate(
+                                    release = release,
+                                    hardware = currentState.deviceHardware,
+                                    address = currentState.address,
+                                    updateState = { _state.value = it },
+                                    notFoundMsg =
+                                    getString(
+                                        Res.string.firmware_update_not_found_in_release,
+                                        currentState.deviceHardware.displayName,
+                                    ),
+                                    startingMsg = getString(Res.string.firmware_update_starting_service),
+                                )
+                            }
+                        }
+                } else if (radioPrefs.isTcp()) {
+                    // WiFi/TCP connection - use unified OTA for ESP32 devices
+                    tempFirmwareFile =
+                        when {
+                            isEsp32Architecture(currentState.deviceHardware.architecture) -> {
+                                val deviceIp = extractIpFromAddress(radioPrefs.devAddr)
+                                if (deviceIp != null) {
+                                    esp32OtaUpdateHandler.startWifiUpdate(
+                                        release = release,
+                                        hardware = currentState.deviceHardware,
+                                        deviceIp = deviceIp,
+                                        updateState = { _state.value = it },
+                                    )
+                                } else {
+                                    _state.value =
+                                        FirmwareUpdateState.Error("Invalid TCP address: ${radioPrefs.devAddr}")
+                                    null
+                                }
+                            }
+                            else -> {
+                                _state.value = FirmwareUpdateState.Error("WiFi OTA only supported for ESP32 devices")
                                 null
                             }
                         }
-                        else -> {
-                            _state.value = FirmwareUpdateState.Error("WiFi OTA only supported for ESP32 devices")
-                            null
-                        }
-                    }
                 }
             }
     }
@@ -301,7 +304,13 @@ constructor(
                         when {
                             isEsp32Architecture(currentState.deviceHardware.architecture) -> {
                                 esp32OtaUpdateHandler.startBleUpdate(
-                                    release = FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                                    release =
+                                    FirmwareRelease(
+                                        id = "local",
+                                        title = "Local File",
+                                        zipUrl = "",
+                                        releaseNotes = "",
+                                    ),
                                     hardware = currentState.deviceHardware,
                                     address = currentState.address,
                                     updateState = { _state.value = it },
@@ -310,7 +319,13 @@ constructor(
                             }
                             else -> {
                                 otaUpdateHandler.startUpdate(
-                                    release = FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                                    release =
+                                    FirmwareRelease(
+                                        id = "local",
+                                        title = "Local File",
+                                        zipUrl = "",
+                                        releaseNotes = "",
+                                    ),
                                     hardware = currentState.deviceHardware,
                                     address = currentState.address,
                                     updateState = { _state.value = it },
@@ -439,21 +454,17 @@ private sealed interface DfuInternalState {
 private fun isValidBluetoothAddress(address: String?): Boolean =
     address != null && BLUETOOTH_ADDRESS_REGEX.matches(address)
 
-private fun isEsp32Architecture(architecture: String): Boolean {
-    return architecture.startsWith("esp32", ignoreCase = true)
-}
+private fun isEsp32Architecture(architecture: String): Boolean = architecture.startsWith("esp32", ignoreCase = true)
 
 /**
- * Extract IP address from TCP device address.
- * TCP addresses are formatted as "t<ip_address>", e.g., "t192.168.1.100"
+ * Extract IP address from TCP device address. TCP addresses are formatted as "t<ip_address>", e.g., "t192.168.1.100"
  */
-private fun extractIpFromAddress(address: String): String? {
-    return if (address.startsWith("t") && address.length > 1) {
+private fun extractIpFromAddress(address: String?): String? =
+    if (address != null && address.startsWith("t") && address.length > 1) {
         address.substring(1)
     } else {
         null
     }
-}
 
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease

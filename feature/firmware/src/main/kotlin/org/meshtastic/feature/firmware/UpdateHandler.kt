@@ -62,6 +62,18 @@ class FirmwareRetriever @Inject constructor(private val fileHandler: FirmwareFil
         internalFileExtension = ".uf2",
     )
 
+    suspend fun retrieveEsp32Firmware(
+        release: FirmwareRelease,
+        hardware: DeviceHardware,
+        onProgress: (Float) -> Unit,
+    ): File? = retrieve(
+        release = release,
+        hardware = hardware,
+        onProgress = onProgress,
+        fileSuffix = ".bin",
+        internalFileExtension = ".bin",
+    )
+
     private suspend fun retrieve(
         release: FirmwareRelease,
         hardware: DeviceHardware,
