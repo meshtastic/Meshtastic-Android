@@ -17,8 +17,6 @@
 
 package org.meshtastic.feature.firmware.ota
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.net.Uri
 import co.touchlab.kermit.Logger
@@ -26,6 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
@@ -40,6 +39,7 @@ class Esp32OtaUpdateHandler
 constructor(
     private val firmwareRetriever: FirmwareRetriever,
     private val serviceRepository: ServiceRepository,
+    private val centralManager: CentralManager,
     @ApplicationContext private val context: Context,
 ) {
 
@@ -84,11 +84,7 @@ constructor(
             Logger.i { "ESP32 OTA: Firmware hash: $sha256Hash" }
             triggerRebootOta(1, sha256Bytes) // 1 = BLE
 
-            val bluetoothDevice =
-                getBluetoothDevice(address)
-                    ?: throw OtaProtocolException.ConnectionFailed("Invalid Bluetooth address: $address")
-
-            val transport = BleOtaTransport(context, bluetoothDevice)
+            val transport = BleOtaTransport(centralManager, address)
 
             // Give the device time to reboot if it's currently in normal mode
             var connected = false
@@ -299,15 +295,6 @@ constructor(
             Logger.e(e) { "ESP32 OTA: Failed to read firmware from URI" }
             null
         }
-    }
-
-    /** Get BluetoothDevice from MAC address. */
-    private fun getBluetoothDevice(address: String): BluetoothDevice? = try {
-        val adapter = BluetoothAdapter.getDefaultAdapter()
-        adapter?.getRemoteDevice(address)
-    } catch (e: Exception) {
-        Logger.e(e) { "ESP32 OTA: Failed to get Bluetooth device" }
-        null
     }
 
     /**
