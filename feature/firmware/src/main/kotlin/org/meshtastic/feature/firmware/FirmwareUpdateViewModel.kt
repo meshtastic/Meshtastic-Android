@@ -17,13 +17,7 @@
 
 package org.meshtastic.feature.firmware
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.hardware.usb.UsbManager
 import android.net.Uri
-import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
@@ -32,19 +26,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import no.nordicsemi.android.dfu.DfuProgressListenerAdapter
-import no.nordicsemi.android.dfu.DfuServiceListenerHelper
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
@@ -68,10 +58,7 @@ import org.meshtastic.core.strings.firmware_update_method_ble
 import org.meshtastic.core.strings.firmware_update_method_usb
 import org.meshtastic.core.strings.firmware_update_method_wifi
 import org.meshtastic.core.strings.firmware_update_no_device
-import org.meshtastic.core.strings.firmware_update_not_found_in_release
-import org.meshtastic.core.strings.firmware_update_rebooting
 import org.meshtastic.core.strings.firmware_update_starting_dfu
-import org.meshtastic.core.strings.firmware_update_starting_service
 import org.meshtastic.core.strings.firmware_update_unknown_hardware
 import org.meshtastic.core.strings.firmware_update_updating
 import org.meshtastic.core.strings.unknown
@@ -96,9 +83,9 @@ constructor(
     private val radioPrefs: RadioPrefs,
     @ApplicationContext private val context: Context,
     private val bootloaderWarningDataSource: BootloaderWarningDataSource,
-    private val otaUpdateHandler: OtaUpdateHandler,
-    private val usbUpdateHandler: UsbUpdateHandler,
-    private val esp32OtaUpdateHandler: org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler,
+    private val firmwareUpdateManager: FirmwareUpdateManager,
+    private val dfuManager: DfuManager,
+    private val usbManager: UsbManager,
     private val fileHandler: FirmwareFileHandler,
 ) : ViewModel() {
 
@@ -187,68 +174,13 @@ constructor(
         updateJob?.cancel()
         updateJob =
             viewModelScope.launch {
-                if (radioPrefs.isSerial()) {
-                    tempFirmwareFile =
-                        usbUpdateHandler.startUpdate(
-                            release = release,
-                            hardware = currentState.deviceHardware,
-                            updateState = { _state.value = it },
-                            rebootingMsg = getString(Res.string.firmware_update_rebooting),
-                        )
-                } else if (radioPrefs.isBle()) {
-                    // Route based on device architecture
-                    tempFirmwareFile =
-                        when {
-                            isEsp32Architecture(currentState.deviceHardware.architecture) -> {
-                                // Use ESP32 Unified OTA
-                                esp32OtaUpdateHandler.startBleUpdate(
-                                    release = release,
-                                    hardware = currentState.deviceHardware,
-                                    address = currentState.address,
-                                    updateState = { _state.value = it },
-                                )
-                            }
-                            else -> {
-                                // Use Nordic DFU for nRF52840 and other devices
-                                otaUpdateHandler.startUpdate(
-                                    release = release,
-                                    hardware = currentState.deviceHardware,
-                                    address = currentState.address,
-                                    updateState = { _state.value = it },
-                                    notFoundMsg =
-                                    getString(
-                                        Res.string.firmware_update_not_found_in_release,
-                                        currentState.deviceHardware.displayName,
-                                    ),
-                                    startingMsg = getString(Res.string.firmware_update_starting_service),
-                                )
-                            }
-                        }
-                } else if (radioPrefs.isTcp()) {
-                    // WiFi/TCP connection - use unified OTA for ESP32 devices
-                    tempFirmwareFile =
-                        when {
-                            isEsp32Architecture(currentState.deviceHardware.architecture) -> {
-                                val deviceIp = extractIpFromAddress(radioPrefs.devAddr)
-                                if (deviceIp != null) {
-                                    esp32OtaUpdateHandler.startWifiUpdate(
-                                        release = release,
-                                        hardware = currentState.deviceHardware,
-                                        deviceIp = deviceIp,
-                                        updateState = { _state.value = it },
-                                    )
-                                } else {
-                                    _state.value =
-                                        FirmwareUpdateState.Error("Invalid TCP address: ${radioPrefs.devAddr}")
-                                    null
-                                }
-                            }
-                            else -> {
-                                _state.value = FirmwareUpdateState.Error("WiFi OTA only supported for ESP32 devices")
-                                null
-                            }
-                        }
-                }
+                tempFirmwareFile =
+                    firmwareUpdateManager.startUpdate(
+                        release = release,
+                        hardware = currentState.deviceHardware,
+                        address = currentState.address,
+                        updateState = { _state.value = it },
+                    )
             }
     }
 
@@ -267,7 +199,7 @@ constructor(
                 }
 
                 _state.value = FirmwareUpdateState.Processing(getString(Res.string.firmware_update_flashing))
-                withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { waitForDeviceDetach(context).first() }
+                withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
                     ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
                 _state.value = FirmwareUpdateState.Success
@@ -299,52 +231,15 @@ constructor(
                     tempFirmwareFile = extractedFile
                     val firmwareUri = if (extractedFile != null) Uri.fromFile(extractedFile) else uri
 
-                    if (currentState.updateMethod is FirmwareUpdateMethod.Ble) {
-                        // Route based on device architecture
-                        when {
-                            isEsp32Architecture(currentState.deviceHardware.architecture) -> {
-                                esp32OtaUpdateHandler.startBleUpdate(
-                                    release =
-                                    FirmwareRelease(
-                                        id = "local",
-                                        title = "Local File",
-                                        zipUrl = "",
-                                        releaseNotes = "",
-                                    ),
-                                    hardware = currentState.deviceHardware,
-                                    address = currentState.address,
-                                    updateState = { _state.value = it },
-                                    firmwareUri = firmwareUri,
-                                )
-                            }
-                            else -> {
-                                otaUpdateHandler.startUpdate(
-                                    release =
-                                    FirmwareRelease(
-                                        id = "local",
-                                        title = "Local File",
-                                        zipUrl = "",
-                                        releaseNotes = "",
-                                    ),
-                                    hardware = currentState.deviceHardware,
-                                    address = currentState.address,
-                                    updateState = { _state.value = it },
-                                    notFoundMsg = "File not found",
-                                    startingMsg = getString(Res.string.firmware_update_starting_service),
-                                    firmwareUri = firmwareUri,
-                                )
-                            }
-                        }
-                    } else if (currentState.updateMethod is FirmwareUpdateMethod.Usb) {
-                        usbUpdateHandler.startUpdate(
+                    tempFirmwareFile =
+                        firmwareUpdateManager.startUpdate(
                             release =
                             FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
                             hardware = currentState.deviceHardware,
+                            address = currentState.address,
                             updateState = { _state.value = it },
-                            rebootingMsg = getString(Res.string.firmware_update_rebooting),
                             firmwareUri = firmwareUri,
                         )
-                    }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -363,7 +258,7 @@ constructor(
     }
 
     private suspend fun observeDfuProgress() {
-        dfuProgressFlow(context).flowOn(Dispatchers.Main).collect { dfuState ->
+        dfuManager.progressFlow().flowOn(Dispatchers.Main).collect { dfuState ->
             when (dfuState) {
                 is DfuInternalState.Progress -> {
                     val msg = getString(Res.string.firmware_update_updating, "${dfuState.percent}")
@@ -418,92 +313,12 @@ private fun cleanupTemporaryFiles(fileHandler: FirmwareFileHandler, tempFirmware
     return null
 }
 
-private fun waitForDeviceDetach(context: Context): Flow<Unit> = callbackFlow {
-    val receiver =
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (intent.action == UsbManager.ACTION_USB_DEVICE_DETACHED) {
-                    trySend(Unit).isSuccess
-                    close()
-                }
-            }
-        }
-    val filter = IntentFilter(UsbManager.ACTION_USB_DEVICE_DETACHED)
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
-    } else {
-        @Suppress("UnspecifiedRegisterReceiverFlag")
-        context.registerReceiver(receiver, filter)
-    }
-    awaitClose { context.unregisterReceiver(receiver) }
-}
-
-private sealed interface DfuInternalState {
-    data class Starting(val address: String) : DfuInternalState
-
-    data class Progress(val address: String, val percent: Int) : DfuInternalState
-
-    data class Completed(val address: String) : DfuInternalState
-
-    data class Aborted(val address: String) : DfuInternalState
-
-    data class Error(val address: String, val message: String?) : DfuInternalState
-}
-
 private fun isValidBluetoothAddress(address: String?): Boolean =
     address != null && BLUETOOTH_ADDRESS_REGEX.matches(address)
-
-private fun isEsp32Architecture(architecture: String): Boolean = architecture.startsWith("esp32", ignoreCase = true)
-
-/**
- * Extract IP address from TCP device address. TCP addresses are formatted as "t<ip_address>", e.g., "t192.168.1.100"
- */
-private fun extractIpFromAddress(address: String?): String? =
-    if (address != null && address.startsWith("t") && address.length > 1) {
-        address.substring(1)
-    } else {
-        null
-    }
 
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease
     FirmwareReleaseType.ALPHA -> alphaRelease
-}
-
-private fun dfuProgressFlow(context: Context): Flow<DfuInternalState> = callbackFlow {
-    val listener =
-        object : DfuProgressListenerAdapter() {
-            override fun onDfuProcessStarting(deviceAddress: String) {
-                trySend(DfuInternalState.Starting(deviceAddress))
-            }
-
-            override fun onProgressChanged(
-                deviceAddress: String,
-                percent: Int,
-                speed: Float,
-                avgSpeed: Float,
-                currentPart: Int,
-                partsTotal: Int,
-            ) {
-                trySend(DfuInternalState.Progress(deviceAddress, percent))
-            }
-
-            override fun onDfuCompleted(deviceAddress: String) {
-                trySend(DfuInternalState.Completed(deviceAddress))
-            }
-
-            override fun onDfuAborted(deviceAddress: String) {
-                trySend(DfuInternalState.Aborted(deviceAddress))
-            }
-
-            override fun onError(deviceAddress: String, error: Int, errorType: Int, message: String?) {
-                trySend(DfuInternalState.Error(deviceAddress, message))
-            }
-        }
-
-    DfuServiceListenerHelper.registerProgressListener(context, listener)
-    awaitClose { DfuServiceListenerHelper.unregisterProgressListener(context, listener) }
 }
 
 sealed class FirmwareUpdateMethod(val description: StringResource) {
