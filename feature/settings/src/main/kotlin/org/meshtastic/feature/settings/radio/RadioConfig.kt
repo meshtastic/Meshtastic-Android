@@ -88,7 +88,7 @@ fun RadioConfigItemList(
     isManaged: Boolean,
     node: Node? = null,
     excludedModulesUnlocked: Boolean = false,
-    isDfuCapable: Boolean = false,
+    isOtaCapable: Boolean = false,
     onPreserveFavoritesToggle: (Boolean) -> Unit = {},
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
@@ -212,7 +212,7 @@ fun RadioConfigItemList(
             ManagedMessage()
         }
 
-        if (isDfuCapable && state.isLocal) {
+        if (isOtaCapable && state.isLocal) {
             ListItem(
                 text = stringResource(Res.string.firmware_update_title),
                 leadingIcon = Icons.Rounded.SystemUpdate,

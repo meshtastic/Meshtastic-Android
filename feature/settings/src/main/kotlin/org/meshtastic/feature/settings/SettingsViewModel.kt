@@ -51,6 +51,7 @@ import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
+import org.meshtastic.core.prefs.radio.isTcp
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
@@ -118,15 +119,16 @@ constructor(
     val appVersionName
         get() = buildConfigProvider.versionName
 
-    val isDfuCapable: StateFlow<Boolean> =
+    val isOtaCapable: StateFlow<Boolean> =
         combine(ourNodeInfo, serviceRepository.connectionState) { node, connectionState -> Pair(node, connectionState) }
             .flatMapLatest { (node, connectionState) ->
                 if (node == null || !connectionState.isConnected()) {
                     flowOf(false)
-                } else if (radioPrefs.isBle() || radioPrefs.isSerial()) {
+                } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
                     val hwModel = node.user.hwModel.number
                     val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
-                    flow { emit(hw?.requiresDfu == true) }
+                    // Support both Nordic DFU (requiresDfu) and ESP32 Unified OTA (supportsUnifiedOta)
+                    flow { emit(hw?.requiresDfu == true || hw?.supportsUnifiedOta == true) }
                 } else {
                     flowOf(false)
                 }
