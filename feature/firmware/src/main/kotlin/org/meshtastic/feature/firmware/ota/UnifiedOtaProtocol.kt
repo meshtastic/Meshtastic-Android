@@ -55,6 +55,10 @@ sealed class OtaResponse {
     data class Error(val message: String) : OtaResponse()
 
     companion object {
+        private const val OK_PREFIX_LENGTH = 3
+        private const val ERR_PREFIX_LENGTH = 4
+        private const val VERSION_PARTS_COUNT = 4
+
         /**
          * Parse a response string from the device. Format examples:
          * - "OK\n"
@@ -69,9 +73,9 @@ sealed class OtaResponse {
             return when {
                 trimmed == "OK" -> Ok()
                 trimmed.startsWith("OK ") -> {
-                    val parts = trimmed.substring(3).split(" ")
+                    val parts = trimmed.substring(OK_PREFIX_LENGTH).split(" ")
                     when (parts.size) {
-                        4 ->
+                        VERSION_PARTS_COUNT ->
                             Ok(
                                 hwVersion = parts[0],
                                 fwVersion = parts[1],
@@ -83,7 +87,7 @@ sealed class OtaResponse {
                 }
                 trimmed == "ERASING" -> Erasing
                 trimmed == "ACK" -> Ack
-                trimmed.startsWith("ERR ") -> Error(trimmed.substring(4))
+                trimmed.startsWith("ERR ") -> Error(trimmed.substring(ERR_PREFIX_LENGTH))
                 trimmed == "ERR" -> Error("Unknown error")
                 else -> Error("Unknown response: $trimmed")
             }

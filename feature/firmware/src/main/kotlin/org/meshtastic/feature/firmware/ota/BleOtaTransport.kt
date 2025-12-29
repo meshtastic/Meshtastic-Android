@@ -18,7 +18,6 @@
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -54,7 +53,10 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
     private var otaCharacteristic: RemoteCharacteristic? = null
 
     private val responseFlow =
-        MutableSharedFlow<String>(extraBufferCapacity = 10, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+        MutableSharedFlow<String>(
+            extraBufferCapacity = EXTRA_BUFFER_CAPACITY,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
 
     private var isConnected = false
 
@@ -241,14 +243,14 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
 
         try {
             characteristic.write(data, writeType = WriteType.WITH_RESPONSE)
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             throw OtaProtocolException.TransferFailed("Failed to write data", e)
         }
     }
 
     private suspend fun waitForResponse(timeoutMs: Long): String = try {
         withTimeout(timeoutMs) { responseFlow.first() }
-    } catch (e: CancellationException) {
+    } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
         throw OtaProtocolException.Timeout("Timeout waiting for response after ${timeoutMs}ms")
     }
 
@@ -265,6 +267,8 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
         private const val VERIFICATION_TIMEOUT_MS = 10_000L
 
         // Recommended chunk size for BLE
+        // Recommended chunk size for BLE
         const val RECOMMENDED_CHUNK_SIZE = 512
+        private const val EXTRA_BUFFER_CAPACITY = 10
     }
 }
