@@ -151,7 +151,11 @@ constructor(
 
                 // Step 5: Start OTA
                 updateState(FirmwareUpdateState.Processing("Starting OTA update..."))
-                transport.startOta(firmwareFile.length(), sha256Hash).getOrThrow()
+                transport
+                    .startOta(firmwareFile.length(), sha256Hash) { status ->
+                        updateState(FirmwareUpdateState.Processing(status))
+                    }
+                    .getOrThrow()
 
                 // Step 6: Stream
                 updateState(FirmwareUpdateState.Updating(0f, "Uploading firmware..."))
@@ -163,13 +167,35 @@ constructor(
                         WifiOtaTransport.RECOMMENDED_CHUNK_SIZE
                     }
 
+                val startTime = System.currentTimeMillis()
                 transport
                     .streamFirmware(
                         data = firmwareData,
                         chunkSize = chunkSize,
                         onProgress = { progress ->
+                            val currentTime = System.currentTimeMillis()
+                            val elapsedSeconds = (currentTime - startTime) / 1000f
                             val percent = (progress * 100).toInt()
-                            updateState(FirmwareUpdateState.Updating(progress, "Uploading firmware... $percent%"))
+
+                            val speedText =
+                                if (elapsedSeconds > 0) {
+                                    val bytesSent = (progress * firmwareData.size).toLong()
+                                    val kibPerSecond = (bytesSent / 1024f) / elapsedSeconds
+                                    val remainingBytes = firmwareData.size - bytesSent
+                                    val etaSeconds =
+                                        if (kibPerSecond > 0) (remainingBytes / 1024f) / kibPerSecond else 0f
+
+                                    String.format("%.1f KiB/s, ETA: %ds", kibPerSecond, etaSeconds.toInt())
+                                } else {
+                                    ""
+                                }
+
+                            updateState(
+                                FirmwareUpdateState.Updating(
+                                    progress,
+                                    "Uploading firmware... $percent% ($speedText)",
+                                ),
+                            )
                         },
                     )
                     .getOrThrow()

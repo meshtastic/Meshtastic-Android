@@ -241,6 +241,7 @@ private fun shouldKeepFirmwareScreenOn(state: FirmwareUpdateState): Boolean = wh
     is FirmwareUpdateState.Downloading,
     is FirmwareUpdateState.Processing,
     is FirmwareUpdateState.Updating,
+    is FirmwareUpdateState.Verifying,
     -> true
 
     else -> false
@@ -288,12 +289,28 @@ private fun FirmwareUpdateContent(
                 is FirmwareUpdateState.Downloading -> DownloadingState(state)
                 is FirmwareUpdateState.Processing -> ProcessingState(state.message)
                 is FirmwareUpdateState.Updating -> UpdatingState(state)
+                is FirmwareUpdateState.Verifying -> VerifyingState()
                 is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = onRetry)
                 is FirmwareUpdateState.Success -> SuccessState(onDone = onDone)
                 is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, onSaveFile)
             }
         },
     )
+}
+
+@Composable
+private fun ColumnScope.VerifyingState() {
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
+    Spacer(Modifier.height(24.dp))
+    Text("Verifying update...", style = MaterialTheme.typography.titleMedium)
+    Spacer(Modifier.height(8.dp))
+    Text(
+        "Waiting for device to reconnect...",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(16.dp))
+    CyclingMessages()
 }
 
 @Composable

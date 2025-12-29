@@ -87,32 +87,38 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         }
     }
 
-    override suspend fun startOta(sizeBytes: Long, sha256Hash: String): Result<Unit> = runCatching {
-        val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
-        sendCommand(command)
+    override suspend fun startOta(sizeBytes: Long, sha256Hash: String, onStatus: (String) -> Unit): Result<Unit> =
+        runCatching {
+            val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
+            sendCommand(command)
 
-        // Wait for ERASING response
-        val erasingResponse = readResponse(ERASING_TIMEOUT_MS)
-        when (OtaResponse.parse(erasingResponse)) {
-            is OtaResponse.Erasing -> Logger.i { "WiFi OTA: Device erasing flash..." }
-            is OtaResponse.Error -> {
-                val error = OtaResponse.parse(erasingResponse) as OtaResponse.Error
-                if (error.message.contains("Hash Rejected", ignoreCase = true)) {
-                    throw OtaProtocolException.HashRejected(sha256Hash)
+            // Wait for ERASING response
+            val erasingResponse = readResponse(ERASING_TIMEOUT_MS)
+            when (val parsed = OtaResponse.parse(erasingResponse)) {
+                is OtaResponse.Erasing -> {
+                    Logger.i { "WiFi OTA: Device erasing flash..." }
+                    onStatus("Erasing flash...")
                 }
-                throw OtaProtocolException.CommandFailed(command, error)
-            }
-            else -> {} // OK or other response, continue
-        }
 
-        // Wait for OK response after erasing
-        val okResponse = readResponse(ERASING_TIMEOUT_MS)
-        when (val parsed = OtaResponse.parse(okResponse)) {
-            is OtaResponse.Ok -> Unit
-            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(command, parsed)
-            else -> throw OtaProtocolException.CommandFailed(command, OtaResponse.Error("Expected OK, got: $parsed"))
+                is OtaResponse.Error -> {
+                    if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
+                        throw OtaProtocolException.HashRejected(sha256Hash)
+                    }
+                    throw OtaProtocolException.CommandFailed(command, parsed)
+                }
+
+                else -> {} // OK or other response, continue
+            }
+
+            // Wait for OK response after erasing
+            val okResponse = readResponse(ERASING_TIMEOUT_MS)
+            when (val parsed = OtaResponse.parse(okResponse)) {
+                is OtaResponse.Ok -> Unit
+                is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(command, parsed)
+                else ->
+                    throw OtaProtocolException.CommandFailed(command, OtaResponse.Error("Expected OK, got: $parsed"))
+            }
         }
-    }
 
     override suspend fun streamFirmware(data: ByteArray, chunkSize: Int, onProgress: (Float) -> Unit): Result<Unit> =
         withContext(Dispatchers.IO) {

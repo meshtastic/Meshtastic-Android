@@ -47,7 +47,7 @@ class DfuManager @Inject constructor(@ApplicationContext private val context: Co
                     currentPart: Int,
                     partsTotal: Int,
                 ) {
-                    trySend(DfuInternalState.Progress(deviceAddress, percent))
+                    trySend(DfuInternalState.Progress(deviceAddress, percent, speed, avgSpeed, currentPart, partsTotal))
                 }
 
                 override fun onDfuCompleted(deviceAddress: String) {
@@ -74,7 +74,14 @@ class DfuManager @Inject constructor(@ApplicationContext private val context: Co
 sealed interface DfuInternalState {
     data class Starting(val address: String) : DfuInternalState
 
-    data class Progress(val address: String, val percent: Int) : DfuInternalState
+    data class Progress(
+        val address: String,
+        val percent: Int,
+        val speed: Float,
+        val avgSpeed: Float,
+        val currentPart: Int,
+        val partsTotal: Int,
+    ) : DfuInternalState
 
     data class Completed(val address: String) : DfuInternalState
 

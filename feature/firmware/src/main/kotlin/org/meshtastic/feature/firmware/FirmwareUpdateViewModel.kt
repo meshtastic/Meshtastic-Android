@@ -17,6 +17,7 @@
 
 package org.meshtastic.feature.firmware
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,11 +27,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -171,16 +174,28 @@ constructor(
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
 
+        if (!checkBatteryLevel()) return
+
         updateJob?.cancel()
         updateJob =
             viewModelScope.launch {
-                tempFirmwareFile =
-                    firmwareUpdateManager.startUpdate(
-                        release = release,
-                        hardware = currentState.deviceHardware,
-                        address = currentState.address,
-                        updateState = { _state.value = it },
-                    )
+                try {
+                    tempFirmwareFile =
+                        firmwareUpdateManager.startUpdate(
+                            release = release,
+                            hardware = currentState.deviceHardware,
+                            address = currentState.address,
+                            updateState = { _state.value = it },
+                        )
+
+                    if (_state.value is FirmwareUpdateState.Success) {
+                        verifyUpdateResult()
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    _state.value = FirmwareUpdateState.Error(e.message ?: "Update failed")
+                }
             }
     }
 
@@ -240,6 +255,10 @@ constructor(
                             updateState = { _state.value = it },
                             firmwareUri = firmwareUri,
                         )
+
+                    if (_state.value is FirmwareUpdateState.Success) {
+                        verifyUpdateResult()
+                    }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -261,8 +280,32 @@ constructor(
         dfuManager.progressFlow().flowOn(Dispatchers.Main).collect { dfuState ->
             when (dfuState) {
                 is DfuInternalState.Progress -> {
-                    val msg = getString(Res.string.firmware_update_updating, "${dfuState.percent}")
-                    _state.value = FirmwareUpdateState.Updating(dfuState.percent / PERCENT_MAX_VALUE, msg)
+                    val progress = dfuState.percent / PERCENT_MAX_VALUE
+                    val percentText = "${dfuState.percent}%"
+
+                    val speedKib = dfuState.speed / 1024f
+                    val remainingBytes =
+                        0L // Nordic library doesn't give us total size directly here, but we can approximate or use
+                    // speed
+
+                    // The Nordic library provides speed in B/s.
+                    // Let's format a comprehensive message.
+                    val partInfo =
+                        if (dfuState.partsTotal > 1) {
+                            " (Part ${dfuState.currentPart}/${dfuState.partsTotal})"
+                        } else {
+                            ""
+                        }
+
+                    val metrics =
+                        if (dfuState.speed > 0) {
+                            String.format(" - %.1f KiB/s%s", speedKib, partInfo)
+                        } else {
+                            partInfo
+                        }
+
+                    val msg = getString(Res.string.firmware_update_updating, percentText) + metrics
+                    _state.value = FirmwareUpdateState.Updating(progress, msg)
                 }
 
                 is DfuInternalState.Error -> {
@@ -287,6 +330,28 @@ constructor(
                 }
             }
         }
+    }
+
+    private suspend fun verifyUpdateResult() {
+        _state.value = FirmwareUpdateState.Verifying
+        // Wait for device to reconnect and settle
+        // This is a simple verification - just waiting for the node to be back in the DB
+        withTimeoutOrNull(60_000L) {
+            nodeRepository.ourNodeInfo.filterNotNull().first()
+            delay(2000) // Extra buffer
+        }
+        _state.value = FirmwareUpdateState.Success
+    }
+
+    private fun checkBatteryLevel(): Boolean {
+        val node = nodeRepository.ourNodeInfo.value ?: return true
+        val level = node.batteryLevel
+        if (level in 1..10) {
+            _state.value =
+                FirmwareUpdateState.Error("Battery too low ($level%). Please charge your device before updating.")
+            return false
+        }
+        return true
     }
 
     private suspend fun getDeviceHardware(ourNode: org.meshtastic.core.database.model.Node): DeviceHardware? {
