@@ -60,7 +60,7 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
 
     /** Connect to the device and discover OTA service. */
     @OptIn(ExperimentalUuidApi::class)
-    suspend fun connect(): Result<Unit> = runCatching {
+    override suspend fun connect(): Result<Unit> = runCatching {
         Logger.i { "BLE OTA: Connecting to $address using Nordic BLE Library..." }
 
         val p =
