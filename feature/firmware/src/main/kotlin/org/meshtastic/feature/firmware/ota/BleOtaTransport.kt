@@ -17,118 +17,103 @@
 
 package org.meshtastic.feature.firmware.ota
 
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCallback
-import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattDescriptor
-import android.bluetooth.BluetoothProfile
-import android.content.Context
-import android.os.Build
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
+import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
+import no.nordicsemi.kotlin.ble.client.android.CentralManager
+import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
+import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.core.WriteType
 import java.util.UUID
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toKotlinUuid
 
 /**
- * BLE transport implementation for ESP32 Unified OTA protocol.
+ * BLE transport implementation for ESP32 Unified OTA protocol. Uses Nordic Kotlin-BLE-Library for modern coroutine
+ * support.
  *
  * Service UUID: 4FAFC201-1FB5-459E-8FCC-C5C9C331914B
  * - OTA Characteristic (Write): 62ec0272-3ec5-11eb-b378-0242ac130005
  * - TX Characteristic (Notify): 62ec0272-3ec5-11eb-b378-0242ac130003
  */
-class BleOtaTransport(private val context: Context, private val device: BluetoothDevice) : UnifiedOtaProtocol {
+class BleOtaTransport(private val centralManager: CentralManager, private val address: String) : UnifiedOtaProtocol {
 
-    private var gatt: BluetoothGatt? = null
-    private var otaCharacteristic: BluetoothGattCharacteristic? = null
-    private var txCharacteristic: BluetoothGattCharacteristic? = null
+    private val transportScope = CoroutineScope(SupervisorJob())
+    private var peripheral: Peripheral? = null
+    private var otaCharacteristic: RemoteCharacteristic? = null
 
-    private val responseChannel = Channel<String>(Channel.UNLIMITED)
+    private val responseFlow =
+        MutableSharedFlow<String>(extraBufferCapacity = 10, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
     private var isConnected = false
 
-    private val gattCallback =
-        object : BluetoothGattCallback() {
-            override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-                when (newState) {
-                    BluetoothProfile.STATE_CONNECTED -> {
-                        Logger.i { "BLE OTA: Connected to ${device.address}" }
-                        gatt.discoverServices()
-                    }
-                    BluetoothProfile.STATE_DISCONNECTED -> {
-                        Logger.i { "BLE OTA: Disconnected from ${device.address}" }
-                        isConnected = false
-                    }
-                }
-            }
-
-            override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-                if (status == BluetoothGatt.GATT_SUCCESS) {
-                    val service = gatt.getService(SERVICE_UUID)
-                    if (service != null) {
-                        otaCharacteristic = service.getCharacteristic(OTA_CHARACTERISTIC_UUID)
-                        txCharacteristic = service.getCharacteristic(TX_CHARACTERISTIC_UUID)
-
-                        if (otaCharacteristic != null && txCharacteristic != null) {
-                            // Enable notifications on TX characteristic
-                            txCharacteristic?.let { enableNotifications(gatt, it) }
-                            isConnected = true
-                            Logger.i { "BLE OTA: Service discovered and ready" }
-                        } else {
-                            Logger.e { "BLE OTA: Required characteristics not found" }
-                        }
-                    } else {
-                        Logger.e { "BLE OTA: Service not found" }
-                    }
-                }
-            }
-
-            override fun onCharacteristicChanged(
-                gatt: BluetoothGatt,
-                characteristic: BluetoothGattCharacteristic,
-                value: ByteArray,
-            ) {
-                if (characteristic.uuid == TX_CHARACTERISTIC_UUID) {
-                    val response = value.decodeToString()
-                    Logger.d { "BLE OTA: Received response: $response" }
-                    responseChannel.trySend(response)
-                }
-            }
-
-            @Deprecated("Deprecated in API 33")
-            override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
-                @Suppress("DEPRECATION")
-                onCharacteristicChanged(gatt, characteristic, characteristic.value)
-            }
-        }
-
     /** Connect to the device and discover OTA service. */
-    suspend fun connect(): Result<Unit> = suspendCancellableCoroutine { continuation ->
-        try {
-            gatt =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    device.connectGatt(context, false, gattCallback, BluetoothDevice.TRANSPORT_LE)
-                } else {
-                    @Suppress("DEPRECATION")
-                    device.connectGatt(context, false, gattCallback)
+    @OptIn(ExperimentalUuidApi::class)
+    suspend fun connect(): Result<Unit> = runCatching {
+        Logger.i { "BLE OTA: Connecting to $address using Nordic BLE Library..." }
+
+        val p =
+            centralManager.getBondedPeripherals().firstOrNull { it.address == address }
+                ?: throw OtaProtocolException.ConnectionFailed("Device not found at address $address")
+
+        peripheral = p
+
+        centralManager.connect(
+            peripheral = p,
+            options = CentralManager.ConnectionOptions.AutoConnect(automaticallyRequestHighestValueLength = true),
+        )
+        p.requestConnectionPriority(ConnectionPriority.HIGH)
+
+        // Monitor connection state
+        p.state
+            .onEach { state ->
+                Logger.d { "BLE OTA: Connection state changed to $state" }
+                if (state is ConnectionState.Disconnected) {
+                    isConnected = false
                 }
-
-            continuation.invokeOnCancellation {
-                gatt?.disconnect()
-                gatt?.close()
             }
+            .launchIn(transportScope)
 
-            // Wait for connection and service discovery
-            continuation.resume(Result.success(Unit))
-        } catch (e: Exception) {
-            continuation.resumeWithException(
-                OtaProtocolException.ConnectionFailed("Failed to connect to BLE device", e),
-            )
+        // Wait for connection
+        p.state.first { it is ConnectionState.Connected }
+
+        // Discover services
+        val services = p.services(listOf(SERVICE_UUID.toKotlinUuid())).filterNotNull().first()
+        val meshtasticOtaService =
+            services.find { it.uuid == SERVICE_UUID.toKotlinUuid() }
+                ?: throw OtaProtocolException.ConnectionFailed("ESP32 OTA service not found")
+
+        otaCharacteristic =
+            meshtasticOtaService.characteristics.find { it.uuid == OTA_CHARACTERISTIC_UUID.toKotlinUuid() }
+        val txChar = meshtasticOtaService.characteristics.find { it.uuid == TX_CHARACTERISTIC_UUID.toKotlinUuid() }
+
+        if (otaCharacteristic == null || txChar == null) {
+            throw OtaProtocolException.ConnectionFailed("Required characteristics not found")
         }
+
+        // Enable notifications and collect responses
+        txChar
+            .subscribe()
+            .onEach { notifyBytes ->
+                val response = notifyBytes.decodeToString()
+                Logger.d { "BLE OTA: Received response: $response" }
+                responseFlow.emit(response)
+            }
+            .launchIn(transportScope)
+
+        isConnected = true
+        Logger.i { "BLE OTA: Service discovered and ready" }
     }
 
     override suspend fun sendVersion(): Result<OtaResponse.Ok> = runCatching {
@@ -233,11 +218,10 @@ class BleOtaTransport(private val context: Context, private val device: Bluetoot
     }
 
     override suspend fun close() {
-        gatt?.disconnect()
-        gatt?.close()
-        gatt = null
+        peripheral?.disconnect()
+        peripheral = null
         isConnected = false
-        responseChannel.close()
+        transportScope.cancel()
     }
 
     private suspend fun sendCommand(command: OtaCommand) {
@@ -249,46 +233,17 @@ class BleOtaTransport(private val context: Context, private val device: Bluetoot
         val characteristic =
             otaCharacteristic ?: throw OtaProtocolException.ConnectionFailed("OTA characteristic not available")
 
-        suspendCancellableCoroutine { continuation ->
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    gatt?.writeCharacteristic(characteristic, data, BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
-                } else {
-                    @Suppress("DEPRECATION")
-                    characteristic.value = data
-                    @Suppress("DEPRECATION")
-                    gatt?.writeCharacteristic(characteristic)
-                }
-                continuation.resume(Unit)
-            } catch (e: Exception) {
-                continuation.resumeWithException(OtaProtocolException.TransferFailed("Failed to write data", e))
-            }
+        try {
+            characteristic.write(data, writeType = WriteType.WITH_RESPONSE)
+        } catch (e: Exception) {
+            throw OtaProtocolException.TransferFailed("Failed to write data", e)
         }
-
-        // Small delay to avoid overwhelming the device
-        delay(WRITE_DELAY_MS)
     }
 
     private suspend fun waitForResponse(timeoutMs: Long): String = try {
-        withTimeout(timeoutMs) { responseChannel.receive() }
+        withTimeout(timeoutMs) { responseFlow.first() }
     } catch (e: CancellationException) {
         throw OtaProtocolException.Timeout("Timeout waiting for response after ${timeoutMs}ms")
-    }
-
-    private fun enableNotifications(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
-        gatt.setCharacteristicNotification(characteristic, true)
-
-        val descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIG_UUID)
-        if (descriptor != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                gatt.writeDescriptor(descriptor, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
-            } else {
-                @Suppress("DEPRECATION")
-                descriptor.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                @Suppress("DEPRECATION")
-                gatt.writeDescriptor(descriptor)
-            }
-        }
     }
 
     companion object {
@@ -296,14 +251,12 @@ class BleOtaTransport(private val context: Context, private val device: Bluetoot
         private val SERVICE_UUID = UUID.fromString("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
         private val OTA_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130005")
         private val TX_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
-        private val CLIENT_CHARACTERISTIC_CONFIG_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 
         // Timeouts
         private const val COMMAND_TIMEOUT_MS = 5_000L
         private const val ERASING_TIMEOUT_MS = 30_000L // Flash erase can take a while
-        private const val ACK_TIMEOUT_MS = 2_000L
+        private const val ACK_TIMEOUT_MS = 3_000L
         private const val VERIFICATION_TIMEOUT_MS = 10_000L
-        private const val WRITE_DELAY_MS = 50L
 
         // Recommended chunk size for BLE
         const val RECOMMENDED_CHUNK_SIZE = 512
