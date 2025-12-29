@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "9.0.0-rc01"
+agp = "9.0.0-rc02"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
