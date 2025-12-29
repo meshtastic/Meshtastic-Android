@@ -57,6 +57,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
+import org.meshtastic.core.prefs.radio.isTcp
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.firmware_update_copying
@@ -65,6 +66,7 @@ import org.meshtastic.core.strings.firmware_update_failed
 import org.meshtastic.core.strings.firmware_update_flashing
 import org.meshtastic.core.strings.firmware_update_method_ble
 import org.meshtastic.core.strings.firmware_update_method_usb
+import org.meshtastic.core.strings.firmware_update_method_wifi
 import org.meshtastic.core.strings.firmware_update_no_device
 import org.meshtastic.core.strings.firmware_update_not_found_in_release
 import org.meshtastic.core.strings.firmware_update_rebooting
@@ -96,6 +98,7 @@ constructor(
     private val bootloaderWarningDataSource: BootloaderWarningDataSource,
     private val otaUpdateHandler: OtaUpdateHandler,
     private val usbUpdateHandler: UsbUpdateHandler,
+    private val esp32OtaUpdateHandler: org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler,
     private val fileHandler: FirmwareFileHandler,
 ) : ViewModel() {
 
@@ -149,6 +152,8 @@ constructor(
                                     FirmwareUpdateMethod.Usb
                                 } else if (radioPrefs.isBle()) {
                                     FirmwareUpdateMethod.Ble
+                                } else if (radioPrefs.isTcp()) {
+                                    FirmwareUpdateMethod.Wifi
                                 } else {
                                     FirmwareUpdateMethod.Unknown
                                 }
@@ -191,19 +196,55 @@ constructor(
                             rebootingMsg = getString(Res.string.firmware_update_rebooting),
                         )
                 } else if (radioPrefs.isBle()) {
-                    tempFirmwareFile =
-                        otaUpdateHandler.startUpdate(
-                            release = release,
-                            hardware = currentState.deviceHardware,
-                            address = currentState.address,
-                            updateState = { _state.value = it },
-                            notFoundMsg =
-                            getString(
-                                Res.string.firmware_update_not_found_in_release,
-                                currentState.deviceHardware.displayName,
-                            ),
-                            startingMsg = getString(Res.string.firmware_update_starting_service),
-                        )
+                    // Route based on device architecture
+                    tempFirmwareFile = when {
+                        isEsp32Architecture(currentState.deviceHardware.architecture) -> {
+                            // Use ESP32 Unified OTA
+                            esp32OtaUpdateHandler.startBleUpdate(
+                                release = release,
+                                hardware = currentState.deviceHardware,
+                                address = currentState.address,
+                                updateState = { _state.value = it },
+                            )
+                        }
+                        else -> {
+                            // Use Nordic DFU for nRF52840 and other devices
+                            otaUpdateHandler.startUpdate(
+                                release = release,
+                                hardware = currentState.deviceHardware,
+                                address = currentState.address,
+                                updateState = { _state.value = it },
+                                notFoundMsg =
+                                getString(
+                                    Res.string.firmware_update_not_found_in_release,
+                                    currentState.deviceHardware.displayName,
+                                ),
+                                startingMsg = getString(Res.string.firmware_update_starting_service),
+                            )
+                        }
+                    }
+                } else if (radioPrefs.isTcp()) {
+                    // WiFi/TCP connection - use unified OTA for ESP32 devices
+                    tempFirmwareFile = when {
+                        isEsp32Architecture(currentState.deviceHardware.architecture) -> {
+                            val deviceIp = extractIpFromAddress(currentState.address)
+                            if (deviceIp != null) {
+                                esp32OtaUpdateHandler.startWifiUpdate(
+                                    release = release,
+                                    hardware = currentState.deviceHardware,
+                                    deviceIp = deviceIp,
+                                    updateState = { _state.value = it },
+                                )
+                            } else {
+                                _state.value = FirmwareUpdateState.Error("Invalid TCP address: ${currentState.address}")
+                                null
+                            }
+                        }
+                        else -> {
+                            _state.value = FirmwareUpdateState.Error("WiFi OTA only supported for ESP32 devices")
+                            null
+                        }
+                    }
                 }
             }
     }
@@ -256,16 +297,29 @@ constructor(
                     val firmwareUri = if (extractedFile != null) Uri.fromFile(extractedFile) else uri
 
                     if (currentState.updateMethod is FirmwareUpdateMethod.Ble) {
-                        otaUpdateHandler.startUpdate(
-                            release =
-                            FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
-                            hardware = currentState.deviceHardware,
-                            address = currentState.address,
-                            updateState = { _state.value = it },
-                            notFoundMsg = "File not found",
-                            startingMsg = getString(Res.string.firmware_update_starting_service),
-                            firmwareUri = firmwareUri,
-                        )
+                        // Route based on device architecture
+                        when {
+                            isEsp32Architecture(currentState.deviceHardware.architecture) -> {
+                                esp32OtaUpdateHandler.startBleUpdate(
+                                    release = FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                                    hardware = currentState.deviceHardware,
+                                    address = currentState.address,
+                                    updateState = { _state.value = it },
+                                    firmwareUri = firmwareUri,
+                                )
+                            }
+                            else -> {
+                                otaUpdateHandler.startUpdate(
+                                    release = FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = ""),
+                                    hardware = currentState.deviceHardware,
+                                    address = currentState.address,
+                                    updateState = { _state.value = it },
+                                    notFoundMsg = "File not found",
+                                    startingMsg = getString(Res.string.firmware_update_starting_service),
+                                    firmwareUri = firmwareUri,
+                                )
+                            }
+                        }
                     } else if (currentState.updateMethod is FirmwareUpdateMethod.Usb) {
                         usbUpdateHandler.startUpdate(
                             release =
@@ -385,6 +439,22 @@ private sealed interface DfuInternalState {
 private fun isValidBluetoothAddress(address: String?): Boolean =
     address != null && BLUETOOTH_ADDRESS_REGEX.matches(address)
 
+private fun isEsp32Architecture(architecture: String): Boolean {
+    return architecture.startsWith("esp32", ignoreCase = true)
+}
+
+/**
+ * Extract IP address from TCP device address.
+ * TCP addresses are formatted as "t<ip_address>", e.g., "t192.168.1.100"
+ */
+private fun extractIpFromAddress(address: String): String? {
+    return if (address.startsWith("t") && address.length > 1) {
+        address.substring(1)
+    } else {
+        null
+    }
+}
+
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease
     FirmwareReleaseType.ALPHA -> alphaRelease
@@ -429,6 +499,8 @@ sealed class FirmwareUpdateMethod(val description: StringResource) {
     object Usb : FirmwareUpdateMethod(Res.string.firmware_update_method_usb)
 
     object Ble : FirmwareUpdateMethod(Res.string.firmware_update_method_ble)
+
+    object Wifi : FirmwareUpdateMethod(Res.string.firmware_update_method_wifi)
 
     object Unknown : FirmwareUpdateMethod(Res.string.unknown)
 }

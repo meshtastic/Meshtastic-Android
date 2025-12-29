@@ -55,6 +55,7 @@ import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Usb
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -352,6 +353,7 @@ private fun ColumnScope.ReadyState(
                 when (state.updateMethod) {
                     FirmwareUpdateMethod.Ble -> Icons.Rounded.Bluetooth
                     FirmwareUpdateMethod.Usb -> Icons.Rounded.Usb
+                    FirmwareUpdateMethod.Wifi -> Icons.Rounded.Wifi
                     else -> Icons.Default.SystemUpdate
                 },
                 contentDescription = null,
