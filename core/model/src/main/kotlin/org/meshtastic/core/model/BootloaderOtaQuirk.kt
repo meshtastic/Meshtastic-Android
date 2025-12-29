@@ -31,6 +31,11 @@ data class BootloaderOtaQuirk(
      * one-time bootloader upgrade (typically via USB) before DFU updates from the app work.
      */
     @SerialName("requiresBootloaderUpgradeForOta") val requiresBootloaderUpgradeForOta: Boolean = false,
+    /**
+     * Indicates that the device supports the ESP32 Unified OTA protocol.
+     * When true, the app will use the unified OTA handler instead of Nordic DFU.
+     */
+    @SerialName("supportsUnifiedOta") val supportsUnifiedOta: Boolean = false,
     /** Optional URL pointing to documentation on how to update the bootloader. */
     @SerialName("infoUrl") val infoUrl: String? = null,
 )

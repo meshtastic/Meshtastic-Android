@@ -17,8 +17,151 @@
       "hwModelSlug": "NOMADSTAR_METEOR_PRO",
       "requiresBootloaderUpgradeForOta": true,
       "infoUrl": "https://github.com/RAKWireless/WisBlock/tree/master/bootloader/RAK4630/Latest/WisCore_RAK4631_Bootloader"
+    },
+    {
+      "hwModel": 12,
+      "hwModelSlug": "LILYGO_TBEAM_S3_CORE",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 16,
+      "hwModelSlug": "TLORA_T3_S3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 28,
+      "hwModelSlug": "SENSELORA_S3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 43,
+      "hwModelSlug": "HELTEC_V3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 44,
+      "hwModelSlug": "HELTEC_WSL_V3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 45,
+      "hwModelSlug": "BETAFPV_2400_TX",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 46,
+      "hwModelSlug": "BETAFPV_900_NANO_TX",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 48,
+      "hwModelSlug": "HELTEC_WIRELESS_TRACKER",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 49,
+      "hwModelSlug": "HELTEC_WIRELESS_PAPER",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 50,
+      "hwModelSlug": "T_DECK",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 51,
+      "hwModelSlug": "T_WATCH_S3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 52,
+      "hwModelSlug": "PICOMPUTER_S3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 53,
+      "hwModelSlug": "HELTEC_HT62",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 54,
+      "hwModelSlug": "EBYTE_ESP32_S3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 55,
+      "hwModelSlug": "ESP32_S3_PICO",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 56,
+      "hwModelSlug": "CHATTER_2",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 57,
+      "hwModelSlug": "HELTEC_WIRELESS_PAPER_V1_0",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 58,
+      "hwModelSlug": "HELTEC_WIRELESS_TRACKER_V1_0",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 59,
+      "hwModelSlug": "UNPHONE",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 61,
+      "hwModelSlug": "CDEBYTE_EORA_S3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 64,
+      "hwModelSlug": "RADIOMASTER_900_BANDIT_NANO",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 65,
+      "hwModelSlug": "HELTEC_CAPSULE_SENSOR_V3",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 66,
+      "hwModelSlug": "HELTEC_VISION_MASTER_T190",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 67,
+      "hwModelSlug": "HELTEC_VISION_MASTER_E213",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 68,
+      "hwModelSlug": "HELTEC_VISION_MASTER_E290",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 70,
+      "hwModelSlug": "SENSECAP_INDICATOR",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 74,
+      "hwModelSlug": "RADIOMASTER_900_BANDIT",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 107,
+      "hwModelSlug": "THINKNODE_M5",
+      "supportsUnifiedOta": true
+    },
+    {
+      "hwModel": 110,
+      "hwModelSlug": "HELTEC_V4",
+      "supportsUnifiedOta": true
     }
   ]
 }
-
-
