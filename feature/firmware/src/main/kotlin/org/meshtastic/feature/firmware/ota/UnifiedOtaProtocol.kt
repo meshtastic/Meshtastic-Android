@@ -94,6 +94,13 @@ sealed class OtaResponse {
 /** Interface for ESP32 Unified OTA protocol implementation. Supports both BLE and WiFi/TCP transports. */
 interface UnifiedOtaProtocol {
     /**
+     * Connect to the device and discover OTA service/establish connection.
+     *
+     * @return Success if connected and ready, error otherwise
+     */
+    suspend fun connect(): Result<Unit>
+
+    /**
      * Send VERSION command to get device information.
      *
      * @return Version information from the device
