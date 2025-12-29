@@ -342,5 +342,20 @@ class MeshService : Service() {
             override fun requestTelemetry(requestId: Int, destNum: Int, type: Int) = toRemoteExceptions {
                 router.actionHandler.handleRequestTelemetry(requestId, destNum, type)
             }
+
+            override fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) =
+                toRemoteExceptions {
+                    val otaMode = AdminProtos.OTAMode.forNumber(mode) ?: AdminProtos.OTAMode.NO_REBOOT_OTA
+                    val otaEventBuilder = AdminProtos.OTAEvent.newBuilder().setRebootOtaMode(otaMode)
+                    if (hash != null) {
+                        otaEventBuilder.otaHash = com.google.protobuf.ByteString.copyFrom(hash)
+                    }
+
+                    packetHandler.sendToRadio(
+                        newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
+                            otaRequest = otaEventBuilder.build()
+                        },
+                    )
+                }
         }
 }

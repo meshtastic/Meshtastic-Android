@@ -21,17 +21,24 @@ import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
 
-/**
- * Utility functions for firmware hash calculation and verification.
- */
+/** Utility functions for firmware hash calculation and verification. */
 object FirmwareHashUtil {
-    
+
     /**
      * Calculate SHA-256 hash of a file.
+     *
      * @param file Firmware file to hash
      * @return 64-character hex string of the SHA-256 hash
      */
-    fun calculateSha256(file: File): String {
+    fun calculateSha256(file: File): String = calculateSha256Bytes(file).toHexString()
+
+    /**
+     * Calculate SHA-256 hash of a file as a byte array.
+     *
+     * @param file Firmware file to hash
+     * @return 32-byte SHA-256 hash
+     */
+    fun calculateSha256Bytes(file: File): ByteArray {
         val digest = MessageDigest.getInstance("SHA-256")
         FileInputStream(file).use { fis ->
             val buffer = ByteArray(8192)
@@ -40,11 +47,12 @@ object FirmwareHashUtil {
                 digest.update(buffer, 0, bytesRead)
             }
         }
-        return digest.digest().toHexString()
+        return digest.digest()
     }
 
     /**
      * Calculate SHA-256 hash of a byte array.
+     *
      * @param data Firmware data to hash
      * @return 64-character hex string of the SHA-256 hash
      */
@@ -56,6 +64,7 @@ object FirmwareHashUtil {
 
     /**
      * Verify that a file's SHA-256 hash matches the expected hash.
+     *
      * @param file Firmware file to verify
      * @param expectedHash Expected SHA-256 hash (64 hex characters)
      * @return true if hashes match, false otherwise
@@ -65,10 +74,6 @@ object FirmwareHashUtil {
         return actualHash.equals(expectedHash, ignoreCase = true)
     }
 
-    /**
-     * Convert byte array to hex string.
-     */
-    private fun ByteArray.toHexString(): String {
-        return joinToString("") { "%02x".format(it) }
-    }
+    /** Convert byte array to hex string. */
+    private fun ByteArray.toHexString(): String = joinToString("") { "%02x".format(it) }
 }

@@ -182,4 +182,11 @@ interface IMeshService {
 
     /// Send request for telemetry to nodeNum
     void requestTelemetry(in int requestId, in int destNum, in int type);
+
+    /**
+    * Tell the node to reboot into OTA mode for firmware update via BLE or WiFi (ESP32 only)
+    * mode is 1 for BLE, 2 for WiFi
+    * hash is the 32-byte firmware SHA256 hash (optional, can be null)
+    */
+    void requestRebootOta(in int requestId, in int destNum, in int mode, in byte []hash);
 }

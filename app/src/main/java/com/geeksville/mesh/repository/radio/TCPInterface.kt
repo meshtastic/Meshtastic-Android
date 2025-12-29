@@ -151,69 +151,76 @@ constructor(
         val attemptStart = System.currentTimeMillis()
         Logger.i { "[$address] TCP connection attempt starting..." }
 
-        val (host, port) =
-            address.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: SERVICE_PORT) }
+        val parts = address.split(":", limit = 2)
+        val host = parts[0]
+        val port = parts.getOrNull(1)?.toIntOrNull() ?: SERVICE_PORT
+        Logger.i { "[$address] Parsed address. Host: $host, Port: $port" }
 
         Logger.d { "[$address] Resolving host '$host' and connecting to port $port..." }
 
-        Socket(InetAddress.getByName(host), port).use { socket ->
-            socket.tcpNoDelay = true
-            socket.soTimeout = SOCKET_TIMEOUT
-            this@TCPInterface.socket = socket
+        try {
+            Socket(InetAddress.getByName(host), port).use { socket ->
+                socket.tcpNoDelay = true
+                socket.soTimeout = SOCKET_TIMEOUT
+                this@TCPInterface.socket = socket
 
-            val connectTime = System.currentTimeMillis() - attemptStart
-            connectionStartTime = System.currentTimeMillis()
-            Logger.i {
-                "[$address] TCP socket connected in ${connectTime}ms - " +
-                    "Local: ${socket.localSocketAddress}, Remote: ${socket.remoteSocketAddress}"
-            }
+                val connectTime = System.currentTimeMillis() - attemptStart
+                connectionStartTime = System.currentTimeMillis()
+                Logger.i {
+                    "[$address] TCP socket connected in ${connectTime}ms - " +
+                        "Local: ${socket.localSocketAddress}, Remote: ${socket.remoteSocketAddress}"
+                }
 
-            BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
-                outStream = outputStream
+                BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
+                    outStream = outputStream
 
-                BufferedInputStream(socket.getInputStream()).use { inputStream ->
-                    super.connect()
+                    BufferedInputStream(socket.getInputStream()).use { inputStream ->
+                        super.connect()
 
-                    retryCount = 1
-                    backoffDelay = MIN_BACKOFF_MILLIS
+                        retryCount = 1
+                        backoffDelay = MIN_BACKOFF_MILLIS
 
-                    var timeoutCount = 0
-                    while (timeoutCount < SOCKET_RETRIES) {
-                        try { // close after 90s of inactivity
-                            val c = inputStream.read()
-                            if (c == -1) {
-                                Logger.w {
-                                    "[$address] TCP got EOF on stream after $packetsReceived packets received"
+                        var timeoutCount = 0
+                        while (timeoutCount < SOCKET_RETRIES) {
+                            try { // close after 90s of inactivity
+                                val c = inputStream.read()
+                                if (c == -1) {
+                                    Logger.w {
+                                        "[$address] TCP got EOF on stream after $packetsReceived packets received"
+                                    }
+                                    break
+                                } else {
+                                    timeoutCount = 0
+                                    packetsReceived++
+                                    bytesReceived++
+                                    readChar(c.toByte())
                                 }
-                                break
-                            } else {
-                                timeoutCount = 0
-                                packetsReceived++
-                                bytesReceived++
-                                readChar(c.toByte())
-                            }
-                        } catch (ex: SocketTimeoutException) {
-                            timeoutCount++
-                            timeoutEvents++
-                            if (timeoutCount % TIMEOUT_LOG_INTERVAL == 0) {
-                                Logger.d {
-                                    "[$address] TCP socket timeout count: $timeoutCount/$SOCKET_RETRIES " +
-                                        "(total timeouts: $timeoutEvents)"
+                            } catch (ex: SocketTimeoutException) {
+                                timeoutCount++
+                                timeoutEvents++
+                                if (timeoutCount % TIMEOUT_LOG_INTERVAL == 0) {
+                                    Logger.d {
+                                        "[$address] TCP socket timeout count: $timeoutCount/$SOCKET_RETRIES " +
+                                            "(total timeouts: $timeoutEvents)"
+                                    }
                                 }
+                                // Ignore and start another read
                             }
-                            // Ignore and start another read
                         }
-                    }
-                    if (timeoutCount >= SOCKET_RETRIES) {
-                        val inactivityMs = SOCKET_RETRIES * SOCKET_TIMEOUT
-                        Logger.w {
-                            "[$address] TCP closing connection due to $SOCKET_RETRIES consecutive timeouts " +
-                                "(${inactivityMs}ms of inactivity)"
+                        if (timeoutCount >= SOCKET_RETRIES) {
+                            val inactivityMs = SOCKET_RETRIES * SOCKET_TIMEOUT
+                            Logger.w {
+                                "[$address] TCP closing connection due to $SOCKET_RETRIES consecutive timeouts " +
+                                    "(${inactivityMs}ms of inactivity)"
+                            }
                         }
                     }
                 }
+                onDeviceDisconnect(false)
             }
-            onDeviceDisconnect(false)
+        } catch (e: Exception) {
+            Logger.e(e) { "[$address] Error connecting to $host:$port" }
+            throw e
         }
     }
 }
