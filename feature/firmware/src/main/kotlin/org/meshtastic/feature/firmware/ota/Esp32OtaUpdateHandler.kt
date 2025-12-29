@@ -35,6 +35,8 @@ import org.meshtastic.feature.firmware.FirmwareUpdateState
 import java.io.File
 import javax.inject.Inject
 
+private const val RETRY_DELAY = 2000L
+
 /**
  * Handler for ESP32 firmware updates using the Unified OTA protocol. Supports both BLE and WiFi/TCP transports via
  * UnifiedOtaProtocol.
@@ -105,17 +107,7 @@ constructor(
         withContext(Dispatchers.IO) {
             // Step 1: Get firmware file
             val firmwareFile =
-                if (firmwareUri != null) {
-                    updateState(FirmwareUpdateState.Processing("Loading firmware..."))
-                    getFirmwareFromUri(firmwareUri)
-                } else {
-                    downloadFirmware(release, hardware, updateState)
-                }
-
-            if (firmwareFile == null) {
-                updateState(FirmwareUpdateState.Error("Failed to obtain firmware file"))
-                return@withContext null
-            }
+                obtainFirmwareFile(release, hardware, firmwareUri, updateState) ?: return@withContext null
 
             // Step 2: Calculate Hash and Trigger Reboot
             val sha256Bytes = FirmwareHashUtil.calculateSha256Bytes(firmwareFile)
@@ -124,87 +116,10 @@ constructor(
             triggerRebootOta(rebootMode, sha256Bytes)
 
             val transport = transportFactory()
-
-            // Step 3: Connect
-            var connected = false
-            for (i in 1..connectionAttempts) {
-                try {
-                    updateState(
-                        FirmwareUpdateState.Processing("Connecting to device (attempt $i/$connectionAttempts)..."),
-                    )
-                    transport.connect().getOrThrow()
-                    connected = true
-                    break
-                } catch (e: Exception) {
-                    if (i == connectionAttempts) throw e
-                    delay(2000)
-                }
-            }
+            if (!connectToDevice(transport, connectionAttempts, updateState)) return@withContext null
 
             try {
-                // Step 4: Version Check
-                updateState(FirmwareUpdateState.Processing("Checking device version..."))
-                val versionInfo = transport.sendVersion().getOrThrow()
-                Logger.i {
-                    "ESP32 OTA: Device version - HW: ${versionInfo.hwVersion}, FW: ${versionInfo.fwVersion}"
-                }
-
-                // Step 5: Start OTA
-                updateState(FirmwareUpdateState.Processing("Starting OTA update..."))
-                transport
-                    .startOta(firmwareFile.length(), sha256Hash) { status ->
-                        updateState(FirmwareUpdateState.Processing(status))
-                    }
-                    .getOrThrow()
-
-                // Step 6: Stream
-                updateState(FirmwareUpdateState.Updating(0f, "Uploading firmware..."))
-                val firmwareData = firmwareFile.readBytes()
-                val chunkSize =
-                    if (rebootMode == 1) {
-                        BleOtaTransport.RECOMMENDED_CHUNK_SIZE
-                    } else {
-                        WifiOtaTransport.RECOMMENDED_CHUNK_SIZE
-                    }
-
-                val startTime = System.currentTimeMillis()
-                transport
-                    .streamFirmware(
-                        data = firmwareData,
-                        chunkSize = chunkSize,
-                        onProgress = { progress ->
-                            val currentTime = System.currentTimeMillis()
-                            val elapsedSeconds = (currentTime - startTime) / 1000f
-                            val percent = (progress * 100).toInt()
-
-                            val speedText =
-                                if (elapsedSeconds > 0) {
-                                    val bytesSent = (progress * firmwareData.size).toLong()
-                                    val kibPerSecond = (bytesSent / 1024f) / elapsedSeconds
-                                    val remainingBytes = firmwareData.size - bytesSent
-                                    val etaSeconds =
-                                        if (kibPerSecond > 0) (remainingBytes / 1024f) / kibPerSecond else 0f
-
-                                    String.format("%.1f KiB/s, ETA: %ds", kibPerSecond, etaSeconds.toInt())
-                                } else {
-                                    ""
-                                }
-
-                            updateState(
-                                FirmwareUpdateState.Updating(
-                                    progress,
-                                    "Uploading firmware... $percent% ($speedText)",
-                                ),
-                            )
-                        },
-                    )
-                    .getOrThrow()
-
-                // Step 7: Final Reboot
-                updateState(FirmwareUpdateState.Processing("Rebooting device..."))
-                transport.reboot().getOrThrow()
-
-                updateState(FirmwareUpdateState.Success)
+                executeOtaSequence(transport, firmwareFile, sha256Hash, rebootMode, updateState)
                 firmwareFile
             } finally {
                 transport.close()
@@ -224,7 +139,7 @@ constructor(
         Logger.e(e) { "ESP32 OTA: Protocol error" }
         updateState(FirmwareUpdateState.Error("OTA update failed: ${e.message}"))
         null
-    } catch (e: Exception) {
+    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         Logger.e(e) { "ESP32 OTA: Unexpected error" }
         updateState(FirmwareUpdateState.Error("Update failed: ${e.message}"))
         null
@@ -248,7 +163,7 @@ constructor(
             tempFile.parentFile?.mkdirs()
             inputStream.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
             tempFile
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "ESP32 OTA: Failed to read firmware from URI" }
             null
         }
@@ -260,8 +175,112 @@ constructor(
             val myInfo = service.getMyNodeInfo() ?: return
             Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
             service.requestRebootOta(service.getPacketId(), myInfo.myNodeNum, mode, hash)
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "ESP32 OTA: Failed to trigger reboot OTA" }
         }
+    }
+
+    private suspend fun obtainFirmwareFile(
+        release: FirmwareRelease,
+        hardware: DeviceHardware,
+        firmwareUri: Uri?,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ): File? {
+        val firmwareFile =
+            if (firmwareUri != null) {
+                updateState(FirmwareUpdateState.Processing("Loading firmware..."))
+                getFirmwareFromUri(firmwareUri)
+            } else {
+                downloadFirmware(release, hardware, updateState)
+            }
+
+        if (firmwareFile == null) {
+            updateState(FirmwareUpdateState.Error("Failed to obtain firmware file"))
+            return null
+        }
+        return firmwareFile
+    }
+
+    private suspend fun connectToDevice(
+        transport: UnifiedOtaProtocol,
+        attempts: Int,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ): Boolean {
+        for (i in 1..attempts) {
+            try {
+                updateState(FirmwareUpdateState.Processing("Connecting to device (attempt $i/$attempts)..."))
+                transport.connect().getOrThrow()
+                return true
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                if (i == attempts) throw e
+                delay(RETRY_DELAY)
+            }
+        }
+        return false
+    }
+
+    private suspend fun executeOtaSequence(
+        transport: UnifiedOtaProtocol,
+        firmwareFile: File,
+        sha256Hash: String,
+        rebootMode: Int,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ) {
+        // Step 4: Version Check
+        updateState(FirmwareUpdateState.Processing("Checking device version..."))
+        val versionInfo = transport.sendVersion().getOrThrow()
+        Logger.i { "ESP32 OTA: Device version - HW: ${versionInfo.hwVersion}, FW: ${versionInfo.fwVersion}" }
+
+        // Step 5: Start OTA
+        updateState(FirmwareUpdateState.Processing("Starting OTA update..."))
+        transport
+            .startOta(firmwareFile.length(), sha256Hash) { status ->
+                updateState(FirmwareUpdateState.Processing(status))
+            }
+            .getOrThrow()
+
+        // Step 6: Stream
+        updateState(FirmwareUpdateState.Updating(0f, "Uploading firmware..."))
+        val firmwareData = firmwareFile.readBytes()
+        val chunkSize =
+            if (rebootMode == 1) {
+                BleOtaTransport.RECOMMENDED_CHUNK_SIZE
+            } else {
+                WifiOtaTransport.RECOMMENDED_CHUNK_SIZE
+            }
+
+        val startTime = System.currentTimeMillis()
+        transport
+            .streamFirmware(
+                data = firmwareData,
+                chunkSize = chunkSize,
+                onProgress = { progress ->
+                    val currentTime = System.currentTimeMillis()
+                    val elapsedSeconds = (currentTime - startTime) / 1000f
+                    val percent = (progress * 100).toInt()
+
+                    val speedText =
+                        if (elapsedSeconds > 0) {
+                            val bytesSent = (progress * firmwareData.size).toLong()
+                            val kibPerSecond = (bytesSent / 1024f) / elapsedSeconds
+                            val remainingBytes = firmwareData.size - bytesSent
+                            val etaSeconds = if (kibPerSecond > 0) (remainingBytes / 1024f) / kibPerSecond else 0f
+
+                            String.format(java.util.Locale.US, "%.1f KiB/s, ETA: %ds", kibPerSecond, etaSeconds.toInt())
+                        } else {
+                            ""
+                        }
+
+                    updateState(FirmwareUpdateState.Updating(progress, "Uploading firmware... $percent% ($speedText)"))
+                },
+            )
+            .getOrThrow()
+        Logger.i { "ESP32 OTA: Firmware stream completed" }
+
+        // Step 7: Final Reboot
+        updateState(FirmwareUpdateState.Processing("Rebooting device..."))
+        transport.reboot().getOrThrow()
+
+        updateState(FirmwareUpdateState.Success)
     }
 }

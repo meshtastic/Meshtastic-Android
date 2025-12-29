@@ -79,7 +79,7 @@ constructor(
             }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "USB Update failed" }
             updateState(FirmwareUpdateState.Error(e.message ?: "USB Update failed"))
             null

@@ -218,7 +218,7 @@ constructor(
                 }
                 onDeviceDisconnect(false)
             }
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "[$address] Error connecting to $host:$port" }
             throw e
         }

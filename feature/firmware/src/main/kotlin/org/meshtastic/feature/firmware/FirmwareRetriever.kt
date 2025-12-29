@@ -79,7 +79,7 @@ class FirmwareRetriever @Inject constructor(private val fileHandler: FirmwareFil
                 fileHandler.downloadFile(directUrl, filename, onProgress)?.let {
                     return it
                 }
-            } catch (e: Exception) {
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.w(e) { "Direct download for $filename failed, falling back to release zip" }
             }
         }

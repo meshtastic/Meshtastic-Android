@@ -74,10 +74,10 @@ constructor(
                 esp32OtaUpdateHandler
             } else {
                 // Should be handled/validated before calling startUpdate
-                throw IllegalStateException("WiFi OTA only supported for ESP32 devices")
+                error("WiFi OTA only supported for ESP32 devices")
             }
         }
-        else -> throw IllegalStateException("Unknown connection type for firmware update")
+        else -> error("Unknown connection type for firmware update")
     }
 
     private fun getTarget(address: String): String = when {

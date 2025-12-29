@@ -17,13 +17,11 @@
 
 package org.meshtastic.feature.firmware
 
-import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -71,11 +69,15 @@ import javax.inject.Inject
 private const val DFU_RECONNECT_PREFIX = "x"
 private const val PERCENT_MAX_VALUE = 100f
 private const val DEVICE_DETACH_TIMEOUT = 30_000L
+private const val VERIFY_TIMEOUT = 60_000L
+private const val VERIFY_DELAY = 2000L
+private const val MIN_BATTERY_LEVEL = 10
+private const val KIB_DIVISOR = 1024f
 
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
 @HiltViewModel
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 class FirmwareUpdateViewModel
 @Inject
 constructor(
@@ -84,7 +86,6 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
     private val radioPrefs: RadioPrefs,
-    @ApplicationContext private val context: Context,
     private val bootloaderWarningDataSource: BootloaderWarningDataSource,
     private val firmwareUpdateManager: FirmwareUpdateManager,
     private val dfuManager: DfuManager,
@@ -97,7 +98,7 @@ constructor(
 
     private val _selectedReleaseType = MutableStateFlow(FirmwareReleaseType.STABLE)
     val selectedReleaseType: StateFlow<FirmwareReleaseType> = _selectedReleaseType.asStateFlow()
-    
+
     private val _selectedRelease = MutableStateFlow<FirmwareRelease?>(null)
     val selectedRelease: StateFlow<FirmwareRelease?> = _selectedRelease.asStateFlow()
 
@@ -144,7 +145,7 @@ constructor(
                     getDeviceHardware(ourNode)?.let { deviceHardware ->
                         _deviceHardware.value = deviceHardware
                         _currentFirmwareVersion.value = ourNode.metadata?.firmwareVersion
-                        
+
                         val releaseFlow =
                             if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
                                 kotlinx.coroutines.flow.flowOf(null)
@@ -192,29 +193,29 @@ constructor(
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
 
-        if (!checkBatteryLevel()) return
+        if (checkBatteryLevel()) {
+            updateJob?.cancel()
+            updateJob =
+                viewModelScope.launch {
+                    try {
+                        tempFirmwareFile =
+                            firmwareUpdateManager.startUpdate(
+                                release = release,
+                                hardware = currentState.deviceHardware,
+                                address = currentState.address,
+                                updateState = { _state.value = it },
+                            )
 
-        updateJob?.cancel()
-        updateJob =
-            viewModelScope.launch {
-                try {
-                    tempFirmwareFile =
-                        firmwareUpdateManager.startUpdate(
-                            release = release,
-                            hardware = currentState.deviceHardware,
-                            address = currentState.address,
-                            updateState = { _state.value = it },
-                        )
-
-                    if (_state.value is FirmwareUpdateState.Success) {
-                        verifyUpdateResult()
+                        if (_state.value is FirmwareUpdateState.Success) {
+                            verifyUpdateResult()
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        _state.value = FirmwareUpdateState.Error(e.message ?: "Update failed")
                     }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    _state.value = FirmwareUpdateState.Error(e.message ?: "Update failed")
                 }
-            }
+        }
     }
 
     fun saveDfuFile(uri: Uri) {
@@ -301,9 +302,7 @@ constructor(
                     val progress = dfuState.percent / PERCENT_MAX_VALUE
                     val percentText = "${dfuState.percent}%"
 
-                    val speedKib = dfuState.speed / 1024f
-                    val remainingBytes =
-                        0L // Nordic library doesn't give us total size directly here, but we can approximate or use
+                    val speedKib = dfuState.speed / KIB_DIVISOR
                     // speed
 
                     // The Nordic library provides speed in B/s.
@@ -317,7 +316,7 @@ constructor(
 
                     val metrics =
                         if (dfuState.speed > 0) {
-                            String.format(" - %.1f KiB/s%s", speedKib, partInfo)
+                            String.format(java.util.Locale.US, " - %.1f KiB/s%s", speedKib, partInfo)
                         } else {
                             partInfo
                         }
@@ -354,9 +353,9 @@ constructor(
         _state.value = FirmwareUpdateState.Verifying
         // Wait for device to reconnect and settle
         // This is a simple verification - just waiting for the node to be back in the DB
-        withTimeoutOrNull(60_000L) {
+        withTimeoutOrNull(VERIFY_TIMEOUT) {
             nodeRepository.ourNodeInfo.filterNotNull().first()
-            delay(2000) // Extra buffer
+            delay(VERIFY_DELAY) // Extra buffer
         }
         _state.value = FirmwareUpdateState.Success
     }
@@ -364,12 +363,13 @@ constructor(
     private fun checkBatteryLevel(): Boolean {
         val node = nodeRepository.ourNodeInfo.value ?: return true
         val level = node.batteryLevel
-        if (level in 1..10) {
+        val isBatteryLow = level in 1..MIN_BATTERY_LEVEL
+
+        if (isBatteryLow) {
             _state.value =
                 FirmwareUpdateState.Error("Battery too low ($level%). Please charge your device before updating.")
-            return false
         }
-        return true
+        return !isBatteryLow
     }
 
     private suspend fun getDeviceHardware(ourNode: org.meshtastic.core.database.model.Node): DeviceHardware? {
