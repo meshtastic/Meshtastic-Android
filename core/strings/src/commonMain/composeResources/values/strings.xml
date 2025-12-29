@@ -1022,7 +1022,7 @@
     <string name="firmware_update_checking">Checking for updates...</string>
     <string name="firmware_update_device">Device: %1$s</string>
     <string name="firmware_update_currently_installed">Currently Installed: %1$s</string>
-    <string name="firmware_update_latest">Latest Release: %1$s</string>
+    <string name="firmware_update_latest">Update To: %1$s</string>
     <string name="firmware_update_stable">Stable</string>
     <string name="firmware_update_alpha">Alpha</string>
     <string name="firmware_update_disconnect_warning">Note: This will temporarily disconnect your device during the update.</string>
@@ -1046,6 +1046,8 @@
     <string name="firmware_update_almost_there">Almost there...</string>
     <string name="firmware_update_taking_a_while">This might take a minute...</string>
     <string name="firmware_update_select_file">Select Local File</string>
+    <string name="firmware_update_local_file">Local File</string>
+    <string name="firmware_update_source_local">Source: Local File</string>
     <string name="firmware_update_unknown_release">Unknown remote release</string>
     <string name="firmware_update_disclaimer_title">Update Warning</string>
     <string name="firmware_update_disclaimer_text">You are about to flash new firmware to your device. This process carries risks.\n\n• Ensure your device is charged.\n• Keep the device close to your phone.\n• Do not close the app during the update.\n\nVerify you have selected the correct firmware for your hardware.</string>

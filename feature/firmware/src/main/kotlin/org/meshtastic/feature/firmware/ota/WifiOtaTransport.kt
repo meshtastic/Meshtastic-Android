@@ -51,7 +51,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
     private var isConnected = false
 
     /** Connect to the device via TCP. */
-    suspend fun connect(): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun connect(): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             Logger.i { "WiFi OTA: Connecting to $deviceIpAddress:$port" }
 

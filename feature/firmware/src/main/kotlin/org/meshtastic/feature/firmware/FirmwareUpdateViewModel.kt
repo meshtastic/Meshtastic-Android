@@ -97,6 +97,15 @@ constructor(
 
     private val _selectedReleaseType = MutableStateFlow(FirmwareReleaseType.STABLE)
     val selectedReleaseType: StateFlow<FirmwareReleaseType> = _selectedReleaseType.asStateFlow()
+    
+    private val _selectedRelease = MutableStateFlow<FirmwareRelease?>(null)
+    val selectedRelease: StateFlow<FirmwareRelease?> = _selectedRelease.asStateFlow()
+
+    private val _deviceHardware = MutableStateFlow<DeviceHardware?>(null)
+    val deviceHardware = _deviceHardware.asStateFlow()
+
+    private val _currentFirmwareVersion = MutableStateFlow<String?>(null)
+    val currentFirmwareVersion = _currentFirmwareVersion.asStateFlow()
 
     private var updateJob: Job? = null
     private var tempFirmwareFile: File? = null
@@ -133,9 +142,18 @@ constructor(
                         return@launch
                     }
                     getDeviceHardware(ourNode)?.let { deviceHardware ->
-                        firmwareReleaseRepository.getReleaseFlow(
-                            _selectedReleaseType.value,
-                        ).collectLatest { release ->
+                        _deviceHardware.value = deviceHardware
+                        _currentFirmwareVersion.value = ourNode.metadata?.firmwareVersion
+                        
+                        val releaseFlow =
+                            if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
+                                kotlinx.coroutines.flow.flowOf(null)
+                            } else {
+                                firmwareReleaseRepository.getReleaseFlow(_selectedReleaseType.value)
+                            }
+
+                        releaseFlow.collectLatest { release ->
+                            _selectedRelease.value = release
                             val dismissed = bootloaderWarningDataSource.isDismissed(address)
                             val firmwareUpdateMethod =
                                 if (radioPrefs.isSerial()) {
@@ -384,6 +402,7 @@ private fun isValidBluetoothAddress(address: String?): Boolean =
 private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType): Flow<FirmwareRelease?> = when (type) {
     FirmwareReleaseType.STABLE -> stableRelease
     FirmwareReleaseType.ALPHA -> alphaRelease
+    FirmwareReleaseType.LOCAL -> kotlinx.coroutines.flow.flowOf(null)
 }
 
 sealed class FirmwareUpdateMethod(val description: StringResource) {

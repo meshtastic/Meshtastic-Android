@@ -73,4 +73,5 @@ fun FirmwareRelease.asDeviceVersion(): DeviceVersion = DeviceVersion(id.substrin
 enum class FirmwareReleaseType {
     STABLE,
     ALPHA,
+    LOCAL,
 }
