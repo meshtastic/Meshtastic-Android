@@ -89,7 +89,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
     override suspend fun startOta(
         sizeBytes: Long,
         sha256Hash: String,
-        onStatus: suspend (String) -> Unit,
+        onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit,
     ): Result<Unit> = runCatching {
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
         sendCommand(command)
@@ -99,7 +99,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         when (val parsed = OtaResponse.parse(erasingResponse)) {
             is OtaResponse.Erasing -> {
                 Logger.i { "WiFi OTA: Device erasing flash..." }
-                onStatus("Erasing flash...")
+                onHandshakeStatus(OtaHandshakeStatus.Erasing)
             }
 
             is OtaResponse.Error -> {

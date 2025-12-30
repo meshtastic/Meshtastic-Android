@@ -34,6 +34,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.firmware_update_checking_version
 import org.meshtastic.core.strings.firmware_update_connecting_attempt
 import org.meshtastic.core.strings.firmware_update_downloading_percent
+import org.meshtastic.core.strings.firmware_update_erasing
 import org.meshtastic.core.strings.firmware_update_hash_rejected
 import org.meshtastic.core.strings.firmware_update_loading
 import org.meshtastic.core.strings.firmware_update_ota_failed
@@ -244,6 +245,7 @@ constructor(
         return false
     }
 
+    @Suppress("LongMethod")
     private suspend fun executeOtaSequence(
         transport: UnifiedOtaProtocol,
         firmwareFile: File,
@@ -261,8 +263,13 @@ constructor(
         val startingOtaMsg = getString(Res.string.firmware_update_starting_ota)
         updateState(FirmwareUpdateState.Processing(ProgressState(startingOtaMsg)))
         transport
-            .startOta(firmwareFile.length(), sha256Hash) { status ->
-                updateState(FirmwareUpdateState.Processing(ProgressState(status)))
+            .startOta(sizeBytes = firmwareFile.length(), sha256Hash = sha256Hash) { status ->
+                when (status) {
+                    OtaHandshakeStatus.Erasing -> {
+                        val erasingMsg = getString(Res.string.firmware_update_erasing)
+                        updateState(FirmwareUpdateState.Processing(ProgressState(erasingMsg)))
+                    }
+                }
             }
             .getOrThrow()
 
