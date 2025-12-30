@@ -128,7 +128,7 @@ constructor(
 
             // Step 2: Calculate Hash and Trigger Reboot
             val sha256Bytes = FirmwareHashUtil.calculateSha256Bytes(firmwareFile)
-            val sha256Hash = FirmwareHashUtil.calculateSha256(firmwareFile)
+            val sha256Hash = FirmwareHashUtil.bytesToHex(sha256Bytes)
             Logger.i { "ESP32 OTA: Firmware hash: $sha256Hash" }
             triggerRebootOta(rebootMode, sha256Bytes)
 
