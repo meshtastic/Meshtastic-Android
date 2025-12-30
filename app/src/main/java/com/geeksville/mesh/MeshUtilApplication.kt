@@ -21,6 +21,8 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
@@ -35,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -57,6 +60,7 @@ class MeshUtilApplication :
 
         // Schedule periodic MeshLog cleanup
         scheduleMeshLogCleanup()
+        enqueueImmediateCleanupIfNeeded()
 
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
@@ -74,7 +78,25 @@ class MeshUtilApplication :
                 .build()
 
         WorkManager.getInstance(this)
-            .enqueueUniquePeriodicWork(MeshLogCleanupWorker.WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, cleanupRequest)
+            .enqueueUniquePeriodicWork(MeshLogCleanupWorker.WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, cleanupRequest)
+    }
+
+    private fun enqueueImmediateCleanupIfNeeded() {
+        // Use entry point to access prefs outside of Hilt graph
+        val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
+        val meshLogPrefs = entryPoint.meshLogPrefs()
+        val retentionDays = meshLogPrefs.retentionDays
+        if (!meshLogPrefs.loggingEnabled || retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) {
+            Logger.i { "Skipping immediate MeshLog cleanup; loggingEnabled=${meshLogPrefs.loggingEnabled}, retention=$retentionDays" }
+            return
+        }
+        Logger.i { "Enqueuing immediate MeshLog cleanup with retentionDays=$retentionDays" }
+        WorkManager.getInstance(this)
+            .enqueueUniqueWork(
+                "${MeshLogCleanupWorker.WORK_NAME}_immediate",
+                ExistingWorkPolicy.REPLACE,
+                OneTimeWorkRequestBuilder<MeshLogCleanupWorker>().build(),
+            )
     }
 
     override val workManagerConfiguration: Configuration
@@ -87,6 +109,8 @@ interface AppEntryPoint {
     fun databaseManager(): DatabaseManager
 
     fun meshPrefs(): MeshPrefs
+
+    fun meshLogPrefs(): MeshLogPrefs
 }
 
 fun logAssert(executeReliableWrite: Boolean) {

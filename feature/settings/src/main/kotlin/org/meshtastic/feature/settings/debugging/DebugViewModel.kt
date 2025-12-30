@@ -261,6 +261,11 @@ constructor(
     fun setLoggingEnabled(enabled: Boolean) {
         meshLogPrefs.loggingEnabled = enabled
         _loggingEnabled.value = enabled
+        if (!enabled) {
+            viewModelScope.launch {
+                meshLogRepository.deleteAll()
+            }
+        }
     }
 
     suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> =

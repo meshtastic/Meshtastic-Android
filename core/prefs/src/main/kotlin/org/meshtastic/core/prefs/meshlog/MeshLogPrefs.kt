@@ -30,7 +30,7 @@ interface MeshLogPrefs {
     companion object {
         const val RETENTION_DAYS_KEY = "meshlog_retention_days"
         const val LOGGING_ENABLED_KEY = "meshlog_logging_enabled"
-        const val DEFAULT_RETENTION_DAYS = 30
+        const val DEFAULT_RETENTION_DAYS = 7
         const val DEFAULT_LOGGING_ENABLED = true
         const val MIN_RETENTION_DAYS = -1 // -1 == keep last hour
         const val MAX_RETENTION_DAYS = 365

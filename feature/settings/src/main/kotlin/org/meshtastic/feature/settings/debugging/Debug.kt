@@ -234,7 +234,7 @@ private fun DebugLogSettings(viewModel: DebugViewModel) {
         @Suppress("MagicNumber")
         val retentionItems =
             listOf((-1L) to "1 hour") +
-                listOf(1, 7, 14, 30, 60, 90, 180, 365).map { days ->
+                listOf(1, 3, 7, 14, 30, 60, 90, 180, 365).map { days ->
                     days.toLong() to if (days == 1) "1 day" else "$days days"
                 } +
                 listOf(0L to stringResource(Res.string.log_retention_never))
