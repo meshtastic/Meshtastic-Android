@@ -322,7 +322,7 @@
     <string name="map_start_download">Herunterladen starten</string>
     <string name="exchange_position">Standort austauschen</string>
     <string name="close">Schließen</string>
-    <string name="radio_configuration">Geräteeinstellungen</string>
+    <string name="radio_configuration">Radioeinstellungen</string>
     <string name="module_settings">Moduleinstellungen</string>
     <string name="add">Hinzufügen</string>
     <string name="edit">Bearbeiten</string>
