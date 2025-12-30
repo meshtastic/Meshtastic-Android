@@ -18,6 +18,7 @@
 package org.meshtastic.feature.firmware
 
 import android.net.Uri
+import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.prefs.radio.RadioPrefs
@@ -59,6 +60,8 @@ constructor(
             firmwareUri = firmwareUri,
         )
     }
+
+    fun dfuProgressFlow(): Flow<DfuInternalState> = nordicDfuHandler.progressFlow()
 
     private fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> usbUpdateHandler
