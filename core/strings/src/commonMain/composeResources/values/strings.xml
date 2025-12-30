@@ -1091,6 +1091,7 @@
     <string name="firmware_update_rebooting_device">Rebooting device...</string>
     <string name="firmware_update_channel_name">Firmware Update</string>
     <string name="firmware_update_channel_description">Firmware update status</string>
+    <string name="firmware_update_erasing">Erasing...</string>
     <string name="back">Back</string>
 
     <string name="interval_unset">Unset</string>

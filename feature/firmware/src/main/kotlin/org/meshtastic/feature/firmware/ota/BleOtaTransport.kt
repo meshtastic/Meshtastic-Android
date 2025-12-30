@@ -135,7 +135,7 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
     override suspend fun startOta(
         sizeBytes: Long,
         sha256Hash: String,
-        onStatus: suspend (String) -> Unit,
+        onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit,
     ): Result<Unit> = runCatching {
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
         sendCommand(command)
@@ -145,7 +145,7 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
         when (val parsed = OtaResponse.parse(erasingResponse)) {
             is OtaResponse.Erasing -> {
                 Logger.i { "BLE OTA: Device erasing flash..." }
-                onStatus("Erasing flash...")
+                onHandshakeStatus(OtaHandshakeStatus.Erasing)
             }
 
             is OtaResponse.Error -> {

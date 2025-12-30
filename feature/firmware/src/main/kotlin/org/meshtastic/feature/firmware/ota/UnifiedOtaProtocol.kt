@@ -95,6 +95,12 @@ sealed class OtaResponse {
     }
 }
 
+/** Status updates during the OTA handshake. */
+sealed class OtaHandshakeStatus {
+    /** The device is erasing the flash partition. */
+    data object Erasing : OtaHandshakeStatus()
+}
+
 /** Interface for ESP32 Unified OTA protocol implementation. Supports both BLE and WiFi/TCP transports. */
 interface UnifiedOtaProtocol {
     /**
@@ -116,10 +122,14 @@ interface UnifiedOtaProtocol {
      *
      * @param sizeBytes Total firmware size in bytes
      * @param sha256Hash SHA-256 hash of the firmware (64 hex characters)
-     * @param onStatus Optional callback to report status changes (e.g., "Erasing...")
+     * @param onHandshakeStatus Optional callback to report status changes (e.g., "Erasing...")
      * @return Success if device accepts and is ready, error otherwise
      */
-    suspend fun startOta(sizeBytes: Long, sha256Hash: String, onStatus: suspend (String) -> Unit = {}): Result<Unit>
+    suspend fun startOta(
+        sizeBytes: Long,
+        sha256Hash: String,
+        onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit = {},
+    ): Result<Unit>
 
     /**
      * Stream firmware binary data to the device.
