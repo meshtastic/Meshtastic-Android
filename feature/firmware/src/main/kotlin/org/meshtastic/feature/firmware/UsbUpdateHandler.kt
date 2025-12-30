@@ -26,11 +26,15 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.firmware_update_downloading_percent
 import org.meshtastic.core.strings.firmware_update_rebooting
+import org.meshtastic.core.strings.firmware_update_retrieval_failed
+import org.meshtastic.core.strings.firmware_update_usb_failed
 import java.io.File
 import javax.inject.Inject
 
 private const val REBOOT_DELAY = 5000L
+private const val PERCENT_MAX = 100
 
 /** Handles firmware updates via USB Mass Storage (UF2). */
 class UsbUpdateHandler
@@ -48,12 +52,17 @@ constructor(
         firmwareUri: Uri?,
     ): File? =
         try {
-            updateState(FirmwareUpdateState.Downloading(0f))
+            val downloadingMsg =
+                getString(Res.string.firmware_update_downloading_percent, 0)
+                    .replace(Regex(":?\\s*%1\\\$d%?"), "")
+                    .trim()
+
+            updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
 
             val rebootingMsg = getString(Res.string.firmware_update_rebooting)
 
             if (firmwareUri != null) {
-                updateState(FirmwareUpdateState.Processing(rebootingMsg))
+                updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
                 serviceRepository.meshService?.rebootToDfu()
                 delay(REBOOT_DELAY)
 
@@ -62,14 +71,20 @@ constructor(
             } else {
                 val firmwareFile =
                     firmwareRetriever.retrieveUsbFirmware(release, hardware) { progress ->
-                        updateState(FirmwareUpdateState.Downloading(progress))
+                        val percent = (progress * PERCENT_MAX).toInt()
+                        updateState(
+                            FirmwareUpdateState.Downloading(
+                                ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
+                            ),
+                        )
                     }
 
                 if (firmwareFile == null) {
-                    updateState(FirmwareUpdateState.Error("Could not retrieve firmware file."))
+                    val retrievalFailedMsg = getString(Res.string.firmware_update_retrieval_failed)
+                    updateState(FirmwareUpdateState.Error(retrievalFailedMsg))
                     null
                 } else {
-                    updateState(FirmwareUpdateState.Processing(rebootingMsg))
+                    updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
                     serviceRepository.meshService?.rebootToDfu()
                     delay(REBOOT_DELAY)
 
@@ -81,7 +96,8 @@ constructor(
             throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "USB Update failed" }
-            updateState(FirmwareUpdateState.Error(e.message ?: "USB Update failed"))
+            val usbFailedMsg = getString(Res.string.firmware_update_usb_failed)
+            updateState(FirmwareUpdateState.Error(e.message ?: usbFailedMsg))
             null
         }
 }

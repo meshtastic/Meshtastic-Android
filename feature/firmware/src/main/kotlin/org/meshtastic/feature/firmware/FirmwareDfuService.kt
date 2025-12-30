@@ -21,15 +21,29 @@ import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import kotlinx.coroutines.runBlocking
 import no.nordicsemi.android.dfu.DfuBaseService
+import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.model.BuildConfig
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.firmware_update_channel_description
+import org.meshtastic.core.strings.firmware_update_channel_name
 
 class FirmwareDfuService : DfuBaseService() {
     override fun onCreate() {
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Using runBlocking here is acceptable as onCreate is a lifecycle method
+        // and we need localized strings for the notification channel.
+        val (channelName, channelDesc) =
+            runBlocking {
+                getString(Res.string.firmware_update_channel_name) to
+                    getString(Res.string.firmware_update_channel_description)
+            }
+
         val channel =
-            NotificationChannel(NOTIFICATION_CHANNEL_DFU, "Firmware Update", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "Firmware update status"
+            NotificationChannel(NOTIFICATION_CHANNEL_DFU, channelName, NotificationManager.IMPORTANCE_LOW).apply {
+                description = channelDesc
                 setShowBadge(false)
             }
         manager.createNotificationChannel(channel)

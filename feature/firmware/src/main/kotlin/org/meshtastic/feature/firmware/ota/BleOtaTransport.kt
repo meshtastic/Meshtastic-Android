@@ -132,84 +132,89 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
         }
     }
 
-    override suspend fun startOta(sizeBytes: Long, sha256Hash: String, onStatus: (String) -> Unit): Result<Unit> =
-        runCatching {
-            val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
-            sendCommand(command)
+    override suspend fun startOta(
+        sizeBytes: Long,
+        sha256Hash: String,
+        onStatus: suspend (String) -> Unit,
+    ): Result<Unit> = runCatching {
+        val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
+        sendCommand(command)
 
-            // Wait for ERASING response
-            val erasingResponse = waitForResponse(ERASING_TIMEOUT_MS)
-            when (val parsed = OtaResponse.parse(erasingResponse)) {
-                is OtaResponse.Erasing -> {
-                    Logger.i { "BLE OTA: Device erasing flash..." }
-                    onStatus("Erasing flash...")
-                }
-
-                is OtaResponse.Error -> {
-                    if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
-                        throw OtaProtocolException.HashRejected(sha256Hash)
-                    }
-                    throw OtaProtocolException.CommandFailed(command, parsed)
-                }
-
-                else -> {} // OK or other response, continue
+        // Wait for ERASING response
+        val erasingResponse = waitForResponse(ERASING_TIMEOUT_MS)
+        when (val parsed = OtaResponse.parse(erasingResponse)) {
+            is OtaResponse.Erasing -> {
+                Logger.i { "BLE OTA: Device erasing flash..." }
+                onStatus("Erasing flash...")
             }
 
-            // Wait for OK response after erasing
-            val okResponse = waitForResponse(ERASING_TIMEOUT_MS)
-            when (val parsed = OtaResponse.parse(okResponse)) {
-                is OtaResponse.Ok -> Unit
-                is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(command, parsed)
-                else ->
-                    throw OtaProtocolException.CommandFailed(command, OtaResponse.Error("Expected OK, got: $parsed"))
+            is OtaResponse.Error -> {
+                if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
+                    throw OtaProtocolException.HashRejected(sha256Hash)
+                }
+                throw OtaProtocolException.CommandFailed(command, parsed)
             }
+
+            else -> {} // OK or other response, continue
         }
 
-    override suspend fun streamFirmware(data: ByteArray, chunkSize: Int, onProgress: (Float) -> Unit): Result<Unit> =
-        runCatching {
-            val totalBytes = data.size
-            var sentBytes = 0
-
-            while (sentBytes < totalBytes) {
-                if (!isConnected) {
-                    throw OtaProtocolException.TransferFailed("Connection lost during transfer")
-                }
-
-                val remainingBytes = totalBytes - sentBytes
-                val currentChunkSize = minOf(chunkSize, remainingBytes)
-                val chunk = data.copyOfRange(sentBytes, sentBytes + currentChunkSize)
-
-                // Write chunk
-                writeData(chunk)
-
-                // Wait for ACK (BLE only)
-                val ackResponse = waitForResponse(ACK_TIMEOUT_MS)
-                when (OtaResponse.parse(ackResponse)) {
-                    is OtaResponse.Ack -> {} // Continue
-                    is OtaResponse.Error -> {
-                        val error = OtaResponse.parse(ackResponse) as OtaResponse.Error
-                        throw OtaProtocolException.TransferFailed("Transfer failed: ${error.message}")
-                    }
-                    else -> throw OtaProtocolException.TransferFailed("Expected ACK, got: $ackResponse")
-                }
-
-                sentBytes += currentChunkSize
-                onProgress(sentBytes.toFloat() / totalBytes)
-            }
-
-            // Wait for final verification
-            val finalResponse = waitForResponse(VERIFICATION_TIMEOUT_MS)
-            when (val parsed = OtaResponse.parse(finalResponse)) {
-                is OtaResponse.Ok -> Unit
-                is OtaResponse.Error -> {
-                    if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
-                        throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
-                    }
-                    throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
-                }
-                else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
-            }
+        // Wait for OK response after erasing
+        val okResponse = waitForResponse(ERASING_TIMEOUT_MS)
+        when (val parsed = OtaResponse.parse(okResponse)) {
+            is OtaResponse.Ok -> Unit
+            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(command, parsed)
+            else -> throw OtaProtocolException.CommandFailed(command, OtaResponse.Error("Expected OK, got: $parsed"))
         }
+    }
+
+    override suspend fun streamFirmware(
+        data: ByteArray,
+        chunkSize: Int,
+        onProgress: suspend (Float) -> Unit,
+    ): Result<Unit> = runCatching {
+        val totalBytes = data.size
+        var sentBytes = 0
+
+        while (sentBytes < totalBytes) {
+            if (!isConnected) {
+                throw OtaProtocolException.TransferFailed("Connection lost during transfer")
+            }
+
+            val remainingBytes = totalBytes - sentBytes
+            val currentChunkSize = minOf(chunkSize, remainingBytes)
+            val chunk = data.copyOfRange(sentBytes, sentBytes + currentChunkSize)
+
+            // Write chunk
+            writeData(chunk)
+
+            // Wait for ACK (BLE only)
+            val ackResponse = waitForResponse(ACK_TIMEOUT_MS)
+            when (OtaResponse.parse(ackResponse)) {
+                is OtaResponse.Ack -> {} // Continue
+                is OtaResponse.Error -> {
+                    val error = OtaResponse.parse(ackResponse) as OtaResponse.Error
+                    throw OtaProtocolException.TransferFailed("Transfer failed: ${error.message}")
+                }
+                else -> throw OtaProtocolException.TransferFailed("Expected ACK, got: $ackResponse")
+            }
+
+            sentBytes += currentChunkSize
+            onProgress(sentBytes.toFloat() / totalBytes)
+        }
+
+        // Wait for final verification
+        val finalResponse = waitForResponse(VERIFICATION_TIMEOUT_MS)
+        when (val parsed = OtaResponse.parse(finalResponse)) {
+            is OtaResponse.Ok -> Unit
+            is OtaResponse.Error -> {
+                if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
+                    throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
+                }
+                throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
+            }
+            else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
+        }
+    }
 
     override suspend fun reboot(): Result<Unit> = runCatching {
         sendCommand(OtaCommand.Reboot)

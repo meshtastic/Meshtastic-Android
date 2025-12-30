@@ -119,7 +119,7 @@ interface UnifiedOtaProtocol {
      * @param onStatus Optional callback to report status changes (e.g., "Erasing...")
      * @return Success if device accepts and is ready, error otherwise
      */
-    suspend fun startOta(sizeBytes: Long, sha256Hash: String, onStatus: (String) -> Unit = {}): Result<Unit>
+    suspend fun startOta(sizeBytes: Long, sha256Hash: String, onStatus: suspend (String) -> Unit = {}): Result<Unit>
 
     /**
      * Stream firmware binary data to the device.
@@ -129,7 +129,7 @@ interface UnifiedOtaProtocol {
      * @param onProgress Progress callback (0.0 to 1.0)
      * @return Success if all data transferred and verified, error otherwise
      */
-    suspend fun streamFirmware(data: ByteArray, chunkSize: Int, onProgress: (Float) -> Unit): Result<Unit>
+    suspend fun streamFirmware(data: ByteArray, chunkSize: Int, onProgress: suspend (Float) -> Unit): Result<Unit>
 
     /**
      * Request device reboot.
