@@ -49,12 +49,15 @@ import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
 import org.meshtastic.core.prefs.radio.isTcp
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.firmware_update_battery_low
 import org.meshtastic.core.strings.firmware_update_copying
 import org.meshtastic.core.strings.firmware_update_dfu_aborted
 import org.meshtastic.core.strings.firmware_update_dfu_error
+import org.meshtastic.core.strings.firmware_update_disconnecting
+import org.meshtastic.core.strings.firmware_update_enabling_dfu
 import org.meshtastic.core.strings.firmware_update_extracting
 import org.meshtastic.core.strings.firmware_update_failed
 import org.meshtastic.core.strings.firmware_update_flashing
@@ -68,9 +71,11 @@ import org.meshtastic.core.strings.firmware_update_starting_dfu
 import org.meshtastic.core.strings.firmware_update_unknown_error
 import org.meshtastic.core.strings.firmware_update_unknown_hardware
 import org.meshtastic.core.strings.firmware_update_updating
+import org.meshtastic.core.strings.firmware_update_validating
 import org.meshtastic.core.strings.unknown
 import java.io.File
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 private const val DFU_RECONNECT_PREFIX = "x"
 private const val PERCENT_MAX_VALUE = 100f
@@ -116,6 +121,7 @@ constructor(
 
     private var updateJob: Job? = null
     private var tempFirmwareFile: File? = null
+    private var originalDeviceAddress: String? = null
 
     init {
         // Cleanup potential leftovers
@@ -199,6 +205,7 @@ constructor(
     fun startUpdate() {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         val release = currentState.release ?: return
+        originalDeviceAddress = currentState.address
 
         viewModelScope.launch {
             if (checkBatteryLevel()) {
@@ -215,7 +222,7 @@ constructor(
                                 )
 
                             if (_state.value is FirmwareUpdateState.Success) {
-                                verifyUpdateResult()
+                                verifyUpdateResult(originalDeviceAddress)
                             }
                         } catch (e: CancellationException) {
                             throw e
@@ -248,7 +255,7 @@ constructor(
                 withTimeoutOrNull(DEVICE_DETACH_TIMEOUT) { usbManager.deviceDetachFlow().first() }
                     ?: Logger.w { "Timed out waiting for device to detach, assuming success" }
 
-                _state.value = FirmwareUpdateState.Success
+                verifyUpdateResult(originalDeviceAddress)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -266,6 +273,7 @@ constructor(
         if (currentState.updateMethod is FirmwareUpdateMethod.Ble && !isValidBluetoothAddress(currentState.address)) {
             return
         }
+        originalDeviceAddress = currentState.address
 
         updateJob?.cancel()
         updateJob =
@@ -290,7 +298,7 @@ constructor(
                         )
 
                     if (_state.value is FirmwareUpdateState.Success) {
-                        verifyUpdateResult()
+                        verifyUpdateResult(originalDeviceAddress)
                     }
                 } catch (e: CancellationException) {
                     throw e
@@ -317,7 +325,7 @@ constructor(
                     val progress = dfuState.percent / PERCENT_MAX_VALUE
                     val percentText = "${dfuState.percent}%"
 
-                    val speedKib = dfuState.speed / KIB_DIVISOR
+                    val speedKib = dfuState.speed * 1.seconds.inWholeMicroseconds / KIB_DIVISOR
 
                     // The Nordic library provides speed in B/s.
                     val partInfo =
@@ -329,7 +337,7 @@ constructor(
 
                     val metrics =
                         if (dfuState.speed > 0) {
-                            String.format(java.util.Locale.US, "%.1f KiB/s%s", speedKib, partInfo)
+                            String.format(java.util.Locale.US, "%.1f KiB/s %s", speedKib, partInfo)
                         } else {
                             partInfo
                         }
@@ -348,9 +356,8 @@ constructor(
                 }
 
                 is DfuInternalState.Completed -> {
-                    _state.value = FirmwareUpdateState.Success
-                    serviceRepository.meshService?.setDeviceAddress("$DFU_RECONNECT_PREFIX${dfuState.address}")
                     tempFirmwareFile = cleanupTemporaryFiles(fileHandler, tempFirmwareFile)
+                    verifyUpdateResult(originalDeviceAddress)
                 }
 
                 is DfuInternalState.Aborted -> {
@@ -363,17 +370,42 @@ constructor(
                     val msg = getString(Res.string.firmware_update_starting_dfu)
                     _state.value = FirmwareUpdateState.Processing(ProgressState(msg))
                 }
+
+                is DfuInternalState.EnablingDfuMode -> {
+                    val msg = getString(Res.string.firmware_update_enabling_dfu)
+                    _state.value = FirmwareUpdateState.Processing(ProgressState(msg))
+                }
+
+                is DfuInternalState.Validating -> {
+                    val msg = getString(Res.string.firmware_update_validating)
+                    _state.value = FirmwareUpdateState.Processing(ProgressState(msg))
+                }
+
+                is DfuInternalState.Disconnecting -> {
+                    val msg = getString(Res.string.firmware_update_disconnecting)
+                    _state.value = FirmwareUpdateState.Processing(ProgressState(msg))
+                }
+
+                else -> {} // ignore connected/disconnected for UI noise
             }
         }
     }
 
-    private suspend fun verifyUpdateResult() {
+    private suspend fun verifyUpdateResult(address: String?) {
         _state.value = FirmwareUpdateState.Verifying
+
+        // Trigger a fresh connection attempt by MeshService
+        address?.let { currentAddr ->
+            Logger.i { "Post-update: Requesting MeshService to reconnect to $currentAddr" }
+            serviceRepository.meshService?.setDeviceAddress("$DFU_RECONNECT_PREFIX$currentAddr")
+        }
+
         // Wait for device to reconnect and settle
-        // This is a simple verification - just waiting for the node to be back in the DB
         withTimeoutOrNull(VERIFY_TIMEOUT) {
+            // Wait for both Connected state and node info to be present
+            serviceRepository.connectionState.first { it is ConnectionState.Connected }
             nodeRepository.ourNodeInfo.filterNotNull().first()
-            delay(VERIFY_DELAY) // Extra buffer
+            delay(VERIFY_DELAY) // Extra buffer for initial config sync
         }
         _state.value = FirmwareUpdateState.Success
     }
