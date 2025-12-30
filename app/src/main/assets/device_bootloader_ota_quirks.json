@@ -4,19 +4,19 @@
       "hwModel": 18,
       "hwModelSlug": "NANO_G2_ULTRA",
       "requiresBootloaderUpgradeForOta": true,
-      "infoUrl": "https://github.com/RAKWireless/WisBlock/tree/master/bootloader/RAK4630/Latest/WisCore_RAK4631_Bootloader"
+      "infoUrl": "https://meshtastic.org/docs/getting-started/flashing-firmware/nrf52/update-nrf52-bootloader/"
     },
     {
       "hwModel": 9,
       "hwModelSlug": "RAK4631",
       "requiresBootloaderUpgradeForOta": true,
-      "infoUrl": "https://github.com/RAKWireless/WisBlock/tree/master/bootloader/RAK4630/Latest/WisCore_RAK4631_Bootloader"
+      "infoUrl": "https://meshtastic.org/docs/getting-started/flashing-firmware/nrf52/update-nrf52-bootloader/"
     },
     {
       "hwModel": 96,
       "hwModelSlug": "NOMADSTAR_METEOR_PRO",
       "requiresBootloaderUpgradeForOta": true,
-      "infoUrl": "https://github.com/RAKWireless/WisBlock/tree/master/bootloader/RAK4630/Latest/WisCore_RAK4631_Bootloader"
+      "infoUrl": "https://meshtastic.org/docs/getting-started/flashing-firmware/nrf52/update-nrf52-bootloader/"
     },
     {
       "hwModel": 12,
