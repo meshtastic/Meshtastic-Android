@@ -99,7 +99,6 @@ constructor(
     private val radioPrefs: RadioPrefs,
     private val bootloaderWarningDataSource: BootloaderWarningDataSource,
     private val firmwareUpdateManager: FirmwareUpdateManager,
-    private val dfuManager: DfuManager,
     private val usbManager: UsbManager,
     private val fileHandler: FirmwareFileHandler,
 ) : ViewModel() {
@@ -319,7 +318,7 @@ constructor(
     }
 
     private suspend fun observeDfuProgress() {
-        dfuManager.progressFlow().flowOn(Dispatchers.Main).collect { dfuState ->
+        firmwareUpdateManager.dfuProgressFlow().flowOn(Dispatchers.Main).collect { dfuState ->
             when (dfuState) {
                 is DfuInternalState.Progress -> {
                     val progress = dfuState.percent / PERCENT_MAX_VALUE
