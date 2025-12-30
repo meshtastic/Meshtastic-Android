@@ -142,6 +142,7 @@ import kotlin.math.absoluteValue
  * infinite recursion on some androids (because contextWrapper.getResources calls to string
  */
 @AndroidEntryPoint
+@Suppress("TooManyFunctions", "LargeClass")
 class MeshService : Service() {
     @Inject lateinit var dispatchers: CoroutineDispatchers
 
@@ -2973,9 +2974,10 @@ class MeshService : Service() {
             override fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) =
                 toRemoteExceptions {
                     val otaMode = AdminProtos.OTAMode.forNumber(mode) ?: AdminProtos.OTAMode.NO_REBOOT_OTA
-                    val otaEventBuilder = AdminProtos.OTAEvent.newBuilder().setRebootOtaMode(otaMode)
+                    val otaEventBuilder = AdminProtos.AdminMessage.OTAEvent.newBuilder()
                     if (hash != null) {
-                        otaEventBuilder.otaHash = com.google.protobuf.ByteString.copyFrom(hash)
+                        otaEventBuilder.otaHash = ByteString.copyFrom(hash)
+                        otaEventBuilder.rebootOtaMode = otaMode
                     }
 
                     packetHandler.sendToRadio(
