@@ -35,9 +35,10 @@ import org.meshtastic.core.strings.firmware_update_starting_service
 import java.io.File
 import javax.inject.Inject
 
-private const val SCAN_TIMEOUT = 2000L
+private const val SCAN_TIMEOUT = 5000L
 private const val PACKETS_BEFORE_PRN = 8
 private const val PERCENT_MAX = 100
+private const val PREPARE_DATA_DELAY = 400L
 
 /** Handles Over-the-Air (OTA) firmware updates for nRF52-based devices using the Nordic DFU library. */
 class NordicDfuHandler
@@ -108,13 +109,15 @@ constructor(
         serviceRepository.meshService?.setDeviceAddress("n")
 
         DfuServiceInitiator(address)
-            .disableResume()
             .setDeviceName(deviceHardware.displayName)
+            .setPrepareDataObjectDelay(PREPARE_DATA_DELAY)
             .setForceScanningForNewAddressInLegacyDfu(true)
+            .setRestoreBond(true)
             .setForeground(true)
             .setKeepBond(true)
             .setForceDfu(false)
             .setPacketsReceiptNotificationsValue(PACKETS_BEFORE_PRN)
+            .setPacketsReceiptNotificationsEnabled(true)
             .setScanTimeout(SCAN_TIMEOUT)
             .setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
             .setZip(firmwareUri)

@@ -19,10 +19,13 @@ package org.meshtastic.feature.firmware
 
 import android.content.Context
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import no.nordicsemi.android.dfu.DfuBaseService
+import no.nordicsemi.android.dfu.DfuLogListener
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper
 import javax.inject.Inject
@@ -35,8 +38,20 @@ class DfuManager @Inject constructor(@ApplicationContext private val context: Co
     fun progressFlow(): Flow<DfuInternalState> = callbackFlow {
         val listener =
             object : DfuProgressListenerAdapter() {
+                override fun onDeviceConnecting(deviceAddress: String) {
+                    trySend(DfuInternalState.Connecting(deviceAddress))
+                }
+
+                override fun onDeviceConnected(deviceAddress: String) {
+                    trySend(DfuInternalState.Connected(deviceAddress))
+                }
+
                 override fun onDfuProcessStarting(deviceAddress: String) {
                     trySend(DfuInternalState.Starting(deviceAddress))
+                }
+
+                override fun onEnablingDfuMode(deviceAddress: String) {
+                    trySend(DfuInternalState.EnablingDfuMode(deviceAddress))
                 }
 
                 override fun onProgressChanged(
@@ -48,6 +63,18 @@ class DfuManager @Inject constructor(@ApplicationContext private val context: Co
                     partsTotal: Int,
                 ) {
                     trySend(DfuInternalState.Progress(deviceAddress, percent, speed, avgSpeed, currentPart, partsTotal))
+                }
+
+                override fun onFirmwareValidating(deviceAddress: String) {
+                    trySend(DfuInternalState.Validating(deviceAddress))
+                }
+
+                override fun onDeviceDisconnecting(deviceAddress: String) {
+                    trySend(DfuInternalState.Disconnecting(deviceAddress))
+                }
+
+                override fun onDeviceDisconnected(deviceAddress: String) {
+                    trySend(DfuInternalState.Disconnected(deviceAddress))
                 }
 
                 override fun onDfuCompleted(deviceAddress: String) {
@@ -63,19 +90,48 @@ class DfuManager @Inject constructor(@ApplicationContext private val context: Co
                 }
             }
 
+        val logListener =
+            object : DfuLogListener {
+                override fun onLogEvent(deviceAddress: String, level: Int, message: String) {
+                    val severity =
+                        when (level) {
+                            DfuBaseService.LOG_LEVEL_DEBUG -> Severity.Debug
+                            DfuBaseService.LOG_LEVEL_INFO -> Severity.Info
+                            DfuBaseService.LOG_LEVEL_APPLICATION -> Severity.Info
+                            DfuBaseService.LOG_LEVEL_WARNING -> Severity.Warn
+                            DfuBaseService.LOG_LEVEL_ERROR -> Severity.Error
+                            else -> Severity.Verbose
+                        }
+                    Logger.log(severity, tag = "NordicDFU", null, "[$deviceAddress] $message")
+                }
+            }
+
         DfuServiceListenerHelper.registerProgressListener(context, listener)
+        DfuServiceListenerHelper.registerLogListener(context, logListener)
+
         awaitClose {
-            runCatching { DfuServiceListenerHelper.unregisterProgressListener(context, listener) }
-                .onFailure { Logger.w(it) { "Failed to unregister DFU listener" } }
+            runCatching {
+                DfuServiceListenerHelper.unregisterProgressListener(context, listener)
+                DfuServiceListenerHelper.unregisterLogListener(context, logListener)
+            }
+                .onFailure { Logger.w(it) { "Failed to unregister DFU listeners" } }
         }
     }
 }
 
 sealed interface DfuInternalState {
-    data class Starting(val address: String) : DfuInternalState
+    val address: String
+
+    data class Connecting(override val address: String) : DfuInternalState
+
+    data class Connected(override val address: String) : DfuInternalState
+
+    data class Starting(override val address: String) : DfuInternalState
+
+    data class EnablingDfuMode(override val address: String) : DfuInternalState
 
     data class Progress(
-        val address: String,
+        override val address: String,
         val percent: Int,
         val speed: Float,
         val avgSpeed: Float,
@@ -83,9 +139,15 @@ sealed interface DfuInternalState {
         val partsTotal: Int,
     ) : DfuInternalState
 
-    data class Completed(val address: String) : DfuInternalState
+    data class Validating(override val address: String) : DfuInternalState
 
-    data class Aborted(val address: String) : DfuInternalState
+    data class Disconnecting(override val address: String) : DfuInternalState
 
-    data class Error(val address: String, val message: String?) : DfuInternalState
+    data class Disconnected(override val address: String) : DfuInternalState
+
+    data class Completed(override val address: String) : DfuInternalState
+
+    data class Aborted(override val address: String) : DfuInternalState
+
+    data class Error(override val address: String, val message: String?) : DfuInternalState
 }

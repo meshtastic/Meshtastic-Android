@@ -50,12 +50,13 @@ import javax.inject.Inject
 
 private const val RETRY_DELAY = 2000L
 private const val PERCENT_MAX = 100
+private const val KIB_DIVISOR = 1024f
+private const val MILLIS_PER_SECOND = 1000f
 
 /**
  * Handler for ESP32 firmware updates using the Unified OTA protocol. Supports both BLE and WiFi/TCP transports via
  * UnifiedOtaProtocol.
  */
-@Suppress("LongMethod")
 class Esp32OtaUpdateHandler
 @Inject
 constructor(
@@ -78,7 +79,7 @@ constructor(
         startWifiUpdate(release, hardware, target, updateState, firmwareUri)
     }
 
-    suspend fun startBleUpdate(
+    private suspend fun startBleUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         address: String,
@@ -94,7 +95,7 @@ constructor(
         connectionAttempts = 5,
     )
 
-    suspend fun startWifiUpdate(
+    private suspend fun startWifiUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         deviceIp: String,
@@ -283,15 +284,15 @@ constructor(
                 chunkSize = chunkSize,
                 onProgress = { progress ->
                     val currentTime = System.currentTimeMillis()
-                    val elapsedSeconds = (currentTime - startTime) / 1000f
+                    val elapsedSeconds = (currentTime - startTime) / MILLIS_PER_SECOND
                     val percent = (progress * PERCENT_MAX).toInt()
 
                     val speedText =
                         if (elapsedSeconds > 0) {
                             val bytesSent = (progress * firmwareData.size).toLong()
-                            val kibPerSecond = (bytesSent / 1024f) / elapsedSeconds
+                            val kibPerSecond = (bytesSent / KIB_DIVISOR) / elapsedSeconds
                             val remainingBytes = firmwareData.size - bytesSent
-                            val etaSeconds = if (kibPerSecond > 0) (remainingBytes / 1024f) / kibPerSecond else 0f
+                            val etaSeconds = if (kibPerSecond > 0) (remainingBytes / KIB_DIVISOR) / kibPerSecond else 0f
 
                             String.format(java.util.Locale.US, "%.1f KiB/s, ETA: %ds", kibPerSecond, etaSeconds.toInt())
                         } else {
