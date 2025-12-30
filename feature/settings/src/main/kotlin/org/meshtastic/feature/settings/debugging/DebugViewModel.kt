@@ -29,13 +29,11 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.repository.MeshLogRepository
@@ -262,18 +260,15 @@ constructor(
         meshLogPrefs.loggingEnabled = enabled
         _loggingEnabled.value = enabled
         if (!enabled) {
-            viewModelScope.launch {
-                meshLogRepository.deleteAll()
-            }
+            viewModelScope.launch { meshLogRepository.deleteAll() }
         }
     }
 
-    suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> =
-        withContext(Dispatchers.IO) {
-            val unbounded = meshLogRepository.getAllLogsUnbounded().first()
-            val logs = if (unbounded.isEmpty()) meshLogRepository.getAllLogs().first() else unbounded
-            toUiState(logs)
-        }
+    suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> = withContext(Dispatchers.IO) {
+        val unbounded = meshLogRepository.getAllLogsUnbounded().first()
+        val logs = if (unbounded.isEmpty()) meshLogRepository.getAllLogs().first() else unbounded
+        toUiState(logs)
+    }
 
     init {
         Logger.d { "DebugViewModel created" }

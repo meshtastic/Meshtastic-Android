@@ -42,7 +42,10 @@ constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     // Fallback constructor for cases where HiltWorkerFactory is not used (e.g., some WorkManager initializations)
-    constructor(appContext: Context, workerParams: WorkerParameters) : this(
+    constructor(
+        appContext: Context,
+        workerParams: WorkerParameters,
+    ) : this(
         appContext,
         workerParams,
         entryPoint(appContext).meshLogRepository(),
@@ -87,5 +90,6 @@ constructor(
 @InstallIn(SingletonComponent::class)
 interface WorkerEntryPoint {
     fun meshLogRepository(): MeshLogRepository
+
     fun meshLogPrefs(): MeshLogPrefs
 }

@@ -467,7 +467,7 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
             } ?: run { throw IOException("Unable to open output stream for URI: $targetUri") }
 
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
-        } catch (e: Exception) {
+        } catch (e: IOException) {
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
             Logger.w(e) { "MeshLog export failed" }
         }

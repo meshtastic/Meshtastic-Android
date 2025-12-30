@@ -78,7 +78,11 @@ class MeshUtilApplication :
                 .build()
 
         WorkManager.getInstance(this)
-            .enqueueUniquePeriodicWork(MeshLogCleanupWorker.WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, cleanupRequest)
+            .enqueueUniquePeriodicWork(
+                MeshLogCleanupWorker.WORK_NAME,
+                ExistingPeriodicWorkPolicy.UPDATE,
+                cleanupRequest,
+            )
     }
 
     private fun enqueueImmediateCleanupIfNeeded() {
@@ -87,7 +91,10 @@ class MeshUtilApplication :
         val meshLogPrefs = entryPoint.meshLogPrefs()
         val retentionDays = meshLogPrefs.retentionDays
         if (!meshLogPrefs.loggingEnabled || retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) {
-            Logger.i { "Skipping immediate MeshLog cleanup; loggingEnabled=${meshLogPrefs.loggingEnabled}, retention=$retentionDays" }
+            Logger.i {
+                "Skipping immediate MeshLog cleanup; " +
+                    "loggingEnabled=${meshLogPrefs.loggingEnabled}, retention=$retentionDays"
+            }
             return
         }
         Logger.i { "Enqueuing immediate MeshLog cleanup with retentionDays=$retentionDays" }
