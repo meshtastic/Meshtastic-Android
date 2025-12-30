@@ -86,82 +86,87 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         }
     }
 
-    override suspend fun startOta(sizeBytes: Long, sha256Hash: String, onStatus: (String) -> Unit): Result<Unit> =
+    override suspend fun startOta(
+        sizeBytes: Long,
+        sha256Hash: String,
+        onStatus: suspend (String) -> Unit,
+    ): Result<Unit> = runCatching {
+        val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
+        sendCommand(command)
+
+        // Wait for ERASING response
+        val erasingResponse = readResponse(ERASING_TIMEOUT_MS)
+        when (val parsed = OtaResponse.parse(erasingResponse)) {
+            is OtaResponse.Erasing -> {
+                Logger.i { "WiFi OTA: Device erasing flash..." }
+                onStatus("Erasing flash...")
+            }
+
+            is OtaResponse.Error -> {
+                if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
+                    throw OtaProtocolException.HashRejected(sha256Hash)
+                }
+                throw OtaProtocolException.CommandFailed(command, parsed)
+            }
+
+            else -> {} // OK or other response, continue
+        }
+
+        // Wait for OK response after erasing
+        val okResponse = readResponse(ERASING_TIMEOUT_MS)
+        when (val parsed = OtaResponse.parse(okResponse)) {
+            is OtaResponse.Ok -> Unit
+            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(command, parsed)
+            else -> throw OtaProtocolException.CommandFailed(command, OtaResponse.Error("Expected OK, got: $parsed"))
+        }
+    }
+
+    override suspend fun streamFirmware(
+        data: ByteArray,
+        chunkSize: Int,
+        onProgress: suspend (Float) -> Unit,
+    ): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
-            sendCommand(command)
-
-            // Wait for ERASING response
-            val erasingResponse = readResponse(ERASING_TIMEOUT_MS)
-            when (val parsed = OtaResponse.parse(erasingResponse)) {
-                is OtaResponse.Erasing -> {
-                    Logger.i { "WiFi OTA: Device erasing flash..." }
-                    onStatus("Erasing flash...")
-                }
-
-                is OtaResponse.Error -> {
-                    if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
-                        throw OtaProtocolException.HashRejected(sha256Hash)
-                    }
-                    throw OtaProtocolException.CommandFailed(command, parsed)
-                }
-
-                else -> {} // OK or other response, continue
+            if (!isConnected) {
+                throw OtaProtocolException.TransferFailed("Not connected")
             }
 
-            // Wait for OK response after erasing
-            val okResponse = readResponse(ERASING_TIMEOUT_MS)
-            when (val parsed = OtaResponse.parse(okResponse)) {
+            val totalBytes = data.size
+            var sentBytes = 0
+            val outputStream = socket!!.getOutputStream()
+
+            while (sentBytes < totalBytes) {
+                val remainingBytes = totalBytes - sentBytes
+                val currentChunkSize = minOf(chunkSize, remainingBytes)
+                val chunk = data.copyOfRange(sentBytes, sentBytes + currentChunkSize)
+
+                // Write chunk directly to TCP stream
+                outputStream.write(chunk)
+                outputStream.flush()
+
+                sentBytes += currentChunkSize
+                onProgress(sentBytes.toFloat() / totalBytes)
+
+                // Small delay to avoid overwhelming the device
+                delay(WRITE_DELAY_MS)
+            }
+
+            Logger.i { "WiFi OTA: Firmware streaming complete ($sentBytes bytes)" }
+
+            // Wait for final verification response
+            val finalResponse = readResponse(VERIFICATION_TIMEOUT_MS)
+            when (val parsed = OtaResponse.parse(finalResponse)) {
                 is OtaResponse.Ok -> Unit
-                is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(command, parsed)
-                else ->
-                    throw OtaProtocolException.CommandFailed(command, OtaResponse.Error("Expected OK, got: $parsed"))
-            }
-        }
-
-    override suspend fun streamFirmware(data: ByteArray, chunkSize: Int, onProgress: (Float) -> Unit): Result<Unit> =
-        withContext(Dispatchers.IO) {
-            runCatching {
-                if (!isConnected) {
-                    throw OtaProtocolException.TransferFailed("Not connected")
-                }
-
-                val totalBytes = data.size
-                var sentBytes = 0
-                val outputStream = socket!!.getOutputStream()
-
-                while (sentBytes < totalBytes) {
-                    val remainingBytes = totalBytes - sentBytes
-                    val currentChunkSize = minOf(chunkSize, remainingBytes)
-                    val chunk = data.copyOfRange(sentBytes, sentBytes + currentChunkSize)
-
-                    // Write chunk directly to TCP stream
-                    outputStream.write(chunk)
-                    outputStream.flush()
-
-                    sentBytes += currentChunkSize
-                    onProgress(sentBytes.toFloat() / totalBytes)
-
-                    // Small delay to avoid overwhelming the device
-                    delay(WRITE_DELAY_MS)
-                }
-
-                Logger.i { "WiFi OTA: Firmware streaming complete ($sentBytes bytes)" }
-
-                // Wait for final verification response
-                val finalResponse = readResponse(VERIFICATION_TIMEOUT_MS)
-                when (val parsed = OtaResponse.parse(finalResponse)) {
-                    is OtaResponse.Ok -> Unit
-                    is OtaResponse.Error -> {
-                        if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
-                            throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
-                        }
-                        throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
+                is OtaResponse.Error -> {
+                    if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
+                        throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
                     }
-                    else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
+                    throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
                 }
+                else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
             }
         }
+    }
 
     override suspend fun reboot(): Result<Unit> = runCatching {
         sendCommand(OtaCommand.Reboot)

@@ -22,6 +22,15 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 
+/**
+ * Represents the progress of a long-running firmware update task.
+ *
+ * @property message A high-level status message (e.g., "Downloading...").
+ * @property progress A value between 0.0 and 1.0 representing completion percentage.
+ * @property details Optional high-frequency detail text (e.g., "1.2 MiB/s, 45%").
+ */
+data class ProgressState(val message: String = "", val progress: Float = 0f, val details: String? = null)
+
 sealed interface FirmwareUpdateState {
     data object Idle : FirmwareUpdateState
 
@@ -36,11 +45,11 @@ sealed interface FirmwareUpdateState {
         val currentFirmwareVersion: String? = null,
     ) : FirmwareUpdateState
 
-    data class Downloading(val progress: Float) : FirmwareUpdateState
+    data class Downloading(val progressState: ProgressState) : FirmwareUpdateState
 
-    data class Processing(val message: String) : FirmwareUpdateState
+    data class Processing(val progressState: ProgressState) : FirmwareUpdateState
 
-    data class Updating(val progress: Float, val message: String) : FirmwareUpdateState
+    data class Updating(val progressState: ProgressState) : FirmwareUpdateState
 
     data object Verifying : FirmwareUpdateState
 

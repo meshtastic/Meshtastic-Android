@@ -26,21 +26,36 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
+import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.firmware_update_checking_version
+import org.meshtastic.core.strings.firmware_update_connecting_attempt
+import org.meshtastic.core.strings.firmware_update_downloading_percent
+import org.meshtastic.core.strings.firmware_update_hash_rejected
+import org.meshtastic.core.strings.firmware_update_loading
+import org.meshtastic.core.strings.firmware_update_ota_failed
+import org.meshtastic.core.strings.firmware_update_rebooting_device
+import org.meshtastic.core.strings.firmware_update_retrieval_failed
+import org.meshtastic.core.strings.firmware_update_starting_ota
+import org.meshtastic.core.strings.firmware_update_uploading
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
+import org.meshtastic.feature.firmware.ProgressState
 import java.io.File
 import javax.inject.Inject
 
 private const val RETRY_DELAY = 2000L
+private const val PERCENT_MAX = 100
 
 /**
  * Handler for ESP32 firmware updates using the Unified OTA protocol. Supports both BLE and WiFi/TCP transports via
  * UnifiedOtaProtocol.
  */
+@Suppress("LongMethod")
 class Esp32OtaUpdateHandler
 @Inject
 constructor(
@@ -129,19 +144,18 @@ constructor(
         throw e
     } catch (e: OtaProtocolException.HashRejected) {
         Logger.e(e) { "ESP32 OTA: Hash rejected by device" }
-        updateState(
-            FirmwareUpdateState.Error(
-                "Firmware hash rejected. Device may require hash provisioning or bootloader update.",
-            ),
-        )
+        val msg = getString(Res.string.firmware_update_hash_rejected)
+        updateState(FirmwareUpdateState.Error(msg))
         null
     } catch (e: OtaProtocolException) {
         Logger.e(e) { "ESP32 OTA: Protocol error" }
-        updateState(FirmwareUpdateState.Error("OTA update failed: ${e.message}"))
+        val msg = getString(Res.string.firmware_update_ota_failed, e.message ?: "")
+        updateState(FirmwareUpdateState.Error(msg))
         null
     } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
         Logger.e(e) { "ESP32 OTA: Unexpected error" }
-        updateState(FirmwareUpdateState.Error("Update failed: ${e.message}"))
+        val msg = getString(Res.string.firmware_update_ota_failed, e.message ?: "")
+        updateState(FirmwareUpdateState.Error(msg))
         null
     }
 
@@ -150,9 +164,16 @@ constructor(
         hardware: DeviceHardware,
         updateState: (FirmwareUpdateState) -> Unit,
     ): File? {
-        updateState(FirmwareUpdateState.Downloading(0f))
+        val downloadingMsg =
+            getString(Res.string.firmware_update_downloading_percent, 0).replace(Regex(":?\\s*%1\\\$d%?"), "").trim()
+        updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
         return firmwareRetriever.retrieveEsp32Firmware(release, hardware) { progress ->
-            updateState(FirmwareUpdateState.Downloading(progress))
+            val percent = (progress * PERCENT_MAX).toInt()
+            updateState(
+                FirmwareUpdateState.Downloading(
+                    ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
+                ),
+            )
         }
     }
 
@@ -188,14 +209,16 @@ constructor(
     ): File? {
         val firmwareFile =
             if (firmwareUri != null) {
-                updateState(FirmwareUpdateState.Processing("Loading firmware..."))
+                val loadingMsg = getString(Res.string.firmware_update_loading)
+                updateState(FirmwareUpdateState.Processing(ProgressState(loadingMsg)))
                 getFirmwareFromUri(firmwareUri)
             } else {
                 downloadFirmware(release, hardware, updateState)
             }
 
         if (firmwareFile == null) {
-            updateState(FirmwareUpdateState.Error("Failed to obtain firmware file"))
+            val retrievalFailedMsg = getString(Res.string.firmware_update_retrieval_failed)
+            updateState(FirmwareUpdateState.Error(retrievalFailedMsg))
             return null
         }
         return firmwareFile
@@ -208,7 +231,8 @@ constructor(
     ): Boolean {
         for (i in 1..attempts) {
             try {
-                updateState(FirmwareUpdateState.Processing("Connecting to device (attempt $i/$attempts)..."))
+                val connectingMsg = getString(Res.string.firmware_update_connecting_attempt, i, attempts)
+                updateState(FirmwareUpdateState.Processing(ProgressState(connectingMsg)))
                 transport.connect().getOrThrow()
                 return true
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
@@ -227,20 +251,23 @@ constructor(
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
         // Step 4: Version Check
-        updateState(FirmwareUpdateState.Processing("Checking device version..."))
+        val checkingVersionMsg = getString(Res.string.firmware_update_checking_version)
+        updateState(FirmwareUpdateState.Processing(ProgressState(checkingVersionMsg)))
         val versionInfo = transport.sendVersion().getOrThrow()
         Logger.i { "ESP32 OTA: Device version - HW: ${versionInfo.hwVersion}, FW: ${versionInfo.fwVersion}" }
 
         // Step 5: Start OTA
-        updateState(FirmwareUpdateState.Processing("Starting OTA update..."))
+        val startingOtaMsg = getString(Res.string.firmware_update_starting_ota)
+        updateState(FirmwareUpdateState.Processing(ProgressState(startingOtaMsg)))
         transport
             .startOta(firmwareFile.length(), sha256Hash) { status ->
-                updateState(FirmwareUpdateState.Processing(status))
+                updateState(FirmwareUpdateState.Processing(ProgressState(status)))
             }
             .getOrThrow()
 
         // Step 6: Stream
-        updateState(FirmwareUpdateState.Updating(0f, "Uploading firmware..."))
+        val uploadingMsg = getString(Res.string.firmware_update_uploading)
+        updateState(FirmwareUpdateState.Updating(ProgressState(uploadingMsg, 0f)))
         val firmwareData = firmwareFile.readBytes()
         val chunkSize =
             if (rebootMode == 1) {
@@ -257,7 +284,7 @@ constructor(
                 onProgress = { progress ->
                     val currentTime = System.currentTimeMillis()
                     val elapsedSeconds = (currentTime - startTime) / 1000f
-                    val percent = (progress * 100).toInt()
+                    val percent = (progress * PERCENT_MAX).toInt()
 
                     val speedText =
                         if (elapsedSeconds > 0) {
@@ -271,14 +298,23 @@ constructor(
                             ""
                         }
 
-                    updateState(FirmwareUpdateState.Updating(progress, "Uploading firmware... $percent% ($speedText)"))
+                    updateState(
+                        FirmwareUpdateState.Updating(
+                            ProgressState(
+                                message = uploadingMsg,
+                                progress = progress,
+                                details = "$percent% ($speedText)",
+                            ),
+                        ),
+                    )
                 },
             )
             .getOrThrow()
         Logger.i { "ESP32 OTA: Firmware stream completed" }
 
         // Step 7: Final Reboot
-        updateState(FirmwareUpdateState.Processing("Rebooting device..."))
+        val rebootingDeviceMsg = getString(Res.string.firmware_update_rebooting_device)
+        updateState(FirmwareUpdateState.Processing(ProgressState(rebootingDeviceMsg)))
         transport.reboot().getOrThrow()
 
         updateState(FirmwareUpdateState.Success)

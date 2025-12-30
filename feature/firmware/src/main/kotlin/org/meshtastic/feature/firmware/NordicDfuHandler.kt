@@ -28,6 +28,8 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.firmware_update_downloading_percent
+import org.meshtastic.core.strings.firmware_update_nordic_failed
 import org.meshtastic.core.strings.firmware_update_not_found_in_release
 import org.meshtastic.core.strings.firmware_update_starting_service
 import java.io.File
@@ -35,7 +37,7 @@ import javax.inject.Inject
 
 private const val SCAN_TIMEOUT = 2000L
 private const val PACKETS_BEFORE_PRN = 8
-private const val DATA_OBJECT_DELAY = 400L
+private const val PERCENT_MAX = 100
 
 /** Handles Over-the-Air (OTA) firmware updates for nRF52-based devices using the Nordic DFU library. */
 class NordicDfuHandler
@@ -54,7 +56,12 @@ constructor(
         firmwareUri: Uri?,
     ): File? =
         try {
-            updateState(FirmwareUpdateState.Downloading(0f))
+            val downloadingMsg =
+                getString(Res.string.firmware_update_downloading_percent, 0)
+                    .replace(Regex(":?\\s*%1\\\$d%?"), "")
+                    .trim()
+
+            updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
 
             if (firmwareUri != null) {
                 initiateDfu(target, hardware, firmwareUri, updateState)
@@ -62,7 +69,12 @@ constructor(
             } else {
                 val firmwareFile =
                     firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
-                        updateState(FirmwareUpdateState.Downloading(progress))
+                        val percent = (progress * PERCENT_MAX).toInt()
+                        updateState(
+                            FirmwareUpdateState.Downloading(
+                                ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
+                            ),
+                        )
                     }
 
                 if (firmwareFile == null) {
@@ -78,7 +90,8 @@ constructor(
             throw e
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.e(e) { "Nordic DFU Update failed" }
-            updateState(FirmwareUpdateState.Error(e.message ?: "Nordic DFU Update failed"))
+            val errorMsg = getString(Res.string.firmware_update_nordic_failed)
+            updateState(FirmwareUpdateState.Error(e.message ?: errorMsg))
             null
         }
 
@@ -89,7 +102,7 @@ constructor(
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
         val startingMsg = getString(Res.string.firmware_update_starting_service)
-        updateState(FirmwareUpdateState.Processing(startingMsg))
+        updateState(FirmwareUpdateState.Processing(ProgressState(startingMsg)))
 
         // n = Nordic (Legacy prefix handling in mesh service)
         serviceRepository.meshService?.setDeviceAddress("n")
@@ -101,7 +114,6 @@ constructor(
             .setForeground(true)
             .setKeepBond(true)
             .setForceDfu(false)
-            .setPrepareDataObjectDelay(DATA_OBJECT_DELAY)
             .setPacketsReceiptNotificationsValue(PACKETS_BEFORE_PRN)
             .setScanTimeout(SCAN_TIMEOUT)
             .setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true)
