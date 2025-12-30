@@ -29,16 +29,21 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
@@ -209,10 +214,10 @@ constructor(
 ) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
-        meshLogRepository.getAllLogs().map(::toUiState).stateInWhileSubscribed(initialValue = persistentListOf())
-
-    val meshLogForExport: StateFlow<ImmutableList<UiMeshLog>> =
-        meshLogRepository.getAllLogsUnbounded().map(::toUiState).stateInWhileSubscribed(initialValue = persistentListOf())
+        meshLogRepository
+            .getAllLogs()
+            .mapLatest { logs -> withContext(Dispatchers.Default) { toUiState(logs) } }
+            .stateInWhileSubscribed(initialValue = persistentListOf())
 
     private val _retentionDays = MutableStateFlow(meshLogPrefs.retentionDays)
     val retentionDays: StateFlow<Int> = _retentionDays.asStateFlow()
@@ -257,6 +262,13 @@ constructor(
         meshLogPrefs.loggingEnabled = enabled
         _loggingEnabled.value = enabled
     }
+
+    suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> =
+        withContext(Dispatchers.IO) {
+            val unbounded = meshLogRepository.getAllLogsUnbounded().first()
+            val logs = if (unbounded.isEmpty()) meshLogRepository.getAllLogs().first() else unbounded
+            toUiState(logs)
+        }
 
     init {
         Logger.d { "DebugViewModel created" }

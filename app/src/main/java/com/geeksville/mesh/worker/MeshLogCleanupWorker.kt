@@ -21,9 +21,9 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import co.touchlab.kermit.Logger
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import co.touchlab.kermit.Logger
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 

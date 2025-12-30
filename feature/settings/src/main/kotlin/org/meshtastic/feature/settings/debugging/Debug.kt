@@ -83,9 +83,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.log_retention_days
-import org.meshtastic.core.strings.log_retention_days_summary
-import org.meshtastic.core.strings.log_retention_never
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.debug_clear
 import org.meshtastic.core.strings.debug_clear_logs_confirm
@@ -95,11 +92,14 @@ import org.meshtastic.core.strings.debug_export_success
 import org.meshtastic.core.strings.debug_filters
 import org.meshtastic.core.strings.debug_logs_export
 import org.meshtastic.core.strings.debug_panel
+import org.meshtastic.core.strings.log_retention_days
+import org.meshtastic.core.strings.log_retention_days_summary
+import org.meshtastic.core.strings.log_retention_never
 import org.meshtastic.core.ui.component.CopyIconButton
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.DropDownPreference
-import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
@@ -155,7 +155,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
     val exportLogsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { createdUri ->
             if (createdUri != null) {
-                scope.launch { exportAllLogsToUri(context, createdUri, viewModel.meshLogForExport.value) }
+                scope.launch { exportAllLogsToUri(context, createdUri, viewModel.loadLogsForExport()) }
             }
         }
 
@@ -226,10 +226,9 @@ private fun DebugLogSettings(viewModel: DebugViewModel) {
 
     Column(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+        Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         @Suppress("MagicNumber")
@@ -430,6 +429,12 @@ fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
 private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<UiMeshLog>) =
     withContext(Dispatchers.IO) {
         try {
+            if (logs.isEmpty()) {
+                withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
+                Logger.w { "MeshLog export aborted: no logs available" }
+                return@withContext
+            }
+
             context.contentResolver.openOutputStream(targetUri)?.use { os ->
                 OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer ->
                     logs.forEach { log ->
@@ -462,9 +467,9 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
             } ?: run { throw IOException("Unable to open output stream for URI: $targetUri") }
 
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
-            Logger.w(e) { "Error:IOException" }
+            Logger.w(e) { "MeshLog export failed" }
         }
     }
 

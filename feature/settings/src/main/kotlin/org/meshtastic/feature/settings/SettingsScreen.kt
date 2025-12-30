@@ -93,9 +93,6 @@ import org.meshtastic.core.strings.export_data_csv
 import org.meshtastic.core.strings.import_configuration
 import org.meshtastic.core.strings.intro_show
 import org.meshtastic.core.strings.location_disabled
-import org.meshtastic.core.strings.log_retention_days
-import org.meshtastic.core.strings.log_retention_days_summary
-import org.meshtastic.core.strings.log_retention_never
 import org.meshtastic.core.strings.modules_already_unlocked
 import org.meshtastic.core.strings.modules_unlocked
 import org.meshtastic.core.strings.preferences_language
@@ -110,7 +107,6 @@ import org.meshtastic.core.strings.theme_system
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
