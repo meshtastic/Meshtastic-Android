@@ -49,7 +49,6 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefsImpl
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
@@ -147,10 +146,18 @@ constructor(
     private val _meshLogRetentionDays = MutableStateFlow(meshLogPrefs.retentionDays)
     val meshLogRetentionDays: StateFlow<Int> = _meshLogRetentionDays.asStateFlow()
 
+    private val _meshLogLoggingEnabled = MutableStateFlow(meshLogPrefs.loggingEnabled)
+    val meshLogLoggingEnabled: StateFlow<Boolean> = _meshLogLoggingEnabled.asStateFlow()
+
     fun setMeshLogRetentionDays(days: Int) {
-        val clamped = days.coerceIn(MeshLogPrefsImpl.MIN_RETENTION_DAYS, MeshLogPrefsImpl.MAX_RETENTION_DAYS)
+        val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
         meshLogPrefs.retentionDays = clamped
         _meshLogRetentionDays.value = clamped
+    }
+
+    fun setMeshLogLoggingEnabled(enabled: Boolean) {
+        meshLogPrefs.loggingEnabled = enabled
+        _meshLogLoggingEnabled.value = enabled
     }
 
     fun setProvideLocation(value: Boolean) {

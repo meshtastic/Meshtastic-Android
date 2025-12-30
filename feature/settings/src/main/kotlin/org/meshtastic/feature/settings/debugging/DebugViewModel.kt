@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
@@ -204,10 +205,20 @@ class DebugViewModel
 constructor(
     private val meshLogRepository: MeshLogRepository,
     private val nodeRepository: NodeRepository,
+    private val meshLogPrefs: MeshLogPrefs,
 ) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
         meshLogRepository.getAllLogs().map(::toUiState).stateInWhileSubscribed(initialValue = persistentListOf())
+
+    val meshLogForExport: StateFlow<ImmutableList<UiMeshLog>> =
+        meshLogRepository.getAllLogsUnbounded().map(::toUiState).stateInWhileSubscribed(initialValue = persistentListOf())
+
+    private val _retentionDays = MutableStateFlow(meshLogPrefs.retentionDays)
+    val retentionDays: StateFlow<Int> = _retentionDays.asStateFlow()
+
+    private val _loggingEnabled = MutableStateFlow(meshLogPrefs.loggingEnabled)
+    val loggingEnabled: StateFlow<Boolean> = _loggingEnabled.asStateFlow()
 
     // --- Managers ---
     val searchManager = LogSearchManager()
@@ -234,6 +245,17 @@ constructor(
     fun updateFilteredLogs(logs: List<UiMeshLog>) {
         filterManager.updateFilteredLogs(logs)
         searchManager.updateMatches(searchManager.searchText.value, logs)
+    }
+
+    fun setRetentionDays(days: Int) {
+        val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
+        meshLogPrefs.retentionDays = clamped
+        _retentionDays.value = clamped
+    }
+
+    fun setLoggingEnabled(enabled: Boolean) {
+        meshLogPrefs.loggingEnabled = enabled
+        _loggingEnabled.value = enabled
     }
 
     init {

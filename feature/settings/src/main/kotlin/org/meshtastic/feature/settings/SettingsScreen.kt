@@ -110,6 +110,7 @@ import org.meshtastic.core.strings.theme_system
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
@@ -366,24 +367,6 @@ fun SettingsScreen(
                     selectedItem = cacheLimit.toLong(),
                     onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
                     summary = stringResource(Res.string.device_db_cache_limit_summary),
-                )
-
-                // MeshLog retention period (App setting)
-                val retentionDays = settingsViewModel.meshLogRetentionDays.collectAsStateWithLifecycle().value
-
-                @Suppress("MagicNumber")
-                val retentionItems =
-                    listOf((-1L) to "1 hour", 0L to stringResource(Res.string.log_retention_never)) +
-                        listOf(1, 7, 14, 30, 60, 90, 180, 365).map { days ->
-                            days.toLong() to if (days == 1) "1 day" else "$days days"
-                        }
-                DropDownPreference(
-                    title = stringResource(Res.string.log_retention_days),
-                    enabled = true,
-                    items = retentionItems,
-                    selectedItem = retentionDays.toLong(),
-                    onItemSelected = { selected -> settingsViewModel.setMeshLogRetentionDays(selected.toInt()) },
-                    summary = stringResource(Res.string.log_retention_days_summary),
                 )
 
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())

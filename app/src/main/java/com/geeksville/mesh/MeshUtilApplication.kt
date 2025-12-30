@@ -68,7 +68,7 @@ class MeshUtilApplication :
     private fun scheduleMeshLogCleanup() {
         val cleanupRequest =
             PeriodicWorkRequestBuilder<MeshLogCleanupWorker>(
-                repeatInterval = 24,
+                repeatInterval = 1,
                 repeatIntervalTimeUnit = TimeUnit.HOURS,
             )
                 .build()

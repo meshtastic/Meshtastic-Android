@@ -23,9 +23,9 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import co.touchlab.kermit.Logger
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import timber.log.Timber
 
 @HiltWorker
 class MeshLogCleanupWorker
@@ -40,8 +40,10 @@ constructor(
     @Suppress("TooGenericExceptionCaught")
     override suspend fun doWork(): Result = try {
         val retentionDays = meshLogPrefs.retentionDays
-        if (retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) {
-            Timber.i("MeshLogCleanupWorker: Skipping cleanup because retention is set to never delete")
+        if (!meshLogPrefs.loggingEnabled) {
+            logger.i { "Skipping cleanup because mesh log storage is disabled" }
+        } else if (retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) {
+            logger.i { "Skipping cleanup because retention is set to never delete" }
         } else {
             val retentionLabel =
                 if (retentionDays == MeshLogPrefs.ONE_HOUR_RETENTION_DAYS) {
@@ -49,17 +51,19 @@ constructor(
                 } else {
                     "$retentionDays days"
                 }
-            Timber.d("MeshLogCleanupWorker: Cleaning logs older than $retentionLabel")
+            logger.d { "Cleaning logs older than $retentionLabel" }
             meshLogRepository.deleteLogsOlderThan(retentionDays)
-            Timber.i("MeshLogCleanupWorker: Successfully cleaned old MeshLog entries")
+            logger.i { "Successfully cleaned old MeshLog entries" }
         }
         Result.success()
     } catch (e: Exception) {
-        Timber.e(e, "MeshLogCleanupWorker: Failed to clean MeshLog entries")
+        logger.e(e) { "Failed to clean MeshLog entries" }
         Result.failure()
     }
 
     companion object {
         const val WORK_NAME = "meshlog_cleanup_worker"
     }
+
+    private val logger = Logger.withTag(WORK_NAME)
 }

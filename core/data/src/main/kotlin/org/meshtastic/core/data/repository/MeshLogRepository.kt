@@ -40,9 +40,13 @@ class MeshLogRepository
 constructor(
     private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
+    private val meshLogPrefs: MeshLogPrefs,
 ) {
     fun getAllLogs(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> =
         dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogs(maxItems) }.flowOn(dispatchers.io).conflate()
+
+    fun getAllLogsUnbounded(): Flow<List<MeshLog>> =
+        dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogs(Int.MAX_VALUE) }.flowOn(dispatchers.io).conflate()
 
     fun getAllLogsInReceiveOrder(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getAllLogsInReceiveOrder(maxItems) }
@@ -136,7 +140,10 @@ constructor(
         .flowOn(dispatchers.io)
 
     suspend fun insert(log: MeshLog) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().insert(log) }
+        withContext(dispatchers.io) {
+            if (!meshLogPrefs.loggingEnabled) return@withContext
+            dbManager.currentDb.value.meshLogDao().insert(log)
+        }
 
     suspend fun deleteAll() = withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteAll() }
 
