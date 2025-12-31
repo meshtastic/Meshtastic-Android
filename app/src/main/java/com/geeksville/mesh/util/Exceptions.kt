@@ -20,6 +20,21 @@ package com.geeksville.mesh.util
 import android.os.RemoteException
 import android.util.Log
 import timber.log.Timber
+import java.util.UUID
+
+open class RadioNotConnectedException(message: String = "Not connected to radio") :
+    RemoteException(message)
+
+class NoDeviceConfigException(message: String = "No radio settings received (is our app too old?)") :
+    RadioNotConnectedException(message)
+
+open class BLEException(msg: String) : RemoteException(msg)
+
+open class BLECharacteristicNotFoundException(uuid: UUID) :
+    BLEException("Can't get characteristic $uuid")
+
+/// Our interface is being shut down
+open class BLEConnectionClosing : BLEException("Connection closing ")
 
 object Exceptions {
     // / Set in Application.onCreate

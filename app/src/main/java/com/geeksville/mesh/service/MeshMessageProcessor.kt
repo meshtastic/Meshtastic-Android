@@ -54,14 +54,15 @@ constructor(
     private val router: MeshRouter,
     private val fromRadioDispatcher: FromRadioPacketHandler,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val logUuidByPacketId = ConcurrentHashMap<Int, String>()
     private val logInsertJobByPacketId = ConcurrentHashMap<Int, Job>()
 
     private val earlyReceivedPackets = ArrayDeque<MeshPacket>()
     private val maxEarlyPacketBuffer = 128
 
-    fun start() {
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
         nodeManager.isNodeDbReady
             .onEach { ready ->
                 if (ready) {
@@ -216,11 +217,7 @@ constructor(
             }
 
             try {
-                if (packet.decoded.portnumValue == Portnums.PortNum.TRACEROUTE_APP_VALUE) {
-                    router.tracerouteHandler.handleTraceroute(packet, log.uuid, logJob)
-                } else {
-                    router.dataHandler.handleReceivedData(packet, myNum)
-                }
+                router.dataHandler.handleReceivedData(packet, myNum, log.uuid, logJob)
             } finally {
                 logUuidByPacketId.remove(packet.id)
                 logInsertJobByPacketId.remove(packet.id)

@@ -57,8 +57,13 @@ constructor(
     private val meshPrefs: MeshPrefs,
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshServiceNotifications,
+    private val radioConfigRepository: org.meshtastic.core.data.repository.RadioConfigRepository,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
 
     companion object {
         private const val DEFAULT_REBOOT_DELAY = 5
@@ -253,6 +258,26 @@ constructor(
 
     fun handleGetRemoteChannel(id: Int, destNum: Int, index: Int) {
         commandSender.sendAdmin(destNum, id, wantResponse = true) { getChannelRequest = index + 1 }
+    }
+
+    fun handleRequestNeighborInfo(requestId: Int, destNum: Int) {
+        commandSender.requestNeighborInfo(requestId, destNum)
+    }
+
+    fun handleBeginEditSettings(myNodeNum: Int) {
+        commandSender.sendAdmin(myNodeNum) { beginEditSettings = true }
+    }
+
+    fun handleCommitEditSettings(myNodeNum: Int) {
+        commandSender.sendAdmin(myNodeNum) { commitEditSettings = true }
+    }
+
+    fun handleRebootToDfu(myNodeNum: Int) {
+        commandSender.sendAdmin(myNodeNum) { enterDfuModeRequest = true }
+    }
+
+    fun handleRequestTelemetry(requestId: Int, destNum: Int, type: Int) {
+        commandSender.requestTelemetry(requestId, destNum, type)
     }
 
     fun handleRequestShutdown(requestId: Int, destNum: Int) {

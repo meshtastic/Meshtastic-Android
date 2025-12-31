@@ -43,11 +43,12 @@ constructor(
     private val context: Application,
     private val locationRepository: LocationRepository,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var locationFlow: Job? = null
 
     @SuppressLint("MissingPermission")
-    fun start(sendPositionFn: (MeshProtos.Position) -> Unit) {
+    fun start(scope: CoroutineScope, sendPositionFn: (MeshProtos.Position) -> Unit) {
+        this.scope = scope
         if (locationFlow?.isActive == true) return
 
         if (context.hasLocationPermission()) {

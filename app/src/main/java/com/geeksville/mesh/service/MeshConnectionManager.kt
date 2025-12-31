@@ -70,12 +70,13 @@ constructor(
     private val nodeManager: MeshNodeManager,
     private val analytics: PlatformAnalytics,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
     private var connectTimeMsec = 0L
 
-    fun init() {
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
         nodeRepository.myNodeInfo
@@ -87,7 +88,7 @@ constructor(
                             .shouldProvideNodeLocation(myNodeEntity.myNodeNum)
                             .onEach { shouldProvide ->
                                 if (shouldProvide) {
-                                    locationManager.start { pos -> commandSender.sendPosition(pos) }
+                                    locationManager.start(scope) { pos -> commandSender.sendPosition(pos) }
                                 } else {
                                     locationManager.stop()
                                 }
@@ -203,7 +204,7 @@ constructor(
         // Start MQTT if enabled
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
-            mqttManager.start(moduleConfig.mqtt.enabled, moduleConfig.mqtt.proxyToClientEnabled)
+            mqttManager.start(scope, moduleConfig.mqtt.enabled, moduleConfig.mqtt.proxyToClientEnabled)
         }
 
         reportConnection()

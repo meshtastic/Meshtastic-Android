@@ -43,7 +43,7 @@ constructor(
     private val serviceRepository: ServiceRepository,
     private val nodeManager: MeshNodeManager,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val _localConfig = MutableStateFlow(LocalConfig.getDefaultInstance())
     val localConfig = _localConfig.asStateFlow()
@@ -54,7 +54,8 @@ constructor(
     private val configTotal = ConfigProtos.Config.getDescriptor().fields.size
     private val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
 
-    init {
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
         radioConfigRepository.localConfigFlow.onEach { _localConfig.value = it }.launchIn(scope)
 
         radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(scope)

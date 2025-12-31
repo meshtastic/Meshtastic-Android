@@ -40,10 +40,11 @@ constructor(
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var mqttMessageFlow: Job? = null
 
-    fun start(enabled: Boolean, proxyToClientEnabled: Boolean) {
+    fun start(scope: CoroutineScope, enabled: Boolean, proxyToClientEnabled: Boolean) {
+        this.scope = scope
         if (mqttMessageFlow?.isActive == true) return
         if (enabled && proxyToClientEnabled) {
             mqttMessageFlow =

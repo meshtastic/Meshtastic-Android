@@ -19,6 +19,7 @@ package com.geeksville.mesh.service
 
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import com.geeksville.mesh.util.RadioNotConnectedException
 import dagger.Lazy
 import java8.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +41,7 @@ import org.meshtastic.proto.MeshProtos.ToRadio
 import org.meshtastic.proto.fromRadio
 import timber.log.Timber
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -62,10 +64,14 @@ constructor(
     }
 
     private var queueJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
-    private val queueResponse = mutableMapOf<Int, CompletableFuture<Boolean>>()
+    private val queueResponse = ConcurrentHashMap<Int, CompletableFuture<Boolean>>()
+
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
 
     /**
      * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
@@ -121,7 +127,8 @@ constructor(
         if (requestId != 0) {
             queueResponse.remove(requestId)?.complete(success)
         } else {
-            queueResponse.entries.lastOrNull { !it.value.isDone }?.value?.complete(success)
+            // This is slightly suboptimal but matches legacy behavior for packets without IDs
+            queueResponse.values.firstOrNull { !it.isDone }?.complete(success)
         }
     }
 
@@ -148,6 +155,8 @@ constructor(
                         Timber.d("queueJob packet id=${packet.id.toUInt()} timeout")
                     } catch (e: Exception) {
                         Timber.d("queueJob packet id=${packet.id.toUInt()} failed")
+                    } finally {
+                        queueResponse.remove(packet.id)
                     }
                 }
             }

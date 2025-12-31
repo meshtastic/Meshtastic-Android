@@ -75,7 +75,11 @@ constructor(
     private val meshPrefs: MeshPrefs,
     private val connectionManager: MeshConnectionManager,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
 
     private val rememberDataType =
         setOf(
@@ -84,12 +88,12 @@ constructor(
             Portnums.PortNum.WAYPOINT_APP_VALUE,
         )
 
-    fun handleReceivedData(packet: MeshPacket, myNodeNum: Int) {
+    fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String? = null, logInsertJob: Job? = null) {
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
         val fromUs = myNodeNum == packet.from
         dataPacket.status = MessageStatus.RECEIVED
 
-        val shouldBroadcast = handleDataPacket(packet, dataPacket, myNodeNum, fromUs)
+        val shouldBroadcast = handleDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
 
         if (shouldBroadcast) {
             serviceBroadcasts.broadcastReceivedData(dataPacket)
@@ -97,7 +101,14 @@ constructor(
         analytics.track("num_data_receive", DataPair("num_data_receive", 1))
     }
 
-    private fun handleDataPacket(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int, fromUs: Boolean): Boolean {
+    private fun handleDataPacket(
+        packet: MeshPacket,
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        fromUs: Boolean,
+        logUuid: String?,
+        logInsertJob: Job?,
+    ): Boolean {
         var shouldBroadcast = !fromUs
         when (packet.decoded.portnumValue) {
             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> handleTextMessage(packet, dataPacket, myNodeNum)
@@ -106,6 +117,10 @@ constructor(
             Portnums.PortNum.POSITION_APP_VALUE -> handlePosition(packet, dataPacket, myNodeNum)
             Portnums.PortNum.NODEINFO_APP_VALUE -> if (!fromUs) handleNodeInfo(packet)
             Portnums.PortNum.TELEMETRY_APP_VALUE -> handleTelemetry(packet, dataPacket, myNodeNum)
+            Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
+                router.tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
+                shouldBroadcast = false
+            }
             Portnums.PortNum.ROUTING_APP_VALUE -> {
                 handleRouting(packet, dataPacket)
                 shouldBroadcast = true
@@ -124,6 +139,11 @@ constructor(
             Portnums.PortNum.ADMIN_APP_VALUE -> {
                 handleAdminMessage(packet, myNodeNum)
                 shouldBroadcast = false
+            }
+
+            Portnums.PortNum.NEIGHBORINFO_APP_VALUE -> {
+                router.neighborInfoHandler.handleNeighborInfo(packet)
+                shouldBroadcast = true
             }
 
             Portnums.PortNum.RANGE_TEST_APP_VALUE,

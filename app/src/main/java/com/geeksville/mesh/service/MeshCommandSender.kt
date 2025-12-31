@@ -30,6 +30,7 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
@@ -37,7 +38,9 @@ import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.position
+import org.meshtastic.proto.telemetry
 import timber.log.Timber
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -58,11 +61,12 @@ constructor(
     private val connectionStateHolder: ConnectionStateHandler?,
     private val radioConfigRepository: RadioConfigRepository?,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val currentPacketId = AtomicLong(java.util.Random(System.currentTimeMillis()).nextLong().absoluteValue)
     private val sessionPasskey = AtomicReference(ByteString.EMPTY)
     private val offlineSentPackets = CopyOnWriteArrayList<DataPacket>()
     val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
+    val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
 
     private val localConfig = MutableStateFlow(LocalConfig.getDefaultInstance())
     private val channelSet = MutableStateFlow(ChannelSet.getDefaultInstance())
@@ -74,9 +78,9 @@ constructor(
             Portnums.PortNum.WAYPOINT_APP_VALUE,
         )
 
-    init {
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
         radioConfigRepository?.localConfigFlow?.onEach { localConfig.value = it }?.launchIn(scope)
-
         radioConfigRepository?.channelSetFlow?.onEach { channelSet.value = it }?.launchIn(scope)
     }
 
@@ -261,6 +265,78 @@ constructor(
                 wantResponse = true
             },
         )
+    }
+
+    fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
+        val type = TelemetryType.entries.getOrNull(typeValue) ?: TelemetryType.DEVICE
+        val telemetryRequest = telemetry {
+            when (type) {
+                TelemetryType.ENVIRONMENT ->
+                    environmentMetrics = TelemetryProtos.EnvironmentMetrics.getDefaultInstance()
+                TelemetryType.AIR_QUALITY ->
+                    airQualityMetrics = TelemetryProtos.AirQualityMetrics.getDefaultInstance()
+                TelemetryType.POWER -> powerMetrics = TelemetryProtos.PowerMetrics.getDefaultInstance()
+                TelemetryType.LOCAL_STATS -> localStats = TelemetryProtos.LocalStats.getDefaultInstance()
+                TelemetryType.DEVICE -> deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
+            }
+        }
+        packetHandler?.sendToRadio(
+            newMeshPacketTo(destNum).buildMeshPacket(
+                id = requestId,
+                channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+            ) {
+                portnumValue = Portnums.PortNum.TELEMETRY_APP_VALUE
+                payload = telemetryRequest.toByteString()
+                wantResponse = true
+            },
+        )
+    }
+
+    fun requestNeighborInfo(requestId: Int, destNum: Int) {
+        neighborInfoStartTimes[requestId] = System.currentTimeMillis()
+        val myNum = nodeManager?.myNodeNum ?: 0
+        if (destNum == myNum) {
+            val oneHour = 3600
+            val neighborInfoToSend =
+                MeshProtos.NeighborInfo.newBuilder()
+                    .setNodeId(myNum)
+                    .setLastSentById(myNum)
+                    .setNodeBroadcastIntervalSecs(oneHour)
+                    .addNeighbors(
+                        MeshProtos.Neighbor.newBuilder()
+                            .setNodeId(0) // Dummy node ID that can be intercepted
+                            .setSnr(0f)
+                            .setLastRxTime((System.currentTimeMillis() / TIME_MS_TO_S).toInt())
+                            .setNodeBroadcastIntervalSecs(oneHour)
+                            .build(),
+                    )
+                    .build()
+
+            // Send the neighbor info from our connected radio to ourselves (simulated)
+            packetHandler?.sendToRadio(
+                newMeshPacketTo(destNum).buildMeshPacket(
+                    wantAck = true,
+                    id = requestId,
+                    channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+                ) {
+                    portnumValue = Portnums.PortNum.NEIGHBORINFO_APP_VALUE
+                    payload = neighborInfoToSend.toByteString()
+                    wantResponse = true
+                },
+            )
+        } else {
+            // Send request to remote
+            packetHandler?.sendToRadio(
+                newMeshPacketTo(destNum).buildMeshPacket(
+                    wantAck = true,
+                    id = requestId,
+                    channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+                ) {
+                    portnumValue = Portnums.PortNum.NEIGHBORINFO_APP_VALUE
+                    wantResponse = true
+                },
+            )
+        }
     }
 
     @VisibleForTesting

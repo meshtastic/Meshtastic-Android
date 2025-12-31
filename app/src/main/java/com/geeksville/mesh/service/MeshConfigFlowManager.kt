@@ -49,10 +49,14 @@ constructor(
     private val commandSender: MeshCommandSender,
     private val packetHandler: PacketHandler,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val configOnlyNonce = 69420
     private val nodeInfoNonce = 69421
     private val wantConfigDelay = 100L
+
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
 
     private val newNodes = mutableListOf<MeshProtos.NodeInfo>()
     val newNodeCount: Int

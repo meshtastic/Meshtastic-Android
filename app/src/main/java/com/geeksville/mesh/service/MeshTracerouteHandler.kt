@@ -46,7 +46,11 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val commandSender: MeshCommandSender,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
 
     fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: kotlinx.coroutines.Job?) {
         val full =

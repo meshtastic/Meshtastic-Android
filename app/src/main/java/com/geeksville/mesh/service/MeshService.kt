@@ -28,6 +28,7 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import com.geeksville.mesh.util.RadioNotConnectedException
 import com.geeksville.mesh.util.toRemoteExceptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -88,18 +89,10 @@ class MeshService : Service() {
         get() = nodeManager.myNodeNum ?: throw RadioNotConnectedException()
 
     companion object {
-        const val ACTION_NODE_CHANGE = "com.geeksville.mesh.NODE_CHANGE"
-        const val ACTION_MESH_CONNECTED = "com.geeksville.mesh.MESH_CONNECTED"
-        const val ACTION_MESSAGE_STATUS = "com.geeksville.mesh.MESSAGE_STATUS"
-
-        private const val PREFIX = "com.geeksville.mesh"
-
-        fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
-
         fun actionReceived(portNum: Int): String {
             val portType = org.meshtastic.proto.Portnums.PortNum.forNumber(portNum)
             val portStr = portType?.toString() ?: portNum.toString()
-            return actionReceived(portStr)
+            return com.geeksville.mesh.service.actionReceived(portStr)
         }
 
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)
@@ -116,9 +109,6 @@ class MeshService : Service() {
 
         val minDeviceVersion = DeviceVersion(BuildConfig.MIN_FW_VERSION)
         val absoluteMinDeviceVersion = DeviceVersion(BuildConfig.ABS_MIN_FW_VERSION)
-
-        class NoDeviceConfigException(message: String = "No radio settings received (is our app too old?)") :
-            RadioNotConnectedException(message)
     }
 
     override fun onCreate() {
@@ -126,8 +116,12 @@ class MeshService : Service() {
         Timber.i("Creating mesh service")
         serviceNotifications.initChannels()
 
-        connectionManager.init()
-        messageProcessor.start()
+        packetHandler.start(serviceScope)
+        router.start(serviceScope)
+        nodeManager.start(serviceScope)
+        connectionManager.start(serviceScope)
+        messageProcessor.start(serviceScope)
+        commandSender.start(serviceScope)
 
         serviceScope.handledLaunch { radioInterfaceService.connect() }
 
@@ -276,11 +270,11 @@ class MeshService : Service() {
             }
 
             override fun beginEditSettings() = toRemoteExceptions {
-                commandSender.sendAdmin(myNodeNum) { beginEditSettings = true }
+                router.actionHandler.handleBeginEditSettings(myNodeNum)
             }
 
             override fun commitEditSettings() = toRemoteExceptions {
-                commandSender.sendAdmin(myNodeNum) { commitEditSettings = true }
+                router.actionHandler.handleCommitEditSettings(myNodeNum)
             }
 
             override fun getChannelSet(): ByteArray = toRemoteExceptions {
@@ -292,7 +286,7 @@ class MeshService : Service() {
             override fun connectionState(): String = connectionStateHolder.connectionState.value.toString()
 
             override fun startProvideLocation() {
-                locationManager.start { commandSender.sendPosition(it) }
+                locationManager.start(serviceScope) { commandSender.sendPosition(it) }
             }
 
             override fun stopProvideLocation() {
@@ -321,6 +315,10 @@ class MeshService : Service() {
                 commandSender.requestTraceroute(requestId, destNum)
             }
 
+            override fun requestNeighborInfo(requestId: Int, destNum: Int) = toRemoteExceptions {
+                router.actionHandler.handleRequestNeighborInfo(requestId, destNum)
+            }
+
             override fun requestShutdown(requestId: Int, destNum: Int) = toRemoteExceptions {
                 router.actionHandler.handleRequestShutdown(requestId, destNum)
             }
@@ -330,7 +328,7 @@ class MeshService : Service() {
             }
 
             override fun rebootToDfu() = toRemoteExceptions {
-                commandSender.sendAdmin(myNodeNum) { enterDfuModeRequest = true }
+                router.actionHandler.handleRebootToDfu(myNodeNum)
             }
 
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
@@ -344,6 +342,10 @@ class MeshService : Service() {
 
             override fun getDeviceConnectionStatus(requestId: Int, destNum: Int) = toRemoteExceptions {
                 router.actionHandler.handleGetDeviceConnectionStatus(requestId, destNum)
+            }
+
+            override fun requestTelemetry(requestId: Int, destNum: Int, type: Int) = toRemoteExceptions {
+                router.actionHandler.handleRequestTelemetry(requestId, destNum, type)
             }
         }
 }

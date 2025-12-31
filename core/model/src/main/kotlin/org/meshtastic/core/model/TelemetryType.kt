@@ -15,9 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.service
+package org.meshtastic.core.model
 
-import android.os.RemoteException
-
-open class RadioNotConnectedException(message: String = "Not connected to radio") :
-    RemoteException(message)
+enum class TelemetryType {
+    DEVICE,
+    ENVIRONMENT,
+    AIR_QUALITY,
+    POWER,
+    LOCAL_STATS,
+}

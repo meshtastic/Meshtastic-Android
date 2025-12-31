@@ -47,12 +47,12 @@ constructor(
 
     /** Broadcast some received data Payload will be a DataPacket */
     fun broadcastReceivedData(payload: DataPacket) {
-        explicitBroadcast(Intent(MeshService.actionReceived(payload.dataType)).putExtra(EXTRA_PAYLOAD, payload))
+        explicitBroadcast(Intent(actionReceived(payload.dataType)).putExtra(EXTRA_PAYLOAD, payload))
     }
 
     fun broadcastNodeChange(info: NodeInfo) {
         Timber.d("Broadcasting node change ${info.user?.toPIIString()}")
-        val intent = Intent(MeshService.ACTION_NODE_CHANGE).putExtra(EXTRA_NODEINFO, info)
+        val intent = Intent(ACTION_NODE_CHANGE).putExtra(EXTRA_NODEINFO, info)
         explicitBroadcast(intent)
     }
 
@@ -65,7 +65,7 @@ constructor(
             // Do not log, contains PII possibly
             // MeshService.Timber.d("Broadcasting message status $p")
             val intent =
-                Intent(MeshService.ACTION_MESSAGE_STATUS).apply {
+                Intent(ACTION_MESSAGE_STATUS).apply {
                     putExtra(EXTRA_PACKET_ID, id)
                     putExtra(EXTRA_STATUS, status as Parcelable)
                 }
@@ -76,7 +76,7 @@ constructor(
     /** Broadcast our current connection status */
     fun broadcastConnection() {
         val connectionState = connectionStateHolder.connectionState.value
-        val intent = Intent(MeshService.ACTION_MESH_CONNECTED).putExtra(EXTRA_CONNECTED, connectionState.toString())
+        val intent = Intent(ACTION_MESH_CONNECTED).putExtra(EXTRA_CONNECTED, connectionState.toString())
         serviceRepository.setConnectionState(connectionState)
         explicitBroadcast(intent)
     }

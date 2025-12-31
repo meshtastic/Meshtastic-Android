@@ -19,6 +19,12 @@ package com.geeksville.mesh.service
 
 const val prefix = "com.geeksville.mesh"
 
+const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
+const val ACTION_MESH_CONNECTED = "$prefix.MESH_CONNECTED"
+const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
+
+fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
+
 
 //
 // standard EXTRA bundle definitions

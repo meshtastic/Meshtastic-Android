@@ -52,12 +52,14 @@ constructor(
     private val serviceBroadcasts: MeshServiceBroadcasts?,
     private val serviceNotifications: MeshServiceNotifications?,
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
+    val nodeDBbyID = ConcurrentHashMap<String, NodeEntity>()
 
-    val nodeDBbyID: Map<String, NodeEntity>
-        get() = nodeDBbyNodeNum.mapKeys { it.value.user.id }
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
 
     val isNodeDbReady = MutableStateFlow(false)
     val allowNodeDbWrites = MutableStateFlow(false)
@@ -74,12 +76,14 @@ constructor(
         scope.handledLaunch {
             val nodes = nodeRepository?.getNodeDBbyNum()?.first() ?: emptyMap()
             nodeDBbyNodeNum.putAll(nodes)
+            nodes.values.forEach { nodeDBbyID[it.user.id] = it }
             myNodeNum = nodeRepository?.myNodeInfo?.value?.myNodeNum
         }
     }
 
     fun clear() {
         nodeDBbyNodeNum.clear()
+        nodeDBbyID.clear()
         isNodeDbReady.value = false
         allowNodeDbWrites.value = false
         myNodeNum = null
@@ -114,7 +118,7 @@ constructor(
     fun getNodes(): List<NodeInfo> = nodeDBbyNodeNum.values.map { it.toNodeInfo() }
 
     fun removeByNodenum(nodeNum: Int) {
-        nodeDBbyNodeNum.remove(nodeNum)
+        nodeDBbyNodeNum.remove(nodeNum)?.let { nodeDBbyID.remove(it.user.id) }
     }
 
     fun getOrCreateNodeInfo(n: Int, channel: Int = 0): NodeEntity = nodeDBbyNodeNum.getOrPut(n) {
@@ -138,6 +142,9 @@ constructor(
     fun updateNodeInfo(nodeNum: Int, withBroadcast: Boolean = true, channel: Int = 0, updateFn: (NodeEntity) -> Unit) {
         val info = getOrCreateNodeInfo(nodeNum, channel)
         updateFn(info)
+        if (info.user.id.isNotEmpty()) {
+            nodeDBbyID[info.user.id] = info
+        }
 
         if (info.user.id.isNotEmpty() && isNodeDbReady.value) {
             scope.handledLaunch { nodeRepository?.upsert(info) }
