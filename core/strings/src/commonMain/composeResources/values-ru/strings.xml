@@ -727,6 +727,7 @@
     <string name="request_telemetry">Запрос телеметрии</string>
     <string name="request_device_metrics">Метрики устройства</string>
     <string name="request_environment_metrics">Метрики окружения</string>
+    <string name="request_air_quality_metrics">Метрики качества воздуха</string>
     <string name="request_power_metrics">Метрики мощности</string>
     <string name="request_local_stats">Локальная статистика</string>
     <string name="request_metadata">Метаданные</string>
