@@ -169,6 +169,10 @@ fun FirmwareUpdateScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { viewModel.startUpdateFromFile(it) }
         }
+    val getBinFileLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let { viewModel.startUpdateFromFile(it) }
+        }
 
     val saveFileLauncher =
         rememberLauncherForActivityResult(
@@ -189,6 +193,8 @@ fun FirmwareUpdateScreen(
                             getZipFileLauncher.launch("application/zip")
                         } else if (readyState.updateMethod is FirmwareUpdateMethod.Usb) {
                             getUf2FileLauncher.launch("*/*")
+                        } else if (readyState.updateMethod is FirmwareUpdateMethod.Wifi) {
+                            getBinFileLauncher.launch("*/*")
                         }
                     }
                 },

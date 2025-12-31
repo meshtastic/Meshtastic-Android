@@ -57,7 +57,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
             socket =
                 Socket().apply {
                     soTimeout = SOCKET_TIMEOUT_MS
-                    connect(InetSocketAddress(deviceIpAddress, port), CONNECTION_TIMEOUT_MS)
+                    connect(InetSocketAddress(deviceIpAddress, this@WifiOtaTransport.port), CONNECTION_TIMEOUT_MS)
                 }
 
             writer = OutputStreamWriter(socket!!.getOutputStream(), Charsets.UTF_8)
