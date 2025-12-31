@@ -19,25 +19,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine last production tag
+      - name: Determine last tag
         id: last_prod_tag
         run: |
-          # Find the highest semantic version tag of the form vX.Y.Z
-          # and ignore any tags with suffixes like -track.N, -rc.N, etc.
-          TAG=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' \
-            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
-            | sed 's/^v//' \
-            | sort -V \
-            | tail -n 1)
-
-          if [ -n "$TAG" ]; then
-            TAG="v$TAG"
-          fi
-
-          echo "Found last production tag: $TAG"
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "Found last tag: $TAG"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Generate changelog from last production tag to current
+      - name: Generate changelog from last tag to current
         if: steps.last_prod_tag.outputs.tag != ''
         uses: mikepenz/release-changelog-builder-action@v6
         id: changelog
@@ -45,35 +34,30 @@ jobs:
           configuration: .github/release.yml
           fromTag: ${{ steps.last_prod_tag.outputs.tag }}
           toTag: ${{ github.sha }}
+          outputFile: main-push-changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Save changelog to file
-        if: steps.last_prod_tag.outputs.tag != ''
-        run: |
-          mkdir -p artifacts
-          cat << 'EOF' > artifacts/main-push-changelog.md
-          ${{ steps.changelog.outputs.changelog }}
-          EOF
 
       - name: Upload changelog artifact
         if: steps.last_prod_tag.outputs.tag != ''
         uses: actions/upload-artifact@v6
         with:
           name: main-push-changelog
-          path: artifacts/main-push-changelog.md
+          path: main-push-changelog.md
 
       - name: Print main push summary
+        env:
+          LAST_TAG: ${{ steps.last_prod_tag.outputs.tag }}
         run: |
           echo "Pushed to main"
           echo "SHA: $GITHUB_SHA"
           echo "Actor: $GITHUB_ACTOR"
           echo "Ref: $GITHUB_REF"
           echo ""
-          if [ "${{ steps.last_prod_tag.outputs.tag }}" != "" ]; then
-            echo "Changelog since last production tag (${{ steps.last_prod_tag.outputs.tag }})":
+          if [ "$LAST_TAG" != "" ]; then
+            echo "Changelog since last tag ($LAST_TAG)":
             echo "----------------------------------------"
-            echo "${{ steps.changelog.outputs.changelog }}"
+            cat main-push-changelog.md
           else
-            echo "No production tag (vX.Y.Z) found. Skipping changelog generation."
+            echo "No tag found. Skipping changelog generation."
           fi

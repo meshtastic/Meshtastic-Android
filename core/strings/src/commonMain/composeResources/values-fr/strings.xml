@@ -120,7 +120,7 @@
     <string name="label_medium_slow">Portée moyenne - Lent</string>
     <string name="label_short_turbo">Portée courte - Turbo</string>
     <string name="label_short_fast">Portée courte - Rapide</string>
-    <string name="label_short_slow">Portée courte- Lent</string>
+    <string name="label_short_slow">Portée courte - Lent</string>
     <string name="config_network_wifi_enabled_summary">L'activation du Wifi désactivera la connexion Bluetooth à l'application.</string>
     <string name="config_network_eth_enabled_summary">Activer Ethernet désactivera la connexion Bluetooth à l'application. Les connexions de nœuds via TCP ne sont pas disponibles sur les appareils Apple.</string>
     <string name="config_network_udp_enabled_summary">Activer les paquets de diffusion via UDP sur le réseau local.</string>
@@ -274,6 +274,7 @@
     <string name="quick_chat_instant">Envoi instantané</string>
     <string name="quick_chat_show">Afficher le menu de discussion rapide</string>
     <string name="quick_chat_hide">Masquer le menu de discussion rapide</string>
+    <string name="quick_chat_show_label">Afficher la discussion rapide</string>
     <string name="factory_reset">Réinitialisation d'usine</string>
     <string name="bluetooth_disabled">Le Bluetooth est désactivé. Veuillez l'activer dans les paramètres de votre appareil.</string>
     <string name="open_settings">Ouvrir les paramètres</string>
@@ -325,6 +326,7 @@
     <string name="mute_status_unmuted">Non muet</string>
     <string name="mute_status_muted_for_days">Muet pendant %1d jours, %.1f heures</string>
     <string name="mute_status_muted_for_hours">Muet pendant %.1f heures</string>
+    <string name="mute_status_label">Statut muet</string>
     <string name="replace">Remplacer</string>
     <string name="wifi_qr_code_scan">Scanner le code QR WiFi</string>
     <string name="wifi_qr_code_error">Format du code QR d'identification WiFi invalide</string>
@@ -716,7 +718,15 @@
     <string name="import_known_shared_contact_text">Avertissement : Ce contact est connu, l'importation écrasera les informations précédentes.</string>
     <string name="public_key_changed">Clé publique modifiée</string>
     <string name="import_label">Importer</string>
+    <string name="request">Requêtes</string>
+    <string name="request_neighbor_info">Informations de voisinage (2.7.15+)</string>
+    <string name="request_telemetry">Demander la télémétrie</string>
     <string name="request_device_metrics">Métriques de l’appareil</string>
+    <string name="request_environment_metrics">Métriques d'environnement</string>
+    <string name="request_air_quality_metrics">Métriques de qualité de l'air</string>
+    <string name="request_power_metrics">Métriques d'alimentation</string>
+    <string name="request_local_stats">Statistiques locales</string>
+    <string name="request_metadata">Métadonnées</string>
     <string name="actions">Actions</string>
     <string name="firmware">Micrologiciel</string>
     <string name="use_12h_format">Utiliser le format horaire 12h</string>
@@ -923,7 +933,7 @@
     <string name="unset">Non défini - 0</string>
     <string name="relayed_by">Relayé par : %1$s</string>
     <plurals name="relays">
-        <item quantity="one">Entendu le relai %1$d</item>
+        <item quantity="one">Entendu par %1$d relai</item>
         <item quantity="other">Entendu par %1$d relais</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s est généralement livré avec un chargeur d'amorçage qui ne prend pas en charge les mises à jour via Bluetooth (OTA ou Over The Air). Vous devrez peut-être flasher un chargeur d'amorçage compatible OTA via USB avant de flasher OTA.</string>

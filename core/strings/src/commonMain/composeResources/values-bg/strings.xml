@@ -153,6 +153,7 @@
     <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/installation">документи</a> по тази тема.</string>
     <string name="none">Няма (дезактивирано)</string>
     <string name="meshtastic_service_notifications">Сервизни известия</string>
+    <string name="acknowledgements">Благодарности</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="contact_invalid">Този контакт е невалиден и не може да бъде добавен</string>
     <string name="debug_panel">Панел за отстраняване на грешки</string>
@@ -330,6 +331,9 @@
         <item quantity="other">%d отскока</item>
     </plurals>
     <string name="traceroute_diff">Отскоци към %1$d Отскоци на връщане %2$d</string>
+    <string name="traceroute_outgoing_route">Изходящ маршрут</string>
+    <string name="traceroute_return_route">Обратен маршрут</string>
+    <string name="view_on_map">Вижте на картата</string>
     <string name="traceroute_showing_nodes">Показване на %1$d/%2$d възела</string>
     <string name="twenty_four_hours">24Ч</string>
     <string name="forty_eight_hours">48Ч</string>
@@ -569,7 +573,9 @@
     <string name="import_known_shared_contact_text">Предупреждение: Този контакт е известен, импортирането ще презапише предишната информация за контакта.</string>
     <string name="public_key_changed">Публичният ключ е променен</string>
     <string name="import_label">Импортиране</string>
+    <string name="request">Заявка</string>
     <string name="request_device_metrics">Метрики на устройството</string>
+    <string name="request_metadata">Метаданни</string>
     <string name="actions">Действия</string>
     <string name="firmware">Фърмуер</string>
     <string name="use_12h_format">Използване на 12ч формат</string>
@@ -802,6 +808,7 @@
     </plurals>
     <!-- Compass -->
     <string name="compass_title">Компас</string>
+    <string name="open_compass">Отваряне на компас</string>
     <string name="compass_distance">Разстояние: %1$s</string>
     <string name="compass_bearing">Пеленг: %1$s</string>
     <string name="compass_bearing_na">Пеленг: Няма данни</string>

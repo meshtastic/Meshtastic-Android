@@ -20,15 +20,10 @@ package org.meshtastic.buildlogic
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
-import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -51,19 +46,9 @@ internal fun Project.configureKotlinAndroid(
                 commonExtension.defaultConfig.targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
             }
         }
-
-        compileOptions.apply {
-            sourceCompatibility = JavaVersion.VERSION_21
-            targetCompatibility = JavaVersion.VERSION_21
-            isCoreLibraryDesugaringEnabled = true
-        }
     }
 
     configureKotlin<KotlinAndroidProjectExtension>()
-
-    dependencies {
-        "coreLibraryDesugaring"(libs.library("android.desugarJdkLibs"))
-    }
 }
 
 /**
@@ -93,14 +78,6 @@ internal fun Project.configureKotlinMultiplatform() {
  * Configure base Kotlin options for JVM (non-Android)
  */
 internal fun Project.configureKotlinJvm() {
-    extensions.configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
-        }
-    }
-
     configureKotlin<KotlinJvmProjectExtension>()
 }
 
@@ -108,9 +85,12 @@ internal fun Project.configureKotlinJvm() {
  * Configure base Kotlin options
  */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
+    extensions.configure<T> {
+        jvmToolchain(21)
+    }
+
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
             allWarningsAsErrors.set(false)
             freeCompilerArgs.addAll(
                 // Enable experimental coroutines APIs, including Flow

@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "9.0.0-rc01"
+agp = "9.0.0-rc02"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -92,7 +92,6 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 
 # Google
-android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.5" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.7.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }

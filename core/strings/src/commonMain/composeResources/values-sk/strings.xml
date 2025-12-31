@@ -23,6 +23,7 @@
     <string name="node_filter_include_unknown">Vrátane neznámych</string>
     <string name="node_filter_only_online">Skryť neaktívne uzle</string>
     <string name="node_filter_only_direct">Zobraziť len priame uzle</string>
+    <string name="node_filter_ignored">Prezeráte si ignorované uzly,\nStalčte tlačidlo späť aby ste sa vrátili k zoznamu uzlov.</string>
     <string name="node_filter_show_details">Zobraziť detaily</string>
     <string name="node_sort_title">Zoradiť podľa</string>
     <string name="node_sort_button">Nastavenie triedenia uzlov</string>
@@ -56,6 +57,7 @@
     <string name="routing_error_admin_public_key_unauthorized">Verejný kľúč neautorizovaný</string>
     <string name="role_client">Klient</string>
     <string name="role_client_desc">Pripojená aplikácia, alebo samostatné zariadenie na odosielanie správ.</string>
+    <string name="role_client_mute">Stlmený Klient</string>
     <string name="role_client_mute_desc">Zariadenie, ktoré nepreposiela pakety z ďalších zariadení.</string>
     <string name="role_router">Smerovač</string>
     <string name="role_router_desc">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ. Viditeľný v zozname uzlov.</string>
@@ -75,6 +77,7 @@
     <string name="role_lost_and_found_desc">Pravidelne vysiela polohu ako správu na predvolený kanál, aby pomohol pri obnove zariadenia.</string>
     <string name="role_tak_tracker">TAK Sledovač</string>
     <string name="role_tak_tracker_desc">Umožňuje automatické vysielanie TAK PLI a znižuje rutinné vysielanie.</string>
+    <string name="role_router_late">Smerovač s Oneskorením</string>
     <string name="role_router_late_desc">Uzol infraštruktúry, ktorý vždy preposiela pakety raz, ale až po všetkých ostatných režimoch, čím zabezpečuje dodatočné pokrytie pre miestne zväzky. Viditeľný v zozname uzlov.</string>
     <string name="rebroadcast_mode_all">Všetky</string>
     <string name="rebroadcast_mode_all_desc">Preposiela akúkoľvek pozorovanú správu, ak bola na našom súkromnom kanáli alebo z inej siete s rovnakými parametrami lora.</string>
@@ -91,6 +94,7 @@
     <string name="config_device_ledHeartbeatEnabled_summary">Ovláda blikajúcu LED na zariadení. Pre väčšinu zariadení toto ovláda jednu zo štyroch LED, neovláda LED pre GPS a nabíjanie.</string>
     <string name="config_device_use_phone_tz">Použiť časovú zónu telefónu</string>
     <string name="config_device_transmitOverLora_summary">Okrem odoslania do MQTT a PhoneAPI je prenášanie informácii o susedoch prostredníctvom LoRa. Nedostupné na kanáli s predvoleným kľúčom a názvom.</string>
+    <string name="config_display_screen_on_secs_summary">Doba počas ktorej ostane obrazovka zapnutá potom ako je stlačené používateľské tlačidlo alebo bola prijatá správa.</string>
     <string name="config_display_flip_screen_summary">Otočiť obrazovku vertikálne.</string>
     <string name="label_very_long_slow">Veľmi Ďaleký Dosah - Pomali</string>
     <string name="label_long_fast">Ďaleký Dosah - Rýchlo</string>
