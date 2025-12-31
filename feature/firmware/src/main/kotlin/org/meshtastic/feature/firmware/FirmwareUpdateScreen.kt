@@ -181,7 +181,10 @@ fun FirmwareUpdateScreen(
                 onPickFile = {
                     if (state is FirmwareUpdateState.Ready) {
                         val readyState = state as FirmwareUpdateState.Ready
-                        if (readyState.updateMethod is FirmwareUpdateMethod.Ble || readyState.updateMethod is FirmwareUpdateMethod.Wifi) {
+                        if (
+                            readyState.updateMethod is FirmwareUpdateMethod.Ble ||
+                            readyState.updateMethod is FirmwareUpdateMethod.Wifi
+                        ) {
                             getFileLauncher.launch("application/zip")
                         } else if (readyState.updateMethod is FirmwareUpdateMethod.Usb) {
                             getFileLauncher.launch("application/octet-stream")
