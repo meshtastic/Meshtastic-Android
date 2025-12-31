@@ -137,7 +137,8 @@ interface PacketDao {
     )
     suspend fun clearUnreadCount(contact: String, timestamp: Long)
 
-    @Upsert suspend fun insert(packet: Packet)
+    @Upsert
+    suspend fun insert(packet: Packet)
 
     @Transaction
     @Query(
@@ -205,7 +206,8 @@ interface PacketDao {
         deletePackets(uuidList)
     }
 
-    @Update suspend fun update(packet: Packet)
+    @Update
+    suspend fun update(packet: Packet)
 
     @Transaction
     suspend fun updateMessageStatus(data: DataPacket, m: MessageStatus) {
@@ -296,7 +298,8 @@ interface PacketDao {
         upsertContactSettings(contactList)
     }
 
-    @Upsert suspend fun insert(reaction: ReactionEntity)
+    @Upsert
+    suspend fun insert(reaction: ReactionEntity)
 
     @Transaction
     suspend fun deleteAll() {

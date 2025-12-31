@@ -110,7 +110,7 @@ class DatabaseManager @Inject constructor(private val app: Application) {
     }
 
     /** Execute [block] with the current DB instance. */
-    fun <T> withDb(block: (MeshtasticDatabase) -> T): T = block(currentDb.value)
+    inline fun <T> withDb(block: (MeshtasticDatabase) -> T): T = block(currentDb.value)
 
     private fun markLastUsed(dbName: String) {
         prefs.edit().putLong(lastUsedKey(dbName), System.currentTimeMillis()).apply()

@@ -46,14 +46,15 @@ interface MeshLogDao {
     )
     fun getLogsFrom(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>
 
-    @Insert fun insert(log: MeshLog)
+    @Insert
+    suspend fun insert(log: MeshLog)
 
     @Query("DELETE FROM log")
-    fun deleteAll()
+    suspend fun deleteAll()
 
     @Query("DELETE FROM log WHERE uuid = :uuid")
-    fun deleteLog(uuid: String)
+    suspend fun deleteLog(uuid: String)
 
     @Query("DELETE FROM log WHERE from_num = :fromNum AND port_num = :portNum")
-    fun deleteLogs(fromNum: Int, portNum: Int)
+    suspend fun deleteLogs(fromNum: Int, portNum: Int)
 }

@@ -45,7 +45,7 @@ interface NodeInfoDao {
      * @return A [NodeEntity] that is safe to upsert, or null if the upsert should be aborted (e.g., due to an
      *   impersonation attempt, though this logic is currently commented out).
      */
-    private fun getVerifiedNodeForUpsert(incomingNode: NodeEntity): NodeEntity {
+    private suspend fun getVerifiedNodeForUpsert(incomingNode: NodeEntity): NodeEntity {
         // Populate the NodeEntity.publicKey field from the User.publicKey for consistency
         // and to support lazy migration.
         incomingNode.publicKey = incomingNode.user.publicKey
@@ -70,7 +70,7 @@ interface NodeInfoDao {
     }
 
     /** Validates a new node before it is inserted into the database. */
-    private fun handleNewNodeUpsertValidation(newNode: NodeEntity): NodeEntity {
+    private suspend fun handleNewNodeUpsertValidation(newNode: NodeEntity): NodeEntity {
         // Check if the new node's public key (if present and not empty)
         // is already claimed by another existing node.
         if (newNode.publicKey?.isEmpty == false) {
@@ -118,10 +118,10 @@ interface NodeInfoDao {
     fun getMyNodeInfo(): Flow<MyNodeEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun setMyNodeInfo(myInfo: MyNodeEntity)
+    suspend fun setMyNodeInfo(myInfo: MyNodeEntity)
 
     @Query("DELETE FROM my_node")
-    fun clearMyNodeInfo()
+    suspend fun clearMyNodeInfo()
 
     @Query(
         """
@@ -198,7 +198,7 @@ interface NodeInfoDao {
     ): Flow<List<NodeWithRelations>>
 
     @Transaction
-    fun clearNodeInfo(preserveFavorites: Boolean) {
+    suspend fun clearNodeInfo(preserveFavorites: Boolean) {
         if (preserveFavorites) {
             deleteNonFavoriteNodes()
         } else {
@@ -207,50 +207,52 @@ interface NodeInfoDao {
     }
 
     @Query("DELETE FROM nodes WHERE is_favorite = 0")
-    fun deleteNonFavoriteNodes()
+    suspend fun deleteNonFavoriteNodes()
 
     @Query("DELETE FROM nodes")
-    fun deleteAllNodes()
+    suspend fun deleteAllNodes()
 
     @Query("DELETE FROM nodes WHERE num=:num")
-    fun deleteNode(num: Int)
+    suspend fun deleteNode(num: Int)
 
     @Query("DELETE FROM nodes WHERE num IN (:nodeNums)")
-    fun deleteNodes(nodeNums: List<Int>)
+    suspend fun deleteNodes(nodeNums: List<Int>)
 
     @Query("SELECT * FROM nodes WHERE last_heard < :lastHeard")
-    fun getNodesOlderThan(lastHeard: Int): List<NodeEntity>
+    suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity>
 
     @Query("SELECT * FROM nodes WHERE short_name IS NULL")
-    fun getUnknownNodes(): List<NodeEntity>
+    suspend fun getUnknownNodes(): List<NodeEntity>
 
-    @Upsert fun upsert(meta: MetadataEntity)
+    @Upsert
+    suspend fun upsert(meta: MetadataEntity)
 
     @Query("DELETE FROM metadata WHERE num=:num")
-    fun deleteMetadata(num: Int)
+    suspend fun deleteMetadata(num: Int)
 
     @Query("SELECT * FROM nodes WHERE num=:num")
     @Transaction
-    fun getNodeByNum(num: Int): NodeWithRelations?
+    suspend fun getNodeByNum(num: Int): NodeWithRelations?
 
     @Query("SELECT * FROM nodes WHERE public_key = :publicKey LIMIT 1")
-    fun findNodeByPublicKey(publicKey: ByteString?): NodeEntity?
+    suspend fun findNodeByPublicKey(publicKey: ByteString?): NodeEntity?
 
-    @Upsert fun doUpsert(node: NodeEntity)
+    @Upsert
+    suspend fun doUpsert(node: NodeEntity)
 
-    fun upsert(node: NodeEntity) {
+    suspend fun upsert(node: NodeEntity) {
         val verifiedNode = getVerifiedNodeForUpsert(node)
         doUpsert(verifiedNode)
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun putAll(nodes: List<NodeEntity>)
+    suspend fun putAll(nodes: List<NodeEntity>)
 
     @Query("UPDATE nodes SET notes = :notes WHERE num = :num")
-    fun setNodeNotes(num: Int, notes: String)
+    suspend fun setNodeNotes(num: Int, notes: String)
 
     @Transaction
-    fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {
+    suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {
         clearMyNodeInfo()
         setMyNodeInfo(mi)
         putAll(nodes.map { getVerifiedNodeForUpsert(it) })
@@ -261,7 +263,7 @@ interface NodeInfoDao {
      * ensures search functionality works for all nodes. Skips placeholder/default users (hwModel == UNSET).
      */
     @Transaction
-    fun backfillDenormalizedNames() {
+    suspend fun backfillDenormalizedNames() {
         val nodes = getAllNodesSnapshot()
         val nodesToUpdate =
             nodes
@@ -277,5 +279,5 @@ interface NodeInfoDao {
     }
 
     @Query("SELECT * FROM nodes")
-    fun getAllNodesSnapshot(): List<NodeEntity>
+    suspend fun getAllNodesSnapshot(): List<NodeEntity>
 }
