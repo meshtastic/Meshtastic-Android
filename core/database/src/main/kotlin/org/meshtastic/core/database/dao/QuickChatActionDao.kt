@@ -30,8 +30,7 @@ interface QuickChatActionDao {
     @Query("Select * from quick_chat order by position asc")
     fun getAll(): Flow<List<QuickChatAction>>
 
-    @Upsert
-    suspend fun upsert(action: QuickChatAction)
+    @Upsert suspend fun upsert(action: QuickChatAction)
 
     @Query("Delete from quick_chat")
     suspend fun deleteAll()

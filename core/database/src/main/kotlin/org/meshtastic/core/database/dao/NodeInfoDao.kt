@@ -224,8 +224,7 @@ interface NodeInfoDao {
     @Query("SELECT * FROM nodes WHERE short_name IS NULL")
     suspend fun getUnknownNodes(): List<NodeEntity>
 
-    @Upsert
-    suspend fun upsert(meta: MetadataEntity)
+    @Upsert suspend fun upsert(meta: MetadataEntity)
 
     @Query("DELETE FROM metadata WHERE num=:num")
     suspend fun deleteMetadata(num: Int)
@@ -237,8 +236,7 @@ interface NodeInfoDao {
     @Query("SELECT * FROM nodes WHERE public_key = :publicKey LIMIT 1")
     suspend fun findNodeByPublicKey(publicKey: ByteString?): NodeEntity?
 
-    @Upsert
-    suspend fun doUpsert(node: NodeEntity)
+    @Upsert suspend fun doUpsert(node: NodeEntity)
 
     suspend fun upsert(node: NodeEntity) {
         val verifiedNode = getVerifiedNodeForUpsert(node)
