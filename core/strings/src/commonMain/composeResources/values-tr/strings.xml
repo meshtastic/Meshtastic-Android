@@ -580,17 +580,4 @@
     <string name="firmware_update_failed">Güncelleme başarısız</string>
     <string name="interval_unset">Ayarlanmamış</string>
     <!-- Compass -->
-    <string name="debug_export_no_logs">No logs to export</string>
-    <plurals name="log_retention_hours">
-        <item quantity="one">%1$d hour</item>
-        <item quantity="other">%1$d hours</item>
-    </plurals>
-    <plurals name="log_retention_days_quantity">
-        <item quantity="one">%1$d day</item>
-        <item quantity="other">%1$d days</item>
-    </plurals>
-
-    <string name="log_retention_one_hour">1 hour</string>
-    <string name="log_retention_days_format">%1$d days</string>
-
 </resources>
