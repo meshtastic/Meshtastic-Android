@@ -161,15 +161,7 @@ fun FirmwareUpdateScreen(
     val currentVersion by viewModel.currentFirmwareVersion.collectAsStateWithLifecycle()
     val selectedRelease by viewModel.selectedRelease.collectAsStateWithLifecycle()
 
-    val getZipFileLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let { viewModel.startUpdateFromFile(it) }
-        }
-    val getUf2FileLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let { viewModel.startUpdateFromFile(it) }
-        }
-    val getBinFileLauncher =
+    val getFileLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { viewModel.startUpdateFromFile(it) }
         }
@@ -189,12 +181,10 @@ fun FirmwareUpdateScreen(
                 onPickFile = {
                     if (state is FirmwareUpdateState.Ready) {
                         val readyState = state as FirmwareUpdateState.Ready
-                        if (readyState.updateMethod is FirmwareUpdateMethod.Ble) {
-                            getZipFileLauncher.launch("application/zip")
+                        if (readyState.updateMethod is FirmwareUpdateMethod.Ble || readyState.updateMethod is FirmwareUpdateMethod.Wifi) {
+                            getFileLauncher.launch("application/zip")
                         } else if (readyState.updateMethod is FirmwareUpdateMethod.Usb) {
-                            getUf2FileLauncher.launch("*/*")
-                        } else if (readyState.updateMethod is FirmwareUpdateMethod.Wifi) {
-                            getBinFileLauncher.launch("*/*")
+                            getFileLauncher.launch("application/octet-stream")
                         }
                     }
                 },
