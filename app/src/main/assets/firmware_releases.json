@@ -180,5 +180,12 @@
       }
     ]
   },
-  "pullRequests": []
+  "pullRequests": [
+    {
+      "id": "9130",
+      "title": "feat: add nix files for creating a default development environment",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9130",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    }
+  ]
 }
