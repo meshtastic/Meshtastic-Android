@@ -17,21 +17,26 @@
 
 package com.geeksville.mesh.service
 
-const val prefix = "com.geeksville.mesh"
+const val PREFIX = "com.geeksville.mesh"
 
+const val ACTION_NODE_CHANGE = "$PREFIX.NODE_CHANGE"
+const val ACTION_MESH_CONNECTED = "$PREFIX.MESH_CONNECTED"
+const val ACTION_MESSAGE_STATUS = "$PREFIX.MESSAGE_STATUS"
+
+fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
 
 //
 // standard EXTRA bundle definitions
 //
 
 // a bool true means now connected, false means not
-const val EXTRA_CONNECTED = "$prefix.Connected"
-const val EXTRA_PROGRESS = "$prefix.Progress"
+const val EXTRA_CONNECTED = "$PREFIX.Connected"
+const val EXTRA_PROGRESS = "$PREFIX.Progress"
 
-/// a bool true means we expect this condition to continue until, false means device might come back
-const val EXTRA_PERMANENT = "$prefix.Permanent"
+// / a bool true means we expect this condition to continue until, false means device might come back
+const val EXTRA_PERMANENT = "$PREFIX.Permanent"
 
-const val EXTRA_PAYLOAD = "$prefix.Payload"
-const val EXTRA_NODEINFO = "$prefix.NodeInfo"
-const val EXTRA_PACKET_ID = "$prefix.PacketId"
-const val EXTRA_STATUS = "$prefix.Status"
+const val EXTRA_PAYLOAD = "$PREFIX.Payload"
+const val EXTRA_NODEINFO = "$PREFIX.NodeInfo"
+const val EXTRA_PACKET_ID = "$PREFIX.PacketId"
+const val EXTRA_STATUS = "$PREFIX.Status"

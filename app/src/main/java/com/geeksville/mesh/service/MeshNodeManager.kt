@@ -1,0 +1,258 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.geeksville.mesh.service
+
+import androidx.annotation.VisibleForTesting
+import co.touchlab.kermit.Logger
+import com.geeksville.mesh.concurrent.handledLaunch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.database.entity.MetadataEntity
+import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.NodeInfo
+import org.meshtastic.core.model.Position
+import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.PaxcountProtos
+import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.copy
+import org.meshtastic.proto.telemetry
+import org.meshtastic.proto.user
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Suppress("TooManyFunctions")
+@Singleton
+class MeshNodeManager
+@Inject
+constructor(
+    private val nodeRepository: NodeRepository?,
+    private val serviceBroadcasts: MeshServiceBroadcasts?,
+    private val serviceNotifications: MeshServiceNotifications?,
+) {
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
+    val nodeDBbyID = ConcurrentHashMap<String, NodeEntity>()
+
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
+
+    val isNodeDbReady = MutableStateFlow(false)
+    val allowNodeDbWrites = MutableStateFlow(false)
+
+    var myNodeNum: Int? = null
+
+    companion object {
+        private const val TIME_MS_TO_S = 1000L
+    }
+
+    @VisibleForTesting internal constructor() : this(null, null, null)
+
+    fun loadCachedNodeDB() {
+        scope.handledLaunch {
+            val nodes = nodeRepository?.getNodeDBbyNum()?.first() ?: emptyMap()
+            nodeDBbyNodeNum.putAll(nodes)
+            nodes.values.forEach { nodeDBbyID[it.user.id] = it }
+            myNodeNum = nodeRepository?.myNodeInfo?.value?.myNodeNum
+        }
+    }
+
+    fun clear() {
+        nodeDBbyNodeNum.clear()
+        nodeDBbyID.clear()
+        isNodeDbReady.value = false
+        allowNodeDbWrites.value = false
+        myNodeNum = null
+    }
+
+    fun getMyNodeInfo(): MyNodeInfo? {
+        val mi = nodeRepository?.myNodeInfo?.value ?: return null
+        val myNode = nodeDBbyNodeNum[mi.myNodeNum]
+        return MyNodeInfo(
+            myNodeNum = mi.myNodeNum,
+            hasGPS = myNode?.position?.latitudeI != 0,
+            model = mi.model ?: myNode?.user?.hwModel?.name,
+            firmwareVersion = mi.firmwareVersion,
+            couldUpdate = mi.couldUpdate,
+            shouldUpdate = mi.shouldUpdate,
+            currentPacketId = mi.currentPacketId,
+            messageTimeoutMsec = mi.messageTimeoutMsec,
+            minAppVersion = mi.minAppVersion,
+            maxChannels = mi.maxChannels,
+            hasWifi = mi.hasWifi,
+            channelUtilization = 0f,
+            airUtilTx = 0f,
+            deviceId = mi.deviceId ?: myNode?.user?.id,
+        )
+    }
+
+    fun getMyId(): String {
+        val num = myNodeNum ?: nodeRepository?.myNodeInfo?.value?.myNodeNum ?: return ""
+        return nodeDBbyNodeNum[num]?.user?.id ?: ""
+    }
+
+    fun getNodes(): List<NodeInfo> = nodeDBbyNodeNum.values.map { it.toNodeInfo() }
+
+    fun removeByNodenum(nodeNum: Int) {
+        nodeDBbyNodeNum.remove(nodeNum)?.let { nodeDBbyID.remove(it.user.id) }
+    }
+
+    fun getOrCreateNodeInfo(n: Int, channel: Int = 0): NodeEntity = nodeDBbyNodeNum.getOrPut(n) {
+        val userId = DataPacket.nodeNumToDefaultId(n)
+        val defaultUser = user {
+            id = userId
+            longName = "Meshtastic ${userId.takeLast(n = 4)}"
+            shortName = userId.takeLast(n = 4)
+            hwModel = MeshProtos.HardwareModel.UNSET
+        }
+
+        NodeEntity(
+            num = n,
+            user = defaultUser,
+            longName = defaultUser.longName,
+            shortName = defaultUser.shortName,
+            channel = channel,
+        )
+    }
+
+    fun updateNodeInfo(nodeNum: Int, withBroadcast: Boolean = true, channel: Int = 0, updateFn: (NodeEntity) -> Unit) {
+        val info = getOrCreateNodeInfo(nodeNum, channel)
+        updateFn(info)
+        if (info.user.id.isNotEmpty()) {
+            nodeDBbyID[info.user.id] = info
+        }
+
+        if (info.user.id.isNotEmpty() && isNodeDbReady.value) {
+            scope.handledLaunch { nodeRepository?.upsert(info) }
+        }
+
+        if (withBroadcast) {
+            serviceBroadcasts?.broadcastNodeChange(info.toNodeInfo())
+        }
+    }
+
+    fun insertMetadata(nodeNum: Int, metadata: MeshProtos.DeviceMetadata) {
+        scope.handledLaunch { nodeRepository?.insertMetadata(MetadataEntity(nodeNum, metadata)) }
+    }
+
+    fun handleReceivedUser(fromNum: Int, p: MeshProtos.User, channel: Int = 0, manuallyVerified: Boolean = false) {
+        updateNodeInfo(fromNum) {
+            val newNode = (it.isUnknownUser && p.hwModel != MeshProtos.HardwareModel.UNSET)
+            val shouldPreserve = shouldPreserveExistingUser(it.user, p)
+
+            if (shouldPreserve) {
+                it.longName = it.user.longName
+                it.shortName = it.user.shortName
+                it.channel = channel
+                it.manuallyVerified = manuallyVerified
+            } else {
+                val keyMatch = !it.hasPKC || it.user.publicKey == p.publicKey
+                it.user = if (keyMatch) p else p.copy { publicKey = NodeEntity.ERROR_BYTE_STRING }
+                it.longName = p.longName
+                it.shortName = p.shortName
+                it.channel = channel
+                it.manuallyVerified = manuallyVerified
+                if (newNode) {
+                    serviceNotifications?.showNewNodeSeenNotification(it)
+                }
+            }
+        }
+    }
+
+    fun handleReceivedPosition(
+        fromNum: Int,
+        myNodeNum: Int,
+        p: MeshProtos.Position,
+        defaultTime: Long = System.currentTimeMillis(),
+    ) {
+        if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0) {
+            Logger.d { "Ignoring nop position update for the local node" }
+        } else {
+            updateNodeInfo(fromNum) { it.setPosition(p, (defaultTime / TIME_MS_TO_S).toInt()) }
+        }
+    }
+
+    fun handleReceivedTelemetry(fromNum: Int, telemetry: TelemetryProtos.Telemetry) {
+        updateNodeInfo(fromNum) { nodeEntity ->
+            when {
+                telemetry.hasDeviceMetrics() -> nodeEntity.deviceTelemetry = telemetry
+                telemetry.hasEnvironmentMetrics() -> nodeEntity.environmentTelemetry = telemetry
+                telemetry.hasPowerMetrics() -> nodeEntity.powerTelemetry = telemetry
+            }
+        }
+    }
+
+    fun handleReceivedPaxcounter(fromNum: Int, p: PaxcountProtos.Paxcount) {
+        updateNodeInfo(fromNum) { it.paxcounter = p }
+    }
+
+    fun installNodeInfo(info: MeshProtos.NodeInfo, withBroadcast: Boolean = true) {
+        updateNodeInfo(info.num, withBroadcast = withBroadcast) { entity ->
+            if (info.hasUser()) {
+                if (shouldPreserveExistingUser(entity.user, info.user)) {
+                    entity.longName = entity.user.longName
+                    entity.shortName = entity.user.shortName
+                } else {
+                    entity.user =
+                        info.user.copy {
+                            if (isLicensed) clearPublicKey()
+                            if (info.viaMqtt) longName = "$longName (MQTT)"
+                        }
+                    entity.longName = entity.user.longName
+                    entity.shortName = entity.user.shortName
+                }
+            }
+            if (info.hasPosition()) {
+                entity.position = info.position
+                entity.latitude = Position.degD(info.position.latitudeI)
+                entity.longitude = Position.degD(info.position.longitudeI)
+            }
+            entity.lastHeard = info.lastHeard
+            if (info.hasDeviceMetrics()) {
+                entity.deviceTelemetry = telemetry { deviceMetrics = info.deviceMetrics }
+            }
+            entity.channel = info.channel
+            entity.viaMqtt = info.viaMqtt
+            entity.hopsAway = if (info.hasHopsAway()) info.hopsAway else -1
+            entity.isFavorite = info.isFavorite
+            entity.isIgnored = info.isIgnored
+        }
+    }
+
+    private fun shouldPreserveExistingUser(existing: MeshProtos.User, incoming: MeshProtos.User): Boolean {
+        val isDefaultName = incoming.longName.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+        val isDefaultHwModel = incoming.hwModel == MeshProtos.HardwareModel.UNSET
+        val hasExistingUser = existing.id.isNotEmpty() && existing.hwModel != MeshProtos.HardwareModel.UNSET
+        return hasExistingUser && isDefaultName && isDefaultHwModel
+    }
+
+    fun toNodeID(n: Int): String = if (n == DataPacket.NODENUM_BROADCAST) {
+        DataPacket.ID_BROADCAST
+    } else {
+        nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
+    }
+}

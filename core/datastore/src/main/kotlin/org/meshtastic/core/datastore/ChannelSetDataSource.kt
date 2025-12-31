@@ -47,12 +47,11 @@ class ChannelSetDataSource @Inject constructor(private val channelSetStore: Data
         channelSetStore.updateData { preference -> preference.toBuilder().clear().build() }
     }
 
-    suspend fun clearSettings() {
-        channelSetStore.updateData { preference -> preference.toBuilder().clearSettings().build() }
-    }
-
-    suspend fun addAllSettings(settingsList: List<ChannelSettings>) {
-        channelSetStore.updateData { preference -> preference.toBuilder().addAllSettings(settingsList).build() }
+    /** Replaces all [ChannelSettings] in a single atomic operation. */
+    suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
+        channelSetStore.updateData { preference ->
+            preference.toBuilder().clearSettings().addAllSettings(settingsList).build()
+        }
     }
 
     /** Updates the [ChannelSettings] list with the provided channel. */

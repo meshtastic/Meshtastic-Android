@@ -40,12 +40,14 @@ import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.MeshProtos.ToRadio
 import org.meshtastic.proto.fromRadio
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Suppress("TooManyFunctions")
 @Singleton
 class PacketHandler
 @Inject
@@ -54,18 +56,22 @@ constructor(
     private val serviceBroadcasts: MeshServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val connectionStateHolder: MeshServiceConnectionStateHolder,
+    private val connectionStateHolder: ConnectionStateHandler,
 ) {
 
     companion object {
-        private const val TIMEOUT_MS = 250L
+        private const val TIMEOUT_MS = 5000L // Increased from 250ms to be more tolerant
     }
 
     private var queueJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
-    private val queueResponse = mutableMapOf<Int, CompletableFuture<Boolean>>()
+    private val queueResponse = ConcurrentHashMap<Int, CompletableFuture<Boolean>>()
+
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
 
     /**
      * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
@@ -121,7 +127,8 @@ constructor(
         if (requestId != 0) {
             queueResponse.remove(requestId)?.complete(success)
         } else {
-            queueResponse.entries.lastOrNull { !it.value.isDone }?.value?.complete(success)
+            // This is slightly suboptimal but matches legacy behavior for packets without IDs
+            queueResponse.values.firstOrNull { !it.isDone }?.complete(success)
         }
     }
 
@@ -148,6 +155,8 @@ constructor(
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
                     } catch (e: Exception) {
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} failed" }
+                    } finally {
+                        queueResponse.remove(packet.id)
                     }
                 }
             }
