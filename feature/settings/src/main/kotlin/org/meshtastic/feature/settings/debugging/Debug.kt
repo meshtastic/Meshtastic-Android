@@ -82,6 +82,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.debug_clear
@@ -93,7 +94,9 @@ import org.meshtastic.core.strings.debug_filters
 import org.meshtastic.core.strings.debug_logs_export
 import org.meshtastic.core.strings.debug_panel
 import org.meshtastic.core.strings.log_retention_days
+import org.meshtastic.core.strings.log_retention_days_quantity
 import org.meshtastic.core.strings.log_retention_days_summary
+import org.meshtastic.core.strings.log_retention_hours
 import org.meshtastic.core.strings.log_retention_never
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.DropDownPreference
@@ -233,9 +236,9 @@ private fun DebugLogSettings(viewModel: DebugViewModel) {
     ) {
         @Suppress("MagicNumber")
         val retentionItems =
-            listOf((-1L) to "1 hour") +
+            listOf((-1L) to pluralStringResource(Res.plurals.log_retention_hours, 1, 1)) +
                 listOf(1, 3, 7, 14, 30, 60, 90, 180, 365).map { days ->
-                    days.toLong() to if (days == 1) "1 day" else "$days days"
+                    days.toLong() to pluralStringResource(Res.plurals.log_retention_days_quantity, days, days)
                 } +
                 listOf(0L to stringResource(Res.string.log_retention_never))
         DropDownPreference(

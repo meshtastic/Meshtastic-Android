@@ -226,6 +226,19 @@
     <string name="debug_export_cancelled">Export canceled</string>
     <string name="debug_export_success">%1$d logs exported</string>
     <string name="debug_export_failed">Failed to write log file: %1$s</string>
+    <string name="debug_export_no_logs">No logs to export</string>
+    <string name="log_retention_one_hour">1 hour</string>
+    <string name="log_retention_days_format">%1$d days</string>
+
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
     <string name="debug_filters">Filters</string>
     <string name="debug_active_filters">Active filters</string>
     <string name="debug_default_search">Search in logs…</string>

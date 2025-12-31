@@ -1016,4 +1016,17 @@
     <string name="compass_no_location_fix">Odotetaan GPS-paikannusta etäisyyden ja suunnan laskemiseksi.</string>
     <string name="compass_uncertainty">Arvioitu alue: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Arvioitu alue: tarkkuus tuntematon</string>
+    <string name="debug_export_no_logs">No logs to export</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+
+    <string name="log_retention_one_hour">1 hour</string>
+    <string name="log_retention_days_format">%1$d days</string>
+
 </resources>
