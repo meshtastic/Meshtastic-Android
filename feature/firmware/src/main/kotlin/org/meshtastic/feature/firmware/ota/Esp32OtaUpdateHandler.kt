@@ -107,7 +107,7 @@ constructor(
         hardware = hardware,
         updateState = updateState,
         firmwareUri = firmwareUri,
-        transportFactory = { WifiOtaTransport(deviceIp) },
+        transportFactory = { WifiOtaTransport(deviceIp, WifiOtaTransport.DEFAULT_PORT) },
         rebootMode = 2,
         connectionAttempts = 10,
     )
