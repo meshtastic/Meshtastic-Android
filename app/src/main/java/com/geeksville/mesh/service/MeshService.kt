@@ -1573,8 +1573,13 @@ class MeshService : Service() {
     private fun getHopsAwayForPacket(packet: MeshPacket): Int =
         if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
             0 // These don't come with the .hop params, but do not propagate, so they must be 0
-        } else if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
+        } else if (packet.hopStart == 0 && !packet.decoded.hasBitfield()) {
+            // Firmware prior to 2.3.0 doesn't set hopStart. The bitfield was added in 2.5.0. Its
+            // absence is used to approximate firmware versions where hopStart is missing and when
+            // the number of hops away cannot be calculated.
             -1
+        } else if (packet.hopLimit > packet.hopStart) {
+            -1 // Invalid hopStart/hopLimit.
         } else {
             packet.hopStart - packet.hopLimit
         }
