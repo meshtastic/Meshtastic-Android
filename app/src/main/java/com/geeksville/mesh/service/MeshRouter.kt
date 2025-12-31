@@ -22,9 +22,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Orchestrates the specialized packet handlers for the [MeshService].
- * This class serves as a central registry and lifecycle manager for all routing sub-components.
+ * Orchestrates the specialized packet handlers for the [MeshService]. This class serves as a central registry and
+ * lifecycle manager for all routing sub-components.
  */
+@Suppress("LongParameterList")
 @Singleton
 class MeshRouter
 @Inject

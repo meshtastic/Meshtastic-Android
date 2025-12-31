@@ -114,7 +114,8 @@ constructor(
                 PayloadVariantCase.XMODEMPACKET -> "XmodemPacket" to proto.xmodemPacket.toString()
                 PayloadVariantCase.DEVICEUICONFIG -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
                 PayloadVariantCase.FILEINFO -> "FileInfo" to proto.fileInfo.toString()
-                else -> return // Other variants (Config, NodeInfo, etc.) are handled by dispatcher but not necessarily logged as raw strings here
+                else -> return // Other variants (Config, NodeInfo, etc.) are handled by dispatcher but not necessarily
+                // logged as raw strings here
             }
 
         insertMeshLog(

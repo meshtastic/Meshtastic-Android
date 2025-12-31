@@ -25,6 +25,7 @@ import com.meshtastic.core.strings.getString
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -74,6 +75,8 @@ constructor(
     private val historyManager: MeshHistoryManager,
     private val meshPrefs: MeshPrefs,
     private val connectionManager: MeshConnectionManager,
+    private val tracerouteHandler: MeshTracerouteHandler,
+    private val neighborInfoHandler: MeshNeighborInfoHandler,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -117,8 +120,22 @@ constructor(
             Portnums.PortNum.POSITION_APP_VALUE -> handlePosition(packet, dataPacket, myNodeNum)
             Portnums.PortNum.NODEINFO_APP_VALUE -> if (!fromUs) handleNodeInfo(packet)
             Portnums.PortNum.TELEMETRY_APP_VALUE -> handleTelemetry(packet, dataPacket, myNodeNum)
+            else -> shouldBroadcast = handleSpecializedDataPacket(packet, dataPacket, myNodeNum, logUuid, logInsertJob)
+        }
+        return shouldBroadcast
+    }
+
+    private fun handleSpecializedDataPacket(
+        packet: MeshPacket,
+        dataPacket: DataPacket,
+        myNodeNum: Int,
+        logUuid: String?,
+        logInsertJob: Job?,
+    ): Boolean {
+        var shouldBroadcast = false
+        when (packet.decoded.portnumValue) {
             Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
-                router.tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
+                tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
                 shouldBroadcast = false
             }
             Portnums.PortNum.ROUTING_APP_VALUE -> {
@@ -142,13 +159,16 @@ constructor(
             }
 
             Portnums.PortNum.NEIGHBORINFO_APP_VALUE -> {
-                router.neighborInfoHandler.handleNeighborInfo(packet)
+                neighborInfoHandler.handleNeighborInfo(packet)
                 shouldBroadcast = true
             }
 
             Portnums.PortNum.RANGE_TEST_APP_VALUE,
             Portnums.PortNum.DETECTION_SENSOR_APP_VALUE,
-            -> handleRangeTest(dataPacket, myNodeNum)
+            -> {
+                handleRangeTest(dataPacket, myNodeNum)
+                shouldBroadcast = false
+            }
         }
         return shouldBroadcast
     }

@@ -57,7 +57,6 @@ constructor(
     private val meshPrefs: MeshPrefs,
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshServiceNotifications,
-    private val radioConfigRepository: org.meshtastic.core.data.repository.RadioConfigRepository,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -172,10 +171,7 @@ constructor(
                 when {
                     provideLocation && position.isValid() -> position
                     else ->
-                        nodeManager.nodeDBbyNodeNum[myNodeNum]
-                            ?.position
-                            ?.let { Position(it) }
-                            ?.takeIf { it.isValid() }
+                        nodeManager.nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
                 }
             currentPosition?.let { commandSender.requestPosition(destNum, it) }
         }
@@ -237,9 +233,7 @@ constructor(
     }
 
     fun handleGetCannedMessages(id: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, id, wantResponse = true) {
-            getCannedMessageModuleMessagesRequest = true
-        }
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { getCannedMessageModuleMessagesRequest = true }
     }
 
     fun handleSetChannel(payload: ByteArray?, myNodeNum: Int) {
@@ -297,9 +291,7 @@ constructor(
     }
 
     fun handleGetDeviceConnectionStatus(requestId: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, requestId, wantResponse = true) {
-            getDeviceConnectionStatusRequest = true
-        }
+        commandSender.sendAdmin(destNum, requestId, wantResponse = true) { getDeviceConnectionStatusRequest = true }
     }
 
     fun handleUpdateLastAddress(deviceAddr: String?) {

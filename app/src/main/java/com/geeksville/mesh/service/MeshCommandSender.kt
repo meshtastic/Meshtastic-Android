@@ -50,6 +50,7 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.absoluteValue
+import kotlin.time.Duration.Companion.hours
 
 @Suppress("TooManyFunctions")
 @Singleton
@@ -273,8 +274,7 @@ constructor(
             when (type) {
                 TelemetryType.ENVIRONMENT ->
                     environmentMetrics = TelemetryProtos.EnvironmentMetrics.getDefaultInstance()
-                TelemetryType.AIR_QUALITY ->
-                    airQualityMetrics = TelemetryProtos.AirQualityMetrics.getDefaultInstance()
+                TelemetryType.AIR_QUALITY -> airQualityMetrics = TelemetryProtos.AirQualityMetrics.getDefaultInstance()
                 TelemetryType.POWER -> powerMetrics = TelemetryProtos.PowerMetrics.getDefaultInstance()
                 TelemetryType.LOCAL_STATS -> localStats = TelemetryProtos.LocalStats.getDefaultInstance()
                 TelemetryType.DEVICE -> deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
@@ -296,7 +296,7 @@ constructor(
         neighborInfoStartTimes[requestId] = System.currentTimeMillis()
         val myNum = nodeManager?.myNodeNum ?: 0
         if (destNum == myNum) {
-            val oneHour = 3600
+            val oneHour = 1.hours.inWholeMinutes.toInt()
             val neighborInfoToSend =
                 MeshProtos.NeighborInfo.newBuilder()
                     .setNodeId(myNum)
@@ -345,7 +345,7 @@ constructor(
         else -> {
             val numericNum =
                 if (toId.startsWith(NODE_ID_PREFIX)) {
-                    toId.substring(1).toLongOrNull(HEX_RADIX)?.toInt()
+                    toId.substring(NODE_ID_START_INDEX).toLongOrNull(HEX_RADIX)?.toInt()
                 } else {
                     null
                 }
@@ -414,6 +414,7 @@ constructor(
 
         private const val ADMIN_CHANNEL_NAME = "admin"
         private const val NODE_ID_PREFIX = "!"
+        private const val NODE_ID_START_INDEX = 1
         private const val HEX_RADIX = 16
     }
 }

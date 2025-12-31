@@ -48,7 +48,7 @@ constructor(
 
     fun handleNeighborInfo(packet: MeshPacket) {
         val ni = MeshProtos.NeighborInfo.parseFrom(packet.decoded.payload)
-        
+
         // Update Node DB
         nodeManager.updateNodeInfo(packet.from) { it.neighborInfo = ni }
         nodeManager.nodeDBbyNodeNum[packet.from]?.let { serviceBroadcasts.broadcastNodeChange(it) }
@@ -57,23 +57,29 @@ constructor(
         val requestId = packet.decoded.requestId
         val start = commandSender.neighborInfoStartTimes.remove(requestId)
 
-        val neighbors = ni.neighborsList.joinToString("\n") { n ->
-            val node = nodeManager.nodeDBbyNodeNum[n.nodeId]
-            val name = node?.let { "${it.longName} (${it.shortName})" } ?: getString(Res.string.unknown_username)
-            "• $name (SNR: ${n.snr})"
-        }
+        val neighbors =
+            ni.neighborsList.joinToString("\n") { n ->
+                val node = nodeManager.nodeDBbyNodeNum[n.nodeId]
+                val name = node?.let { "${it.longName} (${it.shortName})" } ?: getString(Res.string.unknown_username)
+                "• $name (SNR: ${n.snr})"
+            }
 
         val formatted = "Neighbors of ${nodeManager.nodeDBbyNodeNum[packet.from]?.longName ?: "Unknown"}:\n$neighbors"
 
-        val responseText = if (start != null) {
-            val elapsedMs = System.currentTimeMillis() - start
-            val seconds = elapsedMs / 1000.0
-            Timber.i("Neighbor info $requestId complete in $seconds s")
-            String.format(Locale.US, "%s\n\nDuration: %.1f s", formatted, seconds)
-        } else {
-            formatted
-        }
+        val responseText =
+            if (start != null) {
+                val elapsedMs = System.currentTimeMillis() - start
+                val seconds = elapsedMs / MILLIS_PER_SECOND
+                Timber.i("Neighbor info $requestId complete in $seconds s")
+                String.format(Locale.US, "%s\n\nDuration: %.1f s", formatted, seconds)
+            } else {
+                formatted
+            }
 
         serviceRepository.setNeighborInfoResponse(responseText)
+    }
+
+    companion object {
+        private const val MILLIS_PER_SECOND = 1000.0
     }
 }

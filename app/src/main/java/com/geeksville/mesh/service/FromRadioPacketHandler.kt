@@ -24,8 +24,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Dispatches non-packet [MeshProtos.FromRadio] variants to their respective handlers.
- * This class is stateless and handles routing for config, metadata, and specialized system messages.
+ * Dispatches non-packet [MeshProtos.FromRadio] variants to their respective handlers. This class is stateless and
+ * handles routing for config, metadata, and specialized system messages.
  */
 @Singleton
 class FromRadioPacketHandler
@@ -66,7 +66,9 @@ constructor(
             MeshProtos.FromRadio.PayloadVariantCase.XMODEMPACKET,
             MeshProtos.FromRadio.PayloadVariantCase.DEVICEUICONFIG,
             MeshProtos.FromRadio.PayloadVariantCase.FILEINFO,
-            -> { /* No specialized routing needed here */ }
+            -> {
+                /* No specialized routing needed here */
+            }
 
             else -> Timber.d("Dispatcher ignoring ${proto.payloadVariantCase}")
         }

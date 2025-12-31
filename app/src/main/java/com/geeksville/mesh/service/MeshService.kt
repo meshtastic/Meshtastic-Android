@@ -211,9 +211,7 @@ class MeshService : Service() {
                 router.actionHandler.handleGetRemoteOwner(id, destNum)
             }
 
-            override fun send(p: DataPacket) = toRemoteExceptions {
-                router.actionHandler.handleSend(p, myNodeNum)
-            }
+            override fun send(p: DataPacket) = toRemoteExceptions { router.actionHandler.handleSend(p, myNodeNum) }
 
             override fun getConfig(): ByteArray = toRemoteExceptions {
                 runBlocking {
@@ -327,9 +325,7 @@ class MeshService : Service() {
                 router.actionHandler.handleRequestReboot(requestId, destNum)
             }
 
-            override fun rebootToDfu() = toRemoteExceptions {
-                router.actionHandler.handleRebootToDfu(myNodeNum)
-            }
+            override fun rebootToDfu() = toRemoteExceptions { router.actionHandler.handleRebootToDfu(myNodeNum) }
 
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
                 router.actionHandler.handleRequestFactoryReset(requestId, destNum)
