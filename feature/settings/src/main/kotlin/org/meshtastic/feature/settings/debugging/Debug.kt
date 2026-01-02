@@ -23,6 +23,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -80,6 +82,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.debug_clear
@@ -90,9 +93,16 @@ import org.meshtastic.core.strings.debug_export_success
 import org.meshtastic.core.strings.debug_filters
 import org.meshtastic.core.strings.debug_logs_export
 import org.meshtastic.core.strings.debug_panel
+import org.meshtastic.core.strings.log_retention_days
+import org.meshtastic.core.strings.log_retention_days_quantity
+import org.meshtastic.core.strings.log_retention_days_summary
+import org.meshtastic.core.strings.log_retention_hours
+import org.meshtastic.core.strings.log_retention_never
 import org.meshtastic.core.ui.component.CopyIconButton
+import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
@@ -148,9 +158,11 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
     val exportLogsLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { createdUri ->
             if (createdUri != null) {
-                scope.launch { exportAllLogsToUri(context, createdUri, filteredLogs) }
+                scope.launch { exportAllLogsToUri(context, createdUri, viewModel.loadLogsForExport()) }
             }
         }
+
+    var showSettings by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -160,7 +172,12 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
-                actions = { DebugMenuActions(deleteLogs = { viewModel.deleteAllLogs() }) },
+                actions = {
+                    IconButton(onClick = { showSettings = !showSettings }) {
+                        Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
+                    }
+                    DebugMenuActions(deleteLogs = { viewModel.deleteAllLogs() })
+                },
                 onClickChip = {},
             )
         },
@@ -187,6 +204,9 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
                             exportLogsLauncher.launch(fileName)
                         },
                     )
+                    if (showSettings) {
+                        DebugLogSettings(viewModel = viewModel)
+                    }
                 }
                 items(filteredLogs, key = { it.uuid }) { log ->
                     DebugItem(
@@ -199,6 +219,44 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DebugLogSettings(viewModel: DebugViewModel) {
+    val retentionDays = viewModel.retentionDays.collectAsStateWithLifecycle().value
+    val loggingEnabled = viewModel.loggingEnabled.collectAsStateWithLifecycle().value
+
+    Column(
+        modifier =
+        Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        @Suppress("MagicNumber")
+        val retentionItems =
+            listOf((-1L) to pluralStringResource(Res.plurals.log_retention_hours, 1, 1)) +
+                listOf(1, 3, 7, 14, 30, 60, 90, 180, 365).map { days ->
+                    days.toLong() to pluralStringResource(Res.plurals.log_retention_days_quantity, days, days)
+                } +
+                listOf(0L to stringResource(Res.string.log_retention_never))
+        DropDownPreference(
+            title = stringResource(Res.string.log_retention_days),
+            enabled = loggingEnabled,
+            items = retentionItems,
+            selectedItem = retentionDays.toLong(),
+            onItemSelected = { selected: Long -> viewModel.setRetentionDays(selected.toInt()) },
+            summary = stringResource(Res.string.log_retention_days_summary),
+        )
+
+        SwitchPreference(
+            title = "Store mesh logs",
+            enabled = true,
+            checked = loggingEnabled,
+            onCheckedChange = { viewModel.setLoggingEnabled(it) },
+            summary = "Disable to skip writing mesh logs to disk",
+        )
     }
 }
 
@@ -374,6 +432,12 @@ fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
 private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<UiMeshLog>) =
     withContext(Dispatchers.IO) {
         try {
+            if (logs.isEmpty()) {
+                withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
+                Logger.w { "MeshLog export aborted: no logs available" }
+                return@withContext
+            }
+
             context.contentResolver.openOutputStream(targetUri)?.use { os ->
                 OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer ->
                     logs.forEach { log ->
@@ -408,7 +472,7 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
         } catch (e: IOException) {
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
-            Logger.w(e) { "Error:IOException" }
+            Logger.w(e) { "MeshLog export failed" }
         }
     }
 

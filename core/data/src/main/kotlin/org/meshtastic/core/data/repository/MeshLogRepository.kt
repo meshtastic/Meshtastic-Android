@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.Portnums
@@ -39,9 +40,15 @@ class MeshLogRepository
 constructor(
     private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
+    private val meshLogPrefs: MeshLogPrefs,
 ) {
     fun getAllLogs(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> =
         dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogs(maxItems) }.flowOn(dispatchers.io).conflate()
+
+    fun getAllLogsUnbounded(): Flow<List<MeshLog>> = dbManager.currentDb
+        .flatMapLatest { it.meshLogDao().getAllLogs(Int.MAX_VALUE) }
+        .flowOn(dispatchers.io)
+        .conflate()
 
     fun getAllLogsInReceiveOrder(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getAllLogsInReceiveOrder(maxItems) }
@@ -134,8 +141,10 @@ constructor(
         .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
         .flowOn(dispatchers.io)
 
-    suspend fun insert(log: MeshLog) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().insert(log) }
+    suspend fun insert(log: MeshLog) = withContext(dispatchers.io) {
+        if (!meshLogPrefs.loggingEnabled) return@withContext
+        dbManager.currentDb.value.meshLogDao().insert(log)
+    }
 
     suspend fun deleteAll() = withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteAll() }
 
@@ -144,6 +153,19 @@ constructor(
 
     suspend fun deleteLogs(nodeNum: Int, portNum: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteLogs(nodeNum, portNum) }
+
+    @Suppress("MagicNumber")
+    suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
+        if (retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) return@withContext
+
+        val cutoffTimestamp =
+            if (retentionDays == MeshLogPrefs.ONE_HOUR_RETENTION_DAYS) {
+                System.currentTimeMillis() - (60 * 60 * 1000L)
+            } else {
+                System.currentTimeMillis() - (retentionDays * 24 * 60 * 60 * 1000L)
+            }
+        dbManager.currentDb.value.meshLogDao().deleteOlderThan(cutoffTimestamp)
+    }
 
     companion object {
         private const val MAX_ITEMS = 500

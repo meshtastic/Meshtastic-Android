@@ -56,4 +56,7 @@ interface MeshLogDao {
 
     @Query("DELETE FROM log WHERE from_num = :fromNum AND port_num = :portNum")
     suspend fun deleteLogs(fromNum: Int, portNum: Int)
+
+    @Query("DELETE FROM log WHERE received_date < :cutoffTimestamp")
+    suspend fun deleteOlderThan(cutoffTimestamp: Long)
 }

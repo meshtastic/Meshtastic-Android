@@ -31,13 +31,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
+import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos
@@ -204,10 +208,20 @@ class DebugViewModel
 constructor(
     private val meshLogRepository: MeshLogRepository,
     private val nodeRepository: NodeRepository,
+    private val meshLogPrefs: MeshLogPrefs,
 ) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
-        meshLogRepository.getAllLogs().map(::toUiState).stateInWhileSubscribed(initialValue = persistentListOf())
+        meshLogRepository
+            .getAllLogs()
+            .mapLatest { logs -> withContext(Dispatchers.Default) { toUiState(logs) } }
+            .stateInWhileSubscribed(initialValue = persistentListOf())
+
+    private val _retentionDays = MutableStateFlow(meshLogPrefs.retentionDays)
+    val retentionDays: StateFlow<Int> = _retentionDays.asStateFlow()
+
+    private val _loggingEnabled = MutableStateFlow(meshLogPrefs.loggingEnabled)
+    val loggingEnabled: StateFlow<Boolean> = _loggingEnabled.asStateFlow()
 
     // --- Managers ---
     val searchManager = LogSearchManager()
@@ -234,6 +248,26 @@ constructor(
     fun updateFilteredLogs(logs: List<UiMeshLog>) {
         filterManager.updateFilteredLogs(logs)
         searchManager.updateMatches(searchManager.searchText.value, logs)
+    }
+
+    fun setRetentionDays(days: Int) {
+        val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
+        meshLogPrefs.retentionDays = clamped
+        _retentionDays.value = clamped
+    }
+
+    fun setLoggingEnabled(enabled: Boolean) {
+        meshLogPrefs.loggingEnabled = enabled
+        _loggingEnabled.value = enabled
+        if (!enabled) {
+            viewModelScope.launch { meshLogRepository.deleteAll() }
+        }
+    }
+
+    suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> = withContext(Dispatchers.IO) {
+        val unbounded = meshLogRepository.getAllLogsUnbounded().first()
+        val logs = if (unbounded.isEmpty()) meshLogRepository.getAllLogs().first() else unbounded
+        toUiState(logs)
     }
 
     init {

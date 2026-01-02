@@ -364,6 +364,7 @@ fun SettingsScreen(
                     onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
                     summary = stringResource(Res.string.device_db_cache_limit_summary),
                 )
+
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
                 val nodeName = ourNode?.user?.shortName ?: ""
 
