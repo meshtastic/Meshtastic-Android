@@ -45,6 +45,12 @@ class HiltConventionPlugin : Plugin<Project> {
             pluginManager.withPlugin("com.android.base") {
                 apply(plugin = "dagger.hilt.android.plugin")
             }
+
+            pluginManager.withPlugin("org.jetbrains.kotlin.plugin.compose") {
+                dependencies {
+                    "implementation"(libs.library("androidx-hilt-lifecycle-viewmodel-compose"))
+                }
+            }
         }
     }
 }

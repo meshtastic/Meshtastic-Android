@@ -58,7 +58,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.emoji2.emojipicker)
-    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.guava)
     implementation(libs.zxing.core)
     implementation(libs.zxing.android.embedded)
