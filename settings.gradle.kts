@@ -77,6 +77,11 @@ develocity {
         }
         publishing.onlyIf { false }
     }
+    buildCache {
+        local {
+            isEnabled = true
+        }
+    }
 }
 
 @Suppress("UnstableApiUsage")
