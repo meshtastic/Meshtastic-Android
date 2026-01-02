@@ -77,7 +77,7 @@ constructor(
 
         val providerList = buildList {
             val providers = allProviders
-            if (android.os.Build.VERSION.SDK_INT >= 31 && LocationManager.FUSED_PROVIDER in providers) {
+            if (LocationManager.FUSED_PROVIDER in providers) {
                 add(LocationManager.FUSED_PROVIDER)
             } else {
                 if (LocationManager.GPS_PROVIDER in providers) add(LocationManager.GPS_PROVIDER)

@@ -33,20 +33,9 @@ enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: I
 
     companion object {
         fun getFromLocale(locale: Locale = Locale.getDefault()): DisplayUnits =
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
-                    LocaleData.MeasurementSystem.SI -> DisplayUnits.METRIC
-                    else -> DisplayUnits.IMPERIAL
-                }
-            } else {
-                when (locale.country.uppercase(locale)) {
-                    "US",
-                    "LR",
-                    "MM",
-                    "GB",
-                    -> DisplayUnits.IMPERIAL
-                    else -> DisplayUnits.METRIC
-                }
+            when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
+                LocaleData.MeasurementSystem.SI -> DisplayUnits.METRIC
+                else -> DisplayUnits.IMPERIAL
             }
     }
 }

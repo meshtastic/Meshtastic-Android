@@ -21,7 +21,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.os.Build
 import androidx.core.content.ContextCompat
 
 /** Checks if the device has a GPS receiver. */
@@ -44,22 +43,12 @@ fun Context.gpsDisabled(): Boolean {
  * Determines the list of Bluetooth permissions that are currently missing. Internal helper for
  * [hasBluetoothPermission].
  *
- * For Android S (API 31) and above, this includes [Manifest.permission.BLUETOOTH_SCAN] and
- * [Manifest.permission.BLUETOOTH_CONNECT]. For older versions, it includes [Manifest.permission.ACCESS_FINE_LOCATION]
- * as it is required for Bluetooth scanning.
+ * This includes [Manifest.permission.BLUETOOTH_SCAN] and [Manifest.permission.BLUETOOTH_CONNECT].
  *
  * @return Array of missing Bluetooth permission strings. Empty if all are granted.
  */
 private fun Context.getBluetoothPermissions(): Array<String> {
-    val requiredPermissions = mutableListOf<String>()
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
-        requiredPermissions.add(Manifest.permission.BLUETOOTH_CONNECT)
-    } else {
-        // ACCESS_FINE_LOCATION is required for Bluetooth scanning on pre-S devices.
-        requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
+    val requiredPermissions = listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
     return requiredPermissions
         .filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
         .toTypedArray()

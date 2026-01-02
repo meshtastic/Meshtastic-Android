@@ -23,7 +23,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -67,14 +66,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-        enableEdgeToEdge(
-            // Disable three-button navbar scrim on pre-Q devices
-            navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Disable three-button navbar scrim
-            window.setNavigationBarContrastEnforced(false)
-        }
+        enableEdgeToEdge(navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT))
+        // Disable three-button navbar scrim (unconditional on API 32+)
+        window.setNavigationBarContrastEnforced(false)
 
         super.onCreate(savedInstanceState)
 
