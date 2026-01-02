@@ -24,29 +24,61 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.findByType
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
+/**
+ * Convention plugin for analytics (Google Services, Crashlytics, Datadog).
+ * Segregates these plugins to only affect the "google" flavor and disables their tasks for "fdroid".
+ */
 class AnalyticsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
+            // Apply plugins only when the "google" flavor is present.
             extensions.configure<ApplicationExtension> {
-                defaultConfig {
-                    productFlavors {
-                        all {
-                            if (name == "google") {
-                                apply(plugin = libs.plugin("google-services").get().pluginId)
-                                apply(plugin = libs.plugin("firebase-crashlytics").get().pluginId)
-                                apply(plugin = libs.plugin("datadog").get().pluginId)
-                            }
-                        }
+                productFlavors.all {
+                    if (name == "google") {
+                        apply(plugin = libs.plugin("google-services").get().pluginId)
+                        apply(plugin = libs.plugin("firebase-crashlytics").get().pluginId)
+                        apply(plugin = libs.plugin("datadog").get().pluginId)
                     }
                 }
             }
+
+            // More efficient task segregation: Only register task-disabling listeners if the plugins are applied.
+            // This avoids iterating all tasks with a generic filter and improves configuration performance.
+            plugins.withId("com.google.gms.google-services") {
+                tasks.configureEach {
+                    if (name.contains("fdroid", ignoreCase = true) && name.contains("GoogleServices")) {
+                        enabled = false
+                    }
+                }
+            }
+
+            plugins.withId("com.google.firebase.crashlytics") {
+                tasks.configureEach {
+                    if (name.contains("fdroid", ignoreCase = true) &&
+                        (name.contains("Crashlytics", ignoreCase = true) || name.contains("buildId", ignoreCase = true))
+                    ) {
+                        enabled = false
+                    }
+                }
+            }
+
+            plugins.withId("com.datadoghq.dd-sdk-android-gradle-plugin") {
+                tasks.configureEach {
+                    if (name.contains("fdroid", ignoreCase = true) && name.contains("Datadog", ignoreCase = true)) {
+                        enabled = false
+                    }
+                }
+            }
+
+            // Configure variant-specific extensions.
             extensions.configure<ApplicationAndroidComponentsExtension> {
                 onVariants { variant ->
                     if (variant.flavorName == "google") {
-                        extensions.configure<DdExtension> {
+                        extensions.findByType<DdExtension>()?.apply {
                             variants {
                                 register(variant.name) {
                                     site = "US5"
@@ -56,18 +88,6 @@ class AnalyticsConventionPlugin : Plugin<Project> {
                             checkProjectDependencies = SdkCheckLevel.NONE
                         }
                     }
-                }
-            }
-
-            // Disable Analytics tasks for non-google flavors
-            val analyticsKeywords = listOf("crashlytics", "google", "datadog", "buildId")
-            tasks.configureEach {
-                val taskName = name.lowercase()
-                val isAnalyticsTask = analyticsKeywords.any { taskName.contains(it, ignoreCase = true) }
-
-                if (isAnalyticsTask && taskName.contains("fdroid", ignoreCase = true)) {
-                    logger.lifecycle("AnalyticsConventionPlugin: Disabling task $name")
-                    enabled = false
                 }
             }
         }

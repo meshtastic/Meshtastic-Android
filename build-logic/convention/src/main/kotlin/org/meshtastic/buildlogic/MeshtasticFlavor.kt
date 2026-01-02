@@ -48,10 +48,8 @@ fun configureFlavors(
                 register(meshtasticFlavor.name) {
                     dimension = meshtasticFlavor.dimension.name
                     flavorConfigurationBlock(this, meshtasticFlavor)
-                    if (this@apply is ApplicationExtension && this is ApplicationProductFlavor) {
-                        if (meshtasticFlavor.default) {
-                            isDefault = true
-                        }
+                    if (meshtasticFlavor.default) {
+                        isDefault = true
                     }
                 }
             }
