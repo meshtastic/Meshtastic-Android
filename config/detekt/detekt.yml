@@ -55,7 +55,7 @@ comments:
   AbsentOrWrongFileLicense:
     active: true
     licenseTemplateFile: 'license.template'
-    licenseTemplateIsRegex: false
+    licenseTemplateIsRegex: true
   CommentOverPrivateFunction:
     active: false
   CommentOverPrivateProperty:
