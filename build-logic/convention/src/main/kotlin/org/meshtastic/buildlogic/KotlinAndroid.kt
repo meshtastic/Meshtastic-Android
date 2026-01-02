@@ -93,6 +93,8 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         compilerOptions {
             allWarningsAsErrors.set(false)
             freeCompilerArgs.addAll(
+                // Increase memory for the Kotlin compiler
+                "-Xmx4g",
                 // Enable experimental coroutines APIs, including Flow
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-Xcontext-parameters",
