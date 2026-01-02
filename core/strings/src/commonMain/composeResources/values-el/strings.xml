@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="node_filter_placeholder">Φίλτρο</string>
     <string name="node_sort_alpha">A-Ω</string>
     <string name="node_sort_channel">Κανάλι</string>

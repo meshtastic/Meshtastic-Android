@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="routing_error_admin_public_key_unauthorized">Cheie publică neautorizată</string>
     <string name="role_sensor_desc">Transmite pachete telemetrice ca prioritate.</string>
     <!-- Position Config -->

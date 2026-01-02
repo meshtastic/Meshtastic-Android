@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">klarifye filtè nœud</string>
     <string name="node_filter_include_unknown">Enkli enkoni</string>

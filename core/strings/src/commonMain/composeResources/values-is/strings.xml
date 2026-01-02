@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <!-- Position Config -->
     <string name="channel_name">Heiti rásar</string>
     <string name="qr_code">QR kóði</string>
