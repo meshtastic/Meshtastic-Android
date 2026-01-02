@@ -21,11 +21,13 @@ import co.touchlab.kermit.Logger
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.Lazy
-import java8.util.concurrent.CompletableFuture
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -40,12 +42,12 @@ import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.MeshProtos.ToRadio
 import org.meshtastic.proto.fromRadio
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Suppress("TooManyFunctions")
 @Singleton
 class PacketHandler
 @Inject
@@ -54,18 +56,22 @@ constructor(
     private val serviceBroadcasts: MeshServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val connectionStateHolder: MeshServiceConnectionStateHolder,
+    private val connectionStateHolder: ConnectionStateHandler,
 ) {
 
     companion object {
-        private const val TIMEOUT_MS = 250L
+        private const val TIMEOUT_MS = 5000L // Increased from 250ms to be more tolerant
     }
 
     private var queueJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
-    private val queueResponse = mutableMapOf<Int, CompletableFuture<Boolean>>()
+    private val queueResponse = ConcurrentHashMap<Int, CompletableDeferred<Boolean>>()
+
+    fun start(scope: CoroutineScope) {
+        this.scope = scope
+    }
 
     /**
      * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
@@ -109,7 +115,7 @@ constructor(
             queueJob?.cancel()
             queueJob = null
             queuedPackets.clear()
-            queueResponse.entries.lastOrNull { !it.value.isDone }?.value?.complete(false)
+            queueResponse.entries.lastOrNull { !it.value.isCompleted }?.value?.complete(false)
             queueResponse.clear()
         }
     }
@@ -121,7 +127,8 @@ constructor(
         if (requestId != 0) {
             queueResponse.remove(requestId)?.complete(success)
         } else {
-            queueResponse.entries.lastOrNull { !it.value.isDone }?.value?.complete(success)
+            // This is slightly suboptimal but matches legacy behavior for packets without IDs
+            queueResponse.values.firstOrNull { !it.isCompleted }?.complete(success)
         }
     }
 
@@ -142,12 +149,14 @@ constructor(
                         // send packet to the radio and wait for response
                         val response = sendPacket(packet)
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} waiting" }
-                        val success = response.get(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                        val success = withTimeout(TIMEOUT_MS) { response.await() }
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} success $success" }
-                    } catch (e: TimeoutException) {
+                    } catch (e: TimeoutCancellationException) {
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
                     } catch (e: Exception) {
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} failed" }
+                    } finally {
+                        queueResponse.remove(packet.id)
                     }
                 }
             }
@@ -175,11 +184,11 @@ constructor(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    private fun sendPacket(packet: MeshPacket): CompletableFuture<Boolean> {
-        // send the packet to the radio and return a CompletableFuture that will be completed with
+    private fun sendPacket(packet: MeshPacket): CompletableDeferred<Boolean> {
+        // send the packet to the radio and return a CompletableDeferred that will be completed with
         // the result
-        val future = CompletableFuture<Boolean>()
-        queueResponse[packet.id] = future
+        val deferred = CompletableDeferred<Boolean>()
+        queueResponse[packet.id] = deferred
         try {
             if (connectionStateHolder.connectionState.value != ConnectionState.Connected) {
                 throw RadioNotConnectedException()
@@ -187,9 +196,9 @@ constructor(
             sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
         } catch (ex: Exception) {
             Logger.e(ex) { "sendToRadio error: ${ex.message}" }
-            future.complete(false)
+            deferred.complete(false)
         }
-        return future
+        return deferred
     }
 
     private fun insertMeshLog(packetToSave: MeshLog) {

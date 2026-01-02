@@ -57,8 +57,7 @@ constructor(
 
     /** Replaces the [ChannelSettings] list with a new [settingsList]. */
     suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
-        channelSetDataSource.clearSettings()
-        channelSetDataSource.addAllSettings(settingsList)
+        channelSetDataSource.replaceAllSettings(settingsList)
     }
 
     /**

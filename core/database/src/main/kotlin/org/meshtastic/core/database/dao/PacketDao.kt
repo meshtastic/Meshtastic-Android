@@ -329,7 +329,7 @@ interface PacketDao {
             val newIndex = if (oldPSK != null) pskToNewIndex[oldPSK] else null
             if (oldPSK != null && newIndex != null && oldIndex != newIndex) {
                 // Rebuild contact_key with the new index, keeping the rest unchanged
-                val oldKeySuffix = packet.contact_key.drop(1) // removes only the channelIndex prefix
+                val oldKeySuffix = packet.contact_key.dropWhile { it.isDigit() }
                 val newContactKey = "$newIndex$oldKeySuffix"
                 update(packet.copy(contact_key = newContactKey, data = packet.data.copy(channel = newIndex)))
             }
