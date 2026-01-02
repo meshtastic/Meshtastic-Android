@@ -115,6 +115,7 @@
     <string name="config_position_broadcast_smart_minimum_distance_summary">La distancia mínima de cambio en metros que se tendrá en cuenta para una transmisión inteligente de posición.</string>
     <string name="config_position_flags_summary">Campos opcionales a incluir al ensamblar mensajes de posición. Cuantos más campos se incluyan, mayor será el tamaño del mensaje, lo que provocará un mayor tiempo de transmisión y un mayor riesgo de pérdida de paquetes.</string>
     <string name="config_power_is_power_saving_summary">La opción dormirá todo lo posible; los roles de rastreador y sensores y también incluirá la radio LoRa. No uses esta configuración si quieres utilizar tu dispositivo con las aplicaciones del teléfono o si estás usando un dispositivo sin botón de usuario.</string>
+    <string name="config_security_public_key">Generado a partir de nuestra clave pública y enviado a otros nodos de la malla para permitirles calcular una clave secreta compartida.</string>
     <string name="config_security_private_key">Utilizado para crear una clave compartida con un dispositivo remoto.</string>
     <string name="config_security_admin_key">Clave pública autorizada para enviar mensajes de administración a este nodo.</string>
     <string name="config_security_is_managed">Dispositivo gestionado por administrador de la malla, el usuario no puede acceder a las configuraciones del dispositivo.</string>
@@ -173,6 +174,7 @@
     <string name="must_update">Debe actualizar esta aplicación en la tienda de aplicaciones (o en Github). Es demasiado vieja para comunicarse con este firmware de radio. Por favor, lea nuestra <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> sobre este tema.</string>
     <string name="none">Ninguno (desactivado)</string>
     <string name="meshtastic_service_notifications">Notificaciones de servicio</string>
+    <string name="acknowledgements">Agradecimientos</string>
     <string name="channel_invalid">La URL de este canal no es válida y no puede utilizarse</string>
     <string name="contact_invalid">Este contacto no es válido y no se puede agregar</string>
     <string name="debug_panel">Panel de depuración</string>
@@ -239,6 +241,10 @@
     <string name="resend">Reenviar</string>
     <string name="shutdown">Apagar</string>
     <string name="cant_shutdown">Apagado no compatible con este dispositivo</string>
+    <string name="shutdown_warning">⚠️ Esto APAGARÁ el nodo. Se necesitará interacción física para volver a encenderlo.</string>
+    <string name="shutdown_critical_node">⚠️ Este es un nodo crítico de infraestructura. Escriba el nombre del nodo para confirmar:</string>
+    <string name="shutdown_node_name">Nodo: %1$s</string>
+    <string name="shutdown_type_name">Tipo: %1$s</string>
     <string name="reboot">Reiniciar</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Mostrar Introducción</string>
@@ -250,6 +256,7 @@
     <string name="quick_chat_instant">Envía instantáneo</string>
     <string name="quick_chat_show">Mostrar menú rápido de chat</string>
     <string name="quick_chat_hide">Ocultar menú rápido de chat</string>
+    <string name="quick_chat_show_label">Mostrar chat rápido</string>
     <string name="factory_reset">Restablecer los valores de fábrica</string>
     <string name="bluetooth_disabled">Bluetooth está deshabilitado. Por favor, actívalo en la configuración de tu dispositivo.</string>
     <string name="open_settings">Abrir ajustes</string>
@@ -355,6 +362,8 @@ Rango de Valores 0 - 500.</string>
         <item quantity="other">%d saltos</item>
     </plurals>
     <string name="traceroute_diff">Salta hacia %1$d Salta de vuelta %2$d</string>
+    <string name="view_on_map">Ver en el mapa</string>
+    <string name="traceroute_showing_nodes">Mostrando %1$d/%2$d nodos</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1Semana</string>
@@ -720,6 +729,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="modules_unlocked">Módulos desbloqueados</string>
     <string name="modules_already_unlocked">Módulos ya desbloqueados</string>
     <string name="remote">Remoto</string>
+    <string name="node_count_template">(%1$d en línea / %2$d mostrado / %3$d total)</string>
     <string name="react">Reaccionar</string>
     <string name="disconnect">Desconectar</string>
     <string name="scanning_bluetooth">Buscando dispositivos Bluetooth…</string>
@@ -805,6 +815,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="notification_permissions_description">Meshtastic utiliza las notificaciones para mantenerte actualizado sobre nuevos mensajes y otros eventos importantes. Puedes actualizar tus permisos de notificación en cualquier momento desde la configuración.</string>
     <string name="next">Siguiente</string>
     <string name="grant_permissions">Otorgar permisos</string>
+    <string name="nodes_queued_for_deletion">%1$d nodos en cola para borrar:</string>
     <string name="clean_node_database_description">Precaución: Esto elimina los nodos de las bases de datos en la aplicación y en el dispositivo.\nLas selecciones son aditivas.</string>
     <string name="connecting_to_device">Conectándose al dispositivo</string>
     <string name="map_type_normal">Normal</string>
@@ -836,6 +847,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="secondary_channel_position_feature">Deshabilitar la posición en el canal principal permite las emisiones de posición periódica en el primer canal secundario con la posición habilitada, de lo contrario se requiere una solicitud de posición manual.</string>
     <string name="device_configuration">Configuración del dispositivo</string>
     <string name="device_telemetry_enabled">Enviar telemetría del dispositivo</string>
+    <string name="device_telemetry_enabled_summary">Activar/Desactivar el módulo de telemetría del dispositivo para enviar métricas a la malla. Estos son valores nominales. Las mallas congestionadas escalarán automáticamente a intervalos más largos basados en el número de nodos en línea. Mallas con menos de  nodos escalarán a intervalos más rápidos.</string>
     <string name="any">Cualquiera</string>
     <string name="one_hour">1 hora</string>
     <string name="eight_hours">8 horas</string>
@@ -848,10 +860,32 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="no_local_stats">No hay estadísticas disponibles</string>
     <string name="analytics_notice">Se recopilan analíticas de uso para ayudarnos a mejorar la aplicación Android (¡gracias!), recibiremos información anónima sobre el comportamiento del usuario. Esto incluye reportes de fallos, pantallas utilizadas en la aplicación, etc.</string>
     <string name="for_more_information_see_our_privacy_policy">Para más información, consulte nuestra política de privacidad.</string>
+    <string name="unset">Sin establecer - 0</string>
+    <string name="learn_more">Saber más</string>
     <string name="preserve_favorites">¿Conservar favoritos?</string>
     <string name="usb_devices">Dispositivos USB</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">Actualización de firmware</string>
+    <string name="firmware_update_checking">Buscando actualizaciones...</string>
+    <string name="firmware_update_device">Dispositivo: %1$s</string>
+    <string name="firmware_update_currently_installed">Actualmente instalado: %1$s</string>
+    <string name="firmware_update_latest">Última versión: %1$s</string>
+    <string name="firmware_update_retry">Volver a intentar</string>
+    <string name="firmware_update_success">¡Actualización exitosa!</string>
+    <string name="firmware_update_done">Hecho</string>
+    <string name="firmware_update_starting_dfu">Iniciando DFU...</string>
+    <string name="firmware_update_updating">Actualizando... %1$s%</string>
+    <string name="firmware_update_unknown_hardware">Modelo de hardware desconocido: %1$d</string>
+    <string name="firmware_update_no_device">No hay dispositivos conectados</string>
     <string name="firmware_update_failed">Actualización fallida</string>
+    <string name="firmware_update_do_not_close">No cierres la aplicación.</string>
+    <string name="firmware_update_rebooting">Reiniciando en DFU...</string>
+    <string name="firmware_update_method_usb">Transferencia de archivo USB</string>
     <string name="interval_unset">Sin configurar</string>
+    <string name="interval_always_on">Siempre encendido</string>
     <!-- Compass -->
+    <string name="compass_title">Brújula</string>
+    <string name="open_compass">Abrir brújula</string>
+    <string name="compass_distance">Distancia: %1$s</string>
+    <string name="compass_no_magnetometer">Este dispositivo no tiene un sensor de brújula. El rumbo no está disponible.</string>
 </resources>
