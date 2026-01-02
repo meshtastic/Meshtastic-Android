@@ -81,6 +81,16 @@ develocity {
         local {
             isEnabled = true
         }
+//        remote(HttpBuildCache::class.java) {
+//            isAllowInsecureProtocol = true
+//            // Replace with your selfhosted instance address
+//            // see: https://docs.gradle.org/current/userguide/build_cache.html#sec:build_cache_setup_http_backend
+//            url = uri("http://<your-build-cache-ip-here>:5071/cache/")
+//
+//            // Allow this machine to upload results to the cache
+//            isPush = true
+//
+//        }
     }
 }
 
