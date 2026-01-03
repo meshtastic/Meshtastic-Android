@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
@@ -118,6 +117,8 @@ internal fun MessageListPaged(
             nodes = state.nodes,
             ourNode = state.ourNode,
             resendOption = message.status?.equals(MessageStatus.ERROR) ?: false,
+            retryCount = message.retryCount,
+            maxRetries = 5,
             onResend = {
                 handlers.onDeleteMessages(listOf(message.uuid))
                 handlers.onSendMessage(message.text, state.contactKey)
@@ -436,6 +437,8 @@ internal fun MessageStatusDialog(
     nodes: List<Node>,
     ourNode: Node?,
     resendOption: Boolean,
+    retryCount: Int,
+    maxRetries: Int,
     onResend: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -454,6 +457,8 @@ internal fun MessageStatusDialog(
         text = text,
         relayNodeName = relayNodeName,
         relays = message.relays,
+        retryCount = retryCount,
+        maxRetries = maxRetries,
         onConfirm = onResend,
         onDismiss = onDismiss,
     )

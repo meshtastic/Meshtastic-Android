@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -326,6 +327,37 @@ constructor(
         scope.handledLaunch {
             val isAck = routingError == MeshProtos.Routing.Error.NONE_VALUE
             val p = packetRepository.get().getPacketById(requestId)
+            val isMaxRetransmit = routingError == MeshProtos.Routing.Error.MAX_RETRANSMIT_VALUE
+            val shouldRetry =
+                isMaxRetransmit &&
+                    p != null &&
+                    p.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE &&
+                    p.data.from == DataPacket.ID_LOCAL &&
+                    p.data.retryCount < MAX_RETRY_ATTEMPTS
+
+            Logger.d {
+                val retryInfo = "packetId=${p?.packetId} dataId=${p?.data?.id} retry=${p?.data?.retryCount}"
+                val statusInfo = "status=${p?.data?.status}"
+                "[ackNak] req=$requestId routeErr=$routingError isAck=$isAck " +
+                    "maxRetransmit=$isMaxRetransmit shouldRetry=$shouldRetry $retryInfo $statusInfo"
+            }
+
+            if (shouldRetry && p != null) {
+                val newRetryCount = p.data.retryCount + 1
+                val newId = commandSender.generatePacketId()
+                val updatedData =
+                    p.data.copy(id = newId, status = MessageStatus.QUEUED, retryCount = newRetryCount, relayNode = null)
+                val updatedPacket =
+                    p.copy(packetId = newId, data = updatedData, routingError = MeshProtos.Routing.Error.NONE_VALUE)
+                packetRepository.get().update(updatedPacket)
+
+                Logger.w { "[ackNak] retrying req=$requestId newId=$newId retry=$newRetryCount" }
+
+                delay(RETRY_DELAY_MS)
+                commandSender.sendData(updatedData)
+                return@handledLaunch
+            }
+
             val m =
                 when {
                     isAck && fromId == p?.data?.to -> MessageStatus.RECEIVED
@@ -528,6 +560,8 @@ constructor(
     }
 
     companion object {
+        private const val MAX_RETRY_ATTEMPTS = 5
+        private const val RETRY_DELAY_MS = 5_000L
         private const val MILLISECONDS_IN_SECOND = 1000L
         private const val HOPS_AWAY_UNAVAILABLE = -1
 

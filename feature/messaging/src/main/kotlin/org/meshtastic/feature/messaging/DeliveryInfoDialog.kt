@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
+import org.meshtastic.core.strings.message_retry_count
 import org.meshtastic.core.strings.relays
 import org.meshtastic.core.strings.resend
 
@@ -45,6 +45,8 @@ fun DeliveryInfo(
     text: StringResource? = null,
     relayNodeName: String? = null,
     relays: Int = 0,
+    retryCount: Int = 0,
+    maxRetries: Int = 0,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
 ) = AlertDialog(
@@ -74,6 +76,14 @@ fun DeliveryInfo(
             text?.let {
                 Text(
                     text = stringResource(it),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            if (maxRetries > 0) {
+                Text(
+                    text = stringResource(Res.string.message_retry_count, retryCount, maxRetries),
+                    modifier = Modifier.padding(top = 8.dp),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                 )
