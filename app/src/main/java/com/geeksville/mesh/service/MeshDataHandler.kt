@@ -344,18 +344,9 @@ constructor(
                 val newRetryCount = p.data.retryCount + 1
                 val newId = commandSender.generatePacketId()
                 val updatedData =
-                    p.data.copy(
-                        id = newId,
-                        status = MessageStatus.QUEUED,
-                        retryCount = newRetryCount,
-                        relayNode = null,
-                    )
+                    p.data.copy(id = newId, status = MessageStatus.QUEUED, retryCount = newRetryCount, relayNode = null)
                 val updatedPacket =
-                    p.copy(
-                        packetId = newId,
-                        data = updatedData,
-                        routingError = MeshProtos.Routing.Error.NONE_VALUE,
-                    )
+                    p.copy(packetId = newId, data = updatedData, routingError = MeshProtos.Routing.Error.NONE_VALUE)
                 packetRepository.get().update(updatedPacket)
 
                 delay(RETRY_DELAY_MS)
