@@ -50,7 +50,7 @@ object ContactsRoutes {
 }
 
 object MapRoutes {
-    @Serializable data object Map : Route
+    @Serializable data class Map(val waypointId: Int? = null) : Route
 }
 
 object NodesRoutes {

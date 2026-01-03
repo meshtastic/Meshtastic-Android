@@ -116,7 +116,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
             NotificationType(
                 "my_waypoints",
                 Res.string.meshtastic_waypoints_notifications,
-                NotificationManager.IMPORTANCE_LOW,
+                NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object Alert :
@@ -293,8 +293,8 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         notificationManager.notify(contactKey.hashCode(), notification)
     }
 
-    override fun updateWaypointNotification(contactKey: String, name: String, message: String) {
-        val notification = createWaypointNotification(contactKey, name, message)
+    override fun updateWaypointNotification(contactKey: String, name: String, message: String, waypointId: Int) {
+        val notification = createWaypointNotification(name, message, waypointId)
         notificationManager.notify(contactKey.hashCode(), notification)
     }
 
@@ -388,11 +388,11 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         return builder.build()
     }
 
-    private fun createWaypointNotification(contactKey: String, name: String, message: String): Notification {
+    private fun createWaypointNotification(name: String, message: String, waypointId: Int): Notification {
         val person = Person.Builder().setName(name).build()
         val style = NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
 
-        return commonBuilder(NotificationType.Waypoint, createOpenMessageIntent(contactKey))
+        return commonBuilder(NotificationType.Waypoint, createOpenWaypointIntent(waypointId))
             .setCategory(Notification.CATEGORY_MESSAGE)
             .setAutoCancel(true)
             .setStyle(style)
@@ -480,6 +480,19 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         return TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(deepLinkIntent)
             getPendingIntent(contactKey.hashCode(), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+    }
+
+    private fun createOpenWaypointIntent(waypointId: Int): PendingIntent {
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/map?waypointId=$waypointId".toUri()
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(waypointId, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
     }
 

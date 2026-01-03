@@ -20,7 +20,9 @@ package org.meshtastic.feature.map
 import android.app.Application
 import android.net.Uri
 import androidx.core.net.toFile
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
@@ -52,6 +54,7 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
@@ -91,7 +94,10 @@ constructor(
     serviceRepository: ServiceRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
     uiPreferencesDataSource: UiPreferencesDataSource,
+    savedStateHandle: SavedStateHandle,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
+
+    private val waypointId = savedStateHandle.toRoute<MapRoutes.Map>().waypointId
 
     private val targetLatLng =
         googleMapsPrefs.cameraTargetLat
@@ -258,6 +264,17 @@ constructor(
             loadPersistedMapType()
         }
         loadPersistedLayers()
+
+        if (waypointId != null) {
+            viewModelScope.launch {
+                val wpMap = waypoints.first { it.containsKey(waypointId) }
+                wpMap[waypointId]?.let { packet ->
+                    val waypoint = packet.data.waypoint!!
+                    val latLng = LatLng(waypoint.latitudeI / 1e7, waypoint.longitudeI / 1e7)
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
+                }
+            }
+        }
     }
 
     fun saveCameraPosition(cameraPosition: CameraPosition) {

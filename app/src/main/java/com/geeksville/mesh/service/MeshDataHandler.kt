@@ -512,6 +512,7 @@ constructor(
                     contactKey,
                     getSenderName(dataPacket),
                     message,
+                    dataPacket.waypoint!!.id,
                 )
             }
 

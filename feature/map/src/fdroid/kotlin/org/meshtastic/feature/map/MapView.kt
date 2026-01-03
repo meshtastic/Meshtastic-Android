@@ -336,6 +336,18 @@ fun MapView(
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
+    val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
+
+    LaunchedEffect(selectedWaypointId, waypoints) {
+        if (selectedWaypointId != null && waypoints.containsKey(selectedWaypointId)) {
+            waypoints[selectedWaypointId]?.data?.waypoint?.let { pt ->
+                val geoPoint = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
+                map.controller.setCenter(geoPoint)
+                map.controller.setZoom(WAYPOINT_ZOOM)
+            }
+        }
+    }
+
     val tracerouteSelection =
         remember(tracerouteOverlay, tracerouteNodePositions, nodes) {
             mapViewModel.tracerouteNodeSelection(
@@ -1082,6 +1094,7 @@ private const val EARTH_RADIUS_METERS = 6_371_000.0
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_SINGLE_POINT_ZOOM = 12.0
 private const val TRACEROUTE_ZOOM_OUT_LEVELS = 0.5
+private const val WAYPOINT_ZOOM = 15.0
 
 private fun Double.toRad(): Double = Math.toRadians(this)
 

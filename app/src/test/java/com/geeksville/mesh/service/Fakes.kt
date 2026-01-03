@@ -93,6 +93,7 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
         contactKey: String,
         name: String,
         message: String,
+        waypointId: Int,
     ) {}
 
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {}

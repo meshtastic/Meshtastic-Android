@@ -161,7 +161,7 @@ import org.meshtastic.proto.MeshProtos
 enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
     Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
     Nodes(Res.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
-    Map(Res.string.map, MeshtasticIcons.Map, MapRoutes.Map),
+    Map(Res.string.map, MeshtasticIcons.Map, MapRoutes.Map()),
     Settings(Res.string.bottom_nav_settings, MeshtasticIcons.Settings, SettingsRoutes.SettingsGraph()),
     Connections(Res.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
     ;

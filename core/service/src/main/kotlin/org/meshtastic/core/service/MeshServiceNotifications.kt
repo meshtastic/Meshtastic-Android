@@ -44,6 +44,7 @@ interface MeshServiceNotifications {
         contactKey: String,
         name: String,
         message: String,
+        waypointId: Int,
     )
 
     fun showAlertNotification(contactKey: String, name: String, alert: String)
