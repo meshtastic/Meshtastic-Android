@@ -837,6 +837,16 @@
     <string name="clean_ignored_nodes">Clean up ignored nodes</string>
     <string name="clean_now">Clean Now</string>
     <string name="clean_node_database_confirmation">This will remove %1$d nodes from your database. This action cannot be undone.</string>
+    <string name="schedule_cleanup">Schedule cleanup</string>
+    <string name="schedule_cleanup_title">Schedule recurring cleanup</string>
+    <string name="schedule_cleanup_description">Run hourly to remove nodes last seen beyond the chosen days.</string>
+    <string name="schedule_cleanup_success">Scheduled node cleanup</string>
+    <string name="schedule_cleanup_failed">Failed to schedule cleanup: %1$s</string>
+    <string name="cancel_scheduled_cleanup_none">No scheduled cleanup to cancel</string>
+    <string name="debug_schedule_one_hour">Debug: schedule 1-hour unknown-node cleanup</string>
+    <string name="cancel_scheduled_cleanup">Cancel scheduled cleanup</string>
+    <string name="cancel_scheduled_cleanup_success">Cancelled scheduled cleanup</string>
+    <string name="cancel_scheduled_cleanup_failed">Failed to cancel cleanup: %1$s</string>
 
     <string name="security_icon_help_green_lock">A green lock means the channel is securely encrypted with either a 128 or 256 bit AES key.</string>
 
