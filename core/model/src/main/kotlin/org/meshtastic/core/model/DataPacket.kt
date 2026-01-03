@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import android.os.Parcel
@@ -64,6 +63,7 @@ data class DataPacket(
     var relayNode: Int? = null,
     var relays: Int = 0,
     var viaMqtt: Boolean = false, // True if this packet passed via MQTT somewhere along its path
+    var emoji: Int = 0,
 ) : Parcelable {
 
     /** If there was an error with this message, this string describes what was wrong. */
@@ -137,6 +137,9 @@ data class DataPacket(
         parcel.readInt(),
         parcel.readInt().let { if (it == 0) null else it },
         parcel.readInt().let { if (it == -1) null else it },
+        parcel.readInt(), // relays
+        parcel.readInt() == 1, // viaMqtt
+        parcel.readInt(), // emoji
     )
 
     @Suppress("CyclomaticComplexMethod")
@@ -161,6 +164,7 @@ data class DataPacket(
         if (rssi != other.rssi) return false
         if (replyId != other.replyId) return false
         if (relayNode != other.relayNode) return false
+        if (emoji != other.emoji) return false
 
         return true
     }
@@ -181,6 +185,7 @@ data class DataPacket(
         result = 31 * result + rssi
         result = 31 * result + replyId.hashCode()
         result = 31 * result + relayNode.hashCode()
+        result = 31 * result + emoji
         return result
     }
 
@@ -200,6 +205,9 @@ data class DataPacket(
         parcel.writeInt(rssi)
         parcel.writeInt(replyId ?: 0)
         parcel.writeInt(relayNode ?: -1)
+        parcel.writeInt(relays)
+        parcel.writeInt(if (viaMqtt) 1 else 0)
+        parcel.writeInt(emoji)
     }
 
     override fun describeContents(): Int = 0
@@ -221,6 +229,9 @@ data class DataPacket(
         rssi = parcel.readInt()
         replyId = parcel.readInt().let { if (it == 0) null else it }
         relayNode = parcel.readInt().let { if (it == -1) null else it }
+        relays = parcel.readInt()
+        viaMqtt = parcel.readInt() == 1
+        emoji = parcel.readInt()
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {

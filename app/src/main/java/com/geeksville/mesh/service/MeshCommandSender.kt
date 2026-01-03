@@ -152,6 +152,7 @@ constructor(
                 portnumValue = p.dataType
                 payload = ByteString.copyFrom(p.bytes ?: ByteArray(0))
                 p.replyId?.let { if (it != 0) replyId = it }
+                if (p.emoji != 0) emoji = p.emoji
             }
         p.time = System.currentTimeMillis()
         packetHandler?.sendToRadio(meshPacket)
