@@ -64,6 +64,7 @@ data class DataPacket(
     var relays: Int = 0,
     var viaMqtt: Boolean = false, // True if this packet passed via MQTT somewhere along its path
     var retryCount: Int = 0, // Number of automatic retry attempts
+    var emoji: Int = 0,
 ) : Parcelable {
 
     /** If there was an error with this message, this string describes what was wrong. */
@@ -137,7 +138,10 @@ data class DataPacket(
         parcel.readInt(),
         parcel.readInt().let { if (it == 0) null else it },
         parcel.readInt().let { if (it == -1) null else it },
-        parcel.readInt(),
+        parcel.readInt(), // relays
+        parcel.readInt() == 1, // viaMqtt
+        parcel.readInt(), // retryCount
+        parcel.readInt(), // emoji
     )
 
     @Suppress("CyclomaticComplexMethod")
@@ -163,6 +167,7 @@ data class DataPacket(
         if (replyId != other.replyId) return false
         if (relayNode != other.relayNode) return false
         if (retryCount != other.retryCount) return false
+        if (emoji != other.emoji) return false
 
         return true
     }
@@ -184,6 +189,7 @@ data class DataPacket(
         result = 31 * result + replyId.hashCode()
         result = 31 * result + relayNode.hashCode()
         result = 31 * result + retryCount
+        result = 31 * result + emoji
         return result
     }
 
@@ -203,7 +209,10 @@ data class DataPacket(
         parcel.writeInt(rssi)
         parcel.writeInt(replyId ?: 0)
         parcel.writeInt(relayNode ?: -1)
+        parcel.writeInt(relays)
+        parcel.writeInt(if (viaMqtt) 1 else 0)
         parcel.writeInt(retryCount)
+        parcel.writeInt(emoji)
     }
 
     override fun describeContents(): Int = 0
@@ -225,7 +234,10 @@ data class DataPacket(
         rssi = parcel.readInt()
         replyId = parcel.readInt().let { if (it == 0) null else it }
         relayNode = parcel.readInt().let { if (it == -1) null else it }
+        relays = parcel.readInt()
+        viaMqtt = parcel.readInt() == 1
         retryCount = parcel.readInt()
+        emoji = parcel.readInt()
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {

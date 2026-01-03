@@ -71,44 +71,10 @@ constructor(
         ignoreException {
             val myNodeNum = nodeManager.myNodeNum ?: return@ignoreException
             when (action) {
-                is ServiceAction.Favorite -> {
-                    val node = action.node
-                    commandSender.sendAdmin(myNodeNum) {
-                        if (node.isFavorite) removeFavoriteNode = node.num else setFavoriteNode = node.num
-                    }
-                    nodeManager.updateNodeInfo(node.num) { it.isFavorite = !node.isFavorite }
-                }
-                is ServiceAction.Ignore -> {
-                    val node = action.node
-                    commandSender.sendAdmin(myNodeNum) {
-                        if (node.isIgnored) removeIgnoredNode = node.num else setIgnoredNode = node.num
-                    }
-                    nodeManager.updateNodeInfo(node.num) { it.isIgnored = !node.isIgnored }
-                }
-                is ServiceAction.Reaction -> {
-                    val channel = action.contactKey[0].digitToInt()
-                    val destId = action.contactKey.substring(1)
-                    val dataPacket =
-                        org.meshtastic.core.model.DataPacket(
-                            to = destId,
-                            dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                            bytes = action.emoji.encodeToByteArray(),
-                            channel = channel,
-                            replyId = action.replyId,
-                            wantAck = false,
-                        )
-                    commandSender.sendData(dataPacket)
-                    rememberReaction(action)
-                }
-                is ServiceAction.ImportContact -> {
-                    val verifiedContact = action.contact.toBuilder().setManuallyVerified(true).build()
-                    commandSender.sendAdmin(myNodeNum) { addContact = verifiedContact }
-                    nodeManager.handleReceivedUser(
-                        verifiedContact.nodeNum,
-                        verifiedContact.user,
-                        manuallyVerified = true,
-                    )
-                }
+                is ServiceAction.Favorite -> handleFavorite(action, myNodeNum)
+                is ServiceAction.Ignore -> handleIgnore(action, myNodeNum)
+                is ServiceAction.Reaction -> handleReaction(action)
+                is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
                 is ServiceAction.SendContact -> {
                     commandSender.sendAdmin(myNodeNum) { addContact = action.contact }
                 }
@@ -117,6 +83,45 @@ constructor(
                 }
             }
         }
+    }
+
+    private fun handleFavorite(action: ServiceAction.Favorite, myNodeNum: Int) {
+        val node = action.node
+        commandSender.sendAdmin(myNodeNum) {
+            if (node.isFavorite) removeFavoriteNode = node.num else setFavoriteNode = node.num
+        }
+        nodeManager.updateNodeInfo(node.num) { it.isFavorite = !node.isFavorite }
+    }
+
+    private fun handleIgnore(action: ServiceAction.Ignore, myNodeNum: Int) {
+        val node = action.node
+        commandSender.sendAdmin(myNodeNum) {
+            if (node.isIgnored) removeIgnoredNode = node.num else setIgnoredNode = node.num
+        }
+        nodeManager.updateNodeInfo(node.num) { it.isIgnored = !node.isIgnored }
+    }
+
+    private fun handleReaction(action: ServiceAction.Reaction) {
+        val channel = action.contactKey[0].digitToInt()
+        val destId = action.contactKey.substring(1)
+        val dataPacket =
+            org.meshtastic.core.model.DataPacket(
+                to = destId,
+                dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                bytes = action.emoji.encodeToByteArray(),
+                channel = channel,
+                replyId = action.replyId,
+                wantAck = false,
+                emoji = action.emoji.codePointAt(0),
+            )
+        commandSender.sendData(dataPacket)
+        rememberReaction(action)
+    }
+
+    private fun handleImportContact(action: ServiceAction.ImportContact, myNodeNum: Int) {
+        val verifiedContact = action.contact.toBuilder().setManuallyVerified(true).build()
+        commandSender.sendAdmin(myNodeNum) { addContact = verifiedContact }
+        nodeManager.handleReceivedUser(verifiedContact.nodeNum, verifiedContact.user, manuallyVerified = true)
     }
 
     private fun rememberReaction(action: ServiceAction.Reaction) {

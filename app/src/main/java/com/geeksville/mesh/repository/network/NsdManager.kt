@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.network
 
 import android.annotation.SuppressLint
@@ -32,6 +31,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -89,30 +89,37 @@ private fun NsdManager.discoverServices(
 @SuppressLint("NewApi")
 private suspend fun NsdManager.resolveService(serviceInfo: NsdServiceInfo): NsdServiceInfo? =
     suspendCancellableCoroutine { continuation ->
+        val isResumed = AtomicBoolean(false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             val callback =
                 object : NsdManager.ServiceInfoCallback {
                     override fun onServiceInfoCallbackRegistrationFailed(errorCode: Int) {
-                        continuation.resume(null)
+                        if (isResumed.compareAndSet(false, true)) {
+                            continuation.resume(null)
+                        }
                     }
 
                     override fun onServiceUpdated(updatedServiceInfo: NsdServiceInfo) {
                         if (updatedServiceInfo.hostAddresses.isNotEmpty()) {
-                            continuation.resume(updatedServiceInfo)
-                            try {
-                                unregisterServiceInfoCallback(this)
-                            } catch (e: IllegalArgumentException) {
-                                Logger.w(e) { "Already unregistered" }
+                            if (isResumed.compareAndSet(false, true)) {
+                                continuation.resume(updatedServiceInfo)
+                                try {
+                                    unregisterServiceInfoCallback(this)
+                                } catch (e: IllegalArgumentException) {
+                                    Logger.w(e) { "Already unregistered" }
+                                }
                             }
                         }
                     }
 
                     override fun onServiceLost() {
-                        continuation.resume(null)
-                        try {
-                            unregisterServiceInfoCallback(this)
-                        } catch (e: IllegalArgumentException) {
-                            Logger.w(e) { "Already unregistered" }
+                        if (isResumed.compareAndSet(false, true)) {
+                            continuation.resume(null)
+                            try {
+                                unregisterServiceInfoCallback(this)
+                            } catch (e: IllegalArgumentException) {
+                                Logger.w(e) { "Already unregistered" }
+                            }
                         }
                     }
 
@@ -132,11 +139,15 @@ private suspend fun NsdManager.resolveService(serviceInfo: NsdServiceInfo): NsdS
             val listener =
                 object : NsdManager.ResolveListener {
                     override fun onResolveFailed(serviceInfo: NsdServiceInfo, errorCode: Int) {
-                        continuation.resume(null)
+                        if (isResumed.compareAndSet(false, true)) {
+                            continuation.resume(null)
+                        }
                     }
 
                     override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
-                        continuation.resume(serviceInfo)
+                        if (isResumed.compareAndSet(false, true)) {
+                            continuation.resume(serviceInfo)
+                        }
                     }
                 }
             @Suppress("DEPRECATION")
