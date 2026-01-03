@@ -94,11 +94,6 @@ constructor(
             Portnums.PortNum.WAYPOINT_APP_VALUE,
         )
 
-    companion object {
-        private const val MAX_RETRY_ATTEMPTS = 5
-        private const val RETRY_DELAY_MS = 5_000L
-    }
-
     fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String? = null, logInsertJob: Job? = null) {
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
         val fromUs = myNodeNum == packet.from
@@ -340,6 +335,13 @@ constructor(
                     p.data.from == DataPacket.ID_LOCAL &&
                     p.data.retryCount < MAX_RETRY_ATTEMPTS
 
+            Logger.d {
+                val retryInfo = "packetId=${p?.packetId} dataId=${p?.data?.id} retry=${p?.data?.retryCount}"
+                val statusInfo = "status=${p?.data?.status}"
+                "[ackNak] req=$requestId routeErr=$routingError isAck=$isAck " +
+                    "maxRetransmit=$isMaxRetransmit shouldRetry=$shouldRetry $retryInfo $statusInfo"
+            }
+
             if (shouldRetry && p != null) {
                 val newRetryCount = p.data.retryCount + 1
                 val newId = commandSender.generatePacketId()
@@ -348,6 +350,8 @@ constructor(
                 val updatedPacket =
                     p.copy(packetId = newId, data = updatedData, routingError = MeshProtos.Routing.Error.NONE_VALUE)
                 packetRepository.get().update(updatedPacket)
+
+                Logger.w { "[ackNak] retrying req=$requestId newId=$newId retry=$newRetryCount" }
 
                 delay(RETRY_DELAY_MS)
                 commandSender.sendData(updatedData)
@@ -556,6 +560,8 @@ constructor(
     }
 
     companion object {
+        private const val MAX_RETRY_ATTEMPTS = 5
+        private const val RETRY_DELAY_MS = 5_000L
         private const val MILLISECONDS_IN_SECOND = 1000L
         private const val HOPS_AWAY_UNAVAILABLE = -1
 

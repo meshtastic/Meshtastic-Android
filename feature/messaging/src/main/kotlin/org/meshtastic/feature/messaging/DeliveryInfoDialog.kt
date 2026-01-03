@@ -33,6 +33,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
+import org.meshtastic.core.strings.message_retry_count
 import org.meshtastic.core.strings.relays
 import org.meshtastic.core.strings.resend
 
