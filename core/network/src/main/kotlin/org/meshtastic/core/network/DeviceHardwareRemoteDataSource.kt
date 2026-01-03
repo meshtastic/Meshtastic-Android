@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,10 @@
 
 package org.meshtastic.core.network
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.network.service.ApiService
 import javax.inject.Inject
 
 class DeviceHardwareRemoteDataSource @Inject constructor(private val apiService: ApiService) {
-    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware> =
-        withContext(Dispatchers.IO) { apiService.getDeviceHardware() }
+    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware> = apiService.getDeviceHardware()
 }

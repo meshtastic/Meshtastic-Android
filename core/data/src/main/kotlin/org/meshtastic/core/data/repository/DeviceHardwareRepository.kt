@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
@@ -57,69 +55,77 @@ constructor(
      * @return A [Result] containing the [DeviceHardware] on success (or null if not found), or an exception on failure.
      */
     @Suppress("LongMethod")
-    suspend fun getDeviceHardwareByModel(hwModel: Int, forceRefresh: Boolean = false): Result<DeviceHardware?> =
-        withContext(Dispatchers.IO) {
+    suspend fun getDeviceHardwareByModel(
+        hwModel: Int,
+        forceRefresh: Boolean = false
+    ): Result<DeviceHardware?> {
+        Logger.d { "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel, forceRefresh=$forceRefresh)" }
+
+        val quirks = loadQuirks()
+
+        if (forceRefresh) {
+            Logger.d { "DeviceHardwareRepository: forceRefresh=true, clearing local device hardware cache" }
+            localDataSource.deleteAllDeviceHardware()
+        } else {
+            // 1. Attempt to retrieve from cache first
+            val cachedEntity = localDataSource.getByHwModel(hwModel)
+            if (cachedEntity != null && !cachedEntity.isStale()) {
+                Logger.d { "DeviceHardwareRepository: using fresh cached device hardware for hwModel=$hwModel" }
+                return Result.success(
+                    applyBootloaderQuirk(
+                        hwModel,
+                        cachedEntity.asExternalModel(),
+                        quirks
+                    )
+                )
+            }
+            Logger.d { "DeviceHardwareRepository: no fresh cache for hwModel=$hwModel, attempting remote fetch" }
+        }
+
+        // 2. Fetch from remote API
+        return runCatching {
+            Logger.d { "DeviceHardwareRepository: fetching device hardware from remote API" }
+            val remoteHardware = remoteDataSource.getAllDeviceHardware()
             Logger.d {
-                "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel, forceRefresh=$forceRefresh)"
+                "DeviceHardwareRepository: remote API returned ${remoteHardware.size} device hardware entries"
             }
 
-            val quirks = loadQuirks()
+            localDataSource.insertAllDeviceHardware(remoteHardware)
+            val fromDb = localDataSource.getByHwModel(hwModel)?.asExternalModel()
+            Logger.d {
+                "DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel ${if (fromDb != null) "succeeded" else "returned null"}"
+            }
+            fromDb
+        }
+            .onSuccess {
+                // Successfully fetched and found the model
+                return Result.success(applyBootloaderQuirk(hwModel, it, quirks))
+            }
+            .onFailure { e ->
+                Logger.w(e) {
+                    "DeviceHardwareRepository: failed to fetch device hardware from server for hwModel=$hwModel"
+                }
 
-            if (forceRefresh) {
-                Logger.d { "DeviceHardwareRepository: forceRefresh=true, clearing local device hardware cache" }
-                localDataSource.deleteAllDeviceHardware()
-            } else {
-                // 1. Attempt to retrieve from cache first
-                val cachedEntity = localDataSource.getByHwModel(hwModel)
-                if (cachedEntity != null && !cachedEntity.isStale()) {
-                    Logger.d { "DeviceHardwareRepository: using fresh cached device hardware for hwModel=$hwModel" }
-                    return@withContext Result.success(
-                        applyBootloaderQuirk(hwModel, cachedEntity.asExternalModel(), quirks),
+                // 3. Attempt to use stale cache as a fallback, but only if it looks complete.
+                val staleEntity = localDataSource.getByHwModel(hwModel)
+                if (staleEntity != null && !staleEntity.isIncomplete()) {
+                    Logger.d { "DeviceHardwareRepository: using stale cached device hardware for hwModel=$hwModel" }
+                    return Result.success(
+                        applyBootloaderQuirk(
+                            hwModel,
+                            staleEntity.asExternalModel(),
+                            quirks
+                        )
                     )
                 }
-                Logger.d { "DeviceHardwareRepository: no fresh cache for hwModel=$hwModel, attempting remote fetch" }
-            }
 
-            // 2. Fetch from remote API
-            runCatching {
-                Logger.d { "DeviceHardwareRepository: fetching device hardware from remote API" }
-                val remoteHardware = remoteDataSource.getAllDeviceHardware()
+                // 4. Fallback to bundled JSON if cache is empty or incomplete
                 Logger.d {
-                    "DeviceHardwareRepository: remote API returned ${remoteHardware.size} device hardware entries"
+                    "DeviceHardwareRepository: cache ${if (staleEntity == null) "empty" else "incomplete"} for hwModel=$hwModel, falling back to bundled JSON asset"
                 }
-
-                localDataSource.insertAllDeviceHardware(remoteHardware)
-                val fromDb = localDataSource.getByHwModel(hwModel)?.asExternalModel()
-                Logger.d {
-                    "DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel ${if (fromDb != null) "succeeded" else "returned null"}"
-                }
-                fromDb
+                return loadFromBundledJson(hwModel, quirks)
             }
-                .onSuccess {
-                    // Successfully fetched and found the model
-                    return@withContext Result.success(applyBootloaderQuirk(hwModel, it, quirks))
-                }
-                .onFailure { e ->
-                    Logger.w(e) {
-                        "DeviceHardwareRepository: failed to fetch device hardware from server for hwModel=$hwModel"
-                    }
-
-                    // 3. Attempt to use stale cache as a fallback, but only if it looks complete.
-                    val staleEntity = localDataSource.getByHwModel(hwModel)
-                    if (staleEntity != null && !staleEntity.isIncomplete()) {
-                        Logger.d { "DeviceHardwareRepository: using stale cached device hardware for hwModel=$hwModel" }
-                        return@withContext Result.success(
-                            applyBootloaderQuirk(hwModel, staleEntity.asExternalModel(), quirks),
-                        )
-                    }
-
-                    // 4. Fallback to bundled JSON if cache is empty or incomplete
-                    Logger.d {
-                        "DeviceHardwareRepository: cache ${if (staleEntity == null) "empty" else "incomplete"} for hwModel=$hwModel, falling back to bundled JSON asset"
-                    }
-                    return@withContext loadFromBundledJson(hwModel, quirks)
-                }
-        }
+    }
 
     private suspend fun loadFromBundledJson(hwModel: Int, quirks: List<BootloaderOtaQuirk>): Result<DeviceHardware?> =
         runCatching {

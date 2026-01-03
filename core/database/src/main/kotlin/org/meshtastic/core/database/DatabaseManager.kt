@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -88,9 +87,7 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         }
 
         // Build/open Room DB off the main thread
-        val db =
-            dbCache[dbName]
-                ?: withContext(Dispatchers.IO) { buildRoomDb(app, dbName) }.also { dbCache[dbName] = it }
+        val db = dbCache[dbName] ?: buildRoomDb(app, dbName).also { dbCache[dbName] = it }
 
         _currentDb.value = db
         _currentAddress.value = address

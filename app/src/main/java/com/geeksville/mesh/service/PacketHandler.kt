@@ -63,7 +63,7 @@ constructor(
     }
 
     private var queueJob: Job? = null
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
+    private var scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
     private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
     private val queueResponse = ConcurrentHashMap<Int, CompletableDeferred<Boolean>>()

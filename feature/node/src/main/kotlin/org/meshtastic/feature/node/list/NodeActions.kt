@@ -49,11 +49,13 @@ constructor(
         }
     }
 
-    suspend fun removeNode(nodeNum: Int) = withContext(Dispatchers.IO) {
+    suspend fun removeNode(nodeNum: Int) {
         Logger.i { "Removing node '$nodeNum'" }
         try {
-            val packetId = serviceRepository.meshService?.packetId ?: return@withContext
-            serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+            val packetId = serviceRepository.meshService?.packetId ?: return
+            withContext(Dispatchers.IO) {
+                serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+            }
             nodeRepository.deleteNode(nodeNum)
         } catch (ex: RemoteException) {
             Logger.e { "Remove node error: ${ex.message}" }

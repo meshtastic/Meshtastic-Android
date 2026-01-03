@@ -29,8 +29,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flowOn
-import org.meshtastic.core.di.CoroutineDispatchers
 import javax.inject.Inject
 
 data class PhoneLocationState(
@@ -46,7 +44,6 @@ class PhoneLocationProvider
 @Inject
 constructor(
     @ApplicationContext private val context: Context,
-    private val dispatchers: CoroutineDispatchers,
 ) {
     // Streams phone location (and permission/provider state) so the compass stays gated on real fixes.
     fun locationUpdates(): Flow<PhoneLocationState> = callbackFlow {
@@ -115,7 +112,6 @@ constructor(
 
         awaitClose { locationManager.removeUpdates(listener) }
     }
-        .flowOn(dispatchers.io)
 
     private fun hasLocationPermission(): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==

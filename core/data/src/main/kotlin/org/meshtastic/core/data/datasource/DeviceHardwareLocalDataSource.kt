@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,23 +18,23 @@
 package org.meshtastic.core.data.datasource
 
 import dagger.Lazy
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.model.NetworkDeviceHardware
 import javax.inject.Inject
 
-class DeviceHardwareLocalDataSource @Inject constructor(private val deviceHardwareDaoLazy: Lazy<DeviceHardwareDao>) {
-    private val deviceHardwareDao by lazy { deviceHardwareDaoLazy.get() }
+class DeviceHardwareLocalDataSource @Inject constructor(
+    private val deviceHardwareDaoLazy: Lazy<DeviceHardwareDao>
+) {
+    private val deviceHardwareDao get() = deviceHardwareDaoLazy.get()
 
-    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) = withContext(Dispatchers.IO) {
-        deviceHardware.forEach { deviceHardware -> deviceHardwareDao.insert(deviceHardware.asEntity()) }
+    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) {
+        deviceHardware.forEach { deviceHardwareDao.insert(it.asEntity()) }
     }
 
-    suspend fun deleteAllDeviceHardware() = withContext(Dispatchers.IO) { deviceHardwareDao.deleteAll() }
+    suspend fun deleteAllDeviceHardware() = deviceHardwareDao.deleteAll()
 
     suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity? =
-        withContext(Dispatchers.IO) { deviceHardwareDao.getByHwModel(hwModel) }
+        deviceHardwareDao.getByHwModel(hwModel)
 }

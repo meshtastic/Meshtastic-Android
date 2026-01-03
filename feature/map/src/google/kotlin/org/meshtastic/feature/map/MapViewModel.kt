@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -300,6 +300,7 @@ constructor(
 
     private fun loadPersistedLayers() {
         viewModelScope.launch(Dispatchers.IO) {
+            // Dispatchers.IO justified: blocking file I/O operations
             try {
                 val layersDir = File(application.filesDir, "map_layers")
                 if (layersDir.exists() && layersDir.isDirectory) {
@@ -391,6 +392,7 @@ constructor(
     }
 
     private suspend fun copyFileToInternalStorage(uri: Uri, fileName: String): Uri? = withContext(Dispatchers.IO) {
+        // Dispatchers.IO justified: blocking file I/O operations
         try {
             val inputStream = application.contentResolver.openInputStream(uri)
             val directory = File(application.filesDir, "map_layers")
@@ -448,6 +450,7 @@ constructor(
 
     private suspend fun deleteFileToInternalStorage(uri: Uri) {
         withContext(Dispatchers.IO) {
+            // Dispatchers.IO justified: blocking file I/O operations
             try {
                 val file = uri.toFile()
                 if (file.exists()) {
@@ -463,6 +466,7 @@ constructor(
     private suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
         val uriToLoad = layerItem.uri ?: return null
         return withContext(Dispatchers.IO) {
+            // Dispatchers.IO justified: blocking file I/O operations
             try {
                 application.contentResolver.openInputStream(uriToLoad)
             } catch (_: Exception) {

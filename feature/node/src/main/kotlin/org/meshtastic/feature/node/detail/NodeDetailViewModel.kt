@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Position
@@ -73,7 +74,7 @@ constructor(
         }
     }
 
-    fun setNodeNotes(nodeNum: Int, notes: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun setNodeNotes(nodeNum: Int, notes: String) = viewModelScope.launch {
         try {
             nodeRepository.setNodeNotes(nodeNum, notes)
         } catch (ex: java.io.IOException) {
@@ -83,11 +84,13 @@ constructor(
         }
     }
 
-    private fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
+    private fun removeNode(nodeNum: Int) = viewModelScope.launch {
         Logger.i { "Removing node '$nodeNum'" }
         try {
             val packetId = serviceRepository.meshService?.packetId ?: return@launch
-            serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+            withContext(Dispatchers.IO) {
+                serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+            }
             nodeRepository.deleteNode(nodeNum)
         } catch (ex: RemoteException) {
             Logger.e { "Remove node error: ${ex.message}" }

@@ -123,7 +123,7 @@ constructor(
 
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
-    fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
+    fun deleteLog(uuid: String) = viewModelScope.launch { meshLogRepository.deleteLog(uuid) }
 
     fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
         val cached = tracerouteOverlayCache.value[requestId]
@@ -181,7 +181,7 @@ constructor(
         }
     }
 
-    fun clearPosition() = viewModelScope.launch(dispatchers.io) {
+    fun clearPosition() = viewModelScope.launch {
         destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }
     }
 

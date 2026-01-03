@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.DatabaseManager
@@ -42,19 +41,25 @@ constructor(
     private val meshLogPrefs: MeshLogPrefs,
 ) {
     fun getAllLogs(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> =
-        dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogs(maxItems) }.flowOn(dispatchers.io).conflate()
+        dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogs(maxItems) }.conflate()
 
     fun getAllLogsUnbounded(): Flow<List<MeshLog>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getAllLogs(Int.MAX_VALUE) }
-        .flowOn(dispatchers.io)
         .conflate()
 
     fun getAllLogsInReceiveOrder(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getAllLogsInReceiveOrder(maxItems) }
-        .flowOn(dispatchers.io)
         .conflate()
 
-    private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
+    private suspend fun parseTelemetryLog(log: MeshLog): Telemetry? = try {
+        withContext(dispatchers.default) { // CPU-intensive operation, so run on default dispatcher
+            parseTelemetryLogActual(log)
+        }
+    } catch (ignored: Exception) {
+        null
+    }
+
+    private fun parseTelemetryLogActual(log: MeshLog): Telemetry? =
         Telemetry.parseFrom(log.fromRadio.packet.decoded.payload)
             .toBuilder()
             .apply {
@@ -62,7 +67,8 @@ constructor(
                     // Handle float metrics that default to 0.0f when not explicitly set or when 0.0f means no
                     // data
                     if (!environmentMetrics.hasTemperature()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setTemperature(Float.NaN).build()
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setTemperature(Float.NaN).build()
                     }
                     if (!environmentMetrics.hasRelativeHumidity()) {
                         environmentMetrics =
@@ -77,24 +83,30 @@ constructor(
                             environmentMetrics.toBuilder().setBarometricPressure(Float.NaN).build()
                     }
                     if (!environmentMetrics.hasGasResistance()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setGasResistance(Float.NaN).build()
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setGasResistance(Float.NaN).build()
                     }
                     if (!environmentMetrics.hasVoltage()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setVoltage(Float.NaN).build()
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setVoltage(Float.NaN).build()
                     }
                     if (!environmentMetrics.hasCurrent()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setCurrent(Float.NaN).build()
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setCurrent(Float.NaN).build()
                     }
                     if (!environmentMetrics.hasLux()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setLux(Float.NaN).build()
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setLux(Float.NaN).build()
                     }
                     if (!environmentMetrics.hasUvLux()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setUvLux(Float.NaN).build()
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setUvLux(Float.NaN).build()
                     }
 
                     // Handle uint32 metrics that default to 0 when not explicitly set or when 0 means no data
                     if (!environmentMetrics.hasIaq()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setIaq(Int.MIN_VALUE).build()
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setIaq(Int.MIN_VALUE).build()
                     }
                     if (!environmentMetrics.hasSoilMoisture()) {
                         environmentMetrics =
@@ -109,16 +121,14 @@ constructor(
             }
             .setTime((log.received_date / MILLIS_TO_SECONDS).toInt())
             .build()
-    }
-        .getOrNull()
 
     fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = dbManager.currentDb
         .flatMapLatest {
-            it.meshLogDao().getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
+            it.meshLogDao()
+                .getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
         }
         .distinctUntilChanged()
-        .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
-        .flowOn(dispatchers.io)
+        .mapLatest { list -> list.mapNotNull { parseTelemetryLog(it) } }
 
     fun getLogsFrom(
         nodeNum: Int,
@@ -127,35 +137,37 @@ constructor(
     ): Flow<List<MeshLog>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, portNum, maxItem) }
         .distinctUntilChanged()
-        .flowOn(dispatchers.io)
 
     /*
      * Retrieves MeshPackets matching 'nodeNum' and 'portNum'.
      * If 'portNum' is not specified, returns all MeshPackets. Otherwise, filters by 'portNum'.
      */
-    fun getMeshPacketsFrom(nodeNum: Int, portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE): Flow<List<MeshPacket>> =
-        getLogsFrom(nodeNum, portNum).mapLatest { list -> list.map { it.fromRadio.packet } }.flowOn(dispatchers.io)
+    fun getMeshPacketsFrom(
+        nodeNum: Int,
+        portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE
+    ): Flow<List<MeshPacket>> =
+        getLogsFrom(nodeNum, portNum).mapLatest { list -> list.map { it.fromRadio.packet } }
 
     fun getMyNodeInfo(): Flow<MeshProtos.MyNodeInfo?> = getLogsFrom(0, 0)
         .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
-        .flowOn(dispatchers.io)
 
-    suspend fun insert(log: MeshLog) = withContext(dispatchers.io) {
-        if (!meshLogPrefs.loggingEnabled) return@withContext
+
+    suspend fun insert(log: MeshLog) {
+        if (!meshLogPrefs.loggingEnabled) return
         dbManager.currentDb.value.meshLogDao().insert(log)
     }
 
-    suspend fun deleteAll() = withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteAll() }
+    suspend fun deleteAll() = dbManager.currentDb.value.meshLogDao().deleteAll()
 
     suspend fun deleteLog(uuid: String) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteLog(uuid) }
+        dbManager.currentDb.value.meshLogDao().deleteLog(uuid)
 
     suspend fun deleteLogs(nodeNum: Int, portNum: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteLogs(nodeNum, portNum) }
+        dbManager.currentDb.value.meshLogDao().deleteLogs(nodeNum, portNum)
 
     @Suppress("MagicNumber")
-    suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
-        if (retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) return@withContext
+    suspend fun deleteLogsOlderThan(retentionDays: Int) {
+        if (retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) return
 
         val cutoffTimestamp =
             if (retentionDays == MeshLogPrefs.ONE_HOUR_RETENTION_DAYS) {
