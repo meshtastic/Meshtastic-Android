@@ -45,6 +45,8 @@ fun DeliveryInfo(
     text: StringResource? = null,
     relayNodeName: String? = null,
     relays: Int = 0,
+    retryCount: Int = 0,
+    maxRetries: Int = 0,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
 ) = AlertDialog(
@@ -74,6 +76,14 @@ fun DeliveryInfo(
             text?.let {
                 Text(
                     text = stringResource(it),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            if (maxRetries > 0) {
+                Text(
+                    text = stringResource(Res.string.message_retry_count, retryCount, maxRetries),
+                    modifier = Modifier.padding(top = 8.dp),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                 )

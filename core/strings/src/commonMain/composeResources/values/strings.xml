@@ -51,6 +51,7 @@
     <string name="unrecognized">Unrecognized</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_queued">Queued for sending</string>
+    <string name="message_retry_count">Retries: %1$d / %2$d</string>
     <string name="routing_error_none">Acknowledged</string>
     <string name="routing_error_no_route">No route</string>
     <string name="routing_error_got_nak">Received a negative acknowledgment</string>

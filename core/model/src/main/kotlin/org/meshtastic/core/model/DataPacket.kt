@@ -64,6 +64,7 @@ data class DataPacket(
     var relayNode: Int? = null,
     var relays: Int = 0,
     var viaMqtt: Boolean = false, // True if this packet passed via MQTT somewhere along its path
+    var retryCount: Int = 0, // Number of automatic retry attempts
 ) : Parcelable {
 
     /** If there was an error with this message, this string describes what was wrong. */
@@ -137,6 +138,7 @@ data class DataPacket(
         parcel.readInt(),
         parcel.readInt().let { if (it == 0) null else it },
         parcel.readInt().let { if (it == -1) null else it },
+        parcel.readInt(),
     )
 
     @Suppress("CyclomaticComplexMethod")
@@ -161,6 +163,7 @@ data class DataPacket(
         if (rssi != other.rssi) return false
         if (replyId != other.replyId) return false
         if (relayNode != other.relayNode) return false
+        if (retryCount != other.retryCount) return false
 
         return true
     }
@@ -181,6 +184,7 @@ data class DataPacket(
         result = 31 * result + rssi
         result = 31 * result + replyId.hashCode()
         result = 31 * result + relayNode.hashCode()
+        result = 31 * result + retryCount
         return result
     }
 
@@ -200,6 +204,7 @@ data class DataPacket(
         parcel.writeInt(rssi)
         parcel.writeInt(replyId ?: 0)
         parcel.writeInt(relayNode ?: -1)
+        parcel.writeInt(retryCount)
     }
 
     override fun describeContents(): Int = 0
@@ -221,6 +226,7 @@ data class DataPacket(
         rssi = parcel.readInt()
         replyId = parcel.readInt().let { if (it == 0) null else it }
         relayNode = parcel.readInt().let { if (it == -1) null else it }
+        retryCount = parcel.readInt()
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {

@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -92,6 +93,11 @@ constructor(
             Portnums.PortNum.ALERT_APP_VALUE,
             Portnums.PortNum.WAYPOINT_APP_VALUE,
         )
+
+    companion object {
+        private const val MAX_RETRY_ATTEMPTS = 5
+        private const val RETRY_DELAY_MS = 5_000L
+    }
 
     fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String? = null, logInsertJob: Job? = null) {
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
@@ -326,6 +332,37 @@ constructor(
         scope.handledLaunch {
             val isAck = routingError == MeshProtos.Routing.Error.NONE_VALUE
             val p = packetRepository.get().getPacketById(requestId)
+            val isMaxRetransmit = routingError == MeshProtos.Routing.Error.MAX_RETRANSMIT_VALUE
+            val shouldRetry =
+                isMaxRetransmit &&
+                    p != null &&
+                    p.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE &&
+                    p.data.from == DataPacket.ID_LOCAL &&
+                    p.data.retryCount < MAX_RETRY_ATTEMPTS
+
+            if (shouldRetry && p != null) {
+                val newRetryCount = p.data.retryCount + 1
+                val newId = commandSender.generatePacketId()
+                val updatedData =
+                    p.data.copy(
+                        id = newId,
+                        status = MessageStatus.QUEUED,
+                        retryCount = newRetryCount,
+                        relayNode = null,
+                    )
+                val updatedPacket =
+                    p.copy(
+                        packetId = newId,
+                        data = updatedData,
+                        routingError = MeshProtos.Routing.Error.NONE_VALUE,
+                    )
+                packetRepository.get().update(updatedPacket)
+
+                delay(RETRY_DELAY_MS)
+                commandSender.sendData(updatedData)
+                return@handledLaunch
+            }
+
             val m =
                 when {
                     isAck && fromId == p?.data?.to -> MessageStatus.RECEIVED
