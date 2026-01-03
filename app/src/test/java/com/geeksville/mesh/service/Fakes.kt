@@ -89,6 +89,12 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
         channelName: String?,
     ) {}
 
+    override fun updateWaypointNotification(
+        contactKey: String,
+        name: String,
+        message: String,
+    ) {}
+
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {}
 
     override fun showNewNodeSeenNotification(node: NodeEntity) {}

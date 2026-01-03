@@ -256,6 +256,7 @@
     <string name="new_messages_below">New messages below</string>
     <string name="meshtastic_messages_notifications">Direct message notifications</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
+    <string name="meshtastic_waypoints_notifications">Waypoint notifications</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>
     <string name="firmware_too_old">Firmware update required.</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>

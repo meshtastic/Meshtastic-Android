@@ -477,7 +477,7 @@ constructor(
                             dataPacket.alert ?: getString(Res.string.critical_alert),
                         )
                     } else if (updateNotification) {
-                        scope.handledLaunch { updateMessageNotification(contactKey, dataPacket) }
+                        scope.handledLaunch { updateNotification(contactKey, dataPacket) }
                     }
                 }
             }
@@ -487,30 +487,36 @@ constructor(
     private fun getSenderName(packet: DataPacket): String =
         nodeManager.nodeDBbyID[packet.from]?.user?.longName ?: getString(Res.string.unknown_username)
 
-    private suspend fun updateMessageNotification(contactKey: String, dataPacket: DataPacket) {
-        val message =
-            when (dataPacket.dataType) {
-                Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
-                Portnums.PortNum.WAYPOINT_APP_VALUE ->
-                    getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
-
-                else -> return
+    private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket) {
+        when (dataPacket.dataType) {
+            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
+                val message = dataPacket.text!!
+                val channelName =
+                    if (dataPacket.to == DataPacket.ID_BROADCAST) {
+                        radioConfigRepository.channelSetFlow.first().settingsList.getOrNull(dataPacket.channel)?.name
+                    } else {
+                        null
+                    }
+                serviceNotifications.updateMessageNotification(
+                    contactKey,
+                    getSenderName(dataPacket),
+                    message,
+                    dataPacket.to == DataPacket.ID_BROADCAST,
+                    channelName,
+                )
             }
 
-        val channelName =
-            if (dataPacket.to == DataPacket.ID_BROADCAST) {
-                radioConfigRepository.channelSetFlow.first().settingsList.getOrNull(dataPacket.channel)?.name
-            } else {
-                null
+            Portnums.PortNum.WAYPOINT_APP_VALUE -> {
+                val message = getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
+                serviceNotifications.updateWaypointNotification(
+                    contactKey,
+                    getSenderName(dataPacket),
+                    message,
+                )
             }
 
-        serviceNotifications.updateMessageNotification(
-            contactKey,
-            getSenderName(dataPacket),
-            message,
-            dataPacket.to == DataPacket.ID_BROADCAST,
-            channelName,
-        )
+            else -> return
+        }
     }
 
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {

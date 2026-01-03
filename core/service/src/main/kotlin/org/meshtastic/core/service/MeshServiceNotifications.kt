@@ -24,6 +24,7 @@ import org.meshtastic.proto.TelemetryProtos
 
 const val SERVICE_NOTIFY_ID = 101
 
+@Suppress("TooManyFunctions")
 interface MeshServiceNotifications {
     fun clearNotifications()
 
@@ -37,6 +38,12 @@ interface MeshServiceNotifications {
         message: String,
         isBroadcast: Boolean,
         channelName: String?,
+    )
+
+    fun updateWaypointNotification(
+        contactKey: String,
+        name: String,
+        message: String,
     )
 
     fun showAlertNotification(contactKey: String, name: String, alert: String)

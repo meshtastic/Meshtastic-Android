@@ -55,6 +55,7 @@ import org.meshtastic.core.strings.meshtastic_low_battery_temporary_remote_notif
 import org.meshtastic.core.strings.meshtastic_messages_notifications
 import org.meshtastic.core.strings.meshtastic_new_nodes_notifications
 import org.meshtastic.core.strings.meshtastic_service_notifications
+import org.meshtastic.core.strings.meshtastic_waypoints_notifications
 import org.meshtastic.core.strings.new_node_seen
 import org.meshtastic.core.strings.no_local_stats
 import org.meshtastic.core.strings.reply
@@ -111,6 +112,13 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
+        object Waypoint :
+            NotificationType(
+                "my_waypoints",
+                Res.string.meshtastic_waypoints_notifications,
+                NotificationManager.IMPORTANCE_LOW,
+            )
+
         object Alert :
             NotificationType(
                 "my_alerts",
@@ -152,6 +160,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
                 ServiceState,
                 DirectMessage,
                 BroadcastMessage,
+                Waypoint,
                 Alert,
                 NewNode,
                 LowBatteryLocal,
@@ -190,6 +199,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
 
                     NotificationType.DirectMessage,
                     NotificationType.BroadcastMessage,
+                    NotificationType.Waypoint,
                     NotificationType.NewNode,
                     NotificationType.LowBatteryLocal,
                     NotificationType.LowBatteryRemote,
@@ -283,6 +293,11 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         notificationManager.notify(contactKey.hashCode(), notification)
     }
 
+    override fun updateWaypointNotification(contactKey: String, name: String, message: String) {
+        val notification = createWaypointNotification(contactKey, name, message)
+        notificationManager.notify(contactKey.hashCode(), notification)
+    }
+
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
         val notification = createAlertNotification(contactKey, name, alert)
         // Use a consistent, unique ID for each alert source.
@@ -371,6 +386,20 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         }
 
         return builder.build()
+    }
+
+    private fun createWaypointNotification(contactKey: String, name: String, message: String): Notification {
+        val person = Person.Builder().setName(name).build()
+        val style = NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
+
+        return commonBuilder(NotificationType.Waypoint, createOpenMessageIntent(contactKey))
+            .setCategory(Notification.CATEGORY_MESSAGE)
+            .setAutoCancel(true)
+            .setStyle(style)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setWhen(System.currentTimeMillis())
+            .setShowWhen(true)
+            .build()
     }
 
     private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
