@@ -514,7 +514,7 @@ fun MapView(
     }
 
     @Suppress("MagicNumber")
-    fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
+    fun MapView.onWaypointChanged(waypoints: Collection<Packet>, selectedWaypointId: Int?): List<MarkerWithLabel> {
         val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
@@ -552,7 +552,9 @@ fun MapView(
                     com.meshtastic.core.strings.getString(Res.string.expires) +
                     ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
-                setVisible(false) // This seems to be always false, was this intended?
+                if (selectedWaypointId == pt.id) {
+                    showInfoWindow()
+                }
                 setOnLongClickListener {
                     showMarkerLongPressDialog(pt.id)
                     true
@@ -728,7 +730,7 @@ fun MapView(
                     with(mapView) {
                         updateMarkers(
                             onNodesChanged(nodesForMarkers),
-                            onWaypointChanged(waypoints.values),
+                            onWaypointChanged(waypoints.values, selectedWaypointId),
                             nodeClusterer,
                         )
                     }

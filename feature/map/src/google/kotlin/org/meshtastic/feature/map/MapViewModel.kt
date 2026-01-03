@@ -97,7 +97,8 @@ constructor(
     savedStateHandle: SavedStateHandle,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
 
-    private val waypointId = savedStateHandle.toRoute<MapRoutes.Map>().waypointId
+    private val _selectedWaypointId = MutableStateFlow(savedStateHandle.toRoute<MapRoutes.Map>().waypointId)
+    val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
     private val targetLatLng =
         googleMapsPrefs.cameraTargetLat
@@ -265,10 +266,10 @@ constructor(
         }
         loadPersistedLayers()
 
-        if (waypointId != null) {
+        selectedWaypointId.value?.let { wpId ->
             viewModelScope.launch {
-                val wpMap = waypoints.first { it.containsKey(waypointId) }
-                wpMap[waypointId]?.let { packet ->
+                val wpMap = waypoints.first { it.containsKey(wpId) }
+                wpMap[wpId]?.let { packet ->
                     val waypoint = packet.data.waypoint!!
                     val latLng = LatLng(waypoint.latitudeI / 1e7, waypoint.longitudeI / 1e7)
                     cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)

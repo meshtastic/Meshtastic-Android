@@ -263,6 +263,8 @@ fun MapView(
             .collectAsStateWithLifecycle(listOf())
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
+    val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
+
     val tracerouteSelection =
         remember(tracerouteOverlay, tracerouteNodePositions, allNodes) {
             mapViewModel.tracerouteNodeSelection(
@@ -581,6 +583,7 @@ fun MapView(
                     isConnected = isConnected,
                     unicodeEmojiToBitmapProvider = ::unicodeEmojiToBitmap,
                     onEditWaypointRequest = { waypointToEdit -> editingWaypoint = waypointToEdit },
+                    selectedWaypointId = selectedWaypointId,
                 )
 
                 MapEffect(mapLayers) { map ->
