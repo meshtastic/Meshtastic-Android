@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,8 @@ constructor(
     }
 
     suspend fun checkUrlExists(url: String): Boolean = withContext(Dispatchers.IO) {
+        // Dispatchers.IO justified: blocking network I/O
+        // TODO: replace with a more efficient and non-blocking approach.
         val request = Request.Builder().url(url).head().build()
         try {
             client.newCall(request).execute().use { response -> response.isSuccessful }
@@ -72,6 +74,8 @@ constructor(
 
     suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): File? =
         withContext(Dispatchers.IO) {
+            // Dispatchers.IO justified: blocking network and file I/O
+            // TODO: replace with a more efficient and non-blocking approach.
             val request = Request.Builder().url(url).build()
             val response =
                 try {
@@ -119,6 +123,7 @@ constructor(
 
     suspend fun extractFirmware(zipFile: File, hardware: DeviceHardware, fileExtension: String): File? =
         withContext(Dispatchers.IO) {
+            // Dispatchers.IO justified: blocking file I/O operations
             val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
             if (target.isEmpty()) return@withContext null
 
@@ -144,6 +149,7 @@ constructor(
 
     suspend fun extractFirmware(uri: Uri, hardware: DeviceHardware, fileExtension: String): File? =
         withContext(Dispatchers.IO) {
+            // Dispatchers.IO justified: blocking file I/O operations
             val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
             if (target.isEmpty()) return@withContext null
 
@@ -181,6 +187,7 @@ constructor(
     }
 
     suspend fun copyFileToUri(sourceFile: File, destinationUri: Uri) = withContext(Dispatchers.IO) {
+        // Dispatchers.IO justified: blocking file I/O operations
         val inputStream = FileInputStream(sourceFile)
         val outputStream =
             context.contentResolver.openOutputStream(destinationUri)
@@ -190,6 +197,7 @@ constructor(
     }
 
     suspend fun copyUriToUri(sourceUri: Uri, destinationUri: Uri) = withContext(Dispatchers.IO) {
+        // Dispatchers.IO justified: blocking file I/O operations
         val inputStream =
             context.contentResolver.openInputStream(sourceUri) ?: throw IOException("Cannot open source URI")
         val outputStream =

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.network
 
 import android.net.ConnectivityManager
@@ -22,8 +21,6 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.flowOn
-import org.meshtastic.core.di.CoroutineDispatchers
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,14 +30,13 @@ class NetworkRepository
 constructor(
     private val nsdManagerLazy: dagger.Lazy<NsdManager>,
     private val connectivityManager: dagger.Lazy<ConnectivityManager>,
-    private val dispatchers: CoroutineDispatchers,
 ) {
 
     val networkAvailable: Flow<Boolean>
-        get() = connectivityManager.get().networkAvailable().flowOn(dispatchers.io).conflate()
+        get() = connectivityManager.get().networkAvailable().conflate()
 
     val resolvedList: Flow<List<NsdServiceInfo>>
-        get() = nsdManagerLazy.get().serviceList(SERVICE_TYPE).flowOn(dispatchers.io).conflate()
+        get() = nsdManagerLazy.get().serviceList(SERVICE_TYPE).conflate()
 
     companion object {
         internal const val SERVICE_PORT = 4403

@@ -17,16 +17,14 @@
 
 package org.meshtastic.core.data.repository
 
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.map
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.proto.MeshProtos
 import javax.inject.Inject
 
@@ -34,30 +32,33 @@ class TracerouteSnapshotRepository
 @Inject
 constructor(
     private val dbManager: DatabaseManager,
-    private val dispatchers: CoroutineDispatchers,
 ) {
 
-    fun getSnapshotPositions(logUuid: String): Flow<Map<Int, MeshProtos.Position>> = dbManager.currentDb
-        .flatMapLatest { it.tracerouteNodePositionDao().getByLogUuid(logUuid) }
-        .distinctUntilChanged()
-        .mapLatest { list -> list.associate { it.nodeNum to it.position } }
-        .flowOn(dispatchers.io)
-        .conflate()
+    fun getSnapshotPositions(logUuid: String): Flow<Map<Int, MeshProtos.Position>> =
+        dbManager.currentDb
+            .flatMapLatest { it.tracerouteNodePositionDao().getByLogUuid(logUuid) }
+            .distinctUntilChanged()
+            .map { list -> list.associate { it.nodeNum to it.position } }
+            .conflate()
 
-    suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, MeshProtos.Position>) =
-        withContext(dispatchers.io) {
+    suspend fun upsertSnapshotPositions(
+        logUuid: String,
+        requestId: Int,
+        positions: Map<Int, MeshProtos.Position>
+    ) {
+        dbManager.currentDb.value.withTransaction {
             val dao = dbManager.currentDb.value.tracerouteNodePositionDao()
             dao.deleteByLogUuid(logUuid)
-            if (positions.isEmpty()) return@withContext
-            val entities =
-                positions.map { (nodeNum, position) ->
-                    TracerouteNodePositionEntity(
-                        logUuid = logUuid,
-                        requestId = requestId,
-                        nodeNum = nodeNum,
-                        position = position,
-                    )
-                }
+            if (positions.isEmpty()) return@withTransaction
+            val entities = positions.map { (nodeNum, position) ->
+                TracerouteNodePositionEntity(
+                    logUuid = logUuid,
+                    requestId = requestId,
+                    nodeNum = nodeNum,
+                    position = position,
+                )
+            }
             dao.insertAll(entities)
         }
+    }
 }

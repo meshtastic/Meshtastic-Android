@@ -81,7 +81,7 @@ class MeshService : Service() {
     @Inject lateinit var router: MeshRouter
 
     private val serviceJob = Job()
-    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+    private val serviceScope = CoroutineScope(Dispatchers.Default + serviceJob)
 
     private val myNodeNum: Int
         get() = nodeManager.myNodeNum ?: throw RadioNotConnectedException()

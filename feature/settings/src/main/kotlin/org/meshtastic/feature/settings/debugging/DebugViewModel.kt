@@ -25,13 +25,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,6 +37,7 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -208,12 +207,13 @@ constructor(
     private val meshLogRepository: MeshLogRepository,
     private val nodeRepository: NodeRepository,
     private val meshLogPrefs: MeshLogPrefs,
+    private val dispatchers: CoroutineDispatchers,
 ) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
         meshLogRepository
             .getAllLogs()
-            .mapLatest { logs -> withContext(Dispatchers.Default) { toUiState(logs) } }
+            .mapLatest { logs -> withContext(dispatchers.default) { toUiState(logs) } }
             .stateInWhileSubscribed(initialValue = persistentListOf())
 
     private val _retentionDays = MutableStateFlow(meshLogPrefs.retentionDays)
@@ -263,10 +263,10 @@ constructor(
         }
     }
 
-    suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> = withContext(Dispatchers.IO) {
+    suspend fun loadLogsForExport(): ImmutableList<UiMeshLog> {
         val unbounded = meshLogRepository.getAllLogsUnbounded().first()
         val logs = if (unbounded.isEmpty()) meshLogRepository.getAllLogs().first() else unbounded
-        toUiState(logs)
+        return toUiState(logs)
     }
 
     init {
@@ -387,7 +387,7 @@ constructor(
 
     private fun Int.asNodeId(): String = "!%08x".format(Locale.getDefault(), this)
 
-    fun deleteAllLogs() = viewModelScope.launch(Dispatchers.IO) { meshLogRepository.deleteAll() }
+    fun deleteAllLogs() = viewModelScope.launch { meshLogRepository.deleteAll() }
 
     @Immutable
     data class UiMeshLog(

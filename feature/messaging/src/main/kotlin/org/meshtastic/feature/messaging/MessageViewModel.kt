@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,9 +56,7 @@ private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
-class MessageViewModel
-@Inject
-constructor(
+class MessageViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
@@ -76,14 +73,16 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
-    val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
+    val nodeList: StateFlow<List<Node>> =
+        nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(channelSet {})
 
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
-    val quickChatActions = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
+    val quickChatActions =
+        quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
     val contactSettings: StateFlow<Map<String, ContactSettings>> =
         packetRepository.getContactSettings().stateInWhileSubscribed(initialValue = emptyMap())
@@ -92,7 +91,12 @@ constructor(
     private val pagedMessagesForContactKey: Flow<PagingData<Message>> =
         contactKeyForPagedMessages
             .filterNotNull()
-            .flatMapLatest { contactKey -> packetRepository.getMessagesFromPaged(contactKey, ::getNode) }
+            .flatMapLatest { contactKey ->
+                packetRepository.getMessagesFromPaged(
+                    contactKey,
+                    ::getNode
+                )
+            }
             .cachedIn(viewModelScope)
 
     init {
@@ -116,7 +120,8 @@ constructor(
     fun getFirstUnreadMessageUuid(contactKey: String): Flow<Long?> =
         packetRepository.getFirstUnreadMessageUuid(contactKey)
 
-    fun hasUnreadMessages(contactKey: String): Flow<Boolean> = packetRepository.hasUnreadMessages(contactKey)
+    fun hasUnreadMessages(contactKey: String): Flow<Boolean> =
+        packetRepository.hasUnreadMessages(contactKey)
 
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 
@@ -145,7 +150,11 @@ constructor(
      * @param replyId The ID of the message this is a reply to, if any.
      */
     @Suppress("NestedBlockDepth")
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
+    fun sendMessage(
+        str: String,
+        contactKey: String = "0${DataPacket.ID_BROADCAST}",
+        replyId: Int? = null
+    ) {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
@@ -156,8 +165,8 @@ constructor(
             val fwVersion = ourNodeInfo.value?.metadata?.firmwareVersion
             val destNode = nodeRepository.getNode(dest)
             val isClientBase = ourNodeInfo.value?.user?.role == Role.CLIENT_BASE
-            fwVersion?.let { fw ->
-                val ver = DeviceVersion(asString = fw)
+            if (fwVersion != null) {
+                val ver = DeviceVersion(asString = fwVersion)
                 val verifiedSharedContactsVersion =
                     DeviceVersion(
                         asString = VERIFIED_CONTACT_FIRMWARE_CUTOFF,
@@ -177,14 +186,23 @@ constructor(
     }
 
     fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
-        viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey)) }
+        viewModelScope.launch {
+            serviceRepository.onServiceAction(
+                ServiceAction.Reaction(
+                    emoji,
+                    replyId,
+                    contactKey
+                )
+            )
+        }
 
     fun deleteMessages(uuidList: List<Long>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
+        viewModelScope.launch { packetRepository.deleteMessages(uuidList) }
 
-    fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
-        viewModelScope.launch(Dispatchers.IO) {
-            val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
+    fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) {
+        viewModelScope.launch {
+            val existingTimestamp =
+                contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
             if (lastReadTimestamp <= existingTimestamp) {
                 return@launch
             }
@@ -193,6 +211,7 @@ constructor(
             val unreadCount = packetRepository.getUnreadCount(contact)
             if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
         }
+    }
 
     private fun favoriteNode(node: Node) = viewModelScope.launch {
         try {

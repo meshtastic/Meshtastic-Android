@@ -181,7 +181,9 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
             )
         },
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+        Column(modifier = Modifier
+            .padding(paddingValues)
+            .fillMaxSize()) {
             LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
                 stickyHeader {
                     val animatedAlpha by
@@ -270,7 +272,9 @@ internal fun DebugItem(
     val colorScheme = MaterialTheme.colorScheme
 
     Card(
-        modifier = modifier.fillMaxWidth().padding(4.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(4.dp),
         colors =
         CardDefaults.cardColors(
             containerColor =
@@ -289,7 +293,10 @@ internal fun DebugItem(
     ) {
         SelectionContainer {
             Column(
-                modifier = Modifier.padding(if (isSelected) 12.dp else 8.dp).fillMaxWidth().clickable { onLogClick() },
+                modifier = Modifier
+                    .padding(if (isSelected) 12.dp else 8.dp)
+                    .fillMaxWidth()
+                    .clickable { onLogClick() },
             ) {
                 DebugItemHeader(log = log, searchText = searchText, isSelected = isSelected, theme = colorScheme)
                 val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchText)
@@ -320,7 +327,9 @@ internal fun DebugItem(
 @Composable
 private fun DebugItemHeader(log: UiMeshLog, searchText: String, isSelected: Boolean, theme: ColorScheme) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = if (isSelected) 12.dp else 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = if (isSelected) 12.dp else 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -429,6 +438,7 @@ fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<UiMeshLog>) =
+    // TODO: Move this code to ViewModel.
     withContext(Dispatchers.IO) {
         try {
             if (logs.isEmpty()) {
@@ -675,7 +685,9 @@ private fun DebugScreenEmptyPreview() {
         Surface {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
-                    Surface(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                    Surface(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -690,7 +702,9 @@ private fun DebugScreenEmptyPreview() {
                                     OutlinedTextField(
                                         value = "",
                                         onValueChange = {},
-                                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 8.dp),
                                         placeholder = { Text("Search in logs...") },
                                         singleLine = true,
                                     )
@@ -710,7 +724,9 @@ private fun DebugScreenEmptyPreview() {
                 }
                 // Empty state
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = "No Debug Logs",
@@ -788,7 +804,9 @@ private fun DebugScreenWithSampleDataPreview() {
         Surface {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
-                    Surface(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                    Surface(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)) {
                         Column(modifier = Modifier.padding(8.dp)) {
                             Text(
                                 text = "Debug Screen Preview",

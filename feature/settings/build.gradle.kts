@@ -54,6 +54,7 @@ dependencies {
     implementation(projects.core.service)
     implementation(projects.core.strings)
     implementation(projects.core.ui)
+    implementation(projects.core.di)
 
     implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.accompanist.permissions)

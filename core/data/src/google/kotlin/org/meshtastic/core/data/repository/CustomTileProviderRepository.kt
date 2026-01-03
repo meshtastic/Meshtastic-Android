@@ -96,7 +96,7 @@ constructor(
     }
 
     private suspend fun saveDataToPrefs(providers: List<CustomTileProviderConfig>) {
-        withContext(dispatchers.io) {
+        withContext(dispatchers.default) {
             try {
                 val jsonString = json.encodeToString(providers)
                 mapTileProviderPrefs.customTileProviders = jsonString
