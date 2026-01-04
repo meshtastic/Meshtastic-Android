@@ -85,30 +85,50 @@ interface NodeInfoDao {
     }
 
     private fun handleExistingNodeUpsertValidation(existingNode: NodeEntity, incomingNode: NodeEntity): NodeEntity {
+        val isPlaceholder = incomingNode.user.hwModel == MeshProtos.HardwareModel.UNSET
+        val hasExistingUser = existingNode.user.hwModel != MeshProtos.HardwareModel.UNSET
+        val isDefaultName = incomingNode.user.longName.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+
+        val shouldPreserve = hasExistingUser && isPlaceholder && isDefaultName
+
+        if (shouldPreserve) {
+            // Preserve existing name and user info, but update metadata like lastHeard, SNR, and position.
+            val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
+            return existingNode.copy(
+                lastHeard = incomingNode.lastHeard,
+                snr = incomingNode.snr,
+                rssi = incomingNode.rssi,
+                position = incomingNode.position,
+                hopsAway = incomingNode.hopsAway,
+                deviceTelemetry = incomingNode.deviceTelemetry,
+                environmentTelemetry = incomingNode.environmentTelemetry,
+                powerTelemetry = incomingNode.powerTelemetry,
+                paxcounter = incomingNode.paxcounter,
+                channel = incomingNode.channel,
+                viaMqtt = incomingNode.viaMqtt,
+                notes = resolvedNotes,
+            )
+        }
+
         // A public key is considered matching if the incoming key equals the existing key,
         // OR if the existing key is empty (allowing a new key to be set or an update to proceed).
-        val isPublicKeyMatchingOrExistingIsEmpty =
-            existingNode.user.publicKey == incomingNode.publicKey || existingNode.user.publicKey.isEmpty
+        val existingResolvedKey = existingNode.publicKey ?: existingNode.user.publicKey
+        val isPublicKeyMatchingOrExistingIsEmpty = existingResolvedKey == incomingNode.publicKey || !existingNode.hasPKC
 
-        val isPlaceholder = incomingNode.user.hwModel == MeshProtos.HardwareModel.UNSET
+        val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
 
         return if (isPublicKeyMatchingOrExistingIsEmpty) {
             // Keys match or existing key was empty: trust the incoming node data completely.
             // This allows for legitimate updates to user info and other fields.
-            val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
-            val resolvedLongName = if (isPlaceholder) null else incomingNode.longName ?: existingNode.longName
-            val resolvedShortName = if (isPlaceholder) null else incomingNode.shortName ?: existingNode.shortName
-            incomingNode.copy(notes = resolvedNotes, longName = resolvedLongName, shortName = resolvedShortName)
+            incomingNode.copy(notes = resolvedNotes)
         } else {
-            existingNode.copy(
-                lastHeard = incomingNode.lastHeard,
-                snr = incomingNode.snr,
-                position = incomingNode.position,
-                // Preserve the existing user object, but update its internal public key to EMPTY
-                // to reflect the conflict state.
-                user = existingNode.user.toBuilder().setPublicKey(ByteString.EMPTY).build(),
-                publicKey = ByteString.EMPTY,
-                notes = existingNode.notes,
+            // Public key mismatch: This could be a factory reset or a hardware ID collision.
+            // We allow the name and user info to update, but we clear the public key
+            // to indicate that this node is no longer "verified" against the previous key.
+            incomingNode.copy(
+                user = incomingNode.user.toBuilder().setPublicKey(NodeEntity.ERROR_BYTE_STRING).build(),
+                publicKey = NodeEntity.ERROR_BYTE_STRING,
+                notes = resolvedNotes,
             )
         }
     }

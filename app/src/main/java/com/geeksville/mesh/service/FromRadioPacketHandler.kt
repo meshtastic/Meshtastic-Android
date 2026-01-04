@@ -34,6 +34,7 @@ constructor(
     private val router: MeshRouter,
     private val mqttManager: MeshMqttManager,
     private val packetHandler: PacketHandler,
+    private val serviceNotifications: org.meshtastic.core.service.MeshServiceNotifications,
 ) {
     @Suppress("CyclomaticComplexMethod")
     fun handleFromRadio(proto: MeshProtos.FromRadio) {
@@ -56,6 +57,7 @@ constructor(
             MeshProtos.FromRadio.PayloadVariantCase.CHANNEL -> router.configHandler.handleChannel(proto.channel)
             MeshProtos.FromRadio.PayloadVariantCase.CLIENTNOTIFICATION -> {
                 serviceRepository.setClientNotification(proto.clientNotification)
+                serviceNotifications.showClientNotification(proto.clientNotification)
                 packetHandler.removeResponse(proto.clientNotification.replyId, complete = false)
             }
             // Logging-only variants are handled by MeshMessageProcessor before dispatching here

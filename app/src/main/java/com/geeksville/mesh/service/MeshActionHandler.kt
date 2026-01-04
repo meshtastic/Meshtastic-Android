@@ -56,6 +56,7 @@ constructor(
     private val meshPrefs: MeshPrefs,
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshServiceNotifications,
+    private val messageProcessor: Lazy<MeshMessageProcessor>,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -304,6 +305,7 @@ constructor(
             meshPrefs.deviceAddress = deviceAddr
             scope.handledLaunch {
                 nodeManager.clear()
+                messageProcessor.get().clearEarlyPackets()
                 databaseManager.switchActiveDatabase(deviceAddr)
                 serviceNotifications.clearNotifications()
                 nodeManager.loadCachedNodeDB()
