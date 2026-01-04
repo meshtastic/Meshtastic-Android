@@ -31,7 +31,7 @@ interface MeshServiceNotifications {
 
     fun updateServiceStateNotification(summaryString: String?, telemetry: TelemetryProtos.Telemetry?): Notification
 
-    fun updateMessageNotification(
+    suspend fun updateMessageNotification(
         contactKey: String,
         name: String,
         message: String,
@@ -39,7 +39,15 @@ interface MeshServiceNotifications {
         channelName: String?,
     )
 
-    fun updateWaypointNotification(contactKey: String, name: String, message: String, waypointId: Int)
+    suspend fun updateWaypointNotification(contactKey: String, name: String, message: String, waypointId: Int)
+
+    suspend fun updateReactionNotification(
+        contactKey: String,
+        name: String,
+        emoji: String,
+        isBroadcast: Boolean,
+        channelName: String?,
+    )
 
     fun showAlertNotification(contactKey: String, name: String, alert: String)
 

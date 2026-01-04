@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.repository
 
 import androidx.paging.Pager
@@ -46,7 +45,7 @@ constructor(
     private val dispatchers: CoroutineDispatchers,
 ) {
     fun getWaypoints(): Flow<List<Packet>> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getAllPackets(PortNum.WAYPOINT_APP_VALUE) }
+        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getAllWaypointsFlow() }
 
     fun getContacts(): Flow<Map<String, Packet>> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactKeys() }
@@ -97,18 +96,21 @@ constructor(
     suspend fun insert(packet: Packet) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().insert(packet) }
 
-    suspend fun getMessagesFrom(contact: String, getNode: suspend (String?) -> Node) = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().getMessagesFrom(contact).mapLatest { packets ->
-            packets.map { packet ->
-                val message = packet.toMessage(getNode)
-                message.replyId
-                    .takeIf { it != null && it != 0 }
-                    ?.let { getPacketByPacketId(it) }
-                    ?.toMessage(getNode)
-                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+    suspend fun getMessagesFrom(contact: String, limit: Int? = null, getNode: suspend (String?) -> Node) =
+        withContext(dispatchers.io) {
+            val dao = dbManager.currentDb.value.packetDao()
+            val flow = if (limit != null) dao.getMessagesFrom(contact, limit) else dao.getMessagesFrom(contact)
+            flow.mapLatest { packets ->
+                packets.map { packet ->
+                    val message = packet.toMessage(getNode)
+                    message.replyId
+                        .takeIf { it != null && it != 0 }
+                        ?.let { getPacketByPacketId(it) }
+                        ?.toMessage(getNode)
+                        ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+                }
             }
         }
-    }
 
     fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>> = Pager(
         config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50),
@@ -176,4 +178,7 @@ constructor(
         withContext(dispatchers.io) {
             dbManager.currentDb.value.packetDao().migrateChannelsByPSK(oldSettings, newSettings)
         }
+
+    private fun org.meshtastic.core.database.dao.PacketDao.getAllWaypointsFlow(): Flow<List<Packet>> =
+        getAllPackets(PortNum.WAYPOINT_APP_VALUE)
 }

@@ -521,11 +521,12 @@ constructor(
     }
 
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
+        val emoji = packet.decoded.payload.toByteArray().decodeToString()
         val reaction =
             ReactionEntity(
                 replyId = packet.decoded.replyId,
                 userId = dataMapper.toNodeID(packet.from),
-                emoji = packet.decoded.payload.toByteArray().decodeToString(),
+                emoji = emoji,
                 timestamp = System.currentTimeMillis(),
                 snr = packet.rxSnr,
                 rssi = packet.rxRssi,
@@ -537,6 +538,31 @@ constructor(
                 },
             )
         packetRepository.get().insertReaction(reaction)
+
+        // Find the original packet to get the contactKey
+        packetRepository.get().getPacketByPacketId(packet.decoded.replyId)?.let { original ->
+            val contactKey = original.packet.contact_key
+            val isMuted = packetRepository.get().getContactSettings(contactKey).isMuted
+            if (!isMuted) {
+                val channelName =
+                    if (original.packet.data.to == DataPacket.ID_BROADCAST) {
+                        radioConfigRepository.channelSetFlow
+                            .first()
+                            .settingsList
+                            .getOrNull(original.packet.data.channel)
+                            ?.name
+                    } else {
+                        null
+                    }
+                serviceNotifications.updateReactionNotification(
+                    contactKey,
+                    getSenderName(dataMapper.toDataPacket(packet)!!),
+                    emoji,
+                    original.packet.data.to == DataPacket.ID_BROADCAST,
+                    channelName,
+                )
+            }
+        }
     }
 
     private fun currentTransport(address: String? = meshPrefs.deviceAddress): String = when (address?.firstOrNull()) {
