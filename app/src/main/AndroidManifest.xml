@@ -221,6 +221,8 @@
             </intent-filter>
         </receiver>
         <receiver android:name="com.geeksville.mesh.service.ReplyReceiver"/>
+        <receiver android:name="com.geeksville.mesh.service.MarkAsReadReceiver"/>
+        <receiver android:name="com.geeksville.mesh.service.ReactionReceiver"/>
 
         <!-- allow for plugin discovery -->
         <activity
