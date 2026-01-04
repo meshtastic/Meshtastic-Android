@@ -52,6 +52,7 @@ import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
 
 @AndroidEntryPoint
+@Suppress("TooManyFunctions", "LargeClass")
 class MeshService : Service() {
 
     @Inject lateinit var radioInterfaceService: RadioInterfaceService
@@ -342,5 +343,21 @@ class MeshService : Service() {
             override fun requestTelemetry(requestId: Int, destNum: Int, type: Int) = toRemoteExceptions {
                 router.actionHandler.handleRequestTelemetry(requestId, destNum, type)
             }
+
+            override fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) =
+                toRemoteExceptions {
+                    val otaMode = AdminProtos.OTAMode.forNumber(mode) ?: AdminProtos.OTAMode.NO_REBOOT_OTA
+                    val otaEventBuilder = AdminProtos.AdminMessage.OTAEvent.newBuilder()
+                    if (hash != null) {
+                        otaEventBuilder.otaHash = ByteString.copyFrom(hash)
+                        otaEventBuilder.rebootOtaMode = otaMode
+                    }
+
+                    packetHandler.sendToRadio(
+                        newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
+                            otaRequest = otaEventBuilder.build()
+                        },
+                    )
+                }
         }
 }
