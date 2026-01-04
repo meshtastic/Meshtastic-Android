@@ -41,6 +41,7 @@
     <string name="unrecognized">Tundmatu</string>
     <string name="message_status_enroute">Ootab kinnitamist</string>
     <string name="message_status_queued">Saatmise järjekorras</string>
+    <string name="message_retry_count">Proovimist: %1$d / %2$d</string>
     <string name="routing_error_none">Kinnitatud</string>
     <string name="routing_error_no_route">Marsruuti pole</string>
     <string name="routing_error_got_nak">Negatiivne kinnitus</string>
@@ -201,6 +202,15 @@
     <string name="debug_export_cancelled">Eksport katkestatud</string>
     <string name="debug_export_success">%1$d logi eksporditud</string>
     <string name="debug_export_failed">Ebaõnnestus kirjutada logi faili: %1$s</string>
+    <string name="debug_export_no_logs">Eksporditavaid logisid pole</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d tund</item>
+        <item quantity="other">%1$d tundi</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d päev</item>
+        <item quantity="other">%1$d päeva</item>
+    </plurals>
     <string name="debug_filters">Filtrid</string>
     <string name="debug_active_filters">Aktiivsed filtrid</string>
     <string name="debug_default_search">Otsi logist…</string>
@@ -490,6 +500,9 @@
     <string name="messages">Sõnum</string>
     <string name="device_db_cache_limit">Seadme DB vahemälu piirang</string>
     <string name="device_db_cache_limit_summary">Maksimaalne telefonis hoitav seadmete andmebaaside arv</string>
+    <string name="log_retention_days">MeshLogi säilitusperiood</string>
+    <string name="log_retention_days_summary">Vali, kaua logisid säilitada. Logide säilitamiseks vali „Mitte kunagi”.</string>
+    <string name="log_retention_never">Ära kunagi kustuta logisid</string>
     <string name="detection_sensor_config">Tuvastusanduri sätted</string>
     <string name="detection_sensor_enabled">Tuvastusandur lubatud</string>
     <string name="minimum_broadcast_seconds">Minimaalne edastusaeg (sekund)</string>
