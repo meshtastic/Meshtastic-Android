@@ -43,6 +43,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
+@Suppress("TooManyFunctions")
 @Singleton
 class MeshMessageProcessor
 @Inject
@@ -59,6 +60,10 @@ constructor(
 
     private val earlyReceivedPackets = ArrayDeque<MeshPacket>()
     private val maxEarlyPacketBuffer = 128
+
+    fun clearEarlyPackets() {
+        synchronized(earlyReceivedPackets) { earlyReceivedPackets.clear() }
+    }
 
     fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -112,8 +117,13 @@ constructor(
                 PayloadVariantCase.XMODEMPACKET -> "XmodemPacket" to proto.xmodemPacket.toString()
                 PayloadVariantCase.DEVICEUICONFIG -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
                 PayloadVariantCase.FILEINFO -> "FileInfo" to proto.fileInfo.toString()
-                else -> return // Other variants (Config, NodeInfo, etc.) are handled by dispatcher but not necessarily
-                // logged as raw strings here
+                PayloadVariantCase.MY_INFO -> "MyInfo" to proto.myInfo.toString()
+                PayloadVariantCase.NODE_INFO -> "NodeInfo" to proto.nodeInfo.toString()
+                PayloadVariantCase.CONFIG -> "Config" to proto.config.toString()
+                PayloadVariantCase.MODULECONFIG -> "ModuleConfig" to proto.moduleConfig.toString()
+                PayloadVariantCase.CHANNEL -> "Channel" to proto.channel.toString()
+                PayloadVariantCase.CLIENTNOTIFICATION -> "ClientNotification" to proto.clientNotification.toString()
+                else -> return
             }
 
         insertMeshLog(
@@ -208,7 +218,9 @@ constructor(
                 it.hopsAway =
                     if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
                         0
-                    } else if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
+                    } else if (packet.hopStart == 0 && !packet.decoded.hasBitfield()) {
+                        -1
+                    } else if (packet.hopLimit > packet.hopStart) {
                         -1
                     } else {
                         packet.hopStart - packet.hopLimit
