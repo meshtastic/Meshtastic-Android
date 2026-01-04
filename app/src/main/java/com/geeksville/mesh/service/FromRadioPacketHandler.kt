@@ -17,6 +17,7 @@
 package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.MeshProtos
 import javax.inject.Inject
@@ -34,7 +35,7 @@ constructor(
     private val router: MeshRouter,
     private val mqttManager: MeshMqttManager,
     private val packetHandler: PacketHandler,
-    private val serviceNotifications: org.meshtastic.core.service.MeshServiceNotifications,
+    private val serviceNotifications: MeshServiceNotifications,
 ) {
     @Suppress("CyclomaticComplexMethod")
     fun handleFromRadio(proto: MeshProtos.FromRadio) {
