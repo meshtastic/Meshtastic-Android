@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.service
 
 import android.app.Notification
@@ -40,12 +39,7 @@ interface MeshServiceNotifications {
         channelName: String?,
     )
 
-    fun updateWaypointNotification(
-        contactKey: String,
-        name: String,
-        message: String,
-        waypointId: Int,
-    )
+    fun updateWaypointNotification(contactKey: String, name: String, message: String, waypointId: Int)
 
     fun showAlertNotification(contactKey: String, name: String, alert: String)
 
