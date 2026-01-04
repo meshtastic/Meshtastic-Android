@@ -186,12 +186,6 @@
       "title": "Add Minimesh Lite device variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/9176",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9174",
-      "title": "Fix zero in sp02 and Heart Rate on screen",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9174",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }

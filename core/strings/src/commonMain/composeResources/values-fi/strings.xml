@@ -229,6 +229,7 @@
     <string name="new_messages_below">Uudet viestit alla</string>
     <string name="meshtastic_messages_notifications">Suorien viestien ilmoitukset</string>
     <string name="meshtastic_broadcast_notifications">Yleislähetysviestien ilmoitukset</string>
+    <string name="meshtastic_waypoints_notifications">Reittipisteilmoitukset</string>
     <string name="meshtastic_alerts_notifications">Hälytysilmoitukset</string>
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
