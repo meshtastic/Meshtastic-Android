@@ -32,6 +32,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.milliseconds
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
 import org.meshtastic.core.database.entity.MetadataEntity
@@ -186,4 +189,54 @@ constructor(
 
     suspend fun setNodeNotes(num: Int, notes: String) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.setNodeNotes(num, notes) }
+
+    /**
+     * Returns nodes eligible for cleanup using the same rules as the settings UI:
+     * - Nodes older than [olderThanDays]
+     * - If [onlyUnknownNodes] is true, they must also be unknown
+     * - Always exclude nodes with PKI heard within the last 7 days, ignored nodes, and favorites
+     */
+    suspend fun getNodesForCleanup(olderThanDays: Int, onlyUnknownNodes: Boolean): List<NodeEntity> =
+        withContext(dispatchers.io) {
+            val currentTimeSeconds = System.currentTimeMillis().milliseconds.inWholeSeconds
+            val sevenDaysAgoSeconds = currentTimeSeconds - 7.days.inWholeSeconds
+            val olderThanTimestamp = currentTimeSeconds - olderThanDays.days.inWholeSeconds
+
+            val initialNodesToConsider =
+                if (onlyUnknownNodes) {
+                    val olderNodes = nodeInfoReadDataSource.getNodesOlderThan(olderThanTimestamp.toInt())
+                    val unknownNodes = nodeInfoReadDataSource.getUnknownNodes()
+                    olderNodes.filter { node -> unknownNodes.any { unknown -> node.num == unknown.num } }
+                } else {
+                    nodeInfoReadDataSource.getNodesOlderThan(olderThanTimestamp.toInt())
+                }
+
+            initialNodesToConsider.filterNot { node ->
+                (node.hasPKC && node.lastHeard >= sevenDaysAgoSeconds) ||
+                    node.isIgnored ||
+                    node.isFavorite
+            }
+        }
+
+    suspend fun getNodesForCleanupMinutes(olderThanMinutes: Int, onlyUnknownNodes: Boolean): List<NodeEntity> =
+        withContext(dispatchers.io) {
+            val currentTimeSeconds = System.currentTimeMillis().milliseconds.inWholeSeconds
+            val sevenDaysAgoSeconds = currentTimeSeconds - 7.days.inWholeSeconds
+            val olderThanTimestamp = currentTimeSeconds - olderThanMinutes.minutes.inWholeSeconds
+
+            val initialNodesToConsider =
+                if (onlyUnknownNodes) {
+                    val olderNodes = nodeInfoReadDataSource.getNodesOlderThan(olderThanTimestamp.toInt())
+                    val unknownNodes = nodeInfoReadDataSource.getUnknownNodes()
+                    olderNodes.filter { node -> unknownNodes.any { unknown -> node.num == unknown.num } }
+                } else {
+                    nodeInfoReadDataSource.getNodesOlderThan(olderThanTimestamp.toInt())
+                }
+
+            initialNodesToConsider.filterNot { node ->
+                (node.hasPKC && node.lastHeard >= sevenDaysAgoSeconds) ||
+                    node.isIgnored ||
+                    node.isFavorite
+            }
+        }
 }
