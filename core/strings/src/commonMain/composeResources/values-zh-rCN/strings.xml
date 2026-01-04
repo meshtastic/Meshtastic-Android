@@ -20,14 +20,14 @@
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">筛选器csvfganw</string>
     <string name="desc_node_filter_clear">清除筛选</string>
-    <string name="node_filter_title">筛选</string>
+    <string name="node_filter_title">筛选条件</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
-    <string name="node_filter_exclude_infrastructure">不包括基础设施</string>
+    <string name="node_filter_exclude_infrastructure">排除公共节点</string>
     <string name="node_filter_only_online">隐藏离线节点</string>
     <string name="node_filter_only_direct">仅显示直连节点</string>
     <string name="node_filter_ignored">您正在查看被忽略的节点，\n点击返回到节点列表。</string>
     <string name="node_filter_show_details">显示详细信息</string>
-    <string name="node_sort_title">排序方式</string>
+    <string name="node_sort_title">排序规则</string>
     <string name="node_sort_button">节点排序选项</string>
     <string name="node_sort_alpha">字母顺序</string>
     <string name="node_sort_channel">频道</string>
@@ -41,6 +41,7 @@
     <string name="unrecognized">无法识别的</string>
     <string name="message_status_enroute">正在等待确认</string>
     <string name="message_status_queued">发送队列中</string>
+    <string name="message_retry_count">重试: %1$d / %2$d</string>
     <string name="routing_error_none">已确认</string>
     <string name="routing_error_no_route">无路径</string>
     <string name="routing_error_got_nak">接收到否定确认</string>
@@ -97,11 +98,11 @@
     <string name="config_device_tripleClickAsAdHocPing_summary">当用户按钮被点击三次时，在主通道上发送定位。</string>
     <string name="config_device_ledHeartbeatEnabled_summary">控制设备上的指示灯闪烁。对于大多数设备，这将控制最多 4 个指示灯，充电器和 GPS 指示灯无法控制。</string>
     <string name="config_device_tzdef_summary">设备屏幕和日志上的日期时区。</string>
-    <string name="config_device_use_phone_tz">使用手机时区</string>
+    <string name="config_device_use_phone_tz">使用手机的地方时区</string>
     <string name="config_device_transmitOverLora_summary">是否除了发送到 MQTT 和 PhoneAPI 外，还应通过 LoRa 传输我们的邻居信息（NeighborInfo）。在具有默认密钥和名称的通道上不可用。</string>
     <string name="config_display_screen_on_secs_summary">按下用户按钮或收到消息后屏幕保持亮屏的时间。</string>
     <string name="config_display_auto_screen_carousel_secs_summary">根据指定的时间间隔，像旋转木马一样自动切换到屏幕上的下一页。</string>
-    <string name="config_display_compass_north_top_summary">屏幕上的指南针总是向北指针。</string>
+    <string name="config_display_compass_north_top_summary">屏幕上的指南针总是指向北。</string>
     <string name="config_display_flip_screen_summary">垂直翻转屏幕。</string>
     <string name="config_display_units_summary">设备屏幕显示的单位。</string>
     <string name="config_display_oled_summary">覆盖自动OLED屏幕检测。</string>
@@ -114,6 +115,7 @@
     <string name="config_lora_frequency_slot_summary">您的节点运行频率是根据地区、调制解调器预设和此字段计算的。 当0时，插槽会自动根据主频道名称计算，并会从默认的公共插槽中改变。 如果配置了私有的主频道和公立中等频道，则更改到公共默认频道。</string>
     <string name="label_very_long_slow">超长距离 / 低速模式</string>
     <string name="label_long_fast">长距离 / 快速模式</string>
+    <string name="label_long_turbo">长距离 / 高速模式</string>
     <string name="label_long_moderate">长距离 / 中速模式</string>
     <string name="label_long_slow">长距离 / 低速模式</string>
     <string name="label_medium_fast">中距离 / 快速模式</string>
@@ -149,7 +151,7 @@
     <string name="advanced_device_gps">高级设备 GPS</string>
     <string name="gps_receive_gpio">GPS 接收GPIO</string>
     <string name="gps_transmit_gpio">GPS 输出 GPIO</string>
-    <string name="gps_en_gpio">GPS EN GPIO</string>
+    <string name="gps_en_gpio">GPS 使能 GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">调试</string>
     <string name="channel_name">频道名称</string>
@@ -158,7 +160,7 @@
     <string name="send">传送</string>
     <string name="warning_not_paired">您尚未将手机与 Meshtastic 兼容的装置配对。请先配对装置并设置您的用户名称。\n\n此开源应用程序仍在开发中，如有问题，请在我们的论坛 https://github.com/orgs/meshtastic/discussions 上面发文询问。\n\n 也可参阅我们的网页 - www.meshtastic.org。</string>
     <string name="you">你</string>
-    <string name="analytics_okay">允许进行数据分析和崩溃报告。</string>
+    <string name="analytics_okay">报告崩溃信息</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
     <string name="discard_changes">忽略</string>
@@ -191,6 +193,7 @@
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
     <string name="none">无 (停用)</string>
     <string name="meshtastic_service_notifications">服务通知</string>
+    <string name="acknowledgements">开源</string>
     <string name="channel_invalid">此频道 URL 无效，无法使用</string>
     <string name="contact_invalid">此频道 URL 无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
@@ -199,8 +202,12 @@
     <string name="debug_export_cancelled">已取消导出</string>
     <string name="debug_export_success">导出%1$d 日志</string>
     <string name="debug_export_failed">写入日志文件失败： %1$s</string>
+    <string name="debug_export_no_logs">没有可导出的日志</string>
     <plurals name="log_retention_hours">
         <item quantity="other">%1$d 小时</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="other">%1$d 天</item>
     </plurals>
     <string name="debug_filters">筛选器</string>
     <string name="debug_active_filters">启用的过滤器</string>
@@ -263,7 +270,7 @@
     <string name="shutdown">关机</string>
     <string name="cant_shutdown">此设备不支持关机</string>
     <string name="shutdown_warning">⚠️ 警告！此操作将会关闭该节点。你需要使用电源开关按键才能重启设备~</string>
-    <string name="shutdown_critical_node">:警告：这是一个关键的基础设施节点。请输入节点名称以确认：</string>
+    <string name="shutdown_critical_node">警告：这是一个关键的基础设施节点。请输入节点名称以确认：</string>
     <string name="shutdown_node_name">节点 (%1$s</string>
     <string name="shutdown_type_name">类型： %1$s</string>
     <string name="reboot">重启</string>
@@ -277,6 +284,7 @@
     <string name="quick_chat_instant">立即发送</string>
     <string name="quick_chat_show">显示快速聊天菜单</string>
     <string name="quick_chat_hide">隐藏快速聊天菜单</string>
+    <string name="quick_chat_show_label">显示快捷消息</string>
     <string name="factory_reset">恢复出厂设置</string>
     <string name="bluetooth_disabled">蓝牙已被禁用。请在您的设备设置中启用它。</string>
     <string name="open_settings">打开设置</string>
@@ -328,6 +336,7 @@
     <string name="mute_status_unmuted">非静音</string>
     <string name="mute_status_muted_for_days">%1d 天静音 %.1f 小时</string>
     <string name="mute_status_muted_for_hours">%.1f 小时静音</string>
+    <string name="mute_status_label">静默状态</string>
     <string name="replace">替换</string>
     <string name="wifi_qr_code_scan">扫描 WiFi 二维码</string>
     <string name="wifi_qr_code_error">WiFi凭据二维码格式无效</string>
@@ -382,6 +391,12 @@
         <item quantity="other">%d 越点数</item>
     </plurals>
     <string name="traceroute_diff">越点数：去程 %1$d，回程 %2$d</string>
+    <string name="traceroute_outgoing_route">路由出口</string>
+    <string name="traceroute_return_route">路由回程</string>
+    <string name="traceroute_endpoint_missing">无法显示路由跟踪地图，因为起始节点或目标节点没有位置信息。</string>
+    <string name="view_on_map">查看地图</string>
+    <string name="traceroute_map_no_data">此轨迹追踪器还没有任何可映射的节点。</string>
+    <string name="traceroute_showing_nodes">显示 %1$d/%2$d 节点</string>
     <string name="twenty_four_hours">24 小时</string>
     <string name="forty_eight_hours">48 小时</string>
     <string name="one_week">1 周</string>
@@ -393,10 +408,10 @@
     <string name="alert_bell_text">警铃字符！</string>
     <string name="critical_alert">关键告警！</string>
     <string name="favorite">收藏</string>
-    <string name="add_favorite">添加至收藏夹</string>
-    <string name="remove_favorite">从收藏夹中移除</string>
-    <string name="favorite_add">添加 '%1$s'为收藏节点？</string>
-    <string name="favorite_remove">不再把'%1$s'作为收藏节点？</string>
+    <string name="add_favorite">添加至收藏</string>
+    <string name="remove_favorite">从收藏中移除</string>
+    <string name="favorite_add">添加 '%1$s'到收藏？</string>
+    <string name="favorite_remove">不再把'%1$s'添加到收藏？</string>
     <string name="power_metrics_log">电源计量日志</string>
     <string name="channel_1">频道 1</string>
     <string name="channel_2">频道 2</string>
@@ -482,7 +497,10 @@
     <string name="send_bell">发送响铃</string>
     <string name="messages">消息</string>
     <string name="device_db_cache_limit">设备数据库缓存限制</string>
-    <string name="device_db_cache_limit_summary">保留在手机上的最大设备数据量</string>
+    <string name="device_db_cache_limit_summary">节点在手机上数据缓存限制</string>
+    <string name="log_retention_days">Mesh日志保留时长</string>
+    <string name="log_retention_days_summary">选择保存日志的长度。选择永远不要保留所有日志。</string>
+    <string name="log_retention_never">永不删除日志</string>
     <string name="detection_sensor_config">检测传感器配置</string>
     <string name="detection_sensor_enabled">启用检测传感器</string>
     <string name="minimum_broadcast_seconds">最小广播时间(秒)</string>
@@ -712,8 +730,15 @@
     <string name="import_known_shared_contact_text">警告：此联系人已知，导入将覆盖之前的联系人信息。</string>
     <string name="public_key_changed">公钥已更改</string>
     <string name="import_label">导入</string>
+    <string name="request">请求</string>
+    <string name="request_neighbor_info">邻居信息(2.7.15+)</string>
+    <string name="request_telemetry">请求远程操作</string>
     <string name="request_device_metrics">设备指标</string>
     <string name="request_environment_metrics">传感器指标</string>
+    <string name="request_air_quality_metrics">空气质量日志</string>
+    <string name="request_power_metrics">电源计量日志</string>
+    <string name="request_local_stats">本地统计数据</string>
+    <string name="request_metadata">元数据</string>
     <string name="actions">操作</string>
     <string name="firmware">固件</string>
     <string name="use_12h_format">使用 12 小时制格式</string>
@@ -905,6 +930,7 @@
     <string name="device_configuration">设备配置</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <string name="device_telemetry_enabled">发送设备远程数据</string>
+    <string name="device_telemetry_enabled_summary">启用/禁用设备遥测模块，以将指标发送至网络。这些是标称值。拥堵的网络会根据在线节点的数量自动调整为更长的间隔。节点少于个的网络会调整为更快的间隔。</string>
     <string name="any">任意内容</string>
     <string name="one_hour">1 小时</string>
     <string name="eight_hours">8 小时</string>
@@ -935,8 +961,8 @@
     <string name="firmware_update_device">设备: %1$s</string>
     <string name="firmware_update_currently_installed">目前已安装: %1$s</string>
     <string name="firmware_update_latest">最新版本： %1$s</string>
-    <string name="firmware_update_stable">稳定的</string>
-    <string name="firmware_update_alpha">Alpha</string>
+    <string name="firmware_update_stable">稳定版本</string>
+    <string name="firmware_update_alpha">开发版本</string>
     <string name="firmware_update_disconnect_warning">注意：这将在更新过程中暂时断开设备。</string>
     <string name="firmware_update_downloading">正在下载固件...%1$d</string>
     <string name="firmware_update_error">错误：%1$s</string>
@@ -958,7 +984,7 @@
     <string name="firmware_update_almost_there">即将完成…</string>
     <string name="firmware_update_taking_a_while">这可能需要几分钟...</string>
     <string name="firmware_update_select_file">选择本地文件</string>
-    <string name="firmware_update_unknown_release">未知的远程版本</string>
+    <string name="firmware_update_unknown_release">未知的网络版本</string>
     <string name="firmware_update_disclaimer_title">更新警告</string>
     <string name="firmware_update_disclaimer_text">你即将为你的设备刷入新固件。此过程存在风险。
 

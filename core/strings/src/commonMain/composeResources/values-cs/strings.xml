@@ -163,6 +163,7 @@
     <string name="debug_filters">Filtry</string>
     <string name="debug_active_filters">Aktivní filtry</string>
     <string name="debug_default_search">Hledat v protokolech…</string>
+    <string name="debug_search_clear">Vymazat hledání</string>
     <string name="debug_filter_add">Přidat filtr</string>
     <string name="debug_filter_clear">Vymazat všechny filtry</string>
     <string name="debug_clear">Vymazat protokoly</string>

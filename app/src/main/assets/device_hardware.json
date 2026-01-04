@@ -349,6 +349,23 @@
     "partitionScheme": "16MB"
   },
   {
+    "hwModel": 33,
+    "hwModelSlug": "T_ECHO_PLUS",
+    "platformioTarget": "t-echo-plus",
+    "architecture": "nrf52840",
+    "supportLevel": 1,
+    "activelySupported": false,
+    "displayName": "LILYGO T-Echo Plus",
+    "tags": [
+      "LilyGo"
+    ],
+    "images": [
+      "t-echo_plus.svg"
+    ],
+    "requiresDfu": true,
+    "hasInkHud": true
+  },
+  {
     "hwModel": 39,
     "hwModelSlug": "DIY_V1",
     "platformioTarget": "meshtastic-diy-v1",
