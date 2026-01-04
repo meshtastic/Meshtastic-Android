@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.service
 
 import android.app.Notification
@@ -55,6 +54,7 @@ import org.meshtastic.core.strings.meshtastic_low_battery_temporary_remote_notif
 import org.meshtastic.core.strings.meshtastic_messages_notifications
 import org.meshtastic.core.strings.meshtastic_new_nodes_notifications
 import org.meshtastic.core.strings.meshtastic_service_notifications
+import org.meshtastic.core.strings.meshtastic_waypoints_notifications
 import org.meshtastic.core.strings.new_node_seen
 import org.meshtastic.core.strings.no_local_stats
 import org.meshtastic.core.strings.reply
@@ -111,6 +111,13 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
+        object Waypoint :
+            NotificationType(
+                "my_waypoints",
+                Res.string.meshtastic_waypoints_notifications,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+
         object Alert :
             NotificationType(
                 "my_alerts",
@@ -152,6 +159,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
                 ServiceState,
                 DirectMessage,
                 BroadcastMessage,
+                Waypoint,
                 Alert,
                 NewNode,
                 LowBatteryLocal,
@@ -190,6 +198,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
 
                     NotificationType.DirectMessage,
                     NotificationType.BroadcastMessage,
+                    NotificationType.Waypoint,
                     NotificationType.NewNode,
                     NotificationType.LowBatteryLocal,
                     NotificationType.LowBatteryRemote,
@@ -283,6 +292,11 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         notificationManager.notify(contactKey.hashCode(), notification)
     }
 
+    override fun updateWaypointNotification(contactKey: String, name: String, message: String, waypointId: Int) {
+        val notification = createWaypointNotification(name, message, waypointId)
+        notificationManager.notify(contactKey.hashCode(), notification)
+    }
+
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
         val notification = createAlertNotification(contactKey, name, alert)
         // Use a consistent, unique ID for each alert source.
@@ -373,6 +387,20 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         return builder.build()
     }
 
+    private fun createWaypointNotification(name: String, message: String, waypointId: Int): Notification {
+        val person = Person.Builder().setName(name).build()
+        val style = NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
+
+        return commonBuilder(NotificationType.Waypoint, createOpenWaypointIntent(waypointId))
+            .setCategory(Notification.CATEGORY_MESSAGE)
+            .setAutoCancel(true)
+            .setStyle(style)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setWhen(System.currentTimeMillis())
+            .setShowWhen(true)
+            .build()
+    }
+
     private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
         val person = Person.Builder().setName(name).build()
         val style = NotificationCompat.MessagingStyle(person).addMessage(alert, System.currentTimeMillis(), person)
@@ -451,6 +479,19 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         return TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(deepLinkIntent)
             getPendingIntent(contactKey.hashCode(), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+    }
+
+    private fun createOpenWaypointIntent(waypointId: Int): PendingIntent {
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/map?waypointId=$waypointId".toUri()
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(waypointId, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
     }
 

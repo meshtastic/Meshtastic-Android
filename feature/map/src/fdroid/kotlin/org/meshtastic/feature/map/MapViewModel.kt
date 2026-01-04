@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,21 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map
 
+import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class MapViewModel
 @Inject
@@ -39,7 +45,11 @@ constructor(
     serviceRepository: ServiceRepository,
     radioConfigRepository: RadioConfigRepository,
     buildConfigProvider: BuildConfigProvider,
+    savedStateHandle: SavedStateHandle,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
+
+    private val _selectedWaypointId = MutableStateFlow(savedStateHandle.toRoute<MapRoutes.Map>().waypointId)
+    val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
     var mapStyleId: Int
         get() = mapPrefs.mapStyle

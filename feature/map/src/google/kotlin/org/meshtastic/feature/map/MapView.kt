@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("MagicNumber")
 
 package org.meshtastic.feature.map
@@ -263,6 +262,8 @@ fun MapView(
             .collectAsStateWithLifecycle(listOf())
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
+    val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
+
     val tracerouteSelection =
         remember(tracerouteOverlay, tracerouteNodePositions, allNodes) {
             mapViewModel.tracerouteNodeSelection(
@@ -581,6 +582,7 @@ fun MapView(
                     isConnected = isConnected,
                     unicodeEmojiToBitmapProvider = ::unicodeEmojiToBitmap,
                     onEditWaypointRequest = { waypointToEdit -> editingWaypoint = waypointToEdit },
+                    selectedWaypointId = selectedWaypointId,
                 )
 
                 MapEffect(mapLayers) { map ->
