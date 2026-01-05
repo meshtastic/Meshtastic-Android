@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.messaging.component
 
 import androidx.compose.animation.AnimatedVisibility
@@ -54,9 +53,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Reaction
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.hops_away_template
+import org.meshtastic.core.strings.you
 import org.meshtastic.core.ui.component.BottomSheetDialog
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
@@ -113,8 +114,9 @@ internal fun ReactionRow(
 
 private fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
 
+@Suppress("LongMethod")
 @Composable
-internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {}) =
+internal fun ReactionDialog(reactions: List<Reaction>, myId: String? = null, onDismiss: () -> Unit = {}) =
     BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
         val groupedEmojis = reactions.groupBy { it.emoji }
         var selectedEmoji by remember { mutableStateOf<String?>(null) }
@@ -144,7 +146,14 @@ internal fun ReactionDialog(reactions: List<Reaction>, onDismiss: () -> Unit = {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(text = reaction.user.longName, style = MaterialTheme.typography.titleMedium)
+                        val isLocal = reaction.user.id == myId || reaction.user.id == DataPacket.ID_LOCAL
+                        val displayName =
+                            if (isLocal) {
+                                "${reaction.user.longName} (${stringResource(Res.string.you)})"
+                            } else {
+                                reaction.user.longName
+                            }
+                        Text(text = displayName, style = MaterialTheme.typography.titleMedium)
                         Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
                     }
                     Row(
