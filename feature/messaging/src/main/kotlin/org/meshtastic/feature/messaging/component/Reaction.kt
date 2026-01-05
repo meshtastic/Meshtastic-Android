@@ -114,6 +114,7 @@ internal fun ReactionRow(
 
 private fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
 
+@Suppress("LongMethod")
 @Composable
 internal fun ReactionDialog(reactions: List<Reaction>, myId: String? = null, onDismiss: () -> Unit = {}) =
     BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
@@ -146,11 +147,12 @@ internal fun ReactionDialog(reactions: List<Reaction>, myId: String? = null, onD
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         val isLocal = reaction.user.id == myId || reaction.user.id == DataPacket.ID_LOCAL
-                        val displayName = if (isLocal) {
-                            "${reaction.user.longName} (${stringResource(Res.string.you)})"
-                        } else {
-                            reaction.user.longName
-                        }
+                        val displayName =
+                            if (isLocal) {
+                                "${reaction.user.longName} (${stringResource(Res.string.you)})"
+                            } else {
+                                reaction.user.longName
+                            }
                         Text(text = displayName, style = MaterialTheme.typography.titleMedium)
                         Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
                     }
