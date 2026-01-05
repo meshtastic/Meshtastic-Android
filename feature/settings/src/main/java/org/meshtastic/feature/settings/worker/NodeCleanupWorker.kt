@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import co.touchlab.kermit.Logger
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -75,7 +76,14 @@ constructor(
         }
 
         logger.i { "Node cleanup: removed ${nodeNums.size} nodes older than $olderThanDays days" }
-        Result.success()
+        val output =
+            workDataOf(
+                KEY_LAST_RUN_EPOCH to System.currentTimeMillis(),
+                KEY_OLDER_THAN_DAYS to olderThanDays,
+                KEY_OLDER_THAN_MINUTES to olderThanMinutes,
+                KEY_ONLY_UNKNOWN to onlyUnknownNodes,
+            )
+        Result.success(output)
     } catch (e: Exception) {
         logger.e(e) { "Node cleanup failed" }
         Result.failure()
@@ -86,7 +94,12 @@ constructor(
         const val KEY_OLDER_THAN_DAYS = "older_than_days"
         const val KEY_OLDER_THAN_MINUTES = "older_than_minutes"
         const val KEY_ONLY_UNKNOWN = "only_unknown"
+        const val KEY_LAST_RUN_EPOCH = "last_run_epoch"
         const val DEFAULT_DAYS = 30
+
+        const val TAG_DAYS_PREFIX = "days:"
+        const val TAG_MINUTES_PREFIX = "minutes:"
+        const val TAG_UNKNOWN = "unknown"
 
         private fun entryPoint(context: Context): NodeWorkerEntryPoint =
             EntryPointAccessors.fromApplication(context.applicationContext, NodeWorkerEntryPoint::class.java)

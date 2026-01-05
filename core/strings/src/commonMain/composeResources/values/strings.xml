@@ -847,6 +847,14 @@
     <string name="cancel_scheduled_cleanup">Cancel scheduled cleanup</string>
     <string name="cancel_scheduled_cleanup_success">Cancelled scheduled cleanup</string>
     <string name="cancel_scheduled_cleanup_failed">Failed to cancel cleanup: %1$s</string>
+    <string name="scheduled_cleanup_status">Scheduled cleanup</string>
+    <string name="scheduled_cleanup_none">No cleanup scheduled</string>
+    <string name="scheduled_cleanup_state">State: %1$s</string>
+    <string name="scheduled_cleanup_params">Threshold: %1$d (%2$s unknown only)</string>
+    <string name="scheduled_cleanup_last_run">Last run: %1$s</string>
+    <string name="run_cleanup_now">Run cleanup now</string>
+    <string name="run_cleanup_now_success">Triggered cleanup</string>
+    <string name="run_cleanup_now_failed">Failed to trigger cleanup: %1$s</string>
 
     <string name="security_icon_help_green_lock">A green lock means the channel is securely encrypted with either a 128 or 256 bit AES key.</string>
 

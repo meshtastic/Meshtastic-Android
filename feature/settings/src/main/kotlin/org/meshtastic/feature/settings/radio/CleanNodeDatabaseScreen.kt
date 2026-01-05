@@ -57,12 +57,18 @@ import org.meshtastic.core.strings.clean_node_database_title
 import org.meshtastic.core.strings.clean_nodes_older_than
 import org.meshtastic.core.strings.clean_now
 import org.meshtastic.core.strings.clean_unknown_nodes
+import org.meshtastic.core.strings.scheduled_cleanup_status
+import org.meshtastic.core.strings.scheduled_cleanup_none
+import org.meshtastic.core.strings.scheduled_cleanup_state
+import org.meshtastic.core.strings.scheduled_cleanup_params
+import org.meshtastic.core.strings.scheduled_cleanup_last_run
 import org.meshtastic.core.strings.nodes_queued_for_deletion
 import org.meshtastic.core.strings.schedule_cleanup
-import org.meshtastic.core.strings.schedule_cleanup_description
 import org.meshtastic.core.strings.schedule_cleanup_failed
-import org.meshtastic.core.strings.schedule_cleanup_title
 import org.meshtastic.core.strings.schedule_cleanup_success
+import org.meshtastic.core.strings.run_cleanup_now
+import org.meshtastic.core.strings.run_cleanup_now_success
+import org.meshtastic.core.strings.run_cleanup_now_failed
 import org.meshtastic.core.strings.cancel_scheduled_cleanup
 import org.meshtastic.core.strings.cancel_scheduled_cleanup_success
 import org.meshtastic.core.strings.cancel_scheduled_cleanup_failed
@@ -80,11 +86,12 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
     val olderThanDays by viewModel.olderThanDays.collectAsState()
     val onlyUnknownNodes by viewModel.onlyUnknownNodes.collectAsState()
     val nodesToDelete by viewModel.nodesToDelete.collectAsState()
+    val scheduleStatus by viewModel.scheduleStatus.collectAsState()
     var showConfirmationDialog by remember { mutableStateOf(false) }
-    var showScheduleDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     LaunchedEffect(olderThanDays, onlyUnknownNodes) { viewModel.getNodesToDelete() }
+    LaunchedEffect(Unit) { viewModel.refreshScheduleStatus() }
 
     LaunchedEffect(Unit) {
         viewModel.scheduleEvents.collect { result ->
@@ -97,6 +104,15 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.runNowEvents.collect { result ->
+            when (result) {
+                is RunNowResult.Success -> context.showToast(Res.string.run_cleanup_now_success)
+                is RunNowResult.Failure -> context.showToast(Res.string.run_cleanup_now_failed, result.reason)
+            }
+        }
+    }
+
     if (showConfirmationDialog) {
         ConfirmationDialog(
             nodesToDeleteCount = nodesToDelete.size,
@@ -105,18 +121,6 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
                 showConfirmationDialog = false
             },
             onDismiss = { showConfirmationDialog = false },
-        )
-    }
-
-    if (showScheduleDialog) {
-        ScheduleCleanupDialog(
-            initialDays = olderThanDays.toInt().coerceAtLeast(MIN_KNOWN_DAYS_THRESHOLD.toInt()),
-            initialUnknownOnly = onlyUnknownNodes,
-            onConfirm = { days, unknownOnly ->
-                viewModel.scheduleNodeCleanup(days, unknownOnly)
-                showScheduleDialog = false
-            },
-            onDismiss = { showScheduleDialog = false },
         )
     }
 
@@ -141,6 +145,10 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        ScheduleStatus(status = scheduleStatus)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Button(
             onClick = { if (nodesToDelete.isNotEmpty()) showConfirmationDialog = true },
             modifier = Modifier.fillMaxWidth(),
@@ -152,7 +160,7 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = { showScheduleDialog = true },
+            onClick = { viewModel.scheduleNodeCleanup(olderThanDays = olderThanDays.toInt(), onlyUnknownNodes = onlyUnknownNodes) },
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(Res.string.schedule_cleanup))
@@ -163,6 +171,13 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(Res.string.cancel_scheduled_cleanup))
+        }
+
+        TextButton(
+            onClick = { viewModel.runNodeCleanupNow(olderThanDays = olderThanDays.toInt(), onlyUnknownNodes = onlyUnknownNodes) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(Res.string.run_cleanup_now))
         }
 
         TextButton(
@@ -218,64 +233,41 @@ private fun DaysThresholdFilter(
 }
 
 @Composable
-private fun ScheduleCleanupDialog(
-    initialDays: Int,
-    initialUnknownOnly: Boolean,
-    onConfirm: (Int, Boolean) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var selectedDays by remember { mutableStateOf(initialDays.toFloat()) }
-    var unknownOnly by remember { mutableStateOf(initialUnknownOnly) }
-
-    val valueRange =
-        if (unknownOnly) {
-            MIN_UNKNOWN_DAYS_THRESHOLD..MAX_DAYS_THRESHOLD
-        } else {
-            MIN_KNOWN_DAYS_THRESHOLD..MAX_DAYS_THRESHOLD
+private fun ScheduleStatus(status: ScheduleStatus?) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(text = stringResource(Res.string.scheduled_cleanup_status), style = MaterialTheme.typography.titleMedium)
+        if (status == null) {
+            Text(text = stringResource(Res.string.scheduled_cleanup_none), style = MaterialTheme.typography.bodySmall)
+            return
         }
 
-    LaunchedEffect(unknownOnly) {
-        if (!unknownOnly && selectedDays < MIN_KNOWN_DAYS_THRESHOLD) {
-            selectedDays = MIN_KNOWN_DAYS_THRESHOLD
-        }
+        val stateText = status.state?.name ?: "N/A"
+        val paramsText =
+            if (status.olderThanMinutes != null && status.olderThanMinutes > 0) {
+                stringResource(
+                    Res.string.scheduled_cleanup_params,
+                    status.olderThanMinutes,
+                    status.onlyUnknown,
+                )
+            } else {
+                stringResource(
+                    Res.string.scheduled_cleanup_params,
+                    status.olderThanDays ?: 0,
+                    status.onlyUnknown,
+                )
+            }
+        val lastRunText =
+            status.lastRunEpochMillis?.let { formatDateTime(it) }
+                ?: stringResource(Res.string.scheduled_cleanup_none)
+
+        Text(text = stringResource(Res.string.scheduled_cleanup_state, stateText), style = MaterialTheme.typography.bodySmall)
+        Text(text = paramsText, style = MaterialTheme.typography.bodySmall)
+        Text(text = stringResource(Res.string.scheduled_cleanup_last_run, lastRunText), style = MaterialTheme.typography.bodySmall)
     }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.schedule_cleanup_title)) },
-        text = {
-            Column {
-                Text(stringResource(Res.string.schedule_cleanup_description))
-                Spacer(modifier = Modifier.height(16.dp))
-                DaysThresholdFilter(
-                    olderThanDays = selectedDays,
-                    onlyUnknownNodes = unknownOnly,
-                    useZeroMin = true, // keep slider visual position stable while enforcing min via clamp
-                    onDaysChanged = {
-                        val min = if (unknownOnly) MIN_UNKNOWN_DAYS_THRESHOLD else MIN_KNOWN_DAYS_THRESHOLD
-                        selectedDays = it.coerceAtLeast(min)
-                    },
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                UnknownNodesFilter(
-                    onlyUnknownNodes = unknownOnly,
-                    onCheckedChanged = {
-                        unknownOnly = it
-                        if (!it && selectedDays < MIN_KNOWN_DAYS_THRESHOLD) {
-                            selectedDays = MIN_KNOWN_DAYS_THRESHOLD
-                        }
-                    },
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = { onConfirm(selectedDays.toInt(), unknownOnly) }) {
-                Text(stringResource(Res.string.schedule_cleanup))
-            }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
-    )
 }
+
+private fun formatDateTime(epochMillis: Long): String =
+    java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT).format(java.util.Date(epochMillis))
 
 /**
  * Composable for the "only unknown nodes" filter.
