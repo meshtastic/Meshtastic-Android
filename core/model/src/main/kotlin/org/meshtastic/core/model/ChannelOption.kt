@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,19 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("MagicNumber")
 
 package org.meshtastic.core.model
 
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.label_lite_fast
+import org.meshtastic.core.strings.label_lite_slow
 import org.meshtastic.core.strings.label_long_fast
 import org.meshtastic.core.strings.label_long_moderate
 import org.meshtastic.core.strings.label_long_slow
 import org.meshtastic.core.strings.label_long_turbo
 import org.meshtastic.core.strings.label_medium_fast
 import org.meshtastic.core.strings.label_medium_slow
+import org.meshtastic.core.strings.label_narrow_fast
+import org.meshtastic.core.strings.label_narrow_slow
 import org.meshtastic.core.strings.label_short_fast
 import org.meshtastic.core.strings.label_short_slow
 import org.meshtastic.core.strings.label_short_turbo
@@ -34,7 +37,6 @@ import org.meshtastic.core.strings.label_very_long_slow
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.RegionCode
-import kotlin.math.floor
 
 /** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
 private fun hash(name: String): UInt { // using UInt instead of Long to match RadioInterface.cpp results
@@ -75,10 +77,15 @@ val LoRaConfig.numChannels: Int
         val bw = bandwidth(regionInfo)
         if (bw <= 0f) return 1 // Return 1 if bandwidth is zero or negative
 
-        val num = floor((regionInfo.freqEnd - regionInfo.freqStart) / bw)
+        // Calculate number of channels: spacing = gap between channels (0 for continuous spectrum)
+        // Match firmware: uint32_t numChannels = round((myRegion->freqEnd - myRegion->freqStart + myRegion->spacing) /
+        // channelSpacing);
+        val channelSpacing = regionInfo.spacing + bw
+        val num = Math.round((regionInfo.freqEnd - regionInfo.freqStart + regionInfo.spacing) / channelSpacing).toInt()
+
         // If the regional frequency range is smaller than the bandwidth, the firmware would
         // fall back to a default preset. In the app, we return 1 to avoid a crash.
-        return if (num > 0) num.toInt() else 1
+        return if (num > 0) num else 1
     }
 
 internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
@@ -91,7 +98,15 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     if (overrideFrequency != 0f) return overrideFrequency + frequencyOffset
     val regionInfo = RegionInfo.fromRegionCode(region)
     return if (regionInfo != null) {
-        (regionInfo.freqStart + bandwidth(regionInfo) / 2) + (channelNum - 1) * bandwidth(regionInfo)
+        val bw = bandwidth(regionInfo)
+        val channelSpacing = regionInfo.spacing + bw
+        // Match firmware: float freq = myRegion->freqStart + (bw / 2000) + (channel_num * channelSpacing);
+        // Note: firmware channel_num is 0-indexed in the calculation, but the app uses 1-indexed for some reason?
+        // Let's re-verify the firmware logic.
+        // Firmware: channel_num = hash(channelName) % numChannels;
+        // freq = myRegion->freqStart + (bw / 2000) + (channel_num * channelSpacing);
+        // The app's channelNum function returns 1..numChannels if channelNum is 0.
+        (regionInfo.freqStart + bw / 2) + (channelNum - 1) * channelSpacing
     } else {
         0f
     }
@@ -105,6 +120,8 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
  * @property freqStart The starting frequency in MHz
  * @property freqEnd The ending frequency in MHz
  * @property wideLora Whether the region uses wide Lora
+ * @property spacing The gap between channels in MHz
+ * @property defaultPreset The default modem preset for this region
  * @see
  *   [LoRaWAN Regional Parameters](https://lora-alliance.org/wp-content/uploads/2020/11/lorawan_regional_parameters_v1.0.3reva_0.pdf)
  */
@@ -115,6 +132,8 @@ enum class RegionInfo(
     val freqStart: Float,
     val freqEnd: Float,
     val wideLora: Boolean = false,
+    val spacing: Float = 0f,
+    val defaultPreset: ModemPreset = ModemPreset.LONG_FAST,
 ) {
     /** This needs to be last. Same as US. */
     UNSET(RegionCode.UNSET, "Please set a region", 902.0f, 928.0f),
@@ -301,6 +320,38 @@ enum class RegionInfo(
      * @see [Firmware Issue #7399](https://github.com/meshtastic/firmware/pull/7399)
      */
     BR_902(RegionCode.BR_902, "Brazil 902MHz", 902.0f, 907.5f, wideLora = false),
+
+    /** EU 866MHz RFID band */
+    EU_866(
+        RegionCode.EU_866,
+        "European Union 866MHz",
+        865.6375f,
+        867.5625f,
+        wideLora = false,
+        spacing = 0.475f,
+        defaultPreset = ModemPreset.LITE_FAST,
+    ),
+
+    /** EU 868MHz band, with narrow presets */
+    NARROW_868(
+        RegionCode.NARROW_868,
+        "European Union 868MHz (Narrow)",
+        869.4f,
+        869.65f,
+        wideLora = false,
+        spacing = 0.015f,
+        defaultPreset = ModemPreset.NARROW_FAST,
+    ),
+
+    /** US 433MHz Amateur Use band */
+    HAM_US433(
+        RegionCode.HAM_US433,
+        "United States 433MHz (Amateur)",
+        430.0f,
+        450.0f,
+        wideLora = false,
+        defaultPreset = ModemPreset.NARROW_SLOW,
+    ),
     ;
 
     companion object {
@@ -320,6 +371,10 @@ enum class ChannelOption(val modemPreset: ModemPreset, val labelRes: StringResou
     SHORT_FAST(ModemPreset.SHORT_FAST, Res.string.label_short_fast, 0.250f),
     SHORT_SLOW(ModemPreset.SHORT_SLOW, Res.string.label_short_slow, 0.250f),
     SHORT_TURBO(ModemPreset.SHORT_TURBO, Res.string.label_short_turbo, 0.500f),
+    LITE_FAST(ModemPreset.LITE_FAST, Res.string.label_lite_fast, 0.125f),
+    LITE_SLOW(ModemPreset.LITE_SLOW, Res.string.label_lite_slow, 0.125f),
+    NARROW_FAST(ModemPreset.NARROW_FAST, Res.string.label_narrow_fast, 0.0625f),
+    NARROW_SLOW(ModemPreset.NARROW_SLOW, Res.string.label_narrow_slow, 0.0625f),
     ;
 
     companion object {
