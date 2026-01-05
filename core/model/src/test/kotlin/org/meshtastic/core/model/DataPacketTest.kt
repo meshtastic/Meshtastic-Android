@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import kotlinx.serialization.json.Json
@@ -42,12 +41,14 @@ class DataPacketTest {
     @Test
     fun `DataPacket serialization preserves sfppHash`() {
         val hash = byteArrayOf(5, 6, 7, 8)
-        val packet = DataPacket(to = "to", channel = 0, text = "test").copy(sfppHash = hash, status = MessageStatus.SFPP_CONFIRMED)
-        
+        val packet =
+            DataPacket(to = "to", channel = 0, text = "test")
+                .copy(sfppHash = hash, status = MessageStatus.SFPP_CONFIRMED)
+
         val json = Json { isLenient = true }
         val encoded = json.encodeToString(DataPacket.serializer(), packet)
         val decoded = json.decodeFromString(DataPacket.serializer(), encoded)
-        
+
         assertEquals(packet.status, decoded.status)
         assertArrayEquals(hash, decoded.sfppHash)
     }

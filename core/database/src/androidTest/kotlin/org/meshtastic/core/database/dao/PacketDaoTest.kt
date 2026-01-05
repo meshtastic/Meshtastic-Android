@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.dao
 
 import androidx.room.Room
@@ -207,7 +206,10 @@ class PacketDaoTest {
 
         packetDao.insert(packet)
 
-        val retrieved = packetDao.getAllPackets(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE).first().find { it.sfpp_hash?.contentEquals(hash) == true }
+        val retrieved =
+            packetDao.getAllPackets(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE).first().find {
+                it.sfpp_hash?.contentEquals(hash) == true
+            }
         assertNotNull(retrieved)
         assertTrue(retrieved?.sfpp_hash?.contentEquals(hash) == true)
     }
@@ -240,12 +242,8 @@ class PacketDaoTest {
         val found = packetDao.findPacketsWithId(packetId)
         found.forEach { p ->
             if (p.data.from == fromId && p.data.to == toId) {
-                packetDao.update(
-                    p.copy(
-                        data = p.data.copy(status = MessageStatus.SFPP_CONFIRMED, sfppHash = hash),
-                        sfpp_hash = hash,
-                    ),
-                )
+                val data = p.data.copy(status = MessageStatus.SFPP_CONFIRMED, sfppHash = hash)
+                packetDao.update(p.copy(data = data, sfpp_hash = hash))
             }
         }
 
