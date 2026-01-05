@@ -156,6 +156,11 @@ constructor(
                 shouldBroadcast = false
             }
 
+            Portnums.PortNum.STORE_FORWARD_PLUSPLUS_APP_VALUE -> {
+                handleStoreForwardPlusPlus(packet)
+                shouldBroadcast = false
+            }
+
             Portnums.PortNum.ADMIN_APP_VALUE -> {
                 handleAdminMessage(packet, myNodeNum)
                 shouldBroadcast = false
@@ -184,6 +189,11 @@ constructor(
     private fun handleStoreAndForward(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val u = StoreAndForwardProtos.StoreAndForward.parseFrom(packet.decoded.payload)
         handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
+    }
+
+    private fun handleStoreForwardPlusPlus(packet: MeshPacket) {
+        val sfpp = MeshProtos.StoreForwardPlusPlus.parseFrom(packet.decoded.payload)
+        Logger.d { "Received StoreForwardPlusPlus packet: $sfpp" }
     }
 
     private fun handlePaxCounter(packet: MeshPacket) {
