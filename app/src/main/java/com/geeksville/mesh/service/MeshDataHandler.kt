@@ -194,6 +194,26 @@ constructor(
     private fun handleStoreForwardPlusPlus(packet: MeshPacket) {
         val sfpp = MeshProtos.StoreForwardPlusPlus.parseFrom(packet.decoded.payload)
         Logger.d { "Received StoreForwardPlusPlus packet: $sfpp" }
+
+        when (sfpp.sfppMessageType) {
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF,
+            -> {
+                scope.handledLaunch {
+                    packetRepository
+                        .get()
+                        .updateSFPPStatus(
+                            packetId = sfpp.encapsulatedId,
+                            from = sfpp.encapsulatedFrom,
+                            to = sfpp.encapsulatedTo,
+                            hash = sfpp.messageHash.toByteArray(),
+                        )
+                }
+            }
+            else -> {
+                // Other types like CANON_ANNOUNCE or LINK_REQUEST
+            }
+        }
     }
 
     private fun handlePaxCounter(packet: MeshPacket) {

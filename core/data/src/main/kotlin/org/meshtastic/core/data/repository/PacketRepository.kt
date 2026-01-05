@@ -140,6 +140,25 @@ constructor(
     suspend fun getPacketByPacketId(packetId: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId) }
 
+    suspend fun updateSFPPStatus(packetId: Int, from: Int, to: Int, hash: ByteArray) = withContext(dispatchers.io) {
+        val dao = dbManager.currentDb.value.packetDao()
+        val packets = dao.findPacketsWithId(packetId)
+        val fromId = DataPacket.nodeNumToDefaultId(from)
+        val toId =
+            if (to == 0 || to == DataPacket.NODENUM_BROADCAST) {
+                DataPacket.ID_BROADCAST
+            } else {
+                DataPacket.nodeNumToDefaultId(to)
+            }
+
+        packets.forEach { packet ->
+            if (packet.data.from == fromId && packet.data.to == toId) {
+                val updatedData = packet.data.copy(status = MessageStatus.SFPP_CONFIRMED, sfppHash = hash)
+                dao.update(packet.copy(data = updatedData, sfpp_hash = hash))
+            }
+        }
+    }
+
     suspend fun deleteMessages(uuidList: List<Long>) = withContext(dispatchers.io) {
         for (chunk in uuidList.chunked(500)) {
             // Fetch DAO per chunk to avoid holding a stale reference if the active DB switches

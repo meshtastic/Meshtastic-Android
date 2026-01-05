@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.messaging.component
 
 import androidx.compose.animation.AnimatedVisibility
@@ -29,6 +28,7 @@ import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudUpload
 import androidx.compose.material.icons.twotone.HowToReg
+import androidx.compose.material.icons.twotone.Link
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -83,6 +83,7 @@ private fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageS
                         MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
                         MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
                         MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                        MessageStatus.SFPP_CONFIRMED -> Icons.TwoTone.Link
                         MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
                         MessageStatus.ERROR -> Icons.TwoTone.CloudOff
                         else -> Icons.TwoTone.Warning

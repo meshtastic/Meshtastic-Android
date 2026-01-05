@@ -254,6 +254,15 @@ interface PacketDao {
     @Query("SELECT * FROM packet WHERE packet_id = :packetId LIMIT 1")
     suspend fun getPacketByPacketId(packetId: Int): PacketEntity?
 
+    @Query(
+        """
+        SELECT * FROM packet 
+        WHERE packet_id = :packetId 
+        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        """,
+    )
+    suspend fun findPacketsWithId(packetId: Int): List<Packet>
+
     @Transaction
     suspend fun getQueuedPackets(): List<DataPacket>? = getDataPackets().filter { it.status == MessageStatus.QUEUED }
 

@@ -84,6 +84,7 @@ data class Packet(
     @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
     @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
+    @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteArray? = null,
 ) {
     companion object {
         const val RELAY_NODE_SUFFIX_MASK = 0xFF
