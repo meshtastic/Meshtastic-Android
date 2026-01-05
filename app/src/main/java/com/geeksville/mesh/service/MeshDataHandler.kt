@@ -494,8 +494,13 @@ constructor(
         }
     }
 
-    private fun getSenderName(packet: DataPacket): String =
-        nodeManager.nodeDBbyID[packet.from]?.user?.longName ?: getString(Res.string.unknown_username)
+    private fun getSenderName(packet: DataPacket): String {
+        if (packet.from == DataPacket.ID_LOCAL) {
+            val myId = nodeManager.getMyId()
+            return nodeManager.nodeDBbyID[myId]?.user?.longName ?: getString(Res.string.unknown_username)
+        }
+        return nodeManager.nodeDBbyID[packet.from]?.user?.longName ?: getString(Res.string.unknown_username)
+    }
 
     private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket) {
         when (dataPacket.dataType) {

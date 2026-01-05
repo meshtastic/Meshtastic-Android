@@ -130,7 +130,7 @@ constructor(
             val reaction =
                 ReactionEntity(
                     replyId = action.replyId,
-                    userId = DataPacket.ID_LOCAL,
+                    userId = nodeManager.getMyId(),
                     emoji = action.emoji,
                     timestamp = System.currentTimeMillis(),
                     snr = 0f,
