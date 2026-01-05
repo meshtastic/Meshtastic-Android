@@ -201,6 +201,15 @@
     <string name="debug_export_cancelled">Export abgebrochen</string>
     <string name="debug_export_success">%1$d Protokolle exportiert</string>
     <string name="debug_export_failed">Fehler beim Scheiben der Protokolldatei: %1$s</string>
+    <string name="debug_export_no_logs">Keine Logs zum Exportieren</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d Stunde</item>
+        <item quantity="other">%1$d Stunden</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d Tag</item>
+        <item quantity="other">%1$d Tage</item>
+    </plurals>
     <string name="debug_filters">Filter</string>
     <string name="debug_active_filters">Aktive Filter</string>
     <string name="debug_default_search">In Protokollen suchen</string>
@@ -490,6 +499,9 @@
     <string name="messages">Nachrichten</string>
     <string name="device_db_cache_limit">Limit der Gerätedatenbanken</string>
     <string name="device_db_cache_limit_summary">Maximale Anzahl der Gerätedatenbanken auf diesem Telefon</string>
+    <string name="log_retention_days">Protokoll Speicherdauer</string>
+    <string name="log_retention_days_summary">Wählen Sie wie lange die Protokolle gehalten werden sollen. Wählen Sie nie aus, um alle Protokolle zu speichern.</string>
+    <string name="log_retention_never">Protokolle niemals löschen</string>
     <string name="detection_sensor_config">Sensoreinstellungen für Erkennung</string>
     <string name="detection_sensor_enabled">Erkennungssensor aktiviert</string>
     <string name="minimum_broadcast_seconds">Minimale Übertragungszeit (Sekunden)</string>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.service
 
 import android.content.BroadcastReceiver
@@ -59,7 +58,7 @@ class ReplyReceiver : BroadcastReceiver() {
             val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
             val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString() ?: ""
             sendMessage(message, contactKey)
-            MeshServiceNotificationsImpl(context).cancelMessageNotification(contactKey)
+            meshServiceNotifications.cancelMessageNotification(contactKey)
         }
     }
 }

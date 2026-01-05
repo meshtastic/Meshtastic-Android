@@ -81,10 +81,25 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
         telemetry: TelemetryProtos.Telemetry?,
     ): Notification = null as Notification
 
-    override fun updateMessageNotification(
+    override suspend fun updateMessageNotification(
         contactKey: String,
         name: String,
         message: String,
+        isBroadcast: Boolean,
+        channelName: String?,
+    ) {}
+
+    override suspend fun updateWaypointNotification(
+        contactKey: String,
+        name: String,
+        message: String,
+        waypointId: Int,
+    ) {}
+
+    override suspend fun updateReactionNotification(
+        contactKey: String,
+        name: String,
+        emoji: String,
         isBroadcast: Boolean,
         channelName: String?,
     ) {}

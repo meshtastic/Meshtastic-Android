@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.component
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -41,6 +41,7 @@ fun WaypointMarkers(
     isConnected: Boolean,
     unicodeEmojiToBitmapProvider: (Int) -> BitmapDescriptor,
     onEditWaypointRequest: (MeshProtos.Waypoint) -> Unit,
+    selectedWaypointId: Int? = null,
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -48,6 +49,12 @@ fun WaypointMarkers(
         displayableWaypoints.forEach { waypoint ->
             val markerState =
                 rememberUpdatedMarkerState(position = LatLng(waypoint.latitudeI * DEG_D, waypoint.longitudeI * DEG_D))
+
+            LaunchedEffect(selectedWaypointId) {
+                if (selectedWaypointId == waypoint.id) {
+                    markerState.showInfoWindow()
+                }
+            }
 
             Marker(
                 state = markerState,

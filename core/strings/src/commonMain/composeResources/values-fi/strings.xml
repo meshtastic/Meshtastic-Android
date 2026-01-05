@@ -41,6 +41,7 @@
     <string name="unrecognized">Tuntematon</string>
     <string name="message_status_enroute">Odottaa vahvistusta</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
+    <string name="message_retry_count">Uudelleenyritykset: %1$d / %2$d</string>
     <string name="routing_error_none">Vahvistettu</string>
     <string name="routing_error_no_route">Ei reittiä</string>
     <string name="routing_error_got_nak">Vastaanotettu kielteinen vahvistus</string>
@@ -201,6 +202,15 @@
     <string name="debug_export_cancelled">Vienti peruutettu</string>
     <string name="debug_export_success">%1$d lokitietoa viety</string>
     <string name="debug_export_failed">Lokitiedoston kirjoittaminen epäonnistui: %1$s</string>
+    <string name="debug_export_no_logs">Ei lokitietoja vietäväksi</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d tunti</item>
+        <item quantity="other">%1$d tuntia</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d päivä</item>
+        <item quantity="other">%1$d päivää</item>
+    </plurals>
     <string name="debug_filters">Suodattimet</string>
     <string name="debug_active_filters">Aktiiviset suodattimet</string>
     <string name="debug_default_search">Hae lokitiedoista…</string>
@@ -219,6 +229,7 @@
     <string name="new_messages_below">Uudet viestit alla</string>
     <string name="meshtastic_messages_notifications">Suorien viestien ilmoitukset</string>
     <string name="meshtastic_broadcast_notifications">Yleislähetysviestien ilmoitukset</string>
+    <string name="meshtastic_waypoints_notifications">Reittipisteilmoitukset</string>
     <string name="meshtastic_alerts_notifications">Hälytysilmoitukset</string>
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
@@ -490,6 +501,9 @@
     <string name="messages">Viestit</string>
     <string name="device_db_cache_limit">Laitetietokannan välimuistin enimmäismäärä</string>
     <string name="device_db_cache_limit_summary">Tallennettavien laitetietokantojen enimmäismäärä tällä puhelimella.</string>
+    <string name="log_retention_days">MeshLog-lokitietojen säilytysaika</string>
+    <string name="log_retention_days_summary">Valitse lokitietojen säilytysaika. Valitse Ei koskaan, jos haluat säilyttää lokitiedot pysyvästi.</string>
+    <string name="log_retention_never">Älä koskaan poista lokitietoja</string>
     <string name="detection_sensor_config">Tunnistinsensorin asetukset</string>
     <string name="detection_sensor_enabled">Tunnistinsensori käytössä</string>
     <string name="minimum_broadcast_seconds">Minimilähetys (sekuntia)</string>

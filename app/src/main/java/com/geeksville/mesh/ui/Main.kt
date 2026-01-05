@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("MatchingDeclarationName")
 
 package com.geeksville.mesh.ui
@@ -161,7 +160,7 @@ import org.meshtastic.proto.MeshProtos
 enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
     Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
     Nodes(Res.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
-    Map(Res.string.map, MeshtasticIcons.Map, MapRoutes.Map),
+    Map(Res.string.map, MeshtasticIcons.Map, MapRoutes.Map()),
     Settings(Res.string.bottom_nav_settings, MeshtasticIcons.Settings, SettingsRoutes.SettingsGraph()),
     Connections(Res.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
     ;

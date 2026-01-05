@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
@@ -336,6 +335,18 @@ fun MapView(
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
+    val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
+
+    LaunchedEffect(selectedWaypointId, waypoints) {
+        if (selectedWaypointId != null && waypoints.containsKey(selectedWaypointId)) {
+            waypoints[selectedWaypointId]?.data?.waypoint?.let { pt ->
+                val geoPoint = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
+                map.controller.setCenter(geoPoint)
+                map.controller.setZoom(WAYPOINT_ZOOM)
+            }
+        }
+    }
+
     val tracerouteSelection =
         remember(tracerouteOverlay, tracerouteNodePositions, nodes) {
             mapViewModel.tracerouteNodeSelection(
@@ -502,7 +513,7 @@ fun MapView(
     }
 
     @Suppress("MagicNumber")
-    fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
+    fun MapView.onWaypointChanged(waypoints: Collection<Packet>, selectedWaypointId: Int?): List<MarkerWithLabel> {
         val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
@@ -540,7 +551,9 @@ fun MapView(
                     com.meshtastic.core.strings.getString(Res.string.expires) +
                     ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
-                setVisible(false) // This seems to be always false, was this intended?
+                if (selectedWaypointId == pt.id) {
+                    showInfoWindow()
+                }
                 setOnLongClickListener {
                     showMarkerLongPressDialog(pt.id)
                     true
@@ -716,7 +729,7 @@ fun MapView(
                     with(mapView) {
                         updateMarkers(
                             onNodesChanged(nodesForMarkers),
-                            onWaypointChanged(waypoints.values),
+                            onWaypointChanged(waypoints.values, selectedWaypointId),
                             nodeClusterer,
                         )
                     }
@@ -1082,6 +1095,7 @@ private const val EARTH_RADIUS_METERS = 6_371_000.0
 private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_SINGLE_POINT_ZOOM = 12.0
 private const val TRACEROUTE_ZOOM_OUT_LEVELS = 0.5
+private const val WAYPOINT_ZOOM = 15.0
 
 private fun Double.toRad(): Double = Math.toRadians(this)
 

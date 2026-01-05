@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.service
 
 import android.app.Notification
@@ -25,21 +24,33 @@ import android.app.TaskStackBuilder
 import android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
 import android.content.Context
 import android.content.Intent
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.content.getSystemService
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R.raw
+import com.geeksville.mesh.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
+import com.geeksville.mesh.service.ReactionReceiver.Companion.REACT_ACTION
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import com.meshtastic.core.strings.getString
+import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.database.model.Message
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.service.MeshServiceNotifications
@@ -48,16 +59,20 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.client_notification
 import org.meshtastic.core.strings.low_battery_message
 import org.meshtastic.core.strings.low_battery_title
+import org.meshtastic.core.strings.mark_as_read
 import org.meshtastic.core.strings.meshtastic_alerts_notifications
+import org.meshtastic.core.strings.meshtastic_app_name
 import org.meshtastic.core.strings.meshtastic_broadcast_notifications
 import org.meshtastic.core.strings.meshtastic_low_battery_notifications
 import org.meshtastic.core.strings.meshtastic_low_battery_temporary_remote_notifications
 import org.meshtastic.core.strings.meshtastic_messages_notifications
 import org.meshtastic.core.strings.meshtastic_new_nodes_notifications
 import org.meshtastic.core.strings.meshtastic_service_notifications
+import org.meshtastic.core.strings.meshtastic_waypoints_notifications
 import org.meshtastic.core.strings.new_node_seen
 import org.meshtastic.core.strings.no_local_stats
 import org.meshtastic.core.strings.reply
+import org.meshtastic.core.strings.you
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.LocalStats
@@ -69,9 +84,14 @@ import javax.inject.Inject
  * This class centralizes notification logic, including channel creation, builder configuration, and displaying
  * notifications for various events like new messages, alerts, and service status changes.
  */
-@Suppress("TooManyFunctions")
-class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext private val context: Context) :
-    MeshServiceNotifications {
+@Suppress("TooManyFunctions", "LongParameterList")
+class MeshServiceNotificationsImpl
+@Inject
+constructor(
+    @ApplicationContext private val context: Context,
+    private val packetRepository: Lazy<PacketRepository>,
+    private val nodeRepository: Lazy<NodeRepository>,
+) : MeshServiceNotifications {
 
     private val notificationManager = context.getSystemService<NotificationManager>()!!
 
@@ -79,6 +99,13 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val MAX_BATTERY_LEVEL = 100
         private val NOTIFICATION_LIGHT_COLOR = Color.BLUE
+        private const val MAX_HISTORY_MESSAGES = 10
+        private const val MIN_CONTEXT_MESSAGES = 3
+        private const val SNIPPET_LENGTH = 30
+        private const val GROUP_KEY_MESSAGES = "com.geeksville.mesh.GROUP_MESSAGES"
+        private const val SUMMARY_ID = 1
+        private const val PERSON_ICON_SIZE = 128
+        private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
     }
 
     /**
@@ -108,6 +135,13 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
             NotificationType(
                 "my_broadcasts",
                 Res.string.meshtastic_broadcast_notifications,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+
+        object Waypoint :
+            NotificationType(
+                "my_waypoints",
+                Res.string.meshtastic_waypoints_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
@@ -152,6 +186,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
                 ServiceState,
                 DirectMessage,
                 BroadcastMessage,
+                Waypoint,
                 Alert,
                 NewNode,
                 LowBatteryLocal,
@@ -190,6 +225,7 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
 
                     NotificationType.DirectMessage,
                     NotificationType.BroadcastMessage,
+                    NotificationType.Waypoint,
                     NotificationType.NewNode,
                     NotificationType.LowBatteryLocal,
                     NotificationType.LowBatteryRemote,
@@ -271,16 +307,108 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         return notification
     }
 
-    override fun updateMessageNotification(
+    override suspend fun updateMessageNotification(
         contactKey: String,
         name: String,
         message: String,
         isBroadcast: Boolean,
         channelName: String?,
     ) {
-        val notification = createMessageNotification(contactKey, name, message, isBroadcast, channelName)
-        // Use a consistent, unique ID for each message conversation.
+        showConversationNotification(contactKey, isBroadcast, channelName)
+    }
+
+    override suspend fun updateReactionNotification(
+        contactKey: String,
+        name: String,
+        emoji: String,
+        isBroadcast: Boolean,
+        channelName: String?,
+    ) {
+        showConversationNotification(contactKey, isBroadcast, channelName)
+    }
+
+    override suspend fun updateWaypointNotification(
+        contactKey: String,
+        name: String,
+        message: String,
+        waypointId: Int,
+    ) {
+        val notification = createWaypointNotification(name, message, waypointId)
         notificationManager.notify(contactKey.hashCode(), notification)
+    }
+
+    private suspend fun showConversationNotification(contactKey: String, isBroadcast: Boolean, channelName: String?) {
+        val ourNode = nodeRepository.get().ourNodeInfo.value
+        val history =
+            packetRepository
+                .get()
+                .getMessagesFrom(contactKey) { nodeId ->
+                    if (nodeId == DataPacket.ID_LOCAL) {
+                        ourNode ?: nodeRepository.get().getNode(nodeId)
+                    } else {
+                        nodeRepository.get().getNode(nodeId ?: "")
+                    }
+                }
+                .first()
+
+        val unread = history.filter { !it.read }
+        val displayHistory =
+            if (unread.size < MIN_CONTEXT_MESSAGES) {
+                history.take(MIN_CONTEXT_MESSAGES).reversed()
+            } else {
+                unread.take(MAX_HISTORY_MESSAGES).reversed()
+            }
+
+        if (displayHistory.isEmpty()) return
+
+        val notification = createConversationNotification(contactKey, isBroadcast, channelName, displayHistory)
+        notificationManager.notify(contactKey.hashCode(), notification)
+        showGroupSummary()
+    }
+
+    private fun showGroupSummary() {
+        val activeNotifications =
+            notificationManager.activeNotifications.filter {
+                it.id != SUMMARY_ID && it.notification.group == GROUP_KEY_MESSAGES
+            }
+
+        val ourNode = nodeRepository.get().ourNodeInfo.value
+        val meName = ourNode?.user?.longName ?: getString(Res.string.you)
+        val me =
+            Person.Builder()
+                .setName(meName)
+                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
+                .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
+                .build()
+
+        val messagingStyle =
+            NotificationCompat.MessagingStyle(me)
+                .setGroupConversation(true)
+                .setConversationTitle(getString(Res.string.meshtastic_app_name))
+
+        activeNotifications.forEach { sbn ->
+            val senderTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+            val messageText = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+            val postTime = sbn.postTime
+
+            if (senderTitle != null && messageText != null) {
+                // For the summary, we're creating a generic Person for the sender from the active notification's title.
+                // We don't have the original Person object or its colors/ID, so we're just using the name.
+                val senderPerson = Person.Builder().setName(senderTitle).build()
+                messagingStyle.addMessage(messageText, postTime, senderPerson)
+            }
+        }
+
+        val summaryNotification =
+            commonBuilder(NotificationType.DirectMessage)
+                .setSmallIcon(com.geeksville.mesh.R.drawable.app_icon)
+                .setStyle(messagingStyle)
+                .setGroup(GROUP_KEY_MESSAGES)
+                .setGroupSummary(true)
+                .setAutoCancel(true)
+                .build()
+
+        notificationManager.notify(SUMMARY_ID, summaryNotification)
     }
 
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
@@ -340,37 +468,105 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         return builder.build()
     }
 
-    private fun createMessageNotification(
+    @Suppress("LongMethod")
+    private fun createConversationNotification(
         contactKey: String,
-        name: String,
-        message: String,
         isBroadcast: Boolean,
-        channelName: String? = null,
+        channelName: String?,
+        history: List<Message>,
     ): Notification {
         val type = if (isBroadcast) NotificationType.BroadcastMessage else NotificationType.DirectMessage
         val builder = commonBuilder(type, createOpenMessageIntent(contactKey))
 
-        val person = Person.Builder().setName(name).build()
+        val ourNode = nodeRepository.get().ourNodeInfo.value
+        val meName = ourNode?.user?.longName ?: getString(Res.string.you)
+        val me =
+            Person.Builder()
+                .setName(meName)
+                .setKey(ourNode?.user?.id ?: DataPacket.ID_LOCAL)
+                .apply { ourNode?.let { setIcon(createPersonIcon(meName, it.colors.second, it.colors.first)) } }
+                .build()
+
         val style =
-            NotificationCompat.MessagingStyle(person)
+            NotificationCompat.MessagingStyle(me)
                 .setGroupConversation(channelName != null)
                 .setConversationTitle(channelName)
-                .addMessage(message, System.currentTimeMillis(), person)
+
+        history.forEach { msg ->
+            // Use the node attached to the message directly to ensure correct identification
+            val person =
+                Person.Builder()
+                    .setName(msg.node.user.longName)
+                    .setKey(msg.node.user.id)
+                    .setIcon(createPersonIcon(msg.node.user.shortName, msg.node.colors.second, msg.node.colors.first))
+                    .build()
+
+            val text =
+                msg.originalMessage?.let { original ->
+                    "↩️ \"${original.node.user.shortName}: ${original.text.take(SNIPPET_LENGTH)}...\": ${msg.text}"
+                } ?: msg.text
+
+            style.addMessage(text, msg.receivedTime, person)
+
+            // Add reactions as separate "messages" in history if they exist
+            msg.emojis.forEach { reaction ->
+                val reactorNode = nodeRepository.get().getNode(reaction.user.id)
+                val reactor =
+                    Person.Builder()
+                        .setName(reaction.user.longName)
+                        .setKey(reaction.user.id)
+                        .setIcon(
+                            createPersonIcon(
+                                reaction.user.shortName,
+                                reactorNode.colors.second,
+                                reactorNode.colors.first,
+                            ),
+                        )
+                        .build()
+                style.addMessage(
+                    "${reaction.emoji} to \"${msg.text.take(SNIPPET_LENGTH)}...\"",
+                    reaction.timestamp,
+                    reactor,
+                )
+            }
+        }
+        val lastMessage = history.last()
 
         builder
             .setCategory(Notification.CATEGORY_MESSAGE)
             .setAutoCancel(true)
             .setStyle(style)
+            .setGroup(GROUP_KEY_MESSAGES)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setWhen(lastMessage.receivedTime)
+            .setShowWhen(true)
+            .addAction(createReplyAction(contactKey))
+            .addAction(createMarkAsReadAction(contactKey))
+            .addAction(
+                createReactionAction(
+                    contactKey = contactKey,
+                    packetId = lastMessage.packetId,
+                    toId = lastMessage.node.user.id,
+                    channelIndex = lastMessage.node.channel,
+                ),
+            )
+
+        return builder.build()
+    }
+
+    private fun createWaypointNotification(name: String, message: String, waypointId: Int): Notification {
+        val person = Person.Builder().setName(name).build()
+        val style = NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
+
+        return commonBuilder(NotificationType.Waypoint, createOpenWaypointIntent(waypointId))
+            .setCategory(Notification.CATEGORY_MESSAGE)
+            .setAutoCancel(true)
+            .setStyle(style)
+            .setGroup(GROUP_KEY_MESSAGES)
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setWhen(System.currentTimeMillis())
             .setShowWhen(true)
-
-        // Only add reply action for direct messages, not broadcasts
-        if (!isBroadcast) {
-            builder.addAction(createReplyAction(contactKey))
-        }
-
-        return builder.build()
+            .build()
     }
 
     private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
@@ -454,6 +650,19 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
         }
     }
 
+    private fun createOpenWaypointIntent(waypointId: Int): PendingIntent {
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/map?waypointId=$waypointId".toUri()
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(waypointId, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+    }
+
     private fun createReplyAction(contactKey: String): NotificationCompat.Action {
         val replyLabel = getString(Res.string.reply)
         val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(replyLabel).build()
@@ -476,6 +685,51 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
             .build()
     }
 
+    private fun createMarkAsReadAction(contactKey: String): NotificationCompat.Action {
+        val label = getString(Res.string.mark_as_read)
+        val intent =
+            Intent(context, MarkAsReadReceiver::class.java).apply {
+                action = MARK_AS_READ_ACTION
+                putExtra(MarkAsReadReceiver.CONTACT_KEY, contactKey)
+            }
+        val pendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                contactKey.hashCode(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_view, label, pendingIntent).build()
+    }
+
+    private fun createReactionAction(
+        contactKey: String,
+        packetId: Int,
+        toId: String,
+        channelIndex: Int,
+    ): NotificationCompat.Action {
+        val label = "👍"
+        val intent =
+            Intent(context, ReactionReceiver::class.java).apply {
+                action = REACT_ACTION
+                putExtra(ReactionReceiver.EXTRA_CONTACT_KEY, contactKey)
+                putExtra(ReactionReceiver.EXTRA_PACKET_ID, packetId)
+                putExtra(ReactionReceiver.EXTRA_TO_ID, toId)
+                putExtra(ReactionReceiver.EXTRA_CHANNEL_INDEX, channelIndex)
+                putExtra(ReactionReceiver.EXTRA_EMOJI, "👍")
+            }
+        val pendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                packetId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_add, label, pendingIntent).build()
+    }
+
     private fun commonBuilder(
         type: NotificationType,
         contentIntent: PendingIntent? = null,
@@ -487,6 +741,33 @@ class MeshServiceNotificationsImpl @Inject constructor(@ApplicationContext priva
             .setColor(NOTIFICATION_LIGHT_COLOR)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(contentIntent ?: openAppIntent)
+    }
+
+    private fun createPersonIcon(name: String, backgroundColor: Int, foregroundColor: Int): IconCompat {
+        val bitmap = createBitmap(PERSON_ICON_SIZE, PERSON_ICON_SIZE)
+        val canvas = Canvas(bitmap)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+        // Draw background circle
+        paint.color = backgroundColor
+        canvas.drawCircle(PERSON_ICON_SIZE / 2f, PERSON_ICON_SIZE / 2f, PERSON_ICON_SIZE / 2f, paint)
+
+        // Draw initials
+        paint.color = foregroundColor
+        paint.textSize = PERSON_ICON_SIZE * PERSON_ICON_TEXT_SIZE_RATIO
+        paint.textAlign = Paint.Align.CENTER
+        val initial =
+            if (name.isNotEmpty()) {
+                val codePoint = name.codePointAt(0)
+                String(Character.toChars(codePoint)).uppercase()
+            } else {
+                "?"
+            }
+        val xPos = canvas.width / 2f
+        val yPos = (canvas.height / 2f - (paint.descent() + paint.ascent()) / 2f)
+        canvas.drawText(initial, xPos, yPos, paint)
+
+        return IconCompat.createWithBitmap(bitmap)
     }
     // endregion
 }

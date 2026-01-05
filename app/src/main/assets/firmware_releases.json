@@ -180,5 +180,12 @@
       }
     ]
   },
-  "pullRequests": []
+  "pullRequests": [
+    {
+      "id": "9176",
+      "title": "Add Minimesh Lite device variant",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9176",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    }
+  ]
 }

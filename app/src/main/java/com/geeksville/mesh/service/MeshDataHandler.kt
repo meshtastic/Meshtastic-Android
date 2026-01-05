@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -326,6 +327,37 @@ constructor(
         scope.handledLaunch {
             val isAck = routingError == MeshProtos.Routing.Error.NONE_VALUE
             val p = packetRepository.get().getPacketById(requestId)
+            val isMaxRetransmit = routingError == MeshProtos.Routing.Error.MAX_RETRANSMIT_VALUE
+            val shouldRetry =
+                isMaxRetransmit &&
+                    p != null &&
+                    p.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE &&
+                    p.data.from == DataPacket.ID_LOCAL &&
+                    p.data.retryCount < MAX_RETRY_ATTEMPTS
+
+            Logger.d {
+                val retryInfo = "packetId=${p?.packetId} dataId=${p?.data?.id} retry=${p?.data?.retryCount}"
+                val statusInfo = "status=${p?.data?.status}"
+                "[ackNak] req=$requestId routeErr=$routingError isAck=$isAck " +
+                    "maxRetransmit=$isMaxRetransmit shouldRetry=$shouldRetry $retryInfo $statusInfo"
+            }
+
+            if (shouldRetry && p != null) {
+                val newRetryCount = p.data.retryCount + 1
+                val newId = commandSender.generatePacketId()
+                val updatedData =
+                    p.data.copy(id = newId, status = MessageStatus.QUEUED, retryCount = newRetryCount, relayNode = null)
+                val updatedPacket =
+                    p.copy(packetId = newId, data = updatedData, routingError = MeshProtos.Routing.Error.NONE_VALUE)
+                packetRepository.get().update(updatedPacket)
+
+                Logger.w { "[ackNak] retrying req=$requestId newId=$newId retry=$newRetryCount" }
+
+                delay(RETRY_DELAY_MS)
+                commandSender.sendData(updatedData)
+                return@handledLaunch
+            }
+
             val m =
                 when {
                     isAck && fromId == p?.data?.to -> MessageStatus.RECEIVED
@@ -445,7 +477,7 @@ constructor(
                             dataPacket.alert ?: getString(Res.string.critical_alert),
                         )
                     } else if (updateNotification) {
-                        scope.handledLaunch { updateMessageNotification(contactKey, dataPacket) }
+                        scope.handledLaunch { updateNotification(contactKey, dataPacket) }
                     }
                 }
             }
@@ -455,38 +487,46 @@ constructor(
     private fun getSenderName(packet: DataPacket): String =
         nodeManager.nodeDBbyID[packet.from]?.user?.longName ?: getString(Res.string.unknown_username)
 
-    private suspend fun updateMessageNotification(contactKey: String, dataPacket: DataPacket) {
-        val message =
-            when (dataPacket.dataType) {
-                Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
-                Portnums.PortNum.WAYPOINT_APP_VALUE ->
-                    getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
-
-                else -> return
+    private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket) {
+        when (dataPacket.dataType) {
+            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
+                val message = dataPacket.text!!
+                val channelName =
+                    if (dataPacket.to == DataPacket.ID_BROADCAST) {
+                        radioConfigRepository.channelSetFlow.first().settingsList.getOrNull(dataPacket.channel)?.name
+                    } else {
+                        null
+                    }
+                serviceNotifications.updateMessageNotification(
+                    contactKey,
+                    getSenderName(dataPacket),
+                    message,
+                    dataPacket.to == DataPacket.ID_BROADCAST,
+                    channelName,
+                )
             }
 
-        val channelName =
-            if (dataPacket.to == DataPacket.ID_BROADCAST) {
-                radioConfigRepository.channelSetFlow.first().settingsList.getOrNull(dataPacket.channel)?.name
-            } else {
-                null
+            Portnums.PortNum.WAYPOINT_APP_VALUE -> {
+                val message = getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
+                serviceNotifications.updateWaypointNotification(
+                    contactKey,
+                    getSenderName(dataPacket),
+                    message,
+                    dataPacket.waypoint!!.id,
+                )
             }
 
-        serviceNotifications.updateMessageNotification(
-            contactKey,
-            getSenderName(dataPacket),
-            message,
-            dataPacket.to == DataPacket.ID_BROADCAST,
-            channelName,
-        )
+            else -> return
+        }
     }
 
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
+        val emoji = packet.decoded.payload.toByteArray().decodeToString()
         val reaction =
             ReactionEntity(
                 replyId = packet.decoded.replyId,
                 userId = dataMapper.toNodeID(packet.from),
-                emoji = packet.decoded.payload.toByteArray().decodeToString(),
+                emoji = emoji,
                 timestamp = System.currentTimeMillis(),
                 snr = packet.rxSnr,
                 rssi = packet.rxRssi,
@@ -498,6 +538,31 @@ constructor(
                 },
             )
         packetRepository.get().insertReaction(reaction)
+
+        // Find the original packet to get the contactKey
+        packetRepository.get().getPacketByPacketId(packet.decoded.replyId)?.let { original ->
+            val contactKey = original.packet.contact_key
+            val isMuted = packetRepository.get().getContactSettings(contactKey).isMuted
+            if (!isMuted) {
+                val channelName =
+                    if (original.packet.data.to == DataPacket.ID_BROADCAST) {
+                        radioConfigRepository.channelSetFlow
+                            .first()
+                            .settingsList
+                            .getOrNull(original.packet.data.channel)
+                            ?.name
+                    } else {
+                        null
+                    }
+                serviceNotifications.updateReactionNotification(
+                    contactKey,
+                    getSenderName(dataMapper.toDataPacket(packet)!!),
+                    emoji,
+                    original.packet.data.to == DataPacket.ID_BROADCAST,
+                    channelName,
+                )
+            }
+        }
     }
 
     private fun currentTransport(address: String? = meshPrefs.deviceAddress): String = when (address?.firstOrNull()) {
@@ -528,6 +593,8 @@ constructor(
     }
 
     companion object {
+        private const val MAX_RETRY_ATTEMPTS = 5
+        private const val RETRY_DELAY_MS = 5_000L
         private const val MILLISECONDS_IN_SECOND = 1000L
         private const val HOPS_AWAY_UNAVAILABLE = -1
 

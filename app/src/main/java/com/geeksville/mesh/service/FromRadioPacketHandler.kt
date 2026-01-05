@@ -17,6 +17,7 @@
 package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.MeshProtos
 import javax.inject.Inject
@@ -34,6 +35,7 @@ constructor(
     private val router: MeshRouter,
     private val mqttManager: MeshMqttManager,
     private val packetHandler: PacketHandler,
+    private val serviceNotifications: MeshServiceNotifications,
 ) {
     @Suppress("CyclomaticComplexMethod")
     fun handleFromRadio(proto: MeshProtos.FromRadio) {
@@ -56,6 +58,7 @@ constructor(
             MeshProtos.FromRadio.PayloadVariantCase.CHANNEL -> router.configHandler.handleChannel(proto.channel)
             MeshProtos.FromRadio.PayloadVariantCase.CLIENTNOTIFICATION -> {
                 serviceRepository.setClientNotification(proto.clientNotification)
+                serviceNotifications.showClientNotification(proto.clientNotification)
                 packetHandler.removeResponse(proto.clientNotification.replyId, complete = false)
             }
             // Logging-only variants are handled by MeshMessageProcessor before dispatching here

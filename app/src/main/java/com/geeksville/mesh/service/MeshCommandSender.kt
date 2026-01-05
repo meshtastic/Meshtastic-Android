@@ -41,7 +41,6 @@ import org.meshtastic.proto.Portnums
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.position
 import org.meshtastic.proto.telemetry
-import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
@@ -122,6 +121,7 @@ constructor(
     fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()
         val bytes = p.bytes ?: ByteArray(0)
+        require(p.dataType != 0) { "Port numbers must be non-zero!" }
         if (bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN_VALUE) {
             p.status = MessageStatus.ERROR
             throw RemoteException("Message too long")
@@ -132,7 +132,7 @@ constructor(
         if (connectionStateHolder?.connectionState?.value == ConnectionState.Connected) {
             try {
                 sendNow(p)
-            } catch (ex: IOException) {
+            } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
                 Logger.e(ex) { "Error sending message, so enqueueing" }
                 enqueueForSending(p)
             }
@@ -170,7 +170,7 @@ constructor(
             try {
                 sendNow(p)
                 sentPackets.add(p)
-            } catch (ex: IOException) {
+            } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
                 Logger.e(ex) { "Error sending queued message:" }
             }
         }
