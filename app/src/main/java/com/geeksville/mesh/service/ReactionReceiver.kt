@@ -24,6 +24,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.meshtastic.core.data.repository.PacketRepository
+import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.proto.Portnums
@@ -34,6 +36,8 @@ class ReactionReceiver : BroadcastReceiver() {
     @Inject lateinit var commandSender: MeshCommandSender
 
     @Inject lateinit var meshServiceNotifications: MeshServiceNotifications
+
+    @Inject lateinit var packetRepository: PacketRepository
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -71,9 +75,23 @@ class ReactionReceiver : BroadcastReceiver() {
                         bytes = emoji.toByteArray(Charsets.UTF_8),
                         dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
                         replyId = packetId,
+                        wantAck = true,
                         emoji = emoji.codePointAt(0),
                     )
                 commandSender.sendData(reactionPacket)
+
+                val reaction =
+                    ReactionEntity(
+                        replyId = packetId,
+                        userId = DataPacket.ID_LOCAL,
+                        emoji = emoji,
+                        timestamp = System.currentTimeMillis(),
+                        packetId = reactionPacket.id,
+                        status = org.meshtastic.core.model.MessageStatus.QUEUED,
+                        to = toId,
+                        channel = channelIndex,
+                    )
+                packetRepository.insertReaction(reaction)
 
                 // Dismiss the notification after reacting
                 meshServiceNotifications.cancelMessageNotification(contactKey)

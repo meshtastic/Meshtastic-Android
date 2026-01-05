@@ -172,6 +172,12 @@ constructor(
     suspend fun insertReaction(reaction: ReactionEntity) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().insert(reaction) }
 
+    suspend fun updateReaction(reaction: ReactionEntity) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().update(reaction) }
+
+    suspend fun getReactionByPacketId(packetId: Int) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getReactionByPacketId(packetId) }
+
     suspend fun clearPacketDB() = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteAll() }
 
     suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>) =
