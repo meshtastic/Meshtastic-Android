@@ -148,116 +148,116 @@ internal fun ReactionDialog(
     onResend: (Reaction) -> Unit = {},
     nodes: List<Node> = emptyList(),
     ourNode: Node? = null,
-) =
-    BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
-        val groupedEmojis = reactions.groupBy { it.emoji }
-        var selectedEmoji by remember { mutableStateOf<String?>(null) }
-        val filteredReactions = selectedEmoji?.let { groupedEmojis[it] ?: emptyList() } ?: reactions
+) = BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
+    val groupedEmojis = reactions.groupBy { it.emoji }
+    var selectedEmoji by remember { mutableStateOf<String?>(null) }
+    val filteredReactions = selectedEmoji?.let { groupedEmojis[it] ?: emptyList() } ?: reactions
 
-        var showStatusDialog by remember { mutableStateOf<Reaction?>(null) }
-        showStatusDialog?.let { reaction ->
-            val title = if (reaction.routingError > 0) Res.string.error else Res.string.message_delivery_status
-            val text =
-                when (reaction.status) {
-                    MessageStatus.RECEIVED -> Res.string.delivery_confirmed
-                    MessageStatus.QUEUED -> Res.string.message_status_queued
-                    MessageStatus.ENROUTE -> Res.string.message_status_enroute
-                    else -> getStringResFrom(reaction.routingError)
-                }
+    var showStatusDialog by remember { mutableStateOf<Reaction?>(null) }
+    showStatusDialog?.let { reaction ->
+        val title = if (reaction.routingError > 0) Res.string.error else Res.string.message_delivery_status
+        val text =
+            when (reaction.status) {
+                MessageStatus.RECEIVED -> Res.string.delivery_confirmed
+                MessageStatus.QUEUED -> Res.string.message_status_queued
+                MessageStatus.ENROUTE -> Res.string.message_status_enroute
+                else -> getStringResFrom(reaction.routingError)
+            }
 
-            val relayNodeName = reaction.relayNode?.let { relayNodeId ->
+        val relayNodeName =
+            reaction.relayNode?.let { relayNodeId ->
                 Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.longName
             }
 
-            DeliveryInfo(
-                title = title,
-                text = text,
-                resendOption = reaction.status == MessageStatus.ERROR,
-                onConfirm = {
-                    onResend(reaction)
-                    showStatusDialog = null
-                },
-                onDismiss = { showStatusDialog = null },
-                relayNodeName = relayNodeName,
-                relays = reaction.relays,
-                retryCount = reaction.retryCount,
-                maxRetries = 5,
+        DeliveryInfo(
+            title = title,
+            text = text,
+            resendOption = reaction.status == MessageStatus.ERROR,
+            onConfirm = {
+                onResend(reaction)
+                showStatusDialog = null
+            },
+            onDismiss = { showStatusDialog = null },
+            relayNodeName = relayNodeName,
+            relays = reaction.relays,
+            retryCount = reaction.retryCount,
+            maxRetries = 5,
+        )
+    }
+
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+        items(groupedEmojis.entries.toList()) { (emoji, reactions) ->
+            val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL }
+            val isSending =
+                localReaction?.status == MessageStatus.QUEUED || localReaction?.status == MessageStatus.ENROUTE
+            Text(
+                text = "$emoji${reactions.size}",
+                modifier =
+                Modifier.clip(CircleShape)
+                    .background(if (selectedEmoji == emoji) Color.Gray else Color.Transparent)
+                    .then(if (isSending) Modifier.graphicsLayer(alpha = 0.5f) else Modifier)
+                    .padding(8.dp)
+                    .clickable { selectedEmoji = if (selectedEmoji == emoji) null else emoji },
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
+    }
 
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            items(groupedEmojis.entries.toList()) { (emoji, reactions) ->
-                val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL }
-                val isSending =
-                    localReaction?.status == MessageStatus.QUEUED || localReaction?.status == MessageStatus.ENROUTE
-                Text(
-                    text = "$emoji${reactions.size}",
-                    modifier =
-                    Modifier.clip(CircleShape)
-                        .background(if (selectedEmoji == emoji) Color.Gray else Color.Transparent)
-                        .then(if (isSending) Modifier.graphicsLayer(alpha = 0.5f) else Modifier)
-                        .padding(8.dp)
-                        .clickable { selectedEmoji = if (selectedEmoji == emoji) null else emoji },
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
+    HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
-        HorizontalDivider(Modifier.padding(vertical = 8.dp))
-
-        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            items(filteredReactions) { reaction ->
-                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        val isLocal = reaction.user.id == myId || reaction.user.id == DataPacket.ID_LOCAL
-                        val displayName =
-                            if (isLocal) {
-                                "${reaction.user.longName} (${stringResource(Res.string.you)})"
-                            } else {
-                                reaction.user.longName
+    LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        items(filteredReactions) { reaction ->
+            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val isLocal = reaction.user.id == myId || reaction.user.id == DataPacket.ID_LOCAL
+                    val displayName =
+                        if (isLocal) {
+                            "${reaction.user.longName} (${stringResource(Res.string.you)})"
+                        } else {
+                            reaction.user.longName
+                        }
+                    Text(text = displayName, style = MaterialTheme.typography.titleMedium)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (isLocal) {
+                            MessageStatusButton(
+                                status = reaction.status,
+                                fromLocal = true,
+                                onStatusClick = { showStatusDialog = reaction },
+                            )
+                        }
+                        Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 0.dp, bottom = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val isLocalOrPreDbUpdateReaction = (reaction.rssi == 0)
+                    if (!isLocalOrPreDbUpdateReaction) {
+                        if (reaction.hopsAway == 0) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Snr(reaction.snr)
+                                Rssi(reaction.rssi)
                             }
-                        Text(text = displayName, style = MaterialTheme.typography.titleMedium)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (isLocal) {
-                                MessageStatusButton(
-                                    status = reaction.status,
-                                    fromLocal = true,
-                                    onStatusClick = { showStatusDialog = reaction },
-                                )
-                            }
-                            Text(text = reaction.emoji, style = MaterialTheme.typography.titleLarge)
+                        } else {
+                            Text(
+                                text = stringResource(Res.string.hops_away_template, reaction.hopsAway),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
                         }
                     }
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = 0.dp, bottom = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        val isLocalOrPreDbUpdateReaction = (reaction.rssi == 0)
-                        if (!isLocalOrPreDbUpdateReaction) {
-                            if (reaction.hopsAway == 0) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Snr(reaction.snr)
-                                    Rssi(reaction.rssi)
-                                }
-                            } else {
-                                Text(
-                                    text = stringResource(Res.string.hops_away_template, reaction.hopsAway),
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(text = getShortDateTime(reaction.timestamp), style = MaterialTheme.typography.labelSmall)
-                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = getShortDateTime(reaction.timestamp), style = MaterialTheme.typography.labelSmall)
                 }
             }
         }
     }
+}
 
 @PreviewLightDark
 @Composable

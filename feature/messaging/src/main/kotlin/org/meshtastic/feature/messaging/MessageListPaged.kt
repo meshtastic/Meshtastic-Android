@@ -283,8 +283,10 @@ private fun LazyItemScope.renderPagedChatMessageRow(
         sendReaction = { emoji ->
             val hasReacted =
                 message.emojis.any { reaction ->
-                    (reaction.user.id == ourNode.user.id || reaction.user.id == org.meshtastic.core.model.DataPacket.ID_LOCAL) &&
-                        reaction.emoji == emoji
+                    (
+                        reaction.user.id == ourNode.user.id ||
+                            reaction.user.id == org.meshtastic.core.model.DataPacket.ID_LOCAL
+                        ) && reaction.emoji == emoji
                 }
             if (!hasReacted) {
                 handlers.onSendReaction(emoji, message.packetId)
