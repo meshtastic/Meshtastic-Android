@@ -39,6 +39,7 @@ enum class MessageStatus : Parcelable {
     QUEUED, // Waiting to send to the mesh as soon as we connect to the device
     ENROUTE, // Delivered to the radio, but no ACK or NAK received
     DELIVERED, // We received an ack
+    SFPP_ROUTING, // Message is being routed/buffered in the SFPP system
     SFPP_CONFIRMED, // Message is confirmed on the SFPP chain
     ERROR, // We received back a nak, message not delivered
 }

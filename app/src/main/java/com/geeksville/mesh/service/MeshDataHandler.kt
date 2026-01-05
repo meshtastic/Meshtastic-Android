@@ -198,7 +198,12 @@ constructor(
         when (sfpp.sfppMessageType) {
             MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
             MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF,
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_SECONDHALF,
             -> {
+                val isFirstHalf =
+                    sfpp.sfppMessageType == MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF
+                val status = if (isFirstHalf) MessageStatus.SFPP_ROUTING else MessageStatus.SFPP_CONFIRMED
+
                 scope.handledLaunch {
                     packetRepository
                         .get()
@@ -207,7 +212,9 @@ constructor(
                             from = sfpp.encapsulatedFrom,
                             to = sfpp.encapsulatedTo,
                             hash = sfpp.messageHash.toByteArray(),
+                            status = status,
                         )
+                    serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulatedId, status)
                 }
             }
             else -> {

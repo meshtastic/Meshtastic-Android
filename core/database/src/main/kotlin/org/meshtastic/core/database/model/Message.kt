@@ -25,6 +25,8 @@ import org.meshtastic.core.strings.error
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.message_status_enroute
 import org.meshtastic.core.strings.message_status_queued
+import org.meshtastic.core.strings.message_status_sfpp_confirmed
+import org.meshtastic.core.strings.message_status_sfpp_routing
 import org.meshtastic.core.strings.routing_error_admin_bad_session_key
 import org.meshtastic.core.strings.routing_error_admin_public_key_unauthorized
 import org.meshtastic.core.strings.routing_error_bad_request
@@ -96,6 +98,8 @@ data class Message(
                 MessageStatus.RECEIVED -> Res.string.delivery_confirmed
                 MessageStatus.QUEUED -> Res.string.message_status_queued
                 MessageStatus.ENROUTE -> Res.string.message_status_enroute
+                MessageStatus.SFPP_ROUTING -> Res.string.message_status_sfpp_routing
+                MessageStatus.SFPP_CONFIRMED -> Res.string.message_status_sfpp_confirmed
                 else -> getStringResFrom(routingError)
             }
         return title to text

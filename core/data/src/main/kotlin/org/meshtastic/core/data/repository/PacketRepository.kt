@@ -140,7 +140,13 @@ constructor(
     suspend fun getPacketByPacketId(packetId: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId) }
 
-    suspend fun updateSFPPStatus(packetId: Int, from: Int, to: Int, hash: ByteArray) = withContext(dispatchers.io) {
+    suspend fun updateSFPPStatus(
+        packetId: Int,
+        from: Int,
+        to: Int,
+        hash: ByteArray,
+        status: MessageStatus = MessageStatus.SFPP_CONFIRMED,
+    ) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
         val packets = dao.findPacketsWithId(packetId)
         val fromId = DataPacket.nodeNumToDefaultId(from)
@@ -153,7 +159,11 @@ constructor(
 
         packets.forEach { packet ->
             if (packet.data.from == fromId && packet.data.to == toId) {
-                val updatedData = packet.data.copy(status = MessageStatus.SFPP_CONFIRMED, sfppHash = hash)
+                // If it's already confirmed, don't downgrade it to routing
+                if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
+                    return@forEach
+                }
+                val updatedData = packet.data.copy(status = status, sfppHash = hash)
                 dao.update(packet.copy(data = updatedData, sfpp_hash = hash))
             }
         }
