@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -456,6 +455,8 @@ constructor(
                         PortNum.PAXCOUNTER_APP_VALUE -> PaxcountProtos.Paxcount.parseFrom(payload).toString()
                         PortNum.STORE_FORWARD_APP_VALUE ->
                             StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
+                        PortNum.STORE_FORWARD_PLUSPLUS_APP_VALUE ->
+                            MeshProtos.StoreForwardPlusPlus.parseFrom(payload).toString()
                         PortNum.NEIGHBORINFO_APP_VALUE -> decodeNeighborInfo(payload)
                         PortNum.TRACEROUTE_APP_VALUE -> decodeTraceroute(packet, payload)
                         else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
