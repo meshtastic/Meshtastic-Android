@@ -150,6 +150,7 @@ constructor(
     suspend fun getPacketByPacketId(packetId: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId) }
 
+    @Suppress("CyclomaticComplexMethod")
     suspend fun updateSFPPStatus(
         packetId: Int,
         from: Int,
@@ -189,6 +190,27 @@ constructor(
                 dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
             }
         }
+
+        dao.getReactionByPacketId(packetId)?.let { reaction ->
+            val reactionFrom = reaction.userId
+            val fromMatches = reactionFrom == fromId || (isFromLocalNode && reactionFrom == DataPacket.ID_LOCAL)
+
+            val toMatches = reaction.to == toId
+
+            co.touchlab.kermit.Logger.d {
+                "SFPP reaction match check: reactionFrom=$reactionFrom fromId=$fromId " +
+                    "isFromLocal=$isFromLocalNode fromMatches=$fromMatches " +
+                    "reactionTo=${reaction.to} toId=$toId toMatches=$toMatches"
+            }
+
+            if (fromMatches && toMatches) {
+                if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
+                    return@let
+                }
+                val updatedReaction = reaction.copy(status = status, sfpp_hash = hash)
+                dao.update(updatedReaction)
+            }
+        }
     }
 
     suspend fun updateSFPPStatusByHash(
@@ -205,6 +227,14 @@ constructor(
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
             val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
             dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
+        }
+
+        dao.findReactionBySfppHash(hash)?.let { reaction ->
+            if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
+                return@let
+            }
+            val updatedReaction = reaction.copy(status = status, sfpp_hash = hash)
+            dao.update(updatedReaction)
         }
     }
 

@@ -59,7 +59,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
-@Suppress("LongParameterList", "TooManyFunctions")
+@Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
 @Singleton
 class MeshDataHandler
 @Inject
@@ -192,6 +192,7 @@ constructor(
         handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
     }
 
+    @Suppress("LongMethod")
     private fun handleStoreForwardPlusPlus(packet: MeshPacket) {
         val sfpp = MeshProtos.StoreForwardPlusPlus.parseFrom(packet.decoded.payload)
         Logger.d { "Received StoreForwardPlusPlus packet: $sfpp" }

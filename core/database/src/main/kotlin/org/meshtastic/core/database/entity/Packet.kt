@@ -140,8 +140,10 @@ data class Reaction(
     val relayNode: Int? = null,
     val to: String? = null,
     val channel: Int = 0,
+    val sfppHash: ByteArray? = null,
 )
 
+@Suppress("ConstructorParameterNaming")
 @Entity(
     tableName = "reactions",
     primaryKeys = ["reply_id", "user_id", "emoji"],
@@ -163,6 +165,7 @@ data class ReactionEntity(
     @ColumnInfo(name = "relay_node") val relayNode: Int? = null,
     @ColumnInfo(name = "to") val to: String? = null,
     @ColumnInfo(name = "channel", defaultValue = "0") val channel: Int = 0,
+    @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteArray? = null,
 )
 
 private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node) = Reaction(
@@ -181,6 +184,7 @@ private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?)
     relayNode = relayNode,
     to = to,
     channel = channel,
+    sfppHash = sfpp_hash,
 )
 
 private suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node) =

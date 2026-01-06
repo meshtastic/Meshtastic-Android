@@ -334,6 +334,15 @@ interface PacketDao {
     suspend fun getReactionByPacketId(packetId: Int): ReactionEntity?
 
     @Transaction
+    @Query(
+        """
+        SELECT * FROM reactions 
+        WHERE substr(sfpp_hash, 1, 8) = substr(:hash, 1, 8)
+        """,
+    )
+    suspend fun findReactionBySfppHash(hash: ByteArray): ReactionEntity?
+
+    @Transaction
     suspend fun deleteAll() {
         deleteAllPackets()
         deleteAllReactions()
