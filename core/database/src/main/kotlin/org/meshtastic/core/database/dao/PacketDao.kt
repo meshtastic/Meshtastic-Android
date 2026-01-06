@@ -328,6 +328,11 @@ interface PacketDao {
 
     @Upsert suspend fun insert(reaction: ReactionEntity)
 
+    @Update suspend fun update(reaction: ReactionEntity)
+
+    @Query("SELECT * FROM reactions WHERE packet_id = :packetId LIMIT 1")
+    suspend fun getReactionByPacketId(packetId: Int): ReactionEntity?
+
     @Transaction
     suspend fun deleteAll() {
         deleteAllPackets()

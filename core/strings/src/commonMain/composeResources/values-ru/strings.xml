@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Фильтр</string>
@@ -233,6 +234,7 @@
     <string name="new_messages_below">Новые сообщения</string>
     <string name="meshtastic_messages_notifications">Уведомления о личных сообщениях</string>
     <string name="meshtastic_broadcast_notifications">Уведомления о сообщениях в общем чате</string>
+    <string name="meshtastic_waypoints_notifications">Уведомления о путевых точках</string>
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
     <string name="firmware_old">Прошивка радиостанции слишком стара для взаимодействия с данным приложением. Чтобы получить больше сведений, посетите <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наше руководство по установке прошивки</a>.</string>
@@ -276,7 +278,7 @@
     <string name="resend">Отправить</string>
     <string name="shutdown">Выключение</string>
     <string name="cant_shutdown">Выключение не поддерживается на этом устройстве</string>
-    <string name="shutdown_warning">⚠️ Эта  нода будет ОТКЛЮЧЕНА. Для её включения потребуется физическое взаимодействие.</string>
+    <string name="shutdown_warning">⚠️ Эта нода будет ОТКЛЮЧЕНА. Для её включения потребуется физическое взаимодействие.</string>
     <string name="shutdown_critical_node">⚠️ Это критичная нода инфраструктуры. Введите её имя для подтверждения:</string>
     <string name="shutdown_node_name">Нода: %1$s</string>
     <string name="shutdown_type_name">Тип: %1$s</string>
@@ -335,6 +337,7 @@
     <string name="remove">Удалить</string>
     <string name="remove_node_text">Этот узел будет удалён из вашего списка, пока ваш узел снова не получит данные от него.</string>
     <string name="mute_notifications">Отключить уведомления</string>
+    <string name="mute_1_hour">1 час</string>
     <string name="mute_8_hours">8 часов</string>
     <string name="mute_1_week">1 неделя</string>
     <string name="mute_always">Всегда</string>
@@ -555,7 +558,7 @@
     <string name="output_led_gpio">Выход LED (GPIO)</string>
     <string name="output_led_active_high">Вывод светодиода активный высокий</string>
     <string name="output_buzzer_gpio">Выход Буззера (GPIO)</string>
-    <string name="use_pwm_buzzer">Использовать PWM-звукоизлучатель</string>
+    <string name="use_view_buzzer">Используйте баззер ПРОСМОТРА</string>
     <string name="output_vibra_gpio">Вибросигнал (GPIO)</string>
     <string name="output_duration_milliseconds">Продолжительность вывода (миллисекунды)</string>
     <string name="nag_timeout_seconds">Таймаут Nag (в секундах)</string>
@@ -1045,4 +1048,5 @@
     <string name="compass_no_location_fix">Ждем сигнала GPS, чтобы рассчитать расстояние и азимут.</string>
     <string name="compass_uncertainty">Предполагаемая площадь: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Предполагаемая площадь: точность неизвестна</string>
+    <string name="mark_as_read">Пометить прочитанным</string>
 </resources>

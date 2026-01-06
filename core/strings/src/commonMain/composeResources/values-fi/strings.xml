@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Suodatus</string>
@@ -330,6 +331,7 @@
     <string name="remove">Poista</string>
     <string name="remove_node_text">Tämä laite poistetaan luettelosta siihen saakka, kunnes sen tiedot vastaanotetaan uudelleen.</string>
     <string name="mute_notifications">Mykistä ilmoitukset</string>
+    <string name="mute_1_hour">1 tunti</string>
     <string name="mute_8_hours">8 tuntia</string>
     <string name="mute_1_week">1 viikko</string>
     <string name="mute_always">Aina</string>
@@ -509,7 +511,7 @@
     <string name="minimum_broadcast_seconds">Minimilähetys (sekuntia)</string>
     <string name="state_broadcast_seconds">Tilatiedon lähetys (sekuntia)</string>
     <string name="send_bell_with_alert_message">Lähetä äänimerkki hälytyssanoman kanssa</string>
-    <string name="friendly_name">Käyttäjäystävälinen nimi</string>
+    <string name="friendly_name">Käyttäjäystävällinen nimi</string>
     <string name="gpio_pin_to_monitor">GPIO-pinni valvontaa varten</string>
     <string name="detection_trigger_type">Tunnistuksen tyyppi</string>
     <string name="use_input_pullup_mode">Käytä INPUT_PULLUP tilaa</string>
@@ -548,7 +550,7 @@
     <string name="output_led_gpio">Ulostulon LED (GPIO)</string>
     <string name="output_led_active_high">Ulostulon LED aktiivinen</string>
     <string name="output_buzzer_gpio">Ulostulon äänimerkki (GPIO)</string>
-    <string name="use_pwm_buzzer">Käytä PWM-äänimerkkiä</string>
+    <string name="use_view_buzzer">Käytä VIEW-summeria</string>
     <string name="output_vibra_gpio">Ulostulon värinä (GPIO)</string>
     <string name="output_duration_milliseconds">Ulostulon kesto (millisekuntia)</string>
     <string name="nag_timeout_seconds">Hälytysaikakatkaisu (sekuntia)</string>
@@ -1031,4 +1033,5 @@
     <string name="compass_no_location_fix">Odotetaan GPS-paikannusta etäisyyden ja suunnan laskemiseksi.</string>
     <string name="compass_uncertainty">Arvioitu alue: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Arvioitu alue: tarkkuus tuntematon</string>
+    <string name="mark_as_read">Merkitse luetuksi</string>
 </resources>

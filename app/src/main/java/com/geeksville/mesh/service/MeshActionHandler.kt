@@ -28,6 +28,7 @@ import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
@@ -112,11 +113,11 @@ constructor(
                 bytes = action.emoji.encodeToByteArray(),
                 channel = channel,
                 replyId = action.replyId,
-                wantAck = false,
+                wantAck = true,
                 emoji = action.emoji.codePointAt(0),
             )
         commandSender.sendData(dataPacket)
-        rememberReaction(action)
+        rememberReaction(action, dataPacket.id)
     }
 
     private fun handleImportContact(action: ServiceAction.ImportContact, myNodeNum: Int) {
@@ -125,17 +126,19 @@ constructor(
         nodeManager.handleReceivedUser(verifiedContact.nodeNum, verifiedContact.user, manuallyVerified = true)
     }
 
-    private fun rememberReaction(action: ServiceAction.Reaction) {
+    private fun rememberReaction(action: ServiceAction.Reaction, packetId: Int) {
         scope.handledLaunch {
             val reaction =
                 ReactionEntity(
                     replyId = action.replyId,
-                    userId = DataPacket.ID_LOCAL,
+                    userId = nodeManager.getMyId(),
                     emoji = action.emoji,
                     timestamp = System.currentTimeMillis(),
                     snr = 0f,
                     rssi = 0,
                     hopsAway = 0,
+                    packetId = packetId,
+                    status = MessageStatus.QUEUED,
                 )
             packetRepository.get().insertReaction(reaction)
         }

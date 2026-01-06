@@ -74,7 +74,7 @@ private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
 )
 
 @Composable
-private fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
+internal fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
     AnimatedVisibility(visible = fromLocal) {
         IconButton(onClick = onStatusClick) {
             Crossfade(targetState = status, label = "MessageStatusIcon") { currentStatus ->

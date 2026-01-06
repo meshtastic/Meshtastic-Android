@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Kärgvõrgustik</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Kärgvõrgustik</string>
     <string name="node_filter_placeholder">Filtreeri</string>
@@ -229,6 +230,7 @@
     <string name="new_messages_below">Uued sõnumid allpool</string>
     <string name="meshtastic_messages_notifications">Otsesõnumi teated</string>
     <string name="meshtastic_broadcast_notifications">Ringhäälingusõnumi teated</string>
+    <string name="meshtastic_waypoints_notifications">Teekonnapunktide teavitused</string>
     <string name="meshtastic_alerts_notifications">Märguteated</string>
     <string name="firmware_too_old">Püsivara värskendus on vajalik.</string>
     <string name="firmware_old">Raadio püsivara on selle rakenduse kasutamiseks liiga vana. Lisateabe saamiseks vaata meie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">püsivara paigaldusjuhendit</a>.</string>
@@ -329,6 +331,7 @@
     <string name="remove">Eemalda</string>
     <string name="remove_node_text">Antud sõlm eemaldatakse loendist kuniks sinu sõlm võtab sellelt vastu uuesti andmeid.</string>
     <string name="mute_notifications">Vaigista teatised</string>
+    <string name="mute_1_hour">1 tund</string>
     <string name="mute_8_hours">8 tundi</string>
     <string name="mute_1_week">1 nädal</string>
     <string name="mute_always">Alati</string>
@@ -547,7 +550,7 @@
     <string name="output_led_gpio">Väljund LED (GPIO)</string>
     <string name="output_led_active_high">Väljund LED aktiivne</string>
     <string name="output_buzzer_gpio">Väljund summer (GPIO)</string>
-    <string name="use_pwm_buzzer">Kasuta PWM summerit</string>
+    <string name="use_view_buzzer">Kuva summerid</string>
     <string name="output_vibra_gpio">Väljund värin (GPIO)</string>
     <string name="output_duration_milliseconds">Väljundi kestvus (millisekundit)</string>
     <string name="nag_timeout_seconds">Häire ajalõpp (sekundit)</string>
@@ -1029,4 +1032,5 @@
     <string name="compass_no_location_fix">Ootan GPSi signaali, et arvutada vahemaa ja suund.</string>
     <string name="compass_uncertainty">Hinnanguline piirkond: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Hinnanguline piirkond: täpsus teadmata</string>
+    <string name="mark_as_read">Märgi loetuks</string>
 </resources>

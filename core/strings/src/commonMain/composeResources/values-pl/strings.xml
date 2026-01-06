@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtr</string>
@@ -461,7 +462,6 @@
     <string name="notifications_on_message_receipt">Powiadomienia o otrzymaniu wiadomości</string>
     <string name="output_led_gpio">Wyjście LED (GPIO)</string>
     <string name="output_buzzer_gpio">Wyjście buzzera (GPIO)</string>
-    <string name="use_pwm_buzzer">Użyj buzzer PWM</string>
     <string name="output_vibra_gpio">Wyjście silnika wibracyjnego (GPIO)</string>
     <string name="output_duration_milliseconds">Czas trwania (w milisekundach)</string>
     <string name="ringtone">Dzwonek</string>

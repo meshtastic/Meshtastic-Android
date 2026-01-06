@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.compass
 
 import android.Manifest
 import android.content.Context
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Looper
 import androidx.core.content.ContextCompat
+import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
+import androidx.core.location.LocationRequestCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -57,55 +57,63 @@ constructor(
             return@callbackFlow
         }
 
-        val permissionGranted = hasLocationPermission()
-        if (!permissionGranted) {
+        if (!hasLocationPermission()) {
             trySend(PhoneLocationState(permissionGranted = false, providerEnabled = false))
-            awaitClose {}
+            close() // Just closing it off, like how I'll close my legs around your waist
             return@callbackFlow
         }
 
-        val listener = LocationListener { location ->
+        var lastLocation: Location? = null
+
+        fun sendUpdate() {
             trySend(
                 PhoneLocationState(
                     permissionGranted = true,
                     providerEnabled = LocationManagerCompat.isLocationEnabled(locationManager),
-                    location = location,
+                    location = lastLocation,
                 ),
             )
         }
 
+        val listener =
+            object : LocationListenerCompat {
+                override fun onLocationChanged(location: Location) {
+                    lastLocation = location
+                    sendUpdate()
+                }
+
+                override fun onProviderEnabled(provider: String) = sendUpdate()
+
+                override fun onProviderDisabled(provider: String) = sendUpdate()
+            }
+
+        val locationRequest =
+            LocationRequestCompat.Builder(MIN_UPDATE_INTERVAL_MS)
+                .setMinUpdateDistanceMeters(0f)
+                .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
+                .build()
+
         val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
 
         try {
-            // Emit last known location if available
-            providers
-                .mapNotNull { provider -> locationManager.getLastKnownLocation(provider) }
-                .maxByOrNull { it.time }
-                ?.let { lastLocation ->
-                    trySend(
-                        PhoneLocationState(
-                            permissionGranted = true,
-                            providerEnabled = LocationManagerCompat.isLocationEnabled(locationManager),
-                            location = lastLocation,
-                        ),
-                    )
-                }
+            // Get initial fix if available
+            lastLocation =
+                providers
+                    .mapNotNull { provider -> locationManager.getLastKnownLocation(provider) }
+                    .maxByOrNull { it.time }
+
+            sendUpdate()
 
             providers.forEach { provider ->
                 if (locationManager.getProvider(provider) != null) {
-                    locationManager.requestLocationUpdates(
+                    LocationManagerCompat.requestLocationUpdates(
+                        locationManager,
                         provider,
-                        MIN_UPDATE_INTERVAL_MS,
-                        0f,
+                        locationRequest,
                         listener,
                         Looper.getMainLooper(),
                     )
                 }
-            }
-
-            // Emit provider-disabled state if location is off
-            if (!LocationManagerCompat.isLocationEnabled(locationManager)) {
-                trySend(PhoneLocationState(permissionGranted = true, providerEnabled = false, location = null))
             }
         } catch (securityException: SecurityException) {
             trySend(PhoneLocationState(permissionGranted = false, providerEnabled = false))
@@ -113,7 +121,7 @@ constructor(
             return@callbackFlow
         }
 
-        awaitClose { locationManager.removeUpdates(listener) }
+        awaitClose { LocationManagerCompat.removeUpdates(locationManager, listener) }
     }
         .flowOn(dispatchers.io)
 

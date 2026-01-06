@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtr</string>
@@ -267,6 +268,7 @@
     <string name="remove">Odstranit</string>
     <string name="remove_node_text">Tento uzel bude odstraněn z vašeho seznamu, dokud z něj váš uzel znovu neobdrží data.</string>
     <string name="mute_notifications">Ztlumit notifikace</string>
+    <string name="mute_1_hour">1 hodina</string>
     <string name="mute_8_hours">8 hodin</string>
     <string name="mute_1_week">1 týden</string>
     <string name="mute_always">Vždy</string>
@@ -460,7 +462,6 @@
     <string name="output_led_gpio">Výstupní LED (GPIO)</string>
     <string name="output_led_active_high">Výstupní LED aktivní při HIGH</string>
     <string name="output_buzzer_gpio">Výstupní pin bzučáku (GPIO)</string>
-    <string name="use_pwm_buzzer">Použít PWM bzučák</string>
     <string name="output_vibra_gpio">Výstupní pin vybračního motorku (GPIO)</string>
     <string name="output_duration_milliseconds">Doba trvání výstupu (v milisekundách)</string>
     <string name="nag_timeout_seconds">Interval opakovaného zvonění (v sekundách)</string>
