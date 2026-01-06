@@ -209,19 +209,21 @@ constructor(
 
                 // Prefer a full 16-byte hash calculated from the message bytes if available
                 // But only if it's NOT a fragment, otherwise the calculated hash would be wrong
-                val hash = when {
-                    !sfpp.messageHash.isEmpty -> sfpp.messageHash.toByteArray()
-                    !isFragment && !sfpp.message.isEmpty -> {
-                        SfppHasher.computeMessageHash(
-                            encryptedPayload = sfpp.message.toByteArray(),
-                            // Map 0 back to NODENUM_BROADCAST to match firmware hash calculation
-                            to = if (sfpp.encapsulatedTo == 0) DataPacket.NODENUM_BROADCAST else sfpp.encapsulatedTo,
-                            from = sfpp.encapsulatedFrom,
-                            id = sfpp.encapsulatedId,
-                        )
-                    }
-                    else -> null
-                } ?: return
+                val hash =
+                    when {
+                        !sfpp.messageHash.isEmpty -> sfpp.messageHash.toByteArray()
+                        !isFragment && !sfpp.message.isEmpty -> {
+                            SfppHasher.computeMessageHash(
+                                encryptedPayload = sfpp.message.toByteArray(),
+                                // Map 0 back to NODENUM_BROADCAST to match firmware hash calculation
+                                to =
+                                if (sfpp.encapsulatedTo == 0) DataPacket.NODENUM_BROADCAST else sfpp.encapsulatedTo,
+                                from = sfpp.encapsulatedFrom,
+                                id = sfpp.encapsulatedId,
+                            )
+                        }
+                        else -> null
+                    } ?: return
 
                 scope.handledLaunch {
                     packetRepository

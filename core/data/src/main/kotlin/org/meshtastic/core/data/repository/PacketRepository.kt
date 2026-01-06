@@ -51,7 +51,12 @@ constructor(
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactKeys() }
 
     fun getContactsPaged(): Flow<PagingData<Packet>> = Pager(
-        config = PagingConfig(pageSize = 30, enablePlaceholders = false, initialLoadSize = 30),
+        config =
+        PagingConfig(
+            pageSize = CONTACTS_PAGE_SIZE,
+            enablePlaceholders = false,
+            initialLoadSize = CONTACTS_PAGE_SIZE,
+        ),
         pagingSourceFactory = { dbManager.currentDb.value.packetDao().getContactKeysPaged() },
     )
         .flow
@@ -113,7 +118,12 @@ constructor(
         }
 
     fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>> = Pager(
-        config = PagingConfig(pageSize = 50, enablePlaceholders = false, initialLoadSize = 50),
+        config =
+        PagingConfig(
+            pageSize = MESSAGES_PAGE_SIZE,
+            enablePlaceholders = false,
+            initialLoadSize = MESSAGES_PAGE_SIZE,
+        ),
         pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contact) },
     )
         .flow
@@ -164,7 +174,7 @@ constructor(
                 if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                     return@forEach
                 }
-                val newTime = if (rxTime > 0) rxTime * 1000L else packet.received_time
+                val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
                 val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
                 dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
             }
@@ -182,14 +192,14 @@ constructor(
             if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                 return@let
             }
-            val newTime = if (rxTime > 0) rxTime * 1000L else packet.received_time
+            val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
             val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
             dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
         }
     }
 
     suspend fun deleteMessages(uuidList: List<Long>) = withContext(dispatchers.io) {
-        for (chunk in uuidList.chunked(500)) {
+        for (chunk in uuidList.chunked(DELETE_CHUNK_SIZE)) {
             // Fetch DAO per chunk to avoid holding a stale reference if the active DB switches
             dbManager.currentDb.value.packetDao().deleteMessages(chunk)
         }
@@ -229,4 +239,11 @@ constructor(
 
     private fun org.meshtastic.core.database.dao.PacketDao.getAllWaypointsFlow(): Flow<List<Packet>> =
         getAllPackets(PortNum.WAYPOINT_APP_VALUE)
+
+    companion object {
+        private const val CONTACTS_PAGE_SIZE = 30
+        private const val MESSAGES_PAGE_SIZE = 50
+        private const val DELETE_CHUNK_SIZE = 500
+        private const val MILLISECONDS_IN_SECOND = 1000L
+    }
 }
