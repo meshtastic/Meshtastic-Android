@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,24 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.firmware.ota
 
 /** Commands supported by the ESP32 Unified OTA protocol. All commands are text-based and terminated with '\n'. */
 sealed class OtaCommand {
-    /** Request device version information */
-    data object Version : OtaCommand() {
-        override fun toString() = "VERSION\n"
-    }
-
     /** Start OTA update with firmware size and SHA-256 hash */
     data class StartOta(val sizeBytes: Long, val sha256Hash: String) : OtaCommand() {
         override fun toString() = "OTA $sizeBytes $sha256Hash\n"
-    }
-
-    /** Request device reboot */
-    data object Reboot : OtaCommand() {
-        override fun toString() = "REBOOT\n"
     }
 }
 
@@ -111,13 +100,6 @@ interface UnifiedOtaProtocol {
     suspend fun connect(): Result<Unit>
 
     /**
-     * Send VERSION command to get device information.
-     *
-     * @return Version information from the device
-     */
-    suspend fun sendVersion(): Result<OtaResponse.Ok>
-
-    /**
      * Start OTA update process.
      *
      * @param sizeBytes Total firmware size in bytes
@@ -140,13 +122,6 @@ interface UnifiedOtaProtocol {
      * @return Success if all data transferred and verified, error otherwise
      */
     suspend fun streamFirmware(data: ByteArray, chunkSize: Int, onProgress: suspend (Float) -> Unit): Result<Unit>
-
-    /**
-     * Request device reboot.
-     *
-     * @return Success if reboot command accepted
-     */
-    suspend fun reboot(): Result<Unit>
 
     /** Close the connection and cleanup resources. */
     suspend fun close()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
@@ -118,20 +117,6 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
         Logger.i { "BLE OTA: Service discovered and ready" }
     }
 
-    override suspend fun sendVersion(): Result<OtaResponse.Ok> = runCatching {
-        sendCommand(OtaCommand.Version)
-        val response = waitForResponse(COMMAND_TIMEOUT_MS)
-        when (val parsed = OtaResponse.parse(response)) {
-            is OtaResponse.Ok -> parsed
-            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(OtaCommand.Version, parsed)
-            else ->
-                throw OtaProtocolException.CommandFailed(
-                    OtaCommand.Version,
-                    OtaResponse.Error("Unexpected response: $parsed"),
-                )
-        }
-    }
-
     override suspend fun startOta(
         sizeBytes: Long,
         sha256Hash: String,
@@ -140,30 +125,27 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
         sendCommand(command)
 
-        // Wait for ERASING response
-        val erasingResponse = waitForResponse(ERASING_TIMEOUT_MS)
-        when (val parsed = OtaResponse.parse(erasingResponse)) {
-            is OtaResponse.Erasing -> {
-                Logger.i { "BLE OTA: Device erasing flash..." }
-                onHandshakeStatus(OtaHandshakeStatus.Erasing)
-            }
-
-            is OtaResponse.Error -> {
-                if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
-                    throw OtaProtocolException.HashRejected(sha256Hash)
+        var handshakeComplete = false
+        while (!handshakeComplete) {
+            val response = waitForResponse(ERASING_TIMEOUT_MS)
+            when (val parsed = OtaResponse.parse(response)) {
+                is OtaResponse.Ok -> handshakeComplete = true
+                is OtaResponse.Erasing -> {
+                    Logger.i { "BLE OTA: Device erasing flash..." }
+                    onHandshakeStatus(OtaHandshakeStatus.Erasing)
                 }
-                throw OtaProtocolException.CommandFailed(command, parsed)
+
+                is OtaResponse.Error -> {
+                    if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
+                        throw OtaProtocolException.HashRejected(sha256Hash)
+                    }
+                    throw OtaProtocolException.CommandFailed(command, parsed)
+                }
+
+                else -> {
+                    Logger.w { "BLE OTA: Unexpected handshake response: $response" }
+                }
             }
-
-            else -> {} // OK or other response, continue
-        }
-
-        // Wait for OK response after erasing
-        val okResponse = waitForResponse(ERASING_TIMEOUT_MS)
-        when (val parsed = OtaResponse.parse(okResponse)) {
-            is OtaResponse.Ok -> Unit
-            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(command, parsed)
-            else -> throw OtaProtocolException.CommandFailed(command, OtaResponse.Error("Expected OK, got: $parsed"))
         }
     }
 
@@ -187,22 +169,40 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
             // Write chunk
             writeData(chunk)
 
-            // Wait for ACK (BLE only)
-            val ackResponse = waitForResponse(ACK_TIMEOUT_MS)
-            when (OtaResponse.parse(ackResponse)) {
-                is OtaResponse.Ack -> {} // Continue
-                is OtaResponse.Error -> {
-                    val error = OtaResponse.parse(ackResponse) as OtaResponse.Error
-                    throw OtaProtocolException.TransferFailed("Transfer failed: ${error.message}")
+            // Wait for response (ACK or OK for last chunk)
+            val response = waitForResponse(ACK_TIMEOUT_MS)
+            val nextSentBytes = sentBytes + currentChunkSize
+            when (val parsed = OtaResponse.parse(response)) {
+                is OtaResponse.Ack -> {
+                    // Normal chunk success
                 }
-                else -> throw OtaProtocolException.TransferFailed("Expected ACK, got: $ackResponse")
+
+                is OtaResponse.Ok -> {
+                    // OK indicates completion (usually on last chunk)
+                    if (nextSentBytes >= totalBytes) {
+                        sentBytes = nextSentBytes
+                        onProgress(1.0f)
+                        return@runCatching Unit
+                    } else {
+                        throw OtaProtocolException.TransferFailed("Premature OK received at offset $nextSentBytes")
+                    }
+                }
+
+                is OtaResponse.Error -> {
+                    if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
+                        throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
+                    }
+                    throw OtaProtocolException.TransferFailed("Transfer failed: ${parsed.message}")
+                }
+
+                else -> throw OtaProtocolException.TransferFailed("Unexpected response: $response")
             }
 
-            sentBytes += currentChunkSize
+            sentBytes = nextSentBytes
             onProgress(sentBytes.toFloat() / totalBytes)
         }
 
-        // Wait for final verification
+        // If we finished the loop without receiving OK, wait for it now
         val finalResponse = waitForResponse(VERIFICATION_TIMEOUT_MS)
         when (val parsed = OtaResponse.parse(finalResponse)) {
             is OtaResponse.Ok -> Unit
@@ -212,21 +212,8 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
                 }
                 throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
             }
-            else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
-        }
-    }
 
-    override suspend fun reboot(): Result<Unit> = runCatching {
-        sendCommand(OtaCommand.Reboot)
-        val response = waitForResponse(COMMAND_TIMEOUT_MS)
-        when (val parsed = OtaResponse.parse(response)) {
-            is OtaResponse.Ok -> Unit
-            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(OtaCommand.Reboot, parsed)
-            else ->
-                throw OtaProtocolException.CommandFailed(
-                    OtaCommand.Reboot,
-                    OtaResponse.Error("Unexpected response: $parsed"),
-                )
+            else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
         }
     }
 
@@ -266,12 +253,10 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
         private val TX_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
 
         // Timeouts
-        private const val COMMAND_TIMEOUT_MS = 5_000L
         private const val ERASING_TIMEOUT_MS = 30_000L // Flash erase can take a while
         private const val ACK_TIMEOUT_MS = 3_000L
         private const val VERIFICATION_TIMEOUT_MS = 10_000L
 
-        // Recommended chunk size for BLE
         // Recommended chunk size for BLE
         const val RECOMMENDED_CHUNK_SIZE = 512
         private const val EXTRA_BUFFER_CAPACITY = 10

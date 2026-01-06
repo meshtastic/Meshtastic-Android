@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.firmware.ota
 
 import android.content.Context
@@ -31,14 +30,12 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.firmware_update_checking_version
 import org.meshtastic.core.strings.firmware_update_connecting_attempt
 import org.meshtastic.core.strings.firmware_update_downloading_percent
 import org.meshtastic.core.strings.firmware_update_erasing
 import org.meshtastic.core.strings.firmware_update_hash_rejected
 import org.meshtastic.core.strings.firmware_update_loading
 import org.meshtastic.core.strings.firmware_update_ota_failed
-import org.meshtastic.core.strings.firmware_update_rebooting_device
 import org.meshtastic.core.strings.firmware_update_retrieval_failed
 import org.meshtastic.core.strings.firmware_update_starting_ota
 import org.meshtastic.core.strings.firmware_update_uploading
@@ -253,12 +250,6 @@ constructor(
         rebootMode: Int,
         updateState: (FirmwareUpdateState) -> Unit,
     ) {
-        // Step 4: Version Check
-        val checkingVersionMsg = getString(Res.string.firmware_update_checking_version)
-        updateState(FirmwareUpdateState.Processing(ProgressState(checkingVersionMsg)))
-        val versionInfo = transport.sendVersion().getOrThrow()
-        Logger.i { "ESP32 OTA: Device version - HW: ${versionInfo.hwVersion}, FW: ${versionInfo.fwVersion}" }
-
         // Step 5: Start OTA
         val startingOtaMsg = getString(Res.string.firmware_update_starting_ota)
         updateState(FirmwareUpdateState.Processing(ProgressState(startingOtaMsg)))
@@ -319,11 +310,6 @@ constructor(
             )
             .getOrThrow()
         Logger.i { "ESP32 OTA: Firmware stream completed" }
-
-        // Step 7: Final Reboot
-        val rebootingDeviceMsg = getString(Res.string.firmware_update_rebooting_device)
-        updateState(FirmwareUpdateState.Processing(ProgressState(rebootingDeviceMsg)))
-        transport.reboot().getOrThrow()
 
         updateState(FirmwareUpdateState.Success)
     }
