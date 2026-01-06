@@ -278,7 +278,7 @@
     <string name="resend">Отправить</string>
     <string name="shutdown">Выключение</string>
     <string name="cant_shutdown">Выключение не поддерживается на этом устройстве</string>
-    <string name="shutdown_warning">⚠️ Эта  нода будет ОТКЛЮЧЕНА. Для её включения потребуется физическое взаимодействие.</string>
+    <string name="shutdown_warning">⚠️ Эта нода будет ОТКЛЮЧЕНА. Для её включения потребуется физическое взаимодействие.</string>
     <string name="shutdown_critical_node">⚠️ Это критичная нода инфраструктуры. Введите её имя для подтверждения:</string>
     <string name="shutdown_node_name">Нода: %1$s</string>
     <string name="shutdown_type_name">Тип: %1$s</string>
