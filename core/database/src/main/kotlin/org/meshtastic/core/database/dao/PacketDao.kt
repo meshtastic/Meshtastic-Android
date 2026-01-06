@@ -264,6 +264,16 @@ interface PacketDao {
     suspend fun findPacketsWithId(packetId: Int): List<Packet>
 
     @Transaction
+    @Query(
+        """
+        SELECT * FROM packet 
+        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND substr(sfpp_hash, 1, 8) = substr(:hash, 1, 8)
+        """,
+    )
+    suspend fun findPacketBySfppHash(hash: ByteArray): Packet?
+
+    @Transaction
     suspend fun getQueuedPackets(): List<DataPacket>? = getDataPackets().filter { it.status == MessageStatus.QUEUED }
 
     @Query(

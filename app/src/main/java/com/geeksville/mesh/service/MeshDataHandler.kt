@@ -37,6 +37,7 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
@@ -200,9 +201,27 @@ constructor(
             MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF,
             MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_SECONDHALF,
             -> {
-                val isFirstHalf =
-                    sfpp.sfppMessageType == MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF
-                val status = if (isFirstHalf) MessageStatus.SFPP_ROUTING else MessageStatus.SFPP_CONFIRMED
+                val isFragment = sfpp.sfppMessageType != MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE
+
+                // If it has a commit hash, it's already on the chain (Confirmed)
+                // Otherwise it's still being routed via SF++ (Routing)
+                val status = if (sfpp.commitHash.isEmpty) MessageStatus.SFPP_ROUTING else MessageStatus.SFPP_CONFIRMED
+
+                // Prefer a full 16-byte hash calculated from the message bytes if available
+                // But only if it's NOT a fragment, otherwise the calculated hash would be wrong
+                val hash = when {
+                    !sfpp.messageHash.isEmpty -> sfpp.messageHash.toByteArray()
+                    !isFragment && !sfpp.message.isEmpty -> {
+                        SfppHasher.computeMessageHash(
+                            encryptedPayload = sfpp.message.toByteArray(),
+                            // Map 0 back to NODENUM_BROADCAST to match firmware hash calculation
+                            to = if (sfpp.encapsulatedTo == 0) DataPacket.NODENUM_BROADCAST else sfpp.encapsulatedTo,
+                            from = sfpp.encapsulatedFrom,
+                            id = sfpp.encapsulatedId,
+                        )
+                    }
+                    else -> null
+                } ?: return
 
                 scope.handledLaunch {
                     packetRepository
@@ -211,15 +230,35 @@ constructor(
                             packetId = sfpp.encapsulatedId,
                             from = sfpp.encapsulatedFrom,
                             to = sfpp.encapsulatedTo,
-                            hash = sfpp.messageHash.toByteArray(),
+                            hash = hash,
                             status = status,
+                            rxTime = sfpp.encapsulatedRxtime.toLong() and 0xFFFFFFFFL,
                         )
                     serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulatedId, status)
                 }
             }
-            else -> {
-                // Other types like CANON_ANNOUNCE or LINK_REQUEST
+
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE -> {
+                scope.handledLaunch {
+                    packetRepository
+                        .get()
+                        .updateSFPPStatusByHash(
+                            hash = sfpp.messageHash.toByteArray(),
+                            status = MessageStatus.SFPP_CONFIRMED,
+                            rxTime = sfpp.encapsulatedRxtime.toLong() and 0xFFFFFFFFL,
+                        )
+                }
             }
+
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.CHAIN_QUERY -> {
+                Logger.i { "SF++: Node ${packet.from} is querying chain status" }
+            }
+
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_REQUEST -> {
+                Logger.i { "SF++: Node ${packet.from} is requesting links" }
+            }
+
+            else -> {}
         }
     }
 

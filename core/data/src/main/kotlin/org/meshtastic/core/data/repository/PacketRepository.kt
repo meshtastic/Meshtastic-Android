@@ -146,6 +146,7 @@ constructor(
         to: Int,
         hash: ByteArray,
         status: MessageStatus = MessageStatus.SFPP_CONFIRMED,
+        rxTime: Long = 0,
     ) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
         val packets = dao.findPacketsWithId(packetId)
@@ -163,9 +164,27 @@ constructor(
                 if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                     return@forEach
                 }
-                val updatedData = packet.data.copy(status = status, sfppHash = hash)
-                dao.update(packet.copy(data = updatedData, sfpp_hash = hash))
+                val newTime = if (rxTime > 0) rxTime * 1000L else packet.received_time
+                val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
+                dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
             }
+        }
+    }
+
+    suspend fun updateSFPPStatusByHash(
+        hash: ByteArray,
+        status: MessageStatus = MessageStatus.SFPP_CONFIRMED,
+        rxTime: Long = 0,
+    ) = withContext(dispatchers.io) {
+        val dao = dbManager.currentDb.value.packetDao()
+        dao.findPacketBySfppHash(hash)?.let { packet ->
+            // If it's already confirmed, don't downgrade it
+            if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
+                return@let
+            }
+            val newTime = if (rxTime > 0) rxTime * 1000L else packet.received_time
+            val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
+            dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
         }
     }
 
