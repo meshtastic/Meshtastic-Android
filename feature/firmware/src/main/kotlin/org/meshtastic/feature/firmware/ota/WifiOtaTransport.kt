@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
@@ -75,20 +74,6 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
             }
     }
 
-    override suspend fun sendVersion(): Result<OtaResponse.Ok> = runCatching {
-        sendCommand(OtaCommand.Version)
-        val response = readResponse()
-        when (val parsed = OtaResponse.parse(response)) {
-            is OtaResponse.Ok -> parsed
-            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(OtaCommand.Version, parsed)
-            else ->
-                throw OtaProtocolException.CommandFailed(
-                    OtaCommand.Version,
-                    OtaResponse.Error("Unexpected response: $parsed"),
-                )
-        }
-    }
-
     override suspend fun startOta(
         sizeBytes: Long,
         sha256Hash: String,
@@ -97,33 +82,31 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
         sendCommand(command)
 
-        // Wait for ERASING response
-        val erasingResponse = readResponse(ERASING_TIMEOUT_MS)
-        when (val parsed = OtaResponse.parse(erasingResponse)) {
-            is OtaResponse.Erasing -> {
-                Logger.i { "WiFi OTA: Device erasing flash..." }
-                onHandshakeStatus(OtaHandshakeStatus.Erasing)
-            }
-
-            is OtaResponse.Error -> {
-                if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
-                    throw OtaProtocolException.HashRejected(sha256Hash)
+        var handshakeComplete = false
+        while (!handshakeComplete) {
+            val response = readResponse(ERASING_TIMEOUT_MS)
+            when (val parsed = OtaResponse.parse(response)) {
+                is OtaResponse.Ok -> handshakeComplete = true
+                is OtaResponse.Erasing -> {
+                    Logger.i { "WiFi OTA: Device erasing flash..." }
+                    onHandshakeStatus(OtaHandshakeStatus.Erasing)
                 }
-                throw OtaProtocolException.CommandFailed(command, parsed)
+
+                is OtaResponse.Error -> {
+                    if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
+                        throw OtaProtocolException.HashRejected(sha256Hash)
+                    }
+                    throw OtaProtocolException.CommandFailed(command, parsed)
+                }
+
+                else -> {
+                    Logger.w { "WiFi OTA: Unexpected handshake response: $response" }
+                }
             }
-
-            else -> {} // OK or other response, continue
-        }
-
-        // Wait for OK response after erasing
-        val okResponse = readResponse(ERASING_TIMEOUT_MS)
-        when (val parsed = OtaResponse.parse(okResponse)) {
-            is OtaResponse.Ok -> Unit
-            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(command, parsed)
-            else -> throw OtaProtocolException.CommandFailed(command, OtaResponse.Error("Expected OK, got: $parsed"))
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     override suspend fun streamFirmware(
         data: ByteArray,
         chunkSize: Int,
@@ -147,6 +130,33 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
                 outputStream.write(chunk)
                 outputStream.flush()
 
+                // In the updated protocol, the device may send ACKs over WiFi too.
+                // We check for any available responses without blocking too long.
+                if (reader?.ready() == true) {
+                    val response = readResponse(ACK_TIMEOUT_MS)
+                    val nextSentBytes = sentBytes + currentChunkSize
+                    when (val parsed = OtaResponse.parse(response)) {
+                        is OtaResponse.Ack -> {
+                            // Normal chunk success
+                        }
+
+                        is OtaResponse.Ok -> {
+                            // OK indicates completion (usually on last chunk)
+                            if (nextSentBytes >= totalBytes) {
+                                sentBytes = nextSentBytes
+                                onProgress(1.0f)
+                                return@runCatching Unit
+                            }
+                        }
+
+                        is OtaResponse.Error -> {
+                            throw OtaProtocolException.TransferFailed("Transfer failed: ${parsed.message}")
+                        }
+
+                        else -> {} // Ignore other responses during stream
+                    }
+                }
+
                 sentBytes += currentChunkSize
                 onProgress(sentBytes.toFloat() / totalBytes)
 
@@ -156,32 +166,24 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
 
             Logger.i { "WiFi OTA: Firmware streaming complete ($sentBytes bytes)" }
 
-            // Wait for final verification response
-            val finalResponse = readResponse(VERIFICATION_TIMEOUT_MS)
-            when (val parsed = OtaResponse.parse(finalResponse)) {
-                is OtaResponse.Ok -> Unit
-                is OtaResponse.Error -> {
-                    if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
-                        throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
+            // Wait for final verification response (loop until OK or Error)
+            var finalHandshakeComplete = false
+            while (!finalHandshakeComplete) {
+                val finalResponse = readResponse(VERIFICATION_TIMEOUT_MS)
+                when (val parsed = OtaResponse.parse(finalResponse)) {
+                    is OtaResponse.Ok -> finalHandshakeComplete = true
+                    is OtaResponse.Ack -> {} // Ignore late ACKs
+                    is OtaResponse.Error -> {
+                        if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
+                            throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
+                        }
+                        throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
                     }
-                    throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
-                }
-                else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
-            }
-        }
-    }
 
-    override suspend fun reboot(): Result<Unit> = runCatching {
-        sendCommand(OtaCommand.Reboot)
-        val response = readResponse()
-        when (val parsed = OtaResponse.parse(response)) {
-            is OtaResponse.Ok -> Unit
-            is OtaResponse.Error -> throw OtaProtocolException.CommandFailed(OtaCommand.Reboot, parsed)
-            else ->
-                throw OtaProtocolException.CommandFailed(
-                    OtaCommand.Reboot,
-                    OtaResponse.Error("Unexpected response: $parsed"),
-                )
+                    else ->
+                        throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $finalResponse")
+                }
+            }
         }
     }
 
@@ -232,6 +234,7 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
         private const val SOCKET_TIMEOUT_MS = 10_000
         private const val COMMAND_TIMEOUT_MS = 5_000L
         private const val ERASING_TIMEOUT_MS = 30_000L
+        private const val ACK_TIMEOUT_MS = 3_000L
         private const val VERIFICATION_TIMEOUT_MS = 10_000L
         private const val WRITE_DELAY_MS = 10L // Shorter than BLE
 

@@ -348,9 +348,9 @@ class MeshService : Service() {
                 toRemoteExceptions {
                     val otaMode = AdminProtos.OTAMode.forNumber(mode) ?: AdminProtos.OTAMode.NO_REBOOT_OTA
                     val otaEventBuilder = AdminProtos.AdminMessage.OTAEvent.newBuilder()
+                    otaEventBuilder.rebootOtaMode = otaMode
                     if (hash != null) {
                         otaEventBuilder.otaHash = ByteString.copyFrom(hash)
-                        otaEventBuilder.rebootOtaMode = otaMode
                     }
 
                     packetHandler.sendToRadio(
