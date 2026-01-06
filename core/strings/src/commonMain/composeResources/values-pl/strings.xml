@@ -462,6 +462,7 @@
     <string name="notifications_on_message_receipt">Powiadomienia o otrzymaniu wiadomości</string>
     <string name="output_led_gpio">Wyjście LED (GPIO)</string>
     <string name="output_buzzer_gpio">Wyjście buzzera (GPIO)</string>
+    <string name="use_pwm_buzzer">Użyj buzzer PWM</string>
     <string name="output_vibra_gpio">Wyjście silnika wibracyjnego (GPIO)</string>
     <string name="output_duration_milliseconds">Czas trwania (w milisekundach)</string>
     <string name="ringtone">Dzwonek</string>

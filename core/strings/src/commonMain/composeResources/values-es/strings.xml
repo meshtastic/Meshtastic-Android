@@ -524,6 +524,7 @@ Rango de Valores 0 - 500.</string>
     <string name="output_led_gpio">Salida LED (pin GPIO)</string>
     <string name="output_led_active_high">LED de salida activo en alto</string>
     <string name="output_buzzer_gpio">Salida buzzer (pin GPIO)</string>
+    <string name="use_pwm_buzzer">Utilizar buzzer PWM</string>
     <string name="output_vibra_gpio">Salida vibratoria (pin GPIO)</string>
     <string name="output_duration_milliseconds">Duración en las salidas (milisegundos)</string>
     <string name="nag_timeout_seconds"></string>

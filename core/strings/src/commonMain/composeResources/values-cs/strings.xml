@@ -462,6 +462,7 @@
     <string name="output_led_gpio">Výstupní LED (GPIO)</string>
     <string name="output_led_active_high">Výstupní LED aktivní při HIGH</string>
     <string name="output_buzzer_gpio">Výstupní pin bzučáku (GPIO)</string>
+    <string name="use_pwm_buzzer">Použít PWM bzučák</string>
     <string name="output_vibra_gpio">Výstupní pin vybračního motorku (GPIO)</string>
     <string name="output_duration_milliseconds">Doba trvání výstupu (v milisekundách)</string>
     <string name="nag_timeout_seconds">Interval opakovaného zvonění (v sekundách)</string>

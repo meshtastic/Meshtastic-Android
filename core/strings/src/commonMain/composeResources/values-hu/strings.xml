@@ -550,7 +550,7 @@
     <string name="output_led_gpio">Kimeneti LED (GPIO)</string>
     <string name="output_led_active_high">Kimeneti LED aktív magas szint</string>
     <string name="output_buzzer_gpio">Kimeneti csipogó (GPIO)</string>
-    <string name="use_view_buzzer">VIEW csipogó használata</string>
+    <string name="use_pwm_buzzer">PWM csipogó használata</string>
     <string name="output_vibra_gpio">Kimeneti rezgő (GPIO)</string>
     <string name="output_duration_milliseconds">Kimeneti időtartam (ezredmásodperc)</string>
     <string name="nag_timeout_seconds">Ismétlő riasztás időkorlát (másodperc)</string>

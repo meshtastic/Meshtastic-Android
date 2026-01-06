@@ -329,6 +329,7 @@
     <string name="display_units">Geef eenheden weer</string>
     <string name="display_mode">Weergavemodus</string>
     <string name="compass_orientation">Kompas oriëntatie</string>
+    <string name="use_pwm_buzzer">Gebruik PWM zoemer</string>
     <string name="output_vibra_gpio">Output vibra (GPIO)</string>
     <string name="output_duration_milliseconds">Output duur (milliseconden)</string>
     <string name="ringtone">Beltoon</string>

@@ -550,7 +550,7 @@
     <string name="output_led_gpio">Ulostulon LED (GPIO)</string>
     <string name="output_led_active_high">Ulostulon LED aktiivinen</string>
     <string name="output_buzzer_gpio">Ulostulon äänimerkki (GPIO)</string>
-    <string name="use_view_buzzer">Käytä VIEW-summeria</string>
+    <string name="use_pwm_buzzer">Käytä PWM-äänimerkkiä</string>
     <string name="output_vibra_gpio">Ulostulon värinä (GPIO)</string>
     <string name="output_duration_milliseconds">Ulostulon kesto (millisekuntia)</string>
     <string name="nag_timeout_seconds">Hälytysaikakatkaisu (sekuntia)</string>

@@ -379,6 +379,7 @@
     <string name="output_led_gpio">Çıktı LED (GPIO)</string>
     <string name="output_led_active_high">Çıktı LED aktif yüksek</string>
     <string name="output_buzzer_gpio">Çıktı zırnı (GPIO)</string>
+    <string name="use_pwm_buzzer">PWM zırnı kullan</string>
     <string name="output_vibra_gpio">Çıktı titreşim (GPIO)</string>
     <string name="output_duration_milliseconds">Çıktı süresi (milisaniye)</string>
     <string name="nag_timeout_seconds">Nag zaman aşımı (saniye)</string>

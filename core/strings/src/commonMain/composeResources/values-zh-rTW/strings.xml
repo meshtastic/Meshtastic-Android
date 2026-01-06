@@ -514,6 +514,7 @@
     <string name="output_led_gpio">輸出LED（GPIO）</string>
     <string name="output_led_active_high">輸出LED 高電平觸發</string>
     <string name="output_buzzer_gpio">輸出蜂鳴（GPIO）</string>
+    <string name="use_pwm_buzzer">使用PWM調製的蜂鳴</string>
     <string name="output_vibra_gpio">輸出振動（GPIO）</string>
     <string name="output_duration_milliseconds">輸出持續時間（毫秒）</string>
     <string name="nag_timeout_seconds">通知逾時時間（秒）</string>
