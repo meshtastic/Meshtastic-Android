@@ -449,6 +449,7 @@
     <string name="external_notification_enabled">Външните известия са активирани</string>
     <string name="notifications_on_message_receipt">Известия за получаване на съобщение</string>
     <string name="notifications_on_alert_bell_receipt">Известия при получаване на сигнал/позвъняване</string>
+    <string name="use_pwm_buzzer">Използване на PWM зумер</string>
     <string name="ringtone">Тон на звънене</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Опции</string>

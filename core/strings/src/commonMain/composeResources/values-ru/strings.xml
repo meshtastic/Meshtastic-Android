@@ -558,7 +558,7 @@
     <string name="output_led_gpio">Выход LED (GPIO)</string>
     <string name="output_led_active_high">Вывод светодиода активный высокий</string>
     <string name="output_buzzer_gpio">Выход Буззера (GPIO)</string>
-    <string name="use_view_buzzer">Используйте баззер ПРОСМОТРА</string>
+    <string name="use_pwm_buzzer">Использовать PWM-звукоизлучатель</string>
     <string name="output_vibra_gpio">Вибросигнал (GPIO)</string>
     <string name="output_duration_milliseconds">Продолжительность вывода (миллисекунды)</string>
     <string name="nag_timeout_seconds">Таймаут Nag (в секундах)</string>

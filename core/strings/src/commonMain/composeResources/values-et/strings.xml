@@ -550,7 +550,7 @@
     <string name="output_led_gpio">Väljund LED (GPIO)</string>
     <string name="output_led_active_high">Väljund LED aktiivne</string>
     <string name="output_buzzer_gpio">Väljund summer (GPIO)</string>
-    <string name="use_view_buzzer">Kuva summerid</string>
+    <string name="use_pwm_buzzer">Kasuta PWM summerit</string>
     <string name="output_vibra_gpio">Väljund värin (GPIO)</string>
     <string name="output_duration_milliseconds">Väljundi kestvus (millisekundit)</string>
     <string name="nag_timeout_seconds">Häire ajalõpp (sekundit)</string>

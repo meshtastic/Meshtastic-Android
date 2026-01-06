@@ -548,6 +548,7 @@
     <string name="output_led_gpio">Ausgabe LED (GPIO)</string>
     <string name="output_led_active_high">Ausgabe LED aktiv hoch</string>
     <string name="output_buzzer_gpio">Ausgabe Summer (GPIO)</string>
+    <string name="use_pwm_buzzer">Benutze PWM Summer</string>
     <string name="output_vibra_gpio">Ausgabe Vibration (GPIO)</string>
     <string name="output_duration_milliseconds">Ausgabedauer (GPIO)</string>
     <string name="nag_timeout_seconds">Nervige Verzögerung (Sekunden)</string>

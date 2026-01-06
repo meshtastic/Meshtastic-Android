@@ -546,6 +546,7 @@
     <string name="output_led_gpio">输出 LED (GPIO)</string>
     <string name="output_led_active_high">输出 LED 活动高</string>
     <string name="output_buzzer_gpio">输出震动(GPIO)</string>
+    <string name="use_pwm_buzzer">使用 PWM 蜂鸣器</string>
     <string name="output_vibra_gpio">输出振动 (GPIO)</string>
     <string name="output_duration_milliseconds">输出持续时间 (毫秒)</string>
     <string name="nag_timeout_seconds">屏幕超时(秒)</string>

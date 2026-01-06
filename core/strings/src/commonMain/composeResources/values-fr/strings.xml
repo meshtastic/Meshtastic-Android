@@ -550,7 +550,7 @@
     <string name="output_led_gpio">LED extérieure (GPIO)</string>
     <string name="output_led_active_high">Sortie LED active à l’état haut</string>
     <string name="output_buzzer_gpio">Buzzer extérieur (GPIO)</string>
-    <string name="use_view_buzzer">Utiliser VIEW buzzer</string>
+    <string name="use_pwm_buzzer">Utiliser le buzzer PWM</string>
     <string name="output_vibra_gpio">Sortie vibreur (GPIO)</string>
     <string name="output_duration_milliseconds">Durée de sortie (en millisecondes)</string>
     <string name="nag_timeout_seconds">Durée de répétition de la sortie (secondes)</string>
