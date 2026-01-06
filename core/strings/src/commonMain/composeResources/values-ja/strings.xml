@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">絞り込み</string>
@@ -362,7 +363,6 @@
     <string name="output_led_gpio">LED出力 (GPIO)</string>
     <string name="output_led_active_high">LED出力 アクティブ高値</string>
     <string name="output_buzzer_gpio">ブザー出力(GPIO)</string>
-    <string name="use_pwm_buzzer">PWMブザーを使用</string>
     <string name="output_vibra_gpio">バイブレーション出力 (GPIO)</string>
     <string name="output_duration_milliseconds">出力時間 (ミリ秒)</string>
     <string name="nag_timeout_seconds">繰り返し通知間隔（秒）</string>

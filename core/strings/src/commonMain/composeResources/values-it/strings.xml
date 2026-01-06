@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtro</string>
@@ -514,7 +515,6 @@
     <string name="output_led_gpio">LED Output (GPIO)</string>
     <string name="output_led_active_high">Output per LED active high</string>
     <string name="output_buzzer_gpio">Output buzzer (GPIO)</string>
-    <string name="use_pwm_buzzer">Usa buzzer PWM</string>
     <string name="output_vibra_gpio">Output vibrazione (GPIO)</string>
     <string name="output_duration_milliseconds">Durata output (millisecondi)</string>
     <string name="nag_timeout_seconds">Timeout chiusura popup (secondi)</string>

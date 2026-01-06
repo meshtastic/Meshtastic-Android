@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Филтър</string>
@@ -41,6 +42,7 @@
     <string name="unrecognized">Неразпознат</string>
     <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
+    <string name="message_retry_count">Повторни опити: %1$d / %2$d</string>
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
@@ -161,6 +163,14 @@
     <string name="debug_logs_export">Експортиране на журнали</string>
     <string name="debug_export_cancelled">Експортирането е отменено</string>
     <string name="debug_export_failed">Неуспешен запис на регистрационен файл: %1$s</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d час</item>
+        <item quantity="other">%1$d часа</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d ден</item>
+        <item quantity="other">%1$d дни</item>
+    </plurals>
     <string name="debug_filters">Филтри</string>
     <string name="debug_active_filters">Активни филтри</string>
     <string name="debug_default_search">Търсене в журналите…</string>
@@ -168,6 +178,7 @@
     <string name="debug_search_prev">Предишно съответствие</string>
     <string name="debug_search_clear">Изчистване на търсенето</string>
     <string name="debug_filter_add">Добавяне на филтър</string>
+    <string name="debug_filter_included">Филтъра включва</string>
     <string name="debug_filter_clear">Изчистване на всички филтри</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
@@ -230,6 +241,7 @@
     <string name="quick_chat_instant">Незабавно изпращане</string>
     <string name="quick_chat_show">Показване на менюто за бърз чат</string>
     <string name="quick_chat_hide">Скриване на менюто за бърз чат</string>
+    <string name="quick_chat_show_label">Показване на бърз чат</string>
     <string name="factory_reset">Фабрично нулиране</string>
     <string name="bluetooth_disabled">Bluetooth е дезактивиран. Моля, активирайте го в настройките на устройството си.</string>
     <string name="open_settings">Отваряне на настройките</string>
@@ -273,6 +285,7 @@
     <string name="remove">Изтрий</string>
     <string name="remove_node_text">Този възел ще бъде премахнат от вашия списък, докато вашият възел не получи данни от него отново.</string>
     <string name="mute_notifications">Заглуши нотификациите</string>
+    <string name="mute_1_hour">1 час</string>
     <string name="mute_8_hours">8 часа</string>
     <string name="mute_1_week">1 седмица</string>
     <string name="mute_always">Винаги</string>
@@ -436,7 +449,6 @@
     <string name="external_notification_enabled">Външните известия са активирани</string>
     <string name="notifications_on_message_receipt">Известия за получаване на съобщение</string>
     <string name="notifications_on_alert_bell_receipt">Известия при получаване на сигнал/позвъняване</string>
-    <string name="use_pwm_buzzer">Използване на PWM зумер</string>
     <string name="ringtone">Тон на звънене</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Опции</string>
@@ -819,4 +831,5 @@
     <string name="compass_no_location_fix">Изчакване на GPS сигнал за изчисляване на разстоянието и пеленга.</string>
     <string name="compass_uncertainty">Приблизителна площ: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Приблизителна площ: неизвестна точност</string>
+    <string name="mark_as_read">Маркиране като прочетено</string>
 </resources>

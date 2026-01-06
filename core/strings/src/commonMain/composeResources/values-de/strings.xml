@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filter</string>
@@ -328,6 +329,7 @@
     <string name="remove">Entfernen</string>
     <string name="remove_node_text">Dieser Knoten wird aus der Liste entfernt, bis dein Knoten wieder Daten von ihm erhält.</string>
     <string name="mute_notifications">Benachrichtigungen stummschalten</string>
+    <string name="mute_1_hour">1 Stunde</string>
     <string name="mute_8_hours">8 Stunden</string>
     <string name="mute_1_week">Eine Woche</string>
     <string name="mute_always">Immer</string>
@@ -546,7 +548,6 @@
     <string name="output_led_gpio">Ausgabe LED (GPIO)</string>
     <string name="output_led_active_high">Ausgabe LED aktiv hoch</string>
     <string name="output_buzzer_gpio">Ausgabe Summer (GPIO)</string>
-    <string name="use_pwm_buzzer">Benutze PWM Summer</string>
     <string name="output_vibra_gpio">Ausgabe Vibration (GPIO)</string>
     <string name="output_duration_milliseconds">Ausgabedauer (GPIO)</string>
     <string name="nag_timeout_seconds">Nervige Verzögerung (Sekunden)</string>

@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filter</string>
@@ -312,6 +313,7 @@
     <string name="remove">Ta bort</string>
     <string name="remove_node_text">Denna nod kommer att tas bort från din lista till dess att din nod tar emot data från den igen.</string>
     <string name="mute_notifications">Tysta notifieringar</string>
+    <string name="mute_1_hour">1 timme</string>
     <string name="mute_8_hours">8 timmar</string>
     <string name="mute_1_week">1 vecka</string>
     <string name="mute_always">Alltid</string>
@@ -508,7 +510,6 @@
     <string name="output_led_gpio">Utmatning LED (GPIO)</string>
     <string name="output_led_active_high">Utmatnings-LED aktiv hög</string>
     <string name="output_buzzer_gpio">Utmatning summer (GPIO)</string>
-    <string name="use_pwm_buzzer">Använd PWM-summern</string>
     <string name="output_vibra_gpio">Utmatning vibration (GPIO)</string>
     <string name="output_duration_milliseconds">Utmatningstid (millisekunder)</string>
     <string name="nag_timeout_seconds">Sluta tjata efter (sekunder)</string>
