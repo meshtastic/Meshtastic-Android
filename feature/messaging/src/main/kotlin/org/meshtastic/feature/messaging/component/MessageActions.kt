@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.messaging.component
 
 import androidx.compose.animation.AnimatedVisibility
@@ -73,7 +72,7 @@ private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
 )
 
 @Composable
-private fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
+internal fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
     AnimatedVisibility(visible = fromLocal) {
         IconButton(onClick = onStatusClick) {
             Crossfade(targetState = status, label = "MessageStatusIcon") { currentStatus ->

@@ -25,6 +25,7 @@ import androidx.room.Relation
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.proto.MeshProtos.User
 
@@ -130,12 +131,20 @@ data class Reaction(
     val snr: Float,
     val rssi: Int,
     val hopsAway: Int,
+    val packetId: Int = 0,
+    val status: MessageStatus = MessageStatus.UNKNOWN,
+    val routingError: Int = 0,
+    val retryCount: Int = 0,
+    val relays: Int = 0,
+    val relayNode: Int? = null,
+    val to: String? = null,
+    val channel: Int = 0,
 )
 
 @Entity(
     tableName = "reactions",
     primaryKeys = ["reply_id", "user_id", "emoji"],
-    indices = [Index(value = ["reply_id"])],
+    indices = [Index(value = ["reply_id"]), Index(value = ["packet_id"])],
 )
 data class ReactionEntity(
     @ColumnInfo(name = "reply_id") val replyId: Int,
@@ -145,6 +154,14 @@ data class ReactionEntity(
     @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
     @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
+    @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
+    @ColumnInfo(name = "status", defaultValue = "0") val status: MessageStatus = MessageStatus.UNKNOWN,
+    @ColumnInfo(name = "routing_error", defaultValue = "0") val routingError: Int = 0,
+    @ColumnInfo(name = "retry_count", defaultValue = "0") val retryCount: Int = 0,
+    @ColumnInfo(name = "relays", defaultValue = "0") val relays: Int = 0,
+    @ColumnInfo(name = "relay_node") val relayNode: Int? = null,
+    @ColumnInfo(name = "to") val to: String? = null,
+    @ColumnInfo(name = "channel", defaultValue = "0") val channel: Int = 0,
 )
 
 private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node) = Reaction(
@@ -155,6 +172,14 @@ private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?)
     snr = snr,
     rssi = rssi,
     hopsAway = hopsAway,
+    packetId = packetId,
+    status = status,
+    routingError = routingError,
+    retryCount = retryCount,
+    relays = relays,
+    relayNode = relayNode,
+    to = to,
+    channel = channel,
 )
 
 private suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node) =

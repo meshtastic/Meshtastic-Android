@@ -130,7 +130,17 @@ internal fun MessageListPaged(
 
     var showReactionDialog by remember { mutableStateOf<List<Reaction>?>(null) }
     showReactionDialog?.let { reactions ->
-        ReactionDialog(reactions = reactions, myId = state.ourNode?.user?.id, onDismiss = { showReactionDialog = null })
+        ReactionDialog(
+            reactions = reactions,
+            myId = state.ourNode?.user?.id,
+            onDismiss = { showReactionDialog = null },
+            onResend = { reaction ->
+                handlers.onSendReaction(reaction.emoji, reaction.replyId)
+                showReactionDialog = null
+            },
+            nodes = state.nodes,
+            ourNode = state.ourNode,
+        )
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -270,7 +280,18 @@ private fun LazyItemScope.renderPagedChatMessageRow(
         onStatusClick = { onShowStatusDialog(message) },
         onReply = { handlers.onReply(message) },
         emojis = message.emojis,
-        sendReaction = { handlers.onSendReaction(it, message.packetId) },
+        sendReaction = { emoji ->
+            val hasReacted =
+                message.emojis.any { reaction ->
+                    (
+                        reaction.user.id == ourNode.user.id ||
+                            reaction.user.id == org.meshtastic.core.model.DataPacket.ID_LOCAL
+                        ) && reaction.emoji == emoji
+                }
+            if (!hasReacted) {
+                handlers.onSendReaction(emoji, message.packetId)
+            }
+        },
         onShowReactions = { onShowReactions(message.emojis) },
         onNavigateToOriginalMessage = {
             coroutineScope.launch {

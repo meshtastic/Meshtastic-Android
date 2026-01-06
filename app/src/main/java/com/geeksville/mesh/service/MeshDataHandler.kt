@@ -333,10 +333,13 @@ constructor(
         packetHandler.removeResponse(packet.decoded.requestId, complete = true)
     }
 
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     private fun handleAckNak(requestId: Int, fromId: String, routingError: Int, relayNode: Int?) {
         scope.handledLaunch {
             val isAck = routingError == MeshProtos.Routing.Error.NONE_VALUE
             val p = packetRepository.get().getPacketById(requestId)
+            val reaction = packetRepository.get().getReactionByPacketId(requestId)
+
             val isMaxRetransmit = routingError == MeshProtos.Routing.Error.MAX_RETRANSMIT_VALUE
             val shouldRetry =
                 isMaxRetransmit &&
@@ -345,14 +348,22 @@ constructor(
                     p.data.from == DataPacket.ID_LOCAL &&
                     p.data.retryCount < MAX_RETRY_ATTEMPTS
 
+            val shouldRetryReaction =
+                isMaxRetransmit &&
+                    reaction != null &&
+                    reaction.userId == DataPacket.ID_LOCAL &&
+                    reaction.retryCount < MAX_RETRY_ATTEMPTS &&
+                    reaction.to != null
+            @Suppress("MaxLineLength")
             Logger.d {
-                val retryInfo = "packetId=${p?.packetId} dataId=${p?.data?.id} retry=${p?.data?.retryCount}"
-                val statusInfo = "status=${p?.data?.status}"
+                val retryInfo =
+                    "packetId=${p?.packetId ?: reaction?.packetId} dataId=${p?.data?.id} retry=${p?.data?.retryCount ?: reaction?.retryCount}"
+                val statusInfo = "status=${p?.data?.status ?: reaction?.status}"
                 "[ackNak] req=$requestId routeErr=$routingError isAck=$isAck " +
-                    "maxRetransmit=$isMaxRetransmit shouldRetry=$shouldRetry $retryInfo $statusInfo"
+                    "maxRetransmit=$isMaxRetransmit shouldRetry=$shouldRetry reaction=$shouldRetryReaction $retryInfo $statusInfo"
             }
 
-            if (shouldRetry && p != null) {
+            if (shouldRetry) {
                 val newRetryCount = p.data.retryCount + 1
                 val newId = commandSender.generatePacketId()
                 val updatedData =
@@ -368,21 +379,66 @@ constructor(
                 return@handledLaunch
             }
 
+            if (shouldRetryReaction && reaction != null) {
+                val newRetryCount = reaction.retryCount + 1
+                val newId = commandSender.generatePacketId()
+
+                val reactionPacket =
+                    DataPacket(
+                        to = reaction.to,
+                        channel = reaction.channel,
+                        bytes = reaction.emoji.toByteArray(Charsets.UTF_8),
+                        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                        replyId = reaction.replyId,
+                        wantAck = true,
+                        emoji = reaction.emoji.codePointAt(0),
+                        id = newId,
+                        retryCount = newRetryCount,
+                    )
+
+                val updatedReaction =
+                    reaction.copy(
+                        packetId = newId,
+                        status = MessageStatus.QUEUED,
+                        retryCount = newRetryCount,
+                        relayNode = null,
+                        routingError = MeshProtos.Routing.Error.NONE_VALUE,
+                    )
+                packetRepository.get().updateReaction(updatedReaction)
+
+                Logger.w { "[ackNak] retrying reaction req=$requestId newId=$newId retry=$newRetryCount" }
+
+                delay(RETRY_DELAY_MS)
+                commandSender.sendData(reactionPacket)
+                return@handledLaunch
+            }
+
             val m =
                 when {
-                    isAck && fromId == p?.data?.to -> MessageStatus.RECEIVED
+                    isAck && (fromId == p?.data?.to || fromId == reaction?.to) -> MessageStatus.RECEIVED
                     isAck -> MessageStatus.DELIVERED
                     else -> MessageStatus.ERROR
                 }
             if (p != null && p.data.status != MessageStatus.RECEIVED) {
                 p.data.status = m
                 p.routingError = routingError
-                p.data.relayNode = relayNode
                 if (isAck) {
                     p.data.relays += 1
                 }
+                p.data.relayNode = relayNode
                 packetRepository.get().update(p)
             }
+
+            reaction?.let { r ->
+                if (r.status != MessageStatus.RECEIVED) {
+                    var updated = r.copy(status = m, routingError = routingError, relayNode = relayNode)
+                    if (isAck) {
+                        updated = updated.copy(relays = updated.relays + 1)
+                    }
+                    packetRepository.get().updateReaction(updated)
+                }
+            }
+
             serviceBroadcasts.broadcastMessageStatus(requestId, m)
         }
     }
