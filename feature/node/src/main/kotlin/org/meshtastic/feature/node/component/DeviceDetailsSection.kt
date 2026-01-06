@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
@@ -27,6 +26,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.twotone.Verified
@@ -72,36 +72,38 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
         colors = CardDefaults.elevatedCardColors(containerColor = colorScheme.surfaceContainerHigh),
         shape = MaterialTheme.shapes.extraLarge,
     ) {
-        Column(modifier = Modifier.padding(vertical = 16.dp)) {
-            Text(
-                text = stringResource(Res.string.device),
-                style = MaterialTheme.typography.titleMedium,
-                color = colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            )
+        SelectionContainer {
+            Column(modifier = Modifier.padding(vertical = 16.dp)) {
+                Text(
+                    text = stringResource(Res.string.device),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                DeviceAvatar(node.colors.second.toLong(), deviceHardware)
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    DeviceAvatar(node.colors.second.toLong(), deviceHardware)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                InsetDivider()
+
+                ListItem(
+                    text = stringResource(Res.string.hardware),
+                    leadingIcon = Icons.Default.Router,
+                    supportingText = deviceHardware.displayName,
+                    copyable = true,
+                    trailingIcon = null,
+                )
+
+                InsetDivider()
+
+                SupportStatusItem(deviceHardware.activelySupported)
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            InsetDivider()
-
-            ListItem(
-                text = stringResource(Res.string.hardware),
-                leadingIcon = Icons.Default.Router,
-                supportingText = deviceHardware.displayName,
-                copyable = true,
-                trailingIcon = null,
-            )
-
-            InsetDivider()
-
-            SupportStatusItem(deviceHardware.activelySupported)
         }
     }
 }
