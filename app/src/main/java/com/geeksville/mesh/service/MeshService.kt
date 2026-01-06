@@ -346,18 +346,7 @@ class MeshService : Service() {
 
             override fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) =
                 toRemoteExceptions {
-                    val otaMode = AdminProtos.OTAMode.forNumber(mode) ?: AdminProtos.OTAMode.NO_REBOOT_OTA
-                    val otaEventBuilder = AdminProtos.AdminMessage.OTAEvent.newBuilder()
-                    otaEventBuilder.rebootOtaMode = otaMode
-                    if (hash != null) {
-                        otaEventBuilder.otaHash = ByteString.copyFrom(hash)
-                    }
-
-                    packetHandler.sendToRadio(
-                        newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
-                            otaRequest = otaEventBuilder.build()
-                        },
-                    )
+                    router.actionHandler.handleRequestRebootOta(requestId, destNum, mode, hash)
                 }
         }
 }

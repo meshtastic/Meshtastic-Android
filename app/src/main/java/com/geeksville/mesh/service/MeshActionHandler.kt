@@ -18,6 +18,7 @@ package com.geeksville.mesh.service
 
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.util.ignoreException
+import com.google.protobuf.ByteString
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -300,6 +301,16 @@ constructor(
 
     fun handleRequestReboot(requestId: Int, destNum: Int) {
         commandSender.sendAdmin(destNum, requestId) { rebootSeconds = DEFAULT_REBOOT_DELAY }
+    }
+
+    fun handleRequestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+        val otaMode = AdminProtos.OTAMode.forNumber(mode) ?: AdminProtos.OTAMode.NO_REBOOT_OTA
+        val otaEventBuilder = AdminProtos.AdminMessage.OTAEvent.newBuilder()
+        otaEventBuilder.rebootOtaMode = otaMode
+        if (hash != null) {
+            otaEventBuilder.otaHash = ByteString.copyFrom(hash)
+        }
+        commandSender.sendAdmin(destNum, requestId) { otaRequest = otaEventBuilder.build() }
     }
 
     fun handleRequestFactoryReset(requestId: Int, destNum: Int) {
