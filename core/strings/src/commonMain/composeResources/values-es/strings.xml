@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtro</string>
@@ -301,6 +302,7 @@
     <string name="remove">Quitar</string>
     <string name="remove_node_text">Este nodo será retirado de tu lista hasta que tu nodo reciba datos de él otra vez.</string>
     <string name="mute_notifications">Silenciar notificaciones</string>
+    <string name="mute_1_hour">1 hora</string>
     <string name="mute_8_hours">8 horas</string>
     <string name="mute_1_week">1 semana</string>
     <string name="mute_always">Siempre</string>
@@ -508,7 +510,6 @@ Rango de Valores 0 - 500.</string>
     <string name="output_led_gpio">Salida LED (pin GPIO)</string>
     <string name="output_led_active_high">LED de salida activo en alto</string>
     <string name="output_buzzer_gpio">Salida buzzer (pin GPIO)</string>
-    <string name="use_pwm_buzzer">Utilizar buzzer PWM</string>
     <string name="output_vibra_gpio">Salida vibratoria (pin GPIO)</string>
     <string name="output_duration_milliseconds">Duración en las salidas (milisegundos)</string>
     <string name="nag_timeout_seconds"></string>

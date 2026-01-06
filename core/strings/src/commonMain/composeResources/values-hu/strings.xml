@@ -16,12 +16,14 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">állomás filter törlése</string>
     <string name="node_filter_title">Szűrés</string>
     <string name="node_filter_include_unknown">Ismeretlent tartalmaz</string>
+    <string name="node_filter_exclude_infrastructure">Infrastruktúra-csomópontok kizárása</string>
     <string name="node_filter_only_online">Offline csomópontok elrejtése</string>
     <string name="node_filter_only_direct">Csak közvetlen csomópontok megjelenítése</string>
     <string name="node_filter_ignored">Figyelmen kívül hagyott csomópontokat nézed,\nnyomd meg a gombot a listához való visszatéréshez.</string>
@@ -36,9 +38,11 @@
     <string name="node_sort_via_mqtt">MQTT-n Keresztül</string>
     <string name="via_mqtt">MQTT-n Keresztül</string>
     <string name="node_sort_via_favorite">Kedvencek szerint</string>
+    <string name="node_filter_show_ignored">Csak a mellőzött csomópontok megjelenítése</string>
     <string name="unrecognized">Ismeretlen</string>
     <string name="message_status_enroute">Visszajelzésre vár</string>
     <string name="message_status_queued">Elküldésre vár</string>
+    <string name="message_retry_count">Újrapróbálkozások: %1$d / %2$d</string>
     <string name="routing_error_none">Visszaigazolva</string>
     <string name="routing_error_no_route">Nincs út</string>
     <string name="routing_error_got_nak">Negatív visszaigazolás érkezett</string>
@@ -112,6 +116,7 @@
     <string name="config_lora_frequency_slot_summary">A csomópont működési frekvenciája a régió, a modem-előbeállítás és ezen mező alapján kerül kiszámításra. Ha az érték 0, a slot automatikusan kiszámításra kerül az elsődleges csatorna neve alapján, és eltér a nyilvános alapértelmezett slottól. Állítsa vissza a nyilvános alapértelmezett slotra, ha privát elsődleges és nyilvános másodlagos csatornák vannak beállítva.</string>
     <string name="label_very_long_slow">Nagyon nagy hatótáv – Lassú</string>
     <string name="label_long_fast">Nagy hatótáv – Gyors</string>
+    <string name="label_long_turbo">Long Range - Turbo</string>
     <string name="label_long_moderate">Nagy hatótáv – Közepes</string>
     <string name="label_long_slow">Nagy hatótáv – Lassú</string>
     <string name="label_medium_fast">Közepes hatótáv – Gyors</string>
@@ -179,6 +184,9 @@
     <string name="ip_port">Port:</string>
     <string name="connected">Kapcsolódva</string>
     <string name="connected_to">Kapcsolódva a(z) %1$s rádióhoz</string>
+    <string name="connection_status">Jelenlegi kapcsolatok:</string>
+    <string name="wifi_ip">Wifi IP:</string>
+    <string name="ethernet_ip">Ethernet IP:</string>
     <string name="connecting">Csatlakozás…</string>
     <string name="not_connected">Nincs kapcsolat</string>
     <string name="connected_sleeping">Kapcsolódva a rádióhoz, de az alvó üzemmódban van</string>
@@ -186,6 +194,7 @@
     <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://meshtastic.org/docs/software/android/installation">docs</a>-ből.</string>
     <string name="none">Egyik sem (letiltás)</string>
     <string name="meshtastic_service_notifications">Szolgáltatás értesítések</string>
+    <string name="acknowledgements">Visszaigazolások (ACK-ek)</string>
     <string name="channel_invalid">Ez a csatorna URL érvénytelen, ezért nem használható.</string>
     <string name="contact_invalid">Ez a névjegy érvénytelen, nem vehető fel</string>
     <string name="debug_panel">Hibakereső panel</string>
@@ -194,6 +203,15 @@
     <string name="debug_export_cancelled">Exportálás megszakítva</string>
     <string name="debug_export_success">%1$d napló exportálva</string>
     <string name="debug_export_failed">Nem sikerült a naplófájl írása: %1$s</string>
+    <string name="debug_export_no_logs">Nincs exportálható napló</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d óra</item>
+        <item quantity="other">%1$d óra</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d nap</item>
+        <item quantity="other">%1$d nap</item>
+    </plurals>
     <string name="debug_filters">Szűrők</string>
     <string name="debug_active_filters">Aktív szűrők</string>
     <string name="debug_default_search">Keresés a naplókban…</string>
@@ -209,8 +227,10 @@
     <string name="debug_clear_logs_confirm">Ez eltávolítja az összes naplócsomagot és adatbázis-bejegyzést az eszközről – teljes visszaállítás, amely végleges.</string>
     <string name="clear">Töröl</string>
     <string name="message_delivery_status">Üzenet kézbesítésének állapota</string>
+    <string name="new_messages_below">Új üzenetek lent</string>
     <string name="meshtastic_messages_notifications">Közvetlen üzenet értesítések</string>
     <string name="meshtastic_broadcast_notifications">Sugárzott üzenet értesítések</string>
+    <string name="meshtastic_waypoints_notifications">Útpont-értesítések</string>
     <string name="meshtastic_alerts_notifications">Riasztási értesítések</string>
     <string name="firmware_too_old">Firmware frissítés szükséges.</string>
     <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon. További tudnivalókat a <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">firmware frissítés leírásában</a> talál, a Github-on.</string>
@@ -252,6 +272,10 @@
     <string name="resend">Újraküldés</string>
     <string name="shutdown">Leállítás</string>
     <string name="cant_shutdown">Leállítás nem támogatott ezen az eszközön</string>
+    <string name="shutdown_warning">⚠️ Ez LEÁLLÍTJA a csomópontot. Újraindításhoz fizikai beavatkozás szükséges.</string>
+    <string name="shutdown_critical_node">⚠️ Ez egy kritikus infrastruktúra-csomópont. Írd be a csomópont nevét a megerősítéshez:</string>
+    <string name="shutdown_node_name">Csomópont: %1$s</string>
+    <string name="shutdown_type_name">Típus: %1$s</string>
     <string name="reboot">Újraindítás</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Bemutatkozás megjelenítése</string>
@@ -263,6 +287,7 @@
     <string name="quick_chat_instant">Azonnali küldés</string>
     <string name="quick_chat_show">Gyors csevegés menü megjelenítése</string>
     <string name="quick_chat_hide">Gyors csevegés menü elrejtése</string>
+    <string name="quick_chat_show_label">Gyors csevegés megjelenítése</string>
     <string name="factory_reset">Gyári beállítások visszaállítása</string>
     <string name="bluetooth_disabled">A Bluetooth ki van kapcsolva. Engedélyezd az eszköz beállításaiban.</string>
     <string name="open_settings">Beállítások megnyitása</string>
@@ -306,9 +331,16 @@
     <string name="remove">Törlés</string>
     <string name="remove_node_text">Ez a csomópont kikerül a listádról, amíg az eszközöd újra nem kap adatot tőle.</string>
     <string name="mute_notifications">Értesítések némítása</string>
+    <string name="mute_1_hour">1 óra</string>
     <string name="mute_8_hours">8 óra</string>
     <string name="mute_1_week">1 hét</string>
     <string name="mute_always">Mindig</string>
+    <string name="currently">Jelenleg:</string>
+    <string name="mute_status_always">Mindig némítva</string>
+    <string name="mute_status_unmuted">Nincs némítva</string>
+    <string name="mute_status_muted_for_days">Némítva ennyi ideig: %1d nap, %.1f óra</string>
+    <string name="mute_status_muted_for_hours">Némítva: %.1f óra</string>
+    <string name="mute_status_label">Némítás állapota</string>
     <string name="replace">Csere</string>
     <string name="wifi_qr_code_scan">WiFi QR kód szkennelése</string>
     <string name="wifi_qr_code_error">Érvénytelen WiFi-hitelesítő QR-kód formátum</string>
@@ -364,6 +396,12 @@
         <item quantity="other">%d ugrások</item>
     </plurals>
     <string name="traceroute_diff">Ugrások oda %1$d Vissza %2$d</string>
+    <string name="traceroute_outgoing_route">Kimenő útvonal</string>
+    <string name="traceroute_return_route">Visszaútvonal</string>
+    <string name="traceroute_endpoint_missing">Nem jeleníthető meg az útvonal-követési (traceroute) térkép, mert a kiinduló vagy a cél csomópontnak nincs pozícióadata.</string>
+    <string name="view_on_map">Megtekintés térképen</string>
+    <string name="traceroute_map_no_data">Ehhez a traceroute-hoz még nincs térképre tehető csomópont.</string>
+    <string name="traceroute_showing_nodes">Megjelenítve: %1$d/%2$d csomópont</string>
     <string name="twenty_four_hours">24 óra</string>
     <string name="forty_eight_hours">48 óra</string>
     <string name="one_week">1 hét</string>
@@ -463,6 +501,11 @@
     <string name="allow_input_source">Bemeneti forrás engedélyezése</string>
     <string name="send_bell">Harangjel küldése</string>
     <string name="messages">Üzenetek</string>
+    <string name="device_db_cache_limit">Eszköz-adatbázis gyorsítótárának korlátja</string>
+    <string name="device_db_cache_limit_summary">Az ezen a telefonon megtartandó eszköz-adatbázisok maximális száma</string>
+    <string name="log_retention_days">MeshLog megőrzési idő</string>
+    <string name="log_retention_days_summary">Válaszd ki, meddig tartsuk meg a naplókat. A „Soha” választásával minden napló megmarad.</string>
+    <string name="log_retention_never">Soha ne töröld a naplókat</string>
     <string name="detection_sensor_config">Érzékelő szenzor beállításai</string>
     <string name="detection_sensor_enabled">Érzékelő szenzor engedélyezve</string>
     <string name="minimum_broadcast_seconds">Minimális sugárzási idő (másodperc)</string>
@@ -507,11 +550,12 @@
     <string name="output_led_gpio">Kimeneti LED (GPIO)</string>
     <string name="output_led_active_high">Kimeneti LED aktív magas szint</string>
     <string name="output_buzzer_gpio">Kimeneti csipogó (GPIO)</string>
-    <string name="use_pwm_buzzer">PWM csipogó használata</string>
+    <string name="use_view_buzzer">VIEW csipogó használata</string>
     <string name="output_vibra_gpio">Kimeneti rezgő (GPIO)</string>
     <string name="output_duration_milliseconds">Kimeneti időtartam (ezredmásodperc)</string>
     <string name="nag_timeout_seconds">Ismétlő riasztás időkorlát (másodperc)</string>
     <string name="ringtone">Csengőhang</string>
+    <string name="play">Lejátszás</string>
     <string name="use_i2s_as_buzzer">I2S használata csipogóként</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Beállítások</string>
@@ -691,6 +735,15 @@
     <string name="import_known_shared_contact_text">Figyelmeztetés: Ez a kapcsolat már létezik, az importálás felülírja a korábbi kapcsolati adatokat.</string>
     <string name="public_key_changed">Nyilvános kulcs megváltozott</string>
     <string name="import_label">Importálás</string>
+    <string name="request">Kérés</string>
+    <string name="request_neighbor_info">NeighborInfo (2.7.15+)</string>
+    <string name="request_telemetry">Telemetria kérése</string>
+    <string name="request_device_metrics">Eszközmetrikák</string>
+    <string name="request_environment_metrics">Környezeti metrikák</string>
+    <string name="request_air_quality_metrics">Levegőminőségi metrikák</string>
+    <string name="request_power_metrics">Tápellátási metrikák</string>
+    <string name="request_local_stats">Helyi statisztikák</string>
+    <string name="request_metadata">Metaadatok</string>
     <string name="actions">Műveletek</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">12 órás időformátum használata</string>
@@ -707,6 +760,7 @@
     <string name="conversations">Beszélgetések</string>
     <string name="nodes">Csomópontok</string>
     <string name="bottom_nav_settings">Beállítások</string>
+    <string name="selected">Kijelölve</string>
     <string name="set_your_region">Régió beállítása</string>
     <string name="reply">Válasz</string>
     <string name="map_reporting_summary">A csomópont időszakosan titkosítatlan térképadat-csomagot küld a beállított MQTT szerverre, amely tartalmazza az azonosítót, a hosszú és rövid nevet, a hozzávetőleges helyet, a hardvermodellt, a szerepkört, a firmware-verziót, a LoRa régiót, a modem-előbeállítást és az elsődleges csatorna nevét.</string>
@@ -732,6 +786,7 @@
     <string name="modules_unlocked">Modulok feloldva</string>
     <string name="modules_already_unlocked">A modulok már fel vannak oldva</string>
     <string name="remote">Távoli</string>
+    <string name="node_count_template">(%1$d online / %2$d megjelenítve / %3$d összesen)</string>
     <string name="react">Reagálás</string>
     <string name="disconnect">Leválasztás</string>
     <string name="scanning_bluetooth">Bluetooth-eszközök keresése…</string>
@@ -775,6 +830,7 @@
     <string name="security_icon_help_show_less">Jelenlegi állapot megjelenítése</string>
     <string name="security_icon_help_dismiss">Bezárás</string>
     <string name="confirm_delete_node">Biztosan törlöd ezt a csomópontot?</string>
+    <string name="forget_connection">Kapcsolat elfelejtése</string>
     <string name="replying_to">Válasz %1$s részére</string>
     <string name="cancel_reply">Válasz törlése</string>
     <string name="delete_messages_title">Üzenetek törlése?</string>

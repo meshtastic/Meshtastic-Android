@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">Filtre</string>
@@ -52,7 +53,7 @@
     <string name="routing_error_too_large">Paquet trop grand</string>
     <string name="routing_error_no_response">Aucune réponse</string>
     <string name="routing_error_bad_request">Mauvaise requête</string>
-    <string name="routing_error_duty_cycle_limit">Limite du cycle de fonctionnement régional atteinte</string>
+    <string name="routing_error_duty_cycle_limit">Limite du temps d'émission autorisé par heure (duty cycle) atteinte</string>
     <string name="routing_error_not_authorized">Non Autorisé</string>
     <string name="routing_error_pki_failed">Échec de l'envoi chiffré</string>
     <string name="routing_error_pki_unknown_pubkey">Clé publique inconnue</string>
@@ -229,6 +230,7 @@
     <string name="new_messages_below">Nouveaux messages au-dessous</string>
     <string name="meshtastic_messages_notifications">Notifications de message</string>
     <string name="meshtastic_broadcast_notifications">Diffuser les notifications de message</string>
+    <string name="meshtastic_waypoints_notifications">Notifications de waypoint</string>
     <string name="meshtastic_alerts_notifications">Notifications d'alerte</string>
     <string name="firmware_too_old">Mise à jour du micrologiciel requise.</string>
     <string name="firmware_old">Le micrologiciel de la radio est trop ancien pour communiquer avec cette application. Pour des informations, voir <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Guide d'installation du micrologiciel</a>.</string>
@@ -325,10 +327,11 @@
     <string name="waypoint_delete">Supprimer le repère ?</string>
     <string name="waypoint_new">Nouveau point de repère</string>
     <string name="waypoint_received">Point de passage reçu : %1$s</string>
-    <string name="error_duty_cycle">Limite du temps d'utilisation atteinte. Vous ne pouvez pas envoyer de messages maintenant, veuillez réessayer plus tard.</string>
+    <string name="error_duty_cycle">Limite du temps d'émission autorisé par heure (duty cycle) atteinte. Vous ne pouvez pas envoyer de messages maintenant, veuillez réessayer plus tard.</string>
     <string name="remove">Supprimer</string>
     <string name="remove_node_text">Ce nœud sera supprimé de votre liste jusqu'à ce que votre nœud reçoive à nouveau des données.</string>
     <string name="mute_notifications">Désactiver les notifications</string>
+    <string name="mute_1_hour">1 heure</string>
     <string name="mute_8_hours">8 heures</string>
     <string name="mute_1_week">1 semaine</string>
     <string name="mute_always">Toujours</string>
@@ -547,7 +550,7 @@
     <string name="output_led_gpio">LED extérieure (GPIO)</string>
     <string name="output_led_active_high">Sortie LED active à l’état haut</string>
     <string name="output_buzzer_gpio">Buzzer extérieur (GPIO)</string>
-    <string name="use_pwm_buzzer">Utiliser le buzzer PWM</string>
+    <string name="use_view_buzzer">Utiliser VIEW buzzer</string>
     <string name="output_vibra_gpio">Sortie vibreur (GPIO)</string>
     <string name="output_duration_milliseconds">Durée de sortie (en millisecondes)</string>
     <string name="nag_timeout_seconds">Durée de répétition de la sortie (secondes)</string>
@@ -568,7 +571,7 @@
     <string name="tx_enabled">Transmission activée</string>
     <string name="tx_power_dbm">Puissance d'émission</string>
     <string name="frequency_slot">Slot de fréquence</string>
-    <string name="override_duty_cycle">Autoriser le dépassement du temps d'utilisation du réseau radio</string>
+    <string name="override_duty_cycle">Autoriser le dépassement du temps d'émission autorisé par heure</string>
     <string name="ignore_incoming">Ignorer les entrées</string>
     <string name="sx126x_rx_boosted_gain">Gain RX Boosté</string>
     <string name="override_frequency_mhz">Remplacer la fréquence</string>
@@ -1026,4 +1029,5 @@
     <string name="compass_no_location_fix">En attente de la réception GPS pour calculer la distance et l'orientation.</string>
     <string name="compass_uncertainty">Surface estimée : \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Surface estimée : précision inconnue</string>
+    <string name="mark_as_read">Marquer comme lu</string>
 </resources>
