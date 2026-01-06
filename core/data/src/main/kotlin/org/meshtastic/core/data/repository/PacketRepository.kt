@@ -157,10 +157,12 @@ constructor(
         hash: ByteArray,
         status: MessageStatus = MessageStatus.SFPP_CONFIRMED,
         rxTime: Long = 0,
+        myNodeNum: Int? = null,
     ) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
         val packets = dao.findPacketsWithId(packetId)
         val fromId = DataPacket.nodeNumToDefaultId(from)
+        val isFromLocalNode = myNodeNum != null && from == myNodeNum
         val toId =
             if (to == 0 || to == DataPacket.NODENUM_BROADCAST) {
                 DataPacket.ID_BROADCAST
@@ -169,7 +171,15 @@ constructor(
             }
 
         packets.forEach { packet ->
-            if (packet.data.from == fromId && packet.data.to == toId) {
+            // For sent messages, from is stored as ID_LOCAL, but SFPP packet has node number
+            val fromMatches =
+                packet.data.from == fromId || (isFromLocalNode && packet.data.from == DataPacket.ID_LOCAL)
+            co.touchlab.kermit.Logger.d {
+                "SFPP match check: packetFrom=${packet.data.from} fromId=$fromId " +
+                    "isFromLocal=$isFromLocalNode fromMatches=$fromMatches " +
+                    "packetTo=${packet.data.to} toId=$toId toMatches=${packet.data.to == toId}"
+            }
+            if (fromMatches && packet.data.to == toId) {
                 // If it's already confirmed, don't downgrade it to routing
                 if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                     return@forEach

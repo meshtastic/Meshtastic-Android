@@ -225,6 +225,10 @@ constructor(
                         else -> null
                     } ?: return
 
+                Logger.d {
+                    "SFPP updateStatus: packetId=${sfpp.encapsulatedId} from=${sfpp.encapsulatedFrom} " +
+                        "to=${sfpp.encapsulatedTo} myNodeNum=${nodeManager.myNodeNum} status=$status"
+                }
                 scope.handledLaunch {
                     packetRepository
                         .get()
@@ -235,6 +239,7 @@ constructor(
                             hash = hash,
                             status = status,
                             rxTime = sfpp.encapsulatedRxtime.toLong() and 0xFFFFFFFFL,
+                            myNodeNum = nodeManager.myNodeNum,
                         )
                     serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulatedId, status)
                 }
