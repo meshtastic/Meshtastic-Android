@@ -19,6 +19,7 @@ package org.meshtastic.core.model
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class DataPacketTest {
@@ -51,5 +52,22 @@ class DataPacketTest {
 
         assertEquals(packet.status, decoded.status)
         assertArrayEquals(hash, decoded.sfppHash)
+    }
+
+    @Test
+    fun `DataPacket equals and hashCode include sfppHash`() {
+        val hash1 = byteArrayOf(1, 2, 3)
+        val hash2 = byteArrayOf(4, 5, 6)
+        val p1 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash1)
+        val p2 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash1)
+        val p3 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash2)
+        val p4 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = null)
+
+        assertEquals(p1, p2)
+        assertEquals(p1.hashCode(), p2.hashCode())
+
+        assertNotEquals(p1, p3)
+        assertNotEquals(p1, p4)
+        assertNotEquals(p1.hashCode(), p3.hashCode())
     }
 }

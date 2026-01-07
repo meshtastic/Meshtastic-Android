@@ -162,6 +162,7 @@ constructor(
     ) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
         val packets = dao.findPacketsWithId(packetId)
+        val reactions = dao.findReactionsWithId(packetId)
         val fromId = DataPacket.nodeNumToDefaultId(from)
         val isFromLocalNode = myNodeNum != null && from == myNodeNum
         val toId =
@@ -191,8 +192,9 @@ constructor(
             }
         }
 
-        dao.getReactionByPacketId(packetId)?.let { reaction ->
+        reactions.forEach { reaction ->
             val reactionFrom = reaction.userId
+            // For sent reactions, from is stored as ID_LOCAL, but SFPP packet has node number
             val fromMatches = reactionFrom == fromId || (isFromLocalNode && reactionFrom == DataPacket.ID_LOCAL)
 
             val toMatches = reaction.to == toId
@@ -203,11 +205,12 @@ constructor(
                     "reactionTo=${reaction.to} toId=$toId toMatches=$toMatches"
             }
 
-            if (fromMatches && toMatches) {
+            if (fromMatches && (reaction.to == null || toMatches)) {
                 if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
-                    return@let
+                    return@forEach
                 }
-                val updatedReaction = reaction.copy(status = status, sfpp_hash = hash)
+                val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
+                val updatedReaction = reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime)
                 dao.update(updatedReaction)
             }
         }
@@ -233,7 +236,8 @@ constructor(
             if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                 return@let
             }
-            val updatedReaction = reaction.copy(status = status, sfpp_hash = hash)
+            val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
+            val updatedReaction = reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime)
             dao.update(updatedReaction)
         }
     }

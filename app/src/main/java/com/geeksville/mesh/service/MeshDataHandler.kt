@@ -419,13 +419,13 @@ constructor(
                 isMaxRetransmit &&
                     p != null &&
                     p.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE &&
-                    p.data.from == DataPacket.ID_LOCAL &&
+                    (p.data.from == DataPacket.ID_LOCAL || p.data.from == nodeManager.getMyId()) &&
                     p.data.retryCount < MAX_RETRY_ATTEMPTS
 
             val shouldRetryReaction =
                 isMaxRetransmit &&
                     reaction != null &&
-                    reaction.userId == DataPacket.ID_LOCAL &&
+                    (reaction.userId == DataPacket.ID_LOCAL || reaction.userId == nodeManager.getMyId()) &&
                     reaction.retryCount < MAX_RETRY_ATTEMPTS &&
                     reaction.to != null
             @Suppress("MaxLineLength")
@@ -583,7 +583,8 @@ constructor(
 
     fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean = true) {
         if (dataPacket.dataType !in rememberDataType) return
-        val fromLocal = dataPacket.from == DataPacket.ID_LOCAL
+        val fromLocal =
+            dataPacket.from == DataPacket.ID_LOCAL || dataPacket.from == DataPacket.nodeNumToDefaultId(myNodeNum)
         val toBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
         val contactId = if (fromLocal || toBroadcast) dataPacket.to else dataPacket.from
 
@@ -603,7 +604,6 @@ constructor(
                 snr = dataPacket.snr,
                 rssi = dataPacket.rssi,
                 hopsAway = dataPacket.hopsAway,
-                replyId = dataPacket.replyId ?: 0,
             )
         scope.handledLaunch {
             packetRepository.get().apply {
@@ -667,10 +667,14 @@ constructor(
 
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
         val emoji = packet.decoded.payload.toByteArray().decodeToString()
+        val fromId = dataMapper.toNodeID(packet.from)
+        val toId = dataMapper.toNodeID(packet.to)
+
         val reaction =
             ReactionEntity(
+                myNodeNum = nodeManager.myNodeNum ?: 0,
                 replyId = packet.decoded.replyId,
-                userId = dataMapper.toNodeID(packet.from),
+                userId = fromId,
                 emoji = emoji,
                 timestamp = System.currentTimeMillis(),
                 snr = packet.rxSnr,
@@ -681,6 +685,10 @@ constructor(
                 } else {
                     packet.hopStart - packet.hopLimit
                 },
+                packetId = packet.id,
+                status = MessageStatus.RECEIVED,
+                to = toId,
+                channel = packet.channel,
             )
         packetRepository.get().insertReaction(reaction)
 

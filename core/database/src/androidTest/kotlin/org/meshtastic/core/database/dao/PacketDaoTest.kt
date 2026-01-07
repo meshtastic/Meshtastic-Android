@@ -24,6 +24,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -31,6 +32,7 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.proto.Portnums
@@ -212,6 +214,93 @@ class PacketDaoTest {
             }
         assertNotNull(retrieved)
         assertTrue(retrieved?.sfpp_hash?.contentEquals(hash) == true)
+    }
+
+    @Test
+    fun test_findPacketBySfppHash() = runBlocking {
+        val hash = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
+        val packet =
+            Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                contact_key = "test",
+                received_time = System.currentTimeMillis(),
+                read = true,
+                data = DataPacket(to = DataPacket.ID_BROADCAST, channel = 0, text = "Test"),
+                sfpp_hash = hash,
+            )
+
+        packetDao.insert(packet)
+
+        // Exact match
+        val found = packetDao.findPacketBySfppHash(hash)
+        assertNotNull(found)
+        assertTrue(found?.sfpp_hash?.contentEquals(hash) == true)
+
+        // Substring match (first 8 bytes)
+        val shortHash = hash.copyOf(8)
+        val foundShort = packetDao.findPacketBySfppHash(shortHash)
+        assertNotNull(foundShort)
+        assertTrue(foundShort?.sfpp_hash?.contentEquals(hash) == true)
+
+        // No match
+        val wrongHash = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)
+        val notFound = packetDao.findPacketBySfppHash(wrongHash)
+        assertNull(notFound)
+    }
+
+    @Test
+    fun test_findReactionBySfppHash() = runBlocking {
+        val hash = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
+        val reaction =
+            ReactionEntity(
+                myNodeNum = myNodeNum,
+                replyId = 123,
+                userId = "sender",
+                emoji = "👍",
+                timestamp = System.currentTimeMillis(),
+                sfpp_hash = hash,
+            )
+
+        packetDao.insert(reaction)
+
+        val found = packetDao.findReactionBySfppHash(hash)
+        assertNotNull(found)
+        assertTrue(found?.sfpp_hash?.contentEquals(hash) == true)
+
+        val shortHash = hash.copyOf(8)
+        val foundShort = packetDao.findReactionBySfppHash(shortHash)
+        assertNotNull(foundShort)
+
+        val wrongHash = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)
+        assertNull(packetDao.findReactionBySfppHash(wrongHash))
+    }
+
+    @Test
+    fun test_updateMessageId_persistence() = runBlocking {
+        val initialId = 100
+        val newId = 200
+        val packet =
+            Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                contact_key = "test",
+                received_time = System.currentTimeMillis(),
+                read = true,
+                data = DataPacket(to = "target", channel = 0, text = "Hello").copy(id = initialId),
+                packetId = initialId,
+            )
+
+        packetDao.insert(packet)
+
+        packetDao.updateMessageId(packet.data, newId)
+
+        val updated = packetDao.getPacketById(newId)
+        assertNotNull(updated)
+        assertEquals(newId, updated?.packetId)
+        assertEquals(newId, updated?.data?.id)
     }
 
     @Test
