@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.protobuf)
 }
+
 
 configure<LibraryExtension> {
     buildFeatures { buildConfig = true }

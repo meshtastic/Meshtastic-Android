@@ -39,6 +39,7 @@ plugins {
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.kover)
     alias(libs.plugins.spotless) apply false
+    alias(libs.plugins.dokka)
     alias(libs.plugins.meshtastic.root)
 }
 
@@ -46,29 +47,64 @@ plugins {
 
 kover {
     reports {
-        total {
-            filters {
-                excludes {
-                    // Exclude generated classes
-                    classes("*_Impl")
-                    classes("*Binding")
-                    classes("*Factory")
-                    classes("*.BuildConfig")
-                    classes("*.R")
-                    classes("*.R$*")
+        filters {
+            excludes {
+                // Exclude generated classes
+                classes("*_Impl")
+                classes("*Binding")
+                classes("*Factory")
+                classes("*.BuildConfig")
+                classes("*.R")
+                classes("*.R$*")
 
-                    // Exclude UI components
-                    annotatedBy("*Preview")
+                // Exclude UI components
+                annotatedBy("*Preview")
 
-                    // Exclude declarations
-                    annotatedBy(
-                        "*.HiltAndroidApp",
-                        "*.AndroidEntryPoint",
-                        "*.Module",
-                        "*.Provides",
-                        "*.Binds",
-                        "*.Composable",
-                    )
+                // Exclude declarations
+                annotatedBy(
+                    "*.HiltAndroidApp",
+                    "*.AndroidEntryPoint",
+                    "*.Module",
+                    "*.Provides",
+                    "*.Binds",
+                    "*.Composable",
+                )
+
+                // Suppress generated code
+                packages("hilt_aggregated_deps")
+                packages("org.meshtastic.core.strings")
+            }
+        }
+    }
+}
+
+subprojects {
+    // Apply Dokka to all subprojects to ensure they are available for aggregation
+    apply(plugin = "org.jetbrains.dokka")
+
+    dokka {
+        dokkaSourceSets.configureEach {
+            perPackageOption {
+                matchingRegex.set("hilt_aggregated_deps")
+                suppress.set(true)
+            }
+            perPackageOption {
+                matchingRegex.set("org.meshtastic.core.strings.*")
+                suppress.set(true)
+            }
+            listOf("java", "kotlin").forEach { lang ->
+                val dir = file("src/main/$lang")
+                if (dir.exists()) {
+                    sourceLink {
+                        enableJdkDocumentationLink.set(true)
+                        enableKotlinStdLibDocumentationLink.set(true)
+                        reportUndocumented.set(true)
+                        localDirectory.set(dir)
+
+                        val relativePath = project.projectDir.relativeTo(rootProject.projectDir).path.replace("\\", "/")
+                        remoteUrl("https://github.com/meshtastic/Meshtastic-Android/blob/main/$relativePath/src/main/$lang")
+                        remoteLineSuffix.set("#L")
+                    }
                 }
             }
         }
@@ -77,7 +113,6 @@ kover {
 
 dependencies {
     kover(projects.app)
-    kover(projects.meshServiceExample)
 
     kover(projects.core.analytics)
     kover(projects.core.common)
@@ -93,4 +128,33 @@ dependencies {
     kover(projects.feature.map)
     kover(projects.feature.node)
     kover(projects.feature.settings)
+
+    dokka(project(":app"))
+    dokka(project(":core:analytics"))
+    dokka(project(":core:common"))
+    dokka(project(":core:data"))
+    dokka(project(":core:database"))
+    dokka(project(":core:datastore"))
+    dokka(project(":core:di"))
+    dokka(project(":core:model"))
+    dokka(project(":core:navigation"))
+    dokka(project(":core:network"))
+    dokka(project(":core:prefs"))
+    dokka(project(":core:proto"))
+    dokka(project(":core:service"))
+    dokka(project(":core:ui"))
+    dokka(project(":feature:intro"))
+    dokka(project(":feature:messaging"))
+    dokka(project(":feature:map"))
+    dokka(project(":feature:node"))
+    dokka(project(":feature:settings"))
 }
+
+dokka {
+    moduleName.set("Meshtastic App")
+    dokkaPublications.html {
+        suppressInheritedMembers.set(true)
+    }
+}
+
+
