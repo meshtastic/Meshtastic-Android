@@ -114,6 +114,7 @@ private fun ReactionItem(
 internal fun ReactionRow(
     modifier: Modifier = Modifier,
     reactions: List<Reaction> = emptyList(),
+    myId: String? = null,
     onSendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
 ) {
@@ -126,7 +127,7 @@ internal fun ReactionRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             items(emojiGroups.entries.toList()) { (emoji, reactions) ->
-                val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL }
+                val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
                 ReactionItem(
                     emoji = emoji,
                     emojiCount = reactions.size,
@@ -187,7 +188,7 @@ internal fun ReactionDialog(
 
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
         items(groupedEmojis.entries.toList()) { (emoji, reactions) ->
-            val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL }
+            val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
             val isSending =
                 localReaction?.status == MessageStatus.QUEUED || localReaction?.status == MessageStatus.ENROUTE
             Text(

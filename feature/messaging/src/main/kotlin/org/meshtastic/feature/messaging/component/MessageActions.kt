@@ -23,11 +23,13 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.twotone.AddLink
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudUpload
 import androidx.compose.material.icons.twotone.HowToReg
+import androidx.compose.material.icons.twotone.Link
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -82,6 +84,8 @@ internal fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: Message
                         MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
                         MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
                         MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                        MessageStatus.SFPP_ROUTING -> Icons.TwoTone.AddLink
+                        MessageStatus.SFPP_CONFIRMED -> Icons.TwoTone.Link
                         MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
                         MessageStatus.ERROR -> Icons.TwoTone.CloudOff
                         else -> Icons.TwoTone.Warning

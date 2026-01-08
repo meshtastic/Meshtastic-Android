@@ -19,6 +19,7 @@ package org.meshtastic.core.database
 import android.content.Context
 import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.DeleteColumn
 import androidx.room.DeleteTable
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -85,8 +86,10 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 25, to = 26),
         AutoMigration(from = 26, to = 27),
         AutoMigration(from = 27, to = 28),
+        AutoMigration(from = 28, to = 29),
+        AutoMigration(from = 29, to = 30, spec = AutoMigration29to30::class),
     ],
-    version = 28,
+    version = 30,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -115,3 +118,6 @@ abstract class MeshtasticDatabase : RoomDatabase() {
 
 @DeleteTable.Entries(DeleteTable(tableName = "NodeInfo"), DeleteTable(tableName = "MyNodeInfo"))
 class AutoMigration12to13 : AutoMigrationSpec
+
+@DeleteColumn.Entries(DeleteColumn(tableName = "packet", columnName = "reply_id"))
+class AutoMigration29to30 : AutoMigrationSpec

@@ -39,6 +39,8 @@ class ReactionReceiver : BroadcastReceiver() {
 
     @Inject lateinit var packetRepository: PacketRepository
 
+    @Inject lateinit var nodeManager: MeshNodeManager
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     companion object {
@@ -82,8 +84,9 @@ class ReactionReceiver : BroadcastReceiver() {
 
                 val reaction =
                     ReactionEntity(
+                        myNodeNum = nodeManager.myNodeNum ?: 0,
                         replyId = packetId,
-                        userId = DataPacket.ID_LOCAL,
+                        userId = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: DataPacket.ID_LOCAL,
                         emoji = emoji,
                         timestamp = System.currentTimeMillis(),
                         packetId = reactionPacket.id,

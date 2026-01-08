@@ -36,11 +36,12 @@ data class PacketEntity(
 ) {
     suspend fun toMessage(getNode: suspend (userId: String?) -> Node) = with(packet) {
         val node = getNode(data.from)
+        val isFromLocal = node.user.id == DataPacket.ID_LOCAL || (myNodeNum != 0 && node.num == myNodeNum)
         Message(
             uuid = uuid,
             receivedTime = received_time,
             node = node,
-            fromLocal = node.user.id == DataPacket.ID_LOCAL,
+            fromLocal = isFromLocal,
             text = data.text.orEmpty(),
             time = getShortDateTime(data.time),
             snr = snr,
@@ -50,7 +51,7 @@ data class PacketEntity(
             status = data.status,
             routingError = routingError,
             packetId = packetId,
-            emojis = reactions.toReaction(getNode),
+            emojis = reactions.filter { it.myNodeNum == myNodeNum || it.myNodeNum == 0 }.toReaction(getNode),
             replyId = data.replyId,
             viaMqtt = data.viaMqtt,
             relayNode = data.relayNode,
@@ -69,6 +70,7 @@ data class PacketEntity(
         Index(value = ["port_num"]),
         Index(value = ["contact_key"]),
         Index(value = ["contact_key", "port_num", "received_time"]),
+        Index(value = ["packet_id"]),
     ],
 )
 data class Packet(
@@ -81,10 +83,10 @@ data class Packet(
     @ColumnInfo(name = "data") val data: DataPacket,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "routing_error", defaultValue = "-1") var routingError: Int = -1,
-    @ColumnInfo(name = "reply_id", defaultValue = "0") val replyId: Int = 0,
     @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
     @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
+    @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteArray? = null,
 ) {
     companion object {
         const val RELAY_NODE_SUFFIX_MASK = 0xFF
@@ -139,14 +141,17 @@ data class Reaction(
     val relayNode: Int? = null,
     val to: String? = null,
     val channel: Int = 0,
+    val sfppHash: ByteArray? = null,
 )
 
+@Suppress("ConstructorParameterNaming")
 @Entity(
     tableName = "reactions",
-    primaryKeys = ["reply_id", "user_id", "emoji"],
+    primaryKeys = ["myNodeNum", "reply_id", "user_id", "emoji"],
     indices = [Index(value = ["reply_id"]), Index(value = ["packet_id"])],
 )
 data class ReactionEntity(
+    @ColumnInfo(name = "myNodeNum", defaultValue = "0") val myNodeNum: Int = 0,
     @ColumnInfo(name = "reply_id") val replyId: Int,
     @ColumnInfo(name = "user_id") val userId: String,
     val emoji: String,
@@ -162,25 +167,30 @@ data class ReactionEntity(
     @ColumnInfo(name = "relay_node") val relayNode: Int? = null,
     @ColumnInfo(name = "to") val to: String? = null,
     @ColumnInfo(name = "channel", defaultValue = "0") val channel: Int = 0,
+    @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteArray? = null,
 )
 
-private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node) = Reaction(
-    replyId = replyId,
-    user = getNode(userId).user,
-    emoji = emoji,
-    timestamp = timestamp,
-    snr = snr,
-    rssi = rssi,
-    hopsAway = hopsAway,
-    packetId = packetId,
-    status = status,
-    routingError = routingError,
-    retryCount = retryCount,
-    relays = relays,
-    relayNode = relayNode,
-    to = to,
-    channel = channel,
-)
+private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node): Reaction {
+    val node = getNode(userId)
+    return Reaction(
+        replyId = replyId,
+        user = node.user,
+        emoji = emoji,
+        timestamp = timestamp,
+        snr = snr,
+        rssi = rssi,
+        hopsAway = hopsAway,
+        packetId = packetId,
+        status = status,
+        routingError = routingError,
+        retryCount = retryCount,
+        relays = relays,
+        relayNode = relayNode,
+        to = to,
+        channel = channel,
+        sfppHash = sfpp_hash,
+    )
+}
 
 private suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node) =
     this.map { it.toReaction(getNode) }

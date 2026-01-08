@@ -75,7 +75,7 @@ constructor(
             when (action) {
                 is ServiceAction.Favorite -> handleFavorite(action, myNodeNum)
                 is ServiceAction.Ignore -> handleIgnore(action, myNodeNum)
-                is ServiceAction.Reaction -> handleReaction(action)
+                is ServiceAction.Reaction -> handleReaction(action, myNodeNum)
                 is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
                 is ServiceAction.SendContact -> {
                     commandSender.sendAdmin(myNodeNum) { addContact = action.contact }
@@ -103,21 +103,23 @@ constructor(
         nodeManager.updateNodeInfo(node.num) { it.isIgnored = !node.isIgnored }
     }
 
-    private fun handleReaction(action: ServiceAction.Reaction) {
+    private fun handleReaction(action: ServiceAction.Reaction, myNodeNum: Int) {
         val channel = action.contactKey[0].digitToInt()
         val destId = action.contactKey.substring(1)
         val dataPacket =
-            org.meshtastic.core.model.DataPacket(
-                to = destId,
-                dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                bytes = action.emoji.encodeToByteArray(),
-                channel = channel,
-                replyId = action.replyId,
-                wantAck = true,
-                emoji = action.emoji.codePointAt(0),
-            )
+            org.meshtastic.core.model
+                .DataPacket(
+                    to = destId,
+                    dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    bytes = action.emoji.encodeToByteArray(),
+                    channel = channel,
+                    replyId = action.replyId,
+                    wantAck = true,
+                    emoji = action.emoji.codePointAt(0),
+                )
+                .apply { from = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: DataPacket.ID_LOCAL }
         commandSender.sendData(dataPacket)
-        rememberReaction(action, dataPacket.id)
+        rememberReaction(action, dataPacket.id, myNodeNum)
     }
 
     private fun handleImportContact(action: ServiceAction.ImportContact, myNodeNum: Int) {
@@ -126,12 +128,13 @@ constructor(
         nodeManager.handleReceivedUser(verifiedContact.nodeNum, verifiedContact.user, manuallyVerified = true)
     }
 
-    private fun rememberReaction(action: ServiceAction.Reaction, packetId: Int) {
+    private fun rememberReaction(action: ServiceAction.Reaction, packetId: Int, myNodeNum: Int) {
         scope.handledLaunch {
             val reaction =
                 ReactionEntity(
+                    myNodeNum = myNodeNum,
                     replyId = action.replyId,
-                    userId = nodeManager.getMyId(),
+                    userId = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: DataPacket.ID_LOCAL,
                     emoji = action.emoji,
                     timestamp = System.currentTimeMillis(),
                     snr = 0f,
@@ -139,6 +142,8 @@ constructor(
                     hopsAway = 0,
                     packetId = packetId,
                     status = MessageStatus.QUEUED,
+                    to = action.contactKey.substring(1),
+                    channel = action.contactKey[0].digitToInt(),
                 )
             packetRepository.get().insertReaction(reaction)
         }

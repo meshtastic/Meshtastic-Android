@@ -204,7 +204,13 @@ interface PacketDao {
     @Query("SELECT packet_id FROM packet WHERE uuid IN (:uuidList)")
     suspend fun getPacketIdsFrom(uuidList: List<Long>): List<Int>
 
-    @Query("DELETE FROM reactions WHERE reply_id IN (:packetIds)")
+    @Query(
+        """
+        DELETE FROM reactions 
+        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND reply_id IN (:packetIds)
+        """,
+    )
     suspend fun deleteReactions(packetIds: List<Int>)
 
     @Transaction
@@ -227,7 +233,7 @@ interface PacketDao {
     @Transaction
     suspend fun updateMessageId(data: DataPacket, id: Int) {
         val new = data.copy(id = id)
-        findDataPacket(data)?.let { update(it.copy(data = new)) }
+        findDataPacket(data)?.let { update(it.copy(data = new, packetId = id)) }
     }
 
     @Query(
@@ -251,8 +257,34 @@ interface PacketDao {
     suspend fun getPacketById(requestId: Int): Packet?
 
     @Transaction
-    @Query("SELECT * FROM packet WHERE packet_id = :packetId LIMIT 1")
+    @Query(
+        """
+        SELECT * FROM packet 
+        WHERE packet_id = :packetId 
+        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        LIMIT 1
+        """,
+    )
     suspend fun getPacketByPacketId(packetId: Int): PacketEntity?
+
+    @Query(
+        """
+        SELECT * FROM packet 
+        WHERE packet_id = :packetId 
+        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        """,
+    )
+    suspend fun findPacketsWithId(packetId: Int): List<Packet>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM packet 
+        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND substr(sfpp_hash, 1, 8) = substr(:hash, 1, 8)
+        """,
+    )
+    suspend fun findPacketBySfppHash(hash: ByteArray): Packet?
 
     @Transaction
     suspend fun getQueuedPackets(): List<DataPacket>? = getDataPackets().filter { it.status == MessageStatus.QUEUED }
@@ -311,8 +343,34 @@ interface PacketDao {
 
     @Update suspend fun update(reaction: ReactionEntity)
 
-    @Query("SELECT * FROM reactions WHERE packet_id = :packetId LIMIT 1")
+    @Query(
+        """
+        SELECT * FROM reactions 
+        WHERE packet_id = :packetId
+        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        """,
+    )
+    suspend fun findReactionsWithId(packetId: Int): List<ReactionEntity>
+
+    @Query(
+        """
+        SELECT * FROM reactions 
+        WHERE packet_id = :packetId 
+        AND (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        LIMIT 1
+        """,
+    )
     suspend fun getReactionByPacketId(packetId: Int): ReactionEntity?
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM reactions 
+        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND substr(sfpp_hash, 1, 8) = substr(:hash, 1, 8)
+        """,
+    )
+    suspend fun findReactionBySfppHash(hash: ByteArray): ReactionEntity?
 
     @Transaction
     suspend fun deleteAll() {

@@ -39,6 +39,8 @@ enum class MessageStatus : Parcelable {
     QUEUED, // Waiting to send to the mesh as soon as we connect to the device
     ENROUTE, // Delivered to the radio, but no ACK or NAK received
     DELIVERED, // We received an ack
+    SFPP_ROUTING, // Message is being routed/buffered in the SFPP system
+    SFPP_CONFIRMED, // Message is confirmed on the SFPP chain
     ERROR, // We received back a nak, message not delivered
 }
 
@@ -65,6 +67,7 @@ data class DataPacket(
     var viaMqtt: Boolean = false, // True if this packet passed via MQTT somewhere along its path
     var retryCount: Int = 0, // Number of automatic retry attempts
     var emoji: Int = 0,
+    var sfppHash: ByteArray? = null,
 ) : Parcelable {
 
     /** If there was an error with this message, this string describes what was wrong. */
@@ -142,6 +145,7 @@ data class DataPacket(
         parcel.readInt() == 1, // viaMqtt
         parcel.readInt(), // retryCount
         parcel.readInt(), // emoji
+        parcel.createByteArray(), // sfppHash
     )
 
     @Suppress("CyclomaticComplexMethod")
@@ -168,6 +172,7 @@ data class DataPacket(
         if (relayNode != other.relayNode) return false
         if (retryCount != other.retryCount) return false
         if (emoji != other.emoji) return false
+        if (!sfppHash.contentEquals(other.sfppHash)) return false
 
         return true
     }
@@ -190,6 +195,7 @@ data class DataPacket(
         result = 31 * result + relayNode.hashCode()
         result = 31 * result + retryCount
         result = 31 * result + emoji
+        result = 31 * result + (sfppHash?.contentHashCode() ?: 0)
         return result
     }
 
@@ -213,6 +219,7 @@ data class DataPacket(
         parcel.writeInt(if (viaMqtt) 1 else 0)
         parcel.writeInt(retryCount)
         parcel.writeInt(emoji)
+        parcel.writeByteArray(sfppHash)
     }
 
     override fun describeContents(): Int = 0
@@ -238,6 +245,7 @@ data class DataPacket(
         viaMqtt = parcel.readInt() == 1
         retryCount = parcel.readInt()
         emoji = parcel.readInt()
+        sfppHash = parcel.createByteArray()
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {

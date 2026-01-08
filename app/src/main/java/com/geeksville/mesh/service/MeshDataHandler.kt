@@ -37,6 +37,7 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
@@ -58,7 +59,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
-@Suppress("LongParameterList", "TooManyFunctions")
+@Suppress("LongParameterList", "TooManyFunctions", "LargeClass")
 @Singleton
 class MeshDataHandler
 @Inject
@@ -191,9 +192,82 @@ constructor(
         handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
     }
 
+    @Suppress("LongMethod")
     private fun handleStoreForwardPlusPlus(packet: MeshPacket) {
         val sfpp = MeshProtos.StoreForwardPlusPlus.parseFrom(packet.decoded.payload)
         Logger.d { "Received StoreForwardPlusPlus packet: $sfpp" }
+
+        when (sfpp.sfppMessageType) {
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF,
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_SECONDHALF,
+            -> {
+                val isFragment = sfpp.sfppMessageType != MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE
+
+                // If it has a commit hash, it's already on the chain (Confirmed)
+                // Otherwise it's still being routed via SF++ (Routing)
+                val status = if (sfpp.commitHash.isEmpty) MessageStatus.SFPP_ROUTING else MessageStatus.SFPP_CONFIRMED
+
+                // Prefer a full 16-byte hash calculated from the message bytes if available
+                // But only if it's NOT a fragment, otherwise the calculated hash would be wrong
+                val hash =
+                    when {
+                        !sfpp.messageHash.isEmpty -> sfpp.messageHash.toByteArray()
+                        !isFragment && !sfpp.message.isEmpty -> {
+                            SfppHasher.computeMessageHash(
+                                encryptedPayload = sfpp.message.toByteArray(),
+                                // Map 0 back to NODENUM_BROADCAST to match firmware hash calculation
+                                to =
+                                if (sfpp.encapsulatedTo == 0) DataPacket.NODENUM_BROADCAST else sfpp.encapsulatedTo,
+                                from = sfpp.encapsulatedFrom,
+                                id = sfpp.encapsulatedId,
+                            )
+                        }
+                        else -> null
+                    } ?: return
+
+                Logger.d {
+                    "SFPP updateStatus: packetId=${sfpp.encapsulatedId} from=${sfpp.encapsulatedFrom} " +
+                        "to=${sfpp.encapsulatedTo} myNodeNum=${nodeManager.myNodeNum} status=$status"
+                }
+                scope.handledLaunch {
+                    packetRepository
+                        .get()
+                        .updateSFPPStatus(
+                            packetId = sfpp.encapsulatedId,
+                            from = sfpp.encapsulatedFrom,
+                            to = sfpp.encapsulatedTo,
+                            hash = hash,
+                            status = status,
+                            rxTime = sfpp.encapsulatedRxtime.toLong() and 0xFFFFFFFFL,
+                            myNodeNum = nodeManager.myNodeNum,
+                        )
+                    serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulatedId, status)
+                }
+            }
+
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE -> {
+                scope.handledLaunch {
+                    packetRepository
+                        .get()
+                        .updateSFPPStatusByHash(
+                            hash = sfpp.messageHash.toByteArray(),
+                            status = MessageStatus.SFPP_CONFIRMED,
+                            rxTime = sfpp.encapsulatedRxtime.toLong() and 0xFFFFFFFFL,
+                        )
+                }
+            }
+
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.CHAIN_QUERY -> {
+                Logger.i { "SF++: Node ${packet.from} is querying chain status" }
+            }
+
+            MeshProtos.StoreForwardPlusPlus.SFPP_message_type.LINK_REQUEST -> {
+                Logger.i { "SF++: Node ${packet.from} is requesting links" }
+            }
+
+            else -> {}
+        }
     }
 
     private fun handlePaxCounter(packet: MeshPacket) {
@@ -345,13 +419,13 @@ constructor(
                 isMaxRetransmit &&
                     p != null &&
                     p.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE &&
-                    p.data.from == DataPacket.ID_LOCAL &&
+                    (p.data.from == DataPacket.ID_LOCAL || p.data.from == nodeManager.getMyId()) &&
                     p.data.retryCount < MAX_RETRY_ATTEMPTS
 
             val shouldRetryReaction =
                 isMaxRetransmit &&
                     reaction != null &&
-                    reaction.userId == DataPacket.ID_LOCAL &&
+                    (reaction.userId == DataPacket.ID_LOCAL || reaction.userId == nodeManager.getMyId()) &&
                     reaction.retryCount < MAX_RETRY_ATTEMPTS &&
                     reaction.to != null
             @Suppress("MaxLineLength")
@@ -509,7 +583,8 @@ constructor(
 
     fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean = true) {
         if (dataPacket.dataType !in rememberDataType) return
-        val fromLocal = dataPacket.from == DataPacket.ID_LOCAL
+        val fromLocal =
+            dataPacket.from == DataPacket.ID_LOCAL || dataPacket.from == DataPacket.nodeNumToDefaultId(myNodeNum)
         val toBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
         val contactId = if (fromLocal || toBroadcast) dataPacket.to else dataPacket.from
 
@@ -529,7 +604,6 @@ constructor(
                 snr = dataPacket.snr,
                 rssi = dataPacket.rssi,
                 hopsAway = dataPacket.hopsAway,
-                replyId = dataPacket.replyId ?: 0,
             )
         scope.handledLaunch {
             packetRepository.get().apply {
@@ -593,10 +667,14 @@ constructor(
 
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
         val emoji = packet.decoded.payload.toByteArray().decodeToString()
+        val fromId = dataMapper.toNodeID(packet.from)
+        val toId = dataMapper.toNodeID(packet.to)
+
         val reaction =
             ReactionEntity(
+                myNodeNum = nodeManager.myNodeNum ?: 0,
                 replyId = packet.decoded.replyId,
-                userId = dataMapper.toNodeID(packet.from),
+                userId = fromId,
                 emoji = emoji,
                 timestamp = System.currentTimeMillis(),
                 snr = packet.rxSnr,
@@ -607,6 +685,10 @@ constructor(
                 } else {
                     packet.hopStart - packet.hopLimit
                 },
+                packetId = packet.id,
+                status = MessageStatus.RECEIVED,
+                to = toId,
+                channel = packet.channel,
             )
         packetRepository.get().insertReaction(reaction)
 
