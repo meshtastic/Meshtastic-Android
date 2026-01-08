@@ -34,7 +34,7 @@ ktor = "3.3.3"
 # Other
 aboutlibraries = "13.2.1"
 coil = "3.3.0"
-dd-sdk-android = "3.4.0"
+dd-sdk-android = "3.5.0"
 detekt = "1.23.8"
 devtools-ksp = "2.3.4"
 markdownRenderer = "0.39.0"
