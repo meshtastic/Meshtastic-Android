@@ -116,8 +116,8 @@
     <string name="delivery_confirmed">Isporučeno</string>
     <string name="error">Pogreška</string>
     <string name="ignore">Ignoriraj</string>
-    <string name="ignore_add">Dodati '%1$s' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
-    <string name="ignore_remove">Ukloniti '%1$s' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
+    <string name="ignore_add">Dodati \'%1$s\' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
+    <string name="ignore_remove">Ukloniti \'%1$s\' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
     <string name="map_select_download_region">Označite regiju za preuzimanje</string>
     <string name="map_tile_download_estimate">Procjena preuzimanja:</string>
     <string name="map_start_download">Pokreni Preuzimanje</string>

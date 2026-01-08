@@ -42,6 +42,8 @@
     <string name="unrecognized">Tuntematon</string>
     <string name="message_status_enroute">Odottaa vahvistusta</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
+    <string name="message_status_sfpp_routing">Reititetään SF++ ketjun kautta…</string>
+    <string name="message_status_sfpp_confirmed">Vahvistettu SF++-ketjussa</string>
     <string name="message_retry_count">Uudelleenyritykset: %1$d / %2$d</string>
     <string name="routing_error_none">Vahvistettu</string>
     <string name="routing_error_no_route">Ei reittiä</string>
@@ -59,6 +61,7 @@
     <string name="routing_error_pki_unknown_pubkey">Tuntematon julkinen avain</string>
     <string name="routing_error_admin_bad_session_key">Virheellinen istuntoavain</string>
     <string name="routing_error_admin_public_key_unauthorized">Julkinen avain ei ole valtuutettu</string>
+    <string name="routing_error_pki_send_fail_public_key">PKI-lähetys epäonnistui, julkinen avain puuttu</string>
     <string name="role_client">Client</string>
     <string name="role_client_desc">Yhdistetty sovellukseen tai itsenäinen viestintälaite.</string>
     <string name="role_client_mute">Client Mute</string>
