@@ -524,59 +524,54 @@ constructor(
     ) {
         Logger.d { "StoreAndForward: ${s.variantCase} ${s.rr} from ${dataPacket.from}" }
         val transport = currentTransport()
-        val lastRequest =
-            if (s.variantCase == StoreAndForwardProtos.StoreAndForward.VariantCase.HISTORY) {
-                s.history.lastRequest
-            } else {
-                0
-            }
+        val isHistory = s.variantCase == StoreAndForwardProtos.StoreAndForward.VariantCase.HISTORY
+        val lastRequest = if (isHistory) s.history.lastRequest else 0
         val baseContext = "transport=$transport from=${dataPacket.from}"
         historyLog { "rxStoreForward $baseContext variant=${s.variantCase} rr=${s.rr} lastRequest=$lastRequest" }
         when (s.variantCase) {
             StoreAndForwardProtos.StoreAndForward.VariantCase.STATS -> {
-                val u =
-                    dataPacket.copy(
-                        bytes = s.stats.toString().encodeToByteArray(),
-                        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                    )
-                rememberDataPacket(u, myNodeNum)
-            }
-
-            StoreAndForwardProtos.StoreAndForward.VariantCase.HISTORY -> {
-                val history = s.history
-                val historySummary =
-                    "routerHistory $baseContext messages=${history.historyMessages} " +
-                        "window=${history.window} lastRequest=${history.lastRequest}"
-                historyLog(Log.DEBUG) { historySummary }
-                val text =
-                    """
-                    Total messages: ${s.history.historyMessages}
-                    History window: ${s.history.window.milliseconds.inWholeMinutes} min
-                    Last request: ${s.history.lastRequest}
-                """
-                        .trimIndent()
+                val text = s.stats.toString()
                 val u =
                     dataPacket.copy(
                         bytes = text.encodeToByteArray(),
                         dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
                     )
                 rememberDataPacket(u, myNodeNum)
-                historyManager.updateStoreForwardLastRequest("router_history", s.history.lastRequest, transport)
             }
-
+            StoreAndForwardProtos.StoreAndForward.VariantCase.HISTORY -> {
+                val h = s.history
+                @Suppress("MaxLineLength")
+                historyLog(Log.DEBUG) {
+                    "routerHistory $baseContext messages=${h.historyMessages} window=${h.window} lastReq=${h.lastRequest}"
+                }
+                val text =
+                    "Total messages: ${h.historyMessages}\n" +
+                        "History window: ${h.window.milliseconds.inWholeMinutes} min\n" +
+                        "Last request: ${h.lastRequest}"
+                val u =
+                    dataPacket.copy(
+                        bytes = text.encodeToByteArray(),
+                        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    )
+                rememberDataPacket(u, myNodeNum)
+                historyManager.updateStoreForwardLastRequest("router_history", h.lastRequest, transport)
+            }
+            StoreAndForwardProtos.StoreAndForward.VariantCase.HEARTBEAT -> {
+                val hb = s.heartbeat
+                historyLog { "rxHeartbeat $baseContext period=${hb.period} secondary=${hb.secondary}" }
+            }
             StoreAndForwardProtos.StoreAndForward.VariantCase.TEXT -> {
                 if (s.rr == StoreAndForwardProtos.StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
                     dataPacket.to = DataPacket.ID_BROADCAST
                 }
-                val textLog =
-                    "rxText $baseContext id=${dataPacket.id} ts=${dataPacket.time} " +
-                        "to=${dataPacket.to} decision=remember"
-                historyLog(Log.DEBUG) { textLog }
+                @Suppress("MaxLineLength")
+                historyLog(Log.DEBUG) {
+                    "rxText $baseContext id=${dataPacket.id} ts=${dataPacket.time} to=${dataPacket.to} decision=remember"
+                }
                 val u =
                     dataPacket.copy(bytes = s.text.toByteArray(), dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
                 rememberDataPacket(u, myNodeNum)
             }
-
             else -> {}
         }
     }
