@@ -43,12 +43,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build Dokka HTML documentation
-        run: ./gradlew :app:dokkaGeneratePublicationHtml
+        run: ./gradlew dokkaGeneratePublicationHtml
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: app/build/dokka/html
+          path: build/dokka/html
 
   deploy:
     if: github.repository == 'meshtastic/Meshtastic-Android'

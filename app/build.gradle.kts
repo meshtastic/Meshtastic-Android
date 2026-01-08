@@ -254,26 +254,6 @@ dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
-dokka {
-    moduleName.set("Meshtastic App")
-    dokkaSourceSets.register("main") {
-        sourceLink {
-            enableJdkDocumentationLink.set(true)
-            enableKotlinStdLibDocumentationLink.set(true)
-            enableJdkDocumentationLink.set(true)
-            reportUndocumented.set(true)
-            localDirectory.set(file("src/main/java"))
-            remoteUrl("https://github.com/geeksville/Meshtastic-Android/app/src/main/java")
-            remoteLineSuffix.set("#L")
-        }
-    }
-    dokkaPublications.html { suppressInheritedMembers.set(true) }
-    dokkaGeneratorIsolation = ProcessIsolation {
-        // Configures heap size
-        maxHeapSize = "6g"
-    }
-}
-
 aboutLibraries {
     export { excludeFields = listOf("generated") }
     library {
