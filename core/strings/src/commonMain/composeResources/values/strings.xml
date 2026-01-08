@@ -72,7 +72,7 @@
     <string name="routing_error_pki_unknown_pubkey">Unknown Public Key</string>
     <string name="routing_error_admin_bad_session_key">Bad session key</string>
     <string name="routing_error_admin_public_key_unauthorized">Public Key unauthorized</string>
-
+    <string name="routing_error_pki_send_fail_public_key">PKI send failed, no public key</string>
     <string name="role_client">Client</string>
     <string name="role_client_desc">App connected or standalone messaging device.</string>
     <string name="role_client_mute">Client Mute</string>
