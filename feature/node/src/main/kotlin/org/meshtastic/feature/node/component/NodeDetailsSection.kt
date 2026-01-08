@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.details
@@ -61,6 +60,7 @@ import org.meshtastic.core.strings.role
 import org.meshtastic.core.strings.short_name
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.user_id
+import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
 fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {

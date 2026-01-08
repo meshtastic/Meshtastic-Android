@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.material3.MaterialTheme
@@ -25,11 +24,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.node_sort_last_heard
 import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
 fun LastHeardInfo(

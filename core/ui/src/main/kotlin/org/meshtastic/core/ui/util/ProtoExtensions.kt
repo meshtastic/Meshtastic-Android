@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.util
 
+import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.unknown_age
@@ -28,13 +29,12 @@ import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.MeshProtos.Position
 import org.meshtastic.proto.channel
 import org.meshtastic.proto.channelSettings
-import java.text.DateFormat
 import kotlin.time.Duration.Companion.days
 
 private const val SECONDS_TO_MILLIS = 1000L
 
 @Composable
-fun MeshProtos.Position.formatPositionTime(dateFormat: DateFormat): String {
+fun MeshProtos.Position.formatPositionTime(): String {
     val currentTime = System.currentTimeMillis()
     val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
     val isOlderThanSixMonths = time * SECONDS_TO_MILLIS < sixMonthsAgo
@@ -42,7 +42,11 @@ fun MeshProtos.Position.formatPositionTime(dateFormat: DateFormat): String {
         if (isOlderThanSixMonths) {
             stringResource(Res.string.unknown_age)
         } else {
-            dateFormat.format(time * SECONDS_TO_MILLIS)
+            DateUtils.formatDateTime(
+                LocalContext.current,
+                time * SECONDS_TO_MILLIS,
+                DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
+            )
         }
     return timeText
 }

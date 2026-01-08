@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.foundation.background
@@ -59,8 +58,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.debug_active_filters
 import org.meshtastic.core.strings.debug_filter_add
+import org.meshtastic.core.strings.debug_filter_add_custom
 import org.meshtastic.core.strings.debug_filter_clear
 import org.meshtastic.core.strings.debug_filter_included
+import org.meshtastic.core.strings.debug_filter_preset_title
 import org.meshtastic.core.strings.debug_filters
 import org.meshtastic.core.strings.match_all
 import org.meshtastic.core.strings.match_any
@@ -79,7 +80,7 @@ fun DebugCustomFilterInput(
             value = customFilterText,
             onValueChange = onCustomFilterTextChange,
             modifier = Modifier.weight(1f),
-            placeholder = { Text("Add custom filter") },
+            placeholder = { Text(stringResource(Res.string.debug_filter_add_custom)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions =
@@ -125,7 +126,7 @@ internal fun DebugPresetFilters(
         }
     Column(modifier = modifier) {
         Text(
-            text = "Preset Filters",
+            text = stringResource(Res.string.debug_filter_preset_title),
             style = TextStyle(fontWeight = FontWeight.Bold),
             modifier = Modifier.padding(vertical = 4.dp),
         )

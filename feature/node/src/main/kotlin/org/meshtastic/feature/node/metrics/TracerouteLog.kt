@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
+import android.text.format.DateUtils
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -52,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -88,7 +89,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshProtos
-import java.text.DateFormat
 
 private data class TracerouteDialog(
     val message: AnnotatedString,
@@ -107,12 +107,12 @@ fun TracerouteLogScreen(
     onViewOnMap: (requestId: Int, responseLogUuid: String) -> Unit = { _, _ -> },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) }
 
     fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
 
     var showDialog by remember { mutableStateOf<TracerouteDialog?>(null) }
     var errorMessageRes by remember { mutableStateOf<StringResource?>(null) }
+    val context = LocalContext.current
 
     TracerouteLogDialogs(
         dialog = showDialog,
@@ -150,7 +150,12 @@ fun TracerouteLogScreen(
                     }
                 val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
 
-                val time = dateFormat.format(log.received_date)
+                val time =
+                    DateUtils.formatDateTime(
+                        context,
+                        log.received_date,
+                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
+                    )
                 val (text, icon) = route.getTextAndIcon()
                 var expanded by remember { mutableStateOf(false) }
 
@@ -359,8 +364,11 @@ fun annotateTraceroute(inString: String?): AnnotatedString {
 @PreviewLightDark
 @Composable
 private fun TracerouteItemPreview() {
-    val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    AppTheme {
-        TracerouteItem(icon = Icons.Default.Group, text = "${dateFormat.format(System.currentTimeMillis())} - Direct")
-    }
+    val time =
+        DateUtils.formatDateTime(
+            LocalContext.current,
+            System.currentTimeMillis(),
+            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
+        )
+    AppTheme { TracerouteItem(icon = Icons.Default.Group, text = "$time - Direct") }
 }

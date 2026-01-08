@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.component
 
 import android.app.DatePickerDialog
@@ -82,9 +81,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalLayoutApi::class)
@@ -119,21 +116,10 @@ fun EditWaypointDialog(
     val minute = calendar.get(Calendar.MINUTE)
 
     // Determine locale-specific date format
-    val locale = Locale.getDefault()
-    val dateFormat =
-        if (locale.country == "US") {
-            SimpleDateFormat("MM/dd/yyyy", locale)
-        } else {
-            SimpleDateFormat("dd/MM/yyyy", locale)
-        }
+    val dateFormat = android.text.format.DateFormat.getDateFormat(context)
     // Check if 24-hour format is preferred
     val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
-    val timeFormat =
-        if (is24Hour) {
-            SimpleDateFormat("HH:mm", locale)
-        } else {
-            SimpleDateFormat("hh:mm a", locale)
-        }
+    val timeFormat = android.text.format.DateFormat.getTimeFormat(context)
 
     // State to hold selected date and time
     var selectedDate by remember { mutableStateOf(dateFormat.format(calendar.time)) }
@@ -205,12 +191,9 @@ fun EditWaypointDialog(
                         DatePickerDialog(
                             context,
                             { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                                selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
                                 calendar.set(selectedYear, selectedMonth, selectedDay)
                                 epochTime = calendar.timeInMillis
-                                if (epochTime != null) {
-                                    selectedDate = dateFormat.format(calendar.time)
-                                }
+                                selectedDate = dateFormat.format(calendar.time)
                             },
                             year,
                             month,
@@ -221,8 +204,6 @@ fun EditWaypointDialog(
                         android.app.TimePickerDialog(
                             context,
                             { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
-                                selectedTime =
-                                    String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
                                 calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
                                 calendar.set(Calendar.MINUTE, selectedMinute)
                                 epochTime = calendar.timeInMillis

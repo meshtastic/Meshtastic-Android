@@ -92,7 +92,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
@@ -109,6 +108,7 @@ import org.meshtastic.core.strings.timestamp
 import org.meshtastic.core.strings.track_point
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.map.component.ClusterItemsListDialog
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
@@ -124,7 +124,6 @@ import org.meshtastic.proto.MeshProtos.Position
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
-import java.text.DateFormat
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -487,9 +486,6 @@ fun MapView(
                         ?.let { focusedNode ->
                             sortedPositions.forEachIndexed { index, position ->
                                 val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
-                                val dateFormat = remember {
-                                    DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-                                }
                                 val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
                                 val color = Color(focusedNode.colors.second).copy(alpha = alpha)
                                 if (index == sortedPositions.lastIndex) {
@@ -501,11 +497,7 @@ fun MapView(
                                         snippet = formatAgo(position.time),
                                         zIndex = alpha,
                                         infoContent = {
-                                            PositionInfoWindowContent(
-                                                position = position,
-                                                dateFormat = dateFormat,
-                                                displayUnits = displayUnits,
-                                            )
+                                            PositionInfoWindowContent(position = position, displayUnits = displayUnits)
                                         },
                                     ) {
                                         Icon(
@@ -759,11 +751,7 @@ fun Uri.getFileName(context: android.content.Context): String {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
-private fun PositionInfoWindowContent(
-    position: Position,
-    dateFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
-    displayUnits: DisplayUnits = DisplayUnits.METRIC,
-) {
+private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayUnits = DisplayUnits.METRIC) {
     @Composable
     fun PositionRow(label: String, value: String) {
         Row(modifier = Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -796,7 +784,7 @@ private fun PositionInfoWindowContent(
                 value = "%.0f°".format(position.groundTrack * HEADING_DEG),
             )
 
-            PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime(dateFormat))
+            PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime())
         }
     }
 }

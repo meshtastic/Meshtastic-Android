@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model.util
 
 import android.widget.EditText
@@ -69,15 +68,14 @@ fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
 @Suppress("MagicNumber")
 fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMillis()): String {
-    val currentTime = (currentTimeMillis / 1000).toInt()
-    val diffMin = (currentTime - lastSeenUnix) / 60
-    return when {
-        diffMin < 1 -> "now"
-        diffMin < 60 -> diffMin.toString() + " min"
-        diffMin < 2880 -> (diffMin / 60).toString() + " h"
-        diffMin < 1440000 -> (diffMin / (60 * 24)).toString() + " d"
-        else -> "?"
-    }
+    val timeInMillis = lastSeenUnix * 1000L
+    return android.text.format.DateUtils.getRelativeTimeSpanString(
+        timeInMillis,
+        currentTimeMillis,
+        android.text.format.DateUtils.MINUTE_IN_MILLIS,
+        android.text.format.DateUtils.FORMAT_ABBREV_RELATIVE,
+    )
+        .toString()
 }
 
 private const val MPS_TO_KMPH = 3.6f
