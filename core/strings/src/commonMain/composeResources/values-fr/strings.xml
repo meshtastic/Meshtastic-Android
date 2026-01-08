@@ -42,6 +42,8 @@
     <string name="unrecognized">Non reconnu</string>
     <string name="message_status_enroute">En attente d'accusé de réception</string>
     <string name="message_status_queued">En file d'attente pour l'envoi</string>
+    <string name="message_status_sfpp_routing">Routage via chaîne SF++…</string>
+    <string name="message_status_sfpp_confirmed">Confirmé via chaîne SF++</string>
     <string name="message_retry_count">Tentative : %1$d / %2$d</string>
     <string name="routing_error_none">Entendu par un autre nœud (mais dans le cas d'un message direct, nous n'avons pas reçu la confirmation de réception par le destinataire : soit il n'a pas reçu le message, soit sa confirmation ne nous est pas parvenue)</string>
     <string name="routing_error_no_route">Pas de routage</string>
@@ -59,6 +61,7 @@
     <string name="routing_error_pki_unknown_pubkey">Clé publique inconnue</string>
     <string name="routing_error_admin_bad_session_key">Mauvaise clé de session</string>
     <string name="routing_error_admin_public_key_unauthorized">Clé publique non autorisée</string>
+    <string name="routing_error_pki_send_fail_public_key">Échec de l'envoi de clé privée, pas de clé publique</string>
     <string name="role_client">Client</string>
     <string name="role_client_desc">Dispositif de messagerie autonome ou connecté à l'application.</string>
     <string name="role_client_mute">Client muet</string>
