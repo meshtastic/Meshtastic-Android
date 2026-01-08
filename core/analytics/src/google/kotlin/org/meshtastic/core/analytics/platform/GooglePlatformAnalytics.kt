@@ -21,7 +21,6 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log.DEBUG
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -42,8 +41,10 @@ import com.datadog.android.rum.GlobalRumMonitor
 import com.datadog.android.rum.Rum
 import com.datadog.android.rum.RumConfiguration
 import com.datadog.android.rum.tracking.AcceptAllNavDestinations
+import com.datadog.android.sessionreplay.ImagePrivacy
 import com.datadog.android.sessionreplay.SessionReplay
 import com.datadog.android.sessionreplay.SessionReplayConfiguration
+import com.datadog.android.sessionreplay.TextAndInputPrivacy
 import com.datadog.android.sessionreplay.compose.ComposeExtensionSupport
 import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
@@ -135,7 +136,7 @@ constructor(
         // Initialize with PENDING, consent will be updated via updateAnalyticsConsent
         Datadog.initialize(application, configuration, TrackingConsent.PENDING)
         Datadog.setUserInfo(analyticsPrefs.installId)
-        Datadog.setVerbosity(DEBUG)
+        Datadog.setVerbosity(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.WARN)
 
         val rumConfiguration =
             RumConfiguration.Builder(BuildConfig.datadogApplicationId)
@@ -160,6 +161,8 @@ constructor(
 
         val sessionReplayConfig =
             SessionReplayConfiguration.Builder(sampleRate = sampleRate)
+                .setTextAndInputPrivacy(TextAndInputPrivacy.MASK_ALL)
+                .setImagePrivacy(ImagePrivacy.MASK_ALL)
                 .addExtensionSupport(ComposeExtensionSupport())
                 .build()
         SessionReplay.enable(sessionReplayConfig)
