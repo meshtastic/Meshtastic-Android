@@ -42,7 +42,6 @@ plugins {
     alias(libs.plugins.protobuf)
 }
 
-
 configure<LibraryExtension> {
     buildFeatures { buildConfig = true }
     namespace = "org.meshtastic.core.network"

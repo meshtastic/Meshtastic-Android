@@ -254,7 +254,6 @@ dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
-
 aboutLibraries {
     export { excludeFields = listOf("generated") }
     library {
