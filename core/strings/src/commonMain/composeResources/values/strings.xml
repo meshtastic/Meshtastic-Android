@@ -251,6 +251,10 @@
     <string name="debug_filter_add">Add filter</string>
     <string name="debug_filter_included">Filter included</string>
     <string name="debug_filter_clear">Clear all filters</string>
+    <string name="debug_filter_add_custom">Add custom filter</string>
+    <string name="debug_filter_preset_title">Preset Filters</string>
+    <string name="debug_store_logs_title">Store mesh logs</string>
+    <string name="debug_store_logs_summary">Disable to skip writing mesh logs to disk</string>
     <string name="debug_clear">Clear Logs</string>
     <string name="match_any">Match Any | All</string>
     <string name="match_all">Match All | Any</string>

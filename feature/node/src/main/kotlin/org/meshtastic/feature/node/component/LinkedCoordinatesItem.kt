@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import android.content.ActivityNotFoundException
@@ -37,7 +36,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.GPSFormat
-import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.Res
@@ -46,6 +44,7 @@ import org.meshtastic.core.strings.last_position_update
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import java.net.URLEncoder

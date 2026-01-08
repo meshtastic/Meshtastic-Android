@@ -18,6 +18,7 @@ package org.meshtastic.feature.map
 
 import android.Manifest // Added for Accompanist
 import android.graphics.Paint
+import android.text.format.DateUtils
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -88,7 +89,6 @@ import org.meshtastic.core.common.hasGps
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.util.formatAgo
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.calculating
 import org.meshtastic.core.strings.cancel
@@ -123,6 +123,7 @@ import org.meshtastic.core.strings.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.TracerouteColors
+import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
@@ -157,7 +158,6 @@ import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
-import java.text.DateFormat
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.atan2
@@ -514,34 +514,32 @@ fun MapView(
 
     @Suppress("MagicNumber")
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>, selectedWaypointId: Int?): List<MarkerWithLabel> {
-        val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
             if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
-            val time = dateFormat.format(waypoint.received_time)
+            val time =
+                DateUtils.formatDateTime(
+                    context,
+                    waypoint.received_time,
+                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
+                )
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
-            val timeLeft = pt.expire * 1000L - System.currentTimeMillis()
+            val now = System.currentTimeMillis()
+            val expireTimeMillis = pt.expire * 1000L
             val expireTimeStr =
                 when {
                     pt.expire == 0 || pt.expire == Int.MAX_VALUE -> "Never"
-                    timeLeft <= 0 -> "Expired"
-                    timeLeft < 60_000 -> "${timeLeft / 1000} seconds"
-                    timeLeft < 3_600_000 -> "${timeLeft / 60_000} minute${if (timeLeft / 60_000 != 1L) "s" else ""}"
-                    timeLeft < 86_400_000 -> {
-                        val hours = (timeLeft / 3_600_000).toInt()
-                        val minutes = ((timeLeft % 3_600_000) / 60_000).toInt()
-                        if (minutes >= 30) {
-                            "${hours + 1} hour${if (hours + 1 != 1) "s" else ""}"
-                        } else if (minutes > 0) {
-                            "$hours hour${if (hours != 1) "s" else ""}, $minutes minute${if (minutes != 1) "s" else ""}"
-                        } else {
-                            "$hours hour${if (hours != 1) "s" else ""}"
-                        }
-                    }
-
-                    else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
+                    expireTimeMillis <= now -> "Expired"
+                    else ->
+                        DateUtils.getRelativeTimeSpanString(
+                            expireTimeMillis,
+                            now,
+                            DateUtils.MINUTE_IN_MILLIS,
+                            DateUtils.FORMAT_ABBREV_RELATIVE,
+                        )
+                            .toString()
                 }
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"

@@ -87,11 +87,14 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.debug_clear
 import org.meshtastic.core.strings.debug_clear_logs_confirm
 import org.meshtastic.core.strings.debug_decoded_payload
+import org.meshtastic.core.strings.debug_default_search
 import org.meshtastic.core.strings.debug_export_failed
 import org.meshtastic.core.strings.debug_export_success
 import org.meshtastic.core.strings.debug_filters
 import org.meshtastic.core.strings.debug_logs_export
 import org.meshtastic.core.strings.debug_panel
+import org.meshtastic.core.strings.debug_store_logs_summary
+import org.meshtastic.core.strings.debug_store_logs_title
 import org.meshtastic.core.strings.log_retention_days
 import org.meshtastic.core.strings.log_retention_days_quantity
 import org.meshtastic.core.strings.log_retention_days_summary
@@ -250,11 +253,11 @@ private fun DebugLogSettings(viewModel: DebugViewModel) {
         )
 
         SwitchPreference(
-            title = "Store mesh logs",
+            title = stringResource(Res.string.debug_store_logs_title),
             enabled = true,
             checked = loggingEnabled,
             onCheckedChange = { viewModel.setLoggingEnabled(it) },
-            summary = "Disable to skip writing mesh logs to disk",
+            summary = stringResource(Res.string.debug_store_logs_summary),
         )
     }
 }
@@ -691,7 +694,7 @@ private fun DebugScreenEmptyPreview() {
                                         value = "",
                                         onValueChange = {},
                                         modifier = Modifier.weight(1f).padding(end = 8.dp),
-                                        placeholder = { Text("Search in logs...") },
+                                        placeholder = { Text(stringResource(Res.string.debug_default_search)) },
                                         singleLine = true,
                                     )
                                     TextButton(onClick = {}) {

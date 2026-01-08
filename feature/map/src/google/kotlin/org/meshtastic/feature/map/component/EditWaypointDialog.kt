@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.component
 
 import android.app.DatePickerDialog
@@ -77,9 +76,7 @@ import org.meshtastic.core.strings.waypoint_new
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.proto.MeshProtos.Waypoint
 import org.meshtastic.proto.copy
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -108,22 +105,8 @@ fun EditWaypointDialog(
         mutableStateOf(waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE)
     }
 
-    val locale = Locale.getDefault()
-    val dateFormat = remember {
-        if (locale.country.equals("US", ignoreCase = true)) {
-            SimpleDateFormat("MM/dd/yyyy", locale)
-        } else {
-            SimpleDateFormat("dd/MM/yyyy", locale)
-        }
-    }
-    val timeFormat = remember {
-        val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
-        if (is24Hour) {
-            SimpleDateFormat("HH:mm", locale)
-        } else {
-            SimpleDateFormat("hh:mm a", locale)
-        }
-    }
+    val dateFormat = remember { android.text.format.DateFormat.getDateFormat(context) }
+    val timeFormat = remember { android.text.format.DateFormat.getTimeFormat(context) }
     dateFormat.timeZone = TimeZone.getDefault()
     timeFormat.timeZone = TimeZone.getDefault()
 

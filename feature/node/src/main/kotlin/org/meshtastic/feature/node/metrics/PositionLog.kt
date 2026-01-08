@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import android.app.Activity
@@ -49,7 +48,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -79,7 +77,6 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.MeshProtos
-import java.text.DateFormat
 
 @Composable
 private fun RowScope.PositionText(text: String, weight: Float) {
@@ -116,7 +113,7 @@ const val DEG_D = 1e-7
 const val HEADING_DEG = 1e-5
 
 @Composable
-fun PositionItem(compactWidth: Boolean, position: MeshProtos.Position, dateFormat: DateFormat, system: DisplayUnits) {
+fun PositionItem(compactWidth: Boolean, position: MeshProtos.Position, system: DisplayUnits) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -129,7 +126,7 @@ fun PositionItem(compactWidth: Boolean, position: MeshProtos.Position, dateForma
             PositionText("${position.groundSpeed} Km/h", WEIGHT_15)
             PositionText("%.0f°".format(position.groundTrack * HEADING_DEG), WEIGHT_15)
         }
-        PositionText(position.formatPositionTime(dateFormat), WEIGHT_40)
+        PositionText(position.formatPositionTime(), WEIGHT_40)
     }
 }
 
@@ -233,10 +230,8 @@ private fun ColumnScope.PositionList(
     positions: List<MeshProtos.Position>,
     displayUnits: DisplayUnits,
 ) {
-    val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) }
-
     LazyColumn(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-        items(positions) { position -> PositionItem(compactWidth, position, dateFormat, displayUnits) }
+        items(positions) { position -> PositionItem(compactWidth, position, displayUnits) }
     }
 }
 
@@ -255,14 +250,7 @@ private val testPosition =
 @Preview(showBackground = true)
 @Composable
 private fun PositionItemPreview() {
-    AppTheme {
-        PositionItem(
-            compactWidth = false,
-            position = testPosition,
-            dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
-            system = DisplayUnits.METRIC,
-        )
-    }
+    AppTheme { PositionItem(compactWidth = false, position = testPosition, system = DisplayUnits.METRIC) }
 }
 
 @PreviewScreenSizes
