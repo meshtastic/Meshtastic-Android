@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,27 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.datasource
 
 import dagger.Lazy
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asEntity
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NetworkDeviceHardware
 import javax.inject.Inject
 
-class DeviceHardwareLocalDataSource @Inject constructor(private val deviceHardwareDaoLazy: Lazy<DeviceHardwareDao>) {
+class DeviceHardwareLocalDataSource
+@Inject
+constructor(
+    private val deviceHardwareDaoLazy: Lazy<DeviceHardwareDao>,
+    private val dispatchers: CoroutineDispatchers,
+) {
     private val deviceHardwareDao by lazy { deviceHardwareDaoLazy.get() }
 
-    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) = withContext(Dispatchers.IO) {
+    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) = withContext(dispatchers.io) {
         deviceHardware.forEach { deviceHardware -> deviceHardwareDao.insert(deviceHardware.asEntity()) }
     }
 
-    suspend fun deleteAllDeviceHardware() = withContext(Dispatchers.IO) { deviceHardwareDao.deleteAll() }
+    suspend fun deleteAllDeviceHardware() = withContext(dispatchers.io) { deviceHardwareDao.deleteAll() }
 
     suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity? =
-        withContext(Dispatchers.IO) { deviceHardwareDao.getByHwModel(hwModel) }
+        withContext(dispatchers.io) { deviceHardwareDao.getByHwModel(hwModel) }
 }
