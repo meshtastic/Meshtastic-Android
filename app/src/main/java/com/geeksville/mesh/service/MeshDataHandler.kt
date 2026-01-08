@@ -365,14 +365,13 @@ constructor(
 
             if (shouldRetry) {
                 val newRetryCount = p.data.retryCount + 1
-                val newId = commandSender.generatePacketId()
+                // Reuse the same packet ID to avoid duplicate messages if the original went through
                 val updatedData =
-                    p.data.copy(id = newId, status = MessageStatus.QUEUED, retryCount = newRetryCount, relayNode = null)
-                val updatedPacket =
-                    p.copy(packetId = newId, data = updatedData, routingError = MeshProtos.Routing.Error.NONE_VALUE)
+                    p.data.copy(status = MessageStatus.QUEUED, retryCount = newRetryCount, relayNode = null)
+                val updatedPacket = p.copy(data = updatedData, routingError = MeshProtos.Routing.Error.NONE_VALUE)
                 packetRepository.get().update(updatedPacket)
 
-                Logger.w { "[ackNak] retrying req=$requestId newId=$newId retry=$newRetryCount" }
+                Logger.w { "[ackNak] retrying req=$requestId retry=$newRetryCount (same packetId)" }
 
                 delay(RETRY_DELAY_MS)
                 commandSender.sendData(updatedData)
@@ -381,7 +380,7 @@ constructor(
 
             if (shouldRetryReaction && reaction != null) {
                 val newRetryCount = reaction.retryCount + 1
-                val newId = commandSender.generatePacketId()
+                // Reuse the same packet ID to avoid duplicate reactions if the original went through
 
                 val reactionPacket =
                     DataPacket(
@@ -392,13 +391,12 @@ constructor(
                         replyId = reaction.replyId,
                         wantAck = true,
                         emoji = reaction.emoji.codePointAt(0),
-                        id = newId,
+                        id = requestId,
                         retryCount = newRetryCount,
                     )
 
                 val updatedReaction =
                     reaction.copy(
-                        packetId = newId,
                         status = MessageStatus.QUEUED,
                         retryCount = newRetryCount,
                         relayNode = null,
@@ -406,7 +404,7 @@ constructor(
                     )
                 packetRepository.get().updateReaction(updatedReaction)
 
-                Logger.w { "[ackNak] retrying reaction req=$requestId newId=$newId retry=$newRetryCount" }
+                Logger.w { "[ackNak] retrying reaction req=$requestId retry=$newRetryCount (same packetId)" }
 
                 delay(RETRY_DELAY_MS)
                 commandSender.sendData(reactionPacket)
