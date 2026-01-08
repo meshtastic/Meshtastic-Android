@@ -42,6 +42,7 @@
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
+    <string name="message_retry_count">Versuch: %1$d / %2$d</string>
     <string name="routing_error_none">Bestätigt</string>
     <string name="routing_error_no_route">Keine Route</string>
     <string name="routing_error_got_nak">negative Bestätigung erhalten</string>
@@ -229,6 +230,7 @@
     <string name="new_messages_below">Neue Nachrichten unten</string>
     <string name="meshtastic_messages_notifications">Benachrichtigung direkte Nachrichten</string>
     <string name="meshtastic_broadcast_notifications">Benachrichtigung allgemeine Nachrichten</string>
+    <string name="meshtastic_waypoints_notifications">Wegpunkt Benachrichtigungen</string>
     <string name="meshtastic_alerts_notifications">Warnmeldungen</string>
     <string name="firmware_too_old">Firmware Aktualisierung erforderlich.</string>
     <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
@@ -1030,4 +1032,5 @@
     <string name="compass_no_location_fix">Warten auf eine GPS Position, um Entfernung und Kurs zu berechnen.</string>
     <string name="compass_uncertainty">Geschätzte Fläche: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Geschätzte Fläche: unbekannte Genauigkeit</string>
+    <string name="mark_as_read">Als gelesen markieren</string>
 </resources>
