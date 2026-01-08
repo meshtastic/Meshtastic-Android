@@ -17,24 +17,16 @@
 package org.meshtastic.core.ui.util
 
 import android.text.format.DateUtils
-import com.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.now
 
 @Suppress("MagicNumber")
 fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMillis()): String {
     val timeInMillis = lastSeenUnix * 1000L
-    val diff = currentTimeMillis - timeInMillis
 
-    return if (diff < 60_000L) {
-        getString(Res.string.now)
-    } else {
-        DateUtils.getRelativeTimeSpanString(
-            timeInMillis,
-            currentTimeMillis,
-            DateUtils.MINUTE_IN_MILLIS,
-            DateUtils.FORMAT_ABBREV_RELATIVE,
-        )
-            .toString()
-    }
+    return DateUtils.getRelativeTimeSpanString(
+        timeInMillis,
+        currentTimeMillis,
+        DateUtils.SECOND_IN_MILLIS,
+        DateUtils.FORMAT_ABBREV_RELATIVE,
+    )
+        .toString()
 }

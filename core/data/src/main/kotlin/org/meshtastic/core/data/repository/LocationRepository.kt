@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.repository
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
@@ -28,13 +27,13 @@ import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
 import androidx.core.location.altitude.AltitudeConverterCompat
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.di.CoroutineDispatchers
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,6 +44,7 @@ constructor(
     private val context: Application,
     private val locationManager: dagger.Lazy<LocationManager>,
     private val analytics: PlatformAnalytics,
+    private val dispatchers: CoroutineDispatchers,
 ) {
 
     /** Status of whether the app is actively subscribed to location changes. */
@@ -97,7 +97,7 @@ constructor(
                     this@requestLocationUpdates,
                     provider,
                     locationRequest,
-                    Dispatchers.IO.asExecutor(),
+                    dispatchers.io.asExecutor(),
                     locationListener,
                 )
             }

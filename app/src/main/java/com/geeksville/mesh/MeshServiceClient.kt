@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh
 
 import android.content.Context
@@ -31,6 +30,7 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.startService
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
+import kotlinx.coroutines.launch
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
@@ -75,10 +75,12 @@ constructor(
         super.onStart(owner)
         Logger.d { "Lifecycle: ON_START" }
 
-        try {
-            bindMeshService()
-        } catch (ex: BindFailedException) {
-            Logger.e { "Bind of MeshService failed: ${ex.message}" }
+        owner.lifecycleScope.launch {
+            try {
+                bindMeshService()
+            } catch (ex: BindFailedException) {
+                Logger.e { "Bind of MeshService failed: ${ex.message}" }
+            }
         }
     }
 
@@ -93,7 +95,7 @@ constructor(
     // endregion
 
     @Suppress("TooGenericExceptionCaught")
-    private fun bindMeshService() {
+    private suspend fun bindMeshService() {
         Logger.d { "Binding to mesh service!" }
         try {
             MeshService.startService(context)

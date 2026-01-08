@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.radio
 
 import android.app.Application
@@ -31,7 +30,6 @@ import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -99,7 +97,7 @@ constructor(
     val mockInterfaceAddress: String by lazy { toInterfaceAddress(InterfaceId.MOCK, "") }
 
     /** We recreate this scope each time we stop an interface */
-    var serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    var serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
     private var radioIf: IRadioInterface = NopInterface("")
 
@@ -292,7 +290,7 @@ constructor(
 
         // cancel any old jobs and get ready for the new ones
         serviceScope.cancel("stopping interface")
-        serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
         if (logSends) {
             sentPacketsLog.close()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.contact
 
 import androidx.lifecycle.ViewModel
@@ -30,7 +29,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -163,8 +161,8 @@ constructor(
                             longName = longName,
                             lastMessageTime = getShortDate(data.time),
                             lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
-                            unreadCount = runBlocking(Dispatchers.IO) { packetRepository.getUnreadCount(contactKey) },
-                            messageCount = runBlocking(Dispatchers.IO) { packetRepository.getMessageCount(contactKey) },
+                            unreadCount = packetRepository.getUnreadCount(contactKey),
+                            messageCount = packetRepository.getMessageCount(contactKey),
                             isMuted = settings[contactKey]?.isMuted == true,
                             isUnmessageable = user.isUnmessagable,
                             nodeColors =

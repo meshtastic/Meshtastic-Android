@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,36 +14,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.datasource
 
 import dagger.Lazy
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.entity.asEntity
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NetworkFirmwareRelease
 import javax.inject.Inject
 
-class FirmwareReleaseLocalDataSource @Inject constructor(private val firmwareReleaseDaoLazy: Lazy<FirmwareReleaseDao>) {
+class FirmwareReleaseLocalDataSource
+@Inject
+constructor(
+    private val firmwareReleaseDaoLazy: Lazy<FirmwareReleaseDao>,
+    private val dispatchers: CoroutineDispatchers,
+) {
     private val firmwareReleaseDao by lazy { firmwareReleaseDaoLazy.get() }
 
     suspend fun insertFirmwareReleases(
         firmwareReleases: List<NetworkFirmwareRelease>,
         releaseType: FirmwareReleaseType,
-    ) = withContext(Dispatchers.IO) {
+    ) = withContext(dispatchers.io) {
         firmwareReleases.forEach { firmwareRelease ->
             firmwareReleaseDao.insert(firmwareRelease.asEntity(releaseType))
         }
     }
 
-    suspend fun deleteAllFirmwareReleases() = withContext(Dispatchers.IO) { firmwareReleaseDao.deleteAll() }
+    suspend fun deleteAllFirmwareReleases() = withContext(dispatchers.io) { firmwareReleaseDao.deleteAll() }
 
     suspend fun getLatestRelease(releaseType: FirmwareReleaseType): FirmwareReleaseEntity? =
-        withContext(Dispatchers.IO) {
+        withContext(dispatchers.io) {
             val releases = firmwareReleaseDao.getReleasesByType(releaseType)
             if (releases.isEmpty()) {
                 return@withContext null

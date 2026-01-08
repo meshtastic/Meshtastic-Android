@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.android
 
 import android.content.ComponentName
@@ -25,6 +24,7 @@ import android.os.IBinder
 import android.os.IInterface
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.util.exceptionReporter
+import kotlinx.coroutines.delay
 import java.io.Closeable
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -64,7 +64,7 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
         }
     }
 
-    fun connect(c: Context, intent: Intent, flags: Int) {
+    suspend fun connect(c: Context, intent: Intent, flags: Int) {
         context = c
         if (isClosed) {
             isClosed = false
@@ -73,7 +73,7 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
                 // Try
                 // a short sleep to see if that helps
                 Logger.e { "Needed to use the second bind attempt hack" }
-                Thread.sleep(500) // was 200ms, but received an autobug from a Galaxy Note4, android 6.0.1
+                delay(500) // was 200ms, but received an autobug from a Galaxy Note4, android 6.0.1
                 if (!c.bindService(intent, connection, flags)) {
                     throw BindFailedException()
                 }

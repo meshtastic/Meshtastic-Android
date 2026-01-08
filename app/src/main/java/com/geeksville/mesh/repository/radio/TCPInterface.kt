@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.radio
 
 import co.touchlab.kermit.Logger
@@ -23,9 +22,9 @@ import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.util.Exceptions
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.di.CoroutineDispatchers
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.IOException
@@ -34,8 +33,13 @@ import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 
-class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @Assisted private val address: String) :
-    StreamInterface(service) {
+class TCPInterface
+@AssistedInject
+constructor(
+    service: RadioInterfaceService,
+    private val dispatchers: CoroutineDispatchers,
+    @Assisted private val address: String,
+) : StreamInterface(service) {
 
     companion object {
         const val MAX_RETRIES_ALLOWED = Int.MAX_VALUE
@@ -143,7 +147,7 @@ class TCPInterface @AssistedInject constructor(service: RadioInterfaceService, @
     }
 
     // Create a socket to make the connection with the server
-    private suspend fun startConnect() = withContext(Dispatchers.IO) {
+    private suspend fun startConnect() = withContext(dispatchers.io) {
         val attemptStart = System.currentTimeMillis()
         Logger.i { "[$address] TCP connection attempt starting..." }
 

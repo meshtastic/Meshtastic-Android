@@ -49,6 +49,7 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    implementation(projects.core.di)
     implementation(projects.core.model)
     implementation(projects.core.proto)
     implementation(projects.core.strings)

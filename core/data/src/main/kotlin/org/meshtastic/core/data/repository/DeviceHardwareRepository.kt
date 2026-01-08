@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asExternalModel
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
@@ -41,6 +40,7 @@ constructor(
     private val localDataSource: DeviceHardwareLocalDataSource,
     private val jsonDataSource: DeviceHardwareJsonDataSource,
     private val bootloaderOtaQuirksJsonDataSource: BootloaderOtaQuirksJsonDataSource,
+    private val dispatchers: CoroutineDispatchers,
 ) {
 
     /**
@@ -58,7 +58,7 @@ constructor(
      */
     @Suppress("LongMethod")
     suspend fun getDeviceHardwareByModel(hwModel: Int, forceRefresh: Boolean = false): Result<DeviceHardware?> =
-        withContext(Dispatchers.IO) {
+        withContext(dispatchers.io) {
             Logger.d {
                 "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel, forceRefresh=$forceRefresh)"
             }

@@ -22,7 +22,6 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +32,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.di.CoroutineDispatchers
 import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -40,9 +40,9 @@ import javax.inject.Singleton
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
 @Singleton
-class DatabaseManager @Inject constructor(private val app: Application) {
+class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
-    private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     private val mutex = Mutex()
 
@@ -72,25 +72,27 @@ class DatabaseManager @Inject constructor(private val app: Application) {
     private val dbCache = mutableMapOf<String, MeshtasticDatabase>() // key = dbName
 
     /** Initialize the active database for [address]. */
-    suspend fun init(address: String?) = switchActiveDatabase(address)
+    suspend fun init(address: String?) {
+        switchActiveDatabase(address)
+    }
 
     /** Switch active database to the one associated with [address]. Serialized via mutex. */
     suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
         val dbName = buildDbName(address)
 
-        // Remember the previously active DB name (if any) so we can record its last-used time as well.
+        // Remember the previously active DB name (any) so we can record its last-used time as well.
         val previousDbName = _currentDb.value?.openHelper?.databaseName
 
         // Fast path: no-op if already on this address
         if (_currentAddress.value == address && _currentDb.value != null) {
             markLastUsed(dbName)
-            return
+            return@withLock
         }
 
         // Build/open Room DB off the main thread
         val db =
             dbCache[dbName]
-                ?: withContext(Dispatchers.IO) { buildRoomDb(app, dbName) }.also { dbCache[dbName] = it }
+                ?: withContext(dispatchers.io) { buildRoomDb(app, dbName) }.also { dbCache[dbName] = it }
 
         _currentDb.value = db
         _currentAddress.value = address
@@ -100,10 +102,10 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         previousDbName?.let { markLastUsed(it) }
 
         // Defer LRU eviction so switch is not blocked by filesystem work
-        managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = dbName) }
+        managerScope.launch(dispatchers.io) { enforceCacheLimit(activeDbName = dbName) }
 
         // One-time cleanup: remove legacy DB if present and not active
-        managerScope.launch(Dispatchers.IO) { cleanupLegacyDbIfNeeded(activeDbName = dbName) }
+        managerScope.launch(dispatchers.io) { cleanupLegacyDbIfNeeded(activeDbName = dbName) }
 
         Logger.i { "Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}" }
     }
@@ -144,7 +146,7 @@ class DatabaseManager @Inject constructor(private val app: Application) {
                 anonymizeDbName(it)
             }}"
         }
-        if (deviceDbs.size <= limit) return
+        if (deviceDbs.size <= limit) return@withLock
         val usageSnapshot = deviceDbs.associateWith { lastUsed(it) }
         Logger.d {
             "LRU lastUsed(ms): ${usageSnapshot.entries.joinToString(", ") { (name, ts) ->
@@ -173,16 +175,16 @@ class DatabaseManager @Inject constructor(private val app: Application) {
         _cacheLimit.value = clamped
         // Enforce asynchronously with current active DB protected
         val active = _currentDb.value?.openHelper?.databaseName ?: defaultDbName()
-        managerScope.launch(Dispatchers.IO) { enforceCacheLimit(activeDbName = active) }
+        managerScope.launch(dispatchers.io) { enforceCacheLimit(activeDbName = active) }
     }
 
     private suspend fun cleanupLegacyDbIfNeeded(activeDbName: String) = mutex.withLock {
-        if (prefs.getBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, false)) return
+        if (prefs.getBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, false)) return@withLock
         val legacy = DatabaseConstants.LEGACY_DB_NAME
         if (legacy == activeDbName) {
             // Never delete the active DB; mark as cleaned to avoid repeated checks
             prefs.edit().putBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, true).apply()
-            return
+            return@withLock
         }
         val legacyFile = getDbFile(app, legacy)
         if (legacyFile != null) {
