@@ -324,7 +324,7 @@ constructor(
         isBroadcast: Boolean,
         channelName: String?,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName)
+        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isBroadcast)
     }
 
     override suspend fun updateWaypointNotification(
@@ -337,7 +337,12 @@ constructor(
         notificationManager.notify(contactKey.hashCode(), notification)
     }
 
-    private suspend fun showConversationNotification(contactKey: String, isBroadcast: Boolean, channelName: String?) {
+    private suspend fun showConversationNotification(
+        contactKey: String,
+        isBroadcast: Boolean,
+        channelName: String?,
+        isSilent: Boolean = false,
+    ) {
         val ourNode = nodeRepository.get().ourNodeInfo.value
         val history =
             packetRepository
@@ -361,7 +366,14 @@ constructor(
 
         if (displayHistory.isEmpty()) return
 
-        val notification = createConversationNotification(contactKey, isBroadcast, channelName, displayHistory)
+        val notification =
+            createConversationNotification(
+                contactKey = contactKey,
+                isBroadcast = isBroadcast,
+                channelName = channelName,
+                history = displayHistory,
+                isSilent = isSilent,
+            )
         notificationManager.notify(contactKey.hashCode(), notification)
         showGroupSummary()
     }
@@ -474,9 +486,14 @@ constructor(
         isBroadcast: Boolean,
         channelName: String?,
         history: List<Message>,
+        isSilent: Boolean = false,
     ): Notification {
         val type = if (isBroadcast) NotificationType.BroadcastMessage else NotificationType.DirectMessage
         val builder = commonBuilder(type, createOpenMessageIntent(contactKey))
+
+        if (isSilent) {
+            builder.setSilent(true)
+        }
 
         val ourNode = nodeRepository.get().ourNodeInfo.value
         val meName = ourNode?.user?.longName ?: getString(Res.string.you)
