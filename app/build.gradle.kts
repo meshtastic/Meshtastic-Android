@@ -33,8 +33,6 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.secrets)
-    alias(libs.plugins.dokka)
-    alias(libs.plugins.kover)
     alias(libs.plugins.aboutlibraries)
 }
 

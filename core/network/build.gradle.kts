@@ -37,8 +37,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.dokka)
-    alias(libs.plugins.kover)
     alias(libs.plugins.protobuf)
 }
 

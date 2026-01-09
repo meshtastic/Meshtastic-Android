@@ -54,6 +54,7 @@ dependencies {
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
     compileOnly(libs.google.services.gradlePlugin)
     compileOnly(libs.hilt.gradlePlugin)
+    implementation(libs.kover.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.androidx.room.gradlePlugin)
@@ -170,6 +171,11 @@ gradlePlugin {
         register("dokka") {
             id = "meshtastic.dokka"
             implementationClass = "DokkaConventionPlugin"
+        }
+        
+        register("kover") {
+            id = "meshtastic.kover"
+            implementationClass = "KoverConventionPlugin"
         }
 
         register("root") {

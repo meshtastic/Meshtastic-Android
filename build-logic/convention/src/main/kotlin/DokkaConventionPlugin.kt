@@ -19,11 +19,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.dependencies
-import org.jetbrains.dokka.gradle.DokkaExtension
+import org.meshtastic.buildlogic.configureDokka
 import org.meshtastic.buildlogic.library
 import org.meshtastic.buildlogic.libs
-import java.io.File
-import java.net.URI
 
 class DokkaConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -35,63 +33,7 @@ class DokkaConventionPlugin : Plugin<Project> {
                 add("dokkaPlugin", libs.library("dokka-android-documentation-plugin"))
             }
 
-            extensions.configure(DokkaExtension::class.java) {
-                // Use the full project path as the module name to ensure uniqueness
-                moduleName.set(project.path.removePrefix(":").replace(":", "-").ifEmpty { project.name })
-
-                // Discover and register Android source sets (main + flavors)
-                val registerAndroidSourceSets = {
-                    project.file("src").listFiles()?.filter { it.isDirectory && !it.name.contains("test", ignoreCase = true) }?.forEach { sourceDir ->
-                        val sourceSetName = sourceDir.name
-                        val ktDir = File(sourceDir, "kotlin")
-                        val javaDir = File(sourceDir, "java")
-                        if (ktDir.exists() || javaDir.exists()) {
-                            dokkaSourceSets.maybeCreate(sourceSetName).apply {
-                                if (ktDir.exists()) sourceRoots.from(ktDir)
-                                if (javaDir.exists()) sourceRoots.from(javaDir)
-                                suppress.set(false)
-                            }
-                        }
-                    }
-                }
-
-                pluginManager.withPlugin("com.android.library") {
-                    if (!plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
-                        registerAndroidSourceSets()
-                    }
-                }
-                pluginManager.withPlugin("com.android.application") {
-                    registerAndroidSourceSets()
-                }
-
-                dokkaSourceSets.configureEach {
-                    perPackageOption {
-                        matchingRegex.set("hilt_aggregated_deps")
-                        suppress.set(true)
-                    }
-                    perPackageOption {
-                        matchingRegex.set("org.meshtastic.core.strings.*")
-                        suppress.set(true)
-                    }
-
-                    // Ensure source sets containing core logic are not suppressed
-                    if (name == "main" || name == "commonMain" || name == "androidMain" || name == "fdroid" || name == "google") {
-                        suppress.set(false)
-                    }
-
-                    sourceLink {
-                        enableJdkDocumentationLink.set(true)
-                        enableKotlinStdLibDocumentationLink.set(true)
-                        reportUndocumented.set(true)
-
-                        // Standardized repo-root based source links
-                        localDirectory.set(project.projectDir)
-                        val relativePath = project.projectDir.relativeTo(rootProject.projectDir).path.replace("\\", "/")
-                        remoteUrl.set(URI("https://github.com/meshtastic/Meshtastic-Android/blob/main/$relativePath"))
-                        remoteLineSuffix.set("#L")
-                    }
-                }
-            }
+            configureDokka()
         }
     }
 }
