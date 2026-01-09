@@ -607,7 +607,8 @@ constructor(
                 if (existingPackets.isNotEmpty()) {
                     Logger.d {
                         "Skipping duplicate packet: packetId=${dataPacket.id} from=${dataPacket.from} " +
-                            "to=${dataPacket.to} contactKey=$contactKey (already have ${existingPackets.size} packet(s))"
+                            "to=${dataPacket.to} contactKey=$contactKey" +
+                            " (already have ${existingPackets.size} packet(s))"
                     }
                     return@handledLaunch
                 }
