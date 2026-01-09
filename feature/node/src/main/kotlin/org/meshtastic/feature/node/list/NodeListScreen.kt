@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.list
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -310,15 +309,12 @@ private fun ContextMenu(
             },
             leadingIcon = {
                 Icon(
-                    imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
+                    imageVector =
+                    if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
                     contentDescription = null,
                 )
             },
-            text = {
-                Text(
-                    text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_always),
-                )
-            },
+            text = { Text(text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_always)) },
         )
 
         DropdownMenuItem(

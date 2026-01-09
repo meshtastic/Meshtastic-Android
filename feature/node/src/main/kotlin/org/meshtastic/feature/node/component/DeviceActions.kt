@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -220,7 +219,8 @@ private fun ManagementActions(
 
         SwitchListItem(
             text = stringResource(if (node.isMuted) Res.string.unmute else Res.string.mute_always),
-            leadingIcon = if (node.isMuted) {
+            leadingIcon =
+            if (node.isMuted) {
                 Icons.AutoMirrored.Filled.VolumeOff
             } else {
                 Icons.AutoMirrored.Default.VolumeUp

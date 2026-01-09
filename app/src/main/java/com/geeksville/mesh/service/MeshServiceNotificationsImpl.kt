@@ -313,8 +313,9 @@ constructor(
         message: String,
         isBroadcast: Boolean,
         channelName: String?,
+        isSilent: Boolean,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName)
+        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isSilent)
     }
 
     override suspend fun updateReactionNotification(
@@ -323,8 +324,9 @@ constructor(
         emoji: String,
         isBroadcast: Boolean,
         channelName: String?,
+        isSilent: Boolean,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isBroadcast)
+        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isSilent)
     }
 
     override suspend fun updateWaypointNotification(

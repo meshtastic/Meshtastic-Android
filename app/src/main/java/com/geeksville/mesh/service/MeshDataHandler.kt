@@ -614,17 +614,17 @@ constructor(
                 }
 
                 insert(packetToSave)
-                val isMuted = getContactSettings(contactKey).isMuted
-                if (!isMuted) {
-                    if (packetToSave.port_num == Portnums.PortNum.ALERT_APP_VALUE) {
-                        serviceNotifications.showAlertNotification(
-                            contactKey,
-                            getSenderName(dataPacket),
-                            dataPacket.alert ?: getString(Res.string.critical_alert),
-                        )
-                    } else if (updateNotification) {
-                        scope.handledLaunch { updateNotification(contactKey, dataPacket) }
-                    }
+                val conversationMuted = getContactSettings(contactKey).isMuted
+                val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
+                val isSilent = conversationMuted || nodeMuted
+                if (packetToSave.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isSilent) {
+                    serviceNotifications.showAlertNotification(
+                        contactKey,
+                        getSenderName(dataPacket),
+                        dataPacket.alert ?: getString(Res.string.critical_alert),
+                    )
+                } else if (updateNotification) {
+                    scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
                 }
             }
         }
@@ -638,7 +638,7 @@ constructor(
         return nodeManager.nodeDBbyID[packet.from]?.user?.longName ?: getString(Res.string.unknown_username)
     }
 
-    private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket) {
+    private suspend fun updateNotification(contactKey: String, dataPacket: DataPacket, isSilent: Boolean) {
         when (dataPacket.dataType) {
             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                 val message = dataPacket.text!!
@@ -654,6 +654,7 @@ constructor(
                     message,
                     dataPacket.to == DataPacket.ID_BROADCAST,
                     channelName,
+                    isSilent,
                 )
             }
 
@@ -712,26 +713,27 @@ constructor(
         // Find the original packet to get the contactKey
         packetRepository.get().getPacketByPacketId(packet.decoded.replyId)?.let { original ->
             val contactKey = original.packet.contact_key
-            val isMuted = packetRepository.get().getContactSettings(contactKey).isMuted
-            if (!isMuted) {
-                val channelName =
-                    if (original.packet.data.to == DataPacket.ID_BROADCAST) {
-                        radioConfigRepository.channelSetFlow
-                            .first()
-                            .settingsList
-                            .getOrNull(original.packet.data.channel)
-                            ?.name
-                    } else {
-                        null
-                    }
-                serviceNotifications.updateReactionNotification(
-                    contactKey,
-                    getSenderName(dataMapper.toDataPacket(packet)!!),
-                    emoji,
-                    original.packet.data.to == DataPacket.ID_BROADCAST,
-                    channelName,
-                )
-            }
+            val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
+            val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
+            val isSilent = conversationMuted || nodeMuted
+            val channelName =
+                if (original.packet.data.to == DataPacket.ID_BROADCAST) {
+                    radioConfigRepository.channelSetFlow
+                        .first()
+                        .settingsList
+                        .getOrNull(original.packet.data.channel)
+                        ?.name
+                } else {
+                    null
+                }
+            serviceNotifications.updateReactionNotification(
+                contactKey,
+                getSenderName(dataMapper.toDataPacket(packet)!!),
+                emoji,
+                original.packet.data.to == DataPacket.ID_BROADCAST,
+                channelName,
+                isSilent,
+            )
         }
     }
 
