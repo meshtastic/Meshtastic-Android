@@ -56,7 +56,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 
-@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NodeStatusIcons(
@@ -68,106 +67,86 @@ fun NodeStatusIcons(
 ) {
     Row(modifier = Modifier.padding(4.dp)) {
         if (isThisNode) {
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                tooltip = {
-                    PlainTooltip {
-                        Text(
-                            stringResource(
-                                when (connectionState) {
-                                    ConnectionState.Connected -> Res.string.connected
-                                    ConnectionState.Connecting -> Res.string.connecting
-                                    ConnectionState.Disconnected -> Res.string.disconnected
-                                    ConnectionState.DeviceSleep -> Res.string.device_sleeping
-                                },
-                            ),
-                        )
-                    }
-                },
-                state = rememberTooltipState(),
-            ) {
-                when (connectionState) {
-                    ConnectionState.Connected -> {
-                        Icon(
-                            imageVector = Icons.TwoTone.CloudDone,
-                            contentDescription = stringResource(Res.string.connected),
-                            modifier = Modifier.size(24.dp), // Smaller size for badge
-                            tint = MaterialTheme.colorScheme.StatusGreen,
-                        )
-                    }
-                    ConnectionState.Connecting -> {
-                        Icon(
-                            imageVector = Icons.TwoTone.CloudSync,
-                            contentDescription = stringResource(Res.string.connecting),
-                            modifier = Modifier.size(24.dp), // Smaller size for badge
-                            tint = MaterialTheme.colorScheme.StatusOrange,
-                        )
-                    }
-                    ConnectionState.Disconnected -> {
-                        Icon(
-                            imageVector = Icons.TwoTone.CloudOff,
-                            contentDescription = stringResource(Res.string.connecting),
-                            modifier = Modifier.size(24.dp), // Smaller size for badge
-                            tint = MaterialTheme.colorScheme.StatusRed,
-                        )
-                    }
-                    ConnectionState.DeviceSleep -> {
-                        Icon(
-                            imageVector = Icons.TwoTone.Cloud,
-                            contentDescription = stringResource(Res.string.device_sleeping),
-                            modifier = Modifier.size(24.dp), // Smaller size for badge
-                            tint = MaterialTheme.colorScheme.StatusYellow,
-                        )
-                    }
-                }
-            }
+            ThisNodeStatusBadge(connectionState)
         }
 
         if (isUnmessageable) {
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                tooltip = { PlainTooltip { Text(stringResource(Res.string.unmonitored_or_infrastructure)) } },
-                state = rememberTooltipState(),
-            ) {
-                IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
-                    Icon(
-                        imageVector = Icons.Rounded.NoCell,
-                        contentDescription = stringResource(Res.string.unmessageable),
-                        modifier = Modifier.size(24.dp), // Smaller size for badge
-                    )
-                }
-            }
+            StatusBadge(
+                imageVector = Icons.Rounded.NoCell,
+                contentDescription = Res.string.unmessageable,
+                tooltipText = Res.string.unmonitored_or_infrastructure,
+            )
         }
         if (isMuted && !isThisNode) {
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                tooltip = { PlainTooltip { Text(stringResource(Res.string.mute_always)) } },
-                state = rememberTooltipState(),
-            ) {
-                IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.VolumeOff,
-                        contentDescription = stringResource(Res.string.mute_always),
-                        modifier = Modifier.size(24.dp), // Smaller size for badge
-                    )
-                }
-            }
+            StatusBadge(
+                imageVector = Icons.AutoMirrored.Filled.VolumeOff,
+                contentDescription = Res.string.mute_always,
+                tooltipText = Res.string.mute_always,
+            )
         }
         if (isFavorite && !isThisNode) {
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                tooltip = { PlainTooltip { Text(stringResource(Res.string.favorite)) } },
-                state = rememberTooltipState(),
-            ) {
-                IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
-                    Icon(
-                        imageVector = Icons.Rounded.Star,
-                        contentDescription = stringResource(Res.string.favorite),
-                        modifier = Modifier.size(24.dp), // Smaller size for badge
-                        tint = MaterialTheme.colorScheme.StatusYellow,
-                    )
-                }
+            StatusBadge(
+                imageVector = Icons.Rounded.Star,
+                contentDescription = Res.string.favorite,
+                tooltipText = Res.string.favorite,
+                tint = MaterialTheme.colorScheme.StatusYellow,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ThisNodeStatusBadge(connectionState: ConnectionState) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = {
+            PlainTooltip {
+                Text(
+                    stringResource(
+                        when (connectionState) {
+                            ConnectionState.Connected -> Res.string.connected
+                            ConnectionState.Connecting -> Res.string.connecting
+                            ConnectionState.Disconnected -> Res.string.disconnected
+                            ConnectionState.DeviceSleep -> Res.string.device_sleeping
+                        },
+                    ),
+                )
             }
+        },
+        state = rememberTooltipState(),
+    ) {
+        val (icon, tint) =
+            when (connectionState) {
+                ConnectionState.Connected -> Icons.TwoTone.CloudDone to MaterialTheme.colorScheme.StatusGreen
+                ConnectionState.Connecting -> Icons.TwoTone.CloudSync to MaterialTheme.colorScheme.StatusOrange
+                ConnectionState.Disconnected -> Icons.TwoTone.CloudOff to MaterialTheme.colorScheme.StatusRed
+                ConnectionState.DeviceSleep -> Icons.TwoTone.Cloud to MaterialTheme.colorScheme.StatusYellow
+            }
+        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StatusBadge(
+    imageVector: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: org.jetbrains.compose.resources.StringResource,
+    tooltipText: org.jetbrains.compose.resources.StringResource,
+    tint: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified,
+) {
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(stringResource(tooltipText)) } },
+        state = rememberTooltipState(),
+    ) {
+        IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
+            Icon(
+                imageVector = imageVector,
+                contentDescription = stringResource(contentDescription),
+                modifier = Modifier.size(24.dp),
+                tint = tint,
+            )
         }
     }
 }

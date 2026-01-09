@@ -35,6 +35,7 @@ import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.feature.node.component.NodeMenuAction
 import javax.inject.Inject
 
+@Suppress("TooManyFunctions")
 @HiltViewModel
 class NodeDetailViewModel
 @Inject
@@ -137,10 +138,10 @@ constructor(
         }
     }
 
-    private fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
+    private fun requestPosition(destNum: Int, pos: Position = Position(0.0, 0.0, 0)) {
         Logger.i { "Requesting position for '$destNum'" }
         try {
-            serviceRepository.meshService?.requestPosition(destNum, position)
+            serviceRepository.meshService?.requestPosition(destNum, pos)
         } catch (ex: RemoteException) {
             Logger.e { "Request position error: ${ex.message}" }
         }
