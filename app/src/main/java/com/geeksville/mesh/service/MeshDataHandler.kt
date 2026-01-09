@@ -602,6 +602,17 @@ constructor(
             )
         scope.handledLaunch {
             packetRepository.get().apply {
+                // Check for duplicates before inserting
+                val existingPackets = findPacketsWithId(dataPacket.id)
+                if (existingPackets.isNotEmpty()) {
+                    Logger.d {
+                        "Skipping duplicate packet: packetId=${dataPacket.id} from=${dataPacket.from} " +
+                            "to=${dataPacket.to} contactKey=$contactKey" +
+                            " (already have ${existingPackets.size} packet(s))"
+                    }
+                    return@handledLaunch
+                }
+
                 insert(packetToSave)
                 val isMuted = getContactSettings(contactKey).isMuted
                 if (!isMuted) {
@@ -685,6 +696,17 @@ constructor(
                 to = toId,
                 channel = packet.channel,
             )
+
+        // Check for duplicates before inserting
+        val existingReactions = packetRepository.get().findReactionsWithId(packet.id)
+        if (existingReactions.isNotEmpty()) {
+            Logger.d {
+                "Skipping duplicate reaction: packetId=${packet.id} replyId=${packet.decoded.replyId} " +
+                    "from=$fromId emoji=$emoji (already have ${existingReactions.size} reaction(s))"
+            }
+            return@handledLaunch
+        }
+
         packetRepository.get().insertReaction(reaction)
 
         // Find the original packet to get the contactKey
