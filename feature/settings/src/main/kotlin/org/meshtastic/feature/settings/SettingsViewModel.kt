@@ -152,11 +152,17 @@ constructor(
         val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
         meshLogPrefs.retentionDays = clamped
         _meshLogRetentionDays.value = clamped
+        viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(clamped) }
     }
 
     fun setMeshLogLoggingEnabled(enabled: Boolean) {
         meshLogPrefs.loggingEnabled = enabled
         _meshLogLoggingEnabled.value = enabled
+        if (!enabled) {
+            viewModelScope.launch { meshLogRepository.deleteAll() }
+        } else {
+            viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays) }
+        }
     }
 
     fun setProvideLocation(value: Boolean) {
