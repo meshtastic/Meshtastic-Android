@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,23 +18,22 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
-import org.meshtastic.buildlogic.configureDokkaAggregation
-import org.meshtastic.buildlogic.configureGraphTasks
-import org.meshtastic.buildlogic.configureKover
-import org.meshtastic.buildlogic.configureKoverAggregation
+import org.gradle.kotlin.dsl.dependencies
+import org.meshtastic.buildlogic.configureDokka
+import org.meshtastic.buildlogic.library
+import org.meshtastic.buildlogic.libs
 
-class RootConventionPlugin : Plugin<Project> {
+class DokkaConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        require(target.path == ":")
         with(target) {
             apply(plugin = "org.jetbrains.dokka")
-            configureDokkaAggregation()
 
-            apply(plugin = "org.jetbrains.kotlinx.kover")
-            configureKover()
-            configureKoverAggregation()
+            // Ensure the Android documentation plugin is available in all modules for better Android support
+            dependencies {
+                add("dokkaPlugin", libs.library("dokka-android-documentation-plugin"))
+            }
 
-            subprojects { configureGraphTasks() }
+            configureDokka()
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.kover)
 }
 
 configure<LibraryExtension> { namespace = "org.meshtastic.core.datastore" }

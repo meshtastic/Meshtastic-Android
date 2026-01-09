@@ -50,9 +50,11 @@ dependencies {
     compileOnly(libs.compose.multiplatform.gradlePlugin)
     compileOnly(libs.datadog.gradlePlugin)
     compileOnly(libs.detekt.gradlePlugin)
+    compileOnly(libs.dokka.gradlePlugin)
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
     compileOnly(libs.google.services.gradlePlugin)
     compileOnly(libs.hilt.gradlePlugin)
+    implementation(libs.kover.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.androidx.room.gradlePlugin)
@@ -164,6 +166,16 @@ gradlePlugin {
         register("kmpLibraryCompose") {
             id = "meshtastic.kmp.library.compose"
             implementationClass = "KmpLibraryComposeConventionPlugin"
+        }
+        
+        register("dokka") {
+            id = "meshtastic.dokka"
+            implementationClass = "DokkaConventionPlugin"
+        }
+        
+        register("kover") {
+            id = "meshtastic.kover"
+            implementationClass = "KoverConventionPlugin"
         }
 
         register("root") {

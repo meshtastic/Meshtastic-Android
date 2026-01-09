@@ -20,6 +20,7 @@ kotlin = "2.3.0"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.9.0"
 ktlint = "1.7.1"
+kover = "0.9.4"
 
 # Compose Multiplatform
 compose-multiplatform = "1.9.3"
@@ -115,6 +116,7 @@ truth = { module = "com.google.truth:truth", version = "1.4.5" }
 
 # Jetbrains
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "2.1.0" }
 
 # fixme remove when hilt updates to support kotlin 2.3.x
 kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin"}
@@ -184,6 +186,7 @@ detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plug
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version = "3.0.6" }
 google-services-gradlePlugin = { module = "com.google.gms.google-services:com.google.gms.google-services.gradle.plugin", version = "4.4.4" }
 hilt-gradlePlugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
+kover-gradlePlugin = { module = "org.jetbrains.kotlinx.kover:org.jetbrains.kotlinx.kover.gradle.plugin", version.ref = "kover" }
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
 secrets-gradlePlugin = {module = "com.google.android.secrets-gradle-plugin:com.google.android.secrets-gradle-plugin.gradle.plugin", version = "1.1.0"}
 serialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
@@ -203,7 +206,7 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.4" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 # Google
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }

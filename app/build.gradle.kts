@@ -33,8 +33,6 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.secrets)
-    alias(libs.plugins.dokka)
-    alias(libs.plugins.kover)
     alias(libs.plugins.aboutlibraries)
 }
 
@@ -250,8 +248,6 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-
-    dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
 aboutLibraries {

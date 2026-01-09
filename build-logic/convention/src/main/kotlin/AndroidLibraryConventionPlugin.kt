@@ -32,7 +32,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.android.lint")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
-            apply(plugin = "org.jetbrains.dokka")
+            apply(plugin = "meshtastic.dokka")
+            apply(plugin = "meshtastic.kover")
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)

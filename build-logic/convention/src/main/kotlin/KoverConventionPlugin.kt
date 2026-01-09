@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.kmp.library) }
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.meshtastic.buildlogic.configureKover
 
-kotlin {
-    @Suppress("UnstableApiUsage")
-    androidLibrary {}
-
-    sourceSets { androidMain.dependencies { implementation(libs.androidx.core.ktx) } }
+class KoverConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            apply(plugin = "org.jetbrains.kotlinx.kover")
+            configureKover()
+        }
+    }
 }
