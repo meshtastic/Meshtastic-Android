@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.outlined.VolumeMute
 import androidx.compose.material.icons.filled.Star
@@ -60,8 +61,10 @@ import org.meshtastic.core.strings.actions
 import org.meshtastic.core.strings.direct_message
 import org.meshtastic.core.strings.favorite
 import org.meshtastic.core.strings.ignore
+import org.meshtastic.core.strings.mute_always
 import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.share_contact
+import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -78,20 +81,24 @@ fun DeviceActions(
 ) {
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
+    var displayMuteDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
 
     NodeActionDialogs(
         node = node,
         displayFavoriteDialog = displayFavoriteDialog,
         displayIgnoreDialog = displayIgnoreDialog,
+        displayMuteDialog = displayMuteDialog,
         displayRemoveDialog = displayRemoveDialog,
         onDismissMenuRequest = {
             displayFavoriteDialog = false
             displayIgnoreDialog = false
+            displayMuteDialog = false
             displayRemoveDialog = false
         },
         onConfirmFavorite = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(it))) },
         onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
+        onConfirmMute = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Mute(it))) },
         onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
     )
 
@@ -133,6 +140,7 @@ fun DeviceActions(
             ManagementActions(
                 node = node,
                 onIgnoreClick = { displayIgnoreDialog = true },
+                onMuteClick = { displayMuteDialog = true },
                 onRemoveClick = { displayRemoveDialog = true },
             )
         }
@@ -191,7 +199,12 @@ private fun PrimaryActionsRow(
 }
 
 @Composable
-private fun ManagementActions(node: Node, onIgnoreClick: () -> Unit, onRemoveClick: () -> Unit) {
+private fun ManagementActions(
+    node: Node,
+    onIgnoreClick: () -> Unit,
+    onMuteClick: () -> Unit,
+    onRemoveClick: () -> Unit,
+) {
     Column {
         SwitchListItem(
             text = stringResource(Res.string.ignore),
@@ -203,6 +216,17 @@ private fun ManagementActions(node: Node, onIgnoreClick: () -> Unit, onRemoveCli
             },
             checked = node.isIgnored,
             onClick = onIgnoreClick,
+        )
+
+        SwitchListItem(
+            text = stringResource(if (node.isMuted) Res.string.unmute else Res.string.mute_always),
+            leadingIcon = if (node.isMuted) {
+                Icons.AutoMirrored.Filled.VolumeOff
+            } else {
+                Icons.AutoMirrored.Default.VolumeUp
+            },
+            checked = node.isMuted,
+            onClick = onMuteClick,
         )
 
         ListItem(

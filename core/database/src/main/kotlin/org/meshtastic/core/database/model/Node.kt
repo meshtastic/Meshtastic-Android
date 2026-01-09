@@ -48,6 +48,7 @@ data class Node(
     val hopsAway: Int = -1,
     val isFavorite: Boolean = false,
     val isIgnored: Boolean = false,
+    val isMuted: Boolean = false,
     val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics.getDefaultInstance(),
     val powerMetrics: PowerMetrics = PowerMetrics.getDefaultInstance(),
     val paxcounter: PaxcountProtos.Paxcount = PaxcountProtos.Paxcount.getDefaultInstance(),

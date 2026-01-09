@@ -239,6 +239,7 @@ constructor(
             entity.hopsAway = if (info.hasHopsAway()) info.hopsAway else -1
             entity.isFavorite = info.isFavorite
             entity.isIgnored = info.isIgnored
+            entity.isMuted = info.isMuted
         }
     }
 

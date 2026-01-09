@@ -28,8 +28,10 @@ import org.meshtastic.core.strings.favorite_remove
 import org.meshtastic.core.strings.ignore
 import org.meshtastic.core.strings.ignore_add
 import org.meshtastic.core.strings.ignore_remove
+import org.meshtastic.core.strings.mute_always
 import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.remove_node_text
+import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 
 @Composable
@@ -37,10 +39,12 @@ fun NodeActionDialogs(
     node: Node,
     displayFavoriteDialog: Boolean,
     displayIgnoreDialog: Boolean,
+    displayMuteDialog: Boolean,
     displayRemoveDialog: Boolean,
     onDismissMenuRequest: () -> Unit,
     onConfirmFavorite: (Node) -> Unit,
     onConfirmIgnore: (Node) -> Unit,
+    onConfirmMute: (Node) -> Unit,
     onConfirmRemove: (Node) -> Unit,
 ) {
     if (displayFavoriteDialog) {
@@ -73,6 +77,20 @@ fun NodeActionDialogs(
             onDismiss = onDismissMenuRequest,
         )
     }
+    if (displayMuteDialog) {
+        SimpleAlertDialog(
+            title = if (node.isMuted) Res.string.unmute else Res.string.mute_always,
+            text = stringResource(
+                if (node.isMuted) Res.string.ignore_remove else Res.string.ignore_add,
+                node.user.longName,
+            ),
+            onConfirm = {
+                onDismissMenuRequest()
+                onConfirmMute(node)
+            },
+            onDismiss = onDismissMenuRequest,
+        )
+    }
     if (displayRemoveDialog) {
         SimpleAlertDialog(
             title = Res.string.remove,
@@ -90,6 +108,8 @@ sealed class NodeMenuAction {
     data class Remove(val node: Node) : NodeMenuAction()
 
     data class Ignore(val node: Node) : NodeMenuAction()
+
+    data class Mute(val node: Node) : NodeMenuAction()
 
     data class Favorite(val node: Node) : NodeMenuAction()
 

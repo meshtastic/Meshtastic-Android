@@ -56,6 +56,7 @@ constructor(
         when (action) {
             is NodeMenuAction.Remove -> removeNode(action.node.num)
             is NodeMenuAction.Ignore -> ignoreNode(action.node)
+            is NodeMenuAction.Mute -> muteNode(action.node)
             is NodeMenuAction.Favorite -> favoriteNode(action.node)
             is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
             is NodeMenuAction.RequestNeighborInfo -> {
@@ -99,6 +100,14 @@ constructor(
             serviceRepository.onServiceAction(ServiceAction.Ignore(node))
         } catch (ex: RemoteException) {
             Logger.e(ex) { "Ignore node error" }
+        }
+    }
+
+    private fun muteNode(node: Node) = viewModelScope.launch {
+        try {
+            serviceRepository.onServiceAction(ServiceAction.Mute(node))
+        } catch (ex: RemoteException) {
+            Logger.e(ex) { "Mute node error" }
         }
     }
 

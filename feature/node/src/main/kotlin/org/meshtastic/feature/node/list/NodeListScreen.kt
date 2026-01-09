@@ -30,6 +30,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.DoDisturbOn
 import androidx.compose.material.icons.outlined.DoDisturbOn
 import androidx.compose.material.icons.rounded.DeleteOutline
@@ -68,11 +70,13 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add_favorite
 import org.meshtastic.core.strings.ignore
+import org.meshtastic.core.strings.mute_always
 import org.meshtastic.core.strings.node_count_template
 import org.meshtastic.core.strings.nodes
 import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.remove_favorite
 import org.meshtastic.core.strings.remove_ignored
+import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -183,20 +187,24 @@ fun NodeListScreen(
                 items(nodes, key = { it.num }) { node ->
                     var displayFavoriteDialog by remember { mutableStateOf(false) }
                     var displayIgnoreDialog by remember { mutableStateOf(false) }
+                    var displayMuteDialog by remember { mutableStateOf(false) }
                     var displayRemoveDialog by remember { mutableStateOf(false) }
 
                     NodeActionDialogs(
                         node = node,
                         displayFavoriteDialog = displayFavoriteDialog,
                         displayIgnoreDialog = displayIgnoreDialog,
+                        displayMuteDialog = displayMuteDialog,
                         displayRemoveDialog = displayRemoveDialog,
                         onDismissMenuRequest = {
                             displayFavoriteDialog = false
                             displayIgnoreDialog = false
+                            displayMuteDialog = false
                             displayRemoveDialog = false
                         },
                         onConfirmFavorite = viewModel::favoriteNode,
                         onConfirmIgnore = viewModel::ignoreNode,
+                        onConfirmMute = viewModel::muteNode,
                         onConfirmRemove = { viewModel.removeNode(it.num) },
                     )
 
@@ -231,6 +239,7 @@ fun NodeListScreen(
                                 node = node,
                                 onClickFavorite = { displayFavoriteDialog = true },
                                 onClickIgnore = { displayIgnoreDialog = true },
+                                onClickMute = { displayMuteDialog = true },
                                 onClickRemove = { displayRemoveDialog = true },
                                 onDismiss = { expanded = false },
                             )
@@ -244,17 +253,20 @@ fun NodeListScreen(
 }
 
 @Composable
+@Suppress("LongParameterList")
 private fun ContextMenu(
     expanded: Boolean,
     node: Node,
     onClickFavorite: (Node) -> Unit,
     onClickIgnore: (Node) -> Unit,
+    onClickMute: (Node) -> Unit,
     onClickRemove: (Node) -> Unit,
     onDismiss: () -> Unit,
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         val isFavorite = node.isFavorite
         val isIgnored = node.isIgnored
+        val isMuted = node.isMuted
 
         DropdownMenuItem(
             onClick = {
@@ -287,6 +299,24 @@ private fun ContextMenu(
                 Text(
                     text = stringResource(if (isIgnored) Res.string.remove_ignored else Res.string.ignore),
                     color = MaterialTheme.colorScheme.StatusRed,
+                )
+            },
+        )
+
+        DropdownMenuItem(
+            onClick = {
+                onClickMute(node)
+                onDismiss()
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
+                    contentDescription = null,
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_always),
                 )
             },
         )

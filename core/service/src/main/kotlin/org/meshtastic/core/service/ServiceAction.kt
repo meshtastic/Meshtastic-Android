@@ -27,6 +27,8 @@ sealed class ServiceAction {
 
     data class Ignore(val node: Node) : ServiceAction()
 
+    data class Mute(val node: Node) : ServiceAction()
+
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 
     data class ImportContact(val contact: AdminProtos.SharedContact) : ServiceAction()

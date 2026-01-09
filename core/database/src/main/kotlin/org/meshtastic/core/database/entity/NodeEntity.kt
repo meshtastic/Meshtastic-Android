@@ -57,6 +57,7 @@ data class NodeWithRelations(
             hopsAway = hopsAway,
             isFavorite = isFavorite,
             isIgnored = isIgnored,
+            isMuted = isMuted,
             environmentMetrics = environmentTelemetry.environmentMetrics,
             powerMetrics = powerTelemetry.powerMetrics,
             paxcounter = paxcounter,
@@ -79,6 +80,7 @@ data class NodeWithRelations(
             hopsAway = hopsAway,
             isFavorite = isFavorite,
             isIgnored = isIgnored,
+            isMuted = isMuted,
             environmentTelemetry = environmentTelemetry,
             powerTelemetry = powerTelemetry,
             paxcounter = paxcounter,
@@ -127,6 +129,7 @@ data class NodeEntity(
     @ColumnInfo(name = "hops_away") var hopsAway: Int = -1,
     @ColumnInfo(name = "is_favorite") var isFavorite: Boolean = false,
     @ColumnInfo(name = "is_ignored", defaultValue = "0") var isIgnored: Boolean = false,
+    @ColumnInfo(name = "is_muted", defaultValue = "0") var isMuted: Boolean = false,
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.newBuilder().build(),
     @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB)
@@ -186,6 +189,7 @@ data class NodeEntity(
         hopsAway = hopsAway,
         isFavorite = isFavorite,
         isIgnored = isIgnored,
+        isMuted = isMuted,
         environmentMetrics = environmentTelemetry.environmentMetrics,
         powerMetrics = powerTelemetry.powerMetrics,
         paxcounter = paxcounter,

@@ -39,7 +39,6 @@ import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.ConfigProtos
 import javax.inject.Inject
-import kotlin.Boolean
 
 @HiltViewModel
 class NodeListViewModel
@@ -160,6 +159,8 @@ constructor(
     fun favoriteNode(node: Node) = viewModelScope.launch { nodeActions.favoriteNode(node) }
 
     fun ignoreNode(node: Node) = viewModelScope.launch { nodeActions.ignoreNode(node) }
+
+    fun muteNode(node: Node) = viewModelScope.launch { nodeActions.muteNode(node) }
 
     fun removeNode(nodeNum: Int) = viewModelScope.launch { nodeActions.removeNode(nodeNum) }
 

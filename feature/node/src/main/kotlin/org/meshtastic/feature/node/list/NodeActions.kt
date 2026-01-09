@@ -49,6 +49,14 @@ constructor(
         }
     }
 
+    suspend fun muteNode(node: Node) {
+        try {
+            serviceRepository.onServiceAction(ServiceAction.Mute(node))
+        } catch (ex: RemoteException) {
+            Logger.e(ex) { "Mute node error" }
+        }
+    }
+
     suspend fun removeNode(nodeNum: Int) = withContext(Dispatchers.IO) {
         Logger.i { "Removing node '$nodeNum'" }
         try {
