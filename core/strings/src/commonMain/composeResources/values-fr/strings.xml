@@ -224,6 +224,10 @@
     <string name="debug_filter_add">Ajouter un filtre</string>
     <string name="debug_filter_included">Filtre inclus</string>
     <string name="debug_filter_clear">Supprimer tous les filtres</string>
+    <string name="debug_filter_add_custom">Ajouter un filtre personnalisé</string>
+    <string name="debug_filter_preset_title">Filtres prédéfinis</string>
+    <string name="debug_store_logs_title">Stocker les journaux de maillage</string>
+    <string name="debug_store_logs_summary">Désactiver pour passer l'écriture des journaux de maillage sur le disque</string>
     <string name="debug_clear">Effacer le journal</string>
     <string name="match_any">Correspondre à n'importe lequel | Tous</string>
     <string name="match_all">Correspondre à tout | N'importe quel</string>
