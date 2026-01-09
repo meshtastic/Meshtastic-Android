@@ -150,6 +150,9 @@ constructor(
     suspend fun getPacketByPacketId(packetId: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId) }
 
+    suspend fun findPacketsWithId(packetId: Int) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().findPacketsWithId(packetId) }
+
     @Suppress("CyclomaticComplexMethod")
     suspend fun updateSFPPStatus(
         packetId: Int,
@@ -279,6 +282,9 @@ constructor(
 
     suspend fun getReactionByPacketId(packetId: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getReactionByPacketId(packetId) }
+
+    suspend fun findReactionsWithId(packetId: Int) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().findReactionsWithId(packetId) }
 
     suspend fun clearPacketDB() = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteAll() }
 
