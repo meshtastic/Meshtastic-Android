@@ -252,6 +252,7 @@ constructor(
         val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
         meshLogPrefs.retentionDays = clamped
         _retentionDays.value = clamped
+        viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(clamped) }
     }
 
     fun setLoggingEnabled(enabled: Boolean) {
@@ -259,6 +260,8 @@ constructor(
         _loggingEnabled.value = enabled
         if (!enabled) {
             viewModelScope.launch { meshLogRepository.deleteAll() }
+        } else {
+            viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays) }
         }
     }
 
