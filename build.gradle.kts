@@ -78,77 +78,41 @@ kover {
     }
 }
 
-subprojects {
-    // Apply Dokka to all subprojects to ensure they are available for aggregation
-    apply(plugin = "org.jetbrains.dokka")
-
-    dokka {
-        dokkaSourceSets.configureEach {
-            perPackageOption {
-                matchingRegex.set("hilt_aggregated_deps")
-                suppress.set(true)
-            }
-            perPackageOption {
-                matchingRegex.set("org.meshtastic.core.strings.*")
-                suppress.set(true)
-            }
-            listOf("java", "kotlin").forEach { lang ->
-                val dir = file("src/main/$lang")
-                if (dir.exists()) {
-                    sourceLink {
-                        enableJdkDocumentationLink.set(true)
-                        enableKotlinStdLibDocumentationLink.set(true)
-                        reportUndocumented.set(true)
-                        localDirectory.set(dir)
-
-                        val relativePath = project.projectDir.relativeTo(rootProject.projectDir).path.replace("\\", "/")
-                        remoteUrl("https://github.com/meshtastic/Meshtastic-Android/blob/main/$relativePath/src/main/$lang")
-                        remoteLineSuffix.set("#L")
-                    }
-                }
-            }
-        }
-    }
-}
-
 dependencies {
     kover(projects.app)
 
     kover(projects.core.analytics)
     kover(projects.core.common)
     kover(projects.core.data)
+    kover(projects.core.database)
     kover(projects.core.datastore)
+    kover(projects.core.di)
     kover(projects.core.model)
     kover(projects.core.navigation)
     kover(projects.core.network)
     kover(projects.core.prefs)
+    kover(projects.core.proto)
+    kover(projects.core.service)
     kover(projects.core.ui)
     kover(projects.feature.intro)
     kover(projects.feature.messaging)
     kover(projects.feature.map)
     kover(projects.feature.node)
     kover(projects.feature.settings)
+    kover(projects.feature.firmware)
 
-    dokka(project(":app"))
-    dokka(project(":core:analytics"))
-    dokka(project(":core:common"))
-    dokka(project(":core:data"))
-    dokka(project(":core:database"))
-    dokka(project(":core:datastore"))
-    dokka(project(":core:di"))
-    dokka(project(":core:model"))
-    dokka(project(":core:navigation"))
-    dokka(project(":core:network"))
-    dokka(project(":core:prefs"))
-    dokka(project(":core:proto"))
-    dokka(project(":core:service"))
-    dokka(project(":core:ui"))
-    dokka(project(":feature:intro"))
-    dokka(project(":feature:messaging"))
-    dokka(project(":feature:map"))
-    dokka(project(":feature:node"))
-    dokka(project(":feature:settings"))
+    // Aggregated Dokka documentation
+    subprojects.forEach { subproject ->
+        subproject.pluginManager.withPlugin("org.jetbrains.dokka") {
+            dokka(subproject)
+        }
+    }
+
+    dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
+
+
+// ... rest of the file ...
 
 dokka {
     moduleName.set("Meshtastic App")
@@ -156,5 +120,3 @@ dokka {
         suppressInheritedMembers.set(true)
     }
 }
-
-
