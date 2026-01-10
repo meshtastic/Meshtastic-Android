@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -55,9 +54,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val userConfig = state.userConfig
     val formState = rememberConfigState(initialValue = userConfig)
-    val capabilities = remember(state.metadata?.firmwareVersion) {
-        Capabilities(state.metadata?.firmwareVersion)
-    }
+    val capabilities = remember(state.metadata?.firmwareVersion) { Capabilities(state.metadata?.firmwareVersion) }
 
     val validLongName = formState.value.longName.isNotBlank()
     val validShortName = formState.value.shortName.isNotBlank()
