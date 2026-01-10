@@ -264,7 +264,9 @@ private fun ContextMenu(
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         FavoriteMenuItem(node, onFavorite, onDismiss)
         IgnoreMenuItem(node, onIgnore, onDismiss)
-        MuteMenuItem(node, onMute, onDismiss)
+        if (node.capabilities.canMuteNode) {
+            MuteMenuItem(node, onMute, onDismiss)
+        }
         RemoveMenuItem(node, onRemove, onDismiss)
     }
 }

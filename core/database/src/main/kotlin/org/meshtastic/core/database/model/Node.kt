@@ -20,6 +20,7 @@ import android.graphics.Color
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
 import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.latLongToMeter
@@ -55,6 +56,8 @@ data class Node(
     val notes: String = "",
     val manuallyVerified: Boolean = false,
 ) {
+    val capabilities: Capabilities by lazy { Capabilities(metadata?.firmwareVersion) }
+
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
             val r = (num and 0xFF0000) shr 16

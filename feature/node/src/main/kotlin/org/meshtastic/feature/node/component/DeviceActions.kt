@@ -227,17 +227,19 @@ private fun ManagementActions(
             onClick = onIgnoreClick,
         )
 
-        SwitchListItem(
-            text = stringResource(Res.string.mute_notifications),
-            leadingIcon =
-            if (node.isMuted) {
-                Icons.AutoMirrored.Filled.VolumeOff
-            } else {
-                Icons.AutoMirrored.Default.VolumeUp
-            },
-            checked = node.isMuted,
-            onClick = onMuteClick,
-        )
+        if (node.capabilities.canMuteNode) {
+            SwitchListItem(
+                text = stringResource(Res.string.mute_notifications),
+                leadingIcon =
+                if (node.isMuted) {
+                    Icons.AutoMirrored.Filled.VolumeOff
+                } else {
+                    Icons.AutoMirrored.Default.VolumeUp
+                },
+                checked = node.isMuted,
+                onClick = onMuteClick,
+            )
+        }
 
         ListItem(
             text = stringResource(Res.string.remove),
