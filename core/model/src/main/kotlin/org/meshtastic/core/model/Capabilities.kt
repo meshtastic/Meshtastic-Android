@@ -33,11 +33,38 @@ data class Capabilities(val firmwareVersion: String?) {
     val canMuteNode: Boolean
         get() = version != null && version >= DeviceVersion("2.8.0")
 
-    /** Ability to request neighbor information from other nodes. Supported since firmware v2.7.15. */
+    /**
+     * Ability to request neighbor information from other nodes.
+     * Supported since firmware v2.7.15.
+     */
     val canRequestNeighborInfo: Boolean
         get() = version != null && version >= DeviceVersion("2.7.15")
 
-    /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */
+    /**
+     * Ability to send verified shared contacts.
+     * Supported since firmware v2.7.12.
+     */
     val canSendVerifiedContacts: Boolean
         get() = version != null && version >= DeviceVersion("2.7.12")
+
+    /**
+     * Ability to toggle device telemetry globally via module config.
+     * Supported since firmware v2.7.12.
+     */
+    val canToggleTelemetryEnabled: Boolean
+        get() = version != null && version >= DeviceVersion("2.7.12")
+
+    /**
+     * Ability to toggle the 'is_unmessageable' flag in user config.
+     * Supported since firmware v2.6.9.
+     */
+    val canToggleUnmessageable: Boolean
+        get() = version != null && version >= DeviceVersion("2.6.9")
+
+    /**
+     * Support for sharing contact information via QR codes.
+     * Supported since firmware v2.6.8.
+     */
+    val supportsQrCodeSharing: Boolean
+        get() = version != null && version >= DeviceVersion("2.6.8")
 }

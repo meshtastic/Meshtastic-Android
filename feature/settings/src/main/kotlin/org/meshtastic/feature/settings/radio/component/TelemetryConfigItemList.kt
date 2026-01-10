@@ -25,7 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.air_quality_metrics_module_enabled
 import org.meshtastic.core.strings.air_quality_metrics_update_interval_seconds
@@ -50,15 +50,15 @@ import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.copy
 import org.meshtastic.proto.moduleConfig
 
-private const val MIN_FW_FOR_TELEMETRY_TOGGLE = "2.7.12"
-
 @Composable
 fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val telemetryConfig = state.moduleConfig.telemetry
     val formState = rememberConfigState(initialValue = telemetryConfig)
 
-    val firmwareVersion = state.metadata?.firmwareVersion ?: "1"
+    val capabilities = remember(state.metadata?.firmwareVersion) {
+        Capabilities(state.metadata?.firmwareVersion)
+    }
 
     RadioConfigScreenList(
         title = stringResource(Res.string.telemetry),
@@ -74,7 +74,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
     ) {
         item {
             TitledCard(title = stringResource(Res.string.telemetry_config)) {
-                if (DeviceVersion(firmwareVersion) >= DeviceVersion(MIN_FW_FOR_TELEMETRY_TOGGLE)) {
+                if (capabilities.canToggleTelemetryEnabled) {
                     SwitchPreference(
                         title = stringResource(Res.string.device_telemetry_enabled),
                         summary = stringResource(Res.string.device_telemetry_enabled_summary),

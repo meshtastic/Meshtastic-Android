@@ -57,7 +57,6 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.qr_code
 import org.meshtastic.core.strings.scan_qr_code
@@ -197,7 +196,6 @@ val Uri.qrCode: Bitmap?
             null
         }
 
-private const val REQUIRED_MIN_FIRMWARE = "2.6.8"
 private const val BARCODE_PIXEL_SIZE = 960
 private const val MESHTASTIC_HOST = "meshtastic.org"
 private const val CONTACT_SHARE_PATH = "/v/"
@@ -206,9 +204,6 @@ private const val CONTACT_SHARE_PATH = "/v/"
 internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$CONTACT_SHARE_PATH#"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 private const val CAMERA_ID = 0
-
-/** Checks if the device firmware version supports QR code sharing. */
-fun DeviceVersion.supportsQrCodeSharing(): Boolean = this >= DeviceVersion(REQUIRED_MIN_FIRMWARE)
 
 /**
  * Converts a URI to a [AdminProtos.SharedContact].

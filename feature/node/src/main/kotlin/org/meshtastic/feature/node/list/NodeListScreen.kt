@@ -64,7 +64,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add_favorite
@@ -81,7 +80,6 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 import org.meshtastic.core.ui.component.smartScrollToTop
-import org.meshtastic.core.ui.component.supportsQrCodeSharing
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
@@ -137,8 +135,7 @@ fun NodeListScreen(
             )
         },
         floatingActionButton = {
-            val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
-            val shareCapable = firmwareVersion.supportsQrCodeSharing()
+            val shareCapable = ourNode?.capabilities?.supportsQrCodeSharing ?: false
             val sharedContact: AdminProtos.SharedContact? by
                 viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
             AddContactFAB(
