@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.entity
 
 import androidx.room.ColumnInfo
@@ -57,6 +56,7 @@ data class NodeWithRelations(
             hopsAway = hopsAway,
             isFavorite = isFavorite,
             isIgnored = isIgnored,
+            isMuted = isMuted,
             environmentMetrics = environmentTelemetry.environmentMetrics,
             powerMetrics = powerTelemetry.powerMetrics,
             paxcounter = paxcounter,
@@ -79,6 +79,7 @@ data class NodeWithRelations(
             hopsAway = hopsAway,
             isFavorite = isFavorite,
             isIgnored = isIgnored,
+            isMuted = isMuted,
             environmentTelemetry = environmentTelemetry,
             powerTelemetry = powerTelemetry,
             paxcounter = paxcounter,
@@ -127,6 +128,7 @@ data class NodeEntity(
     @ColumnInfo(name = "hops_away") var hopsAway: Int = -1,
     @ColumnInfo(name = "is_favorite") var isFavorite: Boolean = false,
     @ColumnInfo(name = "is_ignored", defaultValue = "0") var isIgnored: Boolean = false,
+    @ColumnInfo(name = "is_muted", defaultValue = "0") var isMuted: Boolean = false,
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.newBuilder().build(),
     @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB)
@@ -186,6 +188,7 @@ data class NodeEntity(
         hopsAway = hopsAway,
         isFavorite = isFavorite,
         isIgnored = isIgnored,
+        isMuted = isMuted,
         environmentMetrics = environmentTelemetry.environmentMetrics,
         powerMetrics = powerTelemetry.powerMetrics,
         paxcounter = paxcounter,

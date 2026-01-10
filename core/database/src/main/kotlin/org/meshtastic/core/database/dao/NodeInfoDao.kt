@@ -106,6 +106,9 @@ interface NodeInfoDao {
                 paxcounter = incomingNode.paxcounter,
                 channel = incomingNode.channel,
                 viaMqtt = incomingNode.viaMqtt,
+                isFavorite = incomingNode.isFavorite,
+                isIgnored = incomingNode.isIgnored,
+                isMuted = incomingNode.isMuted,
                 notes = resolvedNotes,
             )
         }

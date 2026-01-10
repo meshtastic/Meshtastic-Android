@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -23,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,7 +30,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.isUnmessageableRole
-import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.hardware_model
 import org.meshtastic.core.strings.licensed_amateur_radio
@@ -54,7 +54,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val userConfig = state.userConfig
     val formState = rememberConfigState(initialValue = userConfig)
-    val firmwareVersion = DeviceVersion(state.metadata?.firmwareVersion ?: "")
+    val capabilities = remember(state.metadata?.firmwareVersion) { Capabilities(state.metadata?.firmwareVersion) }
 
     val validLongName = formState.value.longName.isNotBlank()
     val validShortName = formState.value.shortName.isNotBlank()
@@ -113,8 +113,8 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                     summary = stringResource(Res.string.unmonitored_or_infrastructure),
                     checked =
                     formState.value.isUnmessagable ||
-                        (firmwareVersion < DeviceVersion("2.6.9") && formState.value.role.isUnmessageableRole()),
-                    enabled = formState.value.hasIsUnmessagable() || firmwareVersion >= DeviceVersion("2.6.9"),
+                        (!capabilities.canToggleUnmessageable && formState.value.role.isUnmessageableRole()),
+                    enabled = formState.value.hasIsUnmessagable() || capabilities.canToggleUnmessageable,
                     onCheckedChange = { formState.value = formState.value.copy { isUnmessagable = it } },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )

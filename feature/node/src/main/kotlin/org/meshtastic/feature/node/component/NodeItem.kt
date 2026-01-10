@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import android.content.res.Configuration
@@ -80,6 +79,7 @@ fun NodeItem(
     isActive: Boolean = false,
 ) {
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
+    val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
     val longName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
@@ -145,6 +145,7 @@ fun NodeItem(
                 NodeStatusIcons(
                     isThisNode = isThisNode,
                     isFavorite = isFavorite,
+                    isMuted = isMuted,
                     isUnmessageable = unmessageable,
                     connectionState = connectionState,
                 )

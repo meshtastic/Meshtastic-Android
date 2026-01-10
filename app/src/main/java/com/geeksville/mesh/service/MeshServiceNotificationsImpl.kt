@@ -313,8 +313,9 @@ constructor(
         message: String,
         isBroadcast: Boolean,
         channelName: String?,
+        isSilent: Boolean,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName)
+        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isSilent)
     }
 
     override suspend fun updateReactionNotification(
@@ -323,8 +324,9 @@ constructor(
         emoji: String,
         isBroadcast: Boolean,
         channelName: String?,
+        isSilent: Boolean,
     ) {
-        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isBroadcast)
+        showConversationNotification(contactKey, isBroadcast, channelName, isSilent = isSilent)
     }
 
     override suspend fun updateWaypointNotification(
@@ -332,8 +334,9 @@ constructor(
         name: String,
         message: String,
         waypointId: Int,
+        isSilent: Boolean,
     ) {
-        val notification = createWaypointNotification(name, message, waypointId)
+        val notification = createWaypointNotification(name, message, waypointId, isSilent)
         notificationManager.notify(contactKey.hashCode(), notification)
     }
 
@@ -571,19 +574,30 @@ constructor(
         return builder.build()
     }
 
-    private fun createWaypointNotification(name: String, message: String, waypointId: Int): Notification {
+    private fun createWaypointNotification(
+        name: String,
+        message: String,
+        waypointId: Int,
+        isSilent: Boolean,
+    ): Notification {
         val person = Person.Builder().setName(name).build()
         val style = NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
 
-        return commonBuilder(NotificationType.Waypoint, createOpenWaypointIntent(waypointId))
-            .setCategory(Notification.CATEGORY_MESSAGE)
-            .setAutoCancel(true)
-            .setStyle(style)
-            .setGroup(GROUP_KEY_MESSAGES)
-            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-            .setWhen(System.currentTimeMillis())
-            .setShowWhen(true)
-            .build()
+        val builder =
+            commonBuilder(NotificationType.Waypoint, createOpenWaypointIntent(waypointId))
+                .setCategory(Notification.CATEGORY_MESSAGE)
+                .setAutoCancel(true)
+                .setStyle(style)
+                .setGroup(GROUP_KEY_MESSAGES)
+                .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+                .setWhen(System.currentTimeMillis())
+                .setShowWhen(true)
+
+        if (isSilent) {
+            builder.setSilent(true)
+        }
+
+        return builder.build()
     }
 
     private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {

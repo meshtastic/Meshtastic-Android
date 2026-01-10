@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.list
 
 import androidx.lifecycle.SavedStateHandle
@@ -39,7 +38,6 @@ import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.ConfigProtos
 import javax.inject.Inject
-import kotlin.Boolean
 
 @HiltViewModel
 class NodeListViewModel
@@ -160,6 +158,8 @@ constructor(
     fun favoriteNode(node: Node) = viewModelScope.launch { nodeActions.favoriteNode(node) }
 
     fun ignoreNode(node: Node) = viewModelScope.launch { nodeActions.ignoreNode(node) }
+
+    fun muteNode(node: Node) = viewModelScope.launch { nodeActions.muteNode(node) }
 
     fun removeNode(nodeNum: Int) = viewModelScope.launch { nodeActions.removeNode(nodeNum) }
 

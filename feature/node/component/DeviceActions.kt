@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -60,20 +61,14 @@ import org.meshtastic.core.strings.actions
 import org.meshtastic.core.strings.direct_message
 import org.meshtastic.core.strings.favorite
 import org.meshtastic.core.strings.ignore
-import org.meshtastic.core.strings.mute_notifications
+import org.meshtastic.core.strings.mute_always
 import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.share_contact
+import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
-
-private enum class DialogType {
-    FAVORITE,
-    IGNORE,
-    MUTE,
-    REMOVE,
-}
 
 @Composable
 fun DeviceActions(
@@ -84,15 +79,23 @@ fun DeviceActions(
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
 ) {
-    var displayedDialog by remember { mutableStateOf<DialogType?>(null) }
+    var displayFavoriteDialog by remember { mutableStateOf(false) }
+    var displayIgnoreDialog by remember { mutableStateOf(false) }
+    var displayMuteDialog by remember { mutableStateOf(false) }
+    var displayRemoveDialog by remember { mutableStateOf(false) }
 
     NodeActionDialogs(
         node = node,
-        displayFavoriteDialog = displayedDialog == DialogType.FAVORITE,
-        displayIgnoreDialog = displayedDialog == DialogType.IGNORE,
-        displayMuteDialog = displayedDialog == DialogType.MUTE,
-        displayRemoveDialog = displayedDialog == DialogType.REMOVE,
-        onDismissMenuRequest = { displayedDialog = null },
+        displayFavoriteDialog = displayFavoriteDialog,
+        displayIgnoreDialog = displayIgnoreDialog,
+        displayMuteDialog = displayMuteDialog,
+        displayRemoveDialog = displayRemoveDialog,
+        onDismissMenuRequest = {
+            displayFavoriteDialog = false
+            displayIgnoreDialog = false
+            displayMuteDialog = false
+            displayRemoveDialog = false
+        },
         onConfirmFavorite = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(it))) },
         onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
         onConfirmMute = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Mute(it))) },
@@ -104,56 +107,64 @@ fun DeviceActions(
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         shape = MaterialTheme.shapes.extraLarge,
     ) {
-        Column(modifier = Modifier.padding(vertical = 12.dp)) {
-            ActionsHeader()
-
-            PrimaryActionsRow(
-                node = node,
-                isLocal = isLocal,
-                onAction = onAction,
-                onFavoriteClick = { displayedDialog = DialogType.FAVORITE },
-            )
-
-            if (!isLocal) {
-                ActionsDivider()
-
-                RemoteDeviceActions(
-                    node = node,
-                    lastTracerouteTime = lastTracerouteTime,
-                    lastRequestNeighborsTime = lastRequestNeighborsTime,
-                    onAction = onAction,
-                )
-            }
-
-            ActionsDivider()
-
-            ManagementActions(
-                node = node,
-                onIgnoreClick = { displayedDialog = DialogType.IGNORE },
-                onMuteClick = { displayedDialog = DialogType.MUTE },
-                onRemoveClick = { displayedDialog = DialogType.REMOVE },
-            )
-        }
+        DeviceActionsContent(
+            node = node,
+            isLocal = isLocal,
+            lastTracerouteTime = lastTracerouteTime,
+            lastRequestNeighborsTime = lastRequestNeighborsTime,
+            onAction = onAction,
+            onFavoriteClick = { displayFavoriteDialog = true },
+            onIgnoreClick = { displayIgnoreDialog = true },
+            onMuteClick = { displayMuteDialog = true },
+            onRemoveClick = { displayRemoveDialog = true },
+        )
     }
 }
 
 @Composable
-private fun ActionsHeader() {
-    Text(
-        text = stringResource(Res.string.actions),
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-    )
-}
+private fun DeviceActionsContent(
+    node: Node,
+    isLocal: Boolean,
+    lastTracerouteTime: Long?,
+    lastRequestNeighborsTime: Long?,
+    onAction: (NodeDetailAction) -> Unit,
+    onFavoriteClick: () -> Unit,
+    onIgnoreClick: () -> Unit,
+    onMuteClick: () -> Unit,
+    onRemoveClick: () -> Unit,
+) {
+    Column(modifier = Modifier.padding(vertical = 12.dp)) {
+        Text(
+            text = stringResource(Res.string.actions),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+        )
 
-@Composable
-private fun ActionsDivider() {
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-    )
+        PrimaryActionsRow(node, isLocal, onAction, onFavoriteClick)
+
+        if (!isLocal) {
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            )
+
+            RemoteDeviceActions(
+                node = node,
+                lastTracerouteTime = lastTracerouteTime,
+                lastRequestNeighborsTime = lastRequestNeighborsTime,
+                onAction = onAction,
+            )
+        }
+
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+        )
+
+        ManagementActions(node, onIgnoreClick, onMuteClick, onRemoveClick)
+    }
 }
 
 @Composable
@@ -227,19 +238,16 @@ private fun ManagementActions(
             onClick = onIgnoreClick,
         )
 
-        if (node.capabilities.canMuteNode) {
-            SwitchListItem(
-                text = stringResource(Res.string.mute_notifications),
-                leadingIcon =
-                if (node.isMuted) {
-                    Icons.AutoMirrored.Filled.VolumeOff
-                } else {
-                    Icons.AutoMirrored.Default.VolumeUp
-                },
-                checked = node.isMuted,
-                onClick = onMuteClick,
-            )
-        }
+        SwitchListItem(
+            text = stringResource(if (node.isMuted) Res.string.unmute else Res.string.mute_always),
+            leadingIcon = if (node.isMuted) {
+                Icons.AutoMirrored.Filled.VolumeOff
+            } else {
+                Icons.AutoMirrored.Default.VolumeUp
+            },
+            checked = node.isMuted,
+            onClick = onMuteClick,
+        )
 
         ListItem(
             text = stringResource(Res.string.remove),

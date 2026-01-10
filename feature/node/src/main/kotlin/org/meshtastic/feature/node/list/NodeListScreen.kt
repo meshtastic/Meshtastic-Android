@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.list
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -30,6 +29,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.DoDisturbOn
 import androidx.compose.material.icons.outlined.DoDisturbOn
 import androidx.compose.material.icons.rounded.DeleteOutline
@@ -63,22 +64,22 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add_favorite
 import org.meshtastic.core.strings.ignore
+import org.meshtastic.core.strings.mute_always
 import org.meshtastic.core.strings.node_count_template
 import org.meshtastic.core.strings.nodes
 import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.remove_favorite
 import org.meshtastic.core.strings.remove_ignored
+import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 import org.meshtastic.core.ui.component.smartScrollToTop
-import org.meshtastic.core.ui.component.supportsQrCodeSharing
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
@@ -134,8 +135,7 @@ fun NodeListScreen(
             )
         },
         floatingActionButton = {
-            val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
-            val shareCapable = firmwareVersion.supportsQrCodeSharing()
+            val shareCapable = ourNode?.capabilities?.supportsQrCodeSharing ?: false
             val sharedContact: AdminProtos.SharedContact? by
                 viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
             AddContactFAB(
@@ -183,20 +183,24 @@ fun NodeListScreen(
                 items(nodes, key = { it.num }) { node ->
                     var displayFavoriteDialog by remember { mutableStateOf(false) }
                     var displayIgnoreDialog by remember { mutableStateOf(false) }
+                    var displayMuteDialog by remember { mutableStateOf(false) }
                     var displayRemoveDialog by remember { mutableStateOf(false) }
 
                     NodeActionDialogs(
                         node = node,
                         displayFavoriteDialog = displayFavoriteDialog,
                         displayIgnoreDialog = displayIgnoreDialog,
+                        displayMuteDialog = displayMuteDialog,
                         displayRemoveDialog = displayRemoveDialog,
                         onDismissMenuRequest = {
                             displayFavoriteDialog = false
                             displayIgnoreDialog = false
+                            displayMuteDialog = false
                             displayRemoveDialog = false
                         },
                         onConfirmFavorite = viewModel::favoriteNode,
                         onConfirmIgnore = viewModel::ignoreNode,
+                        onConfirmMute = viewModel::muteNode,
                         onConfirmRemove = { viewModel.removeNode(it.num) },
                     )
 
@@ -229,9 +233,10 @@ fun NodeListScreen(
                             ContextMenu(
                                 expanded = expanded,
                                 node = node,
-                                onClickFavorite = { displayFavoriteDialog = true },
-                                onClickIgnore = { displayIgnoreDialog = true },
-                                onClickRemove = { displayRemoveDialog = true },
+                                onFavorite = { displayFavoriteDialog = true },
+                                onIgnore = { displayIgnoreDialog = true },
+                                onMute = { displayMuteDialog = true },
+                                onRemove = { displayRemoveDialog = true },
                                 onDismiss = { expanded = false },
                             )
                         }
@@ -247,69 +252,103 @@ fun NodeListScreen(
 private fun ContextMenu(
     expanded: Boolean,
     node: Node,
-    onClickFavorite: (Node) -> Unit,
-    onClickIgnore: (Node) -> Unit,
-    onClickRemove: (Node) -> Unit,
+    onFavorite: () -> Unit,
+    onIgnore: () -> Unit,
+    onMute: () -> Unit,
+    onRemove: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-        val isFavorite = node.isFavorite
-        val isIgnored = node.isIgnored
-
-        DropdownMenuItem(
-            onClick = {
-                onClickFavorite(node)
-                onDismiss()
-            },
-            enabled = !isIgnored,
-            leadingIcon = {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
-                    contentDescription = null,
-                )
-            },
-            text = { Text(stringResource(if (isFavorite) Res.string.remove_favorite else Res.string.add_favorite)) },
-        )
-
-        DropdownMenuItem(
-            onClick = {
-                onClickIgnore(node)
-                onDismiss()
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = if (isIgnored) Icons.Filled.DoDisturbOn else Icons.Outlined.DoDisturbOn,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.StatusRed,
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(if (isIgnored) Res.string.remove_ignored else Res.string.ignore),
-                    color = MaterialTheme.colorScheme.StatusRed,
-                )
-            },
-        )
-
-        DropdownMenuItem(
-            onClick = {
-                onClickRemove(node)
-                onDismiss()
-            },
-            enabled = !isIgnored,
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.DeleteOutline,
-                    contentDescription = null,
-                    tint = if (isIgnored) LocalContentColor.current else MaterialTheme.colorScheme.StatusRed,
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(Res.string.remove),
-                    color = if (isIgnored) Color.Unspecified else MaterialTheme.colorScheme.StatusRed,
-                )
-            },
-        )
+        FavoriteMenuItem(node, onFavorite, onDismiss)
+        IgnoreMenuItem(node, onIgnore, onDismiss)
+        if (node.capabilities.canMuteNode) {
+            MuteMenuItem(node, onMute, onDismiss)
+        }
+        RemoveMenuItem(node, onRemove, onDismiss)
     }
+}
+
+@Composable
+private fun FavoriteMenuItem(node: Node, onFavorite: () -> Unit, onDismiss: () -> Unit) {
+    val isFavorite = node.isFavorite
+    DropdownMenuItem(
+        onClick = {
+            onFavorite()
+            onDismiss()
+        },
+        enabled = !node.isIgnored,
+        leadingIcon = {
+            Icon(
+                imageVector = if (isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                contentDescription = null,
+            )
+        },
+        text = { Text(stringResource(if (isFavorite) Res.string.remove_favorite else Res.string.add_favorite)) },
+    )
+}
+
+@Composable
+private fun IgnoreMenuItem(node: Node, onIgnore: () -> Unit, onDismiss: () -> Unit) {
+    val isIgnored = node.isIgnored
+    DropdownMenuItem(
+        onClick = {
+            onIgnore()
+            onDismiss()
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = if (isIgnored) Icons.Filled.DoDisturbOn else Icons.Outlined.DoDisturbOn,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.StatusRed,
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(if (isIgnored) Res.string.remove_ignored else Res.string.ignore),
+                color = MaterialTheme.colorScheme.StatusRed,
+            )
+        },
+    )
+}
+
+@Composable
+private fun MuteMenuItem(node: Node, onMute: () -> Unit, onDismiss: () -> Unit) {
+    val isMuted = node.isMuted
+    DropdownMenuItem(
+        onClick = {
+            onMute()
+            onDismiss()
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
+                contentDescription = null,
+            )
+        },
+        text = { Text(text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_always)) },
+    )
+}
+
+@Composable
+private fun RemoveMenuItem(node: Node, onRemove: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onRemove()
+            onDismiss()
+        },
+        enabled = !node.isIgnored,
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Rounded.DeleteOutline,
+                contentDescription = null,
+                tint = if (node.isIgnored) LocalContentColor.current else MaterialTheme.colorScheme.StatusRed,
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(Res.string.remove),
+                color = if (node.isIgnored) Color.Unspecified else MaterialTheme.colorScheme.StatusRed,
+            )
+        },
+    )
 }

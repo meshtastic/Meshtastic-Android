@@ -75,6 +75,7 @@ constructor(
             when (action) {
                 is ServiceAction.Favorite -> handleFavorite(action, myNodeNum)
                 is ServiceAction.Ignore -> handleIgnore(action, myNodeNum)
+                is ServiceAction.Mute -> handleMute(action, myNodeNum)
                 is ServiceAction.Reaction -> handleReaction(action, myNodeNum)
                 is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
                 is ServiceAction.SendContact -> {
@@ -101,6 +102,12 @@ constructor(
             if (node.isIgnored) removeIgnoredNode = node.num else setIgnoredNode = node.num
         }
         nodeManager.updateNodeInfo(node.num) { it.isIgnored = !node.isIgnored }
+    }
+
+    private fun handleMute(action: ServiceAction.Mute, myNodeNum: Int) {
+        val node = action.node
+        commandSender.sendAdmin(myNodeNum) { toggleMutedNode = node.num }
+        nodeManager.updateNodeInfo(node.num) { it.isMuted = !node.isMuted }
     }
 
     private fun handleReaction(action: ServiceAction.Reaction, myNodeNum: Int) {

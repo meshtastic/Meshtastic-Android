@@ -40,8 +40,8 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
@@ -51,8 +51,6 @@ import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig.Role
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.sharedContact
 import javax.inject.Inject
-
-private const val VERIFIED_CONTACT_FIRMWARE_CUTOFF = "2.7.12"
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
@@ -155,19 +153,14 @@ constructor(
             val fwVersion = ourNodeInfo.value?.metadata?.firmwareVersion
             val destNode = nodeRepository.getNode(dest)
             val isClientBase = ourNodeInfo.value?.user?.role == Role.CLIENT_BASE
-            fwVersion?.let { fw ->
-                val ver = DeviceVersion(asString = fw)
-                val verifiedSharedContactsVersion =
-                    DeviceVersion(
-                        asString = VERIFIED_CONTACT_FIRMWARE_CUTOFF,
-                    ) // Version cutover to verified shared contacts
 
-                if (ver >= verifiedSharedContactsVersion) {
-                    sendSharedContact(destNode)
-                } else {
-                    if (!destNode.isFavorite && !isClientBase) {
-                        favoriteNode(destNode)
-                    }
+            val capabilities = Capabilities(fwVersion)
+
+            if (capabilities.canSendVerifiedContacts) {
+                sendSharedContact(destNode)
+            } else {
+                if (!destNode.isFavorite && !isClientBase) {
+                    favoriteNode(destNode)
                 }
             }
         }

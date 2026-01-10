@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.model
 
 import android.graphics.Color
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
 import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.latLongToMeter
@@ -48,6 +48,7 @@ data class Node(
     val hopsAway: Int = -1,
     val isFavorite: Boolean = false,
     val isIgnored: Boolean = false,
+    val isMuted: Boolean = false,
     val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics.getDefaultInstance(),
     val powerMetrics: PowerMetrics = PowerMetrics.getDefaultInstance(),
     val paxcounter: PaxcountProtos.Paxcount = PaxcountProtos.Paxcount.getDefaultInstance(),
@@ -55,6 +56,8 @@ data class Node(
     val notes: String = "",
     val manuallyVerified: Boolean = false,
 ) {
+    val capabilities: Capabilities by lazy { Capabilities(metadata?.firmwareVersion) }
+
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
             val r = (num and 0xFF0000) shr 16
