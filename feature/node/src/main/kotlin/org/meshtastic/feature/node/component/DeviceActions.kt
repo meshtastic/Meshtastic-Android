@@ -69,6 +69,13 @@ import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
+private enum class DialogType {
+    FAVORITE,
+    IGNORE,
+    MUTE,
+    REMOVE,
+}
+
 @Composable
 fun DeviceActions(
     node: Node,
@@ -78,23 +85,15 @@ fun DeviceActions(
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
 ) {
-    var displayFavoriteDialog by remember { mutableStateOf(false) }
-    var displayIgnoreDialog by remember { mutableStateOf(false) }
-    var displayMuteDialog by remember { mutableStateOf(false) }
-    var displayRemoveDialog by remember { mutableStateOf(false) }
+    var displayedDialog by remember { mutableStateOf<DialogType?>(null) }
 
     NodeActionDialogs(
         node = node,
-        displayFavoriteDialog = displayFavoriteDialog,
-        displayIgnoreDialog = displayIgnoreDialog,
-        displayMuteDialog = displayMuteDialog,
-        displayRemoveDialog = displayRemoveDialog,
-        onDismissMenuRequest = {
-            displayFavoriteDialog = false
-            displayIgnoreDialog = false
-            displayMuteDialog = false
-            displayRemoveDialog = false
-        },
+        displayFavoriteDialog = displayedDialog == DialogType.FAVORITE,
+        displayIgnoreDialog = displayedDialog == DialogType.IGNORE,
+        displayMuteDialog = displayedDialog == DialogType.MUTE,
+        displayRemoveDialog = displayedDialog == DialogType.REMOVE,
+        onDismissMenuRequest = { displayedDialog = null },
         onConfirmFavorite = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(it))) },
         onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
         onConfirmMute = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Mute(it))) },
@@ -106,64 +105,56 @@ fun DeviceActions(
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         shape = MaterialTheme.shapes.extraLarge,
     ) {
-        DeviceActionsContent(
-            node = node,
-            isLocal = isLocal,
-            lastTracerouteTime = lastTracerouteTime,
-            lastRequestNeighborsTime = lastRequestNeighborsTime,
-            onAction = onAction,
-            onFavoriteClick = { displayFavoriteDialog = true },
-            onIgnoreClick = { displayIgnoreDialog = true },
-            onMuteClick = { displayMuteDialog = true },
-            onRemoveClick = { displayRemoveDialog = true },
-        )
+        Column(modifier = Modifier.padding(vertical = 12.dp)) {
+            ActionsHeader()
+
+            PrimaryActionsRow(
+                node = node,
+                isLocal = isLocal,
+                onAction = onAction,
+                onFavoriteClick = { displayedDialog = DialogType.FAVORITE },
+            )
+
+            if (!isLocal) {
+                ActionsDivider()
+
+                RemoteDeviceActions(
+                    node = node,
+                    lastTracerouteTime = lastTracerouteTime,
+                    lastRequestNeighborsTime = lastRequestNeighborsTime,
+                    onAction = onAction,
+                )
+            }
+
+            ActionsDivider()
+
+            ManagementActions(
+                node = node,
+                onIgnoreClick = { displayedDialog = DialogType.IGNORE },
+                onMuteClick = { displayedDialog = DialogType.MUTE },
+                onRemoveClick = { displayedDialog = DialogType.REMOVE },
+            )
+        }
     }
 }
 
 @Composable
-private fun DeviceActionsContent(
-    node: Node,
-    isLocal: Boolean,
-    lastTracerouteTime: Long?,
-    lastRequestNeighborsTime: Long?,
-    onAction: (NodeDetailAction) -> Unit,
-    onFavoriteClick: () -> Unit,
-    onIgnoreClick: () -> Unit,
-    onMuteClick: () -> Unit,
-    onRemoveClick: () -> Unit,
-) {
-    Column(modifier = Modifier.padding(vertical = 12.dp)) {
-        Text(
-            text = stringResource(Res.string.actions),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-        )
+private fun ActionsHeader() {
+    Text(
+        text = stringResource(Res.string.actions),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+    )
+}
 
-        PrimaryActionsRow(node, isLocal, onAction, onFavoriteClick)
-
-        if (!isLocal) {
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            )
-
-            RemoteDeviceActions(
-                node = node,
-                lastTracerouteTime = lastTracerouteTime,
-                lastRequestNeighborsTime = lastRequestNeighborsTime,
-                onAction = onAction,
-            )
-        }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-        )
-
-        ManagementActions(node, onIgnoreClick, onMuteClick, onRemoveClick)
-    }
+@Composable
+private fun ActionsDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+    )
 }
 
 @Composable

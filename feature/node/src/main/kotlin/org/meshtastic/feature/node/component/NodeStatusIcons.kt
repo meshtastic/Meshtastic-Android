@@ -39,7 +39,11 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
@@ -116,24 +120,62 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState) {
         },
         state = rememberTooltipState(),
     ) {
-        val (icon, tint) =
-            when (connectionState) {
-                ConnectionState.Connected -> Icons.TwoTone.CloudDone to MaterialTheme.colorScheme.StatusGreen
-                ConnectionState.Connecting -> Icons.TwoTone.CloudSync to MaterialTheme.colorScheme.StatusOrange
-                ConnectionState.Disconnected -> Icons.TwoTone.CloudOff to MaterialTheme.colorScheme.StatusRed
-                ConnectionState.DeviceSleep -> Icons.TwoTone.Cloud to MaterialTheme.colorScheme.StatusYellow
-            }
-        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint)
+        when (connectionState) {
+            ConnectionState.Connected -> ConnectedStatusIcon()
+            ConnectionState.Connecting -> ConnectingStatusIcon()
+            ConnectionState.Disconnected -> DisconnectedStatusIcon()
+            ConnectionState.DeviceSleep -> DeviceSleepStatusIcon()
+        }
     }
+}
+
+@Composable
+private fun ConnectedStatusIcon() {
+    Icon(
+        imageVector = Icons.TwoTone.CloudDone,
+        contentDescription = stringResource(Res.string.connected),
+        modifier = Modifier.size(24.dp),
+        tint = MaterialTheme.colorScheme.StatusGreen,
+    )
+}
+
+@Composable
+private fun ConnectingStatusIcon() {
+    Icon(
+        imageVector = Icons.TwoTone.CloudSync,
+        contentDescription = stringResource(Res.string.connecting),
+        modifier = Modifier.size(24.dp),
+        tint = MaterialTheme.colorScheme.StatusOrange,
+    )
+}
+
+@Composable
+private fun DisconnectedStatusIcon() {
+    Icon(
+        imageVector = Icons.TwoTone.CloudOff,
+        contentDescription = stringResource(Res.string.disconnected),
+        modifier = Modifier.size(24.dp),
+        tint = MaterialTheme.colorScheme.StatusRed,
+    )
+}
+
+@Composable
+private fun DeviceSleepStatusIcon() {
+    Icon(
+        imageVector = Icons.TwoTone.Cloud,
+        contentDescription = stringResource(Res.string.device_sleeping),
+        modifier = Modifier.size(24.dp),
+        tint = MaterialTheme.colorScheme.StatusYellow,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StatusBadge(
-    imageVector: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescription: org.jetbrains.compose.resources.StringResource,
-    tooltipText: org.jetbrains.compose.resources.StringResource,
-    tint: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified,
+    imageVector: ImageVector,
+    contentDescription: StringResource,
+    tooltipText: StringResource,
+    tint: Color = Color.Unspecified,
 ) {
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
@@ -149,4 +191,16 @@ private fun StatusBadge(
             )
         }
     }
+}
+
+@Preview
+@Composable
+private fun StatusIconsPreview() {
+    NodeStatusIcons(
+        isThisNode = true,
+        isUnmessageable = true,
+        isFavorite = true,
+        isMuted = true,
+        connectionState = ConnectionState.Connected,
+    )
 }

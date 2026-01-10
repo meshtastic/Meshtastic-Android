@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.detail
 
 import androidx.compose.foundation.layout.Box
@@ -45,40 +44,40 @@ import org.meshtastic.feature.node.model.NodeDetailAction
 fun NodeDetailScreen(
     nodeId: Int,
     modifier: Modifier = Modifier,
-    viewModel: MetricsViewModel = hiltViewModel(),
+    metricsViewModel: MetricsViewModel = hiltViewModel(),
     nodeDetailViewModel: NodeDetailViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
 ) {
-    LaunchedEffect(nodeId) { viewModel.setNodeId(nodeId) }
+    LaunchedEffect(nodeId) { metricsViewModel.setNodeId(nodeId) }
 
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
+    val metricsState by metricsViewModel.state.collectAsStateWithLifecycle()
+    val environmentMetricsState by metricsViewModel.environmentState.collectAsStateWithLifecycle()
     val lastTracerouteTime by nodeDetailViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
     val lastRequestNeighborsTime by nodeDetailViewModel.lastRequestNeighborsTime.collectAsStateWithLifecycle()
     val ourNode by nodeDetailViewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
     val availableLogs by
-        remember(state, environmentState) {
+        remember(metricsState, environmentMetricsState) {
             derivedStateOf {
                 buildSet {
-                    if (state.hasDeviceMetrics()) add(LogsType.DEVICE)
-                    if (state.hasPositionLogs()) {
+                    if (metricsState.hasDeviceMetrics()) add(LogsType.DEVICE)
+                    if (metricsState.hasPositionLogs()) {
                         add(LogsType.NODE_MAP)
                         add(LogsType.POSITIONS)
                     }
-                    if (environmentState.hasEnvironmentMetrics()) add(LogsType.ENVIRONMENT)
-                    if (state.hasSignalMetrics()) add(LogsType.SIGNAL)
-                    if (state.hasPowerMetrics()) add(LogsType.POWER)
-                    if (state.hasTracerouteLogs()) add(LogsType.TRACEROUTE)
-                    if (state.hasHostMetrics()) add(LogsType.HOST)
-                    if (state.hasPaxMetrics()) add(LogsType.PAX)
+                    if (environmentMetricsState.hasEnvironmentMetrics()) add(LogsType.ENVIRONMENT)
+                    if (metricsState.hasSignalMetrics()) add(LogsType.SIGNAL)
+                    if (metricsState.hasPowerMetrics()) add(LogsType.POWER)
+                    if (metricsState.hasTracerouteLogs()) add(LogsType.TRACEROUTE)
+                    if (metricsState.hasHostMetrics()) add(LogsType.HOST)
+                    if (metricsState.hasPaxMetrics()) add(LogsType.PAX)
                 }
             }
         }
 
-    val node = state.node
+    val node = metricsState.node
 
     @Suppress("ModifierNotUsedAtRoot")
     Scaffold(
@@ -95,11 +94,10 @@ fun NodeDetailScreen(
         },
     ) { paddingValues ->
         if (node != null) {
-            @Suppress("ViewModelForwarding")
             NodeDetailContent(
                 node = node,
                 ourNode = ourNode,
-                metricsState = state,
+                metricsState = metricsState,
                 lastTracerouteTime = lastTracerouteTime,
                 lastRequestNeighborsTime = lastRequestNeighborsTime,
                 availableLogs = availableLogs,
@@ -111,8 +109,8 @@ fun NodeDetailScreen(
                         navigateToMessages = navigateToMessages,
                         onNavigateUp = onNavigateUp,
                         onNavigate = onNavigate,
-                        viewModel = viewModel,
-                        handleNodeMenuAction = { nodeDetailViewModel.handleNodeMenuAction(it) },
+                        metricsViewModel = metricsViewModel,
+                        nodeDetailViewModel = nodeDetailViewModel,
                     )
                 },
                 modifier = modifier.padding(paddingValues),
@@ -133,26 +131,26 @@ private fun handleNodeAction(
     navigateToMessages: (String) -> Unit,
     onNavigateUp: () -> Unit,
     onNavigate: (Route) -> Unit,
-    viewModel: MetricsViewModel,
-    handleNodeMenuAction: (NodeMenuAction) -> Unit,
+    metricsViewModel: MetricsViewModel,
+    nodeDetailViewModel: NodeDetailViewModel,
 ) {
     when (action) {
         is NodeDetailAction.Navigate -> onNavigate(action.route)
-        is NodeDetailAction.TriggerServiceAction -> viewModel.onServiceAction(action.action)
+        is NodeDetailAction.TriggerServiceAction -> metricsViewModel.onServiceAction(action.action)
         is NodeDetailAction.HandleNodeMenuAction -> {
             when (val menuAction = action.action) {
                 is NodeMenuAction.DirectMessage -> {
                     val hasPKC = ourNode?.hasPKC == true
                     val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
-                    navigateToMessages("$channel${node.user.id}")
+                    navigateToMessages("${channel}${node.user.id}")
                 }
 
                 is NodeMenuAction.Remove -> {
-                    handleNodeMenuAction(menuAction)
+                    nodeDetailViewModel.handleNodeMenuAction(menuAction)
                     onNavigateUp()
                 }
 
-                else -> handleNodeMenuAction(menuAction)
+                else -> nodeDetailViewModel.handleNodeMenuAction(menuAction)
             }
         }
 

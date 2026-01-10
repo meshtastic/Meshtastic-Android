@@ -40,7 +40,13 @@ interface MeshServiceNotifications {
         isSilent: Boolean = false,
     )
 
-    suspend fun updateWaypointNotification(contactKey: String, name: String, message: String, waypointId: Int)
+    suspend fun updateWaypointNotification(
+        contactKey: String,
+        name: String,
+        message: String,
+        waypointId: Int,
+        isSilent: Boolean = false,
+    )
 
     suspend fun updateReactionNotification(
         contactKey: String,

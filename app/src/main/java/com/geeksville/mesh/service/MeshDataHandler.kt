@@ -665,6 +665,7 @@ constructor(
                     getSenderName(dataPacket),
                     message,
                     dataPacket.waypoint!!.id,
+                    isSilent,
                 )
             }
 
