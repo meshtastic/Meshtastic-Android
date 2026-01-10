@@ -224,6 +224,10 @@
     <string name="debug_filter_add">Lisää suodatin</string>
     <string name="debug_filter_included">Sisältää suodattimen</string>
     <string name="debug_filter_clear">Tyhjennä kaikki suodattimet</string>
+    <string name="debug_filter_add_custom">Lisää mukautettu suodatin</string>
+    <string name="debug_filter_preset_title">Oletussuodattimet</string>
+    <string name="debug_store_logs_title">Tallenna mesh-verkon lokitiedot</string>
+    <string name="debug_store_logs_summary">Poista käytöstä, jos et halua kirjoittaa mesh-lokitietoja levylle</string>
     <string name="debug_clear">Tyhjennä lokitiedot</string>
     <string name="match_any">Täsmää yhteen | kaikkiin</string>
     <string name="match_all">Täsmää yhteen | kaikkiin</string>

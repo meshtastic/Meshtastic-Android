@@ -42,6 +42,8 @@
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
+    <string name="message_status_sfpp_routing">Routen über den SF++ Weg.</string>
+    <string name="message_status_sfpp_confirmed">Bestätigt auf dem SF++ Weg.</string>
     <string name="message_retry_count">Versuch: %1$d / %2$d</string>
     <string name="routing_error_none">Bestätigt</string>
     <string name="routing_error_no_route">Keine Route</string>
@@ -59,6 +61,7 @@
     <string name="routing_error_pki_unknown_pubkey">Unbekannter öffentlicher Schlüssel</string>
     <string name="routing_error_admin_bad_session_key">Fehlerhafter Sitzungsschlüssel</string>
     <string name="routing_error_admin_public_key_unauthorized">Öffentlicher Schlüssel nicht autorisiert</string>
+    <string name="routing_error_pki_send_fail_public_key">PKI senden fehlgeschlagen, kein öffentlicher Schlüssel</string>
     <string name="role_client">Client</string>
     <string name="role_client_desc">Mit der App verbundenes oder eigenständiges Messaging-Gerät.</string>
     <string name="role_client_mute">Client Mute</string>
@@ -221,6 +224,10 @@
     <string name="debug_filter_add">Filter hinzufügen</string>
     <string name="debug_filter_included">Filter enthält</string>
     <string name="debug_filter_clear">Alle Filter löschen</string>
+    <string name="debug_filter_add_custom">Benutzerdefinierten Filter hinzufügen</string>
+    <string name="debug_filter_preset_title">Voreingestellte Filter</string>
+    <string name="debug_store_logs_title">Netzprotokolle speichern</string>
+    <string name="debug_store_logs_summary">Deaktivieren, um das Schreiben von Netzprotokollen auf die Festplatte zu überspringen.</string>
     <string name="debug_clear">Protokolle löschen</string>
     <string name="match_any">Irgendwas finden | Alle</string>
     <string name="match_all">Alle finden | Irgendwas</string>
