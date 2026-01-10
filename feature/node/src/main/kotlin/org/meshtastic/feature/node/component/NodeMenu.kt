@@ -27,7 +27,9 @@ import org.meshtastic.core.strings.favorite_remove
 import org.meshtastic.core.strings.ignore
 import org.meshtastic.core.strings.ignore_add
 import org.meshtastic.core.strings.ignore_remove
-import org.meshtastic.core.strings.mute_always
+import org.meshtastic.core.strings.mute_add
+import org.meshtastic.core.strings.mute_notifications
+import org.meshtastic.core.strings.mute_remove
 import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.remove_node_text
 import org.meshtastic.core.strings.unmute
@@ -78,12 +80,9 @@ fun NodeActionDialogs(
     }
     if (displayMuteDialog) {
         SimpleAlertDialog(
-            title = if (node.isMuted) Res.string.unmute else Res.string.mute_always,
+            title = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
             text =
-            stringResource(
-                if (node.isMuted) Res.string.ignore_remove else Res.string.ignore_add,
-                node.user.longName,
-            ),
+            stringResource(if (node.isMuted) Res.string.mute_remove else Res.string.mute_add, node.user.longName),
             onConfirm = {
                 onDismissMenuRequest()
                 onConfirmMute(node)

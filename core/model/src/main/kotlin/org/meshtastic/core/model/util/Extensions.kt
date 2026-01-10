@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.model.util
 
-import android.widget.EditText
 import org.meshtastic.core.model.BuildConfig
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.MeshProtos
@@ -66,18 +65,6 @@ fun Any.toPIIString() = if (!BuildConfig.DEBUG) {
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
-@Suppress("MagicNumber")
-fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMillis()): String {
-    val timeInMillis = lastSeenUnix * 1000L
-    return android.text.format.DateUtils.getRelativeTimeSpanString(
-        timeInMillis,
-        currentTimeMillis,
-        android.text.format.DateUtils.MINUTE_IN_MILLIS,
-        android.text.format.DateUtils.FORMAT_ABBREV_RELATIVE,
-    )
-        .toString()
-}
-
 private const val MPS_TO_KMPH = 3.6f
 private const val KM_TO_MILES = 0.621371f
 
@@ -91,14 +78,4 @@ fun Int.mpsToMph(): Float {
     // Convert meters per second to miles per hour
     val mph = this * MPS_TO_KMPH * KM_TO_MILES
     return mph
-}
-
-// Allows usage like email.onEditorAction(EditorInfo.IME_ACTION_NEXT, { confirm() })
-fun EditText.onEditorAction(actionId: Int, func: () -> Unit) {
-    setOnEditorActionListener { _, receivedActionId, _ ->
-        if (actionId == receivedActionId) {
-            func()
-        }
-        true
-    }
 }

@@ -60,10 +60,9 @@ import org.meshtastic.core.strings.actions
 import org.meshtastic.core.strings.direct_message
 import org.meshtastic.core.strings.favorite
 import org.meshtastic.core.strings.ignore
-import org.meshtastic.core.strings.mute_always
+import org.meshtastic.core.strings.mute_notifications
 import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.share_contact
-import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -229,7 +228,7 @@ private fun ManagementActions(
         )
 
         SwitchListItem(
-            text = stringResource(if (node.isMuted) Res.string.unmute else Res.string.mute_always),
+            text = stringResource(Res.string.mute_notifications),
             leadingIcon =
             if (node.isMuted) {
                 Icons.AutoMirrored.Filled.VolumeOff

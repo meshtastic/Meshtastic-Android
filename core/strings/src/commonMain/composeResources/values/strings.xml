@@ -372,9 +372,11 @@
     <string name="currently">Currently:</string>
     <string name="mute_status_always">Always muted</string>
     <string name="mute_status_unmuted">Not muted</string>
-    <string name="mute_status_muted_for_days">Muted for %1d days, %.1f hours</string>
-    <string name="mute_status_muted_for_hours">Muted for %.1f hours</string>
+    <string name="mute_status_muted_for_days">Muted for %1$d days, %2$.1f hours</string>
+    <string name="mute_status_muted_for_hours">Muted for %1$.1f hours</string>
     <string name="mute_status_label">Mute status</string>
+    <string name="mute_add">Mute notifications for '%1$s'?</string>
+    <string name="mute_remove">Unmute notifications for '%1$s'?</string>
     <string name="replace">Replace</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
