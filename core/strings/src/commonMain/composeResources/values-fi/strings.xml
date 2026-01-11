@@ -345,7 +345,11 @@
     <string name="currently">Tällä hetkellä:</string>
     <string name="mute_status_always">Pysyvästi mykistetty</string>
     <string name="mute_status_unmuted">Ei mykistetty</string>
+    <string name="mute_status_muted_for_days">Mykistetty %1$d päiväksi, %2$.1f tunniksi</string>
+    <string name="mute_status_muted_for_hours">Mykistetty %1$.1f tunniksi</string>
     <string name="mute_status_label">Mykistä tilaviestit</string>
+    <string name="mute_add">Mykistetäänkö ‘%1$s’ ilmoitukset?</string>
+    <string name="mute_remove">Poistetaanko ‘%1$s’ mykistys?</string>
     <string name="replace">Korvaa</string>
     <string name="wifi_qr_code_scan">Skannaa WiFi QR-koodi</string>
     <string name="wifi_qr_code_error">WiFi-verkon käyttöoikeustiedoissa on virheellinen QR-koodin muoto</string>
