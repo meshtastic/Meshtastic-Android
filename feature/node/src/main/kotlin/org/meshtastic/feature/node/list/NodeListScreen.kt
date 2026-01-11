@@ -78,7 +78,6 @@ import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.component.rememberTimeTickWithLifecycle
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.component.NodeActionDialogs
@@ -115,7 +114,6 @@ fun NodeListScreen(
         }
     }
 
-    val currentTimeMillis = rememberTimeTickWithLifecycle()
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
 
     val isScrollInProgress by remember {
@@ -224,7 +222,6 @@ fun NodeListScreen(
                             tempInFahrenheit = state.tempInFahrenheit,
                             onClick = { navigateToNodeDetails(node.num) },
                             onLongClick = longClick,
-                            currentTimeMillis = currentTimeMillis,
                             connectionState = connectionState,
                             isActive = isActive,
                         )
