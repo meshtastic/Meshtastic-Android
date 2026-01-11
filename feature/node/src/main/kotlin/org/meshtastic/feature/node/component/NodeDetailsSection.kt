@@ -123,6 +123,7 @@ private fun MismatchKeyWarning() {
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun MainNodeDetails(node: Node) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -176,6 +177,19 @@ private fun MainNodeDetails(node: Node) {
                 )
             } else {
                 Spacer(Modifier.weight(1f))
+            }
+        }
+
+        if (!node.nodeStatus.isNullOrEmpty()) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                InfoItem(
+                    label = "Status",
+                    value = node.nodeStatus!!,
+                    icon = Icons.Default.CheckCircle,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
     }
