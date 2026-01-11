@@ -34,14 +34,13 @@ import org.meshtastic.core.ui.util.formatAgo
 fun LastHeardInfo(
     modifier: Modifier = Modifier,
     lastHeard: Int,
-    currentTimeMillis: Long,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconInfo(
         modifier = modifier,
         icon = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
         contentDescription = stringResource(Res.string.node_sort_last_heard),
-        text = formatAgo(lastHeard, currentTimeMillis),
+        text = formatAgo(lastHeard),
         contentColor = contentColor,
     )
 }
@@ -49,10 +48,5 @@ fun LastHeardInfo(
 @PreviewLightDark
 @Composable
 private fun LastHeardInfoPreview() {
-    AppTheme {
-        LastHeardInfo(
-            lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600,
-            currentTimeMillis = System.currentTimeMillis(),
-        )
-    }
+    AppTheme { LastHeardInfo(lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600) }
 }

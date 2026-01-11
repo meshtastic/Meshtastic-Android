@@ -1088,4 +1088,5 @@
     <string name="compass_uncertainty">Estimated area: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Estimated area: unknown accuracy</string>
     <string name="mark_as_read">Mark as read</string>
+    <string name="now">Now</string>
 </resources>
