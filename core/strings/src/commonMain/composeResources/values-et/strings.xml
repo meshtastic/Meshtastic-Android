@@ -345,8 +345,6 @@
     <string name="currently">Praegu:</string>
     <string name="mute_status_always">Alati vaigistatud</string>
     <string name="mute_status_unmuted">Mitte vaigistatud</string>
-    <string name="mute_status_muted_for_days">Vaigistatud %1d päeva, %.1f tundi</string>
-    <string name="mute_status_muted_for_hours">Vaigistatud %.1f tundi</string>
     <string name="mute_status_label">Vaigistatud olek</string>
     <string name="replace">Asenda</string>
     <string name="wifi_qr_code_scan">Skaneeri WiFi QR kood</string>

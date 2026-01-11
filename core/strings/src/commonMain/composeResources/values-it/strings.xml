@@ -314,8 +314,6 @@
     <string name="currently">Attualmente:</string>
     <string name="mute_status_always">Sempre mutato</string>
     <string name="mute_status_unmuted">Non mutato</string>
-    <string name="mute_status_muted_for_days">Mutato per %1d giorni, %.1f ore</string>
-    <string name="mute_status_muted_for_hours">Mutato per %.1f ore</string>
     <string name="replace">Sostituisci</string>
     <string name="wifi_qr_code_scan">Scansiona codice QR WiFi</string>
     <string name="wifi_qr_code_error">Formato codice QR delle Credenziali WiFi non valido</string>
@@ -962,4 +960,5 @@
     <string name="interval_unset">Non impostato</string>
     <string name="interval_always_on">Sempre Attivo</string>
     <!-- Compass -->
+    <string name="now">Adesso</string>
 </resources>

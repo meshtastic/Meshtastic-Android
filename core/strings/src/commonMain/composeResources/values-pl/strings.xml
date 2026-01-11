@@ -292,8 +292,6 @@
     <string name="currently">Obecnie:</string>
     <string name="mute_status_always">Zawsze wyciszony</string>
     <string name="mute_status_unmuted">Nie wyciszony</string>
-    <string name="mute_status_muted_for_days">Wyciszony na %1d dni, %.1f godziny</string>
-    <string name="mute_status_muted_for_hours">Wyciszony na %.1f godzin</string>
     <string name="replace">Zastąp</string>
     <string name="wifi_qr_code_scan">Skanuj kod QR Wi-Fi</string>
     <string name="wifi_qr_code_error">Nieprawidłowy format kodu QR</string>
@@ -564,4 +562,5 @@
     <string name="interval_unset">Nieustawiony</string>
     <string name="interval_always_on">Zawsze włączone</string>
     <!-- Compass -->
+    <string name="now">Teraz</string>
 </resources>

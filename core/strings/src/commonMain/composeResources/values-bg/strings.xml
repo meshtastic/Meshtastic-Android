@@ -292,8 +292,6 @@
     <string name="currently">В момента:</string>
     <string name="mute_status_always">Винаги заглушен</string>
     <string name="mute_status_unmuted">Не е заглушен</string>
-    <string name="mute_status_muted_for_days">Заглушшен за %1d дни, %.1f часа</string>
-    <string name="mute_status_muted_for_hours">Заглушен за %.1f часа</string>
     <string name="replace">Замяна</string>
     <string name="wifi_qr_code_scan">Сканиране на QR код за WiFi</string>
     <string name="wifi_qr_code_error">Невалиден формат на QR кода на идентификационните данни за WiFi</string>
@@ -833,4 +831,5 @@
     <string name="compass_uncertainty">Приблизителна площ: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Приблизителна площ: неизвестна точност</string>
     <string name="mark_as_read">Маркиране като прочетено</string>
+    <string name="now">Сега</string>
 </resources>

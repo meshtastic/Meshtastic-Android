@@ -321,8 +321,6 @@
     <string name="currently">Actualmente:</string>
     <string name="mute_status_always">Siempre silenciado</string>
     <string name="mute_status_unmuted">No silenciado</string>
-    <string name="mute_status_muted_for_days">Silenciado por %1d días, %.1f horas</string>
-    <string name="mute_status_muted_for_hours">Silenciado por %.1f horas</string>
     <string name="replace">Reemplazar</string>
     <string name="wifi_qr_code_scan">Escanear código QR WiFi</string>
     <string name="wifi_qr_code_error">Formato de código QR de credencial wifi inválido</string>
@@ -934,4 +932,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="compass_distance">Distancia: %1$s</string>
     <string name="compass_no_magnetometer">Este dispositivo no tiene un sensor de brújula. El rumbo no está disponible.</string>
     <string name="mark_as_read">Marcar como leído</string>
+    <string name="now">Ahora</string>
 </resources>
