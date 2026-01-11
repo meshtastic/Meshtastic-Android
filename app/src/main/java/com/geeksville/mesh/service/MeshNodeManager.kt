@@ -209,6 +209,10 @@ constructor(
         updateNodeInfo(fromNum) { it.paxcounter = p }
     }
 
+    fun handleReceivedNodeStatus(fromNum: Int, s: MeshProtos.StatusMessage) {
+        updateNodeInfo(fromNum) { it.nodeStatus = s.status }
+    }
+
     fun installNodeInfo(info: MeshProtos.NodeInfo, withBroadcast: Boolean = true) {
         updateNodeInfo(info.num, withBroadcast = withBroadcast) { entity ->
             if (info.hasUser()) {

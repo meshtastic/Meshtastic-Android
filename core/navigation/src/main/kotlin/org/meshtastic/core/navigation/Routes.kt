@@ -141,6 +141,8 @@ object SettingsRoutes {
 
     @Serializable data object Paxcounter : Route
 
+    @Serializable data object StatusMessage : Route
+
     // endregion
 
     // region advanced config routes
