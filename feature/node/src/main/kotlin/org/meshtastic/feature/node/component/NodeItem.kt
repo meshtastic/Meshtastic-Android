@@ -74,7 +74,6 @@ fun NodeItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
-    currentTimeMillis: Long,
     connectionState: ConnectionState,
     isActive: Boolean = false,
 ) {
@@ -137,11 +136,7 @@ fun NodeItem(
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
                 )
-                LastHeardInfo(
-                    lastHeard = thatNode.lastHeard,
-                    currentTimeMillis = currentTimeMillis,
-                    contentColor = contentColor,
-                )
+                LastHeardInfo(lastHeard = thatNode.lastHeard, contentColor = contentColor)
                 NodeStatusIcons(
                     isThisNode = isThisNode,
                     isFavorite = isFavorite,
@@ -228,14 +223,7 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(
-            thisNode = thisNode,
-            thatNode = thatNode,
-            0,
-            true,
-            currentTimeMillis = System.currentTimeMillis(),
-            connectionState = ConnectionState.Connected,
-        )
+        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, connectionState = ConnectionState.Connected)
     }
 }
 
@@ -249,7 +237,6 @@ fun NodeInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) thatN
             thatNode = thatNode,
             distanceUnits = 1,
             tempInFahrenheit = true,
-            currentTimeMillis = System.currentTimeMillis(),
             connectionState = ConnectionState.Connected,
         )
     }
