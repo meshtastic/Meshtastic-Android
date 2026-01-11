@@ -22,8 +22,11 @@ package org.meshtastic.core.model
  * This class provides a centralized way to check if specific features are supported by the connected node's firmware.
  * Add new features here to ensure consistency across the app.
  */
-data class Capabilities(val firmwareVersion: String?) {
+data class Capabilities(val firmwareVersion: String?, internal val forceEnableAll: Boolean = BuildConfig.DEBUG) {
     private val version = firmwareVersion?.let { DeviceVersion(it) }
+
+    private fun isSupported(minVersion: String): Boolean =
+        forceEnableAll || (version != null && version >= DeviceVersion(minVersion))
 
     /**
      * Ability to mute notifications from specific nodes via admin messages.
@@ -31,25 +34,25 @@ data class Capabilities(val firmwareVersion: String?) {
      * Note: This is currently not available in firmware but defined here for future support.
      */
     val canMuteNode: Boolean
-        get() = version != null && version >= DeviceVersion("2.8.0")
+        get() = isSupported("2.8.0")
 
     /** Ability to request neighbor information from other nodes. Supported since firmware v2.7.15. */
     val canRequestNeighborInfo: Boolean
-        get() = version != null && version >= DeviceVersion("2.7.15")
+        get() = isSupported("2.7.15")
 
     /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */
     val canSendVerifiedContacts: Boolean
-        get() = version != null && version >= DeviceVersion("2.7.12")
+        get() = isSupported("2.7.12")
 
     /** Ability to toggle device telemetry globally via module config. Supported since firmware v2.7.12. */
     val canToggleTelemetryEnabled: Boolean
-        get() = version != null && version >= DeviceVersion("2.7.12")
+        get() = isSupported("2.7.12")
 
     /** Ability to toggle the 'is_unmessageable' flag in user config. Supported since firmware v2.6.9. */
     val canToggleUnmessageable: Boolean
-        get() = version != null && version >= DeviceVersion("2.6.9")
+        get() = isSupported("2.6.9")
 
     /** Support for sharing contact information via QR codes. Supported since firmware v2.6.8. */
     val supportsQrCodeSharing: Boolean
-        get() = version != null && version >= DeviceVersion("2.6.8")
+        get() = isSupported("2.6.8")
 }
