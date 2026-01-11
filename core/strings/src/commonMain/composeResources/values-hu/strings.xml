@@ -338,8 +338,6 @@
     <string name="currently">Jelenleg:</string>
     <string name="mute_status_always">Mindig némítva</string>
     <string name="mute_status_unmuted">Nincs némítva</string>
-    <string name="mute_status_muted_for_days">Némítva ennyi ideig: %1d nap, %.1f óra</string>
-    <string name="mute_status_muted_for_hours">Némítva: %.1f óra</string>
     <string name="mute_status_label">Némítás állapota</string>
     <string name="replace">Csere</string>
     <string name="wifi_qr_code_scan">WiFi QR kód szkennelése</string>
@@ -950,4 +948,5 @@
     <string name="firmware_update_failed">A frissítés sikertelen</string>
     <string name="interval_unset">Nincs beállítva</string>
     <!-- Compass -->
+    <string name="now">Most</string>
 </resources>

@@ -351,8 +351,6 @@
     <string name="currently">Сейчас:</string>
     <string name="mute_status_always">Всегда заглушен</string>
     <string name="mute_status_unmuted">Не заглушен</string>
-    <string name="mute_status_muted_for_days">Заглушен на %1d дней, %.1f часов</string>
-    <string name="mute_status_muted_for_hours">Заглушен на %.1f часов</string>
     <string name="mute_status_label">Состояние заглушки</string>
     <string name="replace">Заменить</string>
     <string name="wifi_qr_code_scan">Сканировать QR-код WiFi</string>
@@ -1056,4 +1054,5 @@
     <string name="compass_uncertainty">Предполагаемая площадь: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Предполагаемая площадь: точность неизвестна</string>
     <string name="mark_as_read">Пометить прочитанным</string>
+    <string name="now">Только что</string>
 </resources>

@@ -335,8 +335,6 @@
     <string name="currently">当前:</string>
     <string name="mute_status_always">始终静音</string>
     <string name="mute_status_unmuted">非静音</string>
-    <string name="mute_status_muted_for_days">%1d 天静音 %.1f 小时</string>
-    <string name="mute_status_muted_for_hours">%.1f 小时静音</string>
     <string name="mute_status_label">静默状态</string>
     <string name="replace">替换</string>
     <string name="wifi_qr_code_scan">扫描 WiFi 二维码</string>
@@ -1029,4 +1027,5 @@
     <string name="compass_no_location_fix">等待GPS定位以计算距离和方位</string>
     <string name="compass_uncertainty">估计区域: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">估计区域：精度未知</string>
+    <string name="now">当前</string>
 </resources>

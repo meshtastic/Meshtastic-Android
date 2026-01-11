@@ -315,8 +315,6 @@
     <string name="currently">目前：</string>
     <string name="mute_status_always">永久靜音</string>
     <string name="mute_status_unmuted">未靜音</string>
-    <string name="mute_status_muted_for_days">已靜音 %1d 天， %.1f 小時</string>
-    <string name="mute_status_muted_for_hours">已靜音 %.1f 小時</string>
     <string name="replace">替換</string>
     <string name="wifi_qr_code_scan">掃描WiFi QR code</string>
     <string name="wifi_qr_code_error">錯誤的 WiFi 驗證QR code格式</string>

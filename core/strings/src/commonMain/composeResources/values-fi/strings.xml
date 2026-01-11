@@ -345,8 +345,6 @@
     <string name="currently">Tällä hetkellä:</string>
     <string name="mute_status_always">Pysyvästi mykistetty</string>
     <string name="mute_status_unmuted">Ei mykistetty</string>
-    <string name="mute_status_muted_for_days">Mykistetty %1d päivää ja %.1f tuntia</string>
-    <string name="mute_status_muted_for_hours">Mykistetty %.1f tuntia</string>
     <string name="mute_status_label">Mykistä tilaviestit</string>
     <string name="replace">Korvaa</string>
     <string name="wifi_qr_code_scan">Skannaa WiFi QR-koodi</string>
@@ -1041,4 +1039,5 @@
     <string name="compass_uncertainty">Arvioitu alue: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Arvioitu alue: tarkkuus tuntematon</string>
     <string name="mark_as_read">Merkitse luetuksi</string>
+    <string name="now">Nyt</string>
 </resources>

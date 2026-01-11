@@ -345,8 +345,6 @@
     <string name="currently">Actuellement :</string>
     <string name="mute_status_always">Toujours muet</string>
     <string name="mute_status_unmuted">Non muet</string>
-    <string name="mute_status_muted_for_days">Muet pendant %1d jours, %.1f heures</string>
-    <string name="mute_status_muted_for_hours">Muet pendant %.1f heures</string>
     <string name="mute_status_label">Statut muet</string>
     <string name="replace">Remplacer</string>
     <string name="wifi_qr_code_scan">Scanner le code QR WiFi</string>
@@ -1037,4 +1035,5 @@
     <string name="compass_uncertainty">Surface estimée : \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Surface estimée : précision inconnue</string>
     <string name="mark_as_read">Marquer comme lu</string>
+    <string name="now">Maintenant</string>
 </resources>
