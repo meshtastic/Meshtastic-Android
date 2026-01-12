@@ -182,9 +182,9 @@
   },
   "pullRequests": [
     {
-      "id": "9259",
-      "title": "add support for uMesh Modules",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9259",
+      "id": "9289",
+      "title": "Added Minimesh variant",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9289",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
@@ -221,12 +221,6 @@
       "id": "9186",
       "title": "fix: extend retransmission timeout for ROUTER_LATE broadcast window",
       "page_url": "https://github.com/meshtastic/firmware/pull/9186",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9176",
-      "title": "Add Minimesh Lite device variant",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9176",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
