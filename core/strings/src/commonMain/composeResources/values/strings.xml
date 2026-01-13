@@ -56,6 +56,11 @@
     <string name="message_status_sfpp_routing">Routing via SF++ chain…</string>
     <string name="message_status_sfpp_confirmed">Confirmed on SF++ chain</string>
     <string name="message_retry_count">Retries: %1$d / %2$d</string>
+    <string name="retry_dialog_title">Message Failed to Send</string>
+    <string name="retry_dialog_message">Retrying in %1$d seconds… (Attempt %2$d of %3$d)</string>
+    <string name="retry_dialog_reaction_message">Retrying reaction in %1$d seconds… (Attempt %2$d of %3$d)</string>
+    <string name="retry_dialog_confirm">Retry Now</string>
+    <string name="retry_dialog_cancel">Cancel Retry</string>
     <string name="routing_error_none">Acknowledged</string>
     <string name="routing_error_no_route">No route</string>
     <string name="routing_error_got_nak">Received a negative acknowledgment</string>

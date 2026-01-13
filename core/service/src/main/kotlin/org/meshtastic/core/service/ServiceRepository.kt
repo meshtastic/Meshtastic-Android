@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
+
+sealed class RetryEvent {
+    abstract val packetId: Int
+    abstract val attemptNumber: Int
+    abstract val maxAttempts: Int
+
+    data class MessageRetry(
+        override val packetId: Int,
+        val text: String,
+        override val attemptNumber: Int,
+        override val maxAttempts: Int,
+    ) : RetryEvent()
+
+    data class ReactionRetry(
+        override val packetId: Int,
+        val emoji: String,
+        override val attemptNumber: Int,
+        override val maxAttempts: Int,
+    ) : RetryEvent()
+}
 
 data class TracerouteResponse(
     val message: String,
@@ -135,5 +157,47 @@ class ServiceRepository @Inject constructor() {
 
     suspend fun onServiceAction(action: ServiceAction) {
         _serviceAction.send(action)
+    }
+
+    // Retry management
+    private val _retryEvents = MutableSharedFlow<RetryEvent>()
+    val retryEvents: SharedFlow<RetryEvent>
+        get() = _retryEvents
+
+    private val pendingRetries = ConcurrentHashMap<Int, CompletableDeferred<Boolean>>()
+
+    /**
+     * Request a retry for a message or reaction. Emits a retry event to the UI and waits for user response.
+     *
+     * @param event The retry event containing packet information
+     * @param timeoutMs Maximum time to wait for user response (defaults to auto-retry)
+     * @return true if should proceed with retry, false if user cancelled
+     */
+    suspend fun requestRetry(event: RetryEvent, timeoutMs: Long): Boolean {
+        val packetId = event.packetId
+        val deferred = CompletableDeferred<Boolean>()
+        pendingRetries[packetId] = deferred
+
+        _retryEvents.emit(event)
+
+        // Wait for user response with timeout
+        // If timeout occurs (user doesn't respond), default to retry
+        return withTimeoutOrNull(timeoutMs) { deferred.await() } ?: true
+    }
+
+    /**
+     * Respond to a retry request. Called by the UI when user interacts with retry dialog.
+     *
+     * @param packetId The packet ID of the message/reaction
+     * @param shouldRetry true to proceed with retry, false to cancel
+     */
+    fun respondToRetry(packetId: Int, shouldRetry: Boolean) {
+        pendingRetries.remove(packetId)?.complete(shouldRetry)
+    }
+
+    /** Cancel all pending retry requests. Should be called when service is stopped or restarted. */
+    fun cancelPendingRetries() {
+        pendingRetries.forEach { (_, deferred) -> deferred.complete(false) }
+        pendingRetries.clear()
     }
 }

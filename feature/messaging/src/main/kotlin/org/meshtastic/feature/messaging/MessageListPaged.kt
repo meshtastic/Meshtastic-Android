@@ -118,7 +118,7 @@ internal fun MessageListPaged(
             ourNode = state.ourNode,
             resendOption = message.status?.equals(MessageStatus.ERROR) ?: false,
             retryCount = message.retryCount,
-            maxRetries = 5,
+            maxRetries = 2,
             onResend = {
                 handlers.onDeleteMessages(listOf(message.uuid))
                 handlers.onSendMessage(message.text, state.contactKey)

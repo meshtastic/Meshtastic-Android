@@ -27,7 +27,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -40,6 +39,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.service.RetryEvent
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.critical_alert
@@ -439,51 +439,94 @@ constructor(
 
             if (shouldRetry) {
                 val newRetryCount = p.data.retryCount + 1
-                val newId = commandSender.generatePacketId()
-                val updatedData =
-                    p.data.copy(id = newId, status = MessageStatus.QUEUED, retryCount = newRetryCount, relayNode = null)
-                val updatedPacket =
-                    p.copy(packetId = newId, data = updatedData, routingError = MeshProtos.Routing.Error.NONE_VALUE)
-                packetRepository.get().update(updatedPacket)
 
-                Logger.w { "[ackNak] retrying req=$requestId newId=$newId retry=$newRetryCount" }
+                // Emit retry event to UI and wait for user response
+                val retryEvent =
+                    RetryEvent.MessageRetry(
+                        packetId = requestId,
+                        text = p.data.text ?: "",
+                        attemptNumber = newRetryCount,
+                        maxAttempts = MAX_RETRY_ATTEMPTS + 1, // +1 for initial attempt
+                    )
 
-                delay(RETRY_DELAY_MS)
-                commandSender.sendData(updatedData)
+                Logger.w { "[ackNak] requesting retry for req=$requestId retry=$newRetryCount" }
+
+                val shouldProceed = serviceRepository.requestRetry(retryEvent, RETRY_DELAY_MS)
+
+                if (shouldProceed) {
+                    val newId = commandSender.generatePacketId()
+                    val updatedData =
+                        p.data.copy(
+                            id = newId,
+                            status = MessageStatus.QUEUED,
+                            retryCount = newRetryCount,
+                            relayNode = null,
+                        )
+                    val updatedPacket =
+                        p.copy(packetId = newId, data = updatedData, routingError = MeshProtos.Routing.Error.NONE_VALUE)
+                    packetRepository.get().update(updatedPacket)
+
+                    Logger.w { "[ackNak] retrying req=$requestId newId=$newId retry=$newRetryCount" }
+                    commandSender.sendData(updatedData)
+                } else {
+                    // User cancelled retry - mark as ERROR
+                    Logger.w { "[ackNak] retry cancelled by user for req=$requestId" }
+                    p.data.status = MessageStatus.ERROR
+                    packetRepository.get().update(p)
+                }
                 return@handledLaunch
             }
 
             if (shouldRetryReaction && reaction != null) {
                 val newRetryCount = reaction.retryCount + 1
-                val newId = commandSender.generatePacketId()
 
-                val reactionPacket =
-                    DataPacket(
-                        to = reaction.to,
-                        channel = reaction.channel,
-                        bytes = reaction.emoji.toByteArray(Charsets.UTF_8),
-                        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                        replyId = reaction.replyId,
-                        wantAck = true,
-                        emoji = reaction.emoji.codePointAt(0),
-                        id = newId,
-                        retryCount = newRetryCount,
+                // Emit retry event to UI and wait for user response
+                val retryEvent =
+                    RetryEvent.ReactionRetry(
+                        packetId = requestId,
+                        emoji = reaction.emoji,
+                        attemptNumber = newRetryCount,
+                        maxAttempts = MAX_RETRY_ATTEMPTS + 1, // +1 for initial attempt
                     )
 
-                val updatedReaction =
-                    reaction.copy(
-                        packetId = newId,
-                        status = MessageStatus.QUEUED,
-                        retryCount = newRetryCount,
-                        relayNode = null,
-                        routingError = MeshProtos.Routing.Error.NONE_VALUE,
-                    )
-                packetRepository.get().updateReaction(updatedReaction)
+                Logger.w { "[ackNak] requesting retry for reaction req=$requestId retry=$newRetryCount" }
 
-                Logger.w { "[ackNak] retrying reaction req=$requestId newId=$newId retry=$newRetryCount" }
+                val shouldProceed = serviceRepository.requestRetry(retryEvent, RETRY_DELAY_MS)
 
-                delay(RETRY_DELAY_MS)
-                commandSender.sendData(reactionPacket)
+                if (shouldProceed) {
+                    val newId = commandSender.generatePacketId()
+
+                    val reactionPacket =
+                        DataPacket(
+                            to = reaction.to,
+                            channel = reaction.channel,
+                            bytes = reaction.emoji.toByteArray(Charsets.UTF_8),
+                            dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                            replyId = reaction.replyId,
+                            wantAck = true,
+                            emoji = reaction.emoji.codePointAt(0),
+                            id = newId,
+                            retryCount = newRetryCount,
+                        )
+
+                    val updatedReaction =
+                        reaction.copy(
+                            packetId = newId,
+                            status = MessageStatus.QUEUED,
+                            retryCount = newRetryCount,
+                            relayNode = null,
+                            routingError = MeshProtos.Routing.Error.NONE_VALUE,
+                        )
+                    packetRepository.get().updateReaction(updatedReaction)
+
+                    Logger.w { "[ackNak] retrying reaction req=$requestId newId=$newId retry=$newRetryCount" }
+                    commandSender.sendData(reactionPacket)
+                } else {
+                    // User cancelled retry - mark as ERROR
+                    Logger.w { "[ackNak] retry cancelled by user for reaction req=$requestId" }
+                    val errorReaction = reaction.copy(status = MessageStatus.ERROR, routingError = routingError)
+                    packetRepository.get().updateReaction(errorReaction)
+                }
                 return@handledLaunch
             }
 
@@ -766,7 +809,7 @@ constructor(
     }
 
     companion object {
-        private const val MAX_RETRY_ATTEMPTS = 5
+        private const val MAX_RETRY_ATTEMPTS = 2
         private const val RETRY_DELAY_MS = 5_000L
         private const val MILLISECONDS_IN_SECOND = 1000L
         private const val HOPS_AWAY_UNAVAILABLE = -1

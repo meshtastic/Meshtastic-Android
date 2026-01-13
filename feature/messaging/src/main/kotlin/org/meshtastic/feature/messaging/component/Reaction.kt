@@ -182,7 +182,7 @@ internal fun ReactionDialog(
             relayNodeName = relayNodeName,
             relays = reaction.relays,
             retryCount = reaction.retryCount,
-            maxRetries = 5,
+            maxRetries = 2,
         )
     }
 
