@@ -23,7 +23,7 @@ ktlint = "1.7.1"
 kover = "0.9.4"
 
 # Compose Multiplatform
-compose-multiplatform = "1.9.3"
+compose-multiplatform = "1.10.0"
 
 # Google
 hilt = "2.57.2"
