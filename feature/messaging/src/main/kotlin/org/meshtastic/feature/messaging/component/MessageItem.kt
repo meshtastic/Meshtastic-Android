@@ -65,6 +65,9 @@ import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 internal fun MessageItem(
@@ -106,7 +109,7 @@ internal fun MessageItem(
         Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
             .then(
                 if (containsBel) {
-                    Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.medium)
+                    Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.extraLarge)
                 } else {
                     Modifier
                 },
@@ -121,7 +124,12 @@ internal fun MessageItem(
                     end = if (message.fromLocal) 0.dp else 16.dp,
                 )
                 .combinedClickable(onClick = onClick, onLongClick = onLongClick, onDoubleClick = onDoubleClick)
-                .then(messageModifier),
+                .then(messageModifier)
+                .semantics(mergeDescendants = true) {
+                    val senderName = if (message.fromLocal) ourNode.user.longName else node.user.longName
+                    contentDescription = "Message from $senderName: ${message.text}"
+                },
+            shape = MaterialTheme.shapes.extraLarge,
             colors = cardColors,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {

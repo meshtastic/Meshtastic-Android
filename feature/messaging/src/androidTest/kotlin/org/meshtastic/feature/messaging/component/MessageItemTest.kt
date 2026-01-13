@@ -110,4 +110,43 @@ class MessageItemTest {
         // Check that the MQTT icon is not displayed
         composeTestRule.onNodeWithContentDescription("via MQTT").assertDoesNotExist()
     }
+
+    @Test
+    fun messageItem_hasCorrectSemanticContentDescription() {
+        val testNode = NodePreviewParameterProvider().minnieMouse
+        val message =
+            Message(
+                text = "Hello World",
+                time = "10:00",
+                fromLocal = false,
+                status = MessageStatus.RECEIVED,
+                snr = 2.5f,
+                rssi = 90,
+                hopsAway = 0,
+                uuid = 1L,
+                receivedTime = System.currentTimeMillis(),
+                node = testNode,
+                read = false,
+                routingError = 0,
+                packetId = 1234,
+                emojis = listOf(),
+                replyId = null,
+                viaMqtt = false,
+            )
+
+        composeTestRule.setContent {
+            MessageItem(
+                message = message,
+                node = testNode,
+                selected = false,
+                onClick = {},
+                onLongClick = {},
+                onStatusClick = {},
+                ourNode = testNode,
+            )
+        }
+
+        // Verify that the node containing the message text exists and matches the text
+        composeTestRule.onNodeWithContentDescription("Message from ${testNode.user?.longName}: Hello World").assertIsDisplayed()
+    }
 }
