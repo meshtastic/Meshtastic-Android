@@ -433,6 +433,8 @@
     <string name="unknown_channel">Невідомий канал</string>
     <string name="advanced_title">Розширені</string>
     <string name="clean_node_database_title">Очистити базу даних вузлів</string>
+    <string name="clean_unknown_nodes">Очистити лише невідомі вузли</string>
+    <string name="clean_now">Очистити зараз</string>
     <string name="clean_node_database_confirmation">Це призведе до вилучення %1$d вузлів з вашої бази даних. Цю дію не можна скасувати.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
@@ -496,7 +498,7 @@
     <string name="learn_more">Докладніше</string>
     <string name="usb_devices">USB пристрої</string>
     <!-- Firmware Update -->
-    <string name="firmware_update_title">Оновлення прошивки</string>
+    <string name="firmware_update_title">Оновити прошивку</string>
     <string name="firmware_update_checking">Перевірка наявності оновлень...</string>
     <string name="firmware_update_device">Пристрій: %1$s</string>
     <string name="firmware_update_latest">Останній реліз: %1$s</string>
