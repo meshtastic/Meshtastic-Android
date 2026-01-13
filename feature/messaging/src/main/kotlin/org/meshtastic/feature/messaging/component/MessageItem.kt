@@ -97,6 +97,7 @@ internal fun MessageItem(
     ourNode: Node,
     message: Message,
     selected: Boolean,
+    inSelectionMode: Boolean = false,
     onReply: () -> Unit = {},
     sendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
@@ -106,6 +107,8 @@ internal fun MessageItem(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onDoubleClick: () -> Unit = {},
+    onSelect: () -> Unit = {},
+    onDelete: () -> Unit = {},
     onClickChip: (Node) -> Unit = {},
     onNavigateToOriginalMessage: (Int) -> Unit = {},
     onStatusClick: () -> Unit = {},
@@ -114,8 +117,7 @@ internal fun MessageItem(
 ) = Column(
     modifier =
         modifier
-            .fillMaxWidth()
-            .padding(top = if (showUserName) 32.dp else 0.dp),
+            .padding(top = if (showUserName) 32.dp else 4.dp),
 ) {
     var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
     val clipboardManager = LocalClipboardManager.current
@@ -145,6 +147,14 @@ internal fun MessageItem(
                             activeSheet = null
                             clipboardManager.setText(AnnotatedString(message.text))
                         },
+                        onSelect = {
+                            activeSheet = null
+                            onSelect()
+                        },
+                        onDelete = {
+                            activeSheet = null
+                            onDelete()
+                        }
                     )
                 }
                 ActiveSheet.Emoji -> {
@@ -196,7 +206,9 @@ internal fun MessageItem(
                         onClick = onClick,
                         onLongClick = {
                             onLongClick()
-                            activeSheet = ActiveSheet.Actions
+                            if (!inSelectionMode) {
+                                activeSheet = ActiveSheet.Actions
+                            }
                         },
                         onDoubleClick = onDoubleClick,
                     )

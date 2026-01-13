@@ -238,7 +238,7 @@ private fun MessageListPagedContent(
                         onShowStatusDialog = onShowStatusDialog,
                         onShowReactions = onShowReactions,
                         enableAnimations = enableAnimations,
-                        showUserName = prevMessage?.fromLocal == message.fromLocal || prevMessage?.node == message.node,
+                        showUserName = !hasSamePrev,
                         hasSamePrev = hasSamePrev,
                         hasSameNext = hasSameNext,
                         quickEmojis = quickEmojis,
@@ -302,11 +302,16 @@ private fun LazyItemScope.renderPagedChatMessageRow(
         ourNode = ourNode,
         message = message,
         selected = selected,
+        inSelectionMode = inSelectionMode,
         onClick = { if (inSelectionMode) state.selectedIds.toggle(message.uuid) },
         onLongClick = {
-            state.selectedIds.toggle(message.uuid)
+            if (inSelectionMode) {
+                state.selectedIds.toggle(message.uuid)
+            }
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         },
+        onSelect = { state.selectedIds.toggle(message.uuid) },
+        onDelete = { handlers.onDeleteMessages(listOf(message.uuid)) },
         onClickChip = handlers.onClickChip,
         onStatusClick = { onShowStatusDialog(message) },
         onReply = { handlers.onReply(message) },

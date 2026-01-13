@@ -31,29 +31,18 @@ internal fun getMessageBubbleShape(
     val round = cornerRadius
 
     return if (isSender) {
-        // Sender: End (Right side)
-        // Top-Start: Square if contiguous with previous (above), else Round
-        // Top-End: Square if contiguous with previous (above), else Round
-        // Bottom-Start: Square if contiguous with next (below), else Round.
-        // Bottom-End: Square if contiguous with next (below) OR if it's the last message (Tail), else Round.
-        // Since we want a "Tail" (Square) on the last message, AND we want "Contiguous" (Square) on connected messages,
-        // Bottom-End is effectively always Square.
         RoundedCornerShape(
             topStart = if (hasSamePrev) square else round,
             topEnd = if (hasSamePrev) square else round,
-            bottomEnd = square, // Always square (Tail or Contiguous)
-            bottomStart = if (hasSameNext) square else round // Square if contiguous, else Round)
+            bottomStart = if (hasSameNext) square else round,
+            bottomEnd = square,
         )
     } else {
-        // Receiver: Start (Left side)
-        // Top-Start, Top-End: Square if contiguous with previous (above), else Round
-        // Bottom-End: Square if contiguous with next (below), else Round.
-        // Bottom-Start: Square if contiguous with next (below) OR if it's the last message (Tail), else Round.
         RoundedCornerShape(
             topStart = if (hasSamePrev) square else round,
             topEnd = if (hasSamePrev) square else round,
-            bottomEnd = if(hasSameNext) square else round, // Square if contiguous,
-            bottomStart = square // Always square (Tail or Contiguous)
+            bottomStart = square,
+            bottomEnd = if (hasSameNext) square else round,
         )
     }
 }
