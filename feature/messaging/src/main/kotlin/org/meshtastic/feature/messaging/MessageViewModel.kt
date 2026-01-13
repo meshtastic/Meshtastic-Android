@@ -96,12 +96,10 @@ constructor(
 
     val frequentEmojis: List<String>
         get() =
-            customEmojiPrefs
-                .customEmojiFrequency
+            customEmojiPrefs.customEmojiFrequency
                 ?.split(",")
                 ?.associate { entry ->
-                    entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() }
-                        ?: ("" to 0)
+                    entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() } ?: ("" to 0)
                 }
                 ?.toList()
                 ?.sortedByDescending { it.second }

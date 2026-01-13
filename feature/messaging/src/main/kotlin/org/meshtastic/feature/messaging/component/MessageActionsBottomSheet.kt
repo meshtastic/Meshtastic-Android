@@ -63,7 +63,7 @@ fun MessageActionsBottomSheet(
     onMoreReactions: () -> Unit,
     onCopy: () -> Unit,
     onSelect: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         MessageActionsContent(
@@ -73,7 +73,7 @@ fun MessageActionsBottomSheet(
             onMoreReactions = onMoreReactions,
             onCopy = onCopy,
             onSelect = onSelect,
-            onDelete = onDelete
+            onDelete = onDelete,
         )
     }
 }
@@ -86,11 +86,11 @@ fun MessageActionsContent(
     onMoreReactions: () -> Unit,
     onCopy: () -> Unit,
     onSelect: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     Column {
         QuickEmojiRow(quickEmojis = quickEmojis, onReact = onReact, onMoreReactions = onMoreReactions)
-        
+
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         ListItem(
@@ -98,7 +98,7 @@ fun MessageActionsContent(
             leadingContent = { Icon(Icons.Default.Reply, contentDescription = stringResource(Res.string.reply)) },
             modifier = Modifier.clickable(onClick = onReply),
         )
-        
+
         ListItem(
             headlineContent = { Text(stringResource(Res.string.copy)) },
             leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = stringResource(Res.string.copy)) },
@@ -119,39 +119,37 @@ fun MessageActionsContent(
     }
 }
 
+private const val MAX_EMOJI_ROW_SIZE = 6
+
 @Composable
 private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, onMoreReactions: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        quickEmojis.take(6).forEach { emoji ->
+        quickEmojis.take(MAX_EMOJI_ROW_SIZE).forEach { emoji ->
             Box(
-                modifier = Modifier
-                    .size(40.dp)
+                modifier =
+                Modifier.size(40.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable { onReact(emoji) },
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Text(text = emoji, fontSize = 20.sp)
             }
         }
-        
+
         IconButton(
             onClick = onMoreReactions,
-            modifier = Modifier
-                .size(40.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+            modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
         ) {
             Icon(
                 Icons.Default.AddReaction,
                 contentDescription = "More reactions",
                 modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

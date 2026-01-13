@@ -171,7 +171,7 @@ internal fun MessageListPaged(
         onShowStatusDialog = { showStatusDialog = it },
         onShowReactions = { showReactionDialog = it },
         modifier = modifier,
-        quickEmojis = quickEmojis
+        quickEmojis = quickEmojis,
     )
 }
 
@@ -207,23 +207,24 @@ private fun MessageListPagedContent(
         LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
                 val message = state.messages[index]
-                val prevMessage = if (index > 0) state.messages[index - 1] else null
                 val visuallyPrevMessage = if (index < state.messages.itemCount - 1) state.messages[index + 1] else null
                 val visuallyNextMessage = if (index > 0) state.messages[index - 1] else null
 
-                val hasSamePrev = if (message != null && visuallyPrevMessage != null) {
-                    visuallyPrevMessage.fromLocal == message.fromLocal &&
-                        (message.fromLocal || visuallyPrevMessage.node.num == message.node.num)
-                } else {
-                    false
-                }
+                val hasSamePrev =
+                    if (message != null && visuallyPrevMessage != null) {
+                        visuallyPrevMessage.fromLocal == message.fromLocal &&
+                            (message.fromLocal || visuallyPrevMessage.node.num == message.node.num)
+                    } else {
+                        false
+                    }
 
-                val hasSameNext = if (message != null && visuallyNextMessage != null) {
-                    visuallyNextMessage.fromLocal == message.fromLocal &&
-                        (message.fromLocal || visuallyNextMessage.node.num == message.node.num)
-                } else {
-                    false
-                }
+                val hasSameNext =
+                    if (message != null && visuallyNextMessage != null) {
+                        visuallyNextMessage.fromLocal == message.fromLocal &&
+                            (message.fromLocal || visuallyNextMessage.node.num == message.node.num)
+                    } else {
+                        false
+                    }
 
                 if (message != null) {
                     renderPagedChatMessageRow(

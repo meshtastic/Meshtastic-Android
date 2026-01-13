@@ -114,20 +114,13 @@ internal fun MessageItem(
     onStatusClick: () -> Unit = {},
     hasSamePrev: Boolean = false,
     hasSameNext: Boolean = false,
-) = Column(
-    modifier =
-        modifier
-            .padding(top = if (showUserName) 32.dp else 4.dp),
-) {
+) = Column(modifier = modifier.padding(top = if (showUserName) 32.dp else 4.dp)) {
     var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
     val clipboardManager = LocalClipboardManager.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (activeSheet != null) {
-        ModalBottomSheet(
-            onDismissRequest = { activeSheet = null },
-            sheetState = sheetState,
-        ) {
+        ModalBottomSheet(onDismissRequest = { activeSheet = null }, sheetState = sheetState) {
             when (activeSheet) {
                 ActiveSheet.Actions -> {
                     MessageActionsContent(
@@ -140,9 +133,7 @@ internal fun MessageItem(
                             activeSheet = null
                             sendReaction(emoji)
                         },
-                        onMoreReactions = {
-                            activeSheet = ActiveSheet.Emoji
-                        },
+                        onMoreReactions = { activeSheet = ActiveSheet.Emoji },
                         onCopy = {
                             activeSheet = null
                             clipboardManager.setText(AnnotatedString(message.text))
@@ -154,7 +145,7 @@ internal fun MessageItem(
                         onDelete = {
                             activeSheet = null
                             onDelete()
-                        }
+                        },
                     )
                 }
 
@@ -177,34 +168,38 @@ internal fun MessageItem(
     }
 
     val containsBel = message.text.contains('\u0007')
-    val alpha = if (inSelectionMode) {
-        if (selected) 0.6f else 0.2f
-    } else {
-        .4f
-    }
-    val containerColor = if (message.fromLocal) {
-        Color(ourNode.colors.second).copy(alpha = alpha)
-    } else {
-        Color(node.colors.second).copy(alpha = alpha)
-    }.apply {
+
+    val alpha =
         if (inSelectionMode) {
-            copy(alpha = if (selected) 0.6f else 0.2f)
+            if (selected) SELECTED_ALPHA else UNSELECTED_ALPHA
         } else {
-            copy(alpha = 0.4f)
+            NORMAL_ALPHA
         }
-    }
+    val containerColor =
+        if (message.fromLocal) {
+            Color(ourNode.colors.second).copy(alpha = alpha)
+        } else {
+            Color(node.colors.second).copy(alpha = alpha)
+        }
+            .apply {
+                if (inSelectionMode) {
+                    copy(alpha = if (selected) 0.6f else 0.2f)
+                } else {
+                    copy(alpha = 0.4f)
+                }
+            }
     val cardColors =
         CardDefaults.cardColors()
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
-    val messageShape = getMessageBubbleShape(
-        cornerRadius = 16.dp,
-        isSender = message.fromLocal,
-        hasSamePrev = hasSamePrev,
-        hasSameNext = hasSameNext,
-    )
+    val messageShape =
+        getMessageBubbleShape(
+            cornerRadius = 16.dp,
+            isSender = message.fromLocal,
+            hasSamePrev = hasSamePrev,
+            hasSameNext = hasSameNext,
+        )
     val messageModifier =
-        Modifier
-            .padding(horizontal = 8.dp)
+        Modifier.padding(horizontal = 8.dp)
             .then(
                 if (containsBel) {
                     Modifier.border(2.dp, color = MessageItemColors.Red, shape = messageShape)
@@ -215,51 +210,44 @@ internal fun MessageItem(
     Box(modifier = Modifier.wrapContentSize()) {
         Surface(
             modifier =
-                Modifier
-                    .align(if (message.fromLocal) Alignment.TopEnd else Alignment.TopStart)
-                    .padding(
-                        start = if (!message.fromLocal) 0.dp else 16.dp,
-                        end = if (message.fromLocal) 0.dp else 16.dp,
-                    )
-                    .combinedClickable(
-                        onClick = onClick,
-                        onLongClick = {
-                            onLongClick()
-                            if (!inSelectionMode) {
-                                activeSheet = ActiveSheet.Actions
-                            }
-                        },
-                        onDoubleClick = onDoubleClick,
-                    )
-                    .then(messageModifier)
-                    .semantics(mergeDescendants = true) {
-                        val senderName =
-                            if (message.fromLocal) ourNode.user.longName else node.user.longName
-                        contentDescription = "Message from $senderName: ${message.text}"
+            Modifier.align(if (message.fromLocal) Alignment.TopEnd else Alignment.TopStart)
+                .padding(
+                    start = if (!message.fromLocal) 0.dp else 16.dp,
+                    end = if (message.fromLocal) 0.dp else 16.dp,
+                )
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = {
+                        onLongClick()
+                        if (!inSelectionMode) {
+                            activeSheet = ActiveSheet.Actions
+                        }
                     },
+                    onDoubleClick = onDoubleClick,
+                )
+                .then(messageModifier)
+                .semantics(mergeDescendants = true) {
+                    val senderName = if (message.fromLocal) ourNode.user.longName else node.user.longName
+                    contentDescription = "Message from $senderName: ${message.text}"
+                },
             color = containerColor,
             contentColor = contentColorFor(containerColor),
             shape = messageShape,
         ) {
-            val hasPrevPadding = if (hasSamePrev) {
-                12.dp
-            } else {
-                0.dp
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = hasPrevPadding)
-            ) {
+            val hasPrevPadding =
+                if (hasSamePrev) {
+                    12.dp
+                } else {
+                    0.dp
+                }
+            Column(modifier = Modifier.fillMaxWidth().padding(top = hasPrevPadding)) {
                 OriginalMessageSnippet(
                     message = message,
                     ourNode = ourNode,
                     onNavigateToOriginalMessage = onNavigateToOriginalMessage,
                 )
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (showUserName) {
@@ -288,10 +276,7 @@ internal fun MessageItem(
                     Text(text = message.time, style = MaterialTheme.typography.labelSmall)
                     if (message.fromLocal) {
                         Spacer(modifier = Modifier.size(4.dp))
-                        MessageStatusIcon(
-                            status = message.status ?: MessageStatus.UNKNOWN,
-                            onClick = onStatusClick,
-                        )
+                        MessageStatusIcon(status = message.status ?: MessageStatus.UNKNOWN, onClick = onStatusClick)
                     }
                 }
 
@@ -303,10 +288,7 @@ internal fun MessageItem(
                         color = cardColors.contentColor,
                     )
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         if (!message.fromLocal) {
                             if (message.hopsAway == 0) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -315,10 +297,7 @@ internal fun MessageItem(
                                 }
                             } else {
                                 Text(
-                                    text = stringResource(
-                                        Res.string.hops_away_template,
-                                        message.hopsAway
-                                    ),
+                                    text = stringResource(Res.string.hops_away_template, message.hopsAway),
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                             }
@@ -332,8 +311,8 @@ internal fun MessageItem(
         }
 
         Box(
-            modifier = Modifier
-                .align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
+            modifier =
+            Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
                 .padding(horizontal = 24.dp)
                 .offset(y = 24.dp),
         ) {
@@ -347,58 +326,54 @@ internal fun MessageItem(
     }
 }
 
+private const val SELECTED_ALPHA = 0.6f
+private const val UNSELECTED_ALPHA = 0.2f
+private const val NORMAL_ALPHA = 0.4f
+
 private enum class ActiveSheet {
     Actions,
-    Emoji
+    Emoji,
 }
 
 @Composable
 private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit) {
-    val icon = when (status) {
-        MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-        MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-        MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-        MessageStatus.SFPP_ROUTING -> Icons.TwoTone.AddLink
-        MessageStatus.SFPP_CONFIRMED -> Icons.TwoTone.Link
-        MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-        MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-        else -> Icons.TwoTone.Warning
-    }
+    val icon =
+        when (status) {
+            MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+            MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+            MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+            MessageStatus.SFPP_ROUTING -> Icons.TwoTone.AddLink
+            MessageStatus.SFPP_CONFIRMED -> Icons.TwoTone.Link
+            MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+            MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+            else -> Icons.TwoTone.Warning
+        }
     Icon(
         imageVector = icon,
         contentDescription = stringResource(Res.string.message_delivery_status),
-        modifier = Modifier
-            .size(24.dp)
-            .clickable(onClick = onClick)
+        modifier = Modifier.size(24.dp).clickable(onClick = onClick),
     )
 }
 
 @Composable
-private fun OriginalMessageSnippet(
-    message: Message,
-    ourNode: Node,
-    onNavigateToOriginalMessage: (Int) -> Unit,
-) {
+private fun OriginalMessageSnippet(message: Message, ourNode: Node, onNavigateToOriginalMessage: (Int) -> Unit) {
     val originalMessage = message.originalMessage
     if (originalMessage != null && originalMessage.packetId != 0) {
         val originalMessageNode = if (originalMessage.fromLocal) ourNode else originalMessage.node
-        val cardColors = CardDefaults.cardColors().copy(
-            containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f),
-            contentColor = Color(originalMessageNode.colors.first),
-        )
+        val cardColors =
+            CardDefaults.cardColors()
+                .copy(
+                    containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f),
+                    contentColor = Color(originalMessageNode.colors.first),
+                )
         OutlinedCard(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        onNavigateToOriginalMessage(originalMessage.packetId)
-                    },
+            modifier = Modifier.fillMaxWidth().clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
             colors = cardColors,
         ) {
             Row(
                 modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
                     Icons.Default.FormatQuote,
@@ -486,11 +461,7 @@ private fun MessageItemPreview() {
             viaMqtt = true,
         )
     AppTheme {
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .padding(vertical = 16.dp)
-        ) {
+        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp)) {
             MessageItem(
                 message = sent,
                 node = sent.node,
