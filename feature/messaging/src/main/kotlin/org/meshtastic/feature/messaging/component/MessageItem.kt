@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FormatQuote
@@ -78,6 +80,7 @@ internal fun MessageItem(
     onReply: () -> Unit = {},
     sendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
+    showUserName: Boolean = true,
     emojis: List<Reaction> = emptyList(),
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
@@ -87,25 +90,24 @@ internal fun MessageItem(
     onNavigateToOriginalMessage: (Int) -> Unit = {},
 ) = Column(
     modifier =
-    modifier
-        .fillMaxWidth()
-        .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
+        modifier
+            .fillMaxWidth()
+            .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background)
+            .padding(top = if (showUserName) 16.dp else 0.dp),
 ) {
     val containsBel = message.text.contains('\u0007')
     val containerColor =
-        Color(
-            if (message.fromLocal) {
-                ourNode.colors.second
-            } else {
-                node.colors.second
-            },
-        )
-            .copy(alpha = 0.2f)
+        if (message.fromLocal) {
+            Color(ourNode.colors.second).copy(alpha = 0.4f)
+        } else {
+            Color(node.colors.second).copy(alpha = 0.4f)
+        }
     val cardColors =
         CardDefaults.cardColors()
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
     val messageModifier =
-        Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+        Modifier
+            .padding(horizontal = 8.dp)
             .then(
                 if (containsBel) {
                     Modifier.border(2.dp, MessageItemColors.Red)
@@ -113,21 +115,26 @@ internal fun MessageItem(
                     Modifier
                 },
             )
-    Box {
+    Box(modifier = Modifier.wrapContentSize()) {
         Card(
             modifier =
-            Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
-                .padding(
-                    top = 4.dp,
-                    start = if (!message.fromLocal) 0.dp else 16.dp,
-                    end = if (message.fromLocal) 0.dp else 16.dp,
-                )
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick, onDoubleClick = onDoubleClick)
-                .then(messageModifier)
-                .semantics(mergeDescendants = true) {
-                    val senderName = if (message.fromLocal) ourNode.user.longName else node.user.longName
-                    contentDescription = "Message from $senderName: ${message.text}"
-                },
+                Modifier
+                    .align(if (message.fromLocal) Alignment.TopEnd else Alignment.TopStart)
+                    .padding(
+                        start = if (!message.fromLocal) 0.dp else 16.dp,
+                        end = if (message.fromLocal) 0.dp else 16.dp,
+                    )
+                    .combinedClickable(
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        onDoubleClick = onDoubleClick
+                    )
+                    .then(messageModifier)
+                    .semantics(mergeDescendants = true) {
+                        val senderName =
+                            if (message.fromLocal) ourNode.user.longName else node.user.longName
+                        contentDescription = "Message from $senderName: ${message.text}"
+                    },
             colors = cardColors,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -138,33 +145,35 @@ internal fun MessageItem(
                     onNavigateToOriginalMessage = onNavigateToOriginalMessage,
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    val chipNode = if (message.fromLocal) ourNode else node
-                    NodeChip(node = chipNode, onClick = onClickChip)
-                    Text(
-                        text = with(if (message.fromLocal) ourNode.user else node.user) { "$longName ($id)" },
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.weight(1f, fill = true),
-                    )
-                    if (message.viaMqtt) {
-                        Icon(
-                            Icons.Default.Cloud,
-                            contentDescription = stringResource(Res.string.via_mqtt),
-                            modifier = Modifier.size(16.dp),
-                        )
+                    if (showUserName) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            val chipNode = if (message.fromLocal) ourNode else node
+                            NodeChip(node = chipNode, onClick = onClickChip)
+                            Text(
+                                text = (if (message.fromLocal) ourNode.user else node.user).longName,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                            if (message.viaMqtt) {
+                                Icon(
+                                    Icons.Default.Cloud,
+                                    contentDescription = stringResource(Res.string.via_mqtt),
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            }
+                        }
                     }
-                    MessageActions(
-                        isLocal = message.fromLocal,
-                        status = message.status,
-                        onSendReaction = sendReaction,
-                        onSendReply = onReply,
-                        onStatusClick = onStatusClick,
-                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = message.time, style = MaterialTheme.typography.labelSmall)
                 }
 
                 Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp)) {
@@ -175,10 +184,9 @@ internal fun MessageItem(
                         color = cardColors.contentColor,
                     )
 
-                    val topPadding = if (!message.fromLocal) 2.dp else 0.dp
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = topPadding, bottom = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (!message.fromLocal) {
@@ -189,30 +197,45 @@ internal fun MessageItem(
                                 }
                             } else {
                                 Text(
-                                    text = stringResource(Res.string.hops_away_template, message.hopsAway),
+                                    text = stringResource(
+                                        Res.string.hops_away_template,
+                                        message.hopsAway
+                                    ),
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.weight(1f))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (containsBel) {
                                 Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
                             }
-                            Text(text = message.time, style = MaterialTheme.typography.labelSmall)
+                            Spacer(modifier = Modifier.weight(1f))
+                            MessageActions(
+                                isLocal = message.fromLocal,
+                                status = message.status,
+                                onSendReaction = sendReaction,
+                                onSendReply = onReply,
+                                onStatusClick = onStatusClick,
+                            )
+
                         }
                     }
                 }
             }
         }
+
+        ReactionRow(
+            modifier = Modifier
+                .matchParentSize()
+                .align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
+                .padding(horizontal = 24.dp)
+                .offset(y = 12.dp),
+            reactions = emojis,
+            myId = ourNode.user.id,
+            onSendReaction = sendReaction,
+            onShowReactions = onShowReactions,
+        )
     }
-    ReactionRow(
-        modifier = Modifier.fillMaxWidth(),
-        reactions = emojis,
-        myId = ourNode.user.id,
-        onSendReaction = sendReaction,
-        onShowReactions = onShowReactions,
-    )
 }
 
 @Composable
@@ -227,9 +250,12 @@ private fun OriginalMessageSnippet(
         val originalMessageNode = if (originalMessage.fromLocal) ourNode else originalMessage.node
         OutlinedCard(
             modifier =
-            Modifier.fillMaxWidth().padding(4.dp).clickable {
-                onNavigateToOriginalMessage(originalMessage.packetId)
-            },
+                Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .clickable {
+                        onNavigateToOriginalMessage(originalMessage.packetId)
+                    },
             colors = cardColors,
         ) {
             Row(
@@ -322,35 +348,57 @@ private fun MessageItemPreview() {
             viaMqtt = true,
         )
     AppTheme {
-        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp)) {
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(vertical = 16.dp)
+        ) {
             MessageItem(
                 message = sent,
                 node = sent.node,
                 selected = false,
+                ourNode = sent.node,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
                 onClick = {},
                 onLongClick = {},
+                onDoubleClick = {},
+                onClickChip = {},
                 onStatusClick = {},
-                ourNode = sent.node,
+                onNavigateToOriginalMessage = {}
             )
 
             MessageItem(
                 message = received,
                 node = received.node,
                 selected = false,
+                ourNode = sent.node,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
                 onClick = {},
                 onLongClick = {},
+                onDoubleClick = {},
+                onClickChip = {},
                 onStatusClick = {},
-                ourNode = sent.node,
+                onNavigateToOriginalMessage = {}
             )
 
             MessageItem(
                 message = receivedWithOriginalMessage,
                 node = receivedWithOriginalMessage.node,
                 selected = false,
+                ourNode = sent.node,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
                 onClick = {},
                 onLongClick = {},
+                onDoubleClick = {},
+                onClickChip = {},
                 onStatusClick = {},
-                ourNode = sent.node,
+                onNavigateToOriginalMessage = {}
             )
         }
     }

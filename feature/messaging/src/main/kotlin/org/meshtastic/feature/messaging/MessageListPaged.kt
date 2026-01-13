@@ -203,6 +203,7 @@ private fun MessageListPagedContent(
         LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
                 val message = state.messages[index]
+                val prevMessage = if (index > 0) state.messages[index - 1] else null
                 if (message != null) {
                     renderPagedChatMessageRow(
                         message = message,
@@ -216,6 +217,7 @@ private fun MessageListPagedContent(
                         onShowStatusDialog = onShowStatusDialog,
                         onShowReactions = onShowReactions,
                         enableAnimations = enableAnimations,
+                        showUserName = prevMessage?.fromLocal == message.fromLocal || prevMessage?.node == message.node
                     )
 
                     // Show unread divider after the first unread message
@@ -257,6 +259,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
     enableAnimations: Boolean,
+    showUserName: Boolean,
 ) {
     val ourNode = state.ourNode ?: return
     val selected by
@@ -280,6 +283,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
         onStatusClick = { onShowStatusDialog(message) },
         onReply = { handlers.onReply(message) },
         emojis = message.emojis,
+        showUserName = showUserName,
         sendReaction = { emoji ->
             val hasReacted =
                 message.emojis.any { reaction ->
