@@ -38,7 +38,7 @@ coil = "3.3.0"
 dd-sdk-android = "3.5.0"
 detekt = "1.23.8"
 devtools-ksp = "2.3.4"
-markdownRenderer = "0.39.0"
+markdownRenderer = "0.39.1"
 osmdroid-android = "6.1.20"
 protobuf = "4.33.4"
 
