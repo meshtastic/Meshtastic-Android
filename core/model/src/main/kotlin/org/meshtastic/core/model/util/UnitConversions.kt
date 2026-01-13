@@ -30,7 +30,7 @@ object UnitConversions {
         val unit = if (isFahrenheit) "F" else "C"
 
         // Convoluted calculation due to edge case: rounding negative values.
-        // Rounding `-0.5` gives: `0`, since we're rounding `up`. We want `-0.5` to be rounded to `-1`.
+        // We round the absolute value using roundToInt() (banker's rounding), then reapply the sign so values
         val absoluteTemp: Float = kotlin.math.abs(temp)
         val roundedAbsoluteTemp: Int = absoluteTemp.roundToInt()
 
