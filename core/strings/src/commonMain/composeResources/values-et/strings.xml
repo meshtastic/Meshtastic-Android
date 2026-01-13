@@ -345,7 +345,11 @@
     <string name="currently">Praegu:</string>
     <string name="mute_status_always">Alati vaigistatud</string>
     <string name="mute_status_unmuted">Mitte vaigistatud</string>
+    <string name="mute_status_muted_for_days">Vaigistatud %1$d päeva ja %2$.1f tundi</string>
+    <string name="mute_status_muted_for_hours">Vaigistatud %1$.1f tundi</string>
     <string name="mute_status_label">Vaigistatud olek</string>
+    <string name="mute_add">Vaigista kasutaja '%1$s' teated?</string>
+    <string name="mute_remove">Tühistada '%1$s' teadete vaigistus?</string>
     <string name="replace">Asenda</string>
     <string name="wifi_qr_code_scan">Skaneeri WiFi QR kood</string>
     <string name="wifi_qr_code_error">Vigane WiFi tõendi QR koodi vorming</string>
@@ -1038,4 +1042,5 @@
     <string name="compass_uncertainty">Hinnanguline piirkond: \u00b1%1$s (\u00b1%2$s)</string>
     <string name="compass_uncertainty_unknown">Hinnanguline piirkond: täpsus teadmata</string>
     <string name="mark_as_read">Märgi loetuks</string>
+    <string name="now">Kohe</string>
 </resources>
