@@ -43,6 +43,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -64,9 +66,6 @@ import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
-
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -109,7 +108,7 @@ internal fun MessageItem(
         Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
             .then(
                 if (containsBel) {
-                    Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.extraLarge)
+                    Modifier.border(2.dp, MessageItemColors.Red)
                 } else {
                     Modifier
                 },
@@ -129,7 +128,6 @@ internal fun MessageItem(
                     val senderName = if (message.fromLocal) ourNode.user.longName else node.user.longName
                     contentDescription = "Message from $senderName: ${message.text}"
                 },
-            shape = MaterialTheme.shapes.extraLarge,
             colors = cardColors,
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -140,7 +138,7 @@ internal fun MessageItem(
                     onNavigateToOriginalMessage = onNavigateToOriginalMessage,
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
@@ -169,7 +167,7 @@ internal fun MessageItem(
                     )
                 }
 
-                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp)) {
                     AutoLinkText(
                         modifier = Modifier.fillMaxWidth(),
                         text = message.text,
