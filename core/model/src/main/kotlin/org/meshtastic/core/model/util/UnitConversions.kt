@@ -32,13 +32,13 @@ object UnitConversions {
         // Convoluted calculation due to edge case: rounding negative values.
         // Rounding `-0.5` gives: `0`, since we're rounding `up`. We want `-0.5` to be rounded to `-1`.
         val absoluteTemp: Float = kotlin.math.abs(temp)
-        val roundedAbsoluteTempt: Int = absoluteTemp.roundToInt()
+        val roundedAbsoluteTemp: Int = absoluteTemp.roundToInt()
 
-        val isZero = roundedAbsoluteTempt == 0
+        val isZero = roundedAbsoluteTemp == 0
         val isPositive = kotlin.math.sign(temp) > 0
         val sign: String = if (isPositive || isZero) "" else "-"
 
-        return "$sign$roundedAbsoluteTempt°$unit"
+        return "$sign$roundedAbsoluteTemp°$unit"
     }
 
     /**
