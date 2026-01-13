@@ -157,6 +157,7 @@ internal fun MessageItem(
                         }
                     )
                 }
+
                 ActiveSheet.Emoji -> {
                     // Limit height of emoji picker so it doesn't look weird full screen
                     Box(modifier = Modifier.heightIn(max = 400.dp)) {
@@ -169,26 +170,44 @@ internal fun MessageItem(
                         )
                     }
                 }
+
                 null -> {}
             }
         }
     }
 
     val containsBel = message.text.contains('\u0007')
-    val containerColor =if (message.fromLocal) {
-            Color(ourNode.colors.second).copy(alpha = if (selected) 0.2f else 0.4f)
+    val alpha = if (inSelectionMode) {
+        if (selected) 0.6f else 0.2f
+    } else {
+        .4f
+    }
+    val containerColor = if (message.fromLocal) {
+        Color(ourNode.colors.second).copy(alpha = alpha)
+    } else {
+        Color(node.colors.second).copy(alpha = alpha)
+    }.apply {
+        if (inSelectionMode) {
+            copy(alpha = if (selected) 0.6f else 0.2f)
         } else {
-            Color(node.colors.second).copy(alpha = if (selected) 0.2f else 0.4f)
+            copy(alpha = 0.4f)
         }
+    }
     val cardColors =
         CardDefaults.cardColors()
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
+    val messageShape = getMessageBubbleShape(
+        cornerRadius = 16.dp,
+        isSender = message.fromLocal,
+        hasSamePrev = hasSamePrev,
+        hasSameNext = hasSameNext,
+    )
     val messageModifier =
         Modifier
             .padding(horizontal = 8.dp)
             .then(
                 if (containsBel) {
-                    Modifier.border(2.dp, MessageItemColors.Red)
+                    Modifier.border(2.dp, color = MessageItemColors.Red, shape = messageShape)
                 } else {
                     Modifier
                 },
@@ -220,13 +239,7 @@ internal fun MessageItem(
                     },
             color = containerColor,
             contentColor = contentColorFor(containerColor),
-            shape =
-                getMessageBubbleShape(
-                    cornerRadius = 16.dp,
-                    isSender = message.fromLocal,
-                    hasSamePrev = hasSamePrev,
-                    hasSameNext = hasSameNext,
-                ),
+            shape = messageShape,
         ) {
             val hasPrevPadding = if (hasSamePrev) {
                 12.dp
