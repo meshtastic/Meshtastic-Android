@@ -369,6 +369,7 @@ fun MessageScreen(
                         onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
                         onReply = { message -> replyingToPacketId = message?.packetId },
                     ),
+                    quickEmojis = viewModel.frequentEmojis,
                 )
                 // Show FAB if we can scroll towards the newest messages (index 0).
                 if (listState.canScrollBackward) {
@@ -779,7 +780,7 @@ private fun QuickChatRow(
             // Memoize if content is static
             QuickChatAction(
                 name = "🔔",
-                message = "🔔 $alertActionMessage ", // Bell character added to message
+                message = "🔔 $alertActionMessage  ", // Bell character added to message
                 mode = QuickChatAction.Mode.Append,
                 position = -1, // Assuming -1 means it's a special prepended action
             )

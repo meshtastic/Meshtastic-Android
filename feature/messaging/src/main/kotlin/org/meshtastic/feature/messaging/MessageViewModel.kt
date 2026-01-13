@@ -42,6 +42,7 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
@@ -64,6 +65,7 @@ constructor(
     private val serviceRepository: ServiceRepository,
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
+    private val customEmojiPrefs: CustomEmojiPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
@@ -91,6 +93,20 @@ constructor(
             .filterNotNull()
             .flatMapLatest { contactKey -> packetRepository.getMessagesFromPaged(contactKey, ::getNode) }
             .cachedIn(viewModelScope)
+
+    val frequentEmojis: List<String>
+        get() =
+            customEmojiPrefs
+                .customEmojiFrequency
+                ?.split(",")
+                ?.associate { entry ->
+                    entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() }
+                        ?: ("" to 0)
+                }
+                ?.toList()
+                ?.sortedByDescending { it.second }
+                ?.map { it.first }
+                ?.take(6) ?: listOf("👍", "👎", "😂", "🔥", "❤️", "😮")
 
     init {
         val contactKey = savedStateHandle.get<String>("contactKey")

@@ -103,6 +103,7 @@ internal fun MessageListPaged(
     handlers: MessageListHandlers,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
+    quickEmojis: List<String> = emptyList(),
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { state.selectedIds.value.isNotEmpty() } }
@@ -170,6 +171,7 @@ internal fun MessageListPaged(
         onShowStatusDialog = { showStatusDialog = it },
         onShowReactions = { showReactionDialog = it },
         modifier = modifier,
+        quickEmojis = quickEmojis
     )
 }
 
@@ -186,6 +188,7 @@ private fun MessageListPagedContent(
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
     modifier: Modifier = Modifier,
+    quickEmojis: List<String>,
 ) {
     // Calculate unread divider position
     val unreadDividerIndex by
@@ -238,6 +241,7 @@ private fun MessageListPagedContent(
                         showUserName = prevMessage?.fromLocal == message.fromLocal || prevMessage?.node == message.node,
                         hasSamePrev = hasSamePrev,
                         hasSameNext = hasSameNext,
+                        quickEmojis = quickEmojis,
                     )
 
                     // Show unread divider after the first unread message
@@ -283,6 +287,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     showUserName: Boolean,
     hasSamePrev: Boolean,
     hasSameNext: Boolean,
+    quickEmojis: List<String>,
 ) {
     val ourNode = state.ourNode ?: return
     val selected by
@@ -336,6 +341,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
         },
         hasSamePrev = hasSamePrev,
         hasSameNext = hasSameNext,
+        quickEmojis = quickEmojis,
     )
 }
 

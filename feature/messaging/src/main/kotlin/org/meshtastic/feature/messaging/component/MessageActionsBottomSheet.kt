@@ -16,39 +16,116 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Reply
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessageActionsBottomSheet(onDismiss: () -> Unit, onReply: () -> Unit, onReact: () -> Unit, onCopy: () -> Unit) {
+fun MessageActionsBottomSheet(
+    quickEmojis: List<String>,
+    onDismiss: () -> Unit,
+    onReply: () -> Unit,
+    onReact: (String) -> Unit,
+    onMoreReactions: () -> Unit,
+    onCopy: () -> Unit
+) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column {
-            ListItem(
-                headlineContent = { Text("Reply") },
-                leadingContent = { Icon(Icons.Default.Reply, contentDescription = "Reply") },
-                modifier = Modifier.clickable(onClick = onReply),
-            )
-            ListItem(
-                headlineContent = { Text("React") },
-                leadingContent = { Icon(Icons.Default.ThumbUp, contentDescription = "React") },
-                modifier = Modifier.clickable(onClick = onReact),
-            )
-            ListItem(
-                headlineContent = { Text("Copy") },
-                leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = "Copy") },
-                modifier = Modifier.clickable(onClick = onCopy),
+        MessageActionsContent(
+            quickEmojis = quickEmojis,
+            onReply = onReply,
+            onReact = onReact,
+            onMoreReactions = onMoreReactions,
+            onCopy = onCopy
+        )
+    }
+}
+
+@Composable
+fun MessageActionsContent(
+    quickEmojis: List<String>,
+    onReply: () -> Unit,
+    onReact: (String) -> Unit,
+    onMoreReactions: () -> Unit,
+    onCopy: () -> Unit
+) {
+    Column {
+        QuickEmojiRow(quickEmojis = quickEmojis, onReact = onReact, onMoreReactions = onMoreReactions)
+        
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        ListItem(
+            headlineContent = { Text("Reply") },
+            leadingContent = { Icon(Icons.Default.Reply, contentDescription = "Reply") },
+            modifier = Modifier.clickable(onClick = onReply),
+        )
+        
+        ListItem(
+            headlineContent = { Text("Copy") },
+            leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = "Copy") },
+            modifier = Modifier.clickable(onClick = onCopy),
+        )
+    }
+}
+
+@Composable
+private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, onMoreReactions: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        quickEmojis.take(6).forEach { emoji ->
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { onReact(emoji) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = emoji, fontSize = 20.sp)
+            }
+        }
+        
+        IconButton(
+            onClick = onMoreReactions,
+            modifier = Modifier
+                .size(40.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+        ) {
+            Icon(
+                Icons.Default.AddReaction,
+                contentDescription = "More reactions",
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

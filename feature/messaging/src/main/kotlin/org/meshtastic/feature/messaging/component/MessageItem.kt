@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,12 +43,15 @@ import androidx.compose.material.icons.twotone.HowToReg
 import androidx.compose.material.icons.twotone.Link
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,9 +84,11 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
+import org.meshtastic.core.ui.emoji.EmojiPicker
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 internal fun MessageItem(
@@ -96,6 +102,7 @@ internal fun MessageItem(
     onShowReactions: () -> Unit = {},
     showUserName: Boolean = true,
     emojis: List<Reaction> = emptyList(),
+    quickEmojis: List<String> = listOf("👍", "👎", "😂", "🔥", "❤️", "😮"),
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onDoubleClick: () -> Unit = {},
@@ -110,25 +117,51 @@ internal fun MessageItem(
             .fillMaxWidth()
             .padding(top = if (showUserName) 32.dp else 0.dp),
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
     val clipboardManager = LocalClipboardManager.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    if (showBottomSheet) {
-        MessageActionsBottomSheet(
-            onDismiss = { showBottomSheet = false },
-            onReply = {
-                showBottomSheet = false
-                onReply()
-            },
-            onReact = {
-                showBottomSheet = false
-                sendReaction("\uD83D\uDC4D")
-            }, // Default to thumbs up for now
-            onCopy = {
-                showBottomSheet = false
-                clipboardManager.setText(AnnotatedString(message.text))
-            },
-        )
+    if (activeSheet != null) {
+        ModalBottomSheet(
+            onDismissRequest = { activeSheet = null },
+            sheetState = sheetState,
+        ) {
+            when (activeSheet) {
+                ActiveSheet.Actions -> {
+                    MessageActionsContent(
+                        quickEmojis = quickEmojis,
+                        onReply = {
+                            activeSheet = null
+                            onReply()
+                        },
+                        onReact = { emoji ->
+                            activeSheet = null
+                            sendReaction(emoji)
+                        },
+                        onMoreReactions = {
+                            activeSheet = ActiveSheet.Emoji
+                        },
+                        onCopy = {
+                            activeSheet = null
+                            clipboardManager.setText(AnnotatedString(message.text))
+                        },
+                    )
+                }
+                ActiveSheet.Emoji -> {
+                    // Limit height of emoji picker so it doesn't look weird full screen
+                    Box(modifier = Modifier.heightIn(max = 400.dp)) {
+                        EmojiPicker(
+                            onDismiss = { activeSheet = null },
+                            onConfirm = { emoji ->
+                                activeSheet = null
+                                sendReaction(emoji)
+                            },
+                        )
+                    }
+                }
+                null -> {}
+            }
+        }
     }
 
     val containsBel = message.text.contains('\u0007')
@@ -163,7 +196,7 @@ internal fun MessageItem(
                         onClick = onClick,
                         onLongClick = {
                             onLongClick()
-                            showBottomSheet = true
+                            activeSheet = ActiveSheet.Actions
                         },
                         onDoubleClick = onDoubleClick,
                     )
@@ -287,6 +320,11 @@ internal fun MessageItem(
             )
         }
     }
+}
+
+private enum class ActiveSheet {
+    Actions,
+    Emoji
 }
 
 @Composable
