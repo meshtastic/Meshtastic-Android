@@ -122,14 +122,10 @@ fun RetryConfirmationDialog(
     AlertDialog(
         onDismissRequest = { /* Prevent dismissal by clicking outside */ },
         dismissButton = {
-            FilledTonalButton(onClick = onCancel) {
-                Text(text = stringResource(Res.string.retry_dialog_cancel))
-            }
+            FilledTonalButton(onClick = onCancel) { Text(text = stringResource(Res.string.retry_dialog_cancel)) }
         },
         confirmButton = {
-            FilledTonalButton(onClick = onConfirm) {
-                Text(text = stringResource(Res.string.retry_dialog_confirm))
-            }
+            FilledTonalButton(onClick = onConfirm) { Text(text = stringResource(Res.string.retry_dialog_confirm)) }
         },
         title = {
             Text(
