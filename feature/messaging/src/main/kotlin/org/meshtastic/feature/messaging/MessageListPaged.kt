@@ -18,6 +18,7 @@ package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -204,7 +205,12 @@ private fun MessageListPagedContent(
     val enableAnimations by remember { derivedStateOf { !listState.isScrollInProgress } }
 
     Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            reverseLayout = true,
+            contentPadding = PaddingValues(bottom = 24.dp),
+        ) {
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
                 val message = state.messages[index]
                 val visuallyPrevMessage = if (index < state.messages.itemCount - 1) state.messages[index + 1] else null
