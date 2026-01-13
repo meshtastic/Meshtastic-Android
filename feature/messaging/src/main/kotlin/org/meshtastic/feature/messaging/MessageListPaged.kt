@@ -173,6 +173,7 @@ internal fun MessageListPaged(
     )
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun MessageListPagedContent(
     listState: LazyListState,
@@ -204,6 +205,23 @@ private fun MessageListPagedContent(
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
                 val message = state.messages[index]
                 val prevMessage = if (index > 0) state.messages[index - 1] else null
+                val visuallyPrevMessage = if (index < state.messages.itemCount - 1) state.messages[index + 1] else null
+                val visuallyNextMessage = if (index > 0) state.messages[index - 1] else null
+
+                val hasSamePrev = if (message != null && visuallyPrevMessage != null) {
+                    visuallyPrevMessage.fromLocal == message.fromLocal &&
+                        (message.fromLocal || visuallyPrevMessage.node.num == message.node.num)
+                } else {
+                    false
+                }
+
+                val hasSameNext = if (message != null && visuallyNextMessage != null) {
+                    visuallyNextMessage.fromLocal == message.fromLocal &&
+                        (message.fromLocal || visuallyNextMessage.node.num == message.node.num)
+                } else {
+                    false
+                }
+
                 if (message != null) {
                     renderPagedChatMessageRow(
                         message = message,
@@ -217,7 +235,9 @@ private fun MessageListPagedContent(
                         onShowStatusDialog = onShowStatusDialog,
                         onShowReactions = onShowReactions,
                         enableAnimations = enableAnimations,
-                        showUserName = prevMessage?.fromLocal == message.fromLocal || prevMessage?.node == message.node
+                        showUserName = prevMessage?.fromLocal == message.fromLocal || prevMessage?.node == message.node,
+                        hasSamePrev = hasSamePrev,
+                        hasSameNext = hasSameNext,
                     )
 
                     // Show unread divider after the first unread message
@@ -246,6 +266,7 @@ private fun MessageListPagedContent(
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun LazyItemScope.renderPagedChatMessageRow(
     message: Message,
@@ -260,6 +281,8 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     onShowReactions: (List<Reaction>) -> Unit,
     enableAnimations: Boolean,
     showUserName: Boolean,
+    hasSamePrev: Boolean,
+    hasSameNext: Boolean,
 ) {
     val ourNode = state.ourNode ?: return
     val selected by
@@ -311,6 +334,8 @@ private fun LazyItemScope.renderPagedChatMessageRow(
                 }
             }
         },
+        hasSamePrev = hasSamePrev,
+        hasSameNext = hasSameNext,
     )
 }
 

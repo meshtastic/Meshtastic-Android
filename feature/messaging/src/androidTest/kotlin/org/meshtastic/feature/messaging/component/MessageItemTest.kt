@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.messaging.component
 
 import androidx.compose.ui.test.assertIsDisplayed
@@ -147,6 +146,8 @@ class MessageItemTest {
         }
 
         // Verify that the node containing the message text exists and matches the text
-        composeTestRule.onNodeWithContentDescription("Message from ${testNode.user?.longName}: Hello World").assertIsDisplayed()
+        composeTestRule
+            .onNodeWithContentDescription("Message from ${testNode.user?.longName}: Hello World")
+            .assertIsDisplayed()
     }
 }
