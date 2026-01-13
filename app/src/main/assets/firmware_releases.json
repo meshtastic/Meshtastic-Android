@@ -182,6 +182,12 @@
   },
   "pullRequests": [
     {
+      "id": "9289",
+      "title": "Added Minimesh variant",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9289",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9238",
       "title": "Change I2C pins to NFC pads for XIAO nRF52840",
       "page_url": "https://github.com/meshtastic/firmware/pull/9238",
@@ -215,12 +221,6 @@
       "id": "9186",
       "title": "fix: extend retransmission timeout for ROUTER_LATE broadcast window",
       "page_url": "https://github.com/meshtastic/firmware/pull/9186",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9176",
-      "title": "Add Minimesh Lite device variant",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9176",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
