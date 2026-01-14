@@ -26,7 +26,7 @@ class UnifiedOtaProtocolTest {
         val size = 123456L
         val hash = "abc123def456"
         val command = OtaCommand.StartOta(size, hash)
-        
+
         assertEquals("OTA 123456 abc123def456\n", command.toString())
     }
 
@@ -35,8 +35,11 @@ class UnifiedOtaProtocolTest {
         val size = 4294967295L
         val hash = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         val command = OtaCommand.StartOta(size, hash)
-        
-        assertEquals("OTA 4294967295 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\n", command.toString())
+
+        assertEquals(
+            "OTA 4294967295 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\n",
+            command.toString(),
+        )
     }
 
     @Test
@@ -50,7 +53,7 @@ class UnifiedOtaProtocolTest {
     @Test
     fun `OtaResponse parse handles detailed OK with version info`() {
         val response = OtaResponse.parse("OK 1.0 2.3.4 42 v2.3.4-abc123\n")
-        
+
         assert(response is OtaResponse.Ok)
         val ok = response as OtaResponse.Ok
         assertEquals("1.0", ok.hwVersion)
