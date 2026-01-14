@@ -346,7 +346,11 @@
     <string name="currently">Actuellement :</string>
     <string name="mute_status_always">Toujours muet</string>
     <string name="mute_status_unmuted">Non muet</string>
+    <string name="mute_status_muted_for_days">Muet pour %1$d jours, %2$.1f heures</string>
+    <string name="mute_status_muted_for_hours">Muet pour %1$.1f heures</string>
     <string name="mute_status_label">Statut muet</string>
+    <string name="mute_add">Désactiver les notifications pour '%1$s' ?</string>
+    <string name="mute_remove">Réactiver les notifications pour '%1$s' ?</string>
     <string name="replace">Remplacer</string>
     <string name="wifi_qr_code_scan">Scanner le code QR WiFi</string>
     <string name="wifi_qr_code_error">Format du code QR d'identification WiFi invalide</string>
