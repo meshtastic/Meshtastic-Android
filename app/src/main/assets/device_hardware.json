@@ -1316,5 +1316,22 @@
     "images": [
       "thinknode_m6.svg"
     ]
+  },
+  {
+    "hwModel": 122,
+    "hwModelSlug": "TBEAM_1_WATT",
+    "platformioTarget": "t-beam-1w",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "LilyGo T-Beam 1W",
+    "tags": [
+      "LilyGo"
+    ],
+    "hasMui": false,
+    "partitionScheme": "8MB",
+    "images": [
+      "tbeam-1w.svg"
+    ]
   }
 ]
