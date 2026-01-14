@@ -17,6 +17,7 @@
 package org.meshtastic.feature.settings
 
 import android.app.Application
+import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,11 +28,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
@@ -61,12 +65,13 @@ import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
 import java.util.Locale
-import javax.inject.Injec
+import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @Suppress("LongParameterList")
 @HiltViewModel
 class SettingsViewModel
-@Injec
+@Inject
 constructor(
     private val app: Application,
     radioConfigRepository: RadioConfigRepository,
@@ -138,7 +143,7 @@ constructor(
             .stateInWhileSubscribed(initialValue = false)
 
     // Device DB cache limit (bounded by DatabaseConstants)
-    val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimi
+    val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
 
     fun setDbCacheLimit(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
@@ -277,7 +282,7 @@ constructor(
                                         .toString()
                                 }
 
-                            val hopLimit = proto.hopLimi
+                            val hopLimit = proto.hopLimit
 
                             val payload =
                                 when {

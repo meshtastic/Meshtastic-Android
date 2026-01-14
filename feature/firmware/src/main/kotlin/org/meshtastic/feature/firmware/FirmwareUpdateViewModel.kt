@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
@@ -407,11 +408,12 @@ constructor(
             } else {
                 partInfo
             }
-
-        val statusMsg = getString(Res.string.firmware_update_updating, "").replace(Regex(":?\\s*%1\\\$s%?"), "").trim()
-        val details = "$percentText ($metrics)"
-
-        _state.value = FirmwareUpdateState.Updating(ProgressState(statusMsg, progress, details))
+        viewModelScope.launch {
+            val statusMsg =
+                getString(Res.string.firmware_update_updating, "").replace(Regex(":?\\s*%1\\\$s%?"), "").trim()
+            val details = "$percentText ($metrics)"
+            _state.value = FirmwareUpdateState.Updating(ProgressState(statusMsg, progress, details))
+        }
     }
 
     private suspend fun verifyUpdateResult(address: String?) {
