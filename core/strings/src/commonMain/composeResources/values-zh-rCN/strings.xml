@@ -256,6 +256,7 @@
     <string name="delete">删除</string>
     <string name="delete_for_everyone">也从所有人的聊天纪录中删除</string>
     <string name="delete_for_me">仅在我的设备中删除</string>
+    <string name="select">选择</string>
     <string name="select_all">选择全部</string>
     <string name="close_selection">关闭选中</string>
     <string name="delete_selection">删除选中</string>

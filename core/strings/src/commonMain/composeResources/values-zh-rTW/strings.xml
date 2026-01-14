@@ -241,6 +241,7 @@
     <string name="delete">刪除</string>
     <string name="delete_for_everyone">也從所有人的聊天紀錄中刪除</string>
     <string name="delete_for_me">從我的聊天紀錄中刪除</string>
+    <string name="select">選擇</string>
     <string name="select_all">選擇全部</string>
     <string name="close_selection">關閉選取</string>
     <string name="delete_selection">刪除選取項目</string>

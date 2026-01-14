@@ -181,6 +181,7 @@
     <string name="delete">Обриши</string>
     <string name="delete_for_everyone">Обриши за све</string>
     <string name="delete_for_me">Обриши за мене</string>
+    <string name="select">Изабери</string>
     <string name="select_all">Изабери све</string>
     <string name="map_style_selection">Одабир стила</string>
     <string name="map_download_region">Регион за преузимање</string>

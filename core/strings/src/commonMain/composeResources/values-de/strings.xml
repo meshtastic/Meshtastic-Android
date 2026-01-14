@@ -265,6 +265,7 @@
     <string name="delete">Löschen</string>
     <string name="delete_for_everyone">Für jeden löschen</string>
     <string name="delete_for_me">Für mich löschen</string>
+    <string name="select">Auswählen</string>
     <string name="select_all">Alle auswählen</string>
     <string name="close_selection">Auswahl schließen</string>
     <string name="delete_selection">Auswahl löschen</string>

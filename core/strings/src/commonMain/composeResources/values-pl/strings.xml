@@ -214,6 +214,7 @@
     <string name="delete">Usuń</string>
     <string name="delete_for_everyone">Usuń dla wszystkich</string>
     <string name="delete_for_me">Usuń u mnie</string>
+    <string name="select">Wybierz</string>
     <string name="select_all">Zaznacz wszystko</string>
     <string name="close_selection">Zamknij wybór</string>
     <string name="delete_selection">Usuń zaznaczone</string>

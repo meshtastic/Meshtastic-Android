@@ -265,6 +265,7 @@
     <string name="delete">Poista</string>
     <string name="delete_for_everyone">Poista kaikilta</string>
     <string name="delete_for_me">Poista minulta</string>
+    <string name="select">Valitse</string>
     <string name="select_all">Valitse kaikki</string>
     <string name="close_selection">Sulje valinta</string>
     <string name="delete_selection">Poista valitut</string>
