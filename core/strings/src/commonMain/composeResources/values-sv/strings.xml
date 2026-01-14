@@ -42,6 +42,7 @@
     <string name="unrecognized">Okänd</string>
     <string name="message_status_enroute">Inväntar kvittens</string>
     <string name="message_status_queued">Kvittens köad</string>
+    <string name="message_retry_count">Försök: %1$d / %2$d</string>
     <string name="routing_error_none">Kvitterad</string>
     <string name="routing_error_no_route">Ingen rutt</string>
     <string name="routing_error_got_nak">Misslyckad kvittens</string>
@@ -112,6 +113,7 @@
     <string name="config_lora_hop_limit_summary">Sätter det maximala antalet hopp, standard är 3. Ökat antal hopp ökar också trängseln och bör användas med försiktighet. 0 hopp sända meddelanden kommer inte att få ACKs.</string>
     <string name="label_very_long_slow">Mycket lång räckvidd - långsamt</string>
     <string name="label_long_fast">Lång räckvidd - snabbt</string>
+    <string name="label_long_turbo">Lång räckvidd - supersnabbt</string>
     <string name="label_long_moderate">Lång räckvidd - måttligt</string>
     <string name="label_long_slow">Lång räckvidd - långsamt</string>
     <string name="label_medium_fast">Medellång räckvidd - snabbt</string>
@@ -189,6 +191,7 @@
     <string name="must_update">Du måste uppdatera detta program i app-butiken (eller Github). Det är för gammalt för att prata med denna radioenhet. Läs vår <a href="https://meshtastic.org/docs/software/android/installation">dokumentation</a> i detta ämne.</string>
     <string name="none">Ingen (inaktivera)</string>
     <string name="meshtastic_service_notifications">Tjänsteaviseringar</string>
+    <string name="acknowledgements">Bekräftelser</string>
     <string name="channel_invalid">Denna kanal-URL är ogiltig och kan inte användas</string>
     <string name="contact_invalid">Denna kontakt är ogiltig och kan inte läggas till</string>
     <string name="debug_panel">Felsökningspanel</string>
@@ -197,6 +200,15 @@
     <string name="debug_export_cancelled">Exporten avbröts</string>
     <string name="debug_export_success">%1$d loggar exporterade</string>
     <string name="debug_export_failed">Det gick inte att skriva loggfil: %1$s</string>
+    <string name="debug_export_no_logs">Inga loggar att exportera</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d timme</item>
+        <item quantity="other">%1$d timmar</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d dag</item>
+        <item quantity="other">%1$d dagar</item>
+    </plurals>
     <string name="debug_filters">Filter</string>
     <string name="debug_active_filters">Aktiva filter</string>
     <string name="debug_default_search">Sök i loggar…</string>
@@ -206,6 +218,8 @@
     <string name="debug_filter_add">Lägg till filter</string>
     <string name="debug_filter_included">Filtrera inkluderade</string>
     <string name="debug_filter_clear">Rensa alla filter</string>
+    <string name="debug_filter_add_custom">Lägg till anpassat filter</string>
+    <string name="debug_store_logs_title">Spara meshnätsloggar</string>
     <string name="debug_clear">Töm loggar</string>
     <string name="match_any">Matcha någon &lt;unk&gt; alla</string>
     <string name="match_all">Matcha alla &lt;unk&gt; någon</string>
@@ -242,6 +256,7 @@
     <string name="delete">Radera</string>
     <string name="delete_for_everyone">Radera för alla</string>
     <string name="delete_for_me">Radera för mig</string>
+    <string name="select">Välj</string>
     <string name="select_all">Välj alla</string>
     <string name="close_selection">Stäng markerade</string>
     <string name="delete_selection">Radera markerade</string>
@@ -270,6 +285,7 @@
     <string name="quick_chat_instant">Skicka direkt</string>
     <string name="quick_chat_show">Visa snabbchattsmenyn</string>
     <string name="quick_chat_hide">Dölj snabbchattsmenyn</string>
+    <string name="quick_chat_show_label">Visa snabbchatten</string>
     <string name="factory_reset">Återställ till standardinställningar</string>
     <string name="bluetooth_disabled">Bluetooth är inaktiverat. Aktivera den i inställningarna för enheten.</string>
     <string name="open_settings">Öppna inställningar</string>
@@ -320,6 +336,9 @@
     <string name="currently">Nuvarande:</string>
     <string name="mute_status_always">Alltid tystad</string>
     <string name="mute_status_unmuted">Inte tystad</string>
+    <string name="mute_status_muted_for_days">Tystad i %1$d dagar och %2$.1f timmar</string>
+    <string name="mute_status_muted_for_hours">Tystad i %1$.1f timmar</string>
+    <string name="mute_add">Tysta aviseringar i '%1$s'?</string>
     <string name="replace">Ersätt</string>
     <string name="wifi_qr_code_scan">Skanna WiFi QR-kod</string>
     <string name="wifi_qr_code_error">Felaktigt QR-kodformat eller inloggningsinformation</string>
@@ -375,6 +394,9 @@
         <item quantity="other">%d hopp</item>
     </plurals>
     <string name="traceroute_diff">Hopp mot %1$d Hopp tillbaka %2$d</string>
+    <string name="traceroute_outgoing_route">Utgående rutt</string>
+    <string name="traceroute_return_route">Inkommande rutt</string>
+    <string name="view_on_map">Visa på karta</string>
     <string name="twenty_four_hours">24T</string>
     <string name="forty_eight_hours">48T</string>
     <string name="one_week">1V</string>
@@ -467,6 +489,7 @@
     <string name="send_bell">Skicka ljudavisering</string>
     <string name="messages">Meddelanden</string>
     <string name="device_db_cache_limit">Gräns för enhetens DB-cache</string>
+    <string name="log_retention_never">Radera aldrig loggar</string>
     <string name="detection_sensor_config">Inställningar för detekteringssensor</string>
     <string name="detection_sensor_enabled">Detektionssensor aktiverad</string>
     <string name="minimum_broadcast_seconds">Minsta sändningsintervall (sekunder)</string>
@@ -680,7 +703,13 @@
     <string name="import_known_shared_contact_text">Varning: Denna kontakt är känd, en import kommer att skriva över tidigare kontaktuppgifter.</string>
     <string name="public_key_changed">Publik nyckel har ändrats</string>
     <string name="import_label">Importera</string>
+    <string name="request">Begäran</string>
     <string name="request_device_metrics">Enhetens mätvärden</string>
+    <string name="request_environment_metrics">Miljövärden</string>
+    <string name="request_air_quality_metrics">Luftkvalitetsdata</string>
+    <string name="request_power_metrics">Strömdata</string>
+    <string name="request_local_stats">Lokal statistik</string>
+    <string name="request_metadata">Metadata</string>
     <string name="actions">Åtgärder</string>
     <string name="firmware">Fast programvara</string>
     <string name="use_12h_format">Använd 12-timmarsformat</string>
@@ -915,7 +944,9 @@
     <string name="firmware_update_taking_a_while">Det här kan ta en stund...</string>
     <string name="firmware_update_select_file">Välj lokal fil</string>
     <string name="firmware_update_copying">Kopierar fast programvara...</string>
+    <string name="firmware_update_method_usb">USB filöverföring</string>
     <string name="interval_unset">Ej inställd</string>
+    <string name="interval_always_on">Alltid på</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 sekund</item>
         <item quantity="other">%1$d sekunder</item>
@@ -935,5 +966,6 @@
     <string name="compass_bearing">Riktning: %1$s</string>
     <string name="compass_bearing_na">Riktning: okänd</string>
     <string name="compass_no_magnetometer">Denna enhet har ingen kompass. Riktning okänd.</string>
+    <string name="mark_as_read">Markera som läst</string>
     <string name="now">Nu</string>
 </resources>
