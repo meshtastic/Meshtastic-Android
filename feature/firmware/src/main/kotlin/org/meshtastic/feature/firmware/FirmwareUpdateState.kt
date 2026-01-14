@@ -52,6 +52,8 @@ sealed interface FirmwareUpdateState {
 
     data object Verifying : FirmwareUpdateState
 
+    data object VerificationFailed : FirmwareUpdateState
+
     data class Error(val error: String) : FirmwareUpdateState
 
     data object Success : FirmwareUpdateState

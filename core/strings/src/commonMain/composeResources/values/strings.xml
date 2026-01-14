@@ -1068,6 +1068,7 @@
     <string name="firmware_update_usb_instruction_title">Select DFU USB Drive</string>
     <string name="firmware_update_usb_instruction_text">Your device has rebooted into DFU mode and should appear as a USB drive (e.g., RAK4631).\n\nWhen the file picker opens, please select the root of that drive to save the firmware file.</string>
     <string name="firmware_update_verifying">Verifying update...</string>
+    <string name="firmware_update_verification_failed">Verification timed out. Device did not reconnect in time.</string>
     <string name="firmware_update_waiting_reconnect">Waiting for device to reconnect...</string>
     <string name="firmware_update_target">Target: %1$s</string>
     <string name="firmware_update_release_notes">Release Notes</string>

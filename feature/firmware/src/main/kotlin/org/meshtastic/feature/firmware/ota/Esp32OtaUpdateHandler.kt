@@ -177,16 +177,11 @@ constructor(
     }
 
     private suspend fun getFirmwareFromUri(uri: Uri): File? = withContext(Dispatchers.IO) {
-        try {
-            val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
-            val tempFile = File(context.cacheDir, "firmware_update/ota_firmware.bin")
-            tempFile.parentFile?.mkdirs()
-            inputStream.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
-            tempFile
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.e(e) { "ESP32 OTA: Failed to read firmware from URI" }
-            null
-        }
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
+        val tempFile = File(context.cacheDir, "firmware_update/ota_firmware.bin")
+        tempFile.parentFile?.mkdirs()
+        inputStream.use { input -> tempFile.outputStream().use { output -> input.copyTo(output) } }
+        tempFile
     }
 
     private fun triggerRebootOta(mode: Int, hash: ByteArray?) {

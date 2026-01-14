@@ -140,6 +140,12 @@ constructor(
         checkForUpdates()
     }
 
+    fun cancelUpdate() {
+        updateJob?.cancel()
+        _state.value = FirmwareUpdateState.Idle
+        checkForUpdates()
+    }
+
     fun checkForUpdates() {
         updateJob?.cancel()
         updateJob =
@@ -223,6 +229,9 @@ constructor(
                                 verifyUpdateResult(originalDeviceAddress)
                             }
                         } catch (e: CancellationException) {
+                            Logger.i { "Firmware update cancelled" }
+                            _state.value = FirmwareUpdateState.Idle
+                            checkForUpdates()
                             throw e
                         } catch (e: Exception) {
                             val failedMsg = getString(Res.string.firmware_update_failed)
@@ -269,6 +278,10 @@ constructor(
     fun startUpdateFromFile(uri: Uri) {
         val currentState = _state.value as? FirmwareUpdateState.Ready ?: return
         if (currentState.updateMethod is FirmwareUpdateMethod.Ble && !isValidBluetoothAddress(currentState.address)) {
+            viewModelScope.launch {
+                val noDeviceMsg = getString(Res.string.firmware_update_no_device)
+                _state.value = FirmwareUpdateState.Error(noDeviceMsg)
+            }
             return
         }
         originalDeviceAddress = currentState.address
@@ -399,13 +412,21 @@ constructor(
         }
 
         // Wait for device to reconnect and settle
-        withTimeoutOrNull(VERIFY_TIMEOUT) {
-            // Wait for both Connected state and node info to be present
-            serviceRepository.connectionState.first { it is ConnectionState.Connected }
-            nodeRepository.ourNodeInfo.filterNotNull().first()
-            delay(VERIFY_DELAY) // Extra buffer for initial config sync
+        val result =
+            withTimeoutOrNull(VERIFY_TIMEOUT) {
+                // Wait for both Connected state and node info to be present
+                serviceRepository.connectionState.first { it is ConnectionState.Connected }
+                nodeRepository.ourNodeInfo.filterNotNull().first()
+                delay(VERIFY_DELAY) // Extra buffer for initial config sync
+                true
+            }
+
+        if (result == null) {
+            Logger.w { "Post-update verification timed out for $address" }
+            _state.value = FirmwareUpdateState.VerificationFailed
+        } else {
+            _state.value = FirmwareUpdateState.Success
         }
-        _state.value = FirmwareUpdateState.Success
     }
 
     private suspend fun checkBatteryLevel(): Boolean {

@@ -20,8 +20,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -51,11 +49,8 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
     private var peripheral: Peripheral? = null
     private var otaCharacteristic: RemoteCharacteristic? = null
 
-    private val responseFlow =
-        MutableSharedFlow<String>(
-            extraBufferCapacity = EXTRA_BUFFER_CAPACITY,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
+    private val responseChannel =
+        kotlinx.coroutines.channels.Channel<String>(kotlinx.coroutines.channels.Channel.BUFFERED)
 
     private var isConnected = false
 
@@ -107,9 +102,13 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
         txChar
             .subscribe()
             .onEach { notifyBytes ->
-                val response = notifyBytes.decodeToString()
-                Logger.d { "BLE OTA: Received response: $response" }
-                responseFlow.emit(response)
+                try {
+                    val response = notifyBytes.decodeToString()
+                    Logger.d { "BLE OTA: Received response: $response" }
+                    responseChannel.trySend(response)
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
+                }
             }
             .launchIn(transportScope)
 
@@ -241,7 +240,7 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
     }
 
     private suspend fun waitForResponse(timeoutMs: Long): String = try {
-        withTimeout(timeoutMs) { responseFlow.first() }
+        withTimeout(timeoutMs) { responseChannel.receive() }
     } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
         throw OtaProtocolException.Timeout("Timeout waiting for response after ${timeoutMs}ms")
     }
@@ -259,6 +258,5 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
 
         // Recommended chunk size for BLE
         const val RECOMMENDED_CHUNK_SIZE = 512
-        private const val EXTRA_BUFFER_CAPACITY = 10
     }
 }

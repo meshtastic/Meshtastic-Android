@@ -42,7 +42,7 @@ constructor(
 ) : StreamInterface(service) {
 
     companion object {
-        const val MAX_RETRIES_ALLOWED = 20
+        const val MAX_RETRIES_ALLOWED = Int.MAX_VALUE
         const val MIN_BACKOFF_MILLIS = 1 * 1000L // 1 second
         const val MAX_BACKOFF_MILLIS = 5 * 60 * 1000L // 5 minutes
         const val SOCKET_TIMEOUT = 5000

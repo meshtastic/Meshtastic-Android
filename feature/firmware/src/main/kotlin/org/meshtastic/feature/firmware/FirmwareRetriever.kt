@@ -52,13 +52,31 @@ class FirmwareRetriever @Inject constructor(private val fileHandler: FirmwareFil
         release: FirmwareRelease,
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
-    ): File? = retrieve(
-        release = release,
-        hardware = hardware,
-        onProgress = onProgress,
-        fileSuffix = ".bin",
-        internalFileExtension = ".bin",
-    )
+    ): File? {
+        if (hardware.supportsUnifiedOta) {
+            val mcu = hardware.architecture.replace("-", "")
+            val otaFilename = "mt-$mcu-ota.bin"
+            retrieve(
+                release = release,
+                hardware = hardware,
+                onProgress = onProgress,
+                fileSuffix = ".bin",
+                internalFileExtension = ".bin",
+                preferredFilename = otaFilename,
+            )
+                ?.let {
+                    return it
+                }
+        }
+
+        return retrieve(
+            release = release,
+            hardware = hardware,
+            onProgress = onProgress,
+            fileSuffix = ".bin",
+            internalFileExtension = ".bin",
+        )
+    }
 
     private suspend fun retrieve(
         release: FirmwareRelease,
@@ -66,10 +84,11 @@ class FirmwareRetriever @Inject constructor(private val fileHandler: FirmwareFil
         onProgress: (Float) -> Unit,
         fileSuffix: String,
         internalFileExtension: String,
+        preferredFilename: String? = null,
     ): File? {
         val version = release.id.removePrefix("v")
         val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
-        val filename = "firmware-$target-$version$fileSuffix"
+        val filename = preferredFilename ?: "firmware-$target-$version$fileSuffix"
         val directUrl =
             "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-$version/$filename"
 
@@ -86,7 +105,9 @@ class FirmwareRetriever @Inject constructor(private val fileHandler: FirmwareFil
         // Fallback to downloading the full release zip and extracting
         val zipUrl = getDeviceFirmwareUrl(release.zipUrl, hardware.architecture)
         val downloadedZip = fileHandler.downloadFile(zipUrl, "firmware_release.zip", onProgress)
-        return downloadedZip?.let { fileHandler.extractFirmware(it, hardware, internalFileExtension) }
+        return downloadedZip?.let {
+            fileHandler.extractFirmware(it, hardware, internalFileExtension, preferredFilename)
+        }
     }
 
     private fun getDeviceFirmwareUrl(url: String, targetArch: String): String {

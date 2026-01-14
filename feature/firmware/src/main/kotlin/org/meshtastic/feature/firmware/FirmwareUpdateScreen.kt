@@ -139,6 +139,7 @@ import org.meshtastic.core.strings.firmware_update_unknown_release
 import org.meshtastic.core.strings.firmware_update_usb_bootloader_warning
 import org.meshtastic.core.strings.firmware_update_usb_instruction_text
 import org.meshtastic.core.strings.firmware_update_usb_instruction_title
+import org.meshtastic.core.strings.firmware_update_verification_failed
 import org.meshtastic.core.strings.firmware_update_verifying
 import org.meshtastic.core.strings.firmware_update_waiting_reconnect
 import org.meshtastic.core.strings.i_know_what_i_m_doing
@@ -149,6 +150,7 @@ import org.meshtastic.core.strings.save
 private const val CYCLE_DELAY_MS = 4500L
 
 @Composable
+@Suppress("LongMethod")
 fun FirmwareUpdateScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
@@ -198,6 +200,32 @@ fun FirmwareUpdateScreen(
         }
 
     KeepScreenOn(shouldKeepFirmwareScreenOn(state))
+
+    var showExitConfirmation by remember { mutableStateOf(false) }
+
+    androidx.activity.compose.BackHandler(enabled = shouldKeepFirmwareScreenOn(state)) { showExitConfirmation = true }
+
+    if (showExitConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirmation = false },
+            title = { Text(stringResource(Res.string.firmware_update_disclaimer_title)) },
+            text = { Text(stringResource(Res.string.firmware_update_disconnect_warning)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitConfirmation = false
+                        viewModel.cancelUpdate()
+                        navController.navigateUp()
+                    },
+                ) {
+                    Text(stringResource(Res.string.firmware_update_retry)) // Use "Cancel & Exit" if available
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitConfirmation = false }) { Text(stringResource(Res.string.back)) }
+            },
+        )
+    }
 
     FirmwareUpdateScaffold(
         modifier = modifier,
@@ -309,6 +337,8 @@ private fun FirmwareUpdateContent(
                 is FirmwareUpdateState.Updating -> ProgressContent(state.progressState, isUpdating = true)
 
                 is FirmwareUpdateState.Verifying -> VerifyingState()
+                is FirmwareUpdateState.VerificationFailed ->
+                    VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
                 is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
                 is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
                 is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
@@ -773,6 +803,32 @@ private fun CyclingMessages() {
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth().height(48.dp),
     )
+}
+
+@Composable
+private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
+    Icon(
+        Icons.Default.Warning,
+        contentDescription = null,
+        modifier = Modifier.size(64.dp),
+        tint = MaterialTheme.colorScheme.error,
+    )
+    Spacer(Modifier.height(24.dp))
+    Text(
+        stringResource(Res.string.firmware_update_verification_failed),
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodyLarge,
+        textAlign = TextAlign.Center,
+    )
+    Spacer(Modifier.height(32.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        OutlinedButton(onClick = onRetry) {
+            Icon(Icons.Default.Refresh, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(Res.string.firmware_update_retry))
+        }
+        Button(onClick = onIgnore) { Text(stringResource(Res.string.firmware_update_done)) }
+    }
 }
 
 @Composable

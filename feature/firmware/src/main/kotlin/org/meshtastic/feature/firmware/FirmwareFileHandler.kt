@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.firmware
 
 import android.content.Context
@@ -117,61 +116,97 @@ constructor(
             targetFile
         }
 
-    suspend fun extractFirmware(zipFile: File, hardware: DeviceHardware, fileExtension: String): File? =
-        withContext(Dispatchers.IO) {
-            val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
-            if (target.isEmpty()) return@withContext null
+    suspend fun extractFirmware(
+        zipFile: File,
+        hardware: DeviceHardware,
+        fileExtension: String,
+        preferredFilename: String? = null,
+    ): File? = withContext(Dispatchers.IO) {
+        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        if (target.isEmpty() && preferredFilename == null) return@withContext null
 
-            val targetLowerCase = target.lowercase()
-            val matchingEntries = mutableListOf<Pair<ZipEntry, File>>()
+        val targetLowerCase = target.lowercase()
+        val preferredFilenameLower = preferredFilename?.lowercase()
+        val matchingEntries = mutableListOf<Pair<ZipEntry, File>>()
 
-            if (!tempDir.exists()) tempDir.mkdirs()
+        if (!tempDir.exists()) tempDir.mkdirs()
 
-            ZipInputStream(zipFile.inputStream()).use { zipInput ->
+        ZipInputStream(zipFile.inputStream()).use { zipInput ->
+            var entry = zipInput.nextEntry
+            while (entry != null) {
+                val name = entry.name.lowercase()
+                val entryFileName = File(name).name
+
+                val isMatch =
+                    if (preferredFilenameLower != null) {
+                        entryFileName == preferredFilenameLower
+                    } else {
+                        !entry.isDirectory && isValidFirmwareFile(name, targetLowerCase, fileExtension)
+                    }
+
+                if (isMatch) {
+                    val outFile = File(tempDir, entryFileName)
+                    FileOutputStream(outFile).use { output -> zipInput.copyTo(output) }
+                    matchingEntries.add(entry to outFile)
+
+                    if (preferredFilenameLower != null) {
+                        return@withContext outFile
+                    }
+                }
+                entry = zipInput.nextEntry
+            }
+        }
+        matchingEntries.minByOrNull { it.first.name.length }?.second
+    }
+
+    suspend fun extractFirmware(
+        uri: Uri,
+        hardware: DeviceHardware,
+        fileExtension: String,
+        preferredFilename: String? = null,
+    ): File? = withContext(Dispatchers.IO) {
+        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        if (target.isEmpty() && preferredFilename == null) return@withContext null
+
+        val targetLowerCase = target.lowercase()
+        val preferredFilenameLower = preferredFilename?.lowercase()
+        val matchingEntries = mutableListOf<Pair<ZipEntry, File>>()
+
+        if (!tempDir.exists()) tempDir.mkdirs()
+
+        try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
+            ZipInputStream(inputStream).use { zipInput ->
                 var entry = zipInput.nextEntry
                 while (entry != null) {
                     val name = entry.name.lowercase()
-                    if (!entry.isDirectory && isValidFirmwareFile(name, targetLowerCase, fileExtension)) {
-                        val outFile = File(tempDir, File(name).name)
+                    val entryFileName = File(name).name
+
+                    val isMatch =
+                        if (preferredFilenameLower != null) {
+                            entryFileName == preferredFilenameLower
+                        } else {
+                            !entry.isDirectory && isValidFirmwareFile(name, targetLowerCase, fileExtension)
+                        }
+
+                    if (isMatch) {
+                        val outFile = File(tempDir, entryFileName)
                         FileOutputStream(outFile).use { output -> zipInput.copyTo(output) }
                         matchingEntries.add(entry to outFile)
+
+                        if (preferredFilenameLower != null) {
+                            return@withContext outFile
+                        }
                     }
                     entry = zipInput.nextEntry
                 }
             }
-            matchingEntries.minByOrNull { it.first.name.length }?.second
+        } catch (e: IOException) {
+            Logger.w(e) { "Failed to extract firmware from URI" }
+            return@withContext null
         }
-
-    suspend fun extractFirmware(uri: Uri, hardware: DeviceHardware, fileExtension: String): File? =
-        withContext(Dispatchers.IO) {
-            val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
-            if (target.isEmpty()) return@withContext null
-
-            val targetLowerCase = target.lowercase()
-            val matchingEntries = mutableListOf<Pair<ZipEntry, File>>()
-
-            if (!tempDir.exists()) tempDir.mkdirs()
-
-            try {
-                val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
-                ZipInputStream(inputStream).use { zipInput ->
-                    var entry = zipInput.nextEntry
-                    while (entry != null) {
-                        val name = entry.name.lowercase()
-                        if (!entry.isDirectory && isValidFirmwareFile(name, targetLowerCase, fileExtension)) {
-                            val outFile = File(tempDir, File(name).name)
-                            FileOutputStream(outFile).use { output -> zipInput.copyTo(output) }
-                            matchingEntries.add(entry to outFile)
-                        }
-                        entry = zipInput.nextEntry
-                    }
-                }
-            } catch (e: IOException) {
-                Logger.w(e) { "Failed to extract firmware from URI" }
-                return@withContext null
-            }
-            matchingEntries.minByOrNull { it.first.name.length }?.second
-        }
+        matchingEntries.minByOrNull { it.first.name.length }?.second
+    }
 
     private fun isValidFirmwareFile(filename: String, target: String, fileExtension: String): Boolean {
         val regex = Regex(".*[\\-_]${Regex.escape(target)}[\\-_\\.].*")
