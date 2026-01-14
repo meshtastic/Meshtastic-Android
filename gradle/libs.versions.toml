@@ -79,7 +79,7 @@ androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
 
 # AndroidX Compose
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.12.01" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2026.01.00" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
