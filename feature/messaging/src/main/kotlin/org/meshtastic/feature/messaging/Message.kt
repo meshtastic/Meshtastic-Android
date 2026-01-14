@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("TooManyFunctions")
 
 package org.meshtastic.feature.messaging
@@ -369,6 +368,7 @@ fun MessageScreen(
                         onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
                         onReply = { message -> replyingToPacketId = message?.packetId },
                     ),
+                    quickEmojis = viewModel.frequentEmojis,
                 )
                 // Show FAB if we can scroll towards the newest messages (index 0).
                 if (listState.canScrollBackward) {
@@ -779,7 +779,7 @@ private fun QuickChatRow(
             // Memoize if content is static
             QuickChatAction(
                 name = "🔔",
-                message = "🔔 $alertActionMessage ", // Bell character added to message
+                message = "🔔 $alertActionMessage  ", // Bell character added to message
                 mode = QuickChatAction.Mode.Append,
                 position = -1, // Assuming -1 means it's a special prepended action
             )

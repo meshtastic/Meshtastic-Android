@@ -26,23 +26,44 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
+import androidx.compose.material.icons.twotone.AddLink
+import androidx.compose.material.icons.twotone.Cloud
+import androidx.compose.material.icons.twotone.CloudDone
+import androidx.compose.material.icons.twotone.CloudOff
+import androidx.compose.material.icons.twotone.CloudUpload
+import androidx.compose.material.icons.twotone.HowToReg
+import androidx.compose.material.icons.twotone.Link
+import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -54,6 +75,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.hops_away_template
+import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.reply
 import org.meshtastic.core.strings.sample_message
 import org.meshtastic.core.strings.via_mqtt
@@ -62,9 +84,11 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
+import org.meshtastic.core.ui.emoji.EmojiPicker
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 internal fun MessageItem(
@@ -73,95 +97,190 @@ internal fun MessageItem(
     ourNode: Node,
     message: Message,
     selected: Boolean,
+    inSelectionMode: Boolean = false,
     onReply: () -> Unit = {},
     sendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
+    showUserName: Boolean = true,
     emojis: List<Reaction> = emptyList(),
+    quickEmojis: List<String> = listOf("👍", "👎", "😂", "🔥", "❤️", "😮"),
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onDoubleClick: () -> Unit = {},
+    onSelect: () -> Unit = {},
+    onDelete: () -> Unit = {},
     onClickChip: (Node) -> Unit = {},
-    onStatusClick: () -> Unit = {},
     onNavigateToOriginalMessage: (Int) -> Unit = {},
-) = Column(
-    modifier =
-    modifier
-        .fillMaxWidth()
-        .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
-) {
+    onStatusClick: () -> Unit = {},
+    hasSamePrev: Boolean = false,
+    hasSameNext: Boolean = false,
+) = Column(modifier = modifier.padding(top = if (showUserName) 32.dp else 4.dp)) {
+    var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
+    val clipboardManager = LocalClipboardManager.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    if (activeSheet != null) {
+        ModalBottomSheet(onDismissRequest = { activeSheet = null }, sheetState = sheetState) {
+            when (activeSheet) {
+                ActiveSheet.Actions -> {
+                    MessageActionsContent(
+                        quickEmojis = quickEmojis,
+                        onReply = {
+                            activeSheet = null
+                            onReply()
+                        },
+                        onReact = { emoji ->
+                            activeSheet = null
+                            sendReaction(emoji)
+                        },
+                        onMoreReactions = { activeSheet = ActiveSheet.Emoji },
+                        onCopy = {
+                            activeSheet = null
+                            clipboardManager.setText(AnnotatedString(message.text))
+                        },
+                        onSelect = {
+                            activeSheet = null
+                            onSelect()
+                        },
+                        onDelete = {
+                            activeSheet = null
+                            onDelete()
+                        },
+                    )
+                }
+
+                ActiveSheet.Emoji -> {
+                    // Limit height of emoji picker so it doesn't look weird full screen
+                    Box(modifier = Modifier.heightIn(max = 400.dp)) {
+                        EmojiPicker(
+                            onDismiss = { activeSheet = null },
+                            onConfirm = { emoji ->
+                                activeSheet = null
+                                sendReaction(emoji)
+                            },
+                        )
+                    }
+                }
+
+                null -> {}
+            }
+        }
+    }
+
     val containsBel = message.text.contains('\u0007')
+
+    val alpha =
+        if (inSelectionMode) {
+            if (selected) SELECTED_ALPHA else UNSELECTED_ALPHA
+        } else {
+            NORMAL_ALPHA
+        }
     val containerColor =
-        Color(
-            if (message.fromLocal) {
-                ourNode.colors.second
-            } else {
-                node.colors.second
-            },
-        )
-            .copy(alpha = 0.2f)
+        if (message.fromLocal) {
+            Color(ourNode.colors.second).copy(alpha = alpha)
+        } else {
+            Color(node.colors.second).copy(alpha = alpha)
+        }
+            .apply {
+                if (inSelectionMode) {
+                    copy(alpha = if (selected) 0.6f else 0.2f)
+                } else {
+                    copy(alpha = 0.4f)
+                }
+            }
     val cardColors =
         CardDefaults.cardColors()
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
+    val messageShape =
+        getMessageBubbleShape(
+            cornerRadius = 16.dp,
+            isSender = message.fromLocal,
+            hasSamePrev = hasSamePrev,
+            hasSameNext = hasSameNext,
+        )
     val messageModifier =
-        Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+        Modifier.padding(horizontal = 8.dp)
             .then(
                 if (containsBel) {
-                    Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.medium)
+                    Modifier.border(2.dp, color = MessageItemColors.Red, shape = messageShape)
                 } else {
                     Modifier
                 },
             )
-    Box {
-        Card(
+    Box(modifier = Modifier.wrapContentSize()) {
+        Surface(
             modifier =
-            Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
+            Modifier.align(if (message.fromLocal) Alignment.TopEnd else Alignment.TopStart)
                 .padding(
-                    top = 4.dp,
                     start = if (!message.fromLocal) 0.dp else 16.dp,
                     end = if (message.fromLocal) 0.dp else 16.dp,
                 )
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick, onDoubleClick = onDoubleClick)
-                .then(messageModifier),
-            colors = cardColors,
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = {
+                        onLongClick()
+                        if (!inSelectionMode) {
+                            activeSheet = ActiveSheet.Actions
+                        }
+                    },
+                    onDoubleClick = onDoubleClick,
+                )
+                .then(messageModifier)
+                .semantics(mergeDescendants = true) {
+                    val senderName = if (message.fromLocal) ourNode.user.longName else node.user.longName
+                    contentDescription = "Message from $senderName: ${message.text}"
+                },
+            color = containerColor,
+            contentColor = contentColorFor(containerColor),
+            shape = messageShape,
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            val hasPrevPadding =
+                if (hasSamePrev) {
+                    12.dp
+                } else {
+                    0.dp
+                }
+            Column(modifier = Modifier.fillMaxWidth().padding(top = hasPrevPadding)) {
                 OriginalMessageSnippet(
                     message = message,
                     ourNode = ourNode,
-                    cardColors = cardColors,
                     onNavigateToOriginalMessage = onNavigateToOriginalMessage,
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    val chipNode = if (message.fromLocal) ourNode else node
-                    NodeChip(node = chipNode, onClick = onClickChip)
-                    Text(
-                        text = with(if (message.fromLocal) ourNode.user else node.user) { "$longName ($id)" },
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.weight(1f, fill = true),
-                    )
-                    if (message.viaMqtt) {
-                        Icon(
-                            Icons.Default.Cloud,
-                            contentDescription = stringResource(Res.string.via_mqtt),
-                            modifier = Modifier.size(16.dp),
-                        )
+                    if (showUserName) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            val chipNode = if (message.fromLocal) ourNode else node
+                            NodeChip(node = chipNode, onClick = onClickChip)
+                            Text(
+                                text = (if (message.fromLocal) ourNode.user else node.user).longName,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                            if (message.viaMqtt) {
+                                Icon(
+                                    Icons.Default.Cloud,
+                                    contentDescription = stringResource(Res.string.via_mqtt),
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            }
+                        }
                     }
-                    MessageActions(
-                        isLocal = message.fromLocal,
-                        status = message.status,
-                        onSendReaction = sendReaction,
-                        onSendReply = onReply,
-                        onStatusClick = onStatusClick,
-                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = message.time, style = MaterialTheme.typography.labelSmall)
+                    if (message.fromLocal) {
+                        Spacer(modifier = Modifier.size(4.dp))
+                        MessageStatusIcon(status = message.status ?: MessageStatus.UNKNOWN, onClick = onStatusClick)
+                    }
                 }
 
-                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp)) {
                     AutoLinkText(
                         modifier = Modifier.fillMaxWidth(),
                         text = message.text,
@@ -169,12 +288,7 @@ internal fun MessageItem(
                         color = cardColors.contentColor,
                     )
 
-                    val topPadding = if (!message.fromLocal) 2.dp else 0.dp
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = topPadding, bottom = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         if (!message.fromLocal) {
                             if (message.hopsAway == 0) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -188,52 +302,83 @@ internal fun MessageItem(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (containsBel) {
-                                Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
-                            }
-                            Text(text = message.time, style = MaterialTheme.typography.labelSmall)
+                        if (containsBel) {
+                            Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
                         }
                     }
                 }
             }
         }
+
+        Box(
+            modifier =
+            Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
+                .padding(horizontal = 24.dp)
+                .offset(y = 24.dp),
+        ) {
+            ReactionRow(
+                reactions = emojis,
+                myId = ourNode.user.id,
+                onSendReaction = sendReaction,
+                onShowReactions = onShowReactions,
+            )
+        }
     }
-    ReactionRow(
-        modifier = Modifier.fillMaxWidth(),
-        reactions = emojis,
-        myId = ourNode.user.id,
-        onSendReaction = sendReaction,
-        onShowReactions = onShowReactions,
+}
+
+private const val SELECTED_ALPHA = 0.6f
+private const val UNSELECTED_ALPHA = 0.2f
+private const val NORMAL_ALPHA = 0.4f
+
+private enum class ActiveSheet {
+    Actions,
+    Emoji,
+}
+
+@Composable
+private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit) {
+    val icon =
+        when (status) {
+            MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+            MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+            MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+            MessageStatus.SFPP_ROUTING -> Icons.TwoTone.AddLink
+            MessageStatus.SFPP_CONFIRMED -> Icons.TwoTone.Link
+            MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+            MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+            else -> Icons.TwoTone.Warning
+        }
+    Icon(
+        imageVector = icon,
+        contentDescription = stringResource(Res.string.message_delivery_status),
+        modifier = Modifier.size(24.dp).clickable(onClick = onClick),
     )
 }
 
 @Composable
-private fun OriginalMessageSnippet(
-    message: Message,
-    ourNode: Node,
-    cardColors: CardColors = CardDefaults.cardColors(),
-    onNavigateToOriginalMessage: (Int) -> Unit,
-) {
+private fun OriginalMessageSnippet(message: Message, ourNode: Node, onNavigateToOriginalMessage: (Int) -> Unit) {
     val originalMessage = message.originalMessage
     if (originalMessage != null && originalMessage.packetId != 0) {
         val originalMessageNode = if (originalMessage.fromLocal) ourNode else originalMessage.node
+        val cardColors =
+            CardDefaults.cardColors()
+                .copy(
+                    containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f),
+                    contentColor = Color(originalMessageNode.colors.first),
+                )
         OutlinedCard(
-            modifier =
-            Modifier.fillMaxWidth().padding(4.dp).clickable {
-                onNavigateToOriginalMessage(originalMessage.packetId)
-            },
+            modifier = Modifier.fillMaxWidth().clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
             colors = cardColors,
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 4.dp),
+                modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
                     Icons.Default.FormatQuote,
-                    contentDescription = stringResource(Res.string.reply), // Add to strings.xml
+                    contentDescription = stringResource(Res.string.reply),
+                    modifier = Modifier.size(16.dp),
                 )
                 Text(
                     text = originalMessageNode.user.shortName,
@@ -243,11 +388,11 @@ private fun OriginalMessageSnippet(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    modifier = Modifier.weight(1f, fill = true),
-                    text = originalMessage.text, // Should not be null if isAReply is true
+                    text = originalMessage.text,
                     style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1, // Keep snippet brief
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = 20.dp),
                 )
             }
         }
@@ -321,30 +466,45 @@ private fun MessageItemPreview() {
                 message = sent,
                 node = sent.node,
                 selected = false,
+                ourNode = sent.node,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
                 onClick = {},
                 onLongClick = {},
-                onStatusClick = {},
-                ourNode = sent.node,
+                onDoubleClick = {},
+                onClickChip = {},
+                onNavigateToOriginalMessage = {},
             )
 
             MessageItem(
                 message = received,
                 node = received.node,
                 selected = false,
+                ourNode = sent.node,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
                 onClick = {},
                 onLongClick = {},
-                onStatusClick = {},
-                ourNode = sent.node,
+                onDoubleClick = {},
+                onClickChip = {},
+                onNavigateToOriginalMessage = {},
             )
 
             MessageItem(
                 message = receivedWithOriginalMessage,
                 node = receivedWithOriginalMessage.node,
                 selected = false,
+                ourNode = sent.node,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
                 onClick = {},
                 onLongClick = {},
-                onStatusClick = {},
-                ourNode = sent.node,
+                onDoubleClick = {},
+                onClickChip = {},
+                onNavigateToOriginalMessage = {},
             )
         }
     }

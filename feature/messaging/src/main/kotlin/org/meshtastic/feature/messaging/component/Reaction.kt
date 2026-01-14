@@ -77,6 +77,7 @@ import org.meshtastic.proto.MeshProtos
 
 @Composable
 private fun ReactionItem(
+    modifier: Modifier = Modifier,
     emoji: String,
     emojiCount: Int = 1,
     status: MessageStatus = MessageStatus.UNKNOWN,
@@ -87,6 +88,7 @@ private fun ReactionItem(
     val isError = status == MessageStatus.ERROR
 
     BadgedBox(
+        modifier = modifier,
         badge = {
             if (emojiCount > 1) {
                 Badge { Text(fontWeight = FontWeight.Bold, text = emojiCount.toString()) }
@@ -121,14 +123,11 @@ internal fun ReactionRow(
     val emojiGroups = reactions.groupBy { it.emoji }
 
     AnimatedVisibility(emojiGroups.isNotEmpty()) {
-        LazyRow(
-            modifier = modifier.padding(horizontal = 4.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        LazyRow(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
             items(emojiGroups.entries.toList()) { (emoji, reactions) ->
                 val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
                 ReactionItem(
+                    modifier = Modifier.padding(horizontal = 4.dp),
                     emoji = emoji,
                     emojiCount = reactions.size,
                     status = localReaction?.status ?: MessageStatus.RECEIVED,

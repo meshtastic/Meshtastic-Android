@@ -18,6 +18,7 @@ package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -103,6 +104,7 @@ internal fun MessageListPaged(
     handlers: MessageListHandlers,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
+    quickEmojis: List<String> = emptyList(),
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { state.selectedIds.value.isNotEmpty() } }
@@ -170,9 +172,11 @@ internal fun MessageListPaged(
         onShowStatusDialog = { showStatusDialog = it },
         onShowReactions = { showReactionDialog = it },
         modifier = modifier,
+        quickEmojis = quickEmojis,
     )
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun MessageListPagedContent(
     listState: LazyListState,
@@ -185,6 +189,7 @@ private fun MessageListPagedContent(
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
     modifier: Modifier = Modifier,
+    quickEmojis: List<String>,
 ) {
     // Calculate unread divider position
     val unreadDividerIndex by
@@ -200,9 +205,33 @@ private fun MessageListPagedContent(
     val enableAnimations by remember { derivedStateOf { !listState.isScrollInProgress } }
 
     Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState, reverseLayout = true) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            reverseLayout = true,
+            contentPadding = PaddingValues(bottom = 24.dp),
+        ) {
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
                 val message = state.messages[index]
+                val visuallyPrevMessage = if (index < state.messages.itemCount - 1) state.messages[index + 1] else null
+                val visuallyNextMessage = if (index > 0) state.messages[index - 1] else null
+
+                val hasSamePrev =
+                    if (message != null && visuallyPrevMessage != null) {
+                        visuallyPrevMessage.fromLocal == message.fromLocal &&
+                            (message.fromLocal || visuallyPrevMessage.node.num == message.node.num)
+                    } else {
+                        false
+                    }
+
+                val hasSameNext =
+                    if (message != null && visuallyNextMessage != null) {
+                        visuallyNextMessage.fromLocal == message.fromLocal &&
+                            (message.fromLocal || visuallyNextMessage.node.num == message.node.num)
+                    } else {
+                        false
+                    }
+
                 if (message != null) {
                     renderPagedChatMessageRow(
                         message = message,
@@ -216,6 +245,10 @@ private fun MessageListPagedContent(
                         onShowStatusDialog = onShowStatusDialog,
                         onShowReactions = onShowReactions,
                         enableAnimations = enableAnimations,
+                        showUserName = !hasSamePrev,
+                        hasSamePrev = hasSamePrev,
+                        hasSameNext = hasSameNext,
+                        quickEmojis = quickEmojis,
                     )
 
                     // Show unread divider after the first unread message
@@ -244,6 +277,7 @@ private fun MessageListPagedContent(
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun LazyItemScope.renderPagedChatMessageRow(
     message: Message,
@@ -257,6 +291,10 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
     enableAnimations: Boolean,
+    showUserName: Boolean,
+    hasSamePrev: Boolean,
+    hasSameNext: Boolean,
+    quickEmojis: List<String>,
 ) {
     val ourNode = state.ourNode ?: return
     val selected by
@@ -271,15 +309,21 @@ private fun LazyItemScope.renderPagedChatMessageRow(
         ourNode = ourNode,
         message = message,
         selected = selected,
+        inSelectionMode = inSelectionMode,
         onClick = { if (inSelectionMode) state.selectedIds.toggle(message.uuid) },
         onLongClick = {
-            state.selectedIds.toggle(message.uuid)
+            if (inSelectionMode) {
+                state.selectedIds.toggle(message.uuid)
+            }
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         },
+        onSelect = { state.selectedIds.toggle(message.uuid) },
+        onDelete = { handlers.onDeleteMessages(listOf(message.uuid)) },
         onClickChip = handlers.onClickChip,
         onStatusClick = { onShowStatusDialog(message) },
         onReply = { handlers.onReply(message) },
         emojis = message.emojis,
+        showUserName = showUserName,
         sendReaction = { emoji ->
             val hasReacted =
                 message.emojis.any { reaction ->
@@ -307,6 +351,9 @@ private fun LazyItemScope.renderPagedChatMessageRow(
                 }
             }
         },
+        hasSamePrev = hasSamePrev,
+        hasSameNext = hasSameNext,
+        quickEmojis = quickEmojis,
     )
 }
 
