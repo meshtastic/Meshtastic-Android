@@ -162,6 +162,8 @@ fun FirmwareUpdateScreen(
     val currentVersion by viewModel.currentFirmwareVersion.collectAsStateWithLifecycle()
     val selectedRelease by viewModel.selectedRelease.collectAsStateWithLifecycle()
 
+    var showExitConfirmation by remember { mutableStateOf(false) }
+
     val getFileLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { viewModel.startUpdateFromFile(it) }
@@ -186,22 +188,21 @@ fun FirmwareUpdateScreen(
                             readyState.updateMethod is FirmwareUpdateMethod.Ble ||
                             readyState.updateMethod is FirmwareUpdateMethod.Wifi
                         ) {
-                            getFileLauncher.launch("application/zip")
+                            getFileLauncher.launch("*/*")
                         } else if (readyState.updateMethod is FirmwareUpdateMethod.Usb) {
-                            getFileLauncher.launch("application/octet-stream")
+                            getFileLauncher.launch("*/*")
                         }
                     }
                 },
                 onSaveFile = { fileName -> saveFileLauncher.launch(fileName) },
                 onRetry = viewModel::checkForUpdates,
+                onCancel = { showExitConfirmation = true },
                 onDone = { navController.navigateUp() },
                 onDismissBootloaderWarning = viewModel::dismissBootloaderWarningForCurrentDevice,
             )
         }
 
     KeepScreenOn(shouldKeepFirmwareScreenOn(state))
-
-    var showExitConfirmation by remember { mutableStateOf(false) }
 
     androidx.activity.compose.BackHandler(enabled = shouldKeepFirmwareScreenOn(state)) { showExitConfirmation = true }
 
@@ -330,11 +331,13 @@ private fun FirmwareUpdateContent(
                 is FirmwareUpdateState.Ready ->
                     ReadyState(state = state, selectedReleaseType = selectedReleaseType, actions = actions)
 
-                is FirmwareUpdateState.Downloading -> ProgressContent(state.progressState, isDownloading = true)
+                is FirmwareUpdateState.Downloading ->
+                    ProgressContent(state.progressState, onCancel = actions.onCancel, isDownloading = true)
 
-                is FirmwareUpdateState.Processing -> ProgressContent(state.progressState)
+                is FirmwareUpdateState.Processing -> ProgressContent(state.progressState, onCancel = actions.onCancel)
 
-                is FirmwareUpdateState.Updating -> ProgressContent(state.progressState, isUpdating = true)
+                is FirmwareUpdateState.Updating ->
+                    ProgressContent(state.progressState, onCancel = actions.onCancel, isUpdating = true)
 
                 is FirmwareUpdateState.Verifying -> VerifyingState()
                 is FirmwareUpdateState.VerificationFailed ->
@@ -692,7 +695,12 @@ private fun ReleaseTypeSelector(
 }
 
 @Composable
-private fun ProgressContent(progressState: ProgressState, isDownloading: Boolean = false, isUpdating: Boolean = false) {
+private fun ProgressContent(
+    progressState: ProgressState,
+    onCancel: () -> Unit,
+    isDownloading: Boolean = false,
+    isUpdating: Boolean = false,
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -738,6 +746,8 @@ private fun ProgressContent(progressState: ProgressState, isDownloading: Boolean
 
         Spacer(Modifier.height(16.dp))
         CyclingMessages()
+        Spacer(Modifier.height(24.dp))
+        OutlinedButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) }
     }
 }
 

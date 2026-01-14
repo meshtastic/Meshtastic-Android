@@ -55,4 +55,8 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for sharing contact information via QR codes. Supported since firmware v2.6.8. */
     val supportsQrCodeSharing: Boolean
         get() = isSupported("2.6.8")
+
+    /** Support for ESP32 Unified OTA. Supported since firmware v2.7.18. */
+    val supportsEsp32Ota: Boolean
+        get() = isSupported("2.7.18")
 }

@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
@@ -74,7 +73,6 @@ import org.meshtastic.core.strings.firmware_update_validating
 import org.meshtastic.core.strings.unknown
 import java.io.File
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
 
 private const val DFU_RECONNECT_PREFIX = "x"
 private const val PERCENT_MAX_VALUE = 100f
@@ -83,6 +81,7 @@ private const val VERIFY_TIMEOUT = 60_000L
 private const val VERIFY_DELAY = 2000L
 private const val MIN_BATTERY_LEVEL = 10
 private const val KIB_DIVISOR = 1024f
+private const val MILLIS_PER_SECOND = 1000L
 
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
@@ -332,33 +331,7 @@ constructor(
     private suspend fun observeDfuProgress() {
         firmwareUpdateManager.dfuProgressFlow().flowOn(Dispatchers.Main).collect { dfuState ->
             when (dfuState) {
-                is DfuInternalState.Progress -> {
-                    val progress = dfuState.percent / PERCENT_MAX_VALUE
-                    val percentText = "${dfuState.percent}%"
-
-                    val speedKib = dfuState.speed * 1.seconds.inWholeMicroseconds / KIB_DIVISOR
-
-                    // The Nordic library provides speed in B/s.
-                    val partInfo =
-                        if (dfuState.partsTotal > 1) {
-                            " (Part ${dfuState.currentPart}/${dfuState.partsTotal})"
-                        } else {
-                            ""
-                        }
-
-                    val metrics =
-                        if (dfuState.speed > 0) {
-                            String.format(java.util.Locale.US, "%.1f KiB/s %s", speedKib, partInfo)
-                        } else {
-                            partInfo
-                        }
-
-                    val statusMsg =
-                        getString(Res.string.firmware_update_updating, "").replace(Regex(":?\\s*%1\\\$s%?"), "").trim()
-                    val details = "$percentText ($metrics)"
-
-                    _state.value = FirmwareUpdateState.Updating(ProgressState(statusMsg, progress, details))
-                }
+                is DfuInternalState.Progress -> handleDfuProgress(dfuState)
 
                 is DfuInternalState.Error -> {
                     val errorMsg = getString(Res.string.firmware_update_dfu_error, dfuState.message ?: "")
@@ -400,6 +373,45 @@ constructor(
                 else -> {} // ignore connected/disconnected for UI noise
             }
         }
+    }
+
+    private fun handleDfuProgress(dfuState: DfuInternalState.Progress) {
+        val progress = dfuState.percent / PERCENT_MAX_VALUE
+        val percentText = "${dfuState.percent}%"
+
+        // Nordic DFU speed is in Bytes/ms. Convert to KiB/s.
+        val speedBytesPerSec = dfuState.speed * MILLIS_PER_SECOND
+        val speedKib = speedBytesPerSec / KIB_DIVISOR
+
+        // Calculate ETA
+        val totalBytes = tempFirmwareFile?.length() ?: 0L
+        val etaText =
+            if (totalBytes > 0 && speedBytesPerSec > 0 && dfuState.percent > 0) {
+                val remainingBytes = totalBytes * (1f - progress)
+                val etaSeconds = remainingBytes / speedBytesPerSec
+                ", ETA: ${etaSeconds.toInt()}s"
+            } else {
+                ""
+            }
+
+        val partInfo =
+            if (dfuState.partsTotal > 1) {
+                " (Part ${dfuState.currentPart}/${dfuState.partsTotal})"
+            } else {
+                ""
+            }
+
+        val metrics =
+            if (dfuState.speed > 0) {
+                String.format(java.util.Locale.US, "%.1f KiB/s%s%s", speedKib, etaText, partInfo)
+            } else {
+                partInfo
+            }
+
+        val statusMsg = getString(Res.string.firmware_update_updating, "").replace(Regex(":?\\s*%1\\\$s%?"), "").trim()
+        val details = "$percentText ($metrics)"
+
+        _state.value = FirmwareUpdateState.Updating(ProgressState(statusMsg, progress, details))
     }
 
     private suspend fun verifyUpdateResult(address: String?) {

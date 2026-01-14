@@ -27,14 +27,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
@@ -45,6 +42,7 @@ import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
@@ -62,15 +60,13 @@ import org.meshtastic.proto.Portnums
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
-import java.text.SimpleDateFormat
 import java.util.Locale
-import javax.inject.Inject
-import kotlin.math.roundToInt
+import javax.inject.Injec
 
 @Suppress("LongParameterList")
 @HiltViewModel
 class SettingsViewModel
-@Inject
+@Injec
 constructor(
     private val app: Application,
     radioConfigRepository: RadioConfigRepository,
@@ -128,7 +124,13 @@ constructor(
                     val hwModel = node.user.hwModel.number
                     val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
                     // Support both Nordic DFU (requiresDfu) and ESP32 Unified OTA (supportsUnifiedOta)
-                    flow { emit(hw?.requiresDfu == true || hw?.supportsUnifiedOta == true) }
+                    val capabilities = Capabilities(node.metadata?.firmwareVersion)
+
+                    // ESP32 Unified OTA is only supported via BLE or WiFi (TCP), not USB Serial.
+                    val isEsp32OtaSupported =
+                        hw?.supportsUnifiedOta == true && capabilities.supportsEsp32Ota && !radioPrefs.isSerial()
+
+                    flow { emit(hw?.requiresDfu == true || isEsp32OtaSupported) }
                 } else {
                     flowOf(false)
                 }
@@ -136,7 +138,7 @@ constructor(
             .stateInWhileSubscribed(initialValue = false)
 
     // Device DB cache limit (bounded by DatabaseConstants)
-    val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
+    val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimi
 
     fun setDbCacheLimit(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
@@ -275,7 +277,7 @@ constructor(
                                         .toString()
                                 }
 
-                            val hopLimit = proto.hopLimit
+                            val hopLimit = proto.hopLimi
 
                             val payload =
                                 when {

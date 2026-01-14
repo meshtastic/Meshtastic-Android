@@ -231,10 +231,10 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
 
         // Timeouts
         private const val CONNECTION_TIMEOUT_MS = 5_000
-        private const val SOCKET_TIMEOUT_MS = 10_000
-        private const val COMMAND_TIMEOUT_MS = 5_000L
-        private const val ERASING_TIMEOUT_MS = 30_000L
-        private const val ACK_TIMEOUT_MS = 3_000L
+        private const val SOCKET_TIMEOUT_MS = 15_000
+        private const val COMMAND_TIMEOUT_MS = 10_000L
+        private const val ERASING_TIMEOUT_MS = 60_000L
+        private const val ACK_TIMEOUT_MS = 10_000L
         private const val VERIFICATION_TIMEOUT_MS = 10_000L
         private const val WRITE_DELAY_MS = 10L // Shorter than BLE
 

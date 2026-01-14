@@ -252,8 +252,8 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
         private val TX_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
 
         // Timeouts
-        private const val ERASING_TIMEOUT_MS = 30_000L // Flash erase can take a while
-        private const val ACK_TIMEOUT_MS = 5_000L
+        private const val ERASING_TIMEOUT_MS = 60_000L // Flash erase can take a while
+        private const val ACK_TIMEOUT_MS = 10_000L
         private const val VERIFICATION_TIMEOUT_MS = 10_000L
 
         // Recommended chunk size for BLE
