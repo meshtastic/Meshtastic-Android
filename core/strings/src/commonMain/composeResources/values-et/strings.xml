@@ -265,6 +265,7 @@
     <string name="delete">Eemalda</string>
     <string name="delete_for_everyone">Eemalda kõigi jaoks</string>
     <string name="delete_for_me">Eemalda minult</string>
+    <string name="select">Vali</string>
     <string name="select_all">Vali kõik</string>
     <string name="close_selection">Sulge valik</string>
     <string name="delete_selection">Kustuta valik</string>
