@@ -183,7 +183,19 @@ fun MessageScreen(
     var currentRetryEvent by remember { mutableStateOf<RetryEvent?>(null) }
 
     // Observe retry events from the service
-    LaunchedEffect(Unit) { viewModel.retryEvents.collect { event -> currentRetryEvent = event } }
+    // Key on contactKey to restart collection when navigating between conversations
+    LaunchedEffect(contactKey) {
+        android.util.Log.d("MessageScreen", "Starting retry event collection for contact: $contactKey")
+        viewModel.retryEvents.collect { event ->
+            if (event != null) {
+                android.util.Log.d("MessageScreen", "Received retry event: ${event.packetId}")
+                currentRetryEvent = event
+            } else {
+                android.util.Log.d("MessageScreen", "Retry event cleared")
+                currentRetryEvent = null
+            }
+        }
+    }
 
     // Prevent the message TextField from stealing focus when the screen opens
     LaunchedEffect(contactKey) { focusManager.clearFocus() }

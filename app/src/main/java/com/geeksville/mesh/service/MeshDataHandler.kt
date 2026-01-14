@@ -450,8 +450,10 @@ constructor(
                     )
 
                 Logger.w { "[ackNak] requesting retry for req=$requestId retry=$newRetryCount" }
+                Log.d("MeshDataHandler", "[ackNak] Emitting retry event for req=$requestId retry=$newRetryCount")
 
                 val shouldProceed = serviceRepository.requestRetry(retryEvent, RETRY_DELAY_MS)
+                Log.d("MeshDataHandler", "[ackNak] Retry response for req=$requestId: shouldProceed=$shouldProceed")
 
                 if (shouldProceed) {
                     val newId = commandSender.generatePacketId()

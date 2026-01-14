@@ -160,8 +160,8 @@ class ServiceRepository @Inject constructor() {
     }
 
     // Retry management
-    private val _retryEvents = MutableSharedFlow<RetryEvent>()
-    val retryEvents: SharedFlow<RetryEvent>
+    private val _retryEvents = MutableStateFlow<RetryEvent?>(null)
+    val retryEvents: StateFlow<RetryEvent?>
         get() = _retryEvents
 
     private val pendingRetries = ConcurrentHashMap<Int, CompletableDeferred<Boolean>>()
@@ -178,11 +178,15 @@ class ServiceRepository @Inject constructor() {
         val deferred = CompletableDeferred<Boolean>()
         pendingRetries[packetId] = deferred
 
-        _retryEvents.emit(event)
+        Logger.i { "ServiceRepository: Setting retry event for packet $packetId" }
+        _retryEvents.value = event
+        Logger.i { "ServiceRepository: Retry event set, waiting for response..." }
 
         // Wait for user response with timeout
         // If timeout occurs (user doesn't respond), default to retry
-        return withTimeoutOrNull(timeoutMs) { deferred.await() } ?: true
+        val result = withTimeoutOrNull(timeoutMs) { deferred.await() } ?: true
+        Logger.i { "ServiceRepository: Retry result for packet $packetId: $result" }
+        return result
     }
 
     /**
@@ -193,6 +197,7 @@ class ServiceRepository @Inject constructor() {
      */
     fun respondToRetry(packetId: Int, shouldRetry: Boolean) {
         pendingRetries.remove(packetId)?.complete(shouldRetry)
+        _retryEvents.value = null // Clear the event to prevent replay
     }
 
     /** Cancel all pending retry requests. Should be called when service is stopped or restarted. */

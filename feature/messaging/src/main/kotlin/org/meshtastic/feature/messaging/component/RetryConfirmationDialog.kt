@@ -110,7 +110,8 @@ fun RetryConfirmationDialog(
 ) {
     var timeRemaining by remember { mutableIntStateOf(countdownSeconds) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(retryEvent.packetId) {
+        timeRemaining = countdownSeconds // Reset countdown for new event
         while (timeRemaining > 0) {
             delay(COUNTDOWN_DELAY_MS)
             timeRemaining--
