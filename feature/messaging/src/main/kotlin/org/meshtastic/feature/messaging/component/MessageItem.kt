@@ -47,7 +47,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -234,16 +233,11 @@ internal fun MessageItem(
             contentColor = contentColorFor(containerColor),
             shape = messageShape,
         ) {
-            val hasPrevPadding =
-                if (hasSamePrev) {
-                    12.dp
-                } else {
-                    0.dp
-                }
-            Column(modifier = Modifier.fillMaxWidth().padding(top = hasPrevPadding)) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 OriginalMessageSnippet(
                     message = message,
                     ourNode = ourNode,
+                    hasSamePrev = hasSamePrev,
                     onNavigateToOriginalMessage = onNavigateToOriginalMessage,
                 )
                 Row(
@@ -313,11 +307,11 @@ internal fun MessageItem(
         Box(
             modifier =
             Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
-                .padding(horizontal = 24.dp)
-                .offset(y = 24.dp),
+                .padding(horizontal = 12.dp)
+                .offset(y = 20.dp),
         ) {
             ReactionRow(
-                reactions = emojis,
+                reactions = if (message.fromLocal) emojis.reversed() else emojis,
                 myId = ourNode.user.id,
                 onSendReaction = sendReaction,
                 onShowReactions = onShowReactions,
@@ -356,7 +350,12 @@ private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit) {
 }
 
 @Composable
-private fun OriginalMessageSnippet(message: Message, ourNode: Node, onNavigateToOriginalMessage: (Int) -> Unit) {
+private fun OriginalMessageSnippet(
+    message: Message,
+    ourNode: Node,
+    hasSamePrev: Boolean,
+    onNavigateToOriginalMessage: (Int) -> Unit,
+) {
     val originalMessage = message.originalMessage
     if (originalMessage != null && originalMessage.packetId != 0) {
         val originalMessageNode = if (originalMessage.fromLocal) ourNode else originalMessage.node
@@ -366,9 +365,17 @@ private fun OriginalMessageSnippet(message: Message, ourNode: Node, onNavigateTo
                     containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f),
                     contentColor = Color(originalMessageNode.colors.first),
                 )
-        OutlinedCard(
+        Surface(
             modifier = Modifier.fillMaxWidth().clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
-            colors = cardColors,
+            contentColor = cardColors.contentColor,
+            color = cardColors.containerColor,
+            shape =
+            getMessageBubbleShape(
+                cornerRadius = 16.dp,
+                isSender = originalMessage.fromLocal,
+                hasSamePrev = hasSamePrev,
+                hasSameNext = true, // always square off original message bottom
+            ),
         ) {
             Row(
                 modifier = Modifier.padding(8.dp),
