@@ -167,7 +167,7 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
             val chunk = data.copyOfRange(sentBytes, sentBytes + currentChunkSize)
 
             // Write chunk
-            writeData(chunk)
+            writeData(chunk, WriteType.WITHOUT_RESPONSE)
 
             // Wait for response (ACK or OK for last chunk)
             val response = waitForResponse(ACK_TIMEOUT_MS)
@@ -226,15 +226,15 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
 
     private suspend fun sendCommand(command: OtaCommand) {
         val data = command.toString().toByteArray()
-        writeData(data)
+        writeData(data, WriteType.WITH_RESPONSE)
     }
 
-    private suspend fun writeData(data: ByteArray) {
+    private suspend fun writeData(data: ByteArray, writeType: WriteType) {
         val characteristic =
             otaCharacteristic ?: throw OtaProtocolException.ConnectionFailed("OTA characteristic not available")
 
         try {
-            characteristic.write(data, writeType = WriteType.WITH_RESPONSE)
+            characteristic.write(data, writeType = writeType)
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             throw OtaProtocolException.TransferFailed("Failed to write data", e)
         }
@@ -254,7 +254,7 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
 
         // Timeouts
         private const val ERASING_TIMEOUT_MS = 30_000L // Flash erase can take a while
-        private const val ACK_TIMEOUT_MS = 3_000L
+        private const val ACK_TIMEOUT_MS = 5_000L
         private const val VERIFICATION_TIMEOUT_MS = 10_000L
 
         // Recommended chunk size for BLE
