@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("TooManyFunctions")
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 
@@ -23,13 +22,12 @@ package org.meshtastic.feature.firmware
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,14 +45,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Dangerous
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Usb
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -78,7 +75,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -86,16 +82,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.mikepenz.markdown.m3.Markdown
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
@@ -103,6 +103,7 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.back
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.chirpy
 import org.meshtastic.core.strings.dont_show_again_for_device
@@ -117,44 +118,53 @@ import org.meshtastic.core.strings.firmware_update_disclaimer_title
 import org.meshtastic.core.strings.firmware_update_disconnect_warning
 import org.meshtastic.core.strings.firmware_update_do_not_close
 import org.meshtastic.core.strings.firmware_update_done
-import org.meshtastic.core.strings.firmware_update_downloading
 import org.meshtastic.core.strings.firmware_update_error
 import org.meshtastic.core.strings.firmware_update_hang_tight
 import org.meshtastic.core.strings.firmware_update_keep_device_close
 import org.meshtastic.core.strings.firmware_update_latest
+import org.meshtastic.core.strings.firmware_update_local_file
 import org.meshtastic.core.strings.firmware_update_method_detail
 import org.meshtastic.core.strings.firmware_update_rak4631_bootloader_hint
+import org.meshtastic.core.strings.firmware_update_release_notes
 import org.meshtastic.core.strings.firmware_update_retry
 import org.meshtastic.core.strings.firmware_update_save_dfu_file
 import org.meshtastic.core.strings.firmware_update_select_file
+import org.meshtastic.core.strings.firmware_update_source_local
 import org.meshtastic.core.strings.firmware_update_stable
 import org.meshtastic.core.strings.firmware_update_success
 import org.meshtastic.core.strings.firmware_update_taking_a_while
+import org.meshtastic.core.strings.firmware_update_target
 import org.meshtastic.core.strings.firmware_update_title
 import org.meshtastic.core.strings.firmware_update_unknown_release
 import org.meshtastic.core.strings.firmware_update_usb_bootloader_warning
 import org.meshtastic.core.strings.firmware_update_usb_instruction_text
 import org.meshtastic.core.strings.firmware_update_usb_instruction_title
+import org.meshtastic.core.strings.firmware_update_verification_failed
+import org.meshtastic.core.strings.firmware_update_verifying
+import org.meshtastic.core.strings.firmware_update_waiting_reconnect
 import org.meshtastic.core.strings.i_know_what_i_m_doing
 import org.meshtastic.core.strings.learn_more
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.save
 
-@OptIn(ExperimentalMaterial3Api::class)
+private const val CYCLE_DELAY_MS = 4500L
+
 @Composable
+@Suppress("LongMethod")
 fun FirmwareUpdateScreen(
     navController: NavController,
     modifier: Modifier = Modifier,
     viewModel: FirmwareUpdateViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
-    val selectedReleaseType by viewModel.selectedReleaseType.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val selectedReleaseType by viewModel.selectedReleaseType.collectAsStateWithLifecycle()
+    val deviceHardware by viewModel.deviceHardware.collectAsStateWithLifecycle()
+    val currentVersion by viewModel.currentFirmwareVersion.collectAsStateWithLifecycle()
+    val selectedRelease by viewModel.selectedRelease.collectAsStateWithLifecycle()
 
-    val getZipFileLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let { viewModel.startUpdateFromFile(it) }
-        }
-    val getUf2FileLauncher =
+    var showExitConfirmation by remember { mutableStateOf(false) }
+
+    val getFileLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { viewModel.startUpdateFromFile(it) }
         }
@@ -166,30 +176,67 @@ fun FirmwareUpdateScreen(
             uri?.let { viewModel.saveDfuFile(it) }
         }
 
-    val shouldKeepScreenOn = shouldKeepFirmwareScreenOn(state)
+    val actions =
+        remember(viewModel, navController, state) {
+            FirmwareUpdateActions(
+                onReleaseTypeSelect = viewModel::setReleaseType,
+                onStartUpdate = viewModel::startUpdate,
+                onPickFile = {
+                    if (state is FirmwareUpdateState.Ready) {
+                        val readyState = state as FirmwareUpdateState.Ready
+                        if (
+                            readyState.updateMethod is FirmwareUpdateMethod.Ble ||
+                            readyState.updateMethod is FirmwareUpdateMethod.Wifi
+                        ) {
+                            getFileLauncher.launch("*/*")
+                        } else if (readyState.updateMethod is FirmwareUpdateMethod.Usb) {
+                            getFileLauncher.launch("*/*")
+                        }
+                    }
+                },
+                onSaveFile = { fileName -> saveFileLauncher.launch(fileName) },
+                onRetry = viewModel::checkForUpdates,
+                onCancel = { showExitConfirmation = true },
+                onDone = { navController.navigateUp() },
+                onDismissBootloaderWarning = viewModel::dismissBootloaderWarningForCurrentDevice,
+            )
+        }
 
-    KeepScreenOn(shouldKeepScreenOn)
+    KeepScreenOn(shouldKeepFirmwareScreenOn(state))
+
+    androidx.activity.compose.BackHandler(enabled = shouldKeepFirmwareScreenOn(state)) { showExitConfirmation = true }
+
+    if (showExitConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showExitConfirmation = false },
+            title = { Text(stringResource(Res.string.firmware_update_disclaimer_title)) },
+            text = { Text(stringResource(Res.string.firmware_update_disconnect_warning)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitConfirmation = false
+                        viewModel.cancelUpdate()
+                        navController.navigateUp()
+                    },
+                ) {
+                    Text(stringResource(Res.string.firmware_update_retry)) // Use "Cancel & Exit" if available
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitConfirmation = false }) { Text(stringResource(Res.string.back)) }
+            },
+        )
+    }
 
     FirmwareUpdateScaffold(
         modifier = modifier,
         navController = navController,
         state = state,
         selectedReleaseType = selectedReleaseType,
-        onReleaseTypeSelect = viewModel::setReleaseType,
-        onStartUpdate = viewModel::startUpdate,
-        onPickFile = {
-            if (state is FirmwareUpdateState.Ready) {
-                if ((state as FirmwareUpdateState.Ready).updateMethod is FirmwareUpdateMethod.Ble) {
-                    getZipFileLauncher.launch("application/zip")
-                } else if ((state as FirmwareUpdateState.Ready).updateMethod is FirmwareUpdateMethod.Usb) {
-                    getUf2FileLauncher.launch("*/*")
-                }
-            }
-        },
-        onSaveFile = { fileName -> saveFileLauncher.launch(fileName) },
-        onRetry = viewModel::checkForUpdates,
-        onDone = { navController.navigateUp() },
-        onDismissBootloaderWarning = viewModel::dismissBootloaderWarningForCurrentDevice,
+        actions = actions,
+        deviceHardware = deviceHardware,
+        currentVersion = currentVersion,
+        selectedRelease = selectedRelease,
     )
 }
 
@@ -198,13 +245,10 @@ private fun FirmwareUpdateScaffold(
     navController: NavController,
     state: FirmwareUpdateState,
     selectedReleaseType: FirmwareReleaseType,
-    onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
-    onStartUpdate: () -> Unit,
-    onPickFile: () -> Unit,
-    onSaveFile: (String) -> Unit,
-    onRetry: () -> Unit,
-    onDone: () -> Unit,
-    onDismissBootloaderWarning: () -> Unit,
+    actions: FirmwareUpdateActions,
+    deviceHardware: DeviceHardware?,
+    currentVersion: String?,
+    selectedRelease: FirmwareRelease?,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -214,24 +258,46 @@ private fun FirmwareUpdateScaffold(
                 title = { Text(stringResource(Res.string.firmware_update_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.back))
                     }
                 },
             )
         },
     ) { padding ->
-        Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-            FirmwareUpdateContent(
-                state = state,
-                selectedReleaseType = selectedReleaseType,
-                onReleaseTypeSelect = onReleaseTypeSelect,
-                onStartUpdate = onStartUpdate,
-                onPickFile = onPickFile,
-                onSaveFile = onSaveFile,
-                onRetry = onRetry,
-                onDone = onDone,
-                onDismissBootloaderWarning = onDismissBootloaderWarning,
-            )
+        Column(
+            modifier =
+            Modifier.padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .animateContentSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (deviceHardware != null) {
+                Spacer(Modifier.height(16.dp))
+                AnimatedVisibility(
+                    visible =
+                    state is FirmwareUpdateState.Ready ||
+                        state is FirmwareUpdateState.Idle ||
+                        state is FirmwareUpdateState.Checking,
+                ) {
+                    Column {
+                        ReleaseTypeSelector(selectedReleaseType, actions.onReleaseTypeSelect)
+                        Spacer(Modifier.height(16.dp))
+                    }
+                }
+                DeviceInfoCard(
+                    deviceHardware = deviceHardware,
+                    release = selectedRelease,
+                    currentFirmwareVersion = currentVersion,
+                    selectedReleaseType = selectedReleaseType,
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+
+            Box(contentAlignment = Alignment.TopCenter) {
+                FirmwareUpdateContent(state = state, selectedReleaseType = selectedReleaseType, actions = actions)
+            }
         }
     }
 }
@@ -240,6 +306,7 @@ private fun shouldKeepFirmwareScreenOn(state: FirmwareUpdateState): Boolean = wh
     is FirmwareUpdateState.Downloading,
     is FirmwareUpdateState.Processing,
     is FirmwareUpdateState.Updating,
+    is FirmwareUpdateState.Verifying,
     -> true
 
     else -> false
@@ -249,25 +316,12 @@ private fun shouldKeepFirmwareScreenOn(state: FirmwareUpdateState): Boolean = wh
 private fun FirmwareUpdateContent(
     state: FirmwareUpdateState,
     selectedReleaseType: FirmwareReleaseType,
-    onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
-    onStartUpdate: () -> Unit,
-    onPickFile: () -> Unit,
-    onSaveFile: (String) -> Unit,
-    onRetry: () -> Unit,
-    onDone: () -> Unit,
-    onDismissBootloaderWarning: () -> Unit,
+    actions: FirmwareUpdateActions,
 ) {
-    val modifier =
-        if (state is FirmwareUpdateState.Ready) {
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp)
-        } else {
-            Modifier.padding(24.dp)
-        }
-
     Column(
-        modifier = modifier,
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         content = {
             when (state) {
                 is FirmwareUpdateState.Idle,
@@ -275,47 +329,59 @@ private fun FirmwareUpdateContent(
                 -> CheckingState()
 
                 is FirmwareUpdateState.Ready ->
-                    ReadyState(
-                        state = state,
-                        selectedReleaseType = selectedReleaseType,
-                        onReleaseTypeSelect = onReleaseTypeSelect,
-                        onStartUpdate = onStartUpdate,
-                        onPickFile = onPickFile,
-                        onDismissBootloaderWarning = onDismissBootloaderWarning,
-                    )
+                    ReadyState(state = state, selectedReleaseType = selectedReleaseType, actions = actions)
 
-                is FirmwareUpdateState.Downloading -> DownloadingState(state)
-                is FirmwareUpdateState.Processing -> ProcessingState(state.message)
-                is FirmwareUpdateState.Updating -> UpdatingState(state)
-                is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = onRetry)
-                is FirmwareUpdateState.Success -> SuccessState(onDone = onDone)
-                is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, onSaveFile)
+                is FirmwareUpdateState.Downloading ->
+                    ProgressContent(state.progressState, onCancel = actions.onCancel, isDownloading = true)
+
+                is FirmwareUpdateState.Processing -> ProgressContent(state.progressState, onCancel = actions.onCancel)
+
+                is FirmwareUpdateState.Updating ->
+                    ProgressContent(state.progressState, onCancel = actions.onCancel, isUpdating = true)
+
+                is FirmwareUpdateState.Verifying -> VerifyingState()
+                is FirmwareUpdateState.VerificationFailed ->
+                    VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
+                is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
+                is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
+                is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
             }
         },
     )
 }
 
 @Composable
-private fun ColumnScope.CheckingState() {
+private fun VerifyingState() {
+    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
+    Spacer(Modifier.height(24.dp))
+    Text(stringResource(Res.string.firmware_update_verifying), style = MaterialTheme.typography.titleMedium)
+    Spacer(Modifier.height(8.dp))
+    Text(
+        stringResource(Res.string.firmware_update_waiting_reconnect),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(16.dp))
+    CyclingMessages()
+}
+
+@Composable
+private fun CheckingState() {
     CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_checking), style = MaterialTheme.typography.bodyLarge)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Suppress("LongMethod")
-private fun ColumnScope.ReadyState(
+private fun ReadyState(
     state: FirmwareUpdateState.Ready,
     selectedReleaseType: FirmwareReleaseType,
-    onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
-    onStartUpdate: () -> Unit,
-    onPickFile: () -> Unit,
-    onDismissBootloaderWarning: () -> Unit,
+    actions: FirmwareUpdateActions,
 ) {
     var showDisclaimer by remember { mutableStateOf(false) }
-    var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     val device = state.deviceHardware
+    val haptic = LocalHapticFeedback.current
 
     if (showDisclaimer) {
         DisclaimerDialog(
@@ -323,26 +389,38 @@ private fun ColumnScope.ReadyState(
             onDismissRequest = { showDisclaimer = false },
             onConfirm = {
                 showDisclaimer = false
-                pendingAction?.invoke()
+                if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
+                    actions.onPickFile()
+                } else {
+                    actions.onStartUpdate()
+                }
             },
         )
     }
 
-    DeviceInfoCard(device, state.release, state.currentFirmwareVersion)
-
     if (state.showBootloaderWarning) {
+        BootloaderWarningCard(deviceHardware = device, onDismissForDevice = actions.onDismissBootloaderWarning)
         Spacer(Modifier.height(16.dp))
-        BootloaderWarningCard(deviceHardware = device, onDismissForDevice = onDismissBootloaderWarning)
     }
 
-    if (state.release != null) {
-        ReleaseTypeSelector(selectedReleaseType, onReleaseTypeSelect)
-        Spacer(Modifier.height(16.dp))
-        ReleaseNotesCard(state.release.releaseNotes)
-        Spacer(Modifier.height(24.dp))
+    Spacer(Modifier.height(16.dp))
+
+    if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
         Button(
             onClick = {
-                pendingAction = onStartUpdate
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                showDisclaimer = true
+            },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+        ) {
+            Icon(Icons.Default.Folder, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(Res.string.firmware_update_select_file))
+        }
+    } else if (state.release != null) {
+        Button(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showDisclaimer = true
             },
             modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -352,6 +430,7 @@ private fun ColumnScope.ReadyState(
                 when (state.updateMethod) {
                     FirmwareUpdateMethod.Ble -> Icons.Rounded.Bluetooth
                     FirmwareUpdateMethod.Usb -> Icons.Rounded.Usb
+                    FirmwareUpdateMethod.Wifi -> Icons.Rounded.Wifi
                     else -> Icons.Default.SystemUpdate
                 },
                 contentDescription = null,
@@ -364,19 +443,8 @@ private fun ColumnScope.ReadyState(
                 ),
             )
         }
-        Spacer(Modifier.height(16.dp))
-    }
-
-    OutlinedButton(
-        onClick = {
-            pendingAction = onPickFile
-            showDisclaimer = true
-        },
-        modifier = Modifier.fillMaxWidth().height(56.dp),
-    ) {
-        Icon(Icons.Default.Folder, contentDescription = null)
-        Spacer(Modifier.width(8.dp))
-        Text(stringResource(Res.string.firmware_update_select_file))
+        Spacer(Modifier.height(24.dp))
+        ReleaseNotesCard(state.release.releaseNotes)
     }
 }
 
@@ -386,7 +454,7 @@ private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismissReques
         onDismissRequest = onDismissRequest,
         title = { Text(stringResource(Res.string.firmware_update_disclaimer_title)) },
         text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.firmware_update_disclaimer_text))
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -404,7 +472,7 @@ private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismissReques
                     )
                 }
                 if (updateMethod is FirmwareUpdateMethod.Ble) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     ChirpyCard()
                 }
             }
@@ -416,8 +484,11 @@ private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismissReques
 
 @Composable
 private fun ChirpyCard() {
-    Card(modifier = Modifier.fillMaxWidth().padding(4.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(
                 modifier = Modifier.padding(8.dp),
                 verticalAlignment = Alignment.Bottom,
@@ -428,6 +499,7 @@ private fun ChirpyCard() {
                     model =
                     ImageRequest.Builder(LocalContext.current)
                         .data(org.meshtastic.core.ui.R.drawable.chirpy)
+                        .crossfade(true)
                         .build(),
                     contentScale = ContentScale.Fit,
                     contentDescription = stringResource(Res.string.chirpy),
@@ -437,6 +509,7 @@ private fun ChirpyCard() {
             Text(
                 text = stringResource(Res.string.firmware_update_disclaimer_chirpy_says),
                 style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -446,8 +519,9 @@ private fun ChirpyCard() {
 private fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifier = Modifier) {
     val hwImg = deviceHardware.images?.getOrNull(1) ?: deviceHardware.images?.getOrNull(0) ?: "unknown.svg"
     val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
+
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current).data(imageUrl).build(),
+        model = ImageRequest.Builder(LocalContext.current).data(imageUrl).crossfade(true).build(),
         contentScale = ContentScale.Fit,
         contentDescription = deviceHardware.displayName,
         modifier = modifier,
@@ -456,32 +530,17 @@ private fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifi
 
 @Composable
 private fun ReleaseNotesCard(releaseNotes: String) {
-    var expanded by remember { mutableStateOf(false) }
-
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(text = "Release Notes", style = MaterialTheme.typography.titleMedium)
-                Icon(
-                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (expanded) "Collapse" else "Expand",
-                )
-            }
-
-            AnimatedVisibility(visible = expanded) {
-                Column {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Markdown(content = releaseNotes, modifier = Modifier.fillMaxWidth())
-                }
-            }
+            Text(
+                text = stringResource(Res.string.firmware_update_release_notes),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Markdown(content = releaseNotes, modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -491,11 +550,12 @@ private fun DeviceInfoCard(
     deviceHardware: DeviceHardware,
     release: FirmwareRelease?,
     currentFirmwareVersion: String? = null,
+    selectedReleaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
 ) {
     val target = deviceHardware.hwModelSlug.ifEmpty { deviceHardware.platformioTarget }
 
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -514,22 +574,28 @@ private fun DeviceInfoCard(
             }
             Spacer(Modifier.height(8.dp))
             Text(
-                "Target: $target",
+                stringResource(Res.string.firmware_update_target, target),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(4.dp))
-            val currentVersion =
+            val currentVersionString =
                 stringResource(
                     Res.string.firmware_update_currently_installed,
                     currentFirmwareVersion ?: stringResource(Res.string.firmware_update_unknown_release),
                 )
-            Text(modifier = Modifier.fillMaxWidth(), text = currentVersion)
+            Text(modifier = Modifier.fillMaxWidth(), text = currentVersionString)
             Spacer(Modifier.height(4.dp))
-            val releaseVersion = release?.title ?: stringResource(Res.string.firmware_update_unknown_release)
+            val (label, version) =
+                if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
+                    stringResource(Res.string.firmware_update_source_local) to ""
+                } else {
+                    val releaseVersion = release?.title ?: stringResource(Res.string.firmware_update_unknown_release)
+                    stringResource(Res.string.firmware_update_latest, "") to releaseVersion
+                }
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(Res.string.firmware_update_latest, releaseVersion),
+                text = "$label$version",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -540,7 +606,7 @@ private fun DeviceInfoCard(
 @Composable
 private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDevice: () -> Unit) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
         colors =
         CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -607,65 +673,86 @@ private fun ReleaseTypeSelector(
         SegmentedButton(
             selected = selectedReleaseType == FirmwareReleaseType.STABLE,
             onClick = { onReleaseTypeSelect(FirmwareReleaseType.STABLE) },
-            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
         ) {
             Text(stringResource(Res.string.firmware_update_stable))
         }
         SegmentedButton(
             selected = selectedReleaseType == FirmwareReleaseType.ALPHA,
             onClick = { onReleaseTypeSelect(FirmwareReleaseType.ALPHA) },
-            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
         ) {
             Text(stringResource(Res.string.firmware_update_alpha))
+        }
+        SegmentedButton(
+            selected = selectedReleaseType == FirmwareReleaseType.LOCAL,
+            onClick = { onReleaseTypeSelect(FirmwareReleaseType.LOCAL) },
+            shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+        ) {
+            Text(stringResource(Res.string.firmware_update_local_file))
         }
     }
 }
 
-@Suppress("MagicNumber")
 @Composable
-private fun ColumnScope.DownloadingState(state: FirmwareUpdateState.Downloading) {
-    Icon(
-        Icons.Default.CloudDownload,
-        contentDescription = null,
-        modifier = Modifier.size(48.dp),
-        tint = MaterialTheme.colorScheme.primary,
-    )
-    Spacer(Modifier.height(24.dp))
-    Text(
-        stringResource(Res.string.firmware_update_downloading, (state.progress * 100).toInt()),
-        style = MaterialTheme.typography.titleMedium,
-    )
-    Spacer(Modifier.height(16.dp))
-    LinearWavyProgressIndicator(progress = { state.progress }, modifier = Modifier.fillMaxWidth())
-    Spacer(Modifier.height(16.dp))
-    CyclingMessages()
-}
-
-@Composable
-private fun ColumnScope.ProcessingState(message: String) {
-    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
-    Spacer(Modifier.height(24.dp))
-    Text(message, style = MaterialTheme.typography.titleMedium)
-    Spacer(Modifier.height(16.dp))
-    CyclingMessages()
-}
-
-@Composable
-private fun ColumnScope.UpdatingState(state: FirmwareUpdateState.Updating) {
-    CircularWavyProgressIndicator(progress = { state.progress }, modifier = Modifier.size(64.dp))
-    Spacer(Modifier.height(24.dp))
-    Text(state.message, style = MaterialTheme.typography.titleMedium)
-    Spacer(Modifier.height(8.dp))
-    LinearWavyProgressIndicator(progress = { state.progress }, modifier = Modifier.fillMaxWidth())
-    Spacer(Modifier.height(16.dp))
-    CyclingMessages()
-}
-
-@Composable
-private fun ColumnScope.AwaitingFileSaveState(
-    state: FirmwareUpdateState.AwaitingFileSave,
-    onSaveFile: (String) -> Unit,
+private fun ProgressContent(
+    progressState: ProgressState,
+    onCancel: () -> Unit,
+    isDownloading: Boolean = false,
+    isUpdating: Boolean = false,
 ) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+    ) {
+        if (isDownloading) {
+            Icon(
+                Icons.Default.CloudDownload,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        } else {
+            CircularWavyProgressIndicator(
+                progress = { if (isUpdating) progressState.progress else 1f },
+                modifier = Modifier.size(64.dp),
+            )
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        Text(progressState.message, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+
+        val details = progressState.details
+        if (details != null) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = details,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        if (isDownloading || isUpdating) {
+            LinearWavyProgressIndicator(
+                progress = { progressState.progress },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+        CyclingMessages()
+        Spacer(Modifier.height(24.dp))
+        OutlinedButton(onClick = onCancel) { Text(stringResource(Res.string.cancel)) }
+    }
+}
+
+@Composable
+private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, onSaveFile: (String) -> Unit) {
     var showDialog by remember { mutableStateOf(true) }
 
     if (showDialog) {
@@ -700,8 +787,6 @@ private fun ColumnScope.AwaitingFileSaveState(
     }
 }
 
-private const val CYCLE_DELAY = 4000L
-
 @Composable
 private fun CyclingMessages() {
     val messages =
@@ -716,23 +801,48 @@ private fun CyclingMessages() {
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(CYCLE_DELAY)
+            delay(CYCLE_DELAY_MS)
             currentMessageIndex = (currentMessageIndex + 1) % messages.size
         }
     }
 
-    AnimatedContent(targetState = messages[currentMessageIndex], label = "CyclingMessage") { message ->
-        Text(
-            message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+    Text(
+        messages[currentMessageIndex],
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().height(48.dp),
+    )
+}
+
+@Composable
+private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
+    Icon(
+        Icons.Default.Warning,
+        contentDescription = null,
+        modifier = Modifier.size(64.dp),
+        tint = MaterialTheme.colorScheme.error,
+    )
+    Spacer(Modifier.height(24.dp))
+    Text(
+        stringResource(Res.string.firmware_update_verification_failed),
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodyLarge,
+        textAlign = TextAlign.Center,
+    )
+    Spacer(Modifier.height(32.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        OutlinedButton(onClick = onRetry) {
+            Icon(Icons.Default.Refresh, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(Res.string.firmware_update_retry))
+        }
+        Button(onClick = onIgnore) { Text(stringResource(Res.string.firmware_update_done)) }
     }
 }
 
 @Composable
-private fun ColumnScope.ErrorState(error: String, onRetry: () -> Unit) {
+private fun ErrorState(error: String, onRetry: () -> Unit) {
     Icon(
         Icons.Default.Dangerous,
         contentDescription = null,
@@ -755,23 +865,28 @@ private fun ColumnScope.ErrorState(error: String, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun ColumnScope.SuccessState(onDone: () -> Unit) {
-    Icon(
-        Icons.Default.CheckCircle,
-        contentDescription = null,
-        modifier = Modifier.size(80.dp),
-        tint = MaterialTheme.colorScheme.primary,
-    )
-    Spacer(Modifier.height(24.dp))
-    Text(
-        stringResource(Res.string.firmware_update_success),
-        color = MaterialTheme.colorScheme.primary,
-        style = MaterialTheme.typography.headlineMedium,
-        textAlign = TextAlign.Center,
-    )
-    Spacer(Modifier.height(32.dp))
-    Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-        Text(stringResource(Res.string.firmware_update_done))
+private fun SuccessState(onDone: () -> Unit) {
+    val haptic = LocalHapticFeedback.current
+    LaunchedEffect(Unit) { haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            Icons.Default.CheckCircle,
+            contentDescription = null,
+            modifier = Modifier.size(100.dp),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(24.dp))
+        Text(
+            stringResource(Res.string.firmware_update_success),
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.headlineLarge,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(32.dp))
+        Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Text(stringResource(Res.string.firmware_update_done))
+        }
     }
 }
 

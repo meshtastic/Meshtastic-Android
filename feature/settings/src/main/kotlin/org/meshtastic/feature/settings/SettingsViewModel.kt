@@ -17,6 +17,7 @@
 package org.meshtastic.feature.settings
 
 import android.app.Application
+import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,12 +46,14 @@ import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
+import org.meshtastic.core.prefs.radio.isTcp
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
@@ -61,7 +64,6 @@ import org.meshtastic.proto.Portnums
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
-import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -118,15 +120,22 @@ constructor(
     val appVersionName
         get() = buildConfigProvider.versionName
 
-    val isDfuCapable: StateFlow<Boolean> =
+    val isOtaCapable: StateFlow<Boolean> =
         combine(ourNodeInfo, serviceRepository.connectionState) { node, connectionState -> Pair(node, connectionState) }
             .flatMapLatest { (node, connectionState) ->
                 if (node == null || !connectionState.isConnected()) {
                     flowOf(false)
-                } else if (radioPrefs.isBle() || radioPrefs.isSerial()) {
+                } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
                     val hwModel = node.user.hwModel.number
                     val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
-                    flow { emit(hw?.requiresDfu == true) }
+                    // Support both Nordic DFU (requiresDfu) and ESP32 Unified OTA (supportsUnifiedOta)
+                    val capabilities = Capabilities(node.metadata?.firmwareVersion)
+
+                    // ESP32 Unified OTA is only supported via BLE or WiFi (TCP), not USB Serial.
+                    val isEsp32OtaSupported =
+                        hw?.supportsUnifiedOta == true && capabilities.supportsEsp32Ota && !radioPrefs.isSerial()
+
+                    flow { emit(hw?.requiresDfu == true || isEsp32OtaSupported) }
                 } else {
                     flowOf(false)
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio
 
 import androidx.compose.foundation.layout.Arrangement
@@ -88,7 +87,7 @@ fun RadioConfigItemList(
     isManaged: Boolean,
     node: Node? = null,
     excludedModulesUnlocked: Boolean = false,
-    isDfuCapable: Boolean = false,
+    isOtaCapable: Boolean = false,
     onPreserveFavoritesToggle: (Boolean) -> Unit = {},
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
@@ -212,7 +211,7 @@ fun RadioConfigItemList(
             ManagedMessage()
         }
 
-        if (isDfuCapable && state.isLocal) {
+        if (isOtaCapable && state.isLocal) {
             ListItem(
                 text = stringResource(Res.string.firmware_update_title),
                 leadingIcon = Icons.Rounded.SystemUpdate,

@@ -179,6 +179,7 @@ constructor(
             }
             base.copy(
                 requiresBootloaderUpgradeForOta = quirk.requiresBootloaderUpgradeForOta,
+                supportsUnifiedOta = quirk.supportsUnifiedOta,
                 bootloaderInfoUrl = quirk.infoUrl,
             )
         } else {

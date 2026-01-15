@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import kotlinx.serialization.SerialName
@@ -31,6 +30,11 @@ data class BootloaderOtaQuirk(
      * one-time bootloader upgrade (typically via USB) before DFU updates from the app work.
      */
     @SerialName("requiresBootloaderUpgradeForOta") val requiresBootloaderUpgradeForOta: Boolean = false,
+    /**
+     * Indicates that the device supports the ESP32 Unified OTA protocol. When true, the app will use the unified OTA
+     * handler instead of Nordic DFU.
+     */
+    @SerialName("supportsUnifiedOta") val supportsUnifiedOta: Boolean = false,
     /** Optional URL pointing to documentation on how to update the bootloader. */
     @SerialName("infoUrl") val infoUrl: String? = null,
 )

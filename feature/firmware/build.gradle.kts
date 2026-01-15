@@ -37,6 +37,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.kover)
 }
 
 configure<LibraryExtension> { namespace = "org.meshtastic.feature.firmware" }
@@ -73,4 +74,8 @@ dependencies {
 
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
 }
