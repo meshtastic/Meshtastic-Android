@@ -57,6 +57,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.SpeakerNotes
 import androidx.compose.material.icons.filled.SpeakerNotesOff
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.FilterListOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -180,6 +182,7 @@ fun MessageScreen(
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
     val filteredCount by viewModel.getFilteredCount(contactKey).collectAsStateWithLifecycle(initialValue = 0)
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
+    val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
 
     // Retry dialog state
     var currentRetryEvent by remember { mutableStateOf<RetryEvent?>(null) }
@@ -383,6 +386,8 @@ fun MessageScreen(
                     showQuickChat = showQuickChat,
                     onToggleQuickChat = viewModel::toggleShowQuickChat,
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
+                    filteringDisabled = filteringDisabled,
+                    onToggleFilteringDisabled = { viewModel.setContactFilteringDisabled(contactKey, !filteringDisabled) },
                 )
             }
         },
@@ -700,6 +705,8 @@ private fun MessageTopBar(
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,
     onNavigateToQuickChatOptions: () -> Unit = {},
+    filteringDisabled: Boolean = false,
+    onToggleFilteringDisabled: () -> Unit = {},
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -721,11 +728,13 @@ private fun MessageTopBar(
     },
     actions = {
         MessageTopBarActions(
-            showQuickChat,
-            onToggleQuickChat,
-            onNavigateToQuickChatOptions,
-            channelIndex,
-            mismatchKey,
+            showQuickChat = showQuickChat,
+            onToggleQuickChat = onToggleQuickChat,
+            onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
+            channelIndex = channelIndex,
+            mismatchKey = mismatchKey,
+            filteringDisabled = filteringDisabled,
+            onToggleFilteringDisabled = onToggleFilteringDisabled,
         )
     },
 )
@@ -737,6 +746,8 @@ private fun MessageTopBarActions(
     onNavigateToQuickChatOptions: () -> Unit,
     channelIndex: Int?,
     mismatchKey: Boolean,
+    filteringDisabled: Boolean,
+    onToggleFilteringDisabled: () -> Unit,
 ) {
     if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
         NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
@@ -752,6 +763,8 @@ private fun MessageTopBarActions(
             showQuickChat = showQuickChat,
             onToggleQuickChat = onToggleQuickChat,
             onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
+            filteringDisabled = filteringDisabled,
+            onToggleFilteringDisabled = onToggleFilteringDisabled,
         )
     }
 }
@@ -763,6 +776,8 @@ private fun OverFlowMenu(
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,
     onNavigateToQuickChatOptions: () -> Unit,
+    filteringDisabled: Boolean,
+    onToggleFilteringDisabled: () -> Unit,
 ) {
     if (expanded) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
@@ -800,6 +815,21 @@ private fun OverFlowMenu(
                     Icon(
                         imageVector = Icons.Default.ChatBubbleOutline,
                         contentDescription = stringResource(Res.string.quick_chat),
+                    )
+                },
+            )
+            // Per-contact filter disable toggle
+            val filterToggleTitle = if (filteringDisabled) "Enable filtering" else "Disable filtering"
+            DropdownMenuItem(
+                text = { Text(filterToggleTitle) },
+                onClick = {
+                    onDismiss()
+                    onToggleFilteringDisabled()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (filteringDisabled) Icons.Rounded.FilterList else Icons.Rounded.FilterListOff,
+                        contentDescription = filterToggleTitle,
                     )
                 },
             )

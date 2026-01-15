@@ -150,6 +150,12 @@ constructor(
     fun getFilteredCount(contactKey: String): Flow<Int> =
         packetRepository.getFilteredCountFlow(contactKey)
 
+    fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            packetRepository.setContactFilteringDisabled(contactKey, disabled)
+        }
+    }
+
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
         (!state.value).let { toggled ->
             state.update { toggled }
