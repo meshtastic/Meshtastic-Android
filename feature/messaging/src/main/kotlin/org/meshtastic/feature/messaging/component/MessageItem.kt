@@ -291,7 +291,7 @@ internal fun MessageItem(
                             text = "Filtered",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(end = 4.dp),
+                            modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))
