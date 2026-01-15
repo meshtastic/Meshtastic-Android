@@ -507,7 +507,6 @@
     <string name="double_tap_as_button_press">Dubbeltryck som knapptryck</string>
     <string name="time_zone">Tidszon</string>
     <string name="led_heartbeat">LED pulsering</string>
-    <string name="display_config">Display</string>
     <string name="screen_on_for">Håll skärmen tänd</string>
     <string name="compass_north_top">Kompassens norrläge uppåt</string>
     <string name="flip_screen">Vänd skärmen</string>
@@ -922,16 +921,13 @@
     <string name="firmware_update_title">Uppdatering av fast programvara</string>
     <string name="firmware_update_checking">Söker efter uppdateringar...</string>
     <string name="firmware_update_device">Enhet: %1$s</string>
-    <string name="firmware_update_latest">Senaste utgåva: %1$s</string>
     <string name="firmware_update_stable">Stabil version</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_disconnect_warning">Obs: Under uppdateringen kommer enheten att tillfälligt kopplas bort.</string>
-    <string name="firmware_update_downloading">Hämtar fast programvara... %1$d%</string>
     <string name="firmware_update_error">Fel: %1$s</string>
     <string name="firmware_update_retry">Försök igen</string>
     <string name="firmware_update_success">Uppdatering lyckades!</string>
     <string name="firmware_update_done">Klart</string>
-    <string name="firmware_update_updating">Uppdaterar... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Okänd hårdvarumodell: %1$d</string>
     <string name="firmware_update_no_device">Ingen ansluten enhet</string>
     <string name="firmware_update_not_found_in_release">Kunde inte hitta fast programvara för %1$s i utgåvan.</string>
@@ -945,6 +941,7 @@
     <string name="firmware_update_select_file">Välj lokal fil</string>
     <string name="firmware_update_copying">Kopierar fast programvara...</string>
     <string name="firmware_update_method_usb">USB filöverföring</string>
+    <string name="firmware_update_channel_name">Uppdatering av fast programvara</string>
     <string name="interval_unset">Ej inställd</string>
     <string name="interval_always_on">Alltid på</string>
     <plurals name="plurals_seconds">

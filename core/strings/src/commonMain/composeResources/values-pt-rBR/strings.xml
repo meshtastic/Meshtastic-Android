@@ -382,7 +382,6 @@
     <string name="detection_trigger_type">Tipo de gatilho de deteção</string>
     <string name="use_input_pullup_mode">Usar o modo INPUT_PULLUP</string>
     <string name="device_config">Dispositivo</string>
-    <string name="display_config">Tela</string>
     <string name="compass_north_top">Norte da bússola no topo</string>
     <string name="flip_screen">Inverter tela</string>
     <string name="display_units">Unidades de exibição</string>
@@ -728,6 +727,7 @@
     <!-- Firmware Update -->
     <string name="firmware_update_done">Concluído</string>
     <string name="firmware_update_failed">Atualização falhou</string>
+    <string name="back">Voltar</string>
     <string name="interval_unset">Não definido</string>
     <!-- Compass -->
 </resources>

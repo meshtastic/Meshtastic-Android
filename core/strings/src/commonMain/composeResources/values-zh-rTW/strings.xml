@@ -488,7 +488,6 @@
     <string name="triple_click_adhoc_ping">三擊執行臨時 Ping</string>
     <string name="time_zone">時區</string>
     <string name="led_heartbeat">LED 心跳指示</string>
-    <string name="display_config">顯示</string>
     <string name="screen_on_for">螢幕開啟持續時間</string>
     <string name="carousel_interval">輪播間隔</string>
     <string name="compass_north_top">指南針北方向上</string>
@@ -907,6 +906,8 @@
     <string name="firmware_update_stable">穩定版</string>
     <string name="firmware_update_done">完成</string>
     <string name="firmware_update_failed">更新失敗</string>
+    <string name="firmware_update_channel_name">韌體更新</string>
+    <string name="back">返回</string>
     <string name="interval_unset">取消設定</string>
     <!-- Compass -->
 </resources>

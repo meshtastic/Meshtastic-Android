@@ -190,7 +190,6 @@
     <string name="blue">Сіні</string>
     <string name="messages">Паведамленні</string>
     <string name="device_config">Прылада</string>
-    <string name="display_config">Экран</string>
     <string name="oled_type">Тып OLED</string>
     <string name="play">Граць</string>
     <string name="lora_config">LoRa</string>

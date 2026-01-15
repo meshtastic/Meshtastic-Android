@@ -360,7 +360,6 @@
     <string name="use_input_pullup_mode">INPUT_PULLUP modu kullan</string>
     <string name="device_config">Cihaz</string>
     <string name="nodeinfo_broadcast_interval">Node Bilgisi Yayın Aralığı</string>
-    <string name="display_config">Ekran</string>
     <string name="compass_north_top">Pusula kuzey üstte</string>
     <string name="flip_screen">Ekranı Çevir</string>
     <string name="display_units">Görüntü Birimleri</string>

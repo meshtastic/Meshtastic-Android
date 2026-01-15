@@ -323,7 +323,6 @@
     <string name="gpio_pin_to_monitor">GPIO pin om te monitoren</string>
     <string name="detection_trigger_type">Detectie trigger type</string>
     <string name="device_config">Apparaat</string>
-    <string name="display_config">Weergave</string>
     <string name="compass_north_top">Kompas Noorden bovenaan</string>
     <string name="flip_screen">Scherm omdraaien</string>
     <string name="display_units">Geef eenheden weer</string>

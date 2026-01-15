@@ -344,7 +344,6 @@
     <string name="detection_trigger_type">検出トリガーの種類</string>
     <string name="use_input_pullup_mode">INPUT_PULUP モードを使用</string>
     <string name="device_config">接続するデバイスを選択</string>
-    <string name="display_config">表示</string>
     <string name="compass_north_top">ノースアップ表示</string>
     <string name="flip_screen">画面反転</string>
     <string name="display_units">表示単位</string>

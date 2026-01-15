@@ -300,7 +300,6 @@
     <string name="device_config">Пристрій</string>
     <string name="role">Роль пристрою</string>
     <string name="time_zone">Часовий пояс</string>
-    <string name="display_config">Дисплей</string>
     <string name="flip_screen">Перевернути екран</string>
     <string name="display_units">Одиниці виміру</string>
     <string name="oled_type">Тип OLED</string>
@@ -501,15 +500,12 @@
     <string name="firmware_update_title">Оновити прошивку</string>
     <string name="firmware_update_checking">Перевірка наявності оновлень...</string>
     <string name="firmware_update_device">Пристрій: %1$s</string>
-    <string name="firmware_update_latest">Останній реліз: %1$s</string>
     <string name="firmware_update_stable">Стабільна</string>
     <string name="firmware_update_alpha">Альфа</string>
     <string name="firmware_update_disconnect_warning">Примітка: це тимчасово від'єднає ваш пристрій на час оновлення.</string>
-    <string name="firmware_update_downloading">Завантаження прошивки... %1$d%</string>
     <string name="firmware_update_error">Помилка: %1$s</string>
     <string name="firmware_update_retry">Повторити спробу</string>
     <string name="firmware_update_success">Оновлення успішне!</string>
-    <string name="firmware_update_updating">Оновлення... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Невідома модель обладнання: %1$d</string>
     <string name="firmware_update_no_device">Немає під'єднаних пристроїв</string>
     <string name="firmware_update_not_found_in_release">Не вдалося знайти прошивку %1$s в релізі.</string>
@@ -519,6 +515,7 @@
     <string name="firmware_update_almost_there">Майже готово...</string>
     <string name="firmware_update_taking_a_while">Це може зайняти хвилинку...</string>
     <string name="firmware_update_select_file">Вибрати локальний файл</string>
+    <string name="firmware_update_channel_name">Оновити прошивку</string>
     <string name="interval_unset">Скинути</string>
     <!-- Compass -->
     <string name="now">Зараз</string>

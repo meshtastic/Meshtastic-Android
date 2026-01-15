@@ -497,7 +497,6 @@ Rango de Valores 0 - 500.</string>
     <string name="triple_click_adhoc_ping">Triple pulsación para enviar un ping</string>
     <string name="time_zone">Zona horaria</string>
     <string name="led_heartbeat">Latido LED</string>
-    <string name="display_config">Pantalla</string>
     <string name="screen_on_for">Pantalla activa durante</string>
     <string name="carousel_interval">Intervalo de carrusel</string>
     <string name="compass_north_top">La brújula apunta al norte</string>
@@ -897,14 +896,11 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="firmware_update_checking">Buscando actualizaciones...</string>
     <string name="firmware_update_device">Dispositivo: %1$s</string>
     <string name="firmware_update_currently_installed">Actualmente instalado: %1$s</string>
-    <string name="firmware_update_latest">Última versión: %1$s</string>
     <string name="firmware_update_stable">Estable</string>
-    <string name="firmware_update_downloading">Descargando firmware... %1$d%</string>
     <string name="firmware_update_retry">Volver a intentar</string>
     <string name="firmware_update_success">¡Actualización exitosa!</string>
     <string name="firmware_update_done">Hecho</string>
     <string name="firmware_update_starting_dfu">Iniciando DFU...</string>
-    <string name="firmware_update_updating">Actualizando... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Modelo de hardware desconocido: %1$d</string>
     <string name="firmware_update_no_device">No hay dispositivos conectados</string>
     <string name="firmware_update_failed">Actualización fallida</string>
@@ -912,6 +908,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="firmware_update_do_not_close">No cierres la aplicación.</string>
     <string name="firmware_update_rebooting">Reiniciando en DFU...</string>
     <string name="firmware_update_method_usb">Transferencia de archivo USB</string>
+    <string name="firmware_update_channel_name">Actualización de firmware</string>
     <string name="interval_unset">Sin configurar</string>
     <string name="interval_always_on">Siempre encendido</string>
     <plurals name="plurals_seconds">
