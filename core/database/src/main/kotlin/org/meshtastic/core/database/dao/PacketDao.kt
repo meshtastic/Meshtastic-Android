@@ -376,6 +376,46 @@ interface PacketDao {
     )
     suspend fun findReactionBySfppHash(hash: ByteArray): ReactionEntity?
 
+    @Query(
+        """
+        SELECT COUNT(*) FROM packet
+        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+            AND port_num = 1 AND contact_key = :contact AND filtered = 1
+        """,
+    )
+    suspend fun getFilteredCount(contact: String): Int
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM packet
+        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+            AND port_num = 1 AND contact_key = :contact AND filtered = 1
+        """,
+    )
+    fun getFilteredCountFlow(contact: String): Flow<Int>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM packet
+        WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+            AND port_num = 1 AND contact_key = :contact
+            AND (filtered = 0 OR :includeFiltered = 1)
+        ORDER BY received_time DESC
+        """,
+    )
+    fun getMessagesFromPaged(contact: String, includeFiltered: Boolean): PagingSource<Int, PacketEntity>
+
+    @Query("SELECT filtering_disabled FROM contact_settings WHERE contact_key = :contact")
+    suspend fun getContactFilteringDisabled(contact: String): Boolean?
+
+    @Transaction
+    suspend fun setContactFilteringDisabled(contact: String, disabled: Boolean) {
+        val settings = getContactSettings(contact)?.copy(filteringDisabled = disabled)
+            ?: ContactSettings(contact_key = contact, filteringDisabled = disabled)
+        upsertContactSettings(listOf(settings))
+    }
+
     @Transaction
     suspend fun deleteAll() {
         deleteAllPackets()
