@@ -66,6 +66,8 @@
     <string name="role_client_desc">Yhdistetty sovellukseen tai itsenäinen viestintälaite.</string>
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Laite, joka ei välitä paketteja muilta laitteilta.</string>
+    <string name="role_client_base">Client Base</string>
+    <string name="role_client_base_desc">Suosikkiradioihin liittyvät paketit käsitellään ROUTER_LATE-tilassa, muut paketit CLIENT-tilassa.</string>
     <string name="role_router">Router</string>
     <string name="role_router_desc">Laite, joka laajentaa verkon infrastruktuuria viestejä välittämällä. Näkyy laitelistauksessa.</string>
     <string name="role_router_client">Router Client</string>
@@ -413,6 +415,10 @@
     <string name="view_on_map">Näytä kartalla</string>
     <string name="traceroute_map_no_data">Tässä traceroutessa ei ole vielä yhtään kartalle sijoitettavaa laitetta.</string>
     <string name="traceroute_showing_nodes">Näytetään %1$d/%2$d laitetta</string>
+    <string name="traceroute_duration">Kesto: %1$s s</string>
+    <string name="traceroute_time_and_text">%1$s - %2$s</string>
+    <string name="traceroute_route_towards_dest">Reitti jäljitetty kohti määränpäätä:\n\n</string>
+    <string name="traceroute_route_back_to_us">Reitti jäljitetty takaisin tähän laitteeseen:\n\n</string>
     <string name="twenty_four_hours">24t</string>
     <string name="forty_eight_hours">48t</string>
     <string name="one_week">1vko</string>
