@@ -40,11 +40,18 @@ class MessageFilterService @Inject constructor(
      * Determines if a message should be filtered based on the configured filter words.
      *
      * @param message The message text to check.
+     * @param contactKey The contact key for the message (optional, for logging).
+     * @param isFilteringDisabled Whether filtering is disabled for this contact.
      * @return true if the message should be filtered, false otherwise.
      */
-    fun shouldFilter(message: String): Boolean {
+    fun shouldFilter(
+        message: String,
+        contactKey: String? = null,
+        isFilteringDisabled: Boolean = false,
+    ): Boolean {
         if (!filterPrefs.filterEnabled) return false
         if (compiledPatterns.isEmpty()) return false
+        if (isFilteringDisabled) return false
 
         val textToCheck = message.take(MAX_CHECK_LENGTH)
         return compiledPatterns.any { it.containsMatchIn(textToCheck) }
