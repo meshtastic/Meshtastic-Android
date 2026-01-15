@@ -210,13 +210,13 @@
     <plurals name="log_retention_hours">
         <item quantity="one">%1$d час</item>
         <item quantity="few">%1$d часов</item>
-        <item quantity="many">%1$d часа</item>
+        <item quantity="many">%1$d часов</item>
         <item quantity="other">%1$d часы</item>
     </plurals>
     <plurals name="log_retention_days_quantity">
         <item quantity="one">%1$d день</item>
         <item quantity="few">%1$d дней</item>
-        <item quantity="many">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
         <item quantity="other">%1$d дни</item>
     </plurals>
     <string name="debug_filters">Фильтры</string>
@@ -354,9 +354,9 @@
     <string name="mute_status_unmuted">Не заглушен</string>
     <string name="mute_status_muted_for_days">Заглушен на %1$d дней, %2$.1f часов</string>
     <string name="mute_status_muted_for_hours">Заглушен на %1$.1f часов</string>
-    <string name="mute_status_label">Состояние заглушки</string>
-    <string name="mute_add">Откл. уведомления для '%1$s?</string>
-    <string name="mute_remove">Включить уведомления для '%1$s'?</string>
+    <string name="mute_status_label">Статус заглушки</string>
+    <string name="mute_add">Включить уведомления для '%1$s'?</string>
+    <string name="mute_remove">Откл. уведомления для '%1$s?</string>
     <string name="replace">Заменить</string>
     <string name="wifi_qr_code_scan">Сканировать QR-код WiFi</string>
     <string name="wifi_qr_code_error">Неверный формат QR-кода WiFi</string>
@@ -1024,7 +1024,7 @@
     <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
     <string name="firmware_update_waiting_for_device">Ожидание DFU устройства...</string>
     <string name="firmware_update_copying">Копирование прошивки...</string>
-    <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на вашем устройстве с DFU.</string>
+    <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл \".uf2\" на вашем устройстве с DFU.</string>
     <string name="firmware_update_flashing">Прошивка устройства, подождите...</string>
     <string name="firmware_update_method_usb">Передача файлов через USB</string>
     <string name="firmware_update_method_ble">BLE OTA (по воздуху)</string>
