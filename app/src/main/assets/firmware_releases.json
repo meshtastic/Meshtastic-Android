@@ -182,6 +182,12 @@
   },
   "pullRequests": [
     {
+      "id": "9319",
+      "title": "fix(PortduinoGlue): spi_dev_int packing",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9319",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9289",
       "title": "Added Minimesh variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/9289",
