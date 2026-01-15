@@ -1033,7 +1033,7 @@
     <string name="firmware_update_retrieval_failed">Impossible de récupérer le fichier firmware.</string>
     <string name="firmware_update_nordic_failed">Échec de la mise à jour Nordic DFU</string>
     <string name="firmware_update_usb_failed">Échec de la mise à jour USB</string>
-    <string name="firmware_update_hash_rejected">Intégrité (hash) du firmware rejeté. L'appareil peut nécessiter une mise à jour du chargeur de démarrage (bootloader).</string>
+    <string name="firmware_update_hash_rejected">Intégrité (hash) du firmware rejetée. Veuillez réessayer ou mettre à jours l'appareil via USB.</string>
     <string name="firmware_update_ota_failed">Échec de la mise à jour de l'OTA : %1$s</string>
     <string name="firmware_update_loading">Chargement du firmware...</string>
     <string name="firmware_update_waiting_reboot">En attente du redémarrage de l'appareil en mode OTA...</string>
