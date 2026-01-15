@@ -286,6 +286,39 @@ constructor(
     suspend fun findReactionsWithId(packetId: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().findReactionsWithId(packetId) }
 
+    fun getFilteredCountFlow(contactKey: String): Flow<Int> =
+        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFilteredCountFlow(contactKey) }
+
+    suspend fun getFilteredCount(contactKey: String): Int =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getFilteredCount(contactKey) }
+
+    fun getMessagesFromPaged(
+        contactKey: String,
+        includeFiltered: Boolean,
+        getNode: suspend (String?) -> Node,
+    ): Flow<PagingData<Message>> = Pager(
+        config = PagingConfig(
+            pageSize = MESSAGES_PAGE_SIZE,
+            enablePlaceholders = false,
+            initialLoadSize = MESSAGES_PAGE_SIZE,
+        ),
+        pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contactKey, includeFiltered) },
+    )
+        .flow
+        .map { pagingData ->
+            pagingData.map { packet ->
+                val message = packet.toMessage(getNode)
+                message.replyId
+                    .takeIf { it != null && it != 0 }
+                    ?.let { getPacketByPacketId(it) }
+                    ?.toMessage(getNode)
+                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+            }
+        }
+
+    suspend fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().setContactFilteringDisabled(contactKey, disabled) }
+
     suspend fun clearPacketDB() = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteAll() }
 
     suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>) =
