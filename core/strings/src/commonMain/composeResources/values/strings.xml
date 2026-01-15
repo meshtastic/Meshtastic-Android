@@ -77,6 +77,8 @@
     <string name="role_client_desc">App connected or standalone messaging device.</string>
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Device that does not forward packets from other devices.</string>
+    <string name="role_client_base">Client Base</string>
+    <string name="role_client_base_desc">Treats packets from or to favorited nodes as ROUTER_LATE, and all other packets as CLIENT.</string>
     <string name="role_router">Router</string>
     <string name="role_router_desc">Infrastructure node for extending network coverage by relaying messages. Visible in nodes list.</string>
     <string name="role_router_client">Router Client</string>
