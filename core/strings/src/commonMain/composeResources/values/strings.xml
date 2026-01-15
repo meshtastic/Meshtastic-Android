@@ -1141,4 +1141,18 @@
     <string name="add_channels_description">The following channels were found in the QR code. Select the once you would like to add to your device. Existing channels will be preserved.</string>
     <string name="replace_channels_and_settings_title">Replace Channels &amp; Settings</string>
     <string name="replace_channels_and_settings_description">This QR code contains a complete configuration. This will REPLACE your existing channels and radio settings. All existing channels will be removed.</string>
+
+    <!-- Message Filter -->
+    <string name="filter_settings">Message Filter</string>
+    <string name="filter_enable">Enable Filtering</string>
+    <string name="filter_enable_summary">Hide messages containing filter words</string>
+    <string name="filter_words">Filter Words</string>
+    <string name="filter_add_word">Add word</string>
+    <string name="filter_regex_pattern">Regex pattern</string>
+    <string name="filter_whole_word">Whole word match</string>
+    <string name="filter_filtered_count">%1$d filtered</string>
+    <string name="filter_show_filtered">Show filtered messages</string>
+    <string name="filter_hide_filtered">Hide filtered messages</string>
+    <string name="filter_message_label">Filtered</string>
+    <string name="filter_disable_for_contact">Disable filter for this contact</string>
 </resources>
