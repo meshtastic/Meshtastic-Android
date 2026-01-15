@@ -364,7 +364,6 @@
     <string name="gpio_pin_for_rotary_encoder_b_port">GPIO konektor pre Enkóder B port</string>
     <string name="messages">Správy</string>
     <string name="device_config">Zariadenie</string>
-    <string name="display_config">Obrazovka</string>
     <string name="flip_screen">Otoč Obrazovku</string>
     <string name="ringtone">Zvonenie</string>
     <string name="lora_config">LoRa</string>

@@ -523,7 +523,6 @@
     <string name="triple_click_adhoc_ping">Háromszori kattintás – ad hoc ping</string>
     <string name="time_zone">Időzóna</string>
     <string name="led_heartbeat">LED ütemjelzés</string>
-    <string name="display_config">Kijelző</string>
     <string name="screen_on_for">Kijelző bekapcsolva ennyi ideig</string>
     <string name="carousel_interval">Karusszel időköz</string>
     <string name="compass_north_top">Iránytű észak felül</string>

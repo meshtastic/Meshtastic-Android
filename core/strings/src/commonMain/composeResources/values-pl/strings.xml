@@ -445,7 +445,6 @@
     <string name="nodeinfo_broadcast_interval">Interwał transmisji informacji o węźle</string>
     <string name="double_tap_as_button_press">Podwójne dotknięcie jako naciśnięcie przycisku</string>
     <string name="time_zone">Strefa czasowa</string>
-    <string name="display_config">Wyświetlacz</string>
     <string name="screen_on_for">Ekran włączony na</string>
     <string name="carousel_interval">Interwał karuzeli</string>
     <string name="flip_screen">Odwróć ekran</string>
@@ -560,6 +559,7 @@
     <!-- Firmware Update -->
     <string name="firmware_update_no_device">Brak podłączonych urządzeń</string>
     <string name="firmware_update_failed">Aktualizacja nie udała się</string>
+    <string name="back">Wstecz</string>
     <string name="interval_unset">Nieustawiony</string>
     <string name="interval_always_on">Zawsze włączone</string>
     <!-- Compass -->

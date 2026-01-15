@@ -171,7 +171,6 @@
     <string name="audio">إعدادات الصوت</string>
     <string name="messages">الرسائل</string>
     <string name="device_config">الجهاز</string>
-    <string name="display_config">إعدادات الشاشة</string>
     <string name="lora_config">إعدادات لورا</string>
     <string name="region_frequency_plan">الجهة</string>
     <string name="security_config">إعدادات الحماية</string>

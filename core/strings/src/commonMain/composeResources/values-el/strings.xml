@@ -171,7 +171,6 @@
     <string name="blue">Μπλε</string>
     <string name="messages">Μηνύματα</string>
     <string name="device_config">Συσκευή</string>
-    <string name="display_config">Οθόνη</string>
     <string name="lora_config">LoRa</string>
     <string name="region_frequency_plan">Περιφέρεια</string>
     <string name="address">Διεύθυνση</string>

@@ -535,7 +535,6 @@
     <string name="triple_click_adhoc_ping">Kolmekordne klõps Ad Hoc Ping</string>
     <string name="time_zone">Ajavöönd</string>
     <string name="led_heartbeat">Südamelöögi LED</string>
-    <string name="display_config">Ekraan</string>
     <string name="screen_on_for">Ekraan sisse lülitatud</string>
     <string name="carousel_interval">Karusselli intervall</string>
     <string name="compass_north_top">Kompassi põhjasuund üleval</string>
@@ -977,17 +976,14 @@
     <string name="firmware_update_checking">Otsin uuendusi...</string>
     <string name="firmware_update_device">Seade: %1$s</string>
     <string name="firmware_update_currently_installed">Praegu paigaldatud: %1$s</string>
-    <string name="firmware_update_latest">Viimane väljalase: %1$s</string>
     <string name="firmware_update_stable">Stabiilne</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_disconnect_warning">Märkus. See katkestab ajutiselt teie seadme ühenduse värskendamise ajal.</string>
-    <string name="firmware_update_downloading">Laen püsivara... %1$d%</string>
     <string name="firmware_update_error">Viga: %1$s</string>
     <string name="firmware_update_retry">Proovi uuesti</string>
     <string name="firmware_update_success">Värskendus õnnestus!</string>
     <string name="firmware_update_done">Valmis</string>
     <string name="firmware_update_starting_dfu">DFU käivitamine...</string>
-    <string name="firmware_update_updating">Uuendan... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Tundmatu riistvaramudel: %1$d</string>
     <string name="firmware_update_invalid_address">Ühendatud seade ei ole kehtiv BLE seade või aadress on teadmata (%1$s).</string>
     <string name="firmware_update_no_device">Ühtegi seadet pole ühendatud</string>
@@ -1016,6 +1012,8 @@
     <string name="firmware_update_method_detail">Uuendamine %1$s kaudu</string>
     <string name="firmware_update_usb_instruction_title">Vali DFU USB ketas</string>
     <string name="firmware_update_usb_instruction_text">Teie seade on taaskäivitatud DFU režiimis ja peaks kuvatama USB kettana (nt RAK4631).\n\nKui failivalija avaneb, valige püsivara faili salvestamiseks selle ketta juurkaust.</string>
+    <string name="firmware_update_channel_name">Püsivara uuendus</string>
+    <string name="back">Tagasi</string>
     <string name="interval_unset">Määramatta</string>
     <string name="interval_always_on">Alati sees</string>
     <plurals name="plurals_seconds">

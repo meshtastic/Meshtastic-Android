@@ -437,7 +437,6 @@
     <string name="buzzer_gpio">GPIO за зумер</string>
     <string name="rebroadcast_mode">Режим на препредаване</string>
     <string name="time_zone">Часова зона</string>
-    <string name="display_config">Дисплей</string>
     <string name="screen_on_for">Екранът е включен за</string>
     <string name="compass_north_top">Север на компаса отгоре</string>
     <string name="flip_screen">Обръщане на екрана</string>
@@ -773,17 +772,14 @@
     <string name="firmware_update_checking">Проверка за актуализации...</string>
     <string name="firmware_update_device">Устройство: %1$s</string>
     <string name="firmware_update_currently_installed">Текущия инсталиран: %1$s</string>
-    <string name="firmware_update_latest">Последна версия: %1$s</string>
     <string name="firmware_update_stable">Стабилен</string>
     <string name="firmware_update_alpha">Алфа</string>
     <string name="firmware_update_disconnect_warning">Забележка: Това временно ще прекъсне връзката с устройството ви по време на актуализацията.</string>
-    <string name="firmware_update_downloading">Изтегляне на фърмуера... %1$d%</string>
     <string name="firmware_update_error">Грешка: %1$s</string>
     <string name="firmware_update_retry">Опитайте отново</string>
     <string name="firmware_update_success">Актуализацията е успешна!</string>
     <string name="firmware_update_done">Готово</string>
     <string name="firmware_update_starting_dfu">Стартиране на DFU...</string>
-    <string name="firmware_update_updating">Актуализиране... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Неизвестен модел хардуер: %1$d</string>
     <string name="firmware_update_invalid_address">Свързаното устройство не е валидно BLE устройство или адресът е неизвестен (%1$s).</string>
     <string name="firmware_update_no_device">Няма свързано устройство</string>
@@ -808,6 +804,8 @@
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_detail">Актуализиране чрез %1$s</string>
     <string name="firmware_update_usb_instruction_title">Изберете DFU USB устройство</string>
+    <string name="firmware_update_channel_name">Актуализация на фърмуера</string>
+    <string name="back">Назад</string>
     <string name="interval_unset">Не е зададен</string>
     <string name="interval_always_on">Винаги включен</string>
     <plurals name="plurals_seconds">

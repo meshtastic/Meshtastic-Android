@@ -538,7 +538,6 @@
     <string name="triple_click_adhoc_ping">Маякнуть при тройном нажатии</string>
     <string name="time_zone">Часовой пояс</string>
     <string name="led_heartbeat">Сердцебиение светодиодом</string>
-    <string name="display_config">Дисплей</string>
     <string name="screen_on_for">Включать экран на</string>
     <string name="carousel_interval">Интервал карусели</string>
     <string name="compass_north_top">Север компаса в верх</string>
@@ -982,17 +981,14 @@
     <string name="firmware_update_checking">Проверка обновлений...</string>
     <string name="firmware_update_device">Устройство: %1$s</string>
     <string name="firmware_update_currently_installed">Текущая версия: %1$s</string>
-    <string name="firmware_update_latest">Самая свежая версия: %1$s</string>
     <string name="firmware_update_stable">Стабильная</string>
     <string name="firmware_update_alpha">Альфа</string>
     <string name="firmware_update_disconnect_warning">Примечание: Во время обновления устройство временно отключится.</string>
-    <string name="firmware_update_downloading">Загрузка прошивки... %1$d%</string>
     <string name="firmware_update_error">Ошибка: %1$s</string>
     <string name="firmware_update_retry">Повторить</string>
     <string name="firmware_update_success">Обновлено успешно!</string>
     <string name="firmware_update_done">Готово</string>
     <string name="firmware_update_starting_dfu">Запуск прошивки...</string>
-    <string name="firmware_update_updating">Обновление... %1$s%</string>
     <string name="firmware_update_unknown_hardware">Неизвестная модель оборудования: %1$d</string>
     <string name="firmware_update_invalid_address">Подключенное устройство не является допустимым BLE устройством или адрес неизвестен (%1$s).</string>
     <string name="firmware_update_no_device">Нет подключенных устройств</string>
@@ -1021,6 +1017,8 @@
     <string name="firmware_update_method_detail">Обновить по %1$s</string>
     <string name="firmware_update_usb_instruction_title">Выберите DFU USB-диск</string>
     <string name="firmware_update_usb_instruction_text">Ваше устройство перезагрузилось в режим DFU и должно отображаться как USB-накопитель (например, RAK4631).\n\nКогда откроется окно выбора файлов, пожалуйста, выберите корневой каталог этого диска, чтобы сохранить файл прошивки.</string>
+    <string name="firmware_update_channel_name">Обновление прошивки</string>
+    <string name="back">Назад</string>
     <string name="interval_unset">Не установлена</string>
     <string name="interval_always_on">Всегда включено</string>
     <plurals name="plurals_seconds">

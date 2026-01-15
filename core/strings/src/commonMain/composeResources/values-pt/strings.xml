@@ -377,7 +377,6 @@
     <string name="detection_trigger_type">Tipo de gatilho de deteção</string>
     <string name="use_input_pullup_mode">Usar o modo INPUT_PULLUP</string>
     <string name="device_config">Dispositivo</string>
-    <string name="display_config">Ecrã</string>
     <string name="compass_north_top">Norte da bússola no topo</string>
     <string name="flip_screen">Inverter ecrã</string>
     <string name="display_units">Unidade de visualização</string>

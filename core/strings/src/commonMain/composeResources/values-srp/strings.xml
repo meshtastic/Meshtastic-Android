@@ -361,7 +361,6 @@
     <string name="triple_click_adhoc_ping">Троструки клик за Ad Hoc пинг</string>
     <string name="time_zone">Временска зона</string>
     <string name="led_heartbeat">LED срчани откуцаји</string>
-    <string name="display_config">Приказ</string>
     <string name="screen_on_for">Екран укључен за</string>
     <string name="always_point_north">Увек усмеравајте на север</string>
     <string name="external_notification_config">Подешавање спољних обавештења</string>
@@ -452,6 +451,8 @@
     <!-- Firmware Update -->
     <string name="firmware_update_no_device">Нема повезаних уређаја</string>
     <string name="firmware_update_failed">Ажурирање неуспело</string>
+    <string name="firmware_update_release_notes">Белешке о издању</string>
+    <string name="back">Назад</string>
     <string name="interval_unset">Уклони</string>
     <string name="interval_always_on">Увек укључен</string>
     <!-- Compass -->

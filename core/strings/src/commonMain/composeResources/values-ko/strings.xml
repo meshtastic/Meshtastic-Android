@@ -363,7 +363,6 @@
     <string name="device_config">장치</string>
     <string name="rebroadcast_mode">중계 모드</string>
     <string name="nodeinfo_broadcast_interval">노드 정보 발송 주기</string>
-    <string name="display_config">화면</string>
     <string name="compass_north_top">나침반 상단을 북쪽으로 고정</string>
     <string name="flip_screen">화면 뒤집기</string>
     <string name="display_units">단위 표시</string>
