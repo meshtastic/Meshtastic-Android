@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.connections.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -52,17 +51,17 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.ui.connections.isIPAddress
+import com.geeksville.mesh.ui.connections.isValidAddress
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add_network_device
+import org.meshtastic.core.strings.address
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.confirm_forget_connection
 import org.meshtastic.core.strings.discovered_network_devices
 import org.meshtastic.core.strings.forget_connection
-import org.meshtastic.core.strings.ip_address
 import org.meshtastic.core.strings.ip_port
 import org.meshtastic.core.strings.no_network_devices
 import org.meshtastic.core.strings.recent_network_devices
@@ -89,8 +88,8 @@ fun NetworkDevices(
         AddDeviceDialog(
             searchDialogState,
             onHideDialog = { showSearchDialog = false },
-            onClickAdd = { ipAddress, fullAddress ->
-                scanModel.onSelected(DeviceListEntry.Tcp(ipAddress, fullAddress))
+            onClickAdd = { address, fullAddress ->
+                scanModel.onSelected(DeviceListEntry.Tcp(address, fullAddress))
                 showSearchDialog = false
             },
         )
@@ -163,9 +162,9 @@ fun NetworkDevices(
 private fun AddDeviceDialog(
     sheetState: SheetState,
     onHideDialog: () -> Unit,
-    onClickAdd: (ipAddress: String, fullAddress: String) -> Unit,
+    onClickAdd: (address: String, fullAddress: String) -> Unit,
 ) {
-    val ipState = rememberTextFieldState("")
+    val addressState = rememberTextFieldState("")
     val portState = rememberTextFieldState(NetworkRepository.SERVICE_PORT.toString())
 
     val scope = rememberCoroutineScope()
@@ -175,11 +174,11 @@ private fun AddDeviceDialog(
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
-                    state = ipState,
+                    state = addressState,
                     labelPosition = TextFieldLabelPosition.Above(),
                     lineLimits = TextFieldLineLimits.SingleLine,
-                    label = { Text(stringResource(Res.string.ip_address)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
+                    label = { Text(stringResource(Res.string.address)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next),
                     modifier = Modifier.weight(.7f),
                 )
 
@@ -202,18 +201,18 @@ private fun AddDeviceDialog(
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        val ipAddress = ipState.text.toString()
-                        if (ipAddress.isIPAddress()) {
+                        val address = addressState.text.toString()
+                        if (address.isValidAddress()) {
                             val portString = portState.text.toString()
 
                             val combinedString =
                                 if (portString.isNotEmpty() && portString.toInt() != NetworkRepository.SERVICE_PORT) {
-                                    "$ipAddress:$portString"
+                                    "$address:$portString"
                                 } else {
-                                    ipAddress
+                                    address
                                 }
 
-                            onClickAdd(ipState.text.toString(), "t$combinedString")
+                            onClickAdd(addressState.text.toString(), "t$combinedString")
 
                             scope
                                 .launch { sheetState.hide() }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.withContext
@@ -42,6 +41,9 @@ constructor(
 
     override suspend fun clearNodeDB(preserveFavorites: Boolean) =
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearNodeInfo(preserveFavorites) } }
+
+    override suspend fun clearMyNodeInfo() =
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearMyNodeInfo() } }
 
     override suspend fun deleteNode(num: Int) =
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteNode(num) } }

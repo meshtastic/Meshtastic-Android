@@ -137,6 +137,7 @@ constructor(
         serviceBroadcasts.broadcastConnection()
         Logger.d { "Starting connect" }
         connectTimeMsec = System.currentTimeMillis()
+        scope.handledLaunch { nodeRepository.clearMyNodeInfo() }
         startConfigOnly()
     }
 
@@ -219,6 +220,7 @@ constructor(
         commandSender.sendAdmin(myNodeNum) {
             setTimeOnly = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt()
         }
+        updateStatusNotification()
     }
 
     private fun reportConnection() {

@@ -160,6 +160,7 @@ class MeshService : Service() {
         }
         return if (!wantForeground) {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+            stopSelf()
             START_NOT_STICKY
         } else {
             START_STICKY

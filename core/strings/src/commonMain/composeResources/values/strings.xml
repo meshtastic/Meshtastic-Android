@@ -217,6 +217,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="connecting">Connecting</string>
     <string name="not_connected">Not connected</string>
+    <string name="no_device_selected">No device selected</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="app_too_old">Application update required</string>
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://meshtastic.org/docs/software/android/installation">docs</a> on this topic.</string>

@@ -150,6 +150,8 @@ constructor(
     suspend fun clearNodeDB(preserveFavorites: Boolean = false) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.clearNodeDB(preserveFavorites) }
 
+    suspend fun clearMyNodeInfo() = withContext(dispatchers.io) { nodeInfoWriteDataSource.clearMyNodeInfo() }
+
     suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
         nodeInfoWriteDataSource.deleteNode(num)
         nodeInfoWriteDataSource.deleteMetadata(num)
