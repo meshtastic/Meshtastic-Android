@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import android.content.BroadcastReceiver
@@ -94,6 +93,7 @@ import org.meshtastic.core.strings.rebroadcast_mode_known_only_desc
 import org.meshtastic.core.strings.rebroadcast_mode_local_only_desc
 import org.meshtastic.core.strings.rebroadcast_mode_none_desc
 import org.meshtastic.core.strings.role
+import org.meshtastic.core.strings.role_client_base_desc
 import org.meshtastic.core.strings.role_client_desc
 import org.meshtastic.core.strings.role_client_hidden_desc
 import org.meshtastic.core.strings.role_client_mute_desc
@@ -128,6 +128,7 @@ private val DeviceConfig.Role.description: StringResource
     get() =
         when (this) {
             DeviceConfig.Role.CLIENT -> Res.string.role_client_desc
+            DeviceConfig.Role.CLIENT_BASE -> Res.string.role_client_base_desc
             DeviceConfig.Role.CLIENT_MUTE -> Res.string.role_client_mute_desc
             DeviceConfig.Role.ROUTER -> Res.string.role_router_desc
             DeviceConfig.Role.ROUTER_CLIENT -> Res.string.role_router_client_desc
