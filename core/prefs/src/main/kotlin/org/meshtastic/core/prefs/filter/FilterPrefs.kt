@@ -19,6 +19,7 @@ package org.meshtastic.core.prefs.filter
 import android.content.SharedPreferences
 import org.meshtastic.core.prefs.PrefDelegate
 import org.meshtastic.core.prefs.StringSetPrefDelegate
+import org.meshtastic.core.prefs.di.FilterSharedPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,7 +45,7 @@ interface FilterPrefs {
 
 @Singleton
 class FilterPrefsImpl @Inject constructor(
-    private val prefs: SharedPreferences,
+    @FilterSharedPreferences private val prefs: SharedPreferences,
 ) : FilterPrefs {
     override var filterEnabled: Boolean by PrefDelegate(prefs, FilterPrefs.KEY_FILTER_ENABLED, false)
     override var filterWords: Set<String> by StringSetPrefDelegate(prefs, FilterPrefs.KEY_FILTER_WORDS, emptySet())
