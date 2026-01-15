@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.connections.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -39,9 +38,14 @@ import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun EmptyStateContent(imageVector: ImageVector? = null, text: String, actionButton: @Composable (() -> Unit)? = null) {
+fun EmptyStateContent(
+    text: String,
+    modifier: Modifier = Modifier,
+    imageVector: ImageVector? = null,
+    actionButton: @Composable (() -> Unit)? = null,
+) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -63,7 +67,7 @@ fun EmptyStateContent(imageVector: ImageVector? = null, text: String, actionButt
 fun EmptyStateContentPreview() {
     AppTheme {
         Surface {
-            EmptyStateContent(imageVector = Icons.Rounded.BluetoothDisabled, text = "No devices found") {
+            EmptyStateContent(text = "No devices found", imageVector = Icons.Rounded.BluetoothDisabled) {
                 Button(onClick = {}) { Text("Button") }
             }
         }

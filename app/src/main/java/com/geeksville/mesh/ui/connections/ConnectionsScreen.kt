@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,31 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.connections
 
 import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -52,8 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,8 +57,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.ui.connections.components.BLEDevices
+import com.geeksville.mesh.ui.connections.components.ConnectingDeviceInfo
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo
+import com.geeksville.mesh.ui.connections.components.EmptyStateContent
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -81,23 +77,28 @@ import org.meshtastic.core.strings.connected_sleeping
 import org.meshtastic.core.strings.connecting
 import org.meshtastic.core.strings.connections
 import org.meshtastic.core.strings.must_set_region
+import org.meshtastic.core.strings.no_device_selected
 import org.meshtastic.core.strings.not_connected
 import org.meshtastic.core.strings.set_your_region
 import org.meshtastic.core.strings.warning_not_paired
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ConfigProtos
 
-fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+fun String?.isValidAddress(): Boolean = if (this.isNullOrBlank()) {
+    false
+} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
     @Suppress("DEPRECATION")
-    this != null && Patterns.IP_ADDRESS.matcher(this).matches()
+    Patterns.IP_ADDRESS.matcher(this).matches() || Patterns.DOMAIN_NAME.matcher(this).matches()
 } else {
-    InetAddresses.isNumericAddress(this.toString())
+    InetAddresses.isNumericAddress(this) || Patterns.DOMAIN_NAME.matcher(this).matches()
 }
 
 /**
@@ -125,7 +126,6 @@ fun ConnectionsScreen(
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
-    val density = LocalDensity.current
     val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
@@ -197,50 +197,76 @@ fun ConnectionsScreen(
                     .padding(paddingValues)
                     .padding(16.dp),
             ) {
-                var connectionSectionHeight by remember { mutableStateOf(0.dp) }
-                val placeholderHeight = connectionSectionHeight.takeIf { it > 0.dp } ?: 0.dp
-                Box(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).heightIn(min = placeholderHeight)) {
-                    if (connectionState == ConnectionState.Connecting) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().align(Alignment.Center),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            CircularWavyProgressIndicator(modifier = Modifier.size(96.dp).padding(16.dp))
-                        }
-                    }
-                    androidx.compose.animation.AnimatedVisibility(visible = connectionState.isConnected()) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier =
-                            Modifier.fillMaxWidth().onSizeChanged { size ->
-                                if (connectionState.isConnected()) {
-                                    connectionSectionHeight = with(density) { size.height.toDp() }
-                                }
-                            },
-                        ) {
-                            ourNode?.let { node ->
-                                TitledCard(title = stringResource(Res.string.connected_device)) {
-                                    CurrentlyConnectedInfo(
-                                        node = node,
-                                        bleDevice =
-                                        bleDevices.firstOrNull { it.fullAddress == selectedDevice }
-                                            as DeviceListEntry.Ble?,
-                                        onNavigateToNodeDetails = onNavigateToNodeDetails,
-                                        onClickDisconnect = { scanModel.disconnect() },
-                                    )
-                                }
-                            }
+                val uiState =
+                    when {
+                        connectionState.isConnected() && ourNode != null -> 2
+                        connectionState == ConnectionState.Connecting ||
+                            (connectionState == ConnectionState.Disconnected && selectedDevice != "n") -> 1
 
-                            if (regionUnset && selectedDevice != "m") {
-                                TitledCard(title = null) {
-                                    ListItem(
-                                        leadingIcon = Icons.Rounded.Language,
-                                        text = stringResource(Res.string.set_your_region),
-                                    ) {
-                                        isWaiting = true
-                                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                        else -> 0
+                    }
+
+                Crossfade(
+                    targetState = uiState,
+                    label = "connection_state",
+                    modifier = Modifier.padding(bottom = 16.dp),
+                ) { state ->
+                    when (state) {
+                        2 -> {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                ourNode?.let { node ->
+                                    TitledCard(title = stringResource(Res.string.connected_device)) {
+                                        CurrentlyConnectedInfo(
+                                            node = node,
+                                            bleDevice =
+                                            bleDevices.firstOrNull { it.fullAddress == selectedDevice }
+                                                as DeviceListEntry.Ble?,
+                                            onNavigateToNodeDetails = onNavigateToNodeDetails,
+                                            onClickDisconnect = { scanModel.disconnect() },
+                                        )
                                     }
                                 }
+
+                                if (regionUnset && selectedDevice != "m") {
+                                    TitledCard(title = null) {
+                                        ListItem(
+                                            leadingIcon = Icons.Rounded.Language,
+                                            text = stringResource(Res.string.set_your_region),
+                                        ) {
+                                            isWaiting = true
+                                            radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        1 -> {
+                            val selectedEntry =
+                                bleDevices.find { it.fullAddress == selectedDevice }
+                                    ?: discoveredTcpDevices.find { it.fullAddress == selectedDevice }
+                                    ?: recentTcpDevices.find { it.fullAddress == selectedDevice }
+                                    ?: usbDevices.find { it.fullAddress == selectedDevice }
+
+                            val name = selectedEntry?.name ?: "Unknown Device"
+                            val address = selectedEntry?.address ?: selectedDevice
+
+                            TitledCard(title = stringResource(Res.string.connected_device)) {
+                                ConnectingDeviceInfo(
+                                    deviceName = name,
+                                    deviceAddress = address,
+                                    onClickDisconnect = { scanModel.disconnect() },
+                                )
+                            }
+                        }
+
+                        else -> {
+                            Card(modifier = Modifier.fillMaxWidth()) {
+                                EmptyStateContent(
+                                    imageVector = MeshtasticIcons.NoDevice,
+                                    text = stringResource(Res.string.no_device_selected),
+                                    modifier = Modifier.height(160.dp),
+                                )
                             }
                         }
                     }
