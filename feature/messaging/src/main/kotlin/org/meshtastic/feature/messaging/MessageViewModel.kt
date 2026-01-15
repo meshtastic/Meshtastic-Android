@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
@@ -82,6 +83,9 @@ constructor(
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
+    private val _showFiltered = MutableStateFlow(false)
+    val showFiltered: StateFlow<Boolean> = _showFiltered.asStateFlow()
+
     val quickChatActions = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
     val contactSettings: StateFlow<Map<String, ContactSettings>> =
@@ -91,9 +95,15 @@ constructor(
 
     private val contactKeyForPagedMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val pagedMessagesForContactKey: Flow<PagingData<Message>> =
-        contactKeyForPagedMessages
-            .filterNotNull()
-            .flatMapLatest { contactKey -> packetRepository.getMessagesFromPaged(contactKey, ::getNode) }
+        combine(
+            contactKeyForPagedMessages.filterNotNull(),
+            _showFiltered,
+        ) { contactKey, includeFiltered ->
+            contactKey to includeFiltered
+        }
+            .flatMapLatest { (contactKey, includeFiltered) ->
+                packetRepository.getMessagesFromPaged(contactKey, includeFiltered, ::getNode)
+            }
             .cachedIn(viewModelScope)
 
     val frequentEmojis: List<String>
@@ -132,6 +142,13 @@ constructor(
     fun hasUnreadMessages(contactKey: String): Flow<Boolean> = packetRepository.hasUnreadMessages(contactKey)
 
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
+
+    fun toggleShowFiltered() {
+        _showFiltered.update { !it }
+    }
+
+    fun getFilteredCount(contactKey: String): Flow<Int> =
+        packetRepository.getFilteredCountFlow(contactKey)
 
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
         (!state.value).let { toggled ->
