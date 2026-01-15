@@ -39,9 +39,9 @@ internal fun getMessageBubbleShape(
         )
     } else {
         RoundedCornerShape(
-            topStart = if (hasSamePrev) square else round,
+            topStart = square,
             topEnd = if (hasSamePrev) square else round,
-            bottomStart = square,
+            bottomStart = if (hasSameNext) square else round,
             bottomEnd = if (hasSameNext) square else round,
         )
     }

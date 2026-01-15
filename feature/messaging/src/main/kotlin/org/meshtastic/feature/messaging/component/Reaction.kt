@@ -17,6 +17,7 @@
 package org.meshtastic.feature.messaging.component
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -28,13 +29,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.Reaction
@@ -67,10 +71,12 @@ import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.message_status_enroute
 import org.meshtastic.core.strings.message_status_queued
+import org.meshtastic.core.strings.react
 import org.meshtastic.core.strings.you
 import org.meshtastic.core.ui.component.BottomSheetDialog
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.proto.MeshProtos
@@ -87,26 +93,43 @@ private fun ReactionItem(
     val isSending = status == MessageStatus.QUEUED || status == MessageStatus.ENROUTE
     val isError = status == MessageStatus.ERROR
 
-    BadgedBox(
-        modifier = modifier,
-        badge = {
-            if (emojiCount > 1) {
-                Badge { Text(fontWeight = FontWeight.Bold, text = emojiCount.toString()) }
-            }
+    Surface(
+        modifier =
+        modifier
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .then(if (isSending) Modifier.graphicsLayer(alpha = 0.5f) else Modifier),
+        color =
+        when {
+            isError -> MaterialTheme.colorScheme.errorContainer
+            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
         },
-    ) {
-        Surface(
-            modifier =
-            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick)
-                .then(if (isSending) Modifier.graphicsLayer(alpha = 0.5f) else Modifier),
+        shape = if (emojiCount > 1) MaterialTheme.shapes.small else CircleShape,
+        border =
+        BorderStroke(
+            width = 1.dp,
             color =
-            when {
-                isError -> MaterialTheme.colorScheme.errorContainer
-                else -> MaterialTheme.colorScheme.primaryContainer
+            if (isError) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
             },
-            shape = CircleShape,
+        ),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(text = emoji, modifier = Modifier.padding(4.dp).clip(CircleShape))
+            Text(text = emoji, fontSize = 14.sp)
+            if (emojiCount > 1) {
+                Text(
+                    text = emojiCount.toString(),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -123,11 +146,14 @@ internal fun ReactionRow(
     val emojiGroups = reactions.groupBy { it.emoji }
 
     AnimatedVisibility(emojiGroups.isNotEmpty()) {
-        LazyRow(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        LazyRow(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             items(emojiGroups.entries.toList()) { (emoji, reactions) ->
                 val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
                 ReactionItem(
-                    modifier = Modifier.padding(horizontal = 4.dp),
                     emoji = emoji,
                     emojiCount = reactions.size,
                     status = localReaction?.status ?: MessageStatus.RECEIVED,
@@ -135,7 +161,36 @@ internal fun ReactionRow(
                     onLongClick = onShowReactions,
                 )
             }
+            item { AddReactionButton(onSendReaction = onSendReaction) }
         }
+    }
+}
+
+@Composable
+private fun AddReactionButton(modifier: Modifier = Modifier, onSendReaction: (String) -> Unit = {}) {
+    var showEmojiPickerDialog by remember { mutableStateOf(false) }
+    if (showEmojiPickerDialog) {
+        EmojiPickerDialog(
+            onConfirm = { selectedEmoji ->
+                showEmojiPickerDialog = false
+                onSendReaction(selectedEmoji)
+            },
+            onDismiss = { showEmojiPickerDialog = false },
+        )
+    }
+    Surface(
+        onClick = { showEmojiPickerDialog = true },
+        modifier = modifier.size(28.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        shape = CircleShape,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
+    ) {
+        Icon(
+            imageVector = Icons.Default.AddReaction,
+            contentDescription = stringResource(Res.string.react),
+            modifier = Modifier.padding(6.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -266,7 +321,7 @@ private fun ReactionItemPreview() {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             ReactionItem(emoji = "\uD83D\uDE42")
             ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
-            ReactionButton()
+            AddReactionButton()
         }
     }
 }
