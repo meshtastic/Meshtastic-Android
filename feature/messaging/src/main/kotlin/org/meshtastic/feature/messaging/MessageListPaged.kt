@@ -95,6 +95,7 @@ internal data class MessageListPagedState(
     val hasUnreadMessages: Boolean = false,
     val filteredCount: Int = 0,
     val showFiltered: Boolean = false,
+    val filteringDisabled: Boolean = false,
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -219,7 +220,7 @@ private fun MessageListPagedContent(
             reverseLayout = true,
             contentPadding = PaddingValues(
                 bottom = 24.dp,
-                top = if (state.filteredCount > 0) 48.dp else 0.dp,
+                top = if (state.filteredCount > 0 && !state.filteringDisabled) 48.dp else 0.dp,
             ),
         ) {
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
@@ -286,8 +287,8 @@ private fun MessageListPagedContent(
             }
         }
 
-        // Filtered message count badge and toggle
-        if (state.filteredCount > 0) {
+        // Filtered message count badge and toggle (hide when filtering is disabled for this contact)
+        if (state.filteredCount > 0 && !state.filteringDisabled) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

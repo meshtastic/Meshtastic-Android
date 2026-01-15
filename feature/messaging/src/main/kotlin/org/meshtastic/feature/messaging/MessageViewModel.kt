@@ -98,7 +98,11 @@ constructor(
         combine(
             contactKeyForPagedMessages.filterNotNull(),
             _showFiltered,
-        ) { contactKey, includeFiltered ->
+            contactSettings,
+        ) { contactKey, showFiltered, settings ->
+            // If filtering is disabled for this contact, always include filtered messages
+            val filteringDisabled = settings[contactKey]?.filteringDisabled ?: false
+            val includeFiltered = showFiltered || filteringDisabled
             contactKey to includeFiltered
         }
             .flatMapLatest { (contactKey, includeFiltered) ->

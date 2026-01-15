@@ -408,6 +408,7 @@ fun MessageScreen(
                         hasUnreadMessages = hasUnreadMessages,
                         filteredCount = filteredCount,
                         showFiltered = showFiltered,
+                        filteringDisabled = filteringDisabled,
                     ),
                     handlers =
                     MessageListHandlers(
