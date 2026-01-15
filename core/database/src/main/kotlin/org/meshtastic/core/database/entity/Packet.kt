@@ -57,6 +57,7 @@ data class PacketEntity(
             relayNode = data.relayNode,
             relays = data.relays,
             retryCount = data.retryCount,
+            filtered = filtered,
         )
     }
 }
