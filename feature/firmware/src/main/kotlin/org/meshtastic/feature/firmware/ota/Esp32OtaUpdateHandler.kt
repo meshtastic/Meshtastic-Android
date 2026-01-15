@@ -54,6 +54,7 @@ private const val MILLIS_PER_SECOND = 1000f
 
 // Time to wait for OTA reboot packet to be sent before disconnecting mesh service
 private const val PACKET_SEND_DELAY_MS = 2000L
+
 // Time to wait for Android BLE GATT to fully release after disconnecting mesh service
 private const val GATT_RELEASE_DELAY_MS = 1000L
 
@@ -61,6 +62,7 @@ private const val GATT_RELEASE_DELAY_MS = 1000L
  * Handler for ESP32 firmware updates using the Unified OTA protocol. Supports both BLE and WiFi/TCP transports via
  * UnifiedOtaProtocol.
  */
+@Suppress("TooManyFunctions")
 class Esp32OtaUpdateHandler
 @Inject
 constructor(
@@ -209,8 +211,8 @@ constructor(
     }
 
     /**
-     * Disconnect the mesh service BLE connection to free up the GATT for OTA.
-     * Setting device address to "n" (NOP interface) cleanly disconnects without reconnection attempts.
+     * Disconnect the mesh service BLE connection to free up the GATT for OTA. Setting device address to "n" (NOP
+     * interface) cleanly disconnects without reconnection attempts.
      */
     private fun disconnectMeshService() {
         try {
