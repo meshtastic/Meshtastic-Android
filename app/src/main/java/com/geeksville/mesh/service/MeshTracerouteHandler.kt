@@ -29,6 +29,9 @@ import org.meshtastic.core.model.getFullTracerouteResponse
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.traceroute_duration
+import org.meshtastic.core.strings.traceroute_route_back_to_us
+import org.meshtastic.core.strings.traceroute_route_towards_dest
 import org.meshtastic.core.strings.unknown_username
 import org.meshtastic.proto.MeshProtos.MeshPacket
 import java.util.Locale
@@ -53,10 +56,14 @@ constructor(
 
     fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: kotlinx.coroutines.Job?) {
         val full =
-            packet.getFullTracerouteResponse { num ->
-                nodeManager.nodeDBbyNodeNum[num]?.let { "${it.longName} (${it.shortName})" }
-                    ?: getString(Res.string.unknown_username)
-            } ?: return
+            packet.getFullTracerouteResponse(
+                getUser = { num ->
+                    nodeManager.nodeDBbyNodeNum[num]?.let { "${it.longName} (${it.shortName})" }
+                        ?: getString(Res.string.unknown_username)
+                },
+                headerTowards = getString(Res.string.traceroute_route_towards_dest),
+                headerBack = getString(Res.string.traceroute_route_back_to_us),
+            ) ?: return
 
         val requestId = packet.decoded.requestId
         if (logUuid != null) {
@@ -79,7 +86,8 @@ constructor(
                 val elapsedMs = System.currentTimeMillis() - start
                 val seconds = elapsedMs / MILLISECONDS_IN_SECOND
                 Logger.i { "Traceroute $requestId complete in $seconds s" }
-                String.format(Locale.US, "%s\n\nDuration: %.1f s", full, seconds)
+                val durationText = getString(Res.string.traceroute_duration, "%.1f".format(Locale.US, seconds))
+                "$full\n\n$durationText"
             } else {
                 full
             }

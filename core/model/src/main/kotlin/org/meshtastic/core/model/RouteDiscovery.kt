@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import org.jetbrains.compose.resources.StringResource
@@ -72,25 +71,36 @@ private fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): S
         .joinToString("\n")
 }
 
-private fun RouteDiscovery.getTracerouteResponse(getUser: (nodeNum: Int) -> String): String = buildString {
+private fun RouteDiscovery.getTracerouteResponse(
+    getUser: (nodeNum: Int) -> String,
+    headerTowards: String = "Route traced toward destination:\n\n",
+    headerBack: String = "Route traced back to us:\n\n",
+): String = buildString {
     if (routeList.isNotEmpty()) {
-        append("Route traced toward destination:\n\n")
+        append(headerTowards)
         append(formatTraceroutePath(routeList.map(getUser), snrTowardsList))
     }
     if (routeBackList.isNotEmpty()) {
         append("\n\n")
-        append("Route traced back to us:\n\n")
+        append(headerBack)
         append(formatTraceroutePath(routeBackList.map(getUser), snrBackList))
     }
 }
 
-fun MeshProtos.MeshPacket.getTracerouteResponse(getUser: (nodeNum: Int) -> String): String? =
-    fullRouteDiscovery?.getTracerouteResponse(getUser)
+fun MeshProtos.MeshPacket.getTracerouteResponse(
+    getUser: (nodeNum: Int) -> String,
+    headerTowards: String = "Route traced toward destination:\n\n",
+    headerBack: String = "Route traced back to us:\n\n",
+): String? = fullRouteDiscovery?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
 /** Returns a traceroute response string only when the result is complete (both directions). */
-fun MeshProtos.MeshPacket.getFullTracerouteResponse(getUser: (nodeNum: Int) -> String): String? = fullRouteDiscovery
+fun MeshProtos.MeshPacket.getFullTracerouteResponse(
+    getUser: (nodeNum: Int) -> String,
+    headerTowards: String = "Route traced toward destination:\n\n",
+    headerBack: String = "Route traced back to us:\n\n",
+): String? = fullRouteDiscovery
     ?.takeIf { it.routeList.isNotEmpty() && it.routeBackList.isNotEmpty() }
-    ?.getTracerouteResponse(getUser)
+    ?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
 enum class TracerouteMapAvailability {
     Ok,
