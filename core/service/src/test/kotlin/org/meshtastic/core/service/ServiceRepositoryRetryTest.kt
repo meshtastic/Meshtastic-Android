@@ -19,7 +19,6 @@ package org.meshtastic.core.service
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -137,8 +136,7 @@ class ServiceRepositoryRetryTest {
 
     @Test
     fun `retryEvents are cleared after user responds`() = runTest {
-        val testEvent =
-            RetryEvent.MessageRetry(packetId = 333, text = "Clear test", attemptNumber = 1, maxAttempts = 3)
+        val testEvent = RetryEvent.MessageRetry(packetId = 333, text = "Clear test", attemptNumber = 1, maxAttempts = 3)
 
         // Start retry request
         val retryDeferred = async { serviceRepository.requestRetry(testEvent, timeoutMs = 5000) }
