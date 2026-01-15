@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 32,
-    "identityHash": "edefbbd876170b6f8ab10e46ca9c2972",
+    "version": 33,
+    "identityHash": "6f3059ef9ea197672a28a920ca0d8876",
     "entities": [
       {
         "tableName": "my_node",
@@ -441,7 +441,7 @@
       },
       {
         "tableName": "contact_settings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contact_key` TEXT NOT NULL, `muteUntil` INTEGER NOT NULL, `last_read_message_uuid` INTEGER, `last_read_message_timestamp` INTEGER, PRIMARY KEY(`contact_key`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contact_key` TEXT NOT NULL, `muteUntil` INTEGER NOT NULL, `last_read_message_uuid` INTEGER, `last_read_message_timestamp` INTEGER, `filtering_disabled` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`contact_key`))",
         "fields": [
           {
             "fieldPath": "contact_key",
@@ -464,6 +464,13 @@
             "fieldPath": "lastReadMessageTimestamp",
             "columnName": "last_read_message_timestamp",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "filteringDisabled",
+            "columnName": "filtering_disabled",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -993,7 +1000,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'edefbbd876170b6f8ab10e46ca9c2972')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6f3059ef9ea197672a28a920ca0d8876')"
     ]
   }
 }

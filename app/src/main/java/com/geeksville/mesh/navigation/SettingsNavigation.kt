@@ -34,6 +34,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.SettingsScreen
+import org.meshtastic.feature.settings.filter.FilterSettingsScreen
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -175,6 +176,8 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
         }
 
         composable<SettingsRoutes.About> { AboutScreen(onNavigateUp = navController::navigateUp) }
+
+        composable<SettingsRoutes.FilterSettings> { FilterSettingsScreen(onBack = navController::navigateUp) }
     }
 }
 
