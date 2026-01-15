@@ -186,6 +186,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="connecting">Ansluter</string>
     <string name="not_connected">Ej ansluten</string>
+    <string name="no_device_selected">Ingen enhet vald</string>
     <string name="connected_sleeping">Ansluten till radioenhet, men den är i sovläge</string>
     <string name="app_too_old">Applikationen måste uppgraderas</string>
     <string name="must_update">Du måste uppdatera detta program i app-butiken (eller Github). Det är för gammalt för att prata med denna radioenhet. Läs vår <a href="https://meshtastic.org/docs/software/android/installation">dokumentation</a> i detta ämne.</string>

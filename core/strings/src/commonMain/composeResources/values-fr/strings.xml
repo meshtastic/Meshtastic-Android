@@ -192,6 +192,7 @@
     <string name="ethernet_ip">IP Ethernet :</string>
     <string name="connecting">Connexion en cours</string>
     <string name="not_connected">Non connecté</string>
+    <string name="no_device_selected">Aucun appareil sélectionné</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="app_too_old">Mise à jour de l’application requise</string>
     <string name="must_update">Vous devez mettre à jour cette application sur l'app store (ou Github). Il est trop vieux pour dialoguer avec le micrologiciel de la radio. Veuillez lire nos  <a href="https://meshtastic.org/docs/software/android/installation"> docs</a> sur ce sujet.</string>

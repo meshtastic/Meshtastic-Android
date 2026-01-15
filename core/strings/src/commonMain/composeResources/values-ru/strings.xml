@@ -192,6 +192,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="connecting">Подключение</string>
     <string name="not_connected">Нет соединения</string>
+    <string name="no_device_selected">Устройство не выбрано</string>
     <string name="connected_sleeping">Подключен к радиостанции, но она спит</string>
     <string name="app_too_old">Требуется обновление приложения</string>
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
