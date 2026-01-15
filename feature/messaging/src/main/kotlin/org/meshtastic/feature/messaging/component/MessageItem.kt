@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,10 +28,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FormatQuote
@@ -113,7 +112,17 @@ internal fun MessageItem(
     onStatusClick: () -> Unit = {},
     hasSamePrev: Boolean = false,
     hasSameNext: Boolean = false,
-) = Column(modifier = modifier.padding(top = if (showUserName) 32.dp else 4.dp)) {
+) = Column(
+    modifier =
+    modifier.padding(
+        top =
+        if (showUserName) {
+            16.dp
+        } else {
+            4.dp
+        },
+    ),
+) {
     var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
     val clipboardManager = LocalClipboardManager.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -180,13 +189,6 @@ internal fun MessageItem(
         } else {
             Color(node.colors.second).copy(alpha = alpha)
         }
-            .apply {
-                if (inSelectionMode) {
-                    copy(alpha = if (selected) 0.6f else 0.2f)
-                } else {
-                    copy(alpha = 0.4f)
-                }
-            }
     val cardColors =
         CardDefaults.cardColors()
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
@@ -206,117 +208,115 @@ internal fun MessageItem(
                     Modifier
                 },
             )
-    Box(modifier = Modifier.wrapContentSize()) {
-        Surface(
-            modifier =
-            Modifier.align(if (message.fromLocal) Alignment.TopEnd else Alignment.TopStart)
-                .padding(
-                    start = if (!message.fromLocal) 0.dp else 16.dp,
-                    end = if (message.fromLocal) 0.dp else 16.dp,
-                )
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = {
-                        onLongClick()
-                        if (!inSelectionMode) {
-                            activeSheet = ActiveSheet.Actions
-                        }
-                    },
-                    onDoubleClick = onDoubleClick,
-                )
-                .then(messageModifier)
-                .semantics(mergeDescendants = true) {
-                    val senderName = if (message.fromLocal) ourNode.user.longName else node.user.longName
-                    contentDescription = "Message from $senderName: ${message.text}"
-                },
-            color = containerColor,
-            contentColor = contentColorFor(containerColor),
-            shape = messageShape,
+    if (showUserName && !message.fromLocal) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                OriginalMessageSnippet(
-                    message = message,
-                    ourNode = ourNode,
-                    hasSamePrev = hasSamePrev,
-                    onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+            NodeChip(node = node, onClick = onClickChip)
+            Text(
+                text = node.user.longName,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.labelMedium,
+            )
+            if (message.viaMqtt) {
+                Icon(
+                    Icons.Default.Cloud,
+                    contentDescription = stringResource(Res.string.via_mqtt),
+                    modifier = Modifier.size(16.dp),
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (showUserName) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            val chipNode = if (message.fromLocal) ourNode else node
-                            NodeChip(node = chipNode, onClick = onClickChip)
-                            Text(
-                                text = (if (message.fromLocal) ourNode.user else node.user).longName,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                            if (message.viaMqtt) {
-                                Icon(
-                                    Icons.Default.Cloud,
-                                    contentDescription = stringResource(Res.string.via_mqtt),
-                                    modifier = Modifier.size(16.dp),
-                                )
+            }
+        }
+    }
+    Surface(
+        modifier =
+        Modifier.padding(
+            start = if (!message.fromLocal) 0.dp else 24.dp,
+            end = if (message.fromLocal) 0.dp else 24.dp,
+        )
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = {
+                    onLongClick()
+                    if (!inSelectionMode) {
+                        activeSheet = ActiveSheet.Actions
+                    }
+                },
+                onDoubleClick = onDoubleClick,
+            )
+            .then(messageModifier)
+            .semantics(mergeDescendants = true) {
+                val senderName = if (message.fromLocal) ourNode.user.longName else node.user.longName
+                contentDescription = "Message from $senderName: ${message.text}"
+            },
+        color = containerColor,
+        contentColor = contentColorFor(containerColor),
+        shape = messageShape,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            OriginalMessageSnippet(
+                modifier = Modifier.fillMaxWidth(),
+                message = message,
+                ourNode = ourNode,
+                hasSamePrev = hasSamePrev,
+                onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+            )
+
+            Column(modifier = Modifier.padding(8.dp)) {
+                AutoLinkText(
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = cardColors.contentColor,
+                )
+
+                Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
+                    if (!message.fromLocal) {
+                        if (message.hopsAway == 0) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Snr(message.snr)
+                                Rssi(message.rssi)
                             }
+                        } else {
+                            Text(
+                                text = stringResource(Res.string.hops_away_template, message.hopsAway),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
                         }
+                    }
+                    if (containsBel) {
+                        Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    Text(text = message.time, style = MaterialTheme.typography.labelSmall)
-                    if (message.fromLocal) {
-                        Spacer(modifier = Modifier.size(4.dp))
-                        MessageStatusIcon(status = message.status ?: MessageStatus.UNKNOWN, onClick = onStatusClick)
-                    }
-                }
-
-                Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp)) {
-                    AutoLinkText(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = message.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = cardColors.contentColor,
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+                        text = message.time,
+                        style = MaterialTheme.typography.labelSmall,
                     )
-
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        if (!message.fromLocal) {
-                            if (message.hopsAway == 0) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Snr(message.snr)
-                                    Rssi(message.rssi)
-                                }
-                            } else {
-                                Text(
-                                    text = stringResource(Res.string.hops_away_template, message.hopsAway),
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                            }
-                        }
-                        if (containsBel) {
-                            Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
-                        }
+                    if (message.fromLocal) {
+                        MessageStatusIcon(
+                            status = message.status ?: MessageStatus.UNKNOWN,
+                            onClick = onStatusClick,
+                            modifier = modifier.size(24.dp).padding(horizontal = 4.dp),
+                        )
                     }
                 }
             }
         }
-
-        Box(
+    }
+    AnimatedVisibility(emojis.isNotEmpty()) {
+        ReactionRow(
             modifier =
-            Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
-                .padding(horizontal = 12.dp)
-                .offset(y = 20.dp),
-        ) {
-            ReactionRow(
-                reactions = if (message.fromLocal) emojis.reversed() else emojis,
-                myId = ourNode.user.id,
-                onSendReaction = sendReaction,
-                onShowReactions = onShowReactions,
-            )
-        }
+            Modifier.padding(
+                start = if (!message.fromLocal) 0.dp else 24.dp,
+                end = if (message.fromLocal) 0.dp else 24.dp,
+            ),
+            reactions = if (message.fromLocal) emojis.reversed() else emojis,
+            myId = ourNode.user.id,
+            onSendReaction = sendReaction,
+            onShowReactions = onShowReactions,
+        )
     }
 }
 
@@ -330,7 +330,7 @@ private enum class ActiveSheet {
 }
 
 @Composable
-private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit) {
+private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val icon =
         when (status) {
             MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
@@ -345,7 +345,7 @@ private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit) {
     Icon(
         imageVector = icon,
         contentDescription = stringResource(Res.string.message_delivery_status),
-        modifier = Modifier.size(24.dp).clickable(onClick = onClick),
+        modifier = modifier.clickable(onClick = onClick),
     )
 }
 
@@ -355,6 +355,7 @@ private fun OriginalMessageSnippet(
     ourNode: Node,
     hasSamePrev: Boolean,
     onNavigateToOriginalMessage: (Int) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val originalMessage = message.originalMessage
     if (originalMessage != null && originalMessage.packetId != 0) {
@@ -366,7 +367,7 @@ private fun OriginalMessageSnippet(
                     contentColor = Color(originalMessageNode.colors.first),
                 )
         Surface(
-            modifier = Modifier.fillMaxWidth().clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
+            modifier = modifier.fillMaxWidth().clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
             contentColor = cardColors.contentColor,
             color = cardColors.containerColor,
             shape =
