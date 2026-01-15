@@ -1084,6 +1084,7 @@
     <string name="firmware_update_hash_rejected">Firmware hash rejected. Device may require hash provisioning or bootloader update.</string>
     <string name="firmware_update_ota_failed">OTA update failed: %1$s</string>
     <string name="firmware_update_loading">Loading firmware...</string>
+    <string name="firmware_update_waiting_reboot">Waiting for device to reboot into OTA mode...</string>
     <string name="firmware_update_connecting_attempt">Connecting to device (attempt %1$d/%2$d)...</string>
     <string name="firmware_update_checking_version">Checking device version...</string>
     <string name="firmware_update_starting_ota">Starting OTA update...</string>
