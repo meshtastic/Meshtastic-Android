@@ -178,6 +178,8 @@ fun MessageScreen(
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
+    val filteredCount by viewModel.getFilteredCount(contactKey).collectAsStateWithLifecycle(initialValue = 0)
+    val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
 
     // Retry dialog state
     var currentRetryEvent by remember { mutableStateOf<RetryEvent?>(null) }
@@ -399,6 +401,8 @@ fun MessageScreen(
                         contactKey = contactKey,
                         firstUnreadMessageUuid = firstUnreadMessageUuid,
                         hasUnreadMessages = hasUnreadMessages,
+                        filteredCount = filteredCount,
+                        showFiltered = showFiltered,
                     ),
                     handlers =
                     MessageListHandlers(
@@ -410,6 +414,7 @@ fun MessageScreen(
                         onDeleteMessages = { viewModel.deleteMessages(it) },
                         onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
                         onReply = { message -> replyingToPacketId = message?.packetId },
+                        onToggleShowFiltered = viewModel::toggleShowFiltered,
                     ),
                     quickEmojis = viewModel.frequentEmojis,
                 )

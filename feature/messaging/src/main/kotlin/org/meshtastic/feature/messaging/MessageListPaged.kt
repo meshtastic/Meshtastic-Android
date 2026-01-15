@@ -27,8 +27,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,6 +82,7 @@ internal data class MessageListHandlers(
     val onDeleteMessages: (List<Long>) -> Unit,
     val onSendMessage: (String, String) -> Unit,
     val onReply: (Message?) -> Unit,
+    val onToggleShowFiltered: () -> Unit = {},
 )
 
 internal data class MessageListPagedState(
@@ -87,6 +93,8 @@ internal data class MessageListPagedState(
     val contactKey: String,
     val firstUnreadMessageUuid: Long? = null,
     val hasUnreadMessages: Boolean = false,
+    val filteredCount: Int = 0,
+    val showFiltered: Boolean = false,
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -209,7 +217,10 @@ private fun MessageListPagedContent(
             modifier = Modifier.fillMaxSize(),
             state = listState,
             reverseLayout = true,
-            contentPadding = PaddingValues(bottom = 24.dp),
+            contentPadding = PaddingValues(
+                bottom = 24.dp,
+                top = if (state.filteredCount > 0) 48.dp else 0.dp,
+            ),
         ) {
             items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
                 val message = state.messages[index]
@@ -271,6 +282,30 @@ private fun MessageListPagedContent(
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // Filtered message count badge and toggle
+        if (state.filteredCount > 0) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "${state.filteredCount} filtered",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                IconButton(onClick = { handlers.onToggleShowFiltered() }) {
+                    Icon(
+                        imageVector = if (state.showFiltered) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                        contentDescription = if (state.showFiltered) "Hide filtered" else "Show filtered",
+                    )
                 }
             }
         }
