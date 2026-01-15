@@ -62,6 +62,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -76,7 +77,11 @@ import org.meshtastic.core.strings.routing_error_no_response
 import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.strings.traceroute_diff
 import org.meshtastic.core.strings.traceroute_direct
+import org.meshtastic.core.strings.traceroute_duration
 import org.meshtastic.core.strings.traceroute_hops
+import org.meshtastic.core.strings.traceroute_route_back_to_us
+import org.meshtastic.core.strings.traceroute_route_towards_dest
+import org.meshtastic.core.strings.traceroute_time_and_text
 import org.meshtastic.core.strings.view_on_map
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
@@ -165,14 +170,27 @@ fun TracerouteLogScreen(
                             val seconds =
                                 (res.received_date - log.received_date).coerceAtLeast(0).toDouble() / MS_PER_SEC
                             val annotatedBase =
-                                annotateTraceroute(res.fromRadio.packet.getTracerouteResponse(::getUsername))
+                                annotateTraceroute(
+                                    res.fromRadio.packet.getTracerouteResponse(
+                                        ::getUsername,
+                                        headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
+                                        headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                    ),
+                                )
+                            val durationText = stringResource(Res.string.traceroute_duration, "%.1f".format(seconds))
                             buildAnnotatedString {
                                 append(annotatedBase)
-                                append("\n\nDuration: ${"%.1f".format(seconds)} s")
+                                append("\n\n$durationText")
                             }
                         } else {
                             // For cases where there's a result but no full route, display plain text
-                            res.fromRadio.packet.getTracerouteResponse(::getUsername)?.let { AnnotatedString(it) }
+                            res.fromRadio.packet
+                                .getTracerouteResponse(
+                                    ::getUsername,
+                                    headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
+                                    headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                )
+                                ?.let { AnnotatedString(it) }
                         }
                     }
                 val overlay =
@@ -187,14 +205,20 @@ fun TracerouteLogScreen(
                 Box {
                     TracerouteItem(
                         icon = icon,
-                        text = "$time - $text",
+                        text = stringResource(Res.string.traceroute_time_and_text, time, text),
                         modifier =
                         Modifier.combinedClickable(onLongClick = { expanded = true }) {
                             val dialogMessage =
                                 tracerouteDetailsAnnotated
-                                    ?: result?.fromRadio?.packet?.getTracerouteResponse(::getUsername)?.let {
-                                        AnnotatedString(it)
-                                    }
+                                    ?: result
+                                        ?.fromRadio
+                                        ?.packet
+                                        ?.getTracerouteResponse(
+                                            ::getUsername,
+                                            headerTowards = getString(Res.string.traceroute_route_towards_dest),
+                                            headerBack = getString(Res.string.traceroute_route_back_to_us),
+                                        )
+                                        ?.let { AnnotatedString(it) }
                             dialogMessage?.let {
                                 val responseLogUuid = result?.uuid ?: return@combinedClickable
                                 showDialog =
