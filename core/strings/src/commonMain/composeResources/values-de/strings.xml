@@ -192,6 +192,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="connecting">Wird verbunden</string>
     <string name="not_connected">Nicht verbunden</string>
+    <string name="no_device_selected">Kein Gerät ausgewählt</string>
     <string name="connected_sleeping">Mit Funkgerät verbunden, aber es ist im Schlafmodus</string>
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
     <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Sie ist zu alt, um mit dieser Funkgeräte Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/installation">Dokumentation</a> zu diesem Thema.</string>

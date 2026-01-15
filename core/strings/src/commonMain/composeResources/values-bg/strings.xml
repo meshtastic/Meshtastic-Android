@@ -151,6 +151,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="connecting">Свързване</string>
     <string name="not_connected">Няма връзка</string>
+    <string name="no_device_selected">Няма избрано устройство</string>
     <string name="connected_sleeping">Свързан е с радио, но рядиото е в режим на заспиване</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
     <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/installation">документи</a> по тази тема.</string>

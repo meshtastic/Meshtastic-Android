@@ -189,6 +189,7 @@
     <string name="ethernet_ip">以太网 IP 地址：</string>
     <string name="connecting">正在连接</string>
     <string name="not_connected">尚未联机</string>
+    <string name="no_device_selected">未选择设备</string>
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
     <string name="app_too_old">需要更新应用程序</string>
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>

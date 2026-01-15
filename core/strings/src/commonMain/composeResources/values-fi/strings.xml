@@ -192,6 +192,7 @@
     <string name="ethernet_ip">Ethernet-verkon IP:</string>
     <string name="connecting">Yhdistetään</string>
     <string name="not_connected">Ei yhdistetty</string>
+    <string name="no_device_selected">Ei laitetta valittuna</string>
     <string name="connected_sleeping">Yhdistetty radioon, mutta se on lepotilassa</string>
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
     <string name="must_update">Sinun täytyy päivittää tämä sovellus sovelluskaupassa (tai Githubissa). Sovelluksen versio on liian vanha toimimaan tämän radion ohjelmiston kanssa. Ole hyvä ja lue lisää aiheesta <a href="https://meshtastic.org/docs/software/android/installation">dokumenteistamme</a>.</string>
