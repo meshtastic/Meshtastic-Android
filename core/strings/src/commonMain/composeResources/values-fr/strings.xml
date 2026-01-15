@@ -66,6 +66,8 @@
     <string name="role_client_desc">Dispositif de messagerie autonome ou connecté à l'application.</string>
     <string name="role_client_mute">Client muet</string>
     <string name="role_client_mute_desc">Appareil ne transmettant pas les paquets provenant d'autres appareils.</string>
+    <string name="role_client_base">Base Client</string>
+    <string name="role_client_base_desc">Traite les paquets depuis ou vers les nœuds favoris comme Routeur avec retard (ROUTER_LATE), et tous les autres paquets comme CLIENT.</string>
     <string name="role_router">Routeur</string>
     <string name="role_router_desc">Nœud d'infrastructure pour étendre la couverture réseau en relayant les messages. Visible dans la liste des nœuds.</string>
     <string name="role_router_client">Routeur Client</string>
@@ -413,6 +415,10 @@
     <string name="view_on_map">Afficher sur la carte</string>
     <string name="traceroute_map_no_data">Ce traceroute n'a pas encore de nœuds cartographiables.</string>
     <string name="traceroute_showing_nodes">Affichage des nœuds %1$d/%2$d</string>
+    <string name="traceroute_duration">Durée : %1$s s</string>
+    <string name="traceroute_time_and_text">%1$s - %2$s</string>
+    <string name="traceroute_route_towards_dest">Route aller :\n\n</string>
+    <string name="traceroute_route_back_to_us">Route retour :\n\n</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1S</string>
