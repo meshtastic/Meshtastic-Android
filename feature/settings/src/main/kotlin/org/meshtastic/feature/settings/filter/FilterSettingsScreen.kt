@@ -150,7 +150,6 @@ fun FilterSettingsScreen(
             items(filterWords, key = { it }) { word ->
                 FilterWordItem(
                     word = word,
-                    onToggleRegex = { viewModel.toggleRegex(word) },
                     onRemove = { viewModel.removeFilterWord(word) },
                 )
             }
@@ -161,7 +160,6 @@ fun FilterSettingsScreen(
 @Composable
 private fun FilterWordItem(
     word: String,
-    onToggleRegex: () -> Unit,
     onRemove: () -> Unit,
 ) {
     val isRegex = word.startsWith("regex:")
@@ -184,15 +182,6 @@ private fun FilterWordItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(
-                text = "Regex",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Switch(
-                checked = isRegex,
-                onCheckedChange = { onToggleRegex() },
-            )
             IconButton(onClick = onRemove) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete")
             }

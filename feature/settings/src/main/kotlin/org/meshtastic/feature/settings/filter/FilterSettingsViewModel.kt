@@ -61,22 +61,4 @@ class FilterSettingsViewModel @Inject constructor(
             messageFilterService.rebuildPatterns()
         }
     }
-
-    fun toggleRegex(word: String) {
-        val current = filterPrefs.filterWords.toMutableSet()
-        current.remove(word)
-        val newWord = if (word.startsWith(REGEX_PREFIX)) {
-            word.removePrefix(REGEX_PREFIX)
-        } else {
-            "$REGEX_PREFIX$word"
-        }
-        current.add(newWord)
-        filterPrefs.filterWords = current
-        _filterWords.value = current.toList().sorted()
-        messageFilterService.rebuildPatterns()
-    }
-
-    companion object {
-        private const val REGEX_PREFIX = "regex:"
-    }
 }
