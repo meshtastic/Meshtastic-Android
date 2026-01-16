@@ -673,14 +673,14 @@ constructor(
                 insert(packetToSave)
                 val conversationMuted = getContactSettings(contactKey).isMuted
                 val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
-                val isSilent = conversationMuted || nodeMuted || isFiltered
-                if (packetToSave.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isSilent) {
+                val isSilent = conversationMuted || nodeMuted
+                if (packetToSave.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isSilent && !isFiltered) {
                     serviceNotifications.showAlertNotification(
                         contactKey,
                         getSenderName(dataPacket),
                         dataPacket.alert ?: getString(Res.string.critical_alert),
                     )
-                } else if (updateNotification) {
+                } else if (updateNotification && !isFiltered) {
                     scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
                 }
             }
