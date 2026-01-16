@@ -75,7 +75,7 @@ develocity {
         capture {
             fileFingerprints.set(true)
         }
-        publishing.onlyIf { false }
+        publishing.onlyIf { System.getenv("CI") != null }
     }
     buildCache {
         local {
