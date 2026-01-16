@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.entity
 
 import androidx.room.ColumnInfo
@@ -32,12 +31,12 @@ data class DeviceHardwareEntity(
     @ColumnInfo(name = "display_name") val displayName: String,
     @ColumnInfo(name = "has_ink_hud") val hasInkHud: Boolean? = null,
     @ColumnInfo(name = "has_mui") val hasMui: Boolean? = null,
-    @PrimaryKey val hwModel: Int,
+    val hwModel: Int,
     @ColumnInfo(name = "hw_model_slug") val hwModelSlug: String,
     val images: List<String>?,
     @ColumnInfo(name = "last_updated") val lastUpdated: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "partition_scheme") val partitionScheme: String? = null,
-    @ColumnInfo(name = "platformio_target") val platformioTarget: String,
+    @PrimaryKey @ColumnInfo(name = "platformio_target") val platformioTarget: String,
     @ColumnInfo(name = "requires_dfu") val requiresDfu: Boolean?,
     @ColumnInfo(name = "support_level") val supportLevel: Int?,
     val tags: List<String>?,

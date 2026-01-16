@@ -172,6 +172,7 @@ constructor(
                         maxChannels = 8,
                         hasWifi = metadata?.hasWifi == true,
                         deviceId = deviceId.toStringUtf8(),
+                        pioEnv = if (myInfo.pioEnv.isNullOrEmpty()) null else myInfo.pioEnv,
                     )
                 }
             if (metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()) {

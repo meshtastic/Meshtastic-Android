@@ -42,6 +42,7 @@ import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
+import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.prefs.radio.RadioPrefs
@@ -152,7 +153,7 @@ constructor(
             viewModelScope.launch {
                 _state.value = FirmwareUpdateState.Checking
                 runCatching {
-                    val ourNode = nodeRepository.ourNodeInfo.value
+                    val ourNode = nodeRepository.myNodeInfo.value
                     val address = radioPrefs.devAddr?.drop(1)
                     if (address == null || ourNode == null) {
                         _state.value = FirmwareUpdateState.Error(getString(Res.string.firmware_update_no_device))
@@ -160,7 +161,7 @@ constructor(
                     }
                     getDeviceHardware(ourNode)?.let { deviceHardware ->
                         _deviceHardware.value = deviceHardware
-                        _currentFirmwareVersion.value = ourNode.metadata?.firmwareVersion
+                        _currentFirmwareVersion.value = ourNode.firmwareVersion
 
                         val releaseFlow =
                             if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
@@ -192,7 +193,7 @@ constructor(
                                         !dismissed &&
                                         radioPrefs.isBle(),
                                     updateMethod = firmwareUpdateMethod,
-                                    currentFirmwareVersion = ourNode.metadata?.firmwareVersion,
+                                    currentFirmwareVersion = ourNode.firmwareVersion,
                                 )
                         }
                     }
@@ -455,12 +456,15 @@ constructor(
         return !isBatteryLow
     }
 
-    private suspend fun getDeviceHardware(ourNode: org.meshtastic.core.database.model.Node): DeviceHardware? {
-        val hwModel = ourNode.user.hwModel?.number
-        return if (hwModel != null) {
-            deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrElse {
+    private suspend fun getDeviceHardware(ourNode: MyNodeEntity): DeviceHardware? {
+        val nodeInfo = nodeRepository.ourNodeInfo.value
+        val hwModelInt = nodeInfo?.user?.hwModel?.number
+        val target = ourNode.pioEnv
+
+        return if (hwModelInt != null) {
+            deviceHardwareRepository.getDeviceHardwareByModel(hwModelInt, target).getOrElse {
                 _state.value =
-                    FirmwareUpdateState.Error(getString(Res.string.firmware_update_unknown_hardware, hwModel))
+                    FirmwareUpdateState.Error(getString(Res.string.firmware_update_unknown_hardware, hwModelInt))
                 null
             }
         } else {

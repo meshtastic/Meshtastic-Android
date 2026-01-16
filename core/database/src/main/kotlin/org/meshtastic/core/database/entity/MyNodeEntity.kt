@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.entity
 
 import androidx.room.Entity
@@ -34,6 +33,7 @@ data class MyNodeEntity(
     val maxChannels: Int,
     val hasWifi: Boolean,
     val deviceId: String? = "unknown",
+    val pioEnv: String? = null,
 ) {
     /** A human readable description of the software/hardware version */
     val firmwareString: String
@@ -54,5 +54,6 @@ data class MyNodeEntity(
         channelUtilization = 0f,
         airUtilTx = 0f,
         deviceId = deviceId,
+        pioEnv = pioEnv,
     )
 }
