@@ -60,8 +60,6 @@ class FakeNodeInfoWriteDataSource : NodeInfoWriteDataSource {
 
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {}
 
-    override suspend fun clearMyNodeInfo() {}
-
     override suspend fun deleteNode(num: Int) {}
 
     override suspend fun deleteNodes(nodeNums: List<Int>) {}

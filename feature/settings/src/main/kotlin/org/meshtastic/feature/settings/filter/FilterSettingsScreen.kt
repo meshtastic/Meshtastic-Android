@@ -85,65 +85,17 @@ fun FilterSettingsScreen(viewModel: FilterSettingsViewModel = hiltViewModel(), o
             modifier = Modifier.padding(paddingValues).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            item { FilterEnableCard(filterEnabled) { viewModel.setFilterEnabled(it) } }
             item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(stringResource(Res.string.filter_enable), style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                stringResource(Res.string.filter_enable_summary),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Switch(checked = filterEnabled, onCheckedChange = { viewModel.setFilterEnabled(it) })
-                    }
-                }
+                FilterWordsInputCard(
+                    newWord = newWord,
+                    onNewWordChange = { newWord = it },
+                    onAddWord = {
+                        viewModel.addFilterWord(newWord)
+                        newWord = ""
+                    },
+                )
             }
-
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(stringResource(Res.string.filter_words), style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            stringResource(Res.string.filter_words_summary),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 8.dp),
-                        )
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedTextField(
-                                value = newWord,
-                                onValueChange = { newWord = it },
-                                modifier = Modifier.weight(1f),
-                                label = { Text(stringResource(Res.string.filter_add_placeholder)) },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                keyboardActions =
-                                KeyboardActions(
-                                    onDone = {
-                                        viewModel.addFilterWord(newWord)
-                                        newWord = ""
-                                    },
-                                ),
-                            )
-                            IconButton(
-                                onClick = {
-                                    viewModel.addFilterWord(newWord)
-                                    newWord = ""
-                                },
-                            ) {
-                                Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add))
-                            }
-                        }
-                    }
-                }
-            }
-
             if (filterWords.isEmpty()) {
                 item {
                     Text(
@@ -154,9 +106,58 @@ fun FilterSettingsScreen(viewModel: FilterSettingsViewModel = hiltViewModel(), o
                     )
                 }
             }
-
             items(filterWords, key = { it }) { word ->
                 FilterWordItem(word = word, onRemove = { viewModel.removeFilterWord(word) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterEnableCard(enabled: Boolean, onToggle: (Boolean) -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(stringResource(Res.string.filter_enable), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(Res.string.filter_enable_summary),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(checked = enabled, onCheckedChange = onToggle)
+        }
+    }
+}
+
+@Composable
+private fun FilterWordsInputCard(newWord: String, onNewWordChange: (String) -> Unit, onAddWord: () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(stringResource(Res.string.filter_words), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(Res.string.filter_words_summary),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = newWord,
+                    onValueChange = onNewWordChange,
+                    modifier = Modifier.weight(1f),
+                    label = { Text(stringResource(Res.string.filter_add_placeholder)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { onAddWord() }),
+                )
+                IconButton(onClick = onAddWord) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add))
+                }
             }
         }
     }
