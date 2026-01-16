@@ -64,7 +64,8 @@ constructor(
         forceRefresh: Boolean = false,
     ): Result<DeviceHardware?> = withContext(dispatchers.io) {
         Logger.d {
-            "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel, target=$target, forceRefresh=$forceRefresh)"
+            "DeviceHardwareRepository: getDeviceHardwareByModel" +
+                "(hwModel=$hwModel, target=$target, forceRefresh=$forceRefresh)"
         }
 
         val quirks = loadQuirks()
@@ -96,7 +97,8 @@ constructor(
             localDataSource.insertAllDeviceHardware(remoteHardware)
             val fromDb = localDataSource.getByHwModel(hwModel)
             Logger.d {
-                "DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel returned ${fromDb.size} entries"
+                "DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel" +
+                    " returned ${fromDb.size} entries"
             }
             disambiguate(fromDb, target)?.asExternalModel()
         }
@@ -121,7 +123,13 @@ constructor(
 
                 // 4. Fallback to bundled JSON if cache is empty or incomplete
                 Logger.d {
-                    "DeviceHardwareRepository: cache ${if (staleEntities.isEmpty()) "empty" else "incomplete"} for hwModel=$hwModel, falling back to bundled JSON asset"
+                    "DeviceHardwareRepository: cache ${
+                        if (staleEntities.isEmpty()) {
+                            "empty"
+                        } else {
+                            "incomplete"
+                        }
+                    } for hwModel=$hwModel, falling back to bundled JSON asset"
                 }
                 return@withContext loadFromBundledJson(hwModel, target, quirks)
             }
@@ -196,7 +204,10 @@ constructor(
         val result =
             if (matchedQuirk != null) {
                 Logger.d {
-                    "DeviceHardwareRepository: applying quirk: requiresBootloaderUpgradeForOta=${matchedQuirk.requiresBootloaderUpgradeForOta}, infoUrl=${matchedQuirk.infoUrl}"
+                    "DeviceHardwareRepository: applying quirk:" +
+                        " requiresBootloaderUpgradeForOta=" +
+                        "${matchedQuirk.requiresBootloaderUpgradeForOta}," +
+                        " infoUrl=${matchedQuirk.infoUrl}"
                 }
                 base.copy(
                     requiresBootloaderUpgradeForOta = matchedQuirk.requiresBootloaderUpgradeForOta,

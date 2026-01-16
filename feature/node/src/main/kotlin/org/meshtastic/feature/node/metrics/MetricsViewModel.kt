@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import android.app.Application
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -215,21 +213,25 @@ constructor(
             viewModelScope.launch {
                 if (currentDestNum != null) {
                     launch {
-                        nodeRepository.nodeDBbyNum
-                            .mapLatest { nodes -> nodes[currentDestNum] to nodes.keys.firstOrNull() }
+                        combine(nodeRepository.nodeDBbyNum, nodeRepository.myNodeInfo) { nodes, myInfo ->
+                            nodes[currentDestNum] to (nodes.keys.firstOrNull() to myInfo)
+                        }
                             .distinctUntilChanged()
-                            .collect { (node, ourNode) ->
+                            .collect { (node, localData) ->
+                                val (ourNodeNum, myInfo) = localData
                                 // Create a fallback node if not found in database (for hidden clients, etc.)
                                 val actualNode = node ?: createFallbackNode(currentDestNum)
+                                val pioEnv = if (currentDestNum == ourNodeNum) myInfo?.pioEnv else null
                                 val deviceHardware =
                                     actualNode.user.hwModel.safeNumber().let {
-                                        deviceHardwareRepository.getDeviceHardwareByModel(it)
+                                        deviceHardwareRepository.getDeviceHardwareByModel(it, target = pioEnv)
                                     }
                                 _state.update { state ->
                                     state.copy(
                                         node = actualNode,
-                                        isLocal = currentDestNum == ourNode,
+                                        isLocal = currentDestNum == ourNodeNum,
                                         deviceHardware = deviceHardware.getOrNull(),
+                                        reportedTarget = pioEnv,
                                     )
                                 }
                             }
