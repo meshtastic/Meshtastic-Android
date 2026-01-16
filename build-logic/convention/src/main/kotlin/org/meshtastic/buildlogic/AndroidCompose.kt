@@ -43,6 +43,9 @@ internal fun Project.configureAndroidCompose(
         "implementation"(libs.library("androidx-compose-runtime"))
         "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
         "debugImplementation"(libs.library("androidx-compose-ui-tooling"))
+        
+        // Add Espresso explicitly to avoid version mismatch issues on newer Android versions
+        "androidTestImplementation"(libs.library("androidx-test-espresso-core"))
     }
 
     extensions.configure<ComposeCompilerGradlePluginExtension> {

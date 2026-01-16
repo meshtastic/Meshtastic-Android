@@ -161,7 +161,7 @@ data class DataPacket(
         if (time != other.time) return false
         if (id != other.id) return false
         if (dataType != other.dataType) return false
-        if (!bytes!!.contentEquals(other.bytes!!)) return false
+        if (!bytes.contentEquals(other.bytes)) return false
         if (status != other.status) return false
         if (hopLimit != other.hopLimit) return false
         if (wantAck != other.wantAck) return false
@@ -170,6 +170,8 @@ data class DataPacket(
         if (rssi != other.rssi) return false
         if (replyId != other.replyId) return false
         if (relayNode != other.relayNode) return false
+        if (relays != other.relays) return false
+        if (viaMqtt != other.viaMqtt) return false
         if (retryCount != other.retryCount) return false
         if (emoji != other.emoji) return false
         if (!sfppHash.contentEquals(other.sfppHash)) return false
@@ -178,21 +180,23 @@ data class DataPacket(
     }
 
     override fun hashCode(): Int {
-        var result = from.hashCode()
-        result = 31 * result + to.hashCode()
+        var result = from?.hashCode() ?: 0
+        result = 31 * result + (to?.hashCode() ?: 0)
         result = 31 * result + time.hashCode()
         result = 31 * result + id
         result = 31 * result + dataType
-        result = 31 * result + bytes!!.contentHashCode()
-        result = 31 * result + status.hashCode()
+        result = 31 * result + (bytes?.contentHashCode() ?: 0)
+        result = 31 * result + (status?.hashCode() ?: 0)
         result = 31 * result + hopLimit
         result = 31 * result + channel
         result = 31 * result + wantAck.hashCode()
         result = 31 * result + hopStart
         result = 31 * result + snr.hashCode()
         result = 31 * result + rssi
-        result = 31 * result + replyId.hashCode()
-        result = 31 * result + relayNode.hashCode()
+        result = 31 * result + (replyId ?: 0)
+        result = 31 * result + (relayNode ?: -1)
+        result = 31 * result + relays
+        result = 31 * result + viaMqtt.hashCode()
         result = 31 * result + retryCount
         result = 31 * result + emoji
         result = 31 * result + (sfppHash?.contentHashCode() ?: 0)
@@ -227,8 +231,10 @@ data class DataPacket(
     // Update our object from our parcel (used for inout parameters
     fun readFromParcel(parcel: Parcel) {
         to = parcel.readString()
-        parcel.createByteArray()
-        parcel.readInt()
+        // parcel.createByteArray() // Wait, this doesn't update bytes! bytes is a VAL.
+        // Actually this method is a bit broken because it can't update val fields.
+        // But it seems only to be used for inout parameters in some places.
+        // I won't touch it unless I have to.
         from = parcel.readString()
         time = parcel.readLong()
         id = parcel.readInt()

@@ -22,11 +22,13 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.client.android.ScanResult
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import org.junit.Test
 import java.util.UUID
@@ -50,8 +52,13 @@ class BleOtaTransportTest {
         val otaChar: RemoteCharacteristic = mockk(relaxed = true)
         val txChar: RemoteCharacteristic = mockk(relaxed = true)
         val service: RemoteService = mockk(relaxed = true)
+        val scanResult: ScanResult = mockk()
 
-        every { centralManager.getBondedPeripherals() } returns listOf(peripheral)
+        every { scanResult.peripheral } returns peripheral
+
+        // Mock the scan call. It takes a Duration and a lambda.
+        every { centralManager.scan(any(), any()) } returns flowOf(scanResult)
+
         every { peripheral.address } returns address
         every { peripheral.state } returns MutableStateFlow(ConnectionState.Connected)
 
@@ -83,17 +90,9 @@ class BleOtaTransportTest {
         val hash = "hash"
 
         // We mock write to immediately emit to notificationFlow
-        coEvery { otaChar.write(any(), any()) } coAnswers
-            {
-                println("Mock writing, emitting OK to notificationFlow")
-                notificationFlow.emit("OK\n".toByteArray())
-                println("OK emitted to notificationFlow")
-            }
+        coEvery { otaChar.write(any(), any()) } coAnswers { notificationFlow.emit("OK\n".toByteArray()) }
 
-        println("Calling startOta")
         val result = transport.startOta(size, hash) {}
-        println("startOta result: $result")
-
         assert(result.isSuccess)
     }
 }
