@@ -342,6 +342,73 @@ class PacketDaoTest {
         assertTrue(updated.sfpp_hash?.contentEquals(hash) == true)
     }
 
+    @Test
+    fun test_filteredMessages_excludedFromRegularQueries() = runBlocking {
+        val contactKey = "0${DataPacket.ID_BROADCAST}"
+
+        // Insert a filtered message
+        val filteredPacket = Packet(
+            uuid = 0L,
+            myNodeNum = myNodeNum,
+            port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+            contact_key = contactKey,
+            received_time = System.currentTimeMillis(),
+            read = false,
+            data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered message"),
+            filtered = true,
+        )
+        packetDao.insert(filteredPacket)
+
+        // Regular query should not include filtered messages
+        val messages = packetDao.getMessagesFrom(contactKey).first()
+        val hasFilteredMessage = messages.any { it.packet.data.text == "Filtered message" }
+        assertTrue(!hasFilteredMessage)
+    }
+
+    @Test
+    fun test_getFilteredCount_returnsCorrectCount() = runBlocking {
+        val contactKey = "0${DataPacket.ID_BROADCAST}"
+
+        // Insert filtered messages
+        repeat(3) { i ->
+            val filteredPacket = Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                contact_key = contactKey,
+                received_time = System.currentTimeMillis() + i,
+                read = false,
+                data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered $i"),
+                filtered = true,
+            )
+            packetDao.insert(filteredPacket)
+        }
+
+        val filteredCount = packetDao.getFilteredCount(contactKey)
+        assertEquals(3, filteredCount)
+    }
+
+    @Test
+    fun test_contactFilteringDisabled_persistence() = runBlocking {
+        val contactKey = "0!testcontact"
+
+        // Initially should be null or false
+        val initial = packetDao.getContactFilteringDisabled(contactKey)
+        assertTrue(initial == null || initial == false)
+
+        // Set filtering disabled
+        packetDao.setContactFilteringDisabled(contactKey, true)
+
+        val disabled = packetDao.getContactFilteringDisabled(contactKey)
+        assertEquals(true, disabled)
+
+        // Re-enable filtering
+        packetDao.setContactFilteringDisabled(contactKey, false)
+
+        val enabled = packetDao.getContactFilteringDisabled(contactKey)
+        assertEquals(false, enabled)
+    }
+
     companion object {
         private const val SAMPLE_SIZE = 10
     }
