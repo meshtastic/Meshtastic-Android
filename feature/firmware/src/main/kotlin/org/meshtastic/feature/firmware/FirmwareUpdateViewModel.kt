@@ -161,7 +161,7 @@ constructor(
                     }
                     getDeviceHardware(ourNode)?.let { deviceHardware ->
                         _deviceHardware.value = deviceHardware
-                        _currentFirmwareVersion.value = ourNode.firmwareVersion
+                        _currentFirmwareVersion.value = ourNode.metadata?.firmware_version
 
                         val releaseFlow =
                             if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
@@ -193,7 +193,7 @@ constructor(
                                         !dismissed &&
                                         radioPrefs.isBle(),
                                     updateMethod = firmwareUpdateMethod,
-                                    currentFirmwareVersion = ourNode.firmwareVersion,
+                                    currentFirmwareVersion = ourNode.metadata?.firmware_version,
                                 )
                         }
                     }
@@ -450,7 +450,7 @@ constructor(
         val isBatteryLow = level in 1..MIN_BATTERY_LEVEL
 
         if (isBatteryLow) {
-            val batteryLowMsg = getString(Res.string.firmware_update_battery_low, level)
+            val batteryLowMsg = getString(Res.string.firmware_update_battery_low, level!!)
             _state.value = FirmwareUpdateState.Error(batteryLowMsg)
         }
         return !isBatteryLow
@@ -458,10 +458,10 @@ constructor(
 
     private suspend fun getDeviceHardware(ourNode: MyNodeEntity): DeviceHardware? {
         val nodeInfo = nodeRepository.ourNodeInfo.value
-        val hwModelInt = nodeInfo?.user?.hwModel?.number
+        val hwModelInt = nodeInfo?.user?.hw_model.value
         val target = ourNode.pioEnv
 
-        return if (hwModelInt != null) {
+        return if (hwModelInt != 0) {
             deviceHardwareRepository.getDeviceHardwareByModel(hwModelInt, target).getOrElse {
                 _state.value =
                     FirmwareUpdateState.Error(getString(Res.string.firmware_update_unknown_hardware, hwModelInt))

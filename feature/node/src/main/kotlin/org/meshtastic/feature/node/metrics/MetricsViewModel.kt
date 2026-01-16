@@ -58,10 +58,10 @@ import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.MeshPacket
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.User
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -72,7 +72,7 @@ import javax.inject.Inject
 private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
 private fun MeshPacket.hasValidSignal(): Boolean =
-    rxTime > 0 && (rxSnr != 0f && rxRssi != 0) && (hopStart > 0 && hopStart - hopLimit == 0)
+    rx_time != 0 && (rx_snr != 0f && rx_rssi != 0) && (hop_start != 0 && hop_start - (hop_limit ?: 0) == 0)
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
@@ -97,8 +97,10 @@ constructor(
 
     private val tracerouteOverlayCache = MutableStateFlow<Map<Int, TracerouteOverlay>>(emptyMap())
 
-    private fun MeshLog.hasValidTraceroute(): Boolean =
-        with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
+    private fun MeshLog.hasValidTraceroute(): Boolean = fromRadio.packet?.let { packet ->
+        val decoded = packet.decoded
+        decoded != null && decoded.want_response && packet.from == 0 && packet.to == destNum
+    } ?: false
 
     /**
      * Creates a fallback node for hidden clients or nodes not yet in the database. This prevents the detail screen from
@@ -109,12 +111,7 @@ constructor(
         val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
         val longName = getString(Res.string.fallback_node_name) + "  $safeUserId"
         val defaultUser =
-            MeshProtos.User.newBuilder()
-                .setId(userId)
-                .setLongName(longName)
-                .setShortName(safeUserId)
-                .setHwModel(MeshProtos.HardwareModel.UNSET)
-                .build()
+            User(id = userId, long_name = longName, short_name = safeUserId, hw_model = HardwareModel.UNSET)
 
         return Node(num = nodeNum, user = defaultUser)
     }
@@ -180,7 +177,7 @@ constructor(
     }
 
     fun clearPosition() = viewModelScope.launch(dispatchers.io) {
-        destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }
+        destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP.value) }
     }
 
     fun onServiceAction(action: ServiceAction) = viewModelScope.launch { serviceRepository.onServiceAction(action) }
@@ -223,7 +220,7 @@ constructor(
                                 val actualNode = node ?: createFallbackNode(currentDestNum)
                                 val pioEnv = if (currentDestNum == ourNodeNum) myInfo?.pioEnv else null
                                 val deviceHardware =
-                                    actualNode.user.hwModel.safeNumber().let {
+                                    actualNode.user.hw_model.safeNumber().let {
                                         deviceHardwareRepository.getDeviceHardwareByModel(it, target = pioEnv)
                                     }
                                 _state.update { state ->
@@ -239,12 +236,14 @@ constructor(
 
                     launch {
                         radioConfigRepository.deviceProfileFlow.collect { profile ->
-                            val moduleConfig = profile.moduleConfig
+                            val moduleConfig = profile.module_config
                             _state.update { state ->
                                 state.copy(
-                                    isManaged = profile.config.security.isManaged,
-                                    isFahrenheit = moduleConfig.telemetry.environmentDisplayFahrenheit,
-                                    displayUnits = profile.config.display.units,
+                                    isManaged = profile.config?.security?.is_managed ?: false,
+                                    isFahrenheit = moduleConfig?.telemetry?.environment_display_fahrenheit ?: false,
+                                    displayUnits =
+                                    profile.config?.display?.units
+                                        ?: org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.METRIC,
                                 )
                             }
                         }
@@ -254,19 +253,21 @@ constructor(
                         meshLogRepository.getTelemetryFrom(currentDestNum).collect { telemetry ->
                             _state.update { state ->
                                 state.copy(
-                                    deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                                    powerMetrics = telemetry.filter { it.hasPowerMetrics() },
-                                    hostMetrics = telemetry.filter { it.hasHostMetrics() },
+                                    deviceMetrics = telemetry.filter { it.device_metrics != null },
+                                    powerMetrics = telemetry.filter { it.power_metrics != null },
+                                    hostMetrics = telemetry.filter { it.host_metrics != null },
                                 )
                             }
                             _environmentState.update { state ->
                                 state.copy(
                                     environmentMetrics =
                                     telemetry.filter {
-                                        it.hasEnvironmentMetrics() &&
-                                            it.environmentMetrics.hasRelativeHumidity() &&
-                                            it.environmentMetrics.hasTemperature() &&
-                                            !it.environmentMetrics.temperature.isNaN()
+                                        val env = it.environment_metrics
+                                        val temp = env?.temperature
+                                        env?.relative_humidity != null &&
+                                            temp != null &&
+                                            temp != 0f &&
+                                            !temp.isNaN()
                                     },
                                 )
                             }
@@ -283,8 +284,8 @@ constructor(
 
                     launch {
                         combine(
-                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
-                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.TRACEROUTE_APP_VALUE),
+                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP.value),
+                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.TRACEROUTE_APP.value),
                         ) { request, response ->
                             _state.update { state ->
                                 state.copy(
@@ -299,7 +300,7 @@ constructor(
                     launch {
                         meshLogRepository.getMeshPacketsFrom(
                             currentDestNum,
-                            PortNum.POSITION_APP_VALUE,
+                            PortNum.POSITION_APP.value,
                         ).collect { packets ->
                             val distinctPositions =
                                 packets
@@ -307,7 +308,7 @@ constructor(
                                     .asFlow()
                                     .distinctUntilChanged { old, new ->
                                         old.time == new.time ||
-                                            (old.latitudeI == new.latitudeI && old.longitudeI == new.longitudeI)
+                                            (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
                                     }
                                     .toList()
                             _state.update { state -> state.copy(positionLogs = distinctPositions) }
@@ -315,10 +316,7 @@ constructor(
                     }
 
                     launch {
-                        meshLogRepository.getLogsFrom(
-                            currentDestNum,
-                            Portnums.PortNum.PAXCOUNTER_APP_VALUE,
-                        ).collect { logs ->
+                        meshLogRepository.getLogsFrom(currentDestNum, PortNum.PAXCOUNTER_APP.value).collect { logs ->
                             _state.update { state -> state.copy(paxMetrics = logs) }
                         }
                     }
@@ -338,7 +336,7 @@ constructor(
                     launch {
                         meshLogRepository
                             .getMyNodeInfo()
-                            .map { it?.firmwareEdition }
+                            .map { it?.firmware_edition }
                             .distinctUntilChanged()
                             .collect { firmwareEdition ->
                                 _state.update { state -> state.copy(firmwareEdition = firmwareEdition) }
@@ -373,12 +371,12 @@ constructor(
 
             positions.forEach { position ->
                 val rxDateTime = dateFormat.format(position.time * 1000L)
-                val latitude = position.latitudeI * 1e-7
-                val longitude = position.longitudeI * 1e-7
-                val altitude = position.altitude
-                val satsInView = position.satsInView
-                val speed = position.groundSpeed
-                val heading = "%.2f".format(position.groundTrack * 1e-5)
+                val latitude = (position.latitude_i ?: 0) * 1e-7
+                val longitude = (position.longitude_i ?: 0) * 1e-7
+                val altitude = position.altitude ?: 0
+                val satsInView = position.sats_in_view ?: 0
+                val speed = position.ground_speed ?: 0
+                val heading = "%.2f".format((position.ground_track ?: 0) * 1e-5)
 
                 // date,time,latitude,longitude,altitude,satsInView,speed,heading
                 writer.appendLine(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.sharing
 
 import android.Manifest
@@ -129,11 +128,9 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel
@@ -156,8 +153,9 @@ fun ChannelScreen(
     val enabled = connectionState == ConnectionState.Connected && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
-    var channelSet by remember(channels) { mutableStateOf(channels) }
-    val modemPresetName by remember(channels) { mutableStateOf(Channel(loraConfig = channels.loraConfig).name) }
+    var channelSetState by remember(channels) { mutableStateOf(channels) }
+    val modemPresetName by
+        remember(channels) { mutableStateOf(Channel(loraConfig = channels.lora_config ?: Config.LoRaConfig()).name) }
 
     var showResetDialog by remember { mutableStateOf(false) }
 
@@ -187,15 +185,13 @@ fun ChannelScreen(
     /* Holds selections made by the user for QR generation. */
     val channelSelections =
         rememberSaveable(saver = listSaver(save = { it.toList() }, restore = { it.toMutableStateList() })) {
-            mutableStateListOf(elements = Array(size = 8, init = { true }))
+            mutableStateListOf(*Array(size = 8, init = { true }))
         }
 
     val selectedChannelSet =
-        channelSet.copy {
-            val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-            settings.clear()
-            settings.addAll(result)
-        }
+        channelSetState.copy(
+            settings = channelSetState.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true },
+        )
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -238,25 +234,22 @@ fun ChannelScreen(
         } catch (ex: RemoteException) {
             Logger.e(ex) { "ignoring channel problem" }
 
-            channelSet = channels // Throw away user edits
+            channelSetState = channels // Throw away user edits
 
             // Tell the user to try again
             scope.launch { context.showToast(Res.string.cant_change_no_radio) }
         }
     }
 
-    fun installSettings(newChannel: ChannelProtos.ChannelSettings, newLoRaConfig: ConfigProtos.Config.LoRaConfig) {
-        val newSet = channelSet {
-            settings.add(newChannel)
-            loraConfig = newLoRaConfig
-        }
+    fun installSettings(newChannel: ChannelSettings, newLoRaConfig: Config.LoRaConfig) {
+        val newSet = ChannelSet(settings = listOf(newChannel), lora_config = newLoRaConfig)
         installSettings(newSet)
     }
 
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = {
-                channelSet = channels // throw away any edits
+                channelSetState = channels // throw away any edits
                 showResetDialog = false
             },
             title = { Text(text = stringResource(Res.string.reset_to_defaults)) },
@@ -267,10 +260,10 @@ fun ChannelScreen(
                         Logger.d { "Switching back to default channel" }
                         installSettings(
                             Channel.default.settings,
-                            Channel.default.loraConfig.copy {
-                                region = viewModel.region
-                                txEnabled = viewModel.txEnabled
-                            },
+                            Channel.default.loraConfig.copy(
+                                region = viewModel.region,
+                                tx_enabled = viewModel.txEnabled,
+                            ),
                         )
                         showResetDialog = false
                     },
@@ -281,7 +274,7 @@ fun ChannelScreen(
             dismissButton = {
                 TextButton(
                     onClick = {
-                        channelSet = channels // throw away any edits
+                        channelSetState = channels // throw away any edits
                         showResetDialog = false
                     },
                 ) {
@@ -315,7 +308,7 @@ fun ChannelScreen(
             item {
                 ChannelListView(
                     enabled = enabled,
-                    channelSet = channelSet,
+                    channelSet = channelSetState,
                     modemPresetName = modemPresetName,
                     channelSelections = channelSelections,
                     shouldAddChannel = shouldAddChannelsState,
@@ -505,17 +498,13 @@ private fun ChannelListView(
     onClick: () -> Unit = {},
 ) {
     val selectedChannelSet =
-        channelSet.copy {
-            val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-            settings.clear()
-            settings.addAll(result)
-        }
+        channelSet.copy(settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true })
 
     AdaptiveTwoPane(
         first = {
-            channelSet.settingsList.forEachIndexed { index, channel ->
-                val channelObj = Channel(channel, channelSet.loraConfig)
-                val displayTitle = channel.name.ifEmpty { modemPresetName }
+            channelSet.settings.forEachIndexed { index, channel ->
+                val channelObj = Channel(channel, channelSet.lora_config ?: Config.LoRaConfig())
+                val displayTitle = (channel.name ?: "").ifEmpty { modemPresetName }
 
                 ChannelSelection(
                     index = index,
@@ -523,7 +512,7 @@ private fun ChannelListView(
                     enabled = enabled,
                     isSelected = channelSelections[index],
                     onSelected = {
-                        if (it || selectedChannelSet.settingsCount > 1) {
+                        if (it || selectedChannelSet.settings.size > 1) {
                             channelSelections[index] = it
                         }
                     },
@@ -584,11 +573,7 @@ fun ModemPresetInfoPreview() {
 private fun ChannelScreenPreview() {
     ChannelListView(
         enabled = true,
-        channelSet =
-        channelSet {
-            settings.add(Channel.default.settings)
-            loraConfig = Channel.default.loraConfig
-        },
+        channelSet = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
         modemPresetName = Channel.default.name,
         channelSelections = listOf(true).toMutableStateList(),
     )

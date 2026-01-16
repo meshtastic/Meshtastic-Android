@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.datastore
 
 import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
-import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.ModuleConfig
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,27 +34,32 @@ class ModuleConfigDataSource @Inject constructor(private val moduleConfigStore: 
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
                 Logger.e { "Error reading LocalModuleConfig settings: ${exception.message}" }
-                emit(LocalModuleConfig.getDefaultInstance())
+                emit(LocalModuleConfig())
             } else {
                 throw exception
             }
         }
 
     suspend fun clearLocalModuleConfig() {
-        moduleConfigStore.updateData { preference -> preference.toBuilder().clear().build() }
+        moduleConfigStore.updateData { _ -> LocalModuleConfig() }
     }
 
     /** Updates [LocalModuleConfig] from each [ModuleConfig] oneOf. */
-    suspend fun setLocalModuleConfig(config: ModuleConfig) = moduleConfigStore.updateData {
-        val builder = it.toBuilder()
-        config.allFields.forEach { (field, value) ->
-            val localField = it.descriptorForType.findFieldByName(field.name)
-            if (localField != null) {
-                builder.setField(localField, value)
-            } else {
-                Logger.e { "Error writing LocalModuleConfig settings: ${config.payloadVariantCase}" }
-            }
-        }
-        builder.build()
+    suspend fun setLocalModuleConfig(config: ModuleConfig) = moduleConfigStore.updateData { local ->
+        local.copy(
+            mqtt = config.mqtt ?: local.mqtt,
+            serial = config.serial ?: local.serial,
+            external_notification = config.external_notification ?: local.external_notification,
+            store_forward = config.store_forward ?: local.store_forward,
+            range_test = config.range_test ?: local.range_test,
+            telemetry = config.telemetry ?: local.telemetry,
+            canned_message = config.canned_message ?: local.canned_message,
+            audio = config.audio ?: local.audio,
+            remote_hardware = config.remote_hardware ?: local.remote_hardware,
+            neighbor_info = config.neighbor_info ?: local.neighbor_info,
+            ambient_lighting = config.ambient_lighting ?: local.ambient_lighting,
+            detection_sensor = config.detection_sensor ?: local.detection_sensor,
+            paxcounter = config.paxcounter ?: local.paxcounter,
+        )
     }
 }

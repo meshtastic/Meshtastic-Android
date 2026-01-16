@@ -20,10 +20,10 @@ import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
-import org.meshtastic.proto.ChannelProtos.Channel
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,38 +36,37 @@ class ChannelSetDataSource @Inject constructor(private val channelSetStore: Data
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
                 Logger.e { "Error reading DeviceConfig settings: ${exception.message}" }
-                emit(ChannelSet.getDefaultInstance())
+                emit(ChannelSet())
             } else {
                 throw exception
             }
         }
 
     suspend fun clearChannelSet() {
-        channelSetStore.updateData { preference -> preference.toBuilder().clear().build() }
+        channelSetStore.updateData { _ -> ChannelSet() }
     }
 
     /** Replaces all [ChannelSettings] in a single atomic operation. */
     suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
-        channelSetStore.updateData { preference ->
-            preference.toBuilder().clearSettings().addAllSettings(settingsList).build()
-        }
+        channelSetStore.updateData { preference -> preference.copy(settings = settingsList) }
     }
 
     /** Updates the [ChannelSettings] list with the provided channel. */
     suspend fun updateChannelSettings(channel: Channel) {
         if (channel.role == Channel.Role.DISABLED) return
         channelSetStore.updateData { preference ->
-            val builder = preference.toBuilder()
+            val settings = preference.settings.toMutableList()
             // Resize to fit channel
-            while (builder.settingsCount <= channel.index) {
-                builder.addSettings(ChannelSettings.getDefaultInstance())
+            while (settings.size <= channel.index) {
+                settings.add(ChannelSettings())
             }
-            // use setSettings() to ensure settingsList and channel indexes match
-            builder.setSettings(channel.index, channel.settings).build()
+            // use set() to ensure settingsList and channel indexes match
+            settings[channel.index] = channel.settings ?: ChannelSettings()
+            preference.copy(settings = settings)
         }
     }
 
-    suspend fun setLoraConfig(config: ConfigProtos.Config.LoRaConfig) {
-        channelSetStore.updateData { preference -> preference.toBuilder().setLoraConfig(config).build() }
+    suspend fun setLoraConfig(config: Config.LoRaConfig) {
+        channelSetStore.updateData { preference -> preference.copy(lora_config = config) }
     }
 }

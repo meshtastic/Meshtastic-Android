@@ -19,7 +19,6 @@ package com.geeksville.mesh.service
 import android.os.RemoteException
 import androidx.annotation.VisibleForTesting
 import co.touchlab.kermit.Logger
-import com.google.protobuf.ByteString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -32,15 +31,21 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.MeshPacket
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.position
-import org.meshtastic.proto.telemetry
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Constants
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.HealthMetrics
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.Neighbor
+import org.meshtastic.proto.NeighborInfo
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.PowerMetrics
+import org.meshtastic.proto.Telemetry
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
@@ -49,6 +54,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.absoluteValue
 import kotlin.time.Duration.Companion.hours
+import org.meshtastic.proto.Position as ProtoPosition
 
 @Suppress("TooManyFunctions")
 @Singleton
@@ -62,22 +68,18 @@ constructor(
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val currentPacketId = AtomicLong(java.util.Random(System.currentTimeMillis()).nextLong().absoluteValue)
-    private val sessionPasskey = AtomicReference(ByteString.EMPTY)
+    private val sessionPasskey = AtomicReference(okio.ByteString.EMPTY)
     private val offlineSentPackets = CopyOnWriteArrayList<DataPacket>()
     val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
     val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
 
-    private val localConfig = MutableStateFlow(LocalConfig.getDefaultInstance())
-    private val channelSet = MutableStateFlow(ChannelSet.getDefaultInstance())
+    private val localConfig = MutableStateFlow(LocalConfig())
+    private val channelSet = MutableStateFlow(ChannelSet())
 
-    @Volatile var lastNeighborInfo: MeshProtos.NeighborInfo? = null
+    @Volatile var lastNeighborInfo: NeighborInfo? = null
 
     private val rememberDataType =
-        setOf(
-            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-            Portnums.PortNum.ALERT_APP_VALUE,
-            Portnums.PortNum.WAYPOINT_APP_VALUE,
-        )
+        setOf(PortNum.TEXT_MESSAGE_APP.value, PortNum.ALERT_APP.value, PortNum.WAYPOINT_APP.value)
 
     fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -95,11 +97,11 @@ constructor(
         return ((next % numPacketIds) + 1L).toInt()
     }
 
-    fun setSessionPasskey(key: ByteString) {
+    fun setSessionPasskey(key: okio.ByteString) {
         sessionPasskey.set(key)
     }
 
-    private fun getHopLimit(): Int = localConfig.value.lora.hopLimit
+    private fun getHopLimit(): Int = localConfig.value.lora?.hop_limit ?: 0
 
     private fun getAdminChannelIndex(toNum: Int): Int {
         val myNum = nodeManager?.myNodeNum ?: return 0
@@ -111,7 +113,7 @@ constructor(
                 myNum == toNum -> 0
                 myNode?.hasPKC == true && destNode?.hasPKC == true -> DataPacket.PKC_CHANNEL_INDEX
                 else ->
-                    channelSet.value.settingsList
+                    channelSet.value.settings
                         .indexOfFirst { it.name.equals(ADMIN_CHANNEL_NAME, ignoreCase = true) }
                         .coerceAtLeast(0)
             }
@@ -122,7 +124,7 @@ constructor(
         if (p.id == 0) p.id = generatePacketId()
         val bytes = p.bytes ?: ByteArray(0)
         require(p.dataType != 0) { "Port numbers must be non-zero!" }
-        if (bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN_VALUE) {
+        if (bytes.size >= Constants.DATA_PAYLOAD_LEN.value) {
             p.status = MessageStatus.ERROR
             throw RemoteException("Message too long")
         } else {
@@ -142,6 +144,7 @@ constructor(
     }
 
     private fun sendNow(p: DataPacket) {
+        val portNum = PortNum.fromValue(p.dataType) ?: PortNum.UNKNOWN_APP
         val meshPacket =
             newMeshPacketTo(p.to ?: DataPacket.ID_BROADCAST).buildMeshPacket(
                 id = p.id,
@@ -149,10 +152,12 @@ constructor(
                 hopLimit = if (p.hopLimit > 0) p.hopLimit else getHopLimit(),
                 channel = p.channel,
             ) {
-                portnumValue = p.dataType
-                payload = ByteString.copyFrom(p.bytes ?: ByteArray(0))
-                p.replyId?.let { if (it != 0) replyId = it }
-                if (p.emoji != 0) emoji = p.emoji
+                copy(
+                    portnum = portNum,
+                    payload = okio.ByteString.of(*p.bytes ?: ByteArray(0)),
+                    reply_id = p.replyId ?: 0,
+                    emoji = p.emoji,
+                )
             }
         p.time = System.currentTimeMillis()
         packetHandler?.sendToRadio(meshPacket)
@@ -181,19 +186,19 @@ constructor(
         destNum: Int,
         requestId: Int = generatePacketId(),
         wantResponse: Boolean = false,
-        initFn: AdminProtos.AdminMessage.Builder.() -> Unit,
+        initFn: AdminMessage.() -> AdminMessage,
     ) {
         val packet =
             newMeshPacketTo(destNum).buildAdminPacket(id = requestId, wantResponse = wantResponse, initFn = initFn)
         packetHandler?.sendToRadio(packet)
     }
 
-    fun sendPosition(pos: MeshProtos.Position, destNum: Int? = null, wantResponse: Boolean = false) {
+    fun sendPosition(pos: ProtoPosition, destNum: Int? = null, wantResponse: Boolean = false) {
         val myNum = nodeManager?.myNodeNum ?: return
         val idNum = destNum ?: myNum
         Logger.d { "Sending our position/time to=$idNum ${Position(pos)}" }
 
-        if (!localConfig.value.position.fixedPosition) {
+        if (localConfig.value.position?.fixed_position != true) {
             nodeManager.handleReceivedPosition(myNum, myNum, pos)
         }
 
@@ -202,43 +207,49 @@ constructor(
                 channel = if (destNum == null) 0 else nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
                 priority = MeshPacket.Priority.BACKGROUND,
             ) {
-                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                payload = pos.toByteString()
-                this.wantResponse = wantResponse
+                copy(
+                    portnum = PortNum.POSITION_APP,
+                    payload = okio.ByteString.of(*pos.encode()),
+                    want_response = wantResponse,
+                )
             },
         )
     }
 
     fun requestPosition(destNum: Int, currentPosition: Position) {
-        val meshPosition = position {
-            latitudeI = Position.degI(currentPosition.latitude)
-            longitudeI = Position.degI(currentPosition.longitude)
-            altitude = currentPosition.altitude
-            time = (System.currentTimeMillis() / TIME_MS_TO_S).toInt()
-        }
+        val meshPosition =
+            ProtoPosition(
+                latitude_i = Position.degI(currentPosition.latitude),
+                longitude_i = Position.degI(currentPosition.longitude),
+                altitude = currentPosition.altitude,
+                time = (System.currentTimeMillis() / TIME_MS_TO_S).toInt(),
+            )
         packetHandler?.sendToRadio(
             newMeshPacketTo(destNum).buildMeshPacket(
                 channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
                 priority = MeshPacket.Priority.BACKGROUND,
             ) {
-                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                payload = meshPosition.toByteString()
-                wantResponse = true
+                copy(
+                    portnum = PortNum.POSITION_APP,
+                    payload = okio.ByteString.of(*meshPosition.encode()),
+                    want_response = true,
+                )
             },
         )
     }
 
     fun setFixedPosition(destNum: Int, pos: Position) {
-        val meshPos = position {
-            latitudeI = Position.degI(pos.latitude)
-            longitudeI = Position.degI(pos.longitude)
-            altitude = pos.altitude
-        }
+        val meshPos =
+            ProtoPosition(
+                latitude_i = Position.degI(pos.latitude),
+                longitude_i = Position.degI(pos.longitude),
+                altitude = pos.altitude,
+            )
         sendAdmin(destNum) {
             if (pos != Position(0.0, 0.0, 0)) {
-                setFixedPosition = meshPos
+                copy(set_fixed_position = meshPos)
             } else {
-                removeFixedPosition = true
+                copy(remove_fixed_position = true)
             }
         }
         nodeManager?.handleReceivedPosition(destNum, nodeManager.myNodeNum ?: 0, meshPos)
@@ -249,9 +260,11 @@ constructor(
         val myNode = nodeManager.getOrCreateNodeInfo(myNum)
         packetHandler?.sendToRadio(
             newMeshPacketTo(destNum).buildMeshPacket(channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0) {
-                portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
-                wantResponse = true
-                payload = myNode.user.toByteString()
+                copy(
+                    portnum = PortNum.NODEINFO_APP,
+                    want_response = true,
+                    payload = okio.ByteString.of(*myNode.user.encode()),
+                )
             },
         )
     }
@@ -264,32 +277,33 @@ constructor(
                 id = requestId,
                 channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
             ) {
-                portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
-                wantResponse = true
+                copy(portnum = PortNum.TRACEROUTE_APP, want_response = true)
             },
         )
     }
 
     fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
         val type = TelemetryType.entries.getOrNull(typeValue) ?: TelemetryType.DEVICE
-        val telemetryRequest = telemetry {
-            when (type) {
-                TelemetryType.ENVIRONMENT ->
-                    environmentMetrics = TelemetryProtos.EnvironmentMetrics.getDefaultInstance()
-                TelemetryType.AIR_QUALITY -> airQualityMetrics = TelemetryProtos.AirQualityMetrics.getDefaultInstance()
-                TelemetryType.POWER -> powerMetrics = TelemetryProtos.PowerMetrics.getDefaultInstance()
-                TelemetryType.LOCAL_STATS -> localStats = TelemetryProtos.LocalStats.getDefaultInstance()
-                TelemetryType.DEVICE -> deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
-            }
-        }
+        val telemetryRequest =
+            Telemetry(
+                device_metrics = if (type == TelemetryType.DEVICE) DeviceMetrics() else null,
+                environment_metrics = if (type == TelemetryType.ENVIRONMENT) EnvironmentMetrics() else null,
+                air_quality_metrics =
+                if (type == TelemetryType.AIR_QUALITY) org.meshtastic.proto.AirQualityMetrics() else null,
+                power_metrics = if (type == TelemetryType.POWER) PowerMetrics() else null,
+                local_stats = if (type == TelemetryType.LOCAL_STATS) LocalStats() else null,
+                health_metrics = if (type == TelemetryType.HEALTH) HealthMetrics() else null,
+            )
         packetHandler?.sendToRadio(
             newMeshPacketTo(destNum).buildMeshPacket(
                 id = requestId,
                 channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
             ) {
-                portnumValue = Portnums.PortNum.TELEMETRY_APP_VALUE
-                payload = telemetryRequest.toByteString()
-                wantResponse = true
+                copy(
+                    portnum = PortNum.TELEMETRY_APP,
+                    payload = okio.ByteString.of(*telemetryRequest.encode()),
+                    want_response = true,
+                )
             },
         )
     }
@@ -303,19 +317,20 @@ constructor(
                     ?: run {
                         val oneHour = 1.hours.inWholeMinutes.toInt()
                         Logger.d { "No stored neighbor info from connected radio, sending dummy data" }
-                        MeshProtos.NeighborInfo.newBuilder()
-                            .setNodeId(myNum)
-                            .setLastSentById(myNum)
-                            .setNodeBroadcastIntervalSecs(oneHour)
-                            .addNeighbors(
-                                MeshProtos.Neighbor.newBuilder()
-                                    .setNodeId(0) // Dummy node ID that can be intercepted
-                                    .setSnr(0f)
-                                    .setLastRxTime((System.currentTimeMillis() / TIME_MS_TO_S).toInt())
-                                    .setNodeBroadcastIntervalSecs(oneHour)
-                                    .build(),
-                            )
-                            .build()
+                        NeighborInfo(
+                            node_id = myNum,
+                            last_sent_by_id = myNum,
+                            node_broadcast_interval_secs = oneHour,
+                            neighbors =
+                            listOf(
+                                Neighbor(
+                                    node_id = 0, // Dummy node ID that can be intercepted
+                                    snr = 0f,
+                                    last_rx_time = (System.currentTimeMillis() / TIME_MS_TO_S).toInt(),
+                                    node_broadcast_interval_secs = oneHour,
+                                ),
+                            ),
+                        )
                     }
 
             // Send the neighbor info from our connected radio to ourselves (simulated)
@@ -325,9 +340,11 @@ constructor(
                     id = requestId,
                     channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
                 ) {
-                    portnumValue = Portnums.PortNum.NEIGHBORINFO_APP_VALUE
-                    payload = neighborInfoToSend.toByteString()
-                    wantResponse = true
+                    copy(
+                        portnum = PortNum.NEIGHBORINFO_APP,
+                        payload = okio.ByteString.of(*neighborInfoToSend.encode()),
+                        want_response = true,
+                    )
                 },
             )
         } else {
@@ -338,8 +355,7 @@ constructor(
                     id = requestId,
                     channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
                 ) {
-                    portnumValue = Portnums.PortNum.NEIGHBORINFO_APP_VALUE
-                    wantResponse = true
+                    copy(portnum = PortNum.NEIGHBORINFO_APP, want_response = true)
                 },
             )
         }
@@ -361,41 +377,46 @@ constructor(
         }
     }
 
-    private fun newMeshPacketTo(toId: String): MeshPacket.Builder {
+    private fun newMeshPacketTo(toId: String): MeshPacket {
         val destNum = resolveNodeNum(toId)
         return newMeshPacketTo(destNum)
     }
 
-    private fun newMeshPacketTo(destNum: Int): MeshPacket.Builder = MeshPacket.newBuilder().apply { to = destNum }
+    private fun newMeshPacketTo(destNum: Int): MeshPacket = MeshPacket(to = destNum)
 
-    private fun MeshPacket.Builder.buildMeshPacket(
+    private fun MeshPacket.buildMeshPacket(
         wantAck: Boolean = false,
         id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
         hopLimit: Int = 0,
         channel: Int = 0,
         priority: MeshPacket.Priority = MeshPacket.Priority.UNSET,
-        initFn: MeshProtos.Data.Builder.() -> Unit,
+        initFn: Data.() -> Data,
     ): MeshPacket {
-        this.id = id
-        this.wantAck = wantAck
-        this.hopLimit = if (hopLimit > 0) hopLimit else getHopLimit()
-        this.priority = priority
+        var updated =
+            this.copy(
+                id = id,
+                want_ack = wantAck,
+                hop_limit = if (hopLimit > 0) hopLimit else getHopLimit(),
+                priority = priority,
+            )
 
         if (channel == DataPacket.PKC_CHANNEL_INDEX) {
-            pkiEncrypted = true
-            nodeManager?.nodeDBbyNodeNum?.get(to)?.user?.publicKey?.let { publicKey = it }
+            updated =
+                updated.copy(
+                    pki_encrypted = true,
+                    public_key = nodeManager?.nodeDBbyNodeNum?.get(to)?.user?.public_key ?: okio.ByteString.EMPTY,
+                )
         } else {
-            this.channel = channel
+            updated = updated.copy(channel = channel)
         }
 
-        this.decoded = MeshProtos.Data.newBuilder().apply(initFn).build()
-        return build()
+        return updated.copy(decoded = Data().initFn())
     }
 
-    private fun MeshPacket.Builder.buildAdminPacket(
+    private fun MeshPacket.buildAdminPacket(
         id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
         wantResponse: Boolean = false,
-        initFn: AdminProtos.AdminMessage.Builder.() -> Unit,
+        initFn: AdminMessage.() -> AdminMessage,
     ): MeshPacket =
         buildMeshPacket(
             id = id,
@@ -403,14 +424,14 @@ constructor(
             channel = getAdminChannelIndex(to),
             priority = MeshPacket.Priority.RELIABLE,
         ) {
-            this.wantResponse = wantResponse
-            portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
-            payload =
-                AdminProtos.AdminMessage.newBuilder()
-                    .apply(initFn)
-                    .setSessionPasskey(sessionPasskey.get())
-                    .build()
-                    .toByteString()
+            copy(
+                want_response = wantResponse,
+                portnum = PortNum.ADMIN_APP,
+                payload =
+                okio.ByteString.of(
+                    *(AdminMessage().initFn().copy(session_passkey = sessionPasskey.get()).encode()),
+                ),
+            )
         }
 
     companion object {

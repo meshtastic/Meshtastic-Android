@@ -18,14 +18,17 @@ package org.meshtastic.core.database
 
 import androidx.room.TypeConverter
 import co.touchlab.kermit.Logger
-import com.google.protobuf.ByteString
-import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.serialization.json.Json
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.User
 
 @Suppress("TooManyFunctions")
 class Converters {
@@ -40,64 +43,64 @@ class Converters {
     @TypeConverter fun dataToString(value: DataPacket): String = json.encodeToString(DataPacket.serializer(), value)
 
     @TypeConverter
-    fun bytesToFromRadio(bytes: ByteArray): MeshProtos.FromRadio = try {
-        MeshProtos.FromRadio.parseFrom(bytes)
-    } catch (ex: InvalidProtocolBufferException) {
+    fun bytesToFromRadio(bytes: ByteArray): FromRadio = try {
+        FromRadio.ADAPTER.decode(bytes)
+    } catch (ex: Exception) {
         Logger.e(ex) { "bytesToFromRadio TypeConverter error" }
-        MeshProtos.FromRadio.getDefaultInstance()
+        FromRadio()
     }
 
-    @TypeConverter fun fromRadioToBytes(value: MeshProtos.FromRadio): ByteArray? = value.toByteArray()
+    @TypeConverter fun fromRadioToBytes(value: FromRadio): ByteArray? = FromRadio.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToUser(bytes: ByteArray): MeshProtos.User = try {
-        MeshProtos.User.parseFrom(bytes)
-    } catch (ex: InvalidProtocolBufferException) {
+    fun bytesToUser(bytes: ByteArray): User = try {
+        User.ADAPTER.decode(bytes)
+    } catch (ex: Exception) {
         Logger.e(ex) { "bytesToUser TypeConverter error" }
-        MeshProtos.User.getDefaultInstance()
+        User()
     }
 
-    @TypeConverter fun userToBytes(value: MeshProtos.User): ByteArray? = value.toByteArray()
+    @TypeConverter fun userToBytes(value: User): ByteArray? = User.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToPosition(bytes: ByteArray): MeshProtos.Position = try {
-        MeshProtos.Position.parseFrom(bytes)
-    } catch (ex: InvalidProtocolBufferException) {
+    fun bytesToPosition(bytes: ByteArray): Position = try {
+        Position.ADAPTER.decode(bytes)
+    } catch (ex: Exception) {
         Logger.e(ex) { "bytesToPosition TypeConverter error" }
-        MeshProtos.Position.getDefaultInstance()
+        Position()
     }
 
-    @TypeConverter fun positionToBytes(value: MeshProtos.Position): ByteArray? = value.toByteArray()
+    @TypeConverter fun positionToBytes(value: Position): ByteArray? = Position.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToTelemetry(bytes: ByteArray): TelemetryProtos.Telemetry = try {
-        TelemetryProtos.Telemetry.parseFrom(bytes)
-    } catch (ex: InvalidProtocolBufferException) {
+    fun bytesToTelemetry(bytes: ByteArray): Telemetry = try {
+        Telemetry.ADAPTER.decode(bytes)
+    } catch (ex: Exception) {
         Logger.e(ex) { "bytesToTelemetry TypeConverter error" }
-        TelemetryProtos.Telemetry.newBuilder().build() // Return an empty Telemetry object
+        Telemetry()
     }
 
-    @TypeConverter fun telemetryToBytes(value: TelemetryProtos.Telemetry): ByteArray? = value.toByteArray()
+    @TypeConverter fun telemetryToBytes(value: Telemetry): ByteArray? = Telemetry.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToPaxcounter(bytes: ByteArray): PaxcountProtos.Paxcount = try {
-        PaxcountProtos.Paxcount.parseFrom(bytes)
-    } catch (ex: InvalidProtocolBufferException) {
+    fun bytesToPaxcounter(bytes: ByteArray): Paxcount = try {
+        Paxcount.ADAPTER.decode(bytes)
+    } catch (ex: Exception) {
         Logger.e(ex) { "bytesToPaxcounter TypeConverter error" }
-        PaxcountProtos.Paxcount.getDefaultInstance()
+        Paxcount()
     }
 
-    @TypeConverter fun paxCounterToBytes(value: PaxcountProtos.Paxcount): ByteArray? = value.toByteArray()
+    @TypeConverter fun paxCounterToBytes(value: Paxcount): ByteArray? = Paxcount.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToMetadata(bytes: ByteArray): MeshProtos.DeviceMetadata = try {
-        MeshProtos.DeviceMetadata.parseFrom(bytes)
-    } catch (ex: InvalidProtocolBufferException) {
+    fun bytesToMetadata(bytes: ByteArray): DeviceMetadata = try {
+        DeviceMetadata.ADAPTER.decode(bytes)
+    } catch (ex: Exception) {
         Logger.e(ex) { "bytesToMetadata TypeConverter error" }
-        MeshProtos.DeviceMetadata.getDefaultInstance()
+        DeviceMetadata()
     }
 
-    @TypeConverter fun metadataToBytes(value: MeshProtos.DeviceMetadata): ByteArray? = value.toByteArray()
+    @TypeConverter fun metadataToBytes(value: DeviceMetadata): ByteArray? = DeviceMetadata.ADAPTER.encode(value)
 
     @TypeConverter
     fun fromStringList(value: String?): List<String>? {
@@ -115,8 +118,7 @@ class Converters {
         return Json.encodeToString(list)
     }
 
-    @TypeConverter
-    fun bytesToByteString(bytes: ByteArray?): ByteString? = if (bytes == null) null else ByteString.copyFrom(bytes)
+    @TypeConverter fun bytesToByteString(bytes: ByteArray?): ByteString? = bytes?.toByteString()
 
     @TypeConverter fun byteStringToBytes(value: ByteString?): ByteArray? = value?.toByteArray()
 

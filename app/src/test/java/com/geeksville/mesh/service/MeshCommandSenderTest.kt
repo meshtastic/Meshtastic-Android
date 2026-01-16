@@ -22,7 +22,6 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.user
 
 class MeshCommandSenderTest {
 
@@ -60,7 +59,7 @@ class MeshCommandSenderTest {
     fun `resolveNodeNum handles custom node ID from database`() {
         val nodeNum = 456
         val userId = "custom_id"
-        val entity = NodeEntity(num = nodeNum, user = user { id = userId })
+        val entity = NodeEntity(num = nodeNum, user = org.meshtastic.proto.User(id = userId))
         nodeManager.nodeDBbyNodeNum[nodeNum] = entity
         nodeManager.nodeDBbyID[userId] = entity
 

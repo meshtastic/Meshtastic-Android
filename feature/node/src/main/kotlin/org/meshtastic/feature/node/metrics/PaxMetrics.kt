@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
@@ -67,8 +66,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.PortNum
 import java.text.DateFormat
 import java.util.Date
 
@@ -164,7 +163,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
     val dateFormat = DateFormat.getDateTimeInstance()
     var timeFrame by remember { mutableStateOf(TimeFrame.TWENTY_FOUR_HOURS) }
-    // Only show logs that can be decoded as PaxcountProtos.Paxcount
+    // Only show logs that can be decoded as Paxcount
     val paxMetrics =
         state.paxMetrics.mapNotNull { log ->
             val pax = decodePaxFromLog(log)
@@ -181,7 +180,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             .filter { it.first.received_date / 1000 >= oldestTime }
             .map {
                 val t = (it.first.received_date / 1000).toInt()
-                Triple(t, it.second.ble, it.second.wifi)
+                Triple(t, it.second.ble ?: 0, it.second.wifi ?: 0)
             }
             .sortedBy { it.first }
     val totalSeries = graphData.map { it.first to (it.second + it.third) }
@@ -199,7 +198,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -232,7 +231,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                 )
             }
             // List
-            if (paxMetrics.isEmpty()) {
+            if (pagedContactsEmpty(paxMetrics)) { // Corrected check
                 Text(
                     text = stringResource(Res.string.no_pax_metrics_logs),
                     modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -247,20 +246,21 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     }
 }
 
+private fun pagedContactsEmpty(list: List<Pair<MeshLog, Paxcount>>): Boolean = list.isEmpty()
+
 @Suppress("MagicNumber", "CyclomaticComplexMethod")
-fun decodePaxFromLog(log: MeshLog): PaxcountProtos.Paxcount? {
-    var result: PaxcountProtos.Paxcount? = null
+fun decodePaxFromLog(log: MeshLog): Paxcount? {
+    var result: Paxcount? = null
     // First, try to parse from the binary fromRadio field (robust, like telemetry)
     try {
         val packet = log.fromRadio.packet
-        if (packet != null && packet.hasDecoded() && packet.decoded.portnumValue == PortNum.PAXCOUNTER_APP_VALUE) {
-            val pax = PaxcountProtos.Paxcount.parseFrom(packet.decoded.payload)
-            if (pax.ble != 0 || pax.wifi != 0 || pax.uptime != 0) result = pax
+        val decoded = packet?.decoded
+        if (decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
+            val pax = Paxcount.ADAPTER.decode(decoded.payload)
+            if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) result = pax
         }
-    } catch (e: com.google.protobuf.InvalidProtocolBufferException) {
+    } catch (e: Exception) {
         android.util.Log.e("PaxMetrics", "Failed to parse Paxcount from binary data", e)
-    } catch (e: IllegalArgumentException) {
-        android.util.Log.e("PaxMetrics", "Invalid argument while parsing Paxcount from binary data", e)
     }
     // Fallback: Try direct base64 or bytes from raw_message
     if (result == null) {
@@ -268,17 +268,15 @@ fun decodePaxFromLog(log: MeshLog): PaxcountProtos.Paxcount? {
             val base64 = log.raw_message.trim()
             if (base64.matches(Regex("^[A-Za-z0-9+/=\r\n]+$"))) {
                 val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
-                val pax = PaxcountProtos.Paxcount.parseFrom(bytes)
+                val pax = Paxcount.ADAPTER.decode(bytes)
                 result = pax
             } else if (base64.matches(Regex("^[0-9a-fA-F]+$")) && base64.length % 2 == 0) {
                 val bytes = base64.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-                val pax = PaxcountProtos.Paxcount.parseFrom(bytes)
+                val pax = Paxcount.ADAPTER.decode(bytes)
                 result = pax
             }
-        } catch (e: IllegalArgumentException) {
-            android.util.Log.e("PaxMetrics", "Invalid Base64 or hex input", e)
-        } catch (e: com.google.protobuf.InvalidProtocolBufferException) {
-            android.util.Log.e("PaxMetrics", "Failed to parse Paxcount from decoded data", e)
+        } catch (e: Exception) {
+            android.util.Log.e("PaxMetrics", "Invalid input or parse failure", e)
         }
     }
     return result
@@ -303,7 +301,7 @@ fun unescapeProtoString(escaped: String): ByteArray {
 }
 
 @Composable
-fun PaxMetricsItem(log: MeshLog, pax: PaxcountProtos.Paxcount, dateFormat: DateFormat) {
+fun PaxMetricsItem(log: MeshLog, pax: Paxcount, dateFormat: DateFormat) {
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
             text = dateFormat.format(Date(log.received_date)),
@@ -311,8 +309,10 @@ fun PaxMetricsItem(log: MeshLog, pax: PaxcountProtos.Paxcount, dateFormat: DateF
             textAlign = TextAlign.End,
             modifier = Modifier.fillMaxWidth(),
         )
-        val total = pax.ble + pax.wifi
-        val summary = "PAX: $total (B:${pax.ble}  W:${pax.wifi})"
+        val ble = pax.ble ?: 0
+        val wifi = pax.wifi ?: 0
+        val total = ble + wifi
+        val summary = "PAX: $total (B:$ble  W:$wifi)"
         Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 text = summary,
@@ -320,7 +320,7 @@ fun PaxMetricsItem(log: MeshLog, pax: PaxcountProtos.Paxcount, dateFormat: DateF
                 modifier = Modifier.weight(1f, fill = true),
             )
             Text(
-                text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
+                text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime ?: 0),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.End,
                 modifier = Modifier.alignByBaseline(),

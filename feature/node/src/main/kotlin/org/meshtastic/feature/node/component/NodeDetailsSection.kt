@@ -129,13 +129,13 @@ private fun MainNodeDetails(node: Node) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             InfoItem(
                 label = stringResource(Res.string.short_name),
-                value = node.user.shortName.ifEmpty { "???" },
+                value = node.user.short_name.ifEmpty { "???" },
                 icon = Icons.Default.Person,
                 modifier = Modifier.weight(1f),
             )
             InfoItem(
                 label = stringResource(Res.string.role),
-                value = node.user.role.name,
+                value = node.user.role?.name ?: "",
                 icon = Icons.Default.Work,
                 modifier = Modifier.weight(1f),
             )
@@ -167,10 +167,10 @@ private fun MainNodeDetails(node: Node) {
                 icon = Icons.Default.Person,
                 modifier = Modifier.weight(1f),
             )
-            if (node.deviceMetrics.uptimeSeconds > 0) {
+            if ((node.deviceMetrics.uptime_seconds ?: 0) > 0) {
                 InfoItem(
                     label = stringResource(Res.string.uptime),
-                    value = formatUptime(node.deviceMetrics.uptimeSeconds),
+                    value = formatUptime(node.deviceMetrics.uptime_seconds ?: 0),
                     icon = Icons.Default.CheckCircle,
                     modifier = Modifier.weight(1f),
                 )

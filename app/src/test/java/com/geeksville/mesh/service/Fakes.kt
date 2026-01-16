@@ -27,8 +27,8 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.NodeWithRelations
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Telemetry
 
 class FakeNodeInfoReadDataSource : NodeInfoReadDataSource {
     val myNodeInfo = MutableStateFlow<MyNodeEntity?>(null)
@@ -71,6 +71,8 @@ class FakeNodeInfoWriteDataSource : NodeInfoWriteDataSource {
     override suspend fun setNodeNotes(num: Int, notes: String) {}
 
     override suspend fun backfillDenormalizedNames() {}
+
+    override suspend fun clearMyNodeInfo() {}
 }
 
 class FakeMeshServiceNotifications : MeshServiceNotifications {
@@ -78,10 +80,8 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
 
     override fun initChannels() {}
 
-    override fun updateServiceStateNotification(
-        summaryString: String?,
-        telemetry: TelemetryProtos.Telemetry?,
-    ): Notification = null as Notification
+    override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification =
+        null as Notification
 
     override suspend fun updateMessageNotification(
         contactKey: String,
@@ -115,11 +115,11 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
 
     override fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {}
 
-    override fun showClientNotification(clientNotification: MeshProtos.ClientNotification) {}
+    override fun showClientNotification(clientNotification: ClientNotification) {}
 
     override fun cancelMessageNotification(contactKey: String) {}
 
     override fun cancelLowBatteryNotification(node: NodeEntity) {}
 
-    override fun clearClientNotification(notification: MeshProtos.ClientNotification) {}
+    override fun clearClientNotification(notification: ClientNotification) {}
 }

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooGenericExceptionCaught:ChannelSetSerializer.kt$ChannelSetSerializer$exception: Exception</ID>
+    <ID>TooGenericExceptionCaught:LocalConfigSerializer.kt$LocalConfigSerializer$exception: Exception</ID>
+    <ID>TooGenericExceptionCaught:ModuleConfigSerializer.kt$ModuleConfigSerializer$exception: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.datastore
 
 import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import org.meshtastic.proto.ConfigProtos.Config
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,27 +34,27 @@ class LocalConfigDataSource @Inject constructor(private val localConfigStore: Da
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
                 Logger.e { "Error reading LocalConfig settings: ${exception.message}" }
-                emit(LocalConfig.getDefaultInstance())
+                emit(LocalConfig())
             } else {
                 throw exception
             }
         }
 
     suspend fun clearLocalConfig() {
-        localConfigStore.updateData { preference -> preference.toBuilder().clear().build() }
+        localConfigStore.updateData { _ -> LocalConfig() }
     }
 
     /** Updates [LocalConfig] from each [Config] oneOf. */
-    suspend fun setLocalConfig(config: Config) = localConfigStore.updateData {
-        val builder = it.toBuilder()
-        config.allFields.forEach { (field, value) ->
-            val localField = it.descriptorForType.findFieldByName(field.name)
-            if (localField != null) {
-                builder.setField(localField, value)
-            } else {
-                Logger.e { "Error writing LocalConfig settings: ${config.payloadVariantCase}" }
-            }
-        }
-        builder.build()
+    suspend fun setLocalConfig(config: Config) = localConfigStore.updateData { local ->
+        local.copy(
+            device = config.device ?: local.device,
+            position = config.position ?: local.position,
+            power = config.power ?: local.power,
+            network = config.network ?: local.network,
+            display = config.display ?: local.display,
+            lora = config.lora ?: local.lora,
+            bluetooth = config.bluetooth ?: local.bluetooth,
+            security = config.security ?: local.security,
+        )
     }
 }

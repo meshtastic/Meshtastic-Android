@@ -30,7 +30,7 @@ import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
+import org.meshtastic.proto.ChannelSettings
 
 @Suppress("TooManyFunctions")
 @Dao

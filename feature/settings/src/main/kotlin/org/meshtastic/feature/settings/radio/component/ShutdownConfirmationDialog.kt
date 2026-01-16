@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.layout.Column
@@ -45,7 +44,7 @@ import org.meshtastic.core.strings.send
 import org.meshtastic.core.strings.shutdown_node_name
 import org.meshtastic.core.strings.shutdown_warning
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.User
 
 @Composable
 fun ShutdownConfirmationDialog(
@@ -56,7 +55,7 @@ fun ShutdownConfirmationDialog(
     icon: ImageVector? = Icons.Rounded.Warning,
     onConfirm: () -> Unit,
 ) {
-    val nodeLongName = node?.user?.longName ?: "Unknown Node"
+    val nodeLongName = node?.user?.long_name ?: "Unknown Node"
 
     AlertDialog(
         onDismissRequest = {},
@@ -104,11 +103,7 @@ private fun ShutdownDialogContent(nodeLongName: String, isShutdown: Boolean) {
 @Preview
 @Composable
 private fun ShutdownConfirmationDialogPreview() {
-    val mockNode =
-        Node(
-            num = 123,
-            user = MeshProtos.User.newBuilder().setLongName("Rooftop Router Node").setShortName("ROOF").build(),
-        )
+    val mockNode = Node(num = 123, user = User(long_name = "Rooftop Router Node", short_name = "ROOF"))
 
     AppTheme { ShutdownConfirmationDialog(title = "Shutdown?", node = mockNode, onDismiss = {}, onConfirm = {}) }
 }

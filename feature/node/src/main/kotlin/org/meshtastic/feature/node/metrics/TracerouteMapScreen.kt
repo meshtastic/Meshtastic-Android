@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.layout.Arrangement
@@ -55,7 +54,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.feature.map.MapView
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Position
 
 @Composable
 fun TracerouteMapScreen(
@@ -67,27 +66,26 @@ fun TracerouteMapScreen(
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
     val snapshotPositions by
         remember(logUuid) {
-            logUuid?.let(metricsViewModel::tracerouteSnapshotPositions)
-                ?: flowOf(emptyMap<Int, MeshProtos.Position>())
+            logUuid?.let(metricsViewModel::tracerouteSnapshotPositions) ?: flowOf(emptyMap<Int, Position>())
         }
-            .collectAsStateWithLifecycle(emptyMap<Int, MeshProtos.Position>())
+            .collectAsStateWithLifecycle(emptyMap<Int, Position>())
     val tracerouteResult =
         if (logUuid != null) {
             state.tracerouteResults.find { it.uuid == logUuid }
         } else {
-            state.tracerouteResults.find { it.fromRadio.packet.decoded.requestId == requestId }
+            state.tracerouteResults.find { it.fromRadio.packet?.decoded?.request_id == requestId }
         }
     val routeDiscovery = tracerouteResult?.fromRadio?.packet?.fullRouteDiscovery
     val overlayFromLogs =
         remember(routeDiscovery, requestId) {
-            routeDiscovery?.let { TracerouteOverlay(requestId, it.routeList, it.routeBackList) }
+            routeDiscovery?.let { TracerouteOverlay(requestId, it.route, it.route_back) }
         }
     val overlayFromService = remember(requestId) { metricsViewModel.getTracerouteOverlay(requestId) }
     val overlay = overlayFromLogs ?: overlayFromService
     LaunchedEffect(Unit) { metricsViewModel.clearTracerouteResponse() }
 
     TracerouteMapScaffold(
-        title = state.node?.user?.longName ?: stringResource(Res.string.traceroute),
+        title = state.node?.user?.long_name ?: stringResource(Res.string.traceroute),
         overlay = overlay,
         snapshotPositions = snapshotPositions,
         onNavigateUp = onNavigateUp,
@@ -98,7 +96,7 @@ fun TracerouteMapScreen(
 private fun TracerouteMapScaffold(
     title: String,
     overlay: TracerouteOverlay?,
-    snapshotPositions: Map<Int, MeshProtos.Position>,
+    snapshotPositions: Map<Int, Position>,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {

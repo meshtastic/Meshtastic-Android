@@ -155,7 +155,8 @@ import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.feature.node.metrics.annotateTraceroute
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.FirmwareEdition
+import org.meshtastic.proto.NeighborInfo
 
 enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
     Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -227,7 +228,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     clientNotification?.let { notification ->
         var message = notification.message
         val compromisedKeys =
-            if (notification.hasLowEntropyKey() || notification.hasDuplicatedPublicKey()) {
+            if (notification.low_entropy_key != null || notification.duplicated_public_key != null) {
                 message = stringResource(Res.string.compromised_keys)
                 true
             } else {
@@ -303,10 +304,10 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             title = Res.string.neighbor_info,
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    fun tryParseNeighborInfo(input: String): MeshProtos.NeighborInfo? {
+                    fun tryParseNeighborInfo(input: String): NeighborInfo? {
                         // First, try parsing directly from raw bytes of the string
-                        var neighborInfo: MeshProtos.NeighborInfo? =
-                            runCatching { MeshProtos.NeighborInfo.parseFrom(input.toByteArray()) }.getOrNull()
+                        var neighborInfo: NeighborInfo? =
+                            runCatching { NeighborInfo.ADAPTER.decode(input.toByteArray()) }.getOrNull()
 
                         if (neighborInfo == null) {
                             // Next, try to decode a hex dump embedded as text (e.g., "AA BB CC ...")
@@ -314,7 +315,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                             @Suppress("detekt:MagicNumber") // byte offsets
                             if (hexPairs.size >= 4) {
                                 val bytes = hexPairs.map { it.toInt(16).toByte() }.toByteArray()
-                                neighborInfo = runCatching { MeshProtos.NeighborInfo.parseFrom(bytes) }.getOrNull()
+                                neighborInfo = runCatching { NeighborInfo.ADAPTER.decode(bytes) }.getOrNull()
                             }
                         }
 
@@ -326,29 +327,29 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                         fun fmtNode(nodeNum: Int): String = "!%08x".format(nodeNum)
                         Text(text = "NeighborInfo:", style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            text = "node_id: ${fmtNode(parsed.nodeId)}",
+                            text = "node_id: ${fmtNode(parsed.node_id ?: 0)}",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 8.dp),
                         )
                         Text(
-                            text = "last_sent_by_id: ${fmtNode(parsed.lastSentById)}",
+                            text = "last_sent_by_id: ${fmtNode(parsed.last_sent_by_id ?: 0)}",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 2.dp),
                         )
                         Text(
-                            text = "node_broadcast_interval_secs: ${parsed.nodeBroadcastIntervalSecs}",
+                            text = "node_broadcast_interval_secs: ${parsed.node_broadcast_interval_secs ?: 0}",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 2.dp),
                         )
-                        if (parsed.neighborsCount > 0) {
+                        if (parsed.neighbors.isNotEmpty()) {
                             Text(
                                 text = "neighbors:",
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
-                            parsed.neighborsList.forEach { n ->
+                            parsed.neighbors.forEach { n ->
                                 Text(
-                                    text = "  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}",
+                                    text = "  - node_id: ${fmtNode(n.node_id ?: 0)} snr: ${n.snr ?: 0f}",
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(start = 8.dp),
                                 )
@@ -610,7 +611,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
             firmwareEdition?.let { edition ->
                 Logger.d { "FirmwareEdition: ${edition.name}" }
                 when (edition) {
-                    MeshProtos.FirmwareEdition.VANILLA -> {
+                    FirmwareEdition.VANILLA -> {
                         // Handle any specific logic for VANILLA firmware edition if needed
                     }
 

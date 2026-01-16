@@ -40,7 +40,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.PortNum
 
 private const val TAG: String = "MeshServiceExample"
 
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
                         DataPacket(
                             to = DataPacket.ID_BROADCAST,
                             bytes = "Hello from MeshServiceExample".toByteArray(),
-                            dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                            dataType = PortNum.TEXT_MESSAGE_APP.value,
                             from = DataPacket.ID_LOCAL,
                             time = System.currentTimeMillis(),
                             id = 0,

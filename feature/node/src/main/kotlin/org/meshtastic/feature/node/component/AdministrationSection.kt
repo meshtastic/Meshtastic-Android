@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Column
@@ -58,7 +57,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.FirmwareEdition
 
 @Composable
 fun AdministrationSection(
@@ -97,7 +96,7 @@ fun AdministrationSection(
         }
     }
 
-    val firmwareVersion = node.metadata?.firmwareVersion
+    val firmwareVersion = node.metadata?.firmware_version
     val firmwareEdition = metricsState.firmwareEdition
     if (firmwareVersion != null || (firmwareEdition != null && metricsState.isLocal)) {
         FirmwareSection(metricsState, firmwareEdition, firmwareVersion, onFirmwareSelect)
@@ -118,7 +117,7 @@ private fun AdministrationHeader() {
 @Composable
 private fun FirmwareSection(
     metricsState: MetricsState,
-    firmwareEdition: MeshProtos.FirmwareEdition?,
+    firmwareEdition: FirmwareEdition?,
     firmwareVersion: String?,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
 ) {
@@ -139,7 +138,7 @@ private fun FirmwareSection(
             firmwareEdition?.let { edition ->
                 val icon =
                     when (edition) {
-                        MeshProtos.FirmwareEdition.VANILLA -> Icons.Default.Icecream
+                        FirmwareEdition.VANILLA -> Icons.Default.Icecream
                         else -> Icons.Default.ForkLeft
                     }
 

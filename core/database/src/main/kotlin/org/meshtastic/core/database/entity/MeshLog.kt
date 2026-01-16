@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.google.protobuf.TextFormat
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.FromRadio
-import org.meshtastic.proto.Portnums
-import java.io.IOException
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.NodeInfo
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Position
 
 @Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")
 @Entity(tableName = "log", indices = [Index(value = ["from_num"]), Index(value = ["port_num"])])
@@ -37,50 +37,32 @@ data class MeshLog(
     @ColumnInfo(name = "from_num", defaultValue = "0") val fromNum: Int = 0,
     @ColumnInfo(name = "port_num", defaultValue = "0") val portNum: Int = 0,
     @ColumnInfo(name = "from_radio", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
-    val fromRadio: FromRadio = FromRadio.getDefaultInstance(),
+    val fromRadio: FromRadio = FromRadio(),
 ) {
 
-    val meshPacket: MeshProtos.MeshPacket?
+    val meshPacket: MeshPacket?
         get() {
-            if (message_type == "Packet") {
-                val builder = MeshProtos.MeshPacket.newBuilder()
-                try {
-                    TextFormat.getParser().merge(raw_message, builder)
-                    return builder.build()
-                } catch (e: IOException) {}
-            }
+            // Wire doesn't have a TextFormat parser yet.
+            // These getters are mostly for debugging.
             return null
         }
 
-    val nodeInfo: MeshProtos.NodeInfo?
+    val nodeInfo: NodeInfo?
         get() {
-            if (message_type == "NodeInfo") {
-                val builder = MeshProtos.NodeInfo.newBuilder()
-                try {
-                    TextFormat.getParser().merge(raw_message, builder)
-                    return builder.build()
-                } catch (e: IOException) {}
-            }
             return null
         }
 
-    val myNodeInfo: MeshProtos.MyNodeInfo?
+    val myNodeInfo: MyNodeInfo?
         get() {
-            if (message_type == "MyNodeInfo") {
-                val builder = MeshProtos.MyNodeInfo.newBuilder()
-                try {
-                    TextFormat.getParser().merge(raw_message, builder)
-                    return builder.build()
-                } catch (e: IOException) {}
-            }
             return null
         }
 
-    val position: MeshProtos.Position?
+    val position: Position?
         get() {
             return meshPacket?.run {
-                if (hasDecoded() && decoded.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
-                    return MeshProtos.Position.parseFrom(decoded.payload)
+                val decoded = this.decoded
+                if (decoded != null && decoded.portnum == PortNum.POSITION_APP) {
+                    return Position.ADAPTER.decode(decoded.payload)
                 }
                 return null
             } ?: nodeInfo?.position

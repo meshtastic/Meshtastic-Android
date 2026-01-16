@@ -58,7 +58,7 @@ import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.Config
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -133,8 +133,8 @@ constructor(
 
     val displayUnits =
         radioConfigRepository.deviceProfileFlow
-            .mapNotNull { it.config.display.units }
-            .stateInWhileSubscribed(initialValue = ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC)
+            .mapNotNull { it.config?.display?.units }
+            .stateInWhileSubscribed(initialValue = Config.DisplayConfig.DisplayUnits.METRIC)
 
     fun addCustomTileProvider(name: String, urlTemplate: String) {
         viewModelScope.launch {
@@ -270,7 +270,7 @@ constructor(
                 val wpMap = waypoints.first { it.containsKey(wpId) }
                 wpMap[wpId]?.let { packet ->
                     val waypoint = packet.data.waypoint!!
-                    val latLng = LatLng(waypoint.latitudeI / 1e7, waypoint.longitudeI / 1e7)
+                    val latLng = LatLng((waypoint.latitude_i ?: 0) / 1e7, (waypoint.longitude_i ?: 0) / 1e7)
                     cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
                 }
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +40,6 @@ import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.model.util.toSmallDistanceString
 import org.meshtastic.core.model.util.toSpeedString
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.current
 import org.meshtastic.core.strings.dew_point
@@ -61,89 +59,85 @@ import org.meshtastic.core.strings.weight
 import org.meshtastic.core.strings.wind
 import org.meshtastic.feature.node.model.DrawableMetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.Config
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 internal fun EnvironmentMetrics(
     node: Node,
-    displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
     isFahrenheit: Boolean = false,
 ) {
     val vectorMetrics =
         remember(node.environmentMetrics, isFahrenheit, displayUnits) {
             buildList {
                 with(node.environmentMetrics) {
-                    if (hasTemperature()) {
+                    val temp = temperature
+                    if (temp != null && temp != 0f) {
                         add(
                             VectorMetricInfo(
                                 Res.string.temperature,
-                                temperature.toTempString(isFahrenheit),
+                                temp.toTempString(isFahrenheit),
                                 Icons.Default.Thermostat,
                             ),
                         )
                     }
-                    if (hasRelativeHumidity()) {
-                        add(
-                            VectorMetricInfo(
-                                Res.string.humidity,
-                                "%.0f%%".format(relativeHumidity),
-                                Icons.Default.WaterDrop,
-                            ),
-                        )
+                    val rh = relative_humidity
+                    if (rh != null && rh != 0f) {
+                        add(VectorMetricInfo(Res.string.humidity, "%.0f%%".format(rh), Icons.Default.WaterDrop))
                     }
-                    if (hasBarometricPressure()) {
-                        add(
-                            VectorMetricInfo(
-                                Res.string.pressure,
-                                "%.0f hPa".format(barometricPressure),
-                                Icons.Default.Speed,
-                            ),
-                        )
+                    val bp = barometric_pressure
+                    if (bp != null && bp != 0f) {
+                        add(VectorMetricInfo(Res.string.pressure, "%.0f hPa".format(bp), Icons.Default.Speed))
                     }
-                    if (hasGasResistance()) {
-                        add(
-                            VectorMetricInfo(
-                                Res.string.gas_resistance,
-                                "%.0f MΩ".format(gasResistance),
-                                Icons.Default.BlurOn,
-                            ),
-                        )
+                    val gr = gas_resistance
+                    if (gr != null && gr != 0f) {
+                        add(VectorMetricInfo(Res.string.gas_resistance, "%.0f MΩ".format(gr), Icons.Default.BlurOn))
                     }
-                    if (hasVoltage()) {
-                        add(VectorMetricInfo(Res.string.voltage, "%.2fV".format(voltage), Icons.Default.Bolt))
+                    val v = voltage
+                    if (v != null && v != 0f) {
+                        add(VectorMetricInfo(Res.string.voltage, "%.2fV".format(v), Icons.Default.Bolt))
                     }
-                    if (hasCurrent()) {
-                        add(VectorMetricInfo(Res.string.current, "%.1fmA".format(current), Icons.Default.Power))
+                    val c = current
+                    if (c != null && c != 0f) {
+                        add(VectorMetricInfo(Res.string.current, "%.1fmA".format(c), Icons.Default.Power))
                     }
-                    if (hasIaq()) add(VectorMetricInfo(Res.string.iaq, iaq.toString(), Icons.Default.Air))
-                    if (hasDistance()) {
+                    val i = iaq
+                    if (i != null && i != 0) add(VectorMetricInfo(Res.string.iaq, i.toString(), Icons.Default.Air))
+                    val d = distance
+                    if (d != null && d != 0f) {
                         add(
                             VectorMetricInfo(
                                 Res.string.distance,
-                                distance.toSmallDistanceString(displayUnits),
+                                d.toSmallDistanceString(displayUnits),
                                 Icons.Default.Height,
                             ),
                         )
                     }
-                    if (hasLux()) add(VectorMetricInfo(Res.string.lux, "%.0f lx".format(lux), Icons.Default.LightMode))
-                    if (hasUvLux()) {
-                        add(VectorMetricInfo(Res.string.uv_lux, "%.0f lx".format(uvLux), Icons.Default.LightMode))
+                    val l = lux
+                    if (l != null && l != 0f) {
+                        add(VectorMetricInfo(Res.string.lux, "%.0f lx".format(l), Icons.Default.LightMode))
                     }
-                    if (hasWindSpeed()) {
+                    val uv = uv_lux
+                    if (uv != null && uv != 0f) {
+                        add(VectorMetricInfo(Res.string.uv_lux, "%.0f lx".format(uv), Icons.Default.LightMode))
+                    }
+                    val ws = wind_speed
+                    if (ws != null && ws != 0f) {
                         @Suppress("MagicNumber")
-                        val normalizedBearing = (windDirection + 180) % 360
+                        val normalizedBearing = ((wind_direction ?: 0) + 180) % 360
                         add(
                             VectorMetricInfo(
                                 Res.string.wind,
-                                windSpeed.toSpeedString(displayUnits),
+                                ws.toSpeedString(displayUnits),
                                 Icons.Outlined.Navigation,
                                 normalizedBearing.toFloat(),
                             ),
                         )
                     }
-                    if (hasWeight()) {
-                        add(VectorMetricInfo(Res.string.weight, "%.2f kg".format(weight), Icons.Default.Scale))
+                    val w = weight
+                    if (w != null && w != 0f) {
+                        add(VectorMetricInfo(Res.string.weight, "%.2f kg".format(w), Icons.Default.Scale))
                     }
                 }
             }
@@ -152,8 +146,10 @@ internal fun EnvironmentMetrics(
         remember(node.environmentMetrics, isFahrenheit) {
             buildList {
                 with(node.environmentMetrics) {
-                    if (hasTemperature() && hasRelativeHumidity()) {
-                        val dewPoint = UnitConversions.calculateDewPoint(temperature, relativeHumidity)
+                    val temp = temperature
+                    val rh = relative_humidity
+                    if (temp != null && temp != 0f && rh != null && rh != 0f) {
+                        val dewPoint = UnitConversions.calculateDewPoint(temp, rh)
                         add(
                             DrawableMetricInfo(
                                 Res.string.dew_point,
@@ -162,29 +158,32 @@ internal fun EnvironmentMetrics(
                             ),
                         )
                     }
-                    if (hasSoilTemperature()) {
+                    val st = soil_temperature
+                    if (st != null && st != 0f) {
                         add(
                             DrawableMetricInfo(
                                 Res.string.soil_temperature,
-                                soilTemperature.toTempString(isFahrenheit),
+                                st.toTempString(isFahrenheit),
                                 org.meshtastic.feature.node.R.drawable.soil_temperature,
                             ),
                         )
                     }
-                    if (hasSoilMoisture()) {
+                    val sm = soil_moisture
+                    if (sm != null && sm != 0) {
                         add(
                             DrawableMetricInfo(
                                 Res.string.soil_moisture,
-                                "%d%%".format(soilMoisture),
+                                "%d%%".format(sm),
                                 org.meshtastic.feature.node.R.drawable.soil_moisture,
                             ),
                         )
                     }
-                    if (hasRadiation()) {
+                    val r = radiation
+                    if (r != null && r != 0f) {
                         add(
                             DrawableMetricInfo(
                                 Res.string.radiation,
-                                "%.1f µR/h".format(radiation),
+                                "%.1f µR/h".format(r),
                                 org.meshtastic.feature.node.R.drawable.ic_filled_radioactive_24,
                             ),
                         )

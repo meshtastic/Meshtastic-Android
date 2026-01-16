@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.network
 
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.util.ignoreException
-import com.google.protobuf.ByteString
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import okio.ByteString.Companion.toByteString
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient
@@ -35,8 +34,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.subscribeList
-import org.meshtastic.proto.MeshProtos.MqttClientProxyMessage
-import org.meshtastic.proto.mqttClientProxyMessage
+import org.meshtastic.proto.MqttClientProxyMessage
 import java.net.URI
 import java.security.SecureRandom
 import javax.inject.Inject
@@ -81,7 +79,8 @@ constructor(
     val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
         val ownerId = "MeshtasticAndroidMqttProxy-${nodeRepository.myId.value ?: generateClientId()}"
         val channelSet = radioConfigRepository.channelSetFlow.first()
-        val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
+        val mqttConfig =
+            radioConfigRepository.moduleConfigFlow.first().mqtt ?: org.meshtastic.proto.ModuleConfig.MQTTConfig()
 
         val sslContext = SSLContext.getInstance("TLS")
         // Create a custom SSLContext that trusts all certificates
@@ -94,7 +93,7 @@ constructor(
                 userName = mqttConfig.username
                 password = mqttConfig.password.toCharArray()
                 isAutomaticReconnect = true
-                if (mqttConfig.tlsEnabled) {
+                if (mqttConfig.tls_enabled) {
                     socketFactory = sslContext.socketFactory
                 }
             }
@@ -117,7 +116,7 @@ constructor(
                         }
                         .forEach { globalId ->
                             subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+")
-                            if (mqttConfig.jsonEnabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/+")
+                            if (mqttConfig.json_enabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/+")
                         }
                     subscribe("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+")
                 }
@@ -129,11 +128,11 @@ constructor(
 
                 override fun messageArrived(topic: String, message: MqttMessage) {
                     trySend(
-                        mqttClientProxyMessage {
-                            this.topic = topic
-                            data = ByteString.copyFrom(message.payload)
-                            retained = message.isRetained
-                        },
+                        MqttClientProxyMessage(
+                            topic = topic,
+                            data_ = message.payload.toByteString(),
+                            retained = message.isRetained,
+                        ),
                     )
                 }
 
@@ -142,7 +141,7 @@ constructor(
                 }
             }
 
-        val scheme = if (mqttConfig.tlsEnabled) "ssl" else "tcp"
+        val scheme = if (mqttConfig.tls_enabled) "ssl" else "tcp"
         val (host, port) =
             mqttConfig.address
                 .ifEmpty { DEFAULT_SERVER_ADDRESS }

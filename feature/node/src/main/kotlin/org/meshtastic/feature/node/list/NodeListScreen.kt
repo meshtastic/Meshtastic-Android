@@ -83,7 +83,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
-import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.SharedContact
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -134,8 +134,7 @@ fun NodeListScreen(
         },
         floatingActionButton = {
             val shareCapable = ourNode?.capabilities?.supportsQrCodeSharing ?: false
-            val sharedContact: AdminProtos.SharedContact? by
-                viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
+            val sharedContact: SharedContact? by viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
             AddContactFAB(
                 sharedContact = sharedContact,
                 modifier =

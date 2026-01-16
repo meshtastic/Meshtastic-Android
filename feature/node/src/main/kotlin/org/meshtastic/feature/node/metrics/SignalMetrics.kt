@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
@@ -71,7 +70,7 @@ import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshPacket
 
 @Suppress("MagicNumber")
 private enum class Metric(val color: Color, val min: Float, val max: Float) {
@@ -103,7 +102,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -161,15 +160,14 @@ private fun SignalMetricsChart(
     }
 
     val (oldest, newest) =
-        remember(key1 = meshPackets) { Pair(meshPackets.minBy { it.rxTime }, meshPackets.maxBy { it.rxTime }) }
-    val timeDiff = newest.rxTime - oldest.rxTime
+        remember(key1 = meshPackets) {
+            Pair(meshPackets.minBy { it.rx_time ?: 0 }, meshPackets.maxBy { it.rx_time ?: 0 })
+        }
+    val timeDiff = (newest.rx_time ?: 0) - (oldest.rx_time ?: 0)
 
     val scrollState = rememberScrollState()
     val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by
-        remember(key1 = selectedTime) {
-            mutableStateOf(selectedTime.dp(screenWidth, time = (newest.rxTime - oldest.rxTime).toLong()))
-        }
+    val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong())) }
 
     // Calculate visible time range based on scroll position and chart width
     val visibleTimeRange = run {
@@ -180,8 +178,8 @@ private fun SignalMetricsChart(
         val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
         val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
         // With reverseScrolling = true, scrolling right shows older data (left side of chart)
-        val visibleOldest = oldest.rxTime + (timeDiff * (1f - rightRatio)).toInt()
-        val visibleNewest = oldest.rxTime + (timeDiff * (1f - leftRatio)).toInt()
+        val visibleOldest = (oldest.rx_time ?: 0) + (timeDiff * (1f - rightRatio)).toInt()
+        val visibleNewest = (oldest.rx_time ?: 0) + (timeDiff * (1f - leftRatio)).toInt()
         visibleOldest to visibleNewest
     }
 
@@ -208,8 +206,8 @@ private fun SignalMetricsChart(
 
             TimeAxisOverlay(
                 modifier.width(dp),
-                oldest = oldest.rxTime,
-                newest = newest.rxTime,
+                oldest = oldest.rx_time ?: 0,
+                newest = newest.rx_time ?: 0,
                 selectedTime.lineInterval(),
             )
 
@@ -218,7 +216,7 @@ private fun SignalMetricsChart(
                 val width = size.width
                 /* Plot */
                 for (packet in meshPackets) {
-                    val xRatio = (packet.rxTime - oldest.rxTime).toFloat() / timeDiff
+                    val xRatio = ((packet.rx_time ?: 0) - (oldest.rx_time ?: 0)).toFloat() / timeDiff
                     val x = xRatio * width
 
                     /* SNR */
@@ -226,7 +224,7 @@ private fun SignalMetricsChart(
                         drawContext = drawContext,
                         color = Metric.SNR.color,
                         x = x,
-                        value = packet.rxSnr - Metric.SNR.min,
+                        value = (packet.rx_snr ?: 0f) - Metric.SNR.min,
                         divisor = snrDiff,
                     )
 
@@ -235,7 +233,7 @@ private fun SignalMetricsChart(
                         drawContext = drawContext,
                         color = Metric.RSSI.color,
                         x = x,
-                        value = packet.rxRssi - Metric.RSSI.min,
+                        value = (packet.rx_rssi ?: 0).toFloat() - Metric.RSSI.min,
                         divisor = rssiDiff,
                     )
                 }
@@ -258,7 +256,7 @@ private fun SignalMetricsChart(
 
 @Composable
 private fun SignalMetricsCard(meshPacket: MeshPacket) {
-    val time = meshPacket.rxTime * MS_PER_SEC
+    val time = (meshPacket.rx_time ?: 0) * MS_PER_SEC
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Surface {
             SelectionContainer {
@@ -278,13 +276,13 @@ private fun SignalMetricsCard(meshPacket: MeshPacket) {
                             Spacer(modifier = Modifier.height(8.dp))
 
                             /* SNR and RSSI */
-                            SnrAndRssi(meshPacket.rxSnr, meshPacket.rxRssi)
+                            SnrAndRssi(meshPacket.rx_snr ?: 0f, meshPacket.rx_rssi ?: 0)
                         }
                     }
 
                     /* Signal Indicator */
                     Box(modifier = Modifier.weight(weight = 3f).height(IntrinsicSize.Max)) {
-                        LoraSignalIndicator(meshPacket.rxSnr, meshPacket.rxRssi)
+                        LoraSignalIndicator(meshPacket.rx_snr ?: 0f, meshPacket.rx_rssi ?: 0)
                     }
                 }
             }

@@ -20,8 +20,8 @@ import android.os.Parcel
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Waypoint
 
 /** Generic [Parcel.readParcelable] Android 13 compatibility extension. */
 private inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? =
@@ -82,7 +82,7 @@ data class DataPacket(
     ) : this(
         to = to,
         bytes = text.encodeToByteArray(),
-        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+        dataType = PortNum.TEXT_MESSAGE_APP.value,
         channel = channel,
         replyId = replyId ?: 0,
     )
@@ -90,7 +90,7 @@ data class DataPacket(
     /** If this is a text message, return the string, otherwise null */
     val text: String?
         get() =
-            if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
+            if (dataType == PortNum.TEXT_MESSAGE_APP.value) {
                 bytes?.decodeToString()
             } else {
                 null
@@ -98,7 +98,7 @@ data class DataPacket(
 
     val alert: String?
         get() =
-            if (dataType == Portnums.PortNum.ALERT_APP_VALUE) {
+            if (dataType == PortNum.ALERT_APP.value) {
                 bytes?.decodeToString()
             } else {
                 null
@@ -107,13 +107,13 @@ data class DataPacket(
     constructor(
         to: String?,
         channel: Int,
-        waypoint: MeshProtos.Waypoint,
-    ) : this(to = to, bytes = waypoint.toByteArray(), dataType = Portnums.PortNum.WAYPOINT_APP_VALUE, channel = channel)
+        waypoint: Waypoint,
+    ) : this(to = to, bytes = waypoint.encode(), dataType = PortNum.WAYPOINT_APP.value, channel = channel)
 
-    val waypoint: MeshProtos.Waypoint?
+    val waypoint: Waypoint?
         get() =
-            if (dataType == Portnums.PortNum.WAYPOINT_APP_VALUE) {
-                MeshProtos.Waypoint.parseFrom(bytes)
+            if (dataType == PortNum.WAYPOINT_APP.value) {
+                Waypoint.ADAPTER.decode(bytes ?: ByteArray(0))
             } else {
                 null
             }

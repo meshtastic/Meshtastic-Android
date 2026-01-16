@@ -20,34 +20,31 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.traceroute_endpoint_missing
 import org.meshtastic.core.strings.traceroute_map_no_data
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.RouteDiscovery
-import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.RouteDiscovery
 
-val MeshProtos.MeshPacket.fullRouteDiscovery: RouteDiscovery?
-    get() =
-        with(decoded) {
-            if (hasDecoded() && !wantResponse && portnum == Portnums.PortNum.TRACEROUTE_APP) {
-                runCatching { RouteDiscovery.parseFrom(payload).toBuilder() }
-                    .getOrNull()
-                    ?.apply {
-                        val destinationId = dest.takeIf { it != 0 } ?: this@fullRouteDiscovery.to
-                        val sourceId = source.takeIf { it != 0 } ?: this@fullRouteDiscovery.from
-                        val fullRoute = listOf(destinationId) + routeList + sourceId
-                        clearRoute()
-                        addAllRoute(fullRoute)
+val MeshPacket.fullRouteDiscovery: RouteDiscovery?
+    get() {
+        val dec = decoded ?: return null
+        if (dec.want_response != true && dec.portnum == PortNum.TRACEROUTE_APP) {
+            return runCatching { RouteDiscovery.ADAPTER.decode(dec.payload) }
+                .getOrNull()
+                ?.let { rd ->
+                    val destinationId = dec.dest.takeIf { it != 0 } ?: this.to
+                    val sourceId = dec.source.takeIf { it != 0 } ?: this.from
+                    val fullRoute = listOf(destinationId) + rd.route + sourceId
 
-                        val fullRouteBack = listOf(sourceId) + routeBackList + destinationId
-                        clearRouteBack()
-                        if (hopStart > 0 && snrBackCount > 0) { // otherwise back route is invalid
-                            addAllRouteBack(fullRouteBack)
-                        }
-                    }
-                    ?.build()
-            } else {
-                null
-            }
+                    val fullRouteBack = listOf(sourceId) + rd.route_back + destinationId
+                    rd.copy(
+                        route = fullRoute,
+                        route_back =
+                        if ((hop_start ?: 0) > 0 && rd.snr_back.isNotEmpty()) fullRouteBack else rd.route_back,
+                    )
+                }
         }
+        return null
+    }
 
 @Suppress("MagicNumber")
 private fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): String {
@@ -76,31 +73,30 @@ private fun RouteDiscovery.getTracerouteResponse(
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
 ): String = buildString {
-    if (routeList.isNotEmpty()) {
+    if (route.isNotEmpty()) {
         append(headerTowards)
-        append(formatTraceroutePath(routeList.map(getUser), snrTowardsList))
+        append(formatTraceroutePath(route.map(getUser), snr_towards))
     }
-    if (routeBackList.isNotEmpty()) {
+    if (route_back.isNotEmpty()) {
         append("\n\n")
         append(headerBack)
-        append(formatTraceroutePath(routeBackList.map(getUser), snrBackList))
+        append(formatTraceroutePath(route_back.map(getUser), snr_back))
     }
 }
 
-fun MeshProtos.MeshPacket.getTracerouteResponse(
+fun MeshPacket.getTracerouteResponse(
     getUser: (nodeNum: Int) -> String,
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
 ): String? = fullRouteDiscovery?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
 /** Returns a traceroute response string only when the result is complete (both directions). */
-fun MeshProtos.MeshPacket.getFullTracerouteResponse(
+fun MeshPacket.getFullTracerouteResponse(
     getUser: (nodeNum: Int) -> String,
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
-): String? = fullRouteDiscovery
-    ?.takeIf { it.routeList.isNotEmpty() && it.routeBackList.isNotEmpty() }
-    ?.getTracerouteResponse(getUser, headerTowards, headerBack)
+): String? =
+    fullRouteDiscovery?.takeIf { it.route.isNotEmpty() && it.route_back.isNotEmpty() }?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
 enum class TracerouteMapAvailability {
     Ok,

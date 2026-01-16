@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -37,13 +36,12 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
+import org.meshtastic.proto.ModuleConfig
 
 @Composable
 fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val neighborInfoConfig = state.moduleConfig.neighborInfo
+    val neighborInfoConfig = state.moduleConfig.neighbor_info ?: ModuleConfig.NeighborInfoConfig()
     val formState = rememberConfigState(initialValue = neighborInfoConfig)
     val focusManager = LocalFocusManager.current
 
@@ -55,7 +53,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { neighborInfo = it }
+            val config = ModuleConfig(neighbor_info = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -63,26 +61,26 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
             TitledCard(title = stringResource(Res.string.neighbor_info_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.neighbor_info_enabled),
-                    checked = formState.value.enabled,
+                    checked = formState.value.enabled ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.update_interval_seconds),
-                    value = formState.value.updateInterval,
+                    value = formState.value.update_interval ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { updateInterval = it } },
+                    onValueChanged = { formState.value = formState.value.copy(update_interval = it) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.transmit_over_lora),
                     summary = stringResource(Res.string.config_device_transmitOverLora_summary),
-                    checked = formState.value.transmitOverLora,
+                    checked = formState.value.transmit_over_lora ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { transmitOverLora = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(transmit_over_lora = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

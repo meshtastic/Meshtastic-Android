@@ -22,23 +22,15 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.meshtastic.core.strings.getString
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.accept
-import org.meshtastic.core.strings.add
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.new_channel_rcvd
-import org.meshtastic.core.strings.replace
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.channelSettings
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
+import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class ScannedQrCodeDialogTest {
@@ -49,32 +41,20 @@ class ScannedQrCodeDialogTest {
 
     private fun getRandomKey() = Channel.getRandomKey()
 
-    private val channels = channelSet {
-        settings.add(Channel.default.settings)
-        loraConfig = Channel.default.loraConfig
-    }
+    private val channels =
+        ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig)
 
-    private val incoming = channelSet {
-        settings.addAll(
+    private val incoming =
+        ChannelSet(
+            settings =
             listOf(
                 Channel.default.settings,
-                channelSettings {
-                    name = "2"
-                    psk = getRandomKey()
-                },
-                channelSettings {
-                    name = "3"
-                    psk = getRandomKey()
-                },
-                channelSettings {
-                    name = "admin"
-                    psk = getRandomKey()
-                },
+                ChannelSettings(name = "2", psk = getRandomKey()),
+                ChannelSettings(name = "3", psk = getRandomKey()),
+                ChannelSettings(name = "admin", psk = getRandomKey()),
             ),
+            lora_config = Channel.default.loraConfig.copy(modem_preset = Config.LoRaConfig.ModemPreset.SHORT_FAST),
         )
-        loraConfig =
-            Channel.default.loraConfig.copy { modemPreset = ConfigProtos.Config.LoRaConfig.ModemPreset.SHORT_FAST }
-    }
 
     private fun testScannedQrCodeDialog(onDismiss: () -> Unit = {}, onConfirm: (ChannelSet) -> Unit = {}) =
         composeTestRule.setContent {
@@ -138,7 +118,14 @@ class ScannedQrCodeDialogTest {
         }
 
         // Verify onConfirm is called with the correct ChannelSet
-        Assert.assertEquals(incoming, actualChannelSet)
+        // Note: The actual dialog might preserve some fields from channels.lora_config
+        val expectedLora =
+            (incoming.lora_config ?: Config.LoRaConfig()).copy(
+                config_ok_to_mqtt = channels.lora_config?.config_ok_to_mqtt ?: false,
+                tx_power = channels.lora_config?.tx_power ?: 0,
+            )
+        val expectedChannelSet = incoming.copy(lora_config = expectedLora)
+        Assert.assertEquals(expectedChannelSet, actualChannelSet)
     }
 
     @Test
@@ -153,12 +140,7 @@ class ScannedQrCodeDialogTest {
         }
 
         // Verify onConfirm is called with the correct ChannelSet
-        val expectedChannelSet =
-            channels.copy {
-                val list = LinkedHashSet(settings + incoming.settingsList)
-                settings.clear()
-                settings.addAll(list)
-            }
+        val expectedChannelSet = channels.copy(settings = (channels.settings + incoming.settings).distinct())
         Assert.assertEquals(expectedChannelSet, actualChannelSet)
     }
 }

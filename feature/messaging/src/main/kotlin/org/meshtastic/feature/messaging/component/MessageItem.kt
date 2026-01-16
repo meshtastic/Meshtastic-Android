@@ -216,7 +216,7 @@ internal fun MessageItem(
         ) {
             NodeChip(node = node, onClick = onClickChip)
             Text(
-                text = node.user.longName,
+                text = node.user.long_name,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = MaterialTheme.typography.labelMedium,
@@ -248,7 +248,7 @@ internal fun MessageItem(
             )
             .then(messageModifier)
             .semantics(mergeDescendants = true) {
-                val senderName = if (message.fromLocal) ourNode.user.longName else node.user.longName
+                val senderName = if (message.fromLocal) ourNode.user.long_name else node.user.long_name
                 contentDescription = "Message from $senderName: ${message.text}"
             },
         color = containerColor,
@@ -389,7 +389,7 @@ private fun OriginalMessageSnippet(
                     modifier = Modifier.size(16.dp),
                 )
                 Text(
-                    text = originalMessageNode.user.shortName,
+                    text = originalMessageNode.user.short_name,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,

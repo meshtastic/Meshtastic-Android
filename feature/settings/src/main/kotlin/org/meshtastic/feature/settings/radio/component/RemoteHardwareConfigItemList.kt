@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,13 +35,12 @@ import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
+import org.meshtastic.proto.ModuleConfig
 
 @Composable
 fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val remoteHardwareConfig = state.moduleConfig.remoteHardware
+    val remoteHardwareConfig = state.moduleConfig.remote_hardware ?: ModuleConfig.RemoteHardwareConfig()
     val formState = rememberConfigState(initialValue = remoteHardwareConfig)
     val focusManager = LocalFocusManager.current
 
@@ -54,7 +52,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { remoteHardware = it }
+            val config = ModuleConfig(remote_hardware = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -62,33 +60,27 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()
             TitledCard(title = stringResource(Res.string.remote_hardware_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.remote_hardware_enabled),
-                    checked = formState.value.enabled,
+                    checked = formState.value.enabled ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.allow_undefined_pin_access),
-                    checked = formState.value.allowUndefinedPinAccess,
+                    checked = formState.value.allow_undefined_pin_access ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { allowUndefinedPinAccess = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(allow_undefined_pin_access = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 EditListPreference(
                     title = stringResource(Res.string.available_pins),
-                    list = formState.value.availablePinsList,
+                    list = formState.value.available_pins,
                     maxCount = 4, // available_pins max_count:4
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = { list ->
-                        formState.value =
-                            formState.value.copy {
-                                availablePins.clear()
-                                availablePins.addAll(list)
-                            }
-                    },
+                    onValuesChanged = { list -> formState.value = formState.value.copy(available_pins = list) },
                 )
             }
         }

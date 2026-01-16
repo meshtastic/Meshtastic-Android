@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import android.content.res.Resources
@@ -29,7 +28,7 @@ import androidx.compose.ui.graphics.drawscope.DrawContext
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.Telemetry
 
 object GraphUtil {
 
@@ -57,6 +56,7 @@ object GraphUtil {
      * @param telemetries data used to create the [Path]
      * @param index current place in the [List]
      * @param path [Path] that will be used to draw
+     * @param oldestTime The oldest time in the data set
      * @param timeRange The time range for the data set
      * @param width of the [DrawContext]
      * @param timeThreshold to determine significant breaks in time between [Telemetry]s
@@ -80,17 +80,20 @@ object GraphUtil {
                 val telemetry = telemetries[i]
                 val nextTelemetry = telemetries.getOrNull(i + 1) ?: telemetries.last()
 
+                val time = telemetry.time ?: 0
+                val nextTime = nextTelemetry.time ?: 0
+
                 /* Check to see if we have a significant time break between telemetries. */
-                if (nextTelemetry.time - telemetry.time > timeThreshold) {
+                if (nextTime - time > timeThreshold) {
                     i++
                     break
                 }
 
-                val x1Ratio = (telemetry.time - oldestTime).toFloat() / timeRange
+                val x1Ratio = (time - oldestTime).toFloat() / timeRange
                 val x1 = x1Ratio * width
                 val y1 = calculateY(i)
 
-                val x2Ratio = (nextTelemetry.time - oldestTime).toFloat() / timeRange
+                val x2Ratio = (nextTime - oldestTime).toFloat() / timeRange
                 val x2 = x2Ratio * width
                 val y2 = calculateY(i + 1)
 

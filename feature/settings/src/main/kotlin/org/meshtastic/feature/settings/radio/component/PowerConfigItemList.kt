@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -46,13 +45,12 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
-import org.meshtastic.proto.config
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.Config
 
 @Composable
 fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val powerConfig = state.radioConfig.power
+    val powerConfig = state.radioConfig.power ?: Config.PowerConfig()
     val formState = rememberConfigState(initialValue = powerConfig)
     val focusManager = LocalFocusManager.current
 
@@ -64,7 +62,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = config { power = it }
+            val config = Config(power = it)
             viewModel.setConfig(config)
         },
     ) {
@@ -73,57 +71,57 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 SwitchPreference(
                     title = stringResource(Res.string.enable_power_saving_mode),
                     summary = stringResource(Res.string.config_power_is_power_saving_summary),
-                    checked = formState.value.isPowerSaving,
+                    checked = formState.value.is_power_saving ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { isPowerSaving = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(is_power_saving = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 val items = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.shutdown_on_power_loss),
-                    selectedItem = formState.value.onBatteryShutdownAfterSecs.toLong(),
+                    selectedItem = (formState.value.on_battery_shutdown_after_secs ?: 0).toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = {
-                        formState.value = formState.value.copy { onBatteryShutdownAfterSecs = it.toInt() }
+                        formState.value = formState.value.copy(on_battery_shutdown_after_secs = it.toInt())
                     },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.adc_multiplier_override),
-                    checked = formState.value.adcMultiplierOverride > 0f,
+                    checked = (formState.value.adc_multiplier_override ?: 0f) > 0f,
                     enabled = state.connected,
                     onCheckedChange = {
-                        formState.value = formState.value.copy { adcMultiplierOverride = if (it) 1.0f else 0.0f }
+                        formState.value = formState.value.copy(adc_multiplier_override = if (it) 1.0f else 0.0f)
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
-                if (formState.value.adcMultiplierOverride > 0f) {
+                if ((formState.value.adc_multiplier_override ?: 0f) > 0f) {
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.adc_multiplier_override_ratio),
-                        value = formState.value.adcMultiplierOverride,
+                        value = formState.value.adc_multiplier_override ?: 0f,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { formState.value = formState.value.copy { adcMultiplierOverride = it } },
+                        onValueChanged = { formState.value = formState.value.copy(adc_multiplier_override = it) },
                     )
                 }
                 HorizontalDivider()
                 val waitBluetoothItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.wait_for_bluetooth_duration_seconds),
-                    selectedItem = formState.value.waitBluetoothSecs.toLong(),
+                    selectedItem = (formState.value.wait_bluetooth_secs ?: 0).toLong(),
                     enabled = state.connected,
                     items = waitBluetoothItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy { waitBluetoothSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy(wait_bluetooth_secs = it.toInt()) },
                 )
                 HorizontalDivider()
                 val sdsSecsItems = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.super_deep_sleep_duration_seconds),
-                    selectedItem = formState.value.sdsSecs.toLong(),
-                    onItemSelected = { formState.value = formState.value.copy { sdsSecs = it.toInt() } },
+                    selectedItem = (formState.value.sds_secs ?: 0).toLong(),
+                    onItemSelected = { formState.value = formState.value.copy(sds_secs = it.toInt()) },
                     enabled = state.connected,
                     items = sdsSecsItems.map { it.value to it.toDisplayString() },
                 )
@@ -131,18 +129,18 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                 val minWakeItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.minimum_wake_time_seconds),
-                    selectedItem = formState.value.minWakeSecs.toLong(),
+                    selectedItem = (formState.value.min_wake_secs ?: 0).toLong(),
                     enabled = state.connected,
                     items = minWakeItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy { minWakeSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy(min_wake_secs = it.toInt()) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.battery_ina_2xx_i2c_address),
-                    value = formState.value.deviceBatteryInaAddress,
+                    value = formState.value.device_battery_ina_address ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { deviceBatteryInaAddress = it } },
+                    onValueChanged = { formState.value = formState.value.copy(device_battery_ina_address = it) },
                 )
             }
         }

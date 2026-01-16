@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -55,8 +54,8 @@ fun SignalInfo(
 ) {
     val text =
         if (isThisNode) {
-            stringResource(Res.string.channel_air_util)
-                .format(node.deviceMetrics.channelUtilization, node.deviceMetrics.airUtilTx)
+            val dm = node.deviceMetrics
+            stringResource(Res.string.channel_air_util).format(dm.channel_utilization ?: 0f, dm.air_util_tx ?: 0f)
         } else {
             buildList {
                 val hopsString =

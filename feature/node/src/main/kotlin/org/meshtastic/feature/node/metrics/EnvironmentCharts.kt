@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
@@ -52,7 +51,7 @@ import org.meshtastic.core.strings.uv_lux
 import org.meshtastic.feature.node.metrics.GraphUtil.createPath
 import org.meshtastic.feature.node.metrics.GraphUtil.drawPathWithGradient
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.Telemetry
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
@@ -149,7 +148,7 @@ fun EnvironmentMetricsChart(
         val visibleWidthPx = screenWidth * chartWidthRatio
         val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
         val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
+        // With reverseScrolling = true, scrolling right shows older data (left side)
         val visibleOldest = oldest + (timeDiff * (1f - rightRatio)).toInt()
         val visibleNewest = oldest + (timeDiff * (1f - leftRatio)).toInt()
         visibleOldest to visibleNewest
@@ -275,8 +274,8 @@ private fun MetricPlottingCanvas(
                     path = path,
                     color = metric.color,
                     height = height,
-                    x1 = ((telemetries[index - 1].time - oldest).toFloat() / timeDiff) * width,
-                    x2 = ((telemetries[first].time - oldest).toFloat() / timeDiff) * width,
+                    x1 = (((telemetries[index - 1].time ?: 0) - oldest).toFloat() / timeDiff) * width,
+                    x2 = (((telemetries[first].time ?: 0) - oldest).toFloat() / timeDiff) * width,
                 )
             }
         }

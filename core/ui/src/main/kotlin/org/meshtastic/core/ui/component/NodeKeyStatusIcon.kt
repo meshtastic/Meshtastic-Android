@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import android.util.Base64
@@ -57,11 +56,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.ByteString
+import okio.ByteString
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.config_security_public_key
 import org.meshtastic.core.strings.encryption_error
@@ -192,11 +190,12 @@ private fun KeyStatusDialog(title: StringResource, text: StringResource, key: By
             if (showAll) {
                 AllKeyStates()
             } else {
+                val keyVal = key ?: okio.ByteString.EMPTY
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = stringResource(text), textAlign = TextAlign.Center)
                     Spacer(Modifier.height(16.dp))
-                    if (key != null && title == Res.string.encryption_pkc) {
-                        val keyString = Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
+                    if (keyVal.size > 0 && title == Res.string.encryption_pkc) {
+                        val keyString = Base64.encodeToString(keyVal.toByteArray(), Base64.NO_WRAP)
                         Text(
                             text = stringResource(Res.string.config_security_public_key) + ":",
                             textAlign = TextAlign.Center,

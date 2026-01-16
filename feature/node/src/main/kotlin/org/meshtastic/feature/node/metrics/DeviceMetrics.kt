@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
@@ -81,8 +80,7 @@ import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.GraphUtil.createPath
 import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.Telemetry
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
@@ -90,13 +88,13 @@ private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIG
 
 private enum class Device(val color: Color) {
     BATTERY(Green) {
-        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.batteryLevel.toFloat()
+        override fun getValue(telemetry: Telemetry): Float = (telemetry.device_metrics?.battery_level ?: 0).toFloat()
     },
     CH_UTIL(Magenta) {
-        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.channelUtilization
+        override fun getValue(telemetry: Telemetry): Float = telemetry.device_metrics?.channel_utilization ?: 0f
     },
     AIR_UTIL(Cyan) {
-        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.airUtilTx
+        override fun getValue(telemetry: Telemetry): Float = telemetry.device_metrics?.air_util_tx ?: 0f
     }, ;
 
     abstract fun getValue(telemetry: Telemetry): Float
@@ -129,7 +127,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -244,7 +242,7 @@ private fun DeviceMetricsChart(
                         drawContext = drawContext,
                         color = Device.CH_UTIL.color,
                         x = x,
-                        value = telemetry.deviceMetrics.channelUtilization,
+                        value = telemetry.device_metrics?.channel_utilization ?: 0f,
                         divisor = MAX_PERCENT_VALUE,
                     )
 
@@ -253,7 +251,7 @@ private fun DeviceMetricsChart(
                         drawContext = drawContext,
                         color = Device.AIR_UTIL.color,
                         x = x,
-                        value = telemetry.deviceMetrics.airUtilTx,
+                        value = telemetry.device_metrics?.air_util_tx ?: 0f,
                         divisor = MAX_PERCENT_VALUE,
                     )
                 }
@@ -273,7 +271,7 @@ private fun DeviceMetricsChart(
                             timeThreshold = selectedTime.timeThreshold(),
                         ) { i ->
                             val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                            val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                            val ratio = (telemetry.device_metrics?.battery_level ?: 0) / MAX_PERCENT_VALUE
                             val y = height - (ratio * height)
                             return@createPath y
                         }
@@ -301,17 +299,17 @@ private fun DeviceMetricsChartPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
     val telemetries =
         List(20) { i ->
-            Telemetry.newBuilder()
-                .setTime(now - (19 - i) * 60 * 60) // 1-hour intervals, oldest first
-                .setDeviceMetrics(
-                    TelemetryProtos.DeviceMetrics.newBuilder()
-                        .setBatteryLevel(80 - i)
-                        .setVoltage(3.7f - i * 0.02f)
-                        .setChannelUtilization(10f + i * 2)
-                        .setAirUtilTx(5f + i)
-                        .setUptimeSeconds(3600 + i * 300),
-                )
-                .build()
+            Telemetry(
+                time = now - (19 - i) * 60 * 60, // 1-hour intervals, oldest first
+                device_metrics =
+                org.meshtastic.proto.DeviceMetrics(
+                    battery_level = 80 - i,
+                    voltage = 3.7f - i * 0.02f,
+                    channel_utilization = 10f + i * 2,
+                    air_util_tx = 5f + i,
+                    uptime_seconds = 3600 + i * 300,
+                ),
+            )
         }
     AppTheme {
         DeviceMetricsChart(
@@ -325,7 +323,7 @@ private fun DeviceMetricsChartPreview() {
 
 @Composable
 private fun DeviceMetricsCard(telemetry: Telemetry) {
-    val deviceMetrics = telemetry.deviceMetrics
+    val deviceMetrics = telemetry.device_metrics ?: org.meshtastic.proto.DeviceMetrics()
     val time = telemetry.time * MS_PER_SEC
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Surface {
@@ -339,7 +337,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                             fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
 
-                        MaterialBatteryInfo(level = deviceMetrics.batteryLevel, voltage = deviceMetrics.voltage)
+                        MaterialBatteryInfo(level = deviceMetrics.battery_level, voltage = deviceMetrics.voltage ?: 0f)
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
@@ -348,7 +346,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         val text =
                             stringResource(Res.string.channel_air_util)
-                                .format(deviceMetrics.channelUtilization, deviceMetrics.airUtilTx)
+                                .format(deviceMetrics.channel_utilization, deviceMetrics.air_util_tx)
                         Text(
                             text = text,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -367,17 +365,17 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
 private fun DeviceMetricsCardPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
     val telemetry =
-        Telemetry.newBuilder()
-            .setTime(now)
-            .setDeviceMetrics(
-                TelemetryProtos.DeviceMetrics.newBuilder()
-                    .setBatteryLevel(75)
-                    .setVoltage(3.65f)
-                    .setChannelUtilization(22.5f)
-                    .setAirUtilTx(12.0f)
-                    .setUptimeSeconds(7200),
-            )
-            .build()
+        Telemetry(
+            time = now,
+            device_metrics =
+            org.meshtastic.proto.DeviceMetrics(
+                battery_level = 75,
+                voltage = 3.65f,
+                channel_utilization = 22.5f,
+                air_util_tx = 12.0f,
+                uptime_seconds = 7200,
+            ),
+        )
     AppTheme { DeviceMetricsCard(telemetry = telemetry) }
 }
 
@@ -388,17 +386,17 @@ private fun DeviceMetricsScreenPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
     val telemetries =
         List(24) { i ->
-            Telemetry.newBuilder()
-                .setTime(now - (23 - i) * 60 * 60) // 1-hour intervals, oldest first
-                .setDeviceMetrics(
-                    TelemetryProtos.DeviceMetrics.newBuilder()
-                        .setBatteryLevel(85 - i * 2) // Battery decreases over time
-                        .setVoltage(3.8f - i * 0.01f) // Voltage decreases slightly
-                        .setChannelUtilization(15f + i * 1.5f) // Channel utilization increases
-                        .setAirUtilTx(8f + i * 0.8f) // Air utilization increases
-                        .setUptimeSeconds(3600 + i * 3600), // Uptime increases by 1 hour each
-                )
-                .build()
+            Telemetry(
+                time = now - (23 - i) * 60 * 60, // 1-hour intervals, oldest first
+                device_metrics =
+                org.meshtastic.proto.DeviceMetrics(
+                    battery_level = 85 - i * 2, // Battery decreases over time
+                    voltage = 3.8f - i * 0.01f, // Voltage decreases slightly
+                    channel_utilization = 15f + i * 1.5f, // Channel utilization increases
+                    air_util_tx = 8f + i * 0.8f, // Air utilization increases
+                    uptime_seconds = 3600 + i * 3600, // Uptime increases by 1 hour each
+                ),
+            )
         }
 
     AppTheme {

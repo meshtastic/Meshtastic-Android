@@ -17,7 +17,7 @@
 package com.geeksville.mesh.service
 
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshPacket
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,26 +29,24 @@ class MeshDataMapper @Inject constructor(private val nodeManager: MeshNodeManage
         nodeManager.nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
     }
 
-    fun toDataPacket(packet: MeshPacket): DataPacket? = if (!packet.hasDecoded()) {
-        null
-    } else {
-        val data = packet.decoded
-        DataPacket(
+    fun toDataPacket(packet: MeshPacket): DataPacket? {
+        val data = packet.decoded ?: return null
+        return DataPacket(
             from = toNodeID(packet.from),
             to = toNodeID(packet.to),
-            time = packet.rxTime * 1000L,
+            time = (packet.rx_time ?: 0) * 1000L,
             id = packet.id,
-            dataType = data.portnumValue,
+            dataType = data.portnum?.value ?: 0,
             bytes = data.payload.toByteArray(),
-            hopLimit = packet.hopLimit,
-            channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
-            wantAck = packet.wantAck,
-            hopStart = packet.hopStart,
-            snr = packet.rxSnr,
-            rssi = packet.rxRssi,
-            replyId = data.replyId,
-            relayNode = packet.relayNode,
-            viaMqtt = packet.viaMqtt,
+            hopLimit = packet.hop_limit ?: 0,
+            channel = if (packet.pki_encrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
+            wantAck = packet.want_ack,
+            hopStart = packet.hop_start ?: 0,
+            snr = packet.rx_snr ?: 0f,
+            rssi = packet.rx_rssi ?: 0,
+            replyId = data.reply_id,
+            relayNode = packet.relay_node,
+            viaMqtt = packet.via_mqtt,
             emoji = data.emoji,
         )
     }

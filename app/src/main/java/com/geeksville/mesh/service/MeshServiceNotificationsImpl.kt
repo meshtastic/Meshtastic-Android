@@ -73,9 +73,10 @@ import org.meshtastic.core.strings.new_node_seen
 import org.meshtastic.core.strings.no_local_stats
 import org.meshtastic.core.strings.reply
 import org.meshtastic.core.strings.you
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.TelemetryProtos.LocalStats
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.Telemetry
 import javax.inject.Inject
 
 /**
@@ -264,27 +265,24 @@ constructor(
         notificationManager.createNotificationChannel(channel)
     }
 
-    var cachedTelemetry: TelemetryProtos.Telemetry? = null
+    var cachedTelemetry: Telemetry? = null
     var cachedLocalStats: LocalStats? = null
     var nextStatsUpdateMillis: Long = 0
     var cachedMessage: String? = null
 
     // region Public Notification Methods
-    override fun updateServiceStateNotification(
-        summaryString: String?,
-        telemetry: TelemetryProtos.Telemetry?,
-    ): Notification {
-        val hasLocalStats = telemetry?.hasLocalStats() == true
-        val hasDeviceMetrics = telemetry?.hasDeviceMetrics() == true
+    override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification {
+        val hasLocalStats = telemetry?.local_stats != null
+        val hasDeviceMetrics = telemetry?.device_metrics != null
         val message =
             if (hasLocalStats) {
-                val localStats = telemetry.localStats
+                val localStats = telemetry.local_stats
                 val localStatsMessage = localStats?.formatToString()
                 cachedTelemetry = telemetry
                 nextStatsUpdateMillis = System.currentTimeMillis() + FIFTEEN_MINUTES_IN_MILLIS
                 localStatsMessage
             } else if (cachedTelemetry == null && hasDeviceMetrics) {
-                val deviceMetrics = telemetry.deviceMetrics
+                val deviceMetrics = telemetry.device_metrics
                 val deviceMetricsMessage = deviceMetrics.formatToString()
                 if (cachedLocalStats == null) {
                     cachedTelemetry = telemetry
@@ -388,7 +386,7 @@ constructor(
             }
 
         val ourNode = nodeRepository.get().ourNodeInfo.value
-        val meName = ourNode?.user?.longName ?: getString(Res.string.you)
+        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
         val me =
             Person.Builder()
                 .setName(meName)
@@ -433,7 +431,7 @@ constructor(
     }
 
     override fun showNewNodeSeenNotification(node: NodeEntity) {
-        val notification = createNewNodeSeenNotification(node.user.shortName, node.user.longName)
+        val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name)
         notificationManager.notify(node.num, notification)
     }
 
@@ -442,7 +440,7 @@ constructor(
         notificationManager.notify(node.num, notification)
     }
 
-    override fun showClientNotification(clientNotification: MeshProtos.ClientNotification) {
+    override fun showClientNotification(clientNotification: ClientNotification) {
         val notification =
             createClientNotification(getString(Res.string.client_notification), clientNotification.message)
         notificationManager.notify(clientNotification.toString().hashCode(), notification)
@@ -452,7 +450,7 @@ constructor(
 
     override fun cancelLowBatteryNotification(node: NodeEntity) = notificationManager.cancel(node.num)
 
-    override fun clearClientNotification(notification: MeshProtos.ClientNotification) =
+    override fun clearClientNotification(notification: ClientNotification) =
         notificationManager.cancel(notification.toString().hashCode())
 
     // endregion
@@ -499,7 +497,7 @@ constructor(
         }
 
         val ourNode = nodeRepository.get().ourNodeInfo.value
-        val meName = ourNode?.user?.longName ?: getString(Res.string.you)
+        val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
         val me =
             Person.Builder()
                 .setName(meName)
@@ -516,14 +514,14 @@ constructor(
             // Use the node attached to the message directly to ensure correct identification
             val person =
                 Person.Builder()
-                    .setName(msg.node.user.longName)
+                    .setName(msg.node.user.long_name)
                     .setKey(msg.node.user.id)
-                    .setIcon(createPersonIcon(msg.node.user.shortName, msg.node.colors.second, msg.node.colors.first))
+                    .setIcon(createPersonIcon(msg.node.user.short_name, msg.node.colors.second, msg.node.colors.first))
                     .build()
 
             val text =
                 msg.originalMessage?.let { original ->
-                    "↩️ \"${original.node.user.shortName}: ${original.text.take(SNIPPET_LENGTH)}...\": ${msg.text}"
+                    "↩️ \"${original.node.user.short_name}: ${original.text.take(SNIPPET_LENGTH)}...\": ${msg.text}"
                 } ?: msg.text
 
             style.addMessage(text, msg.receivedTime, person)
@@ -533,11 +531,11 @@ constructor(
                 val reactorNode = nodeRepository.get().getNode(reaction.user.id)
                 val reactor =
                     Person.Builder()
-                        .setName(reaction.user.longName)
+                        .setName(reaction.user.long_name)
                         .setKey(reaction.user.id)
                         .setIcon(
                             createPersonIcon(
-                                reaction.user.shortName,
+                                reaction.user.short_name,
                                 reactorNode.colors.second,
                                 reactorNode.colors.first,
                             ),
@@ -631,14 +629,15 @@ constructor(
 
     private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
-        val title = getString(Res.string.low_battery_title).format(node.shortName)
-        val message = getString(Res.string.low_battery_message).format(node.longName, node.deviceMetrics.batteryLevel)
+        val title = getString(Res.string.low_battery_title).format(node.user.short_name)
+        val message =
+            getString(Res.string.low_battery_message).format(node.user.long_name, node.deviceMetrics.battery_level)
 
         return commonBuilder(type)
             .setCategory(Notification.CATEGORY_STATUS)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setProgress(MAX_BATTERY_LEVEL, node.deviceMetrics.batteryLevel, false)
+            .setProgress(MAX_BATTERY_LEVEL, node.deviceMetrics.battery_level ?: 0, false)
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -804,34 +803,21 @@ constructor(
 }
 
 // Extension function to format LocalStats into a readable string.
-private fun LocalStats?.formatToString(): String? = this?.allFields
-    ?.mapNotNull { (k, v) ->
-        when (k.name) {
-            "num_online_nodes",
-            "num_total_nodes",
-            -> null // Exclude these fields
-            "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
-            "channel_utilization" -> "ChUtil: %.2f%%".format(v)
-            "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
-            else -> {
-                val formattedKey = k.name.replace('_', ' ').replaceFirstChar { it.titlecase() }
-                "$formattedKey: $v"
-            }
-        }
-    }
-    ?.joinToString("\n")
+private fun LocalStats?.formatToString(): String? {
+    if (this == null) return null
+    val result = mutableListOf<String>()
+    uptime_seconds?.let { result.add("Uptime: ${formatUptime(it)}") }
+    channel_utilization?.let { result.add("ChUtil: %.2f%%".format(it)) }
+    air_util_tx?.let { result.add("AirUtilTX: %.2f%%".format(it)) }
+    return result.joinToString("\n")
+}
 
-private fun TelemetryProtos.DeviceMetrics?.formatToString(): String? = this?.allFields
-    ?.mapNotNull { (k, v) ->
-        when (k.name) {
-            "battery_level" -> "Battery Level: $v"
-            "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
-            "channel_utilization" -> "ChUtil: %.2f%%".format(v)
-            "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
-            else -> {
-                val formattedKey = k.name.replace('_', ' ').replaceFirstChar { it.titlecase() }
-                "$formattedKey: $v"
-            }
-        }
-    }
-    ?.joinToString("\n")
+private fun DeviceMetrics?.formatToString(): String? {
+    if (this == null) return null
+    val result = mutableListOf<String>()
+    battery_level?.let { result.add("Battery Level: $it") }
+    uptime_seconds?.let { result.add("Uptime: ${formatUptime(it)}") }
+    channel_utilization?.let { result.add("ChUtil: %.2f%%".format(it)) }
+    air_util_tx?.let { result.add("AirUtilTX: %.2f%%".format(it)) }
+    return result.joinToString("\n")
+}

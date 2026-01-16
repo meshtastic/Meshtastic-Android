@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.model
 
 import com.google.android.gms.maps.model.LatLng
@@ -45,6 +44,6 @@ data class NodeClusterItem(val node: Node, val nodePosition: LatLng, val nodeTit
                 18 to 91.182212,
                 19 to 45.58554,
             )
-        return precisionMap[this.node.position.precisionBits]
+        return precisionMap[this.node.position.precision_bits ?: 0]
     }
 }

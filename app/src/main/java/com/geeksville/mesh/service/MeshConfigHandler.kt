@@ -26,11 +26,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
-import org.meshtastic.proto.ModuleConfigProtos
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.ModuleConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,14 +44,14 @@ constructor(
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val _localConfig = MutableStateFlow(LocalConfig.getDefaultInstance())
+    private val _localConfig = MutableStateFlow(LocalConfig())
     val localConfig = _localConfig.asStateFlow()
 
-    private val _moduleConfig = MutableStateFlow(LocalModuleConfig.getDefaultInstance())
+    private val _moduleConfig = MutableStateFlow(LocalModuleConfig())
     val moduleConfig = _moduleConfig.asStateFlow()
 
-    private val configTotal = ConfigProtos.Config.getDescriptor().fields.size
-    private val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
+    private val configTotal = 9 // Hardcoded for now as Descriptors are not available
+    private val moduleTotal = 13 // Hardcoded for now as Descriptors are not available
 
     fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -60,19 +60,25 @@ constructor(
         radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(scope)
     }
 
-    fun handleDeviceConfig(config: ConfigProtos.Config) {
+    fun handleDeviceConfig(config: Config) {
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-        val configCount = _localConfig.value.allFields.size
+        // Wire doesn't have allFields, count non-null fields
+        val configCount = countNonNullFields(_localConfig.value)
         serviceRepository.setStatusMessage("Device config ($configCount / $configTotal)")
     }
 
-    fun handleModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
+    fun handleModuleConfig(config: ModuleConfig) {
         scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
-        val moduleCount = _moduleConfig.value.allFields.size
+        val moduleCount = countNonNullFields(_moduleConfig.value)
         serviceRepository.setStatusMessage("Module config ($moduleCount / $moduleTotal)")
     }
 
-    fun handleChannel(ch: ChannelProtos.Channel) {
+    private fun countNonNullFields(obj: Any): Int = obj::class.java.declaredFields.count { field ->
+        field.isAccessible = true
+        field.get(obj) != null
+    }
+
+    fun handleChannel(ch: Channel) {
         // We always want to save channel settings we receive from the radio
         scope.handledLaunch { radioConfigRepository.updateChannelSettings(ch) }
 
