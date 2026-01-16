@@ -85,13 +85,14 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew :app:connectedFdroidDebugAndroidTest :app:connectedGoogleDebugAndroidTest :core:database:connectedFdroidDebugAndroidTest :core:database:connectedGoogleDebugAndroidTest :core:model:connectedFdroidDebugAndroidTest :core:model:connectedGoogleDebugAndroidTest :core:ui:connectedFdroidDebugAndroidTest :core:ui:connectedGoogleDebugAndroidTest :feature:messaging:connectedFdroidDebugAndroidTest :feature:messaging:connectedGoogleDebugAndroidTest :feature:settings:connectedFdroidDebugAndroidTest :feature:settings:connectedGoogleDebugAndroidTest koverXmlReport --configuration-cache --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew runAllConnectedDebugTests koverXmlReport --configuration-cache --scan && ( killall -INT crashpad_handler || true )
 
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: coverage
           slug: meshtastic/Meshtastic-Android
           files: build/reports/kover/report.xml
 
@@ -101,6 +102,8 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: test_results
+          directory: .
+          files: "**/build/test-results/**/*.xml,**/build/outputs/androidTest-results/**/*.xml"
 
       - name: Upload Test Results
         if: ${{ always() && inputs.upload_artifacts }}
