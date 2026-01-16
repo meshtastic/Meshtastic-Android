@@ -45,6 +45,11 @@
     <string name="message_status_sfpp_routing">Reititetään SF++ ketjun kautta…</string>
     <string name="message_status_sfpp_confirmed">Vahvistettu SF++-ketjussa</string>
     <string name="message_retry_count">Uudelleenyritykset: %1$d / %2$d</string>
+    <string name="retry_dialog_title">Viestin lähetys epäonnistui</string>
+    <string name="retry_dialog_message">Yritetään uudelleen %1$d sekunnin kuluttua… (yritys %2$d / %3$d)</string>
+    <string name="retry_dialog_reaction_message">Yritetään vastausta uudelleen %1$d sekunnin kuluttua… (yritys %2$d / %3$d)</string>
+    <string name="retry_dialog_confirm">Yritä uudelleen nyt</string>
+    <string name="retry_dialog_cancel">Peruuta uudelleenyritys</string>
     <string name="routing_error_none">Vahvistettu</string>
     <string name="routing_error_no_route">Ei reittiä</string>
     <string name="routing_error_got_nak">Vastaanotettu kielteinen vahvistus</string>
