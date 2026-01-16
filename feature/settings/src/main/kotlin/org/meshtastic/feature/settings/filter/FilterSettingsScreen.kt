@@ -47,6 +47,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.filter_add_placeholder
+import org.meshtastic.core.strings.filter_enable
+import org.meshtastic.core.strings.filter_enable_summary
+import org.meshtastic.core.strings.filter_no_words
+import org.meshtastic.core.strings.filter_regex_pattern
+import org.meshtastic.core.strings.filter_settings
+import org.meshtastic.core.strings.filter_whole_word
+import org.meshtastic.core.strings.filter_words
+import org.meshtastic.core.strings.filter_words_summary
 import org.meshtastic.core.ui.component.MainAppBar
 
 @Composable
@@ -61,7 +74,7 @@ fun FilterSettingsScreen(
     Scaffold(
         topBar = {
             MainAppBar(
-                title = "Message Filter",
+                title = stringResource(Res.string.filter_settings),
                 canNavigateUp = true,
                 onNavigateUp = onBack,
                 ourNode = null,
@@ -83,9 +96,9 @@ fun FilterSettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Enable Filtering", style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(Res.string.filter_enable), style = MaterialTheme.typography.titleMedium)
                             Text(
-                                "Hide messages containing filter words",
+                                stringResource(Res.string.filter_enable_summary),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -98,9 +111,9 @@ fun FilterSettingsScreen(
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Filter Words", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(Res.string.filter_words), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Messages containing these words will be hidden",
+                            stringResource(Res.string.filter_words_summary),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(bottom = 8.dp),
@@ -113,7 +126,7 @@ fun FilterSettingsScreen(
                                 value = newWord,
                                 onValueChange = { newWord = it },
                                 modifier = Modifier.weight(1f),
-                                label = { Text("Add word or regex:pattern") },
+                                label = { Text(stringResource(Res.string.filter_add_placeholder)) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                                 keyboardActions = KeyboardActions(
@@ -129,7 +142,7 @@ fun FilterSettingsScreen(
                                     newWord = ""
                                 },
                             ) {
-                                Icon(Icons.Default.Add, contentDescription = "Add")
+                                Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add))
                             }
                         }
                     }
@@ -139,7 +152,7 @@ fun FilterSettingsScreen(
             if (filterWords.isEmpty()) {
                 item {
                     Text(
-                        "No filter words configured",
+                        stringResource(Res.string.filter_no_words),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -177,13 +190,13 @@ private fun FilterWordItem(
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 Text(
-                    text = if (isRegex) "Regex pattern" else "Whole word match",
+                    text = stringResource(if (isRegex) Res.string.filter_regex_pattern else Res.string.filter_whole_word),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             IconButton(onClick = onRemove) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.delete))
             }
         }
     }

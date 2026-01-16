@@ -70,6 +70,7 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.filter_message_label
 import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.reply
@@ -288,7 +289,7 @@ internal fun MessageItem(
                     }
                     if (message.filtered) {
                         Text(
-                            text = "Filtered",
+                            text = stringResource(Res.string.filter_message_label),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 8.dp, end = 4.dp),

@@ -117,6 +117,10 @@ import org.meshtastic.core.strings.copy
 import org.meshtastic.core.strings.delete
 import org.meshtastic.core.strings.delete_messages
 import org.meshtastic.core.strings.delete_messages_title
+import org.meshtastic.core.strings.filter_disable_for_contact
+import org.meshtastic.core.strings.filter_enable_for_contact
+import org.meshtastic.core.strings.filter_hide_count
+import org.meshtastic.core.strings.filter_show_count
 import org.meshtastic.core.strings.message_input_label
 import org.meshtastic.core.strings.navigate_back
 import org.meshtastic.core.strings.overflow_menu
@@ -840,7 +844,10 @@ private fun OverFlowMenu(
             )
             // Show/hide filtered messages toggle (only when there are filtered messages)
             if (filteredCount > 0 && !filteringDisabled) {
-                val showFilteredTitle = if (showFiltered) "Hide $filteredCount filtered" else "Show $filteredCount filtered"
+                val showFilteredTitle = stringResource(
+                    if (showFiltered) Res.string.filter_hide_count else Res.string.filter_show_count,
+                    filteredCount,
+                )
                 DropdownMenuItem(
                     text = { Text(showFilteredTitle) },
                     onClick = {
@@ -856,7 +863,9 @@ private fun OverFlowMenu(
                 )
             }
             // Per-contact filter disable toggle
-            val filterToggleTitle = if (filteringDisabled) "Enable filtering" else "Disable filtering"
+            val filterToggleTitle = stringResource(
+                if (filteringDisabled) Res.string.filter_enable_for_contact else Res.string.filter_disable_for_contact,
+            )
             DropdownMenuItem(
                 text = { Text(filterToggleTitle) },
                 onClick = {
