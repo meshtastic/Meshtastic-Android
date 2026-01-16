@@ -15,12 +15,14 @@ graph TB
     direction TB
     :core:common[common]:::kmp-library
     :core:database[database]:::android-library
+    :core:di[di]:::android-library
     :core:model[model]:::android-library
     :core:proto[proto]:::android-library
     :core:service[service]:::android-library
     :core:strings[strings]:::kmp-library
   end
 
+  :core:database -.-> :core:di
   :core:database -.-> :core:model
   :core:database -.-> :core:proto
   :core:database -.-> :core:strings
