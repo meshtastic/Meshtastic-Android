@@ -91,11 +91,13 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 InsetDivider()
-
+                val deviceText =
+                    state.reportedTarget?.let { target -> "${deviceHardware.displayName} ($target)" }
+                        ?: deviceHardware.displayName
                 ListItem(
                     text = stringResource(Res.string.hardware),
                     leadingIcon = Icons.Default.Router,
-                    supportingText = deviceHardware.displayName,
+                    supportingText = deviceText,
                     copyable = true,
                     trailingIcon = null,
                 )

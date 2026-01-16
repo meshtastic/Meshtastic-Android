@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.model
 
 import androidx.compose.ui.unit.Dp
@@ -56,6 +55,8 @@ data class MetricsState(
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
     val paxMetrics: List<MeshLog> = emptyList(),
+    /** The PlatformIO environment reported by the device (if known). */
+    val reportedTarget: String? = null,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
 

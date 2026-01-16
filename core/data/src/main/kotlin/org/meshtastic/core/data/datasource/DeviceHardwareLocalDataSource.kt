@@ -33,12 +33,17 @@ constructor(
 ) {
     private val deviceHardwareDao by lazy { deviceHardwareDaoLazy.get() }
 
-    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) = withContext(dispatchers.io) {
-        deviceHardware.forEach { deviceHardware -> deviceHardwareDao.insert(deviceHardware.asEntity()) }
-    }
+    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) =
+        withContext(dispatchers.io) { deviceHardwareDao.insertAll(deviceHardware.map { it.asEntity() }) }
 
     suspend fun deleteAllDeviceHardware() = withContext(dispatchers.io) { deviceHardwareDao.deleteAll() }
 
-    suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity? =
+    suspend fun getByHwModel(hwModel: Int): List<DeviceHardwareEntity> =
         withContext(dispatchers.io) { deviceHardwareDao.getByHwModel(hwModel) }
+
+    suspend fun getByTarget(target: String): DeviceHardwareEntity? =
+        withContext(dispatchers.io) { deviceHardwareDao.getByTarget(target) }
+
+    suspend fun getByModelAndTarget(hwModel: Int, target: String): DeviceHardwareEntity? =
+        withContext(dispatchers.io) { deviceHardwareDao.getByModelAndTarget(hwModel, target) }
 }
