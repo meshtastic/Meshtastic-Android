@@ -85,7 +85,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest koverXmlReport --configuration-cache --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew :app:connectedFdroidDebugAndroidTest :app:connectedGoogleDebugAndroidTest :core:database:connectedFdroidDebugAndroidTest :core:database:connectedGoogleDebugAndroidTest :core:model:connectedFdroidDebugAndroidTest :core:model:connectedGoogleDebugAndroidTest :core:ui:connectedFdroidDebugAndroidTest :core:ui:connectedGoogleDebugAndroidTest :feature:messaging:connectedFdroidDebugAndroidTest :feature:messaging:connectedGoogleDebugAndroidTest :feature:settings:connectedFdroidDebugAndroidTest :feature:settings:connectedGoogleDebugAndroidTest koverXmlReport --configuration-cache --scan && ( killall -INT crashpad_handler || true )
 
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}
@@ -93,7 +93,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          files: app/build/reports/kover/xml/report.xml
+          files: build/reports/kover/xml/report.xml
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}

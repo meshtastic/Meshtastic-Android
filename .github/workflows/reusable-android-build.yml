@@ -69,7 +69,7 @@ jobs:
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
       - name: Run Spotless, Detekt, Build, Lint, and Local Tests
-        run: ./gradlew spotlessCheck detekt assembleDebug testDebugUnitTest koverXmlReport --configuration-cache --scan
+        run: ./gradlew spotlessCheck detekt assembleDebug :app:testFdroidDebugUnitTest :app:testGoogleDebugUnitTest :core:analytics:testFdroidDebugUnitTest :core:analytics:testGoogleDebugUnitTest :core:data:testFdroidDebugUnitTest :core:data:testGoogleDebugUnitTest :core:database:testFdroidDebugUnitTest :core:database:testGoogleDebugUnitTest :core:datastore:testFdroidDebugUnitTest :core:datastore:testGoogleDebugUnitTest :core:di:testFdroidDebugUnitTest :core:di:testGoogleDebugUnitTest :core:model:testFdroidDebugUnitTest :core:model:testGoogleDebugUnitTest :core:navigation:testFdroidDebugUnitTest :core:navigation:testGoogleDebugUnitTest :core:network:testFdroidDebugUnitTest :core:network:testGoogleDebugUnitTest :core:prefs:testFdroidDebugUnitTest :core:prefs:testGoogleDebugUnitTest :core:proto:testFdroidDebugUnitTest :core:proto:testGoogleDebugUnitTest :core:service:testFdroidDebugUnitTest :core:service:testGoogleDebugUnitTest :core:ui:testFdroidDebugUnitTest :core:ui:testGoogleDebugUnitTest :feature:firmware:testFdroidDebugUnitTest :feature:firmware:testGoogleDebugUnitTest :feature:intro:testFdroidDebugUnitTest :feature:intro:testGoogleDebugUnitTest :feature:map:testFdroidDebugUnitTest :feature:map:testGoogleDebugUnitTest :feature:messaging:testFdroidDebugUnitTest :feature:messaging:testGoogleDebugUnitTest :feature:node:testFdroidDebugUnitTest :feature:node:testGoogleDebugUnitTest :feature:settings:testFdroidDebugUnitTest :feature:settings:testGoogleDebugUnitTest :mesh_service_example:testDebugUnitTest koverXmlReport --configuration-cache --scan
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
 
@@ -78,7 +78,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          files: app/build/reports/kover/xml/report.xml
+          files: build/reports/kover/xml/report.xml
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
