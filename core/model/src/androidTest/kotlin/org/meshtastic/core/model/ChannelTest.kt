@@ -24,16 +24,16 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.model.util.URL_PREFIX
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.toChannelSet
-import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.ChannelSet
 
 @RunWith(AndroidJUnit4::class)
 class ChannelTest {
     @Test
     fun channelUrlGood() {
-        val ch = channelSet {
-            settings.add(Channel.default.settings)
-            loraConfig = Channel.default.loraConfig
-        }
+        val ch = ChannelSet(
+            settings = listOf(Channel.default.settings),
+            lora_config = Channel.default.loraConfig
+        )
         val channelUrl = ch.getChannelUrl()
 
         Assert.assertTrue(channelUrl.toString().startsWith(URL_PREFIX))

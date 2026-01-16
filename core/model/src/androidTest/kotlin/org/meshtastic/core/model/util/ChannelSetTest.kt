@@ -51,7 +51,7 @@ class ChannelSetTest {
         val url = Uri.parse("https://meshtastic.org/e/#CgMSAQESBggBQANIAQ?add=true")
         val cs = url.toChannelSet()
         Assert.assertEquals("Custom", cs.primaryChannel!!.name)
-        Assert.assertFalse(cs.hasLoraConfig())
+        Assert.assertFalse(cs.lora_config != null)
     }
 
     /** properly parse channel config when `?add=true` is in the query parameters */
@@ -60,6 +60,6 @@ class ChannelSetTest {
         val url = Uri.parse("https://meshtastic.org/e/?add=true#CgMSAQESBggBQANIAQ")
         val cs = url.toChannelSet()
         Assert.assertEquals("Custom", cs.primaryChannel!!.name)
-        Assert.assertFalse(cs.hasLoraConfig())
+        Assert.assertFalse(cs.lora_config != null)
     }
 }

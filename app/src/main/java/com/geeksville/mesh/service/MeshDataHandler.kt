@@ -465,10 +465,10 @@ constructor(
                         )
                     val updatedPacket =
                         p.copy(
-                        packetId = newId,
-                        data = updatedData,
-                        routingError = org.meshtastic.proto.Routing.Error.NONE.value,
-                    )
+                            packetId = newId,
+                            data = updatedData,
+                            routingError = org.meshtastic.proto.Routing.Error.NONE.value,
+                        )
                     packetRepository.get().update(updatedPacket)
 
                     Logger.w { "[ackNak] retrying req=$requestId newId=$newId retry=$newRetryCount" }

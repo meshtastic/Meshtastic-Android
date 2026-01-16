@@ -185,7 +185,7 @@ fun TracerouteLogScreen(
                         } else {
                             // For cases where there's a result but no full route, display plain text
                             res.fromRadio.packet
-                                !!.getTracerouteResponse(
+                                ?.getTracerouteResponse(
                                     ::getUsername,
                                     headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
                                     headerBack = stringResource(Res.string.traceroute_route_back_to_us),

@@ -95,8 +95,9 @@ fun MeshPacket.getFullTracerouteResponse(
     getUser: (nodeNum: Int) -> String,
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
-): String? =
-    fullRouteDiscovery?.takeIf { it.route.isNotEmpty() && it.route_back.isNotEmpty() }?.getTracerouteResponse(getUser, headerTowards, headerBack)
+): String? = fullRouteDiscovery
+    ?.takeIf { it.route.isNotEmpty() && it.route_back.isNotEmpty() }
+    ?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
 enum class TracerouteMapAvailability {
     Ok,

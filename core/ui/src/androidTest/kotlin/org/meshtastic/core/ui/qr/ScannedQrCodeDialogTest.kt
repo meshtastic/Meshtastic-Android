@@ -22,15 +22,21 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.meshtastic.core.strings.getString
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.accept
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.new_channel_rcvd
+import org.meshtastic.core.strings.replace
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
-import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class ScannedQrCodeDialogTest {

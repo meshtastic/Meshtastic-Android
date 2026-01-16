@@ -161,7 +161,7 @@ constructor(
                     }
                     getDeviceHardware(ourNode)?.let { deviceHardware ->
                         _deviceHardware.value = deviceHardware
-                        _currentFirmwareVersion.value = ourNode.metadata?.firmware_version
+                        _currentFirmwareVersion.value = ourNode.firmwareVersion
 
                         val releaseFlow =
                             if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
@@ -193,7 +193,7 @@ constructor(
                                         !dismissed &&
                                         radioPrefs.isBle(),
                                     updateMethod = firmwareUpdateMethod,
-                                    currentFirmwareVersion = ourNode.metadata?.firmware_version,
+                                    currentFirmwareVersion = ourNode.firmwareVersion,
                                 )
                         }
                     }
@@ -458,7 +458,7 @@ constructor(
 
     private suspend fun getDeviceHardware(ourNode: MyNodeEntity): DeviceHardware? {
         val nodeInfo = nodeRepository.ourNodeInfo.value
-        val hwModelInt = nodeInfo?.user?.hw_model.value
+        val hwModelInt = nodeInfo?.user?.hw_model?.value ?: 0
         val target = ourNode.pioEnv
 
         return if (hwModelInt != 0) {

@@ -175,7 +175,7 @@ constructor(
                         maxChannels = 8,
                         hasWifi = metadata?.hasWifi == true,
                         deviceId = device_id.utf8(),
-                        pioEnv = if (myInfo.pioEnv.isNullOrEmpty()) null else myInfo.pioEnv,
+                        pioEnv =  myInfo.pio_env,
                     )
                 }
             if (metadata != null) {

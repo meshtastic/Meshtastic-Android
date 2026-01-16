@@ -71,8 +71,6 @@ class FakeNodeInfoWriteDataSource : NodeInfoWriteDataSource {
     override suspend fun setNodeNotes(num: Int, notes: String) {}
 
     override suspend fun backfillDenormalizedNames() {}
-
-    override suspend fun clearMyNodeInfo() {}
 }
 
 class FakeMeshServiceNotifications : MeshServiceNotifications {
