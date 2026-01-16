@@ -97,9 +97,10 @@ jobs:
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
 
       - name: Upload Test Results
         if: ${{ always() && inputs.upload_artifacts }}

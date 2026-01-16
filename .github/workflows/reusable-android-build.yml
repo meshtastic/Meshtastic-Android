@@ -80,6 +80,13 @@ jobs:
           slug: meshtastic/Meshtastic-Android
           files: app/build/reports/kover/xml/report.xml
 
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+
       - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v6
