@@ -93,7 +93,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          files: build/reports/kover/xml/report.xml
+          files: build/reports/kover/report.xml
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
