@@ -121,9 +121,13 @@ fun ScannedQrCodeDialog(
             val result = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
             channelSet.copy(settings = result)
         } else {
-            // When adding (not replacing), include all previous channels + selected new channels
-            val selectedNewChannels = incoming.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-            channelSet.copy(settings = channels.settings + selectedNewChannels)
+            // When adding (not replacing), include all previous channels + selected new channels.
+            // Since 'channelSet.settings' already contains the merged distinct list, we just filter it.
+            val result = channelSet.settings.filterIndexed { i, _ ->
+                val isExisting = i < channels.settings.size
+                isExisting || channelSelections.getOrNull(i) == true
+            }
+            channelSet.copy(settings = result)
         }
 
     // Compute LoRa configuration changes when in replace mode
@@ -202,12 +206,13 @@ fun ScannedQrCodeDialog(
                     )
                 }
                 itemsIndexed(channelSet.settings) { index, channel ->
+                    val isExisting = !shouldReplace && index < channels.settings.size
                     val channelObj = Channel(channel, channelSet.lora_config ?: Config.LoRaConfig())
                     ChannelSelection(
                         index = index,
                         title = (channel.name ?: "").ifEmpty { modemPresetName },
-                        enabled = true,
-                        isSelected = channelSelections[index],
+                        enabled = !isExisting,
+                        isSelected = if (isExisting) true else channelSelections[index],
                         onSelected = {
                             if (it || selectedChannelSet.settings.size > 1) {
                                 channelSelections[index] = it
