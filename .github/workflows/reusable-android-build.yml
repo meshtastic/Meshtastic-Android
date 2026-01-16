@@ -69,7 +69,7 @@ jobs:
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
       - name: Run Spotless, Detekt, Build, Lint, and Local Tests
-        run: ./gradlew spotlessCheck detekt check assembleDebug koverXmlReport --configuration-cache --scan
+        run: ./gradlew spotlessCheck detekt assembleDebug testDebugUnitTest koverXmlReport --configuration-cache --scan
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
 
