@@ -43,6 +43,7 @@ graph TB
   :core:data -.-> :core:network
   :core:data -.-> :core:prefs
   :core:data -.-> :core:proto
+  :core:database -.-> :core:di
   :core:database -.-> :core:model
   :core:database -.-> :core:proto
   :core:database -.-> :core:strings
@@ -50,6 +51,7 @@ graph TB
   :core:model -.-> :core:common
   :core:model -.-> :core:proto
   :core:model -.-> :core:strings
+  :core:network -.-> :core:di
   :core:network -.-> :core:model
   :core:service -.-> :core:database
   :core:service -.-> :core:model

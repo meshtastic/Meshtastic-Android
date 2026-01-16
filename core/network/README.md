@@ -14,6 +14,7 @@ graph TB
   subgraph :core
     direction TB
     :core:common[common]:::kmp-library
+    :core:di[di]:::android-library
     :core:model[model]:::android-library
     :core:network[network]:::android-library
     :core:proto[proto]:::android-library
@@ -23,6 +24,7 @@ graph TB
   :core:model -.-> :core:common
   :core:model -.-> :core:proto
   :core:model -.-> :core:strings
+  :core:network -.-> :core:di
   :core:network -.-> :core:model
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
