@@ -57,6 +57,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.SpeakerNotes
 import androidx.compose.material.icons.filled.SpeakerNotesOff
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.FilterListOff
 import androidx.compose.material3.AlertDialog
@@ -388,6 +390,9 @@ fun MessageScreen(
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
                     filteringDisabled = filteringDisabled,
                     onToggleFilteringDisabled = { viewModel.setContactFilteringDisabled(contactKey, !filteringDisabled) },
+                    filteredCount = filteredCount,
+                    showFiltered = showFiltered,
+                    onToggleShowFiltered = viewModel::toggleShowFiltered,
                 )
             }
         },
@@ -420,7 +425,6 @@ fun MessageScreen(
                         onDeleteMessages = { viewModel.deleteMessages(it) },
                         onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
                         onReply = { message -> replyingToPacketId = message?.packetId },
-                        onToggleShowFiltered = viewModel::toggleShowFiltered,
                     ),
                     quickEmojis = viewModel.frequentEmojis,
                 )
@@ -708,6 +712,9 @@ private fun MessageTopBar(
     onNavigateToQuickChatOptions: () -> Unit = {},
     filteringDisabled: Boolean = false,
     onToggleFilteringDisabled: () -> Unit = {},
+    filteredCount: Int = 0,
+    showFiltered: Boolean = false,
+    onToggleShowFiltered: () -> Unit = {},
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -736,6 +743,9 @@ private fun MessageTopBar(
             mismatchKey = mismatchKey,
             filteringDisabled = filteringDisabled,
             onToggleFilteringDisabled = onToggleFilteringDisabled,
+            filteredCount = filteredCount,
+            showFiltered = showFiltered,
+            onToggleShowFiltered = onToggleShowFiltered,
         )
     },
 )
@@ -749,6 +759,9 @@ private fun MessageTopBarActions(
     mismatchKey: Boolean,
     filteringDisabled: Boolean,
     onToggleFilteringDisabled: () -> Unit,
+    filteredCount: Int,
+    showFiltered: Boolean,
+    onToggleShowFiltered: () -> Unit,
 ) {
     if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
         NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
@@ -766,6 +779,9 @@ private fun MessageTopBarActions(
             onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
             filteringDisabled = filteringDisabled,
             onToggleFilteringDisabled = onToggleFilteringDisabled,
+            filteredCount = filteredCount,
+            showFiltered = showFiltered,
+            onToggleShowFiltered = onToggleShowFiltered,
         )
     }
 }
@@ -779,6 +795,9 @@ private fun OverFlowMenu(
     onNavigateToQuickChatOptions: () -> Unit,
     filteringDisabled: Boolean,
     onToggleFilteringDisabled: () -> Unit,
+    filteredCount: Int,
+    showFiltered: Boolean,
+    onToggleShowFiltered: () -> Unit,
 ) {
     if (expanded) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
@@ -819,6 +838,23 @@ private fun OverFlowMenu(
                     )
                 },
             )
+            // Show/hide filtered messages toggle (only when there are filtered messages)
+            if (filteredCount > 0 && !filteringDisabled) {
+                val showFilteredTitle = if (showFiltered) "Hide $filteredCount filtered" else "Show $filteredCount filtered"
+                DropdownMenuItem(
+                    text = { Text(showFilteredTitle) },
+                    onClick = {
+                        onDismiss()
+                        onToggleShowFiltered()
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = if (showFiltered) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = showFilteredTitle,
+                        )
+                    },
+                )
+            }
             // Per-contact filter disable toggle
             val filterToggleTitle = if (filteringDisabled) "Enable filtering" else "Disable filtering"
             DropdownMenuItem(
