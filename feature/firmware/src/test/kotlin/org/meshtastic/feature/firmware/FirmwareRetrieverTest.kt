@@ -174,6 +174,50 @@ class FirmwareRetrieverTest {
     }
 
     @Test
+    fun `retrieveOtaFirmware uses platformioTarget for NRF52 variant`() = runTest {
+        val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/nrf52.zip")
+        val hardware =
+            DeviceHardware(
+                hwModelSlug = "RAK4631",
+                platformioTarget = "rak4631_nomadstar_meteor_pro",
+                architecture = "nrf52840",
+            )
+        val expectedFile = File("firmware-rak4631_nomadstar_meteor_pro-2.5.0-ota.zip")
+
+        coEvery { fileHandler.checkUrlExists(any()) } returns true
+        coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
+
+        val result = retriever.retrieveOtaFirmware(release, hardware) {}
+
+        assertEquals(expectedFile, result)
+        coVerify {
+            fileHandler.checkUrlExists(
+                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-2.5.0/firmware-rak4631_nomadstar_meteor_pro-2.5.0-ota.zip",
+            )
+        }
+    }
+
+    @Test
+    fun `retrieveOtaFirmware uses correct filename for STM32`() = runTest {
+        val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/stm32.zip")
+        val hardware =
+            DeviceHardware(hwModelSlug = "ST_GENERIC", platformioTarget = "stm32-generic", architecture = "stm32")
+        val expectedFile = File("firmware-stm32-generic-2.5.0-ota.zip")
+
+        coEvery { fileHandler.checkUrlExists(any()) } returns true
+        coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
+
+        val result = retriever.retrieveOtaFirmware(release, hardware) {}
+
+        assertEquals(expectedFile, result)
+        coVerify {
+            fileHandler.checkUrlExists(
+                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-2.5.0/firmware-stm32-generic-2.5.0-ota.zip",
+            )
+        }
+    }
+
+    @Test
     fun `retrieveUsbFirmware uses correct uf2 extension for RP2040`() = runTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/rp2040.zip")
         val hardware = DeviceHardware(hwModelSlug = "RPI_PICO", platformioTarget = "pico", architecture = "rp2040")
@@ -187,7 +231,27 @@ class FirmwareRetrieverTest {
         assertEquals(expectedFile, result)
         coVerify {
             fileHandler.checkUrlExists(
-                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-2.5.0/firmware-pico-2.5.0.uf2",
+                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/" +
+                    "firmware-2.5.0/firmware-pico-2.5.0.uf2",
+            )
+        }
+    }
+
+    @Test
+    fun `retrieveUsbFirmware uses correct uf2 extension for NRF52`() = runTest {
+        val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/nrf52.zip")
+        val hardware = DeviceHardware(hwModelSlug = "T_ECHO", platformioTarget = "t-echo", architecture = "nrf52840")
+        val expectedFile = File("firmware-t-echo-2.5.0.uf2")
+
+        coEvery { fileHandler.checkUrlExists(any()) } returns true
+        coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
+
+        val result = retriever.retrieveUsbFirmware(release, hardware) {}
+
+        assertEquals(expectedFile, result)
+        coVerify {
+            fileHandler.checkUrlExists(
+                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-2.5.0/firmware-t-echo-2.5.0.uf2",
             )
         }
     }

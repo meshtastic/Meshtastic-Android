@@ -64,8 +64,8 @@ constructor(
         forceRefresh: Boolean = false,
     ): Result<DeviceHardware?> = withContext(dispatchers.io) {
         Logger.d {
-            "DeviceHardwareRepository: getDeviceHardwareByModel" +
-                "(hwModel=$hwModel, target=$target, forceRefresh=$forceRefresh)"
+            "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel," +
+                " target=$target, forceRefresh=$forceRefresh)"
         }
 
         val quirks = loadQuirks()
@@ -75,7 +75,19 @@ constructor(
             localDataSource.deleteAllDeviceHardware()
         } else {
             // 1. Attempt to retrieve from cache first
-            val cachedEntities = localDataSource.getByHwModel(hwModel)
+            var cachedEntities = localDataSource.getByHwModel(hwModel)
+
+            // Fallback to target-only lookup if hwModel-based lookup yielded nothing
+            if (cachedEntities.isEmpty() && target != null) {
+                Logger.d {
+                    "DeviceHardwareRepository: no cache for hwModel=$hwModel, trying target lookup for $target"
+                }
+                val byTarget = localDataSource.getByTarget(target)
+                if (byTarget != null) {
+                    cachedEntities = listOf(byTarget)
+                }
+            }
+
             if (cachedEntities.isNotEmpty() && cachedEntities.all { !it.isStale() }) {
                 Logger.d { "DeviceHardwareRepository: using fresh cached device hardware for hwModel=$hwModel" }
                 val matched = disambiguate(cachedEntities, target)
@@ -95,10 +107,17 @@ constructor(
             }
 
             localDataSource.insertAllDeviceHardware(remoteHardware)
-            val fromDb = localDataSource.getByHwModel(hwModel)
+            var fromDb = localDataSource.getByHwModel(hwModel)
+
+            // Fallback to target lookup after remote fetch
+            if (fromDb.isEmpty() && target != null) {
+                val byTarget = localDataSource.getByTarget(target)
+                if (byTarget != null) fromDb = listOf(byTarget)
+            }
+
             Logger.d {
-                "DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel" +
-                    " returned ${fromDb.size} entries"
+                "DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel returned" +
+                    " ${fromDb.size} entries"
             }
             disambiguate(fromDb, target)?.asExternalModel()
         }
@@ -112,7 +131,12 @@ constructor(
                 }
 
                 // 3. Attempt to use stale cache as a fallback, but only if it looks complete.
-                val staleEntities = localDataSource.getByHwModel(hwModel)
+                var staleEntities = localDataSource.getByHwModel(hwModel)
+                if (staleEntities.isEmpty() && target != null) {
+                    val byTarget = localDataSource.getByTarget(target)
+                    if (byTarget != null) staleEntities = listOf(byTarget)
+                }
+
                 if (staleEntities.isNotEmpty() && staleEntities.all { !it.isIncomplete() }) {
                     Logger.d { "DeviceHardwareRepository: using stale cached device hardware for hwModel=$hwModel" }
                     val matched = disambiguate(staleEntities, target)
@@ -123,13 +147,8 @@ constructor(
 
                 // 4. Fallback to bundled JSON if cache is empty or incomplete
                 Logger.d {
-                    "DeviceHardwareRepository: cache ${
-                        if (staleEntities.isEmpty()) {
-                            "empty"
-                        } else {
-                            "incomplete"
-                        }
-                    } for hwModel=$hwModel, falling back to bundled JSON asset"
+                    "DeviceHardwareRepository: cache ${if (staleEntities.isEmpty()) "empty" else "incomplete"} " +
+                        "for hwModel=$hwModel, falling back to bundled JSON asset"
                 }
                 return@withContext loadFromBundledJson(hwModel, target, quirks)
             }
@@ -147,7 +166,14 @@ constructor(
         }
 
         localDataSource.insertAllDeviceHardware(jsonHardware)
-        val baseList = localDataSource.getByHwModel(hwModel)
+        var baseList = localDataSource.getByHwModel(hwModel)
+
+        // Fallback to target lookup after JSON load
+        if (baseList.isEmpty() && target != null) {
+            val byTarget = localDataSource.getByTarget(target)
+            if (byTarget != null) baseList = listOf(byTarget)
+        }
+
         Logger.d {
             "DeviceHardwareRepository: lookup after JSON load for hwModel=$hwModel returned ${baseList.size} entries"
         }
@@ -204,10 +230,9 @@ constructor(
         val result =
             if (matchedQuirk != null) {
                 Logger.d {
-                    "DeviceHardwareRepository: applying quirk:" +
-                        " requiresBootloaderUpgradeForOta=" +
-                        "${matchedQuirk.requiresBootloaderUpgradeForOta}," +
-                        " infoUrl=${matchedQuirk.infoUrl}"
+                    "DeviceHardwareRepository: applying quirk: " +
+                        "requiresBootloaderUpgradeForOta=${matchedQuirk.requiresBootloaderUpgradeForOta}, " +
+                        "infoUrl=${matchedQuirk.infoUrl}"
                 }
                 base.copy(
                     requiresBootloaderUpgradeForOta = matchedQuirk.requiresBootloaderUpgradeForOta,
