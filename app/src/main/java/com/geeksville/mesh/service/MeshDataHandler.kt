@@ -623,7 +623,6 @@ constructor(
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
     fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean = true) {
         if (dataPacket.dataType !in rememberDataType) return
         val fromLocal =
@@ -648,13 +647,7 @@ constructor(
                 }
 
                 // Check if message should be filtered
-                val isFiltered =
-                    if (dataPacket.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
-                        val isFilteringDisabled = getContactSettings(contactKey).filteringDisabled
-                        messageFilterService.shouldFilter(dataPacket.text.orEmpty(), contactKey, isFilteringDisabled)
-                    } else {
-                        false
-                    }
+                val isFiltered = shouldFilterMessage(dataPacket, contactKey)
 
                 val packetToSave =
                     Packet(
@@ -673,19 +666,36 @@ constructor(
                     )
 
                 insert(packetToSave)
-                val conversationMuted = getContactSettings(contactKey).isMuted
-                val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
-                val isSilent = conversationMuted || nodeMuted
-                if (packetToSave.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isSilent && !isFiltered) {
-                    serviceNotifications.showAlertNotification(
-                        contactKey,
-                        getSenderName(dataPacket),
-                        dataPacket.alert ?: getString(Res.string.critical_alert),
-                    )
-                } else if (updateNotification && !isFiltered) {
-                    scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
+                if (!isFiltered) {
+                    handlePacketNotification(packetToSave, dataPacket, contactKey, updateNotification)
                 }
             }
+        }
+    }
+
+    private suspend fun PacketRepository.shouldFilterMessage(dataPacket: DataPacket, contactKey: String): Boolean {
+        if (dataPacket.dataType != Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) return false
+        val isFilteringDisabled = getContactSettings(contactKey).filteringDisabled
+        return messageFilterService.shouldFilter(dataPacket.text.orEmpty(), contactKey, isFilteringDisabled)
+    }
+
+    private suspend fun handlePacketNotification(
+        packet: Packet,
+        dataPacket: DataPacket,
+        contactKey: String,
+        updateNotification: Boolean,
+    ) {
+        val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
+        val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
+        val isSilent = conversationMuted || nodeMuted
+        if (packet.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isSilent) {
+            serviceNotifications.showAlertNotification(
+                contactKey,
+                getSenderName(dataPacket),
+                dataPacket.alert ?: getString(Res.string.critical_alert),
+            )
+        } else if (updateNotification) {
+            scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
         }
     }
 
