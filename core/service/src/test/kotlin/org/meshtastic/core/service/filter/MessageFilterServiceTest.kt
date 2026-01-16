@@ -86,12 +86,12 @@ class MessageFilterServiceTest {
     @Test
     fun `shouldFilter returns false when contact has filtering disabled`() {
         filterService.rebuildPatterns()
-        assertFalse(filterService.shouldFilter("spam message", contactKey = "0!test123", isFilteringDisabled = true))
+        assertFalse(filterService.shouldFilter("spam message", isFilteringDisabled = true))
     }
 
     @Test
     fun `shouldFilter filters when contact has filtering enabled`() {
         filterService.rebuildPatterns()
-        assertTrue(filterService.shouldFilter("spam message", contactKey = "0!test123", isFilteringDisabled = false))
+        assertTrue(filterService.shouldFilter("spam message", isFilteringDisabled = false))
     }
 }

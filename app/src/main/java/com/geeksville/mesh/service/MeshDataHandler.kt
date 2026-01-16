@@ -676,7 +676,7 @@ constructor(
     private suspend fun PacketRepository.shouldFilterMessage(dataPacket: DataPacket, contactKey: String): Boolean {
         if (dataPacket.dataType != Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) return false
         val isFilteringDisabled = getContactSettings(contactKey).filteringDisabled
-        return messageFilterService.shouldFilter(dataPacket.text.orEmpty(), contactKey, isFilteringDisabled)
+        return messageFilterService.shouldFilter(dataPacket.text.orEmpty(), isFilteringDisabled)
     }
 
     private suspend fun handlePacketNotification(
