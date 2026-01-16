@@ -21,7 +21,6 @@
 #-renamesourcefileattribute SourceFile
 
 # Needed for protobufs
--keep class com.google.protobuf.** { *; }
 -keep class org.meshtastic.proto.** { *; }
 
 # eclipse.paho.client
