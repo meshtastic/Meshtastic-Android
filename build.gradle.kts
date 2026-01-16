@@ -48,3 +48,35 @@ plugins {
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
+
+val debugTests = listOf(
+    "testDebugUnitTest",
+    "testFdroidDebugUnitTest",
+    "testGoogleDebugUnitTest"
+)
+
+tasks.register("runAllDebugTests") {
+    group = "verification"
+    description = "Runs all unit tests for debug variants and flavors"
+    dependsOn(subprojects.map { subproject ->
+        subproject.tasks.matching { task ->
+            task.name in debugTests
+        }
+    })
+}
+
+val connectedTests = listOf(
+    "connectedDebugAndroidTest",
+    "connectedFdroidDebugAndroidTest",
+    "connectedGoogleDebugAndroidTest"
+)
+
+tasks.register("runAllConnectedDebugTests") {
+    group = "verification"
+    description = "Runs all connected tests for debug variants and flavors"
+    dependsOn(subprojects.map { subproject ->
+        subproject.tasks.matching { task ->
+            task.name in connectedTests
+        }
+    })
+}
