@@ -297,12 +297,15 @@ constructor(
         includeFiltered: Boolean,
         getNode: suspend (String?) -> Node,
     ): Flow<PagingData<Message>> = Pager(
-        config = PagingConfig(
+        config =
+        PagingConfig(
             pageSize = MESSAGES_PAGE_SIZE,
             enablePlaceholders = false,
             initialLoadSize = MESSAGES_PAGE_SIZE,
         ),
-        pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contactKey, includeFiltered) },
+        pagingSourceFactory = {
+            dbManager.currentDb.value.packetDao().getMessagesFromPaged(contactKey, includeFiltered)
+        },
     )
         .flow
         .map { pagingData ->
@@ -316,8 +319,9 @@ constructor(
             }
         }
 
-    suspend fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().setContactFilteringDisabled(contactKey, disabled) }
+    suspend fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) = withContext(dispatchers.io) {
+        dbManager.currentDb.value.packetDao().setContactFilteringDisabled(contactKey, disabled)
+    }
 
     suspend fun clearPacketDB() = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteAll() }
 

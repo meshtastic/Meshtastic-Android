@@ -26,10 +26,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefsImpl
-import org.meshtastic.core.prefs.filter.FilterPrefs
-import org.meshtastic.core.prefs.filter.FilterPrefsImpl
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefsImpl
+import org.meshtastic.core.prefs.filter.FilterPrefs
+import org.meshtastic.core.prefs.filter.FilterPrefsImpl
 import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefsImpl
 import org.meshtastic.core.prefs.map.MapPrefs

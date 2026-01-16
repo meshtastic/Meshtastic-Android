@@ -95,11 +95,11 @@ constructor(
 
     private val contactKeyForPagedMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val pagedMessagesForContactKey: Flow<PagingData<Message>> =
-        combine(
-            contactKeyForPagedMessages.filterNotNull(),
-            _showFiltered,
-            contactSettings,
-        ) { contactKey, showFiltered, settings ->
+        combine(contactKeyForPagedMessages.filterNotNull(), _showFiltered, contactSettings) {
+                contactKey,
+                showFiltered,
+                settings,
+            ->
             // If filtering is disabled for this contact, always include filtered messages
             val filteringDisabled = settings[contactKey]?.filteringDisabled ?: false
             val includeFiltered = showFiltered || filteringDisabled
@@ -151,13 +151,10 @@ constructor(
         _showFiltered.update { !it }
     }
 
-    fun getFilteredCount(contactKey: String): Flow<Int> =
-        packetRepository.getFilteredCountFlow(contactKey)
+    fun getFilteredCount(contactKey: String): Flow<Int> = packetRepository.getFilteredCountFlow(contactKey)
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            packetRepository.setContactFilteringDisabled(contactKey, disabled)
-        }
+        viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
     }
 
     private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {

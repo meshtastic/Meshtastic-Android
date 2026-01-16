@@ -33,14 +33,11 @@ import javax.inject.Inject
 @RunWith(AndroidJUnit4::class)
 class MessageFilterIntegrationTest {
 
-    @get:Rule
-    var hiltRule = HiltAndroidRule(this)
+    @get:Rule var hiltRule = HiltAndroidRule(this)
 
-    @Inject
-    lateinit var filterPrefs: FilterPrefs
+    @Inject lateinit var filterPrefs: FilterPrefs
 
-    @Inject
-    lateinit var filterService: MessageFilterService
+    @Inject lateinit var filterService: MessageFilterService
 
     @Before
     fun setup() {

@@ -63,10 +63,7 @@ import org.meshtastic.core.strings.filter_words_summary
 import org.meshtastic.core.ui.component.MainAppBar
 
 @Composable
-fun FilterSettingsScreen(
-    viewModel: FilterSettingsViewModel = hiltViewModel(),
-    onBack: () -> Unit,
-) {
+fun FilterSettingsScreen(viewModel: FilterSettingsViewModel = hiltViewModel(), onBack: () -> Unit) {
     val filterEnabled by viewModel.filterEnabled.collectAsState()
     val filterWords by viewModel.filterWords.collectAsState()
     var newWord by remember { mutableStateOf("") }
@@ -118,10 +115,7 @@ fun FilterSettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(bottom = 8.dp),
                         )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             OutlinedTextField(
                                 value = newWord,
                                 onValueChange = { newWord = it },
@@ -129,7 +123,8 @@ fun FilterSettingsScreen(
                                 label = { Text(stringResource(Res.string.filter_add_placeholder)) },
                                 singleLine = true,
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                keyboardActions = KeyboardActions(
+                                keyboardActions =
+                                KeyboardActions(
                                     onDone = {
                                         viewModel.addFilterWord(newWord)
                                         newWord = ""
@@ -161,20 +156,14 @@ fun FilterSettingsScreen(
             }
 
             items(filterWords, key = { it }) { word ->
-                FilterWordItem(
-                    word = word,
-                    onRemove = { viewModel.removeFilterWord(word) },
-                )
+                FilterWordItem(word = word, onRemove = { viewModel.removeFilterWord(word) })
             }
         }
     }
 }
 
 @Composable
-private fun FilterWordItem(
-    word: String,
-    onRemove: () -> Unit,
-) {
+private fun FilterWordItem(word: String, onRemove: () -> Unit) {
     val isRegex = word.startsWith("regex:")
     val displayText = if (isRegex) word.removePrefix("regex:") else word
 
@@ -185,12 +174,10 @@ private fun FilterWordItem(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                Text(text = displayText, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    text = displayText,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Text(
-                    text = stringResource(if (isRegex) Res.string.filter_regex_pattern else Res.string.filter_whole_word),
+                    text =
+                    stringResource(if (isRegex) Res.string.filter_regex_pattern else Res.string.filter_whole_word),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -44,9 +44,7 @@ interface FilterPrefs {
 }
 
 @Singleton
-class FilterPrefsImpl @Inject constructor(
-    @FilterSharedPreferences private val prefs: SharedPreferences,
-) : FilterPrefs {
+class FilterPrefsImpl @Inject constructor(@FilterSharedPreferences private val prefs: SharedPreferences) : FilterPrefs {
     override var filterEnabled: Boolean by PrefDelegate(prefs, FilterPrefs.KEY_FILTER_ENABLED, false)
     override var filterWords: Set<String> by StringSetPrefDelegate(prefs, FilterPrefs.KEY_FILTER_WORDS, emptySet())
 }

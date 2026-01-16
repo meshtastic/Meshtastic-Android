@@ -393,7 +393,9 @@ fun MessageScreen(
                     onToggleQuickChat = viewModel::toggleShowQuickChat,
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
                     filteringDisabled = filteringDisabled,
-                    onToggleFilteringDisabled = { viewModel.setContactFilteringDisabled(contactKey, !filteringDisabled) },
+                    onToggleFilteringDisabled = {
+                        viewModel.setContactFilteringDisabled(contactKey, !filteringDisabled)
+                    },
                     filteredCount = filteredCount,
                     showFiltered = showFiltered,
                     onToggleShowFiltered = viewModel::toggleShowFiltered,
@@ -844,10 +846,11 @@ private fun OverFlowMenu(
             )
             // Show/hide filtered messages toggle (only when there are filtered messages)
             if (filteredCount > 0 && !filteringDisabled) {
-                val showFilteredTitle = stringResource(
-                    if (showFiltered) Res.string.filter_hide_count else Res.string.filter_show_count,
-                    filteredCount,
-                )
+                val showFilteredTitle =
+                    stringResource(
+                        if (showFiltered) Res.string.filter_hide_count else Res.string.filter_show_count,
+                        filteredCount,
+                    )
                 DropdownMenuItem(
                     text = { Text(showFilteredTitle) },
                     onClick = {
@@ -863,9 +866,14 @@ private fun OverFlowMenu(
                 )
             }
             // Per-contact filter disable toggle
-            val filterToggleTitle = stringResource(
-                if (filteringDisabled) Res.string.filter_enable_for_contact else Res.string.filter_disable_for_contact,
-            )
+            val filterToggleTitle =
+                stringResource(
+                    if (filteringDisabled) {
+                        Res.string.filter_enable_for_contact
+                    } else {
+                        Res.string.filter_disable_for_contact
+                    },
+                )
             DropdownMenuItem(
                 text = { Text(filterToggleTitle) },
                 onClick = {

@@ -26,7 +26,9 @@ import org.meshtastic.core.service.filter.MessageFilterService
 import javax.inject.Inject
 
 @HiltViewModel
-class FilterSettingsViewModel @Inject constructor(
+class FilterSettingsViewModel
+@Inject
+constructor(
     private val filterPrefs: FilterPrefs,
     private val messageFilterService: MessageFilterService,
 ) : ViewModel() {

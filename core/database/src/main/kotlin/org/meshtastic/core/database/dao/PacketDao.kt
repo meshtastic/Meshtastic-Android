@@ -411,8 +411,9 @@ interface PacketDao {
 
     @Transaction
     suspend fun setContactFilteringDisabled(contact: String, disabled: Boolean) {
-        val settings = getContactSettings(contact)?.copy(filteringDisabled = disabled)
-            ?: ContactSettings(contact_key = contact, filteringDisabled = disabled)
+        val settings =
+            getContactSettings(contact)?.copy(filteringDisabled = disabled)
+                ?: ContactSettings(contact_key = contact, filteringDisabled = disabled)
         upsertContactSettings(listOf(settings))
     }
 

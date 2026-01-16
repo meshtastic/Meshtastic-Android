@@ -23,13 +23,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Service for filtering messages based on user-configured filter words.
- * Supports both plain text word matching and regex patterns.
+ * Service for filtering messages based on user-configured filter words. Supports both plain text word matching and
+ * regex patterns.
  */
 @Singleton
-class MessageFilterService @Inject constructor(
-    private val filterPrefs: FilterPrefs,
-) {
+class MessageFilterService @Inject constructor(private val filterPrefs: FilterPrefs) {
     private var compiledPatterns: List<Regex> = emptyList()
 
     init {
@@ -44,11 +42,7 @@ class MessageFilterService @Inject constructor(
      * @param isFilteringDisabled Whether filtering is disabled for this contact.
      * @return true if the message should be filtered, false otherwise.
      */
-    fun shouldFilter(
-        message: String,
-        contactKey: String? = null,
-        isFilteringDisabled: Boolean = false,
-    ): Boolean {
+    fun shouldFilter(message: String, contactKey: String? = null, isFilteringDisabled: Boolean = false): Boolean {
         if (!filterPrefs.filterEnabled) return false
         if (compiledPatterns.isEmpty()) return false
         if (isFilteringDisabled) return false
@@ -58,22 +52,23 @@ class MessageFilterService @Inject constructor(
     }
 
     /**
-     * Rebuilds the compiled regex patterns from the current filter words.
-     * Should be called whenever the filter words are updated.
+     * Rebuilds the compiled regex patterns from the current filter words. Should be called whenever the filter words
+     * are updated.
      */
     fun rebuildPatterns() {
-        compiledPatterns = filterPrefs.filterWords.mapNotNull { word ->
-            try {
-                if (word.startsWith(REGEX_PREFIX)) {
-                    Regex(word.removePrefix(REGEX_PREFIX), RegexOption.IGNORE_CASE)
-                } else {
-                    Regex("\\b${Regex.escape(word)}\\b", RegexOption.IGNORE_CASE)
+        compiledPatterns =
+            filterPrefs.filterWords.mapNotNull { word ->
+                try {
+                    if (word.startsWith(REGEX_PREFIX)) {
+                        Regex(word.removePrefix(REGEX_PREFIX), RegexOption.IGNORE_CASE)
+                    } else {
+                        Regex("\\b${Regex.escape(word)}\\b", RegexOption.IGNORE_CASE)
+                    }
+                } catch (e: PatternSyntaxException) {
+                    Logger.w { "Invalid filter pattern: $word - ${e.message}" }
+                    null
                 }
-            } catch (e: PatternSyntaxException) {
-                Logger.w { "Invalid filter pattern: $word - ${e.message}" }
-                null
             }
-        }
     }
 
     companion object {

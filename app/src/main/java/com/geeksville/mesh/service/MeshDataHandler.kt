@@ -623,6 +623,7 @@ constructor(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean = true) {
         if (dataPacket.dataType !in rememberDataType) return
         val fromLocal =
@@ -647,12 +648,13 @@ constructor(
                 }
 
                 // Check if message should be filtered
-                val isFiltered = if (dataPacket.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
-                    val isFilteringDisabled = getContactSettings(contactKey).filteringDisabled
-                    messageFilterService.shouldFilter(dataPacket.text.orEmpty(), contactKey, isFilteringDisabled)
-                } else {
-                    false
-                }
+                val isFiltered =
+                    if (dataPacket.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
+                        val isFilteringDisabled = getContactSettings(contactKey).filteringDisabled
+                        messageFilterService.shouldFilter(dataPacket.text.orEmpty(), contactKey, isFilteringDisabled)
+                    } else {
+                        false
+                    }
 
                 val packetToSave =
                     Packet(

@@ -347,16 +347,17 @@ class PacketDaoTest {
         val contactKey = "0${DataPacket.ID_BROADCAST}"
 
         // Insert a filtered message
-        val filteredPacket = Packet(
-            uuid = 0L,
-            myNodeNum = myNodeNum,
-            port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-            contact_key = contactKey,
-            received_time = System.currentTimeMillis(),
-            read = false,
-            data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered message"),
-            filtered = true,
-        )
+        val filteredPacket =
+            Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                contact_key = contactKey,
+                received_time = System.currentTimeMillis(),
+                read = false,
+                data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered message"),
+                filtered = true,
+            )
         packetDao.insert(filteredPacket)
 
         // Regular query should not include filtered messages
@@ -371,16 +372,17 @@ class PacketDaoTest {
 
         // Insert filtered messages
         repeat(3) { i ->
-            val filteredPacket = Packet(
-                uuid = 0L,
-                myNodeNum = myNodeNum,
-                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                contact_key = contactKey,
-                received_time = System.currentTimeMillis() + i,
-                read = false,
-                data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered $i"),
-                filtered = true,
-            )
+            val filteredPacket =
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = myNodeNum,
+                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    contact_key = contactKey,
+                    received_time = System.currentTimeMillis() + i,
+                    read = false,
+                    data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered $i"),
+                    filtered = true,
+                )
             packetDao.insert(filteredPacket)
         }
 
