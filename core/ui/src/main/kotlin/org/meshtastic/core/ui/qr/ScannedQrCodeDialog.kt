@@ -123,10 +123,11 @@ fun ScannedQrCodeDialog(
         } else {
             // When adding (not replacing), include all previous channels + selected new channels.
             // Since 'channelSet.settings' already contains the merged distinct list, we just filter it.
-            val result = channelSet.settings.filterIndexed { i, _ ->
-                val isExisting = i < channels.settings.size
-                isExisting || channelSelections.getOrNull(i) == true
-            }
+            val result =
+                channelSet.settings.filterIndexed { i, _ ->
+                    val isExisting = i < channels.settings.size
+                    isExisting || channelSelections.getOrNull(i) == true
+                }
             channelSet.copy(settings = result)
         }
 

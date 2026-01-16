@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -30,10 +29,7 @@ import org.meshtastic.proto.ChannelSet
 class ChannelTest {
     @Test
     fun channelUrlGood() {
-        val ch = ChannelSet(
-            settings = listOf(Channel.default.settings),
-            lora_config = Channel.default.loraConfig
-        )
+        val ch = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig)
         val channelUrl = ch.getChannelUrl()
 
         Assert.assertTrue(channelUrl.toString().startsWith(URL_PREFIX))
