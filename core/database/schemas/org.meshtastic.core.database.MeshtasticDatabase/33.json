@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 33,
-    "identityHash": "6f3059ef9ea197672a28a920ca0d8876",
+    "identityHash": "39cc6bc0cf1dfe244ed72537dde19464",
     "entities": [
       {
         "tableName": "my_node",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`myNodeNum` INTEGER NOT NULL, `model` TEXT, `firmwareVersion` TEXT, `couldUpdate` INTEGER NOT NULL, `shouldUpdate` INTEGER NOT NULL, `currentPacketId` INTEGER NOT NULL, `messageTimeoutMsec` INTEGER NOT NULL, `minAppVersion` INTEGER NOT NULL, `maxChannels` INTEGER NOT NULL, `hasWifi` INTEGER NOT NULL, `deviceId` TEXT, PRIMARY KEY(`myNodeNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`myNodeNum` INTEGER NOT NULL, `model` TEXT, `firmwareVersion` TEXT, `couldUpdate` INTEGER NOT NULL, `shouldUpdate` INTEGER NOT NULL, `currentPacketId` INTEGER NOT NULL, `messageTimeoutMsec` INTEGER NOT NULL, `minAppVersion` INTEGER NOT NULL, `maxChannels` INTEGER NOT NULL, `hasWifi` INTEGER NOT NULL, `deviceId` TEXT, `pioEnv` TEXT, PRIMARY KEY(`myNodeNum`))",
         "fields": [
           {
             "fieldPath": "myNodeNum",
@@ -69,6 +69,11 @@
           {
             "fieldPath": "deviceId",
             "columnName": "deviceId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pioEnv",
+            "columnName": "pioEnv",
             "affinity": "TEXT"
           }
         ],
@@ -786,7 +791,7 @@
       },
       {
         "tableName": "device_hardware",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actively_supported` INTEGER NOT NULL, `architecture` TEXT NOT NULL, `display_name` TEXT NOT NULL, `has_ink_hud` INTEGER, `has_mui` INTEGER, `hwModel` INTEGER NOT NULL, `hw_model_slug` TEXT NOT NULL, `images` TEXT, `last_updated` INTEGER NOT NULL, `partition_scheme` TEXT, `platformio_target` TEXT NOT NULL, `requires_dfu` INTEGER, `support_level` INTEGER, `tags` TEXT, PRIMARY KEY(`hwModel`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actively_supported` INTEGER NOT NULL, `architecture` TEXT NOT NULL, `display_name` TEXT NOT NULL, `has_ink_hud` INTEGER, `has_mui` INTEGER, `hwModel` INTEGER NOT NULL, `hw_model_slug` TEXT NOT NULL, `images` TEXT, `last_updated` INTEGER NOT NULL, `partition_scheme` TEXT, `platformio_target` TEXT NOT NULL, `requires_dfu` INTEGER, `support_level` INTEGER, `tags` TEXT, PRIMARY KEY(`platformio_target`))",
         "fields": [
           {
             "fieldPath": "activelySupported",
@@ -869,7 +874,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "hwModel"
+            "platformio_target"
           ]
         }
       },
@@ -1000,7 +1005,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6f3059ef9ea197672a28a920ca0d8876')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '39cc6bc0cf1dfe244ed72537dde19464')"
     ]
   }
 }

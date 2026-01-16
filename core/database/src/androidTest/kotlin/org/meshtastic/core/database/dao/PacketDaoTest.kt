@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -343,7 +344,7 @@ class PacketDaoTest {
     }
 
     @Test
-    fun test_filteredMessages_excludedFromContactKeys() = runBlocking {
+    fun test_filteredMessages_excludedFromContactKeys(): Unit = runBlocking {
         // Create a new contact with only filtered messages
         val filteredContactKey = "0!filteredonly"
 
@@ -366,7 +367,7 @@ class PacketDaoTest {
     }
 
     @Test
-    fun test_getFilteredCount_returnsCorrectCount() = runBlocking {
+    fun test_getFilteredCount_returnsCorrectCount(): Unit = runBlocking {
         val contactKey = "0${DataPacket.ID_BROADCAST}"
 
         // Insert filtered messages
@@ -390,7 +391,7 @@ class PacketDaoTest {
     }
 
     @Test
-    fun test_contactFilteringDisabled_persistence() = runBlocking {
+    fun test_contactFilteringDisabled_persistence(): Unit = runBlocking {
         val contactKey = "0!testcontact"
 
         // Initially should be null or false

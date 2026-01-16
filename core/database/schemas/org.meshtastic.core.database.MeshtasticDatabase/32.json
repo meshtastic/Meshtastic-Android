@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 32,
-    "identityHash": "edefbbd876170b6f8ab10e46ca9c2972",
+    "identityHash": "9060c828fb1e93ab7316d19dd9989c0f",
     "entities": [
       {
         "tableName": "my_node",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`myNodeNum` INTEGER NOT NULL, `model` TEXT, `firmwareVersion` TEXT, `couldUpdate` INTEGER NOT NULL, `shouldUpdate` INTEGER NOT NULL, `currentPacketId` INTEGER NOT NULL, `messageTimeoutMsec` INTEGER NOT NULL, `minAppVersion` INTEGER NOT NULL, `maxChannels` INTEGER NOT NULL, `hasWifi` INTEGER NOT NULL, `deviceId` TEXT, PRIMARY KEY(`myNodeNum`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`myNodeNum` INTEGER NOT NULL, `model` TEXT, `firmwareVersion` TEXT, `couldUpdate` INTEGER NOT NULL, `shouldUpdate` INTEGER NOT NULL, `currentPacketId` INTEGER NOT NULL, `messageTimeoutMsec` INTEGER NOT NULL, `minAppVersion` INTEGER NOT NULL, `maxChannels` INTEGER NOT NULL, `hasWifi` INTEGER NOT NULL, `deviceId` TEXT, `pioEnv` TEXT, PRIMARY KEY(`myNodeNum`))",
         "fields": [
           {
             "fieldPath": "myNodeNum",
@@ -69,6 +69,11 @@
           {
             "fieldPath": "deviceId",
             "columnName": "deviceId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pioEnv",
+            "columnName": "pioEnv",
             "affinity": "TEXT"
           }
         ],
@@ -289,7 +294,7 @@
       },
       {
         "tableName": "packet",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `sfpp_hash` BLOB, `filtered` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `sfpp_hash` BLOB)",
         "fields": [
           {
             "fieldPath": "uuid",
@@ -374,13 +379,6 @@
             "fieldPath": "sfpp_hash",
             "columnName": "sfpp_hash",
             "affinity": "BLOB"
-          },
-          {
-            "fieldPath": "filtered",
-            "columnName": "filtered",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -779,7 +777,7 @@
       },
       {
         "tableName": "device_hardware",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actively_supported` INTEGER NOT NULL, `architecture` TEXT NOT NULL, `display_name` TEXT NOT NULL, `has_ink_hud` INTEGER, `has_mui` INTEGER, `hwModel` INTEGER NOT NULL, `hw_model_slug` TEXT NOT NULL, `images` TEXT, `last_updated` INTEGER NOT NULL, `partition_scheme` TEXT, `platformio_target` TEXT NOT NULL, `requires_dfu` INTEGER, `support_level` INTEGER, `tags` TEXT, PRIMARY KEY(`hwModel`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`actively_supported` INTEGER NOT NULL, `architecture` TEXT NOT NULL, `display_name` TEXT NOT NULL, `has_ink_hud` INTEGER, `has_mui` INTEGER, `hwModel` INTEGER NOT NULL, `hw_model_slug` TEXT NOT NULL, `images` TEXT, `last_updated` INTEGER NOT NULL, `partition_scheme` TEXT, `platformio_target` TEXT NOT NULL, `requires_dfu` INTEGER, `support_level` INTEGER, `tags` TEXT, PRIMARY KEY(`platformio_target`))",
         "fields": [
           {
             "fieldPath": "activelySupported",
@@ -862,7 +860,7 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "hwModel"
+            "platformio_target"
           ]
         }
       },
@@ -993,7 +991,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'edefbbd876170b6f8ab10e46ca9c2972')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9060c828fb1e93ab7316d19dd9989c0f')"
     ]
   }
 }
