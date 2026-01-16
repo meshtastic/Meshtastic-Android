@@ -85,19 +85,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            ./gradlew :app:connectedFdroidDebugAndroidTest \
-              :app:connectedGoogleDebugAndroidTest \
-              :core:database:connectedDebugAndroidTest \
-              :core:model:connectedDebugAndroidTest \
-              :core:ui:connectedDebugAndroidTest \
-              :feature:messaging:connectedDebugAndroidTest \
-              :feature:node:connectedDebugAndroidTest \
-              :feature:settings:connectedDebugAndroidTest \
-              :mesh_service_example:connectedDebugAndroidTest \
-              koverXmlReport \
-              --configuration-cache \
-              --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew :app:connectedFdroidDebugAndroidTest :app:connectedGoogleDebugAndroidTest :core:database:connectedFdroidDebugAndroidTest :core:database:connectedGoogleDebugAndroidTest :core:model:connectedFdroidDebugAndroidTest :core:model:connectedGoogleDebugAndroidTest :core:ui:connectedFdroidDebugAndroidTest :core:ui:connectedGoogleDebugAndroidTest :feature:messaging:connectedFdroidDebugAndroidTest :feature:messaging:connectedGoogleDebugAndroidTest :feature:node:connectedFdroidDebugAndroidTest :feature:node:connectedGoogleDebugAndroidTest :feature:settings:connectedFdroidDebugAndroidTest :feature:settings:connectedGoogleDebugAndroidTest :mesh_service_example:connectedDebugAndroidTest koverXmlReport --configuration-cache --scan && ( killall -INT crashpad_handler || true )
 
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}
