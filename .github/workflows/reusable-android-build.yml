@@ -69,7 +69,35 @@ jobs:
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
       - name: Run Spotless, Detekt, Build, Lint, and Local Tests
-        run: ./gradlew spotlessCheck detekt assembleDebug testDebugUnitTest koverXmlReport --configuration-cache --scan
+        run: |
+          ./gradlew spotlessCheck \
+            detekt \
+            assembleDebug \
+            :app:testDebugUnitTest \
+            :core:analytics:testDebugUnitTest \
+            :core:common:testDebugUnitTest \
+            :core:data:testDebugUnitTest \
+            :core:database:testDebugUnitTest \
+            :core:datastore:testDebugUnitTest \
+            :core:di:testDebugUnitTest \
+            :core:model:testDebugUnitTest \
+            :core:navigation:testDebugUnitTest \
+            :core:network:testDebugUnitTest \
+            :core:prefs:testDebugUnitTest \
+            :core:proto:testDebugUnitTest \
+            :core:service:testDebugUnitTest \
+            :core:strings:testDebugUnitTest \
+            :core:ui:testDebugUnitTest \
+            :feature:firmware:testDebugUnitTest \
+            :feature:intro:testDebugUnitTest \
+            :feature:map:testDebugUnitTest \
+            :feature:messaging:testDebugUnitTest \
+            :feature:node:testDebugUnitTest \
+            :feature:settings:testDebugUnitTest \
+            :mesh_service_example:testDebugUnitTest \
+            koverXmlReport \
+            --configuration-cache \
+            --scan
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
 
@@ -78,7 +106,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          files: app/build/reports/kover/xml/report.xml
+          files: build/reports/kover/xml/report.xml
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
