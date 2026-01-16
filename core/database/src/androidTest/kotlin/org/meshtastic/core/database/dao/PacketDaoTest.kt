@@ -343,16 +343,16 @@ class PacketDaoTest {
     }
 
     @Test
-    fun test_filteredMessages_excludedFromRegularQueries() = runBlocking {
-        val contactKey = "0${DataPacket.ID_BROADCAST}"
+    fun test_filteredMessages_excludedFromContactKeys() = runBlocking {
+        // Create a new contact with only filtered messages
+        val filteredContactKey = "0!filteredonly"
 
-        // Insert a filtered message
         val filteredPacket =
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
                 port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                contact_key = contactKey,
+                contact_key = filteredContactKey,
                 received_time = System.currentTimeMillis(),
                 read = false,
                 data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered message"),
@@ -360,10 +360,9 @@ class PacketDaoTest {
             )
         packetDao.insert(filteredPacket)
 
-        // Regular query should not include filtered messages
-        val messages = packetDao.getMessagesFrom(contactKey).first()
-        val hasFilteredMessage = messages.any { it.packet.data.text == "Filtered message" }
-        assertTrue(!hasFilteredMessage)
+        // getContactKeys should not include contacts with only filtered messages
+        val contactKeys = packetDao.getContactKeys().first()
+        assertFalse(contactKeys.containsKey(filteredContactKey))
     }
 
     @Test
