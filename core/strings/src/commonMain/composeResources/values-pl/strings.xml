@@ -67,6 +67,7 @@
     <string name="role_router_client_desc">Połączenie zarówno trybu ROUTER, jak i CLIENT. Nie dla urządzeń przenośnych.</string>
     <string name="role_repeater_desc">Węzeł infrastruktury do rozszerzenia zasięgu sieci poprzez przekazywanie pakietów z minimalnym narzutem. Niewidoczny na liście węzłów.</string>
     <string name="role_tracker_desc">Tracker - Do użytku z urządzeniami przeznaczonymi jako śledzenie GPS. Pakiety pozycyjne wysyłane z tego urządzenia będą miały wyższy priorytet, z nadawaniem pozycji co dwie minuty. Inteligentna transmisja pozycji będzie domyślnie wyłączona.</string>
+    <string name="role_sensor">Czujnik</string>
     <string name="role_sensor_desc">Nadaje priorytetowo pakiety telemetryczne.</string>
     <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Zoptymalizowany pod kątem komunikacji systemowej ATAK, redukuje nadmiarowe transmisje.</string>
@@ -100,6 +101,15 @@
     <string name="config_display_wake_on_tap_or_motion_summary">Wymagany jest akcelerometr na urządzeniu.</string>
     <string name="config_lora_region_summary">Region, w którym będziesz używać urządzenia.</string>
     <string name="config_lora_modem_preset_summary">Dostępne presety modemu, domyślnie Long Fast.</string>
+    <string name="label_very_long_slow">Bardzo daleki zasięg — Wolno</string>
+    <string name="label_long_fast">Daleki zasięg — Szybko</string>
+    <string name="label_long_turbo">Daleki zasięg — Turbo</string>
+    <string name="label_long_moderate">Daleki zasięg — Średnio</string>
+    <string name="label_long_slow">Daleki zasięg — Wolno</string>
+    <string name="label_medium_fast">Średni zasięg — Szybko</string>
+    <string name="label_short_turbo">Krótki zasięg — Turbo</string>
+    <string name="label_short_fast">Krótki zasięg — Szybko</string>
+    <string name="label_short_slow">Bliski zasięg — Wolno</string>
     <string name="config_network_wifi_enabled_summary">Włączenie WiFi spowoduje wyłączenie bluetootha.</string>
     <string name="config_network_eth_enabled_summary">Włączenie połączenia Ethernet spowoduje wyłączenie bluetootha. Połączania TCP nie są dostępne na urządzeniach Apple.</string>
     <string name="config_network_udp_enabled_summary">Włącz nadawanie pakietów poprzez UDP w lokalnej sieci.</string>
@@ -121,6 +131,7 @@
     <string name="update_interval">Częstotliwość aktualizacji</string>
     <string name="gps_receive_gpio">GPS Rx GPIO</string>
     <string name="gps_transmit_gpio">GPS Tx GPIO</string>
+    <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debugowanie</string>
     <string name="channel_name">Nazwa Kanału</string>
@@ -157,6 +168,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="connecting">Łączenie</string>
     <string name="not_connected">Nie połączono</string>
+    <string name="no_device_selected">Nie wybrano urządzenia</string>
     <string name="connected_sleeping">Połączono z urządzeniem, ale jest ono w stanie uśpienia</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
     <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub z GitHub, ponieważ aplikacja jest zbyt stara, by skomunikować się z oprogramowaniem zainstalowanym na tym urządzeniu. <a href="https://meshtastic.org/docs/software/android/installation">Więcej informacji (ang.)</a>.</string>
@@ -169,6 +181,7 @@
     <string name="debug_export_cancelled">Eksportowanie anulowane</string>
     <string name="debug_export_success">%1$d Wyeksportowano logi</string>
     <string name="debug_export_failed">Nie można zapisać pliku logów: %1$s</string>
+    <string name="debug_export_no_logs">Brak logów do eksportu</string>
     <string name="debug_filters">Filtry</string>
     <string name="debug_active_filters">Aktywne filtry</string>
     <string name="debug_default_search">Szukaj w logach</string>
@@ -178,6 +191,7 @@
     <string name="debug_filter_add">Dodaj filtr</string>
     <string name="debug_filter_included">Filtr włączony</string>
     <string name="debug_filter_clear">Wyczyść wszystkie filtry</string>
+    <string name="debug_filter_add_custom">Dodaj niestandardowy filtr</string>
     <string name="debug_clear">Wyczyść logi</string>
     <string name="match_any">Dopasuj Dowolne | Wszystkie</string>
     <string name="match_all">Dopasuj Wszystkie | Dowolne</string>
@@ -192,6 +206,7 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Musisz ustawić region!</string>
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ urządzenie nie jest jeszcze podłączone. Proszę, spróbuj ponownie.</string>
+    <string name="save_rangetest">Eksportuj pakiety zasięgu</string>
     <string name="export_data_csv">Eksportuj wszystkie pakiety</string>
     <string name="reset">Zresetuj</string>
     <string name="scan">Skanowanie</string>
@@ -350,6 +365,7 @@
         <item quantity="other">%d skoków</item>
     </plurals>
     <string name="traceroute_diff">Skoki do: %1$d. Skoki od: %2$d</string>
+    <string name="view_on_map">Pokaż na mapie</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1W</string>
@@ -499,6 +515,7 @@
     <string name="smart_position_enabled">Sprytne pozycjonowanie</string>
     <string name="use_fixed_position">Użyj stałego położenia</string>
     <string name="latitude">Szerokość geograficzna</string>
+    <string name="altitude_meters">Wysokość (metry)</string>
     <string name="position_flags">Flagi położenia</string>
     <string name="power_config">Konfiguracja zarządzania energią</string>
     <string name="enable_power_saving_mode">Włącz tryb oszczędzania energii</string>
@@ -552,16 +569,80 @@
     <string name="settings">ustawienia</string>
     <string name="map_type_satellite">Satelita</string>
     <string name="map_type_hybrid">Hybrydowy</string>
+    <string name="app_version">Wersja</string>
     <string name="eight_hours">8 Godzin</string>
     <string name="one_day">24 Godzin</string>
     <string name="two_days">48 Godzin</string>
     <string name="learn_more">Dowiedz się więcej</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_title">Aktualizacja oprogramowania</string>
+    <string name="firmware_update_checking">Sprawdzanie aktualizacji...</string>
+    <string name="firmware_update_device">Urządzenie: %1$s</string>
+    <string name="firmware_update_currently_installed">Aktualnie zainstalowano: %1$s</string>
+    <string name="firmware_update_downloading_percent">Pobieranie firmware... %1$d%%</string>
+    <string name="firmware_update_error">Błąd: %1$s</string>
+    <string name="firmware_update_retry">Ponów próbę</string>
+    <string name="firmware_update_success">Aktualizacja zakończona sukcesem!</string>
+    <string name="firmware_update_done">Wykonano</string>
+    <string name="firmware_update_starting_dfu">Uruchamianie DFU...</string>
     <string name="firmware_update_no_device">Brak podłączonych urządzeń</string>
     <string name="firmware_update_failed">Aktualizacja nie udała się</string>
+    <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_method_detail">Aktualizuj przez %1$s</string>
+    <string name="firmware_update_verifying">Weryfikowanie aktualizacji...</string>
+    <string name="firmware_update_verification_failed">Upłynął limit czasu weryfikacji. Urządzenie nie podłączyło się ponownie w czasie.</string>
+    <string name="firmware_update_waiting_reconnect">Oczekiwanie na ponowne połączenie urządzenia...</string>
+    <string name="firmware_update_release_notes">Informacje o wersji</string>
+    <string name="firmware_update_unknown_error">Nieznany błąd</string>
+    <string name="firmware_update_battery_low">Zbyt niski poziom baterii (%1$d%%). Proszę naładować urządzenie przed aktualizacją.</string>
+    <string name="firmware_update_retrieval_failed">Nie można pobrać pliku oprogramowania.</string>
+    <string name="firmware_update_usb_failed">Aktualizacja przez USB nie powiodła się</string>
+    <string name="firmware_update_ota_failed">Aktualizacja OTA nie powiodła się: %1$s</string>
+    <string name="firmware_update_loading">Wgrywanie firmware...</string>
+    <string name="firmware_update_waiting_reboot">Oczekiwanie na ponowne uruchomienie urządzenia w trybie OTA...</string>
+    <string name="firmware_update_connecting_attempt">Łączenie z urządzeniem (próba %1$d/%2$d)...</string>
+    <string name="firmware_update_checking_version">Sprawdzanie wersji urządzenia...</string>
+    <string name="firmware_update_starting_ota">Uruchamianie aktualizacji OTA...</string>
+    <string name="firmware_update_uploading">Wgrywanie firmware...</string>
+    <string name="firmware_update_uploading_progress">Przesyłanie firmware... %1$d%% (%2$s)</string>
+    <string name="firmware_update_rebooting_device">Ponowne uruchamianie urządzenia...</string>
+    <string name="firmware_update_channel_name">Aktualizacja oprogramowania</string>
+    <string name="firmware_update_channel_description">Status aktualizacji oprogramowania</string>
+    <string name="firmware_update_erasing">Kasowanie...</string>
     <string name="back">Wstecz</string>
     <string name="interval_unset">Nieustawiony</string>
     <string name="interval_always_on">Zawsze włączone</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">1 sekunda</item>
+        <item quantity="few">%1$d sekund</item>
+        <item quantity="many">%1$d sekund</item>
+        <item quantity="other">%1$d sekund</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">1 minuta</item>
+        <item quantity="few">%1$d minuty</item>
+        <item quantity="many">%1$d minuty</item>
+        <item quantity="other">%1$d minuty</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">1 godzina</item>
+        <item quantity="few">%1$d godzin</item>
+        <item quantity="many">%1$d godzin</item>
+        <item quantity="other">%1$d godzin</item>
+    </plurals>
     <!-- Compass -->
+    <string name="compass_title">Kompas</string>
+    <string name="open_compass">Otwórz kompas</string>
+    <string name="compass_distance">Odległość: %1$s</string>
+    <string name="compass_bearing">Kurs: %1$s</string>
+    <string name="compass_bearing_na">Kurs: N/A</string>
+    <string name="compass_no_magnetometer">To urządzenie nie posiada czujnika kompasu. Kurs jest niedostępny.</string>
+    <string name="compass_no_location_permission">Aby pokazać odległość i kurs, wymagane jest uprawnienie do lokalizacji.</string>
+    <string name="compass_location_disabled">Lokalizacja jest wyłączona. Włącz usługi lokalizacji.</string>
+    <string name="compass_no_location_fix">Oczekiwanie na poprawkę GPS, aby obliczyć odległość i kurs.</string>
+    <string name="compass_uncertainty">Szacowany obszar: \u00b1%1$s (\u00b1%2$s)</string>
+    <string name="compass_uncertainty_unknown">Szacowany obszar: nieznana dokładność</string>
+    <string name="mark_as_read">Oznacz jako przeczytane</string>
     <string name="now">Teraz</string>
 </resources>

@@ -45,6 +45,11 @@
     <string name="message_status_sfpp_routing">Routen über den SF++ Weg.</string>
     <string name="message_status_sfpp_confirmed">Bestätigt auf dem SF++ Weg.</string>
     <string name="message_retry_count">Versuch: %1$d / %2$d</string>
+    <string name="retry_dialog_title">Senden der Nachricht fehlgeschlagen</string>
+    <string name="retry_dialog_message">Wiederholung in %1$d Sekunden… (Versuch %2$d von %3$d)</string>
+    <string name="retry_dialog_reaction_message">Wiederholen der Reaktion in %1$d Sekunden… (Versuch %2$d von %3$d)</string>
+    <string name="retry_dialog_confirm">Jetzt erneut versuchen</string>
+    <string name="retry_dialog_cancel">Wiederholung abbrechen</string>
     <string name="routing_error_none">Bestätigt</string>
     <string name="routing_error_no_route">Keine Route</string>
     <string name="routing_error_got_nak">negative Bestätigung erhalten</string>
