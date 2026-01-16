@@ -29,17 +29,15 @@ import org.meshtastic.proto.TelemetryProtos
 
 @Suppress("TooManyFunctions")
 class Converters {
-    @TypeConverter
-    fun dataFromString(value: String): DataPacket {
-        val json = Json { isLenient = true }
-        return json.decodeFromString(DataPacket.serializer(), value)
+    private val json = Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+        encodeDefaults = true
     }
 
-    @TypeConverter
-    fun dataToString(value: DataPacket): String {
-        val json = Json { isLenient = true }
-        return json.encodeToString(DataPacket.serializer(), value)
-    }
+    @TypeConverter fun dataFromString(value: String): DataPacket = json.decodeFromString(DataPacket.serializer(), value)
+
+    @TypeConverter fun dataToString(value: DataPacket): String = json.encodeToString(DataPacket.serializer(), value)
 
     @TypeConverter
     fun bytesToFromRadio(bytes: ByteArray): MeshProtos.FromRadio = try {

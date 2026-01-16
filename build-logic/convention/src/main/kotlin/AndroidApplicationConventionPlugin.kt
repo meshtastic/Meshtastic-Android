@@ -56,6 +56,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     getByName("debug") {
                         isDebuggable = true
                         isPseudoLocalesEnabled = true
+                        enableAndroidTestCoverage = true
                     }
                 }
 

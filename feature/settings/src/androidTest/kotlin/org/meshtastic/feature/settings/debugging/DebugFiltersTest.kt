@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -33,11 +32,14 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.meshtastic.core.strings.getString
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.debug_active_filters
+import org.meshtastic.core.strings.debug_filters
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
-import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class DebugFiltersTest {
@@ -47,7 +49,7 @@ class DebugFiltersTest {
     @Test
     fun debugFilterBar_showsFilterButtonAndMenu() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val filterLabel = context.getString(Res.string.debug_filters)
+        val filterLabel = getString(Res.string.debug_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf<String>()) }
             var customFilterText by remember { mutableStateOf("") }
@@ -77,7 +79,7 @@ class DebugFiltersTest {
     @Test
     fun debugFilterBar_addCustomFilter_displaysActiveFilter() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val activeFiltersLabel = context.getString(Res.string.debug_active_filters)
+        val activeFiltersLabel = getString(Res.string.debug_active_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf<String>()) }
             var customFilterText by remember { mutableStateOf("") }
@@ -108,8 +110,7 @@ class DebugFiltersTest {
 
     @Test
     fun debugActiveFilters_clearAllFilters_removesFilters() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val activeFiltersLabel = context.getString(Res.string.debug_active_filters)
+        val activeFiltersLabel = getString(Res.string.debug_active_filters)
         composeTestRule.setContent {
             var filterTexts by remember { mutableStateOf(listOf("A", "B")) }
             DebugActiveFilters(

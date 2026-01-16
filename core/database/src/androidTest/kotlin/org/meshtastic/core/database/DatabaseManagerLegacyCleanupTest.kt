@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,19 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database
 
 import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.di.CoroutineDispatchers
 
 @RunWith(AndroidJUnit4::class)
 class DatabaseManagerLegacyCleanupTest {
@@ -45,7 +46,9 @@ class DatabaseManagerLegacyCleanupTest {
         app.openOrCreateDatabase(legacyName, Context.MODE_PRIVATE, null).close()
         assertTrue("Precondition: legacy DB should exist before switch", legacyFile.exists())
 
-        val manager = DatabaseManager(app)
+        val testDispatchers =
+            CoroutineDispatchers(io = Dispatchers.IO, main = Dispatchers.Main, default = Dispatchers.Default)
+        val manager = DatabaseManager(app, testDispatchers)
 
         // Switch to a non-null address so active DB != legacy
         manager.switchActiveDatabase("01:23:45:67:89:AB")

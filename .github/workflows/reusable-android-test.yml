@@ -9,7 +9,7 @@ on:
         type: boolean
         default: true
       api_levels:
-        description: 'JSON array string of API levels to run tests on (e.g., `[35]` or `[26, 35]`)'
+        description: 'JSON array string of API levels to run tests on (e.g., `[35]` or `[26, 34, 35]`)'
         required: false
         type: string
         default: '[26, 35]' # Default to running both if not specified by caller
@@ -75,7 +75,7 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
-      - name: Run Android Instrumented Tests
+      - name: Run Android Instrumented Tests and Generate Coverage
         uses: reactivecircus/android-emulator-runner@v2
         env:
           ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
@@ -85,17 +85,29 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew :app:connectedFdroidDebugAndroidTest :app:connectedGoogleDebugAndroidTest --configuration-cache --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew connectedDebugAndroidTest koverXmlReport --configuration-cache --scan && ( killall -INT crashpad_handler || true )
+
+      - name: Upload coverage reports to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          files: app/build/reports/kover/xml/report.xml
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+
       - name: Upload Test Results
-        if: ${{ inputs.upload_artifacts }}
+        if: ${{ always() && inputs.upload_artifacts }}
         uses: actions/upload-artifact@v6
         with:
           name: android-test-reports-api-${{ matrix.api-level }}
-          path: app/build/outputs/androidTest-results/
+          path: |
+            **/build/outputs/androidTest-results/connected/**
+            **/build/reports/androidTests/connected/**
           retention-days: 14

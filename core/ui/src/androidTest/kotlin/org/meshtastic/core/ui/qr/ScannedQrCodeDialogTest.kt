@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,26 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.qr
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.meshtastic.core.strings.getString
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.accept
+import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.new_channel_rcvd
+import org.meshtastic.core.strings.replace
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.channelSet
 import org.meshtastic.proto.channelSettings
 import org.meshtastic.proto.copy
-import org.meshtastic.core.strings.R as Res
 
 @RunWith(AndroidJUnit4::class)
 class ScannedQrCodeDialogTest {

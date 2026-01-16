@@ -227,13 +227,17 @@ interface PacketDao {
     @Transaction
     suspend fun updateMessageStatus(data: DataPacket, m: MessageStatus) {
         val new = data.copy(status = m)
-        findDataPacket(data)?.let { update(it.copy(data = new)) }
+        // Find by packet ID first for better performance and reliability
+        findPacketsWithId(data.id).find { it.data == data }?.let { update(it.copy(data = new)) }
+            ?: findDataPacket(data)?.let { update(it.copy(data = new)) }
     }
 
     @Transaction
     suspend fun updateMessageId(data: DataPacket, id: Int) {
         val new = data.copy(id = id)
-        findDataPacket(data)?.let { update(it.copy(data = new, packetId = id)) }
+        // Find by packet ID first for better performance and reliability
+        findPacketsWithId(data.id).find { it.data == data }?.let { update(it.copy(data = new, packetId = id)) }
+            ?: findDataPacket(data)?.let { update(it.copy(data = new, packetId = id)) }
     }
 
     @Query(

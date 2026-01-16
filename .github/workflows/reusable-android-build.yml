@@ -69,7 +69,7 @@ jobs:
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
       - name: Run Spotless, Detekt, Build, Lint, and Local Tests
-        run: ./gradlew spotlessCheck detekt lintDebug :app:assembleDebug koverXmlReport --configuration-cache --scan
+        run: ./gradlew spotlessCheck detekt assembleDebug testDebugUnitTest koverXmlReport --configuration-cache --scan
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
 
@@ -79,6 +79,13 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
           files: app/build/reports/kover/xml/report.xml
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
 
       - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts }}

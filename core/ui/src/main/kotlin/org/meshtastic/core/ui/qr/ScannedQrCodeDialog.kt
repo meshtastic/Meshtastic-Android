@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.qr
 
 import androidx.compose.foundation.layout.Arrangement
@@ -124,20 +123,10 @@ fun ScannedQrCodeDialog(
         remember(channelSet) { mutableStateListOf(elements = Array(size = channelSet.settingsCount, init = { true })) }
 
     val selectedChannelSet =
-        if (shouldReplace) {
-            channelSet.copy {
-                val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-                settings.clear()
-                settings.addAll(result)
-            }
-        } else {
-            channelSet.copy {
-                // When adding (not replacing), include all previous channels + selected new channels
-                val selectedNewChannels =
-                    incoming.settingsList.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-                settings.clear()
-                settings.addAll(channels.settingsList + selectedNewChannels)
-            }
+        channelSet.copy {
+            val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+            settings.clear()
+            settings.addAll(result)
         }
 
     // Compute LoRa configuration changes when in replace mode
