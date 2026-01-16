@@ -50,7 +50,7 @@ interface PacketDao {
         """
     SELECT * FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-        AND port_num = 1
+        AND port_num = 1 AND filtered = 0
     ORDER BY received_time DESC
     """,
     )
@@ -69,11 +69,11 @@ interface PacketDao {
         SELECT contact_key, MAX(received_time) as max_time
         FROM packet
         WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-            AND port_num = 1
+            AND port_num = 1 AND filtered = 0
         GROUP BY contact_key
     ) latest ON p.contact_key = latest.contact_key AND p.received_time = latest.max_time
     WHERE (p.myNodeNum = 0 OR p.myNodeNum = (SELECT myNodeNum FROM my_node))
-        AND p.port_num = 1
+        AND p.port_num = 1 AND p.filtered = 0
     ORDER BY p.received_time DESC
     """,
     )

@@ -662,7 +662,7 @@ constructor(
                         port_num = dataPacket.dataType,
                         contact_key = contactKey,
                         received_time = System.currentTimeMillis(),
-                        read = fromLocal,
+                        read = fromLocal || isFiltered,
                         data = dataPacket,
                         snr = dataPacket.snr,
                         rssi = dataPacket.rssi,
