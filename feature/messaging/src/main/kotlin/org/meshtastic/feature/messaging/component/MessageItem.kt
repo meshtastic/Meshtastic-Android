@@ -22,12 +22,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -82,7 +80,7 @@ import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
-import org.meshtastic.core.ui.emoji.EmojiPicker
+import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
 
@@ -123,55 +121,46 @@ internal fun MessageItem(
         },
     ),
 ) {
-    var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
+    var activeOverlay by remember { mutableStateOf<ActiveOverlay?>(null) }
     val clipboardManager = LocalClipboardManager.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    if (activeSheet != null) {
-        ModalBottomSheet(onDismissRequest = { activeSheet = null }, sheetState = sheetState) {
-            when (activeSheet) {
-                ActiveSheet.Actions -> {
-                    MessageActionsContent(
-                        quickEmojis = quickEmojis,
-                        onReply = {
-                            activeSheet = null
-                            onReply()
-                        },
-                        onReact = { emoji ->
-                            activeSheet = null
-                            sendReaction(emoji)
-                        },
-                        onMoreReactions = { activeSheet = ActiveSheet.Emoji },
-                        onCopy = {
-                            activeSheet = null
-                            clipboardManager.setText(AnnotatedString(message.text))
-                        },
-                        onSelect = {
-                            activeSheet = null
-                            onSelect()
-                        },
-                        onDelete = {
-                            activeSheet = null
-                            onDelete()
-                        },
-                    )
-                }
+    if (activeOverlay == ActiveOverlay.Emoji) {
+        EmojiPickerDialog(
+            onDismiss = { activeOverlay = null },
+            onConfirm = { emoji ->
+                activeOverlay = null
+                sendReaction(emoji)
+            },
+        )
+    }
 
-                ActiveSheet.Emoji -> {
-                    // Limit height of emoji picker so it doesn't look weird full screen
-                    Box(modifier = Modifier.heightIn(max = 400.dp)) {
-                        EmojiPicker(
-                            onDismiss = { activeSheet = null },
-                            onConfirm = { emoji ->
-                                activeSheet = null
-                                sendReaction(emoji)
-                            },
-                        )
-                    }
-                }
-
-                null -> {}
-            }
+    if (activeOverlay == ActiveOverlay.Actions) {
+        ModalBottomSheet(onDismissRequest = { activeOverlay = null }, sheetState = sheetState) {
+            MessageActionsContent(
+                quickEmojis = quickEmojis,
+                onReply = {
+                    activeOverlay = null
+                    onReply()
+                },
+                onReact = { emoji ->
+                    activeOverlay = null
+                    sendReaction(emoji)
+                },
+                onMoreReactions = { activeOverlay = ActiveOverlay.Emoji },
+                onCopy = {
+                    activeOverlay = null
+                    clipboardManager.setText(AnnotatedString(message.text))
+                },
+                onSelect = {
+                    activeOverlay = null
+                    onSelect()
+                },
+                onDelete = {
+                    activeOverlay = null
+                    onDelete()
+                },
+            )
         }
     }
 
@@ -241,7 +230,7 @@ internal fun MessageItem(
                 onLongClick = {
                     onLongClick()
                     if (!inSelectionMode) {
-                        activeSheet = ActiveSheet.Actions
+                        activeOverlay = ActiveOverlay.Actions
                     }
                 },
                 onDoubleClick = onDoubleClick,
@@ -324,7 +313,7 @@ private const val SELECTED_ALPHA = 0.6f
 private const val UNSELECTED_ALPHA = 0.2f
 private const val NORMAL_ALPHA = 0.4f
 
-private enum class ActiveSheet {
+private enum class ActiveOverlay {
     Actions,
     Emoji,
 }
