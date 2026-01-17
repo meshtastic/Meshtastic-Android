@@ -411,6 +411,61 @@ class PacketDaoTest {
         assertEquals(false, enabled)
     }
 
+    @Test
+    fun test_getMessagesFrom_excludesFilteredMessages(): Unit = runBlocking {
+        val contactKey = "0!notificationtest"
+
+        // Insert mix of filtered and non-filtered messages
+        val normalMessages = listOf("Hello", "How are you?", "Good morning")
+        val filteredMessages = listOf("Filtered message 1", "Filtered message 2")
+
+        normalMessages.forEachIndexed { index, text ->
+            val packet =
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = myNodeNum,
+                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    contact_key = contactKey,
+                    received_time = System.currentTimeMillis() + index,
+                    read = false,
+                    data = DataPacket(DataPacket.ID_BROADCAST, 0, text),
+                    filtered = false,
+                )
+            packetDao.insert(packet)
+        }
+
+        filteredMessages.forEachIndexed { index, text ->
+            val packet =
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = myNodeNum,
+                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    contact_key = contactKey,
+                    received_time = System.currentTimeMillis() + normalMessages.size + index,
+                    read = true, // Filtered messages are marked as read
+                    data = DataPacket(DataPacket.ID_BROADCAST, 0, text),
+                    filtered = true,
+                )
+            packetDao.insert(packet)
+        }
+
+        // Without filter - should return all messages
+        val allMessages = packetDao.getMessagesFrom(contactKey).first()
+        assertEquals(normalMessages.size + filteredMessages.size, allMessages.size)
+
+        // With includeFiltered = true - should return all messages
+        val includingFiltered = packetDao.getMessagesFrom(contactKey, includeFiltered = true).first()
+        assertEquals(normalMessages.size + filteredMessages.size, includingFiltered.size)
+
+        // With includeFiltered = false - should only return non-filtered messages
+        val excludingFiltered = packetDao.getMessagesFrom(contactKey, includeFiltered = false).first()
+        assertEquals(normalMessages.size, excludingFiltered.size)
+
+        // Verify none of the returned messages are filtered
+        val hasFilteredMessages = excludingFiltered.any { it.packet.filtered }
+        assertFalse(hasFilteredMessages)
+    }
+
     companion object {
         private const val SAMPLE_SIZE = 10
     }
