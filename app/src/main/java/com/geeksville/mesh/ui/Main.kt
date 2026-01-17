@@ -326,34 +326,20 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     if (parsed != null) {
                         fun fmtNode(nodeNum: Int): String = "!%08x".format(nodeNum)
                         Text(text = "NeighborInfo:", style = MaterialTheme.typography.bodyMedium)
+                        Text(text = "node_id: ${fmtNode(parsed.node_id)}", style = MaterialTheme.typography.bodySmall)
                         Text(
-                            text = "node_id: ${fmtNode(parsed.node_id ?: 0)}",
+                            text = "last_sent_by_id: ${fmtNode(parsed.last_sent_by_id)}",
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 8.dp),
                         )
                         Text(
-                            text = "last_sent_by_id: ${fmtNode(parsed.last_sent_by_id ?: 0)}",
+                            text = "node_broadcast_interval_secs: ${parsed.node_broadcast_interval_secs}",
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 2.dp),
                         )
-                        Text(
-                            text = "node_broadcast_interval_secs: ${parsed.node_broadcast_interval_secs ?: 0}",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 2.dp),
-                        )
-                        if (parsed.neighbors.isNotEmpty()) {
+                        parsed.neighbors.forEach { n ->
                             Text(
-                                text = "neighbors:",
+                                text = "  - node_id: ${fmtNode(n.node_id)} snr: ${n.snr}",
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 4.dp),
                             )
-                            parsed.neighbors.forEach { n ->
-                                Text(
-                                    text = "  - node_id: ${fmtNode(n.node_id ?: 0)} snr: ${n.snr ?: 0f}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(start = 8.dp),
-                                )
-                            }
                         }
                     } else {
                         val rawBytes = response.toByteArray()

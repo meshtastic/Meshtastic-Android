@@ -42,7 +42,8 @@ enum class Environment(val color: Color) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.soil_temperature
     },
     SOIL_MOISTURE(Purple) {
-        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.soil_moisture?.toFloat()
+        override fun getValue(telemetry: Telemetry) =
+            telemetry.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE }?.toFloat()
     },
     BAROMETRIC_PRESSURE(Green) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.barometric_pressure
@@ -51,7 +52,8 @@ enum class Environment(val color: Color) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.gas_resistance
     },
     IAQ(Magenta) {
-        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.iaq?.toFloat()
+        override fun getValue(telemetry: Telemetry) =
+            telemetry.environment_metrics?.iaq?.takeIf { it != Int.MIN_VALUE }?.toFloat()
     },
     LUX(LightGreen) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.lux
@@ -90,7 +92,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
     @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
     fun environmentMetricsFiltered(timeFrame: TimeFrame, useFahrenheit: Boolean = false): EnvironmentGraphingData {
         val oldestTime = timeFrame.calculateOldestTime()
-        val telemetries = environmentMetrics.filter { (it.time ?: 0) >= oldestTime }
+        // Filter out invalid timestamps (0 or null) and check against the timeframe
+        val telemetries = environmentMetrics.filter { it.time > 0 && it.time >= oldestTime }
         val shouldPlot = BooleanArray(Environment.entries.size) { false }
         if (telemetries.isEmpty()) {
             return EnvironmentGraphingData(metrics = telemetries, shouldPlot = shouldPlot.toList())
@@ -115,8 +118,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Relative Humidity
-        val humidities =
-            telemetries.mapNotNull { it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f } }
+        val humidities = telemetries.mapNotNull { it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() } }
         if (humidities.isNotEmpty()) {
             minValues.add(humidities.minOf { it })
             maxValues.add(humidities.maxOf { it })
@@ -184,14 +186,14 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         val min = if (minValues.isEmpty()) 0f else minValues.minOf { it }
         val max = if (maxValues.isEmpty()) 1f else maxValues.maxOf { it }
 
-        val (oldest, newest) = Pair(telemetries.minBy { it.time ?: 0 }, telemetries.maxBy { it.time ?: 0 })
+        val (oldest, newest) = Pair(telemetries.minBy { it.time }, telemetries.maxBy { it.time })
 
         return EnvironmentGraphingData(
             metrics = telemetries,
             shouldPlot = shouldPlot.toList(),
             leftMinMax = Pair(minPressureValue, maxPressureValue),
             rightMinMax = Pair(min, max),
-            times = Pair(oldest.time ?: 0, newest.time ?: 0),
+            times = Pair(oldest.time, newest.time),
         )
     }
 }

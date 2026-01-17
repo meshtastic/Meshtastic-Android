@@ -189,14 +189,14 @@ private fun ChannelConfigScreen(
             Column {
                 ChannelConfigHeader(
                     frequency =
-                    if ((loraConfig.override_frequency ?: 0f) != 0f) {
-                        loraConfig.override_frequency!!
+                    if (loraConfig.override_frequency != 0f) {
+                        loraConfig.override_frequency
                     } else {
                         primaryChannel.radioFreq
                     },
                     slot =
-                    if ((loraConfig.channel_num ?: 0) != 0) {
-                        loraConfig.channel_num!!
+                    if (loraConfig.channel_num != 0) {
+                        loraConfig.channel_num
                     } else {
                         primaryChannel.channelNum
                     },
@@ -224,7 +224,7 @@ private fun ChannelConfigScreen(
                         ->
                         ChannelCard(
                             index = index,
-                            title = (channel.name ?: "").ifEmpty { modemPresetName },
+                            title = channel.name.ifEmpty { modemPresetName },
                             enabled = enabled,
                             channelSettings = channel,
                             loraConfig = loraConfig,

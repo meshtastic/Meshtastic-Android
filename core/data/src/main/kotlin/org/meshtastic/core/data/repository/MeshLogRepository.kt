@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.repository
 
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -54,14 +55,20 @@ constructor(
         .flowOn(dispatchers.io)
         .conflate()
 
-    private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
+    @VisibleForTesting
+    internal fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
         val payload = log.fromRadio.packet?.decoded?.payload ?: okio.ByteString.EMPTY
         val telemetry = Telemetry.ADAPTER.decode(payload)
-        val env = telemetry.environment_metrics
+        telemetry.sanitize().copy(time = (log.received_date / MILLIS_TO_SECONDS).toInt())
+    }
+        .getOrNull()
+
+    private fun Telemetry.sanitize(): Telemetry {
+        val env = environment_metrics
         val updatedEnv =
             if (env != null) {
                 env.copy(
-                    temperature = if (env.temperature == 0f) Float.NaN else env.temperature,
+                    temperature = env.temperature ?: Float.NaN,
                     relative_humidity = env.relative_humidity ?: Float.NaN,
                     soil_temperature = env.soil_temperature ?: Float.NaN,
                     barometric_pressure = env.barometric_pressure ?: Float.NaN,
@@ -76,9 +83,8 @@ constructor(
             } else {
                 null
             }
-        telemetry.copy(environment_metrics = updatedEnv, time = (log.received_date / MILLIS_TO_SECONDS).toInt())
+        return copy(environment_metrics = updatedEnv)
     }
-        .getOrNull()
 
     fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, PortNum.TELEMETRY_APP.value, MAX_MESH_PACKETS) }

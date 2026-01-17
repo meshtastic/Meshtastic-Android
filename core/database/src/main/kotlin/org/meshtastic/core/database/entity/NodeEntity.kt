@@ -197,25 +197,17 @@ data class NodeEntity(
 
     fun toNodeInfo() = NodeInfo(
         num = num,
-        user =
-        MeshUser(
-            id = user.id,
-            longName = user.long_name,
-            shortName = user.short_name,
-            hwModel = user.hw_model,
-            role = user.role?.value ?: 0,
-        )
-            .takeIf { user.id.isNotEmpty() },
+        user = MeshUser(user),
         position =
         Position(
             latitude = latitude,
             longitude = longitude,
             altitude = position.altitude ?: 0,
             time = position.time,
-            satellitesInView = position.sats_in_view ?: 0,
+            satellitesInView = position.sats_in_view,
             groundSpeed = position.ground_speed ?: 0,
             groundTrack = position.ground_track ?: 0,
-            precisionBits = position.precision_bits ?: 0,
+            precisionBits = position.precision_bits,
         )
             .takeIf { it.isValid() },
         snr = snr,

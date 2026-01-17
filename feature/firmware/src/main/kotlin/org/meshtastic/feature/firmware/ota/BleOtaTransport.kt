@@ -145,6 +145,9 @@ class BleOtaTransport(private val centralManager: CentralManager, private val ad
             peripheral = p,
             options = CentralManager.ConnectionOptions.AutoConnect(automaticallyRequestHighestValueLength = true),
         )
+        // Note: automaticallyRequestHighestValueLength = true in connect options will request MTU 517.
+        // We do not need to explicitly call requestMtu() here, and the method might not be directly exposed on
+        // Peripheral in this version of the library.
         p.requestConnectionPriority(ConnectionPriority.HIGH)
 
         // Monitor connection state

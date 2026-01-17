@@ -51,4 +51,9 @@ dependencies {
 
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation("io.mockk:mockk-agent-jvm:${libs.versions.mockk.get()}")
+    testImplementation(libs.kotlinx.coroutines.test)
 }

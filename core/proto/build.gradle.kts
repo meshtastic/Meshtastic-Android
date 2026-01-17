@@ -23,6 +23,10 @@ plugins {
 }
 
 kotlin {
+    jvm()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
     targets.named("android", com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget::class.java) {
 //        publishLibraryVariants("release", "debug")
         compilerOptions {
@@ -47,5 +51,6 @@ wire {
         srcDir("src/main/proto")
         srcDir("src/main/wire-includes")
     }
-    kotlin {}
+    kotlin {
+    }
 }

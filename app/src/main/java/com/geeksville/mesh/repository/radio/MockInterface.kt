@@ -123,7 +123,7 @@ constructor(
     private fun makeTextMessage(numIn: Int) = FromRadio(
         packet =
         MeshPacket(
-            id = packetIdSequence.next() ?: 0,
+            id = packetIdSequence.next(),
             from = numIn,
             to = 0xffffffff.toInt(), // ugly way of saying broadcast
             rx_time = (System.currentTimeMillis() / 1000).toInt(),

@@ -293,7 +293,7 @@ constructor(
                 try {
                     val extractingMsg = getString(Res.string.firmware_update_extracting)
                     _state.value = FirmwareUpdateState.Processing(ProgressState(extractingMsg))
-                    val extension = if (currentState.updateMethod is FirmwareUpdateMethod.Ble) ".zip" else ".uf2"
+                    val extension = currentState.updateMethod.extension
                     val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
 
                     tempFirmwareFile = extractedFile
@@ -493,12 +493,12 @@ private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType):
     FirmwareReleaseType.LOCAL -> kotlinx.coroutines.flow.flowOf(null)
 }
 
-sealed class FirmwareUpdateMethod(val description: StringResource) {
-    object Usb : FirmwareUpdateMethod(Res.string.firmware_update_method_usb)
+sealed class FirmwareUpdateMethod(val description: StringResource, val extension: String) {
+    object Usb : FirmwareUpdateMethod(Res.string.firmware_update_method_usb, ".uf2")
 
-    object Ble : FirmwareUpdateMethod(Res.string.firmware_update_method_ble)
+    object Ble : FirmwareUpdateMethod(Res.string.firmware_update_method_ble, ".zip")
 
-    object Wifi : FirmwareUpdateMethod(Res.string.firmware_update_method_wifi)
+    object Wifi : FirmwareUpdateMethod(Res.string.firmware_update_method_wifi, ".bin")
 
-    object Unknown : FirmwareUpdateMethod(Res.string.unknown)
+    object Unknown : FirmwareUpdateMethod(Res.string.unknown, "")
 }

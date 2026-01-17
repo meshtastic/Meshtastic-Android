@@ -71,8 +71,7 @@ import javax.inject.Inject
 
 private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
-private fun MeshPacket.hasValidSignal(): Boolean =
-    rx_time != 0 && (rx_snr != 0f && rx_rssi != 0) && (hop_start != 0 && hop_start - (hop_limit ?: 0) == 0)
+private fun MeshPacket.hasValidSignal(): Boolean = rx_time != 0 && hop_start != 0 && hop_start - hop_limit == 0
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
@@ -237,13 +236,19 @@ constructor(
                     launch {
                         radioConfigRepository.deviceProfileFlow.collect { profile ->
                             val moduleConfig = profile.module_config
+                            val displayUnits =
+                                profile.config?.display?.units
+                                    ?: org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.METRIC
                             _state.update { state ->
                                 state.copy(
                                     isManaged = profile.config?.security?.is_managed ?: false,
-                                    isFahrenheit = moduleConfig?.telemetry?.environment_display_fahrenheit ?: false,
-                                    displayUnits =
-                                    profile.config?.display?.units
-                                        ?: org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.METRIC,
+                                    isFahrenheit =
+                                    (moduleConfig?.telemetry?.environment_display_fahrenheit == true) ||
+                                        (
+                                            displayUnits ==
+                                                org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.IMPERIAL
+                                            ),
+                                    displayUnits = displayUnits,
                                 )
                             }
                         }
@@ -264,10 +269,7 @@ constructor(
                                     telemetry.filter {
                                         val env = it.environment_metrics
                                         val temp = env?.temperature
-                                        env?.relative_humidity != null &&
-                                            temp != null &&
-                                            temp != 0f &&
-                                            !temp.isNaN()
+                                        env?.relative_humidity != null && temp != null && !temp.isNaN()
                                     },
                                 )
                             }
@@ -374,7 +376,7 @@ constructor(
                 val latitude = (position.latitude_i ?: 0) * 1e-7
                 val longitude = (position.longitude_i ?: 0) * 1e-7
                 val altitude = position.altitude ?: 0
-                val satsInView = position.sats_in_view ?: 0
+                val satsInView = position.sats_in_view
                 val speed = position.ground_speed ?: 0
                 val heading = "%.2f".format((position.ground_track ?: 0) * 1e-5)
 

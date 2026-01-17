@@ -93,7 +93,7 @@ constructor(
                 userName = mqttConfig.username
                 password = mqttConfig.password.toCharArray()
                 isAutomaticReconnect = true
-                if (mqttConfig.tls_enabled) {
+                if (mqttConfig.tls_enabled == true) {
                     socketFactory = sslContext.socketFactory
                 }
             }
@@ -116,7 +116,7 @@ constructor(
                         }
                         .forEach { globalId ->
                             subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+")
-                            if (mqttConfig.json_enabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/+")
+                            if (mqttConfig.json_enabled == true) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/+")
                         }
                     subscribe("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+")
                 }
@@ -141,7 +141,7 @@ constructor(
                 }
             }
 
-        val scheme = if (mqttConfig.tls_enabled) "ssl" else "tcp"
+        val scheme = if (mqttConfig.tls_enabled == true) "ssl" else "tcp"
         val (host, port) =
             mqttConfig.address
                 .ifEmpty { DEFAULT_SERVER_ADDRESS }

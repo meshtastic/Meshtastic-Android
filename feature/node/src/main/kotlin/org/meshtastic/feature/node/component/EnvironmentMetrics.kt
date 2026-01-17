@@ -73,7 +73,7 @@ internal fun EnvironmentMetrics(
             buildList {
                 with(node.environmentMetrics) {
                     val temp = temperature
-                    if (temp != null && temp != 0f) {
+                    if (temp != null && !temp.isNaN()) {
                         add(
                             VectorMetricInfo(
                                 Res.string.temperature,
@@ -83,29 +83,29 @@ internal fun EnvironmentMetrics(
                         )
                     }
                     val rh = relative_humidity
-                    if (rh != null && rh != 0f) {
+                    if (rh != null && !rh.isNaN()) {
                         add(VectorMetricInfo(Res.string.humidity, "%.0f%%".format(rh), Icons.Default.WaterDrop))
                     }
                     val bp = barometric_pressure
-                    if (bp != null && bp != 0f) {
+                    if (bp != null && !bp.isNaN()) {
                         add(VectorMetricInfo(Res.string.pressure, "%.0f hPa".format(bp), Icons.Default.Speed))
                     }
                     val gr = gas_resistance
-                    if (gr != null && gr != 0f) {
+                    if (gr != null && !gr.isNaN()) {
                         add(VectorMetricInfo(Res.string.gas_resistance, "%.0f MΩ".format(gr), Icons.Default.BlurOn))
                     }
                     val v = voltage
-                    if (v != null && v != 0f) {
+                    if (v != null && !v.isNaN()) {
                         add(VectorMetricInfo(Res.string.voltage, "%.2fV".format(v), Icons.Default.Bolt))
                     }
                     val c = current
-                    if (c != null && c != 0f) {
+                    if (c != null && !c.isNaN()) {
                         add(VectorMetricInfo(Res.string.current, "%.1fmA".format(c), Icons.Default.Power))
                     }
                     val i = iaq
                     if (i != null && i != 0) add(VectorMetricInfo(Res.string.iaq, i.toString(), Icons.Default.Air))
                     val d = distance
-                    if (d != null && d != 0f) {
+                    if (d != null && !d.isNaN()) {
                         add(
                             VectorMetricInfo(
                                 Res.string.distance,
@@ -115,15 +115,15 @@ internal fun EnvironmentMetrics(
                         )
                     }
                     val l = lux
-                    if (l != null && l != 0f) {
+                    if (l != null && !l.isNaN()) {
                         add(VectorMetricInfo(Res.string.lux, "%.0f lx".format(l), Icons.Default.LightMode))
                     }
                     val uv = uv_lux
-                    if (uv != null && uv != 0f) {
+                    if (uv != null && !uv.isNaN()) {
                         add(VectorMetricInfo(Res.string.uv_lux, "%.0f lx".format(uv), Icons.Default.LightMode))
                     }
                     val ws = wind_speed
-                    if (ws != null && ws != 0f) {
+                    if (ws != null && !ws.isNaN()) {
                         @Suppress("MagicNumber")
                         val normalizedBearing = ((wind_direction ?: 0) + 180) % 360
                         add(
@@ -136,30 +136,36 @@ internal fun EnvironmentMetrics(
                         )
                     }
                     val w = weight
-                    if (w != null && w != 0f) {
+                    if (w != null && !w.isNaN()) {
                         add(VectorMetricInfo(Res.string.weight, "%.2f kg".format(w), Icons.Default.Scale))
                     }
                 }
             }
         }
+    fun isAllValid(vararg values: Float?): Boolean = values.all { it != null && !it.isNaN() }
     val drawableMetrics =
         remember(node.environmentMetrics, isFahrenheit) {
             buildList {
                 with(node.environmentMetrics) {
                     val temp = temperature
                     val rh = relative_humidity
-                    if (temp != null && temp != 0f && rh != null && rh != 0f) {
-                        val dewPoint = UnitConversions.calculateDewPoint(temp, rh)
-                        add(
-                            DrawableMetricInfo(
-                                Res.string.dew_point,
-                                dewPoint.toTempString(isFahrenheit),
-                                org.meshtastic.feature.node.R.drawable.ic_outlined_dew_point_24,
-                            ),
-                        )
-                    }
+                    temp
+                        ?.takeIf { !it.isNaN() }
+                        ?.let { t ->
+                            rh?.takeIf { !it.isNaN() }
+                                ?.let { r ->
+                                    val dewPoint = UnitConversions.calculateDewPoint(t, r)
+                                    add(
+                                        DrawableMetricInfo(
+                                            Res.string.dew_point,
+                                            dewPoint.toTempString(isFahrenheit),
+                                            org.meshtastic.feature.node.R.drawable.ic_outlined_dew_point_24,
+                                        ),
+                                    )
+                                }
+                        }
                     val st = soil_temperature
-                    if (st != null && st != 0f) {
+                    if (st != null && !st.isNaN()) {
                         add(
                             DrawableMetricInfo(
                                 Res.string.soil_temperature,
@@ -179,7 +185,7 @@ internal fun EnvironmentMetrics(
                         )
                     }
                     val r = radiation
-                    if (r != null && r != 0f) {
+                    if (r != null && !r.isNaN()) {
                         add(
                             DrawableMetricInfo(
                                 Res.string.radiation,

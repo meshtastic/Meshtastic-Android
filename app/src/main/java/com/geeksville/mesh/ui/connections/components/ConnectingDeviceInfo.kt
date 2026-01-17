@@ -43,13 +43,8 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun ConnectingDeviceInfo(
-    deviceName: String,
-    deviceAddress: String,
-    onClickDisconnect: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
+fun ConnectingDeviceInfo(deviceName: String, deviceAddress: String, onClickDisconnect: () -> Unit) {
+    Column {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,

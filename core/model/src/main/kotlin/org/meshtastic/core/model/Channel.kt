@@ -77,7 +77,7 @@ data class Channel(
     // Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
     val name: String
         get() =
-            (settings.name ?: "").ifEmpty {
+            settings.name.ifEmpty {
                 // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a
                 // human readable name
                 if (loraConfig.use_preset) {
@@ -100,7 +100,7 @@ data class Channel(
 
     val psk: ByteString
         get() {
-            val spsk = settings.psk ?: okio.ByteString.EMPTY
+            val spsk = settings.psk
             return if (spsk.size != 1) {
                 spsk // A standard PSK
             } else {

@@ -23,17 +23,34 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.User
 import java.util.Locale
 
 class NodeInfoTest {
     private val model = HardwareModel.ANDROID_SIM
     private val node =
         listOf(
-            NodeInfo(4, MeshUser("+zero", "User Zero", "U0", model)),
-            NodeInfo(5, MeshUser("+one", "User One", "U1", model), Position(37.1, 121.1, 35)),
-            NodeInfo(6, MeshUser("+two", "User Two", "U2", model), Position(37.11, 121.1, 40)),
-            NodeInfo(7, MeshUser("+three", "User Three", "U3", model), Position(37.101, 121.1, 40)),
-            NodeInfo(8, MeshUser("+four", "User Four", "U4", model), Position(37.116, 121.1, 40)),
+            NodeInfo(4, MeshUser(User(id = "+zero", long_name = "User Zero", short_name = "U0", hw_model = model))),
+            NodeInfo(
+                5,
+                MeshUser(User(id = "+one", long_name = "User One", short_name = "U1", hw_model = model)),
+                Position(37.1, 121.1, 35),
+            ),
+            NodeInfo(
+                6,
+                MeshUser(User(id = "+two", long_name = "User Two", short_name = "U2", hw_model = model)),
+                Position(37.11, 121.1, 40),
+            ),
+            NodeInfo(
+                7,
+                MeshUser(User(id = "+three", long_name = "User Three", short_name = "U3", hw_model = model)),
+                Position(37.101, 121.1, 40),
+            ),
+            NodeInfo(
+                8,
+                MeshUser(User(id = "+four", long_name = "User Four", short_name = "U4", hw_model = model)),
+                Position(37.116, 121.1, 40),
+            ),
         )
 
     private val currentDefaultLocale = LocaleListCompat.getDefault().get(0) ?: Locale.US

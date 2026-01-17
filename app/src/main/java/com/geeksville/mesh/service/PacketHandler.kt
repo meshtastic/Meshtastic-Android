@@ -125,8 +125,7 @@ constructor(
 
     fun handleQueueStatus(queueStatus: QueueStatus) {
         Logger.d { "[queueStatus] ${queueStatus.toOneLineString()}" }
-        val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, mesh_packet_id) }
-        if (success && isFull) return // Queue is full, wait for free != 0
+        val (success, _, requestId) = with(queueStatus) { Triple(res == 0, free == 0, mesh_packet_id) }
         if (requestId != 0) {
             queueResponse.remove(requestId)?.complete(success)
         } else {

@@ -136,10 +136,10 @@ constructor(
 
     fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
         val rxTime =
-            if ((packet.rx_time ?: 0) == 0) {
+            if (packet.rx_time == 0) {
                 (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
             } else {
-                (packet.rx_time ?: 0)
+                packet.rx_time
             }
         val preparedPacket = packet.copy(rx_time = rxTime)
 
@@ -190,7 +190,7 @@ constructor(
                 received_date = System.currentTimeMillis(),
                 raw_message = packet.toString(),
                 fromNum = packet.from,
-                portNum = decoded.portnum?.value ?: 0,
+                portNum = decoded.portnum.value,
                 fromRadio = FromRadio(packet = packet),
             )
         val logJob = insertMeshLog(log)
@@ -205,18 +205,18 @@ constructor(
                 it.lastHeard = (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
             }
             nodeManager.updateNodeInfo(packet.from, withBroadcast = false, channel = packet.channel) {
-                it.lastHeard = packet.rx_time ?: 0
-                it.snr = packet.rx_snr ?: 0f
-                it.rssi = packet.rx_rssi ?: 0
+                it.lastHeard = packet.rx_time
+                it.snr = packet.rx_snr
+                it.rssi = packet.rx_rssi
                 it.hopsAway =
                     if (decoded.portnum == PortNum.RANGE_TEST_APP) {
                         0
-                    } else if ((packet.hop_start ?: 0) == 0 && (decoded.bitfield ?: 0) == 0) {
+                    } else if (packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0) {
                         -1
-                    } else if ((packet.hop_limit ?: 0) > (packet.hop_start ?: 0)) {
+                    } else if (packet.hop_limit > packet.hop_start) {
                         -1
                     } else {
-                        (packet.hop_start ?: 0) - (packet.hop_limit ?: 0)
+                        packet.hop_start - packet.hop_limit
                     }
             }
 

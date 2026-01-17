@@ -22,15 +22,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
+import java.lang.reflect.Modifier
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,17 +50,80 @@ constructor(
     private val _localConfig = MutableStateFlow(LocalConfig())
     val localConfig = _localConfig.asStateFlow()
 
+    private val _localConfigBytes = MutableStateFlow(LocalConfig.ADAPTER.encode(_localConfig.value))
+    val localConfigBytes = _localConfigBytes.asStateFlow()
+
     private val _moduleConfig = MutableStateFlow(LocalModuleConfig())
     val moduleConfig = _moduleConfig.asStateFlow()
 
-    private val configTotal = 9 // Hardcoded for now as Descriptors are not available
-    private val moduleTotal = 13 // Hardcoded for now as Descriptors are not available
+    private val _channelSet = MutableStateFlow(ChannelSet())
+    val channelSet = _channelSet.asStateFlow()
 
-    fun start(scope: CoroutineScope) {
-        this.scope = scope
-        radioConfigRepository.localConfigFlow.onEach { _localConfig.value = it }.launchIn(scope)
+    private val _channelSetBytes = MutableStateFlow(ChannelSet.ADAPTER.encode(_channelSet.value))
+    val channelSetBytes = _channelSetBytes.asStateFlow()
 
+    private val hasLoadedLocalConfig = MutableStateFlow(false)
+    private val hasLoadedChannelSet = MutableStateFlow(false)
+
+    val hasLoaded: Boolean
+        get() = hasLoadedLocalConfig.value && hasLoadedChannelSet.value
+
+    val loadedFlow = kotlinx.coroutines.flow.combine(hasLoadedLocalConfig, hasLoadedChannelSet) { a, b -> a && b }
+
+    // Dynamically count non-static fields to avoid hardcoded values drifting from Proto definitions
+    private val configTotal =
+        Config::class.java.declaredFields.count { !Modifier.isStatic(it.modifiers) && it.name != "unknownFields" }
+
+    private val moduleTotal =
+        LocalModuleConfig::class.java.declaredFields.count {
+            !Modifier.isStatic(it.modifiers) && it.name != "unknownFields"
+        }
+
+    init {
+        radioConfigRepository.localConfigFlow
+            .filterNotNull()
+            .onEach {
+                _localConfig.value = it
+                _localConfigBytes.value = LocalConfig.ADAPTER.encode(it)
+                hasLoadedLocalConfig.value = true
+            }
+            .launchIn(scope)
         radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(scope)
+        radioConfigRepository.channelSetFlow
+            .filterNotNull()
+            .onEach {
+                _channelSet.value = it
+                _channelSetBytes.value = ChannelSet.ADAPTER.encode(it)
+                hasLoadedChannelSet.value = true
+            }
+            .launchIn(scope)
+    }
+
+    fun start(newScope: CoroutineScope) {
+        this.scope = newScope
+        // Re-launch collectors in the new scope if needed, or simply ensure they are active.
+        // Since init block already launched them in the initial scope, and that scope might be
+        // replaced here, we should ideally re-launch them if the scope changes.
+        // However, for this fix, we simply provide the method expected by MeshRouter.
+        // Given the architecture, it's safer to re-attach listeners to the provided scope.
+
+        radioConfigRepository.localConfigFlow
+            .filterNotNull()
+            .onEach {
+                _localConfig.value = it
+                _localConfigBytes.value = LocalConfig.ADAPTER.encode(it)
+                hasLoadedLocalConfig.value = true
+            }
+            .launchIn(newScope)
+        radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(newScope)
+        radioConfigRepository.channelSetFlow
+            .filterNotNull()
+            .onEach {
+                _channelSet.value = it
+                _channelSetBytes.value = ChannelSet.ADAPTER.encode(it)
+                hasLoadedChannelSet.value = true
+            }
+            .launchIn(newScope)
     }
 
     fun handleDeviceConfig(config: Config) {
@@ -75,7 +141,7 @@ constructor(
 
     private fun countNonNullFields(obj: Any): Int = obj::class.java.declaredFields.count { field ->
         field.isAccessible = true
-        field.get(obj) != null
+        !Modifier.isStatic(field.modifiers) && field.name != "unknownFields" && field.get(obj) != null
     }
 
     fun handleChannel(ch: Channel) {

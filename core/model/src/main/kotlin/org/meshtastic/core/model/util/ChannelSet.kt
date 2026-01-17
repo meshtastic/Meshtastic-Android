@@ -76,7 +76,7 @@ val ChannelSet.primaryChannel: Channel?
  * @param upperCasePrefix portions of the URL can be upper case to make for more efficient QR codes
  */
 fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): Uri {
-    val channelBytes = this.encode() ?: ByteArray(0) // if unset just use empty
+    val channelBytes = this.encode() // if unset just use empty
     val enc = Base64.encodeToString(channelBytes, BASE64FLAGS)
     val p = if (upperCasePrefix) URL_PREFIX.uppercase() else URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""

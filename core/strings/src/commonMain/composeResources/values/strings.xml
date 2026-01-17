@@ -191,6 +191,7 @@
     <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
     <string name="channel_name">Channel Name</string>
+    <string name="channel_url">Channel URL</string>
     <string name="qr_code">QR code</string>
     <string name="unknown_username">Unknown Username</string>
     <string name="send">Send</string>

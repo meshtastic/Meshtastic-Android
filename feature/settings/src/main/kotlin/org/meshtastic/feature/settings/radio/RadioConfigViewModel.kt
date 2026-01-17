@@ -127,7 +127,10 @@ constructor(
         analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
     }
 
-    private val destNum = savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum
+    private val destNum =
+        savedStateHandle.get<Int>("destNum")
+            ?: runCatching { savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum }.getOrNull()
+
     private val _destNode = MutableStateFlow<Node?>(null)
     val destNode: StateFlow<Node?>
         get() = _destNode
@@ -531,7 +534,7 @@ constructor(
 
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
         meshService?.beginEditSettings()
-        if (!long_name.isNullOrEmpty() || !short_name.isNullOrEmpty()) {
+        if (long_name != null || short_name != null) {
             destNode.value?.user?.let {
                 val user = it.copy(long_name = long_name ?: it.long_name, short_name = short_name ?: it.short_name)
                 setOwner(user)
@@ -704,7 +707,21 @@ constructor(
         }
         if (data.portnum == PortNum.ADMIN_APP) {
             val parsed = AdminMessage.ADAPTER.decode(data.payload)
-            Logger.d { debugMsg.format(parsed.toString()) } // Wire doesn't have payloadVariantCase.name
+            // Explicitly log the non-null field name for clarity
+            val variant =
+                when {
+                    parsed.get_device_metadata_response != null -> "get_device_metadata_response"
+                    parsed.get_channel_response != null -> "get_channel_response"
+                    parsed.get_owner_response != null -> "get_owner_response"
+                    parsed.get_config_response != null -> "get_config_response"
+                    parsed.get_module_config_response != null -> "get_module_config_response"
+                    parsed.get_canned_message_module_messages_response != null ->
+                        "get_canned_message_module_messages_response"
+                    parsed.get_ringtone_response != null -> "get_ringtone_response"
+                    parsed.get_device_connection_status_response != null -> "get_device_connection_status_response"
+                    else -> "unknown"
+                }
+            Logger.d { debugMsg.format(variant) }
             if (destNum != packet.from) {
                 sendError("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}.")
                 return
@@ -723,7 +740,7 @@ constructor(
                             state.copy(
                                 channelList =
                                 state.channelList.toMutableList().apply {
-                                    val index = response.index ?: 0
+                                    val index = response.index
                                     val settings = response.settings ?: ChannelSettings()
                                     // Make sure list is large enough
                                     while (size <= index) add(ChannelSettings())
@@ -732,14 +749,14 @@ constructor(
                             )
                         }
                         incrementCompleted()
-                        val index = response.index ?: 0
+                        val index = response.index
                         if (index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                             // Not done yet, request next channel
                             getChannel(destNum, index + 1)
                         }
                     } else {
                         // Received last channel, update total and start channel editor
-                        setResponseStateTotal((response.index ?: 0) + 1)
+                        setResponseStateTotal(response.index + 1)
                     }
                 }
 

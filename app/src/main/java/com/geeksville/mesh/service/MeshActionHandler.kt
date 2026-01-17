@@ -159,10 +159,9 @@ constructor(
         }
     }
 
-    fun handleSetOwner(u: org.meshtastic.core.model.MeshUser, myNodeNum: Int) {
-        val owner = User(id = u.id, long_name = u.longName, short_name = u.shortName, is_licensed = u.isLicensed)
-        commandSender.sendAdmin(myNodeNum) { copy(set_owner = owner) }
-        nodeManager.handleReceivedUser(myNodeNum, owner)
+    fun handleSetOwner(u: User, myNodeNum: Int) {
+        commandSender.sendAdmin(myNodeNum) { copy(set_owner = u) }
+        nodeManager.handleReceivedUser(myNodeNum, u)
     }
 
     fun handleSend(p: DataPacket, myNodeNum: Int) {

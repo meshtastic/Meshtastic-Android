@@ -504,7 +504,7 @@ private fun ChannelListView(
         first = {
             channelSet.settings.forEachIndexed { index, channel ->
                 val channelObj = Channel(channel, channelSet.lora_config ?: Config.LoRaConfig())
-                val displayTitle = (channel.name ?: "").ifEmpty { modemPresetName }
+                val displayTitle = channel.name.ifEmpty { modemPresetName }
 
                 ChannelSelection(
                     index = index,

@@ -90,7 +90,12 @@ data class Node(
         get() = deviceMetrics.voltage
 
     val batteryStr
-        get() = if (batteryLevel in 1..100) "$batteryLevel%" else ""
+        get() =
+            when (batteryLevel) {
+                in 0..100 -> "$batteryLevel%"
+                101 -> "PWD" // Standard Meshtastic value for powered
+                else -> ""
+            }
 
     val latitude
         get() = (position.latitude_i ?: 0) * 1e-7
@@ -98,8 +103,8 @@ data class Node(
     val longitude
         get() = (position.longitude_i ?: 0) * 1e-7
 
-    private fun hasValidPosition(): Boolean = latitude != 0.0 &&
-        longitude != 0.0 &&
+    private fun hasValidPosition(): Boolean = position.latitude_i != null &&
+        position.longitude_i != null &&
         (latitude >= -90 && latitude <= 90.0) &&
         (longitude >= -180 && longitude <= 180)
 
@@ -125,41 +130,33 @@ data class Node(
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)
 
     private fun EnvironmentMetrics.getDisplayStrings(isFahrenheit: Boolean): List<String> {
-        val tempVal = temperature ?: 0f
         val temp =
-            if (tempVal != 0f) {
-                if (isFahrenheit) {
-                    "%.1f°F".format(celsiusToFahrenheit(tempVal))
-                } else {
-                    "%.1f°C".format(tempVal)
+            temperature
+                ?.takeIf { !it.isNaN() }
+                ?.let {
+                    if (isFahrenheit) {
+                        "%.1f°F".format(celsiusToFahrenheit(it))
+                    } else {
+                        "%.1f°C".format(it)
+                    }
                 }
-            } else {
-                null
-            }
-        val humidity = if ((relative_humidity ?: 0f) != 0f) "%.0f%%".format(relative_humidity) else null
-        val soilTemp = soil_temperature ?: 0f
+        val humidity = relative_humidity?.takeIf { !it.isNaN() }?.let { "%.0f%%".format(it) }
         val soilTemperatureStr =
-            if (soilTemp != 0f) {
-                if (isFahrenheit) {
-                    "%.1f°F".format(celsiusToFahrenheit(soilTemp))
-                } else {
-                    "%.1f°C".format(soilTemp)
+            soil_temperature
+                ?.takeIf { !it.isNaN() }
+                ?.let {
+                    if (isFahrenheit) {
+                        "%.1f°F".format(celsiusToFahrenheit(it))
+                    } else {
+                        "%.1f°C".format(it)
+                    }
                 }
-            } else {
-                null
-            }
         val soilMoistureRange = 0..100
-        val soilMoistureValue = soil_moisture ?: 0
-        val soilMoisture =
-            if (soilMoistureValue in soilMoistureRange && soil_temperature != 0f) {
-                "%d%%".format(soilMoistureValue)
-            } else {
-                null
-            }
-        val voltageValue = this.voltage ?: 0f
-        val voltage = if (voltageValue != 0f) "%.2fV".format(voltageValue) else null
-        val current = if (this.current != 0f) "%.1fmA".format(this.current) else null
-        val iaq = if (this.iaq != 0) "IAQ: ${this.iaq}" else null
+        val soilMoisture = soil_moisture?.takeIf { it in soilMoistureRange }?.let { "%d%%".format(it) }
+
+        val voltage = voltage?.takeIf { !it.isNaN() }?.let { "%.2fV".format(it) }
+        val current = current?.takeIf { !it.isNaN() }?.let { "%.1fmA".format(it) }
+        val iaq = iaq?.let { "IAQ: $it" }
 
         return listOfNotNull(
             paxcounter.getDisplayString(),

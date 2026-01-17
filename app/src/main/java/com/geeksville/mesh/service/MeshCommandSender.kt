@@ -25,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -46,6 +47,7 @@ import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.User
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
@@ -101,7 +103,7 @@ constructor(
         sessionPasskey.set(key)
     }
 
-    private fun getHopLimit(): Int = localConfig.value.lora?.hop_limit ?: 0
+    private fun getHopLimit(): Int = localConfig.value.lora?.hop_limit?.takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
 
     private fun getAdminChannelIndex(toNum: Int): Int {
         val myNum = nodeManager?.myNodeNum ?: return 0
@@ -154,7 +156,7 @@ constructor(
             ) {
                 copy(
                     portnum = portNum,
-                    payload = okio.ByteString.of(*p.bytes ?: ByteArray(0)),
+                    payload = p.bytes?.toByteString() ?: okio.ByteString.EMPTY,
                     reply_id = p.replyId ?: 0,
                     emoji = p.emoji,
                 )
@@ -209,7 +211,7 @@ constructor(
             ) {
                 copy(
                     portnum = PortNum.POSITION_APP,
-                    payload = okio.ByteString.of(*pos.encode()),
+                    payload = ProtoPosition.ADAPTER.encodeByteString(pos),
                     want_response = wantResponse,
                 )
             },
@@ -231,7 +233,7 @@ constructor(
             ) {
                 copy(
                     portnum = PortNum.POSITION_APP,
-                    payload = okio.ByteString.of(*meshPosition.encode()),
+                    payload = ProtoPosition.ADAPTER.encodeByteString(meshPosition),
                     want_response = true,
                 )
             },
@@ -263,7 +265,7 @@ constructor(
                 copy(
                     portnum = PortNum.NODEINFO_APP,
                     want_response = true,
-                    payload = okio.ByteString.of(*myNode.user.encode()),
+                    payload = User.ADAPTER.encodeByteString(myNode.user),
                 )
             },
         )
@@ -301,7 +303,7 @@ constructor(
             ) {
                 copy(
                     portnum = PortNum.TELEMETRY_APP,
-                    payload = okio.ByteString.of(*telemetryRequest.encode()),
+                    payload = Telemetry.ADAPTER.encodeByteString(telemetryRequest),
                     want_response = true,
                 )
             },
@@ -342,7 +344,7 @@ constructor(
                 ) {
                     copy(
                         portnum = PortNum.NEIGHBORINFO_APP,
-                        payload = okio.ByteString.of(*neighborInfoToSend.encode()),
+                        payload = NeighborInfo.ADAPTER.encodeByteString(neighborInfoToSend),
                         want_response = true,
                     )
                 },
@@ -428,8 +430,8 @@ constructor(
                 want_response = wantResponse,
                 portnum = PortNum.ADMIN_APP,
                 payload =
-                okio.ByteString.of(
-                    *(AdminMessage().initFn().copy(session_passkey = sessionPasskey.get()).encode()),
+                AdminMessage.ADAPTER.encodeByteString(
+                    AdminMessage().initFn().copy(session_passkey = sessionPasskey.get()),
                 ),
             )
         }
@@ -443,5 +445,7 @@ constructor(
         private const val NODE_ID_PREFIX = "!"
         private const val NODE_ID_START_INDEX = 1
         private const val HEX_RADIX = 16
+
+        private const val DEFAULT_HOP_LIMIT = 3
     }
 }

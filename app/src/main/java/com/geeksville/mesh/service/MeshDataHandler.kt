@@ -280,29 +280,24 @@ constructor(
         val u = Waypoint.ADAPTER.decode(payload)
         if (u.locked_to != 0 && u.locked_to != packet.from) return
         val currentSecond = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt()
-        rememberDataPacket(dataPacket, myNodeNum, updateNotification = (u.expire ?: 0) > currentSecond)
+        rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond)
     }
 
     private fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: okio.ByteString.EMPTY
         val u = AdminMessage.ADAPTER.decode(payload)
-        commandSender.setSessionPasskey(u.session_passkey ?: okio.ByteString.EMPTY)
+        commandSender.setSessionPasskey(u.session_passkey)
 
         if (packet.from == myNodeNum) {
-            when {
-                u.get_config_response != null -> configHandler.handleDeviceConfig(u.get_config_response!!)
-
-                u.get_channel_response != null -> configHandler.handleChannel(u.get_channel_response!!)
-
-                else -> {}
-            }
+            u.get_config_response?.let { configHandler.handleDeviceConfig(it) }
+            u.get_channel_response?.let { configHandler.handleChannel(it) }
         }
 
-        if (u.get_device_metadata_response != null) {
+        u.get_device_metadata_response?.let { metadata ->
             if (packet.from == myNodeNum) {
-                configFlowManager.handleLocalMetadata(u.get_device_metadata_response!!)
+                configFlowManager.handleLocalMetadata(metadata)
             } else {
-                nodeManager.insertMetadata(packet.from, u.get_device_metadata_response!!)
+                nodeManager.insertMetadata(packet.from, metadata)
             }
         }
     }
@@ -344,8 +339,9 @@ constructor(
                 t.device_metrics != null -> {
                     nodeEntity.deviceTelemetry = t
                     if (fromNum == myNodeNum || (isRemote && nodeEntity.isFavorite)) {
-                        val dm = t.device_metrics!!
+                        val dm = t.device_metrics
                         if (
+                            dm != null &&
                             (dm.voltage ?: 0f) > BATTERY_PERCENT_UNSUPPORTED &&
                             (dm.battery_level ?: 0) <= BATTERY_PERCENT_LOW_THRESHOLD
                         ) {
@@ -386,8 +382,8 @@ constructor(
         }
         if (shouldDisplay) {
             val now = System.currentTimeMillis() / MILLISECONDS_IN_SECOND
-            if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
-            if ((now - batteryPercentCooldowns[fromNum]!!) >= BATTERY_PERCENT_COOLDOWN_SECONDS || forceDisplay) {
+            val lastCooldown = batteryPercentCooldowns[fromNum] ?: 0L
+            if ((now - lastCooldown) >= BATTERY_PERCENT_COOLDOWN_SECONDS || forceDisplay) {
                 batteryPercentCooldowns[fromNum] = now
                 return true
             }
@@ -482,7 +478,7 @@ constructor(
                 return@handledLaunch
             }
 
-            if (shouldRetryReaction && reaction != null) {
+            if (shouldRetryReaction) {
                 val newRetryCount = reaction.retryCount + 1
 
                 // Emit retry event to UI and wait for user response
@@ -584,14 +580,16 @@ constructor(
             }
             val text =
                 "Total messages: ${h.history_messages}\n" +
-                    "History window: ${(h.window ?: 0).toLong().milliseconds.inWholeMinutes} min\n" +
+                    "History window: ${h.window.toLong().milliseconds.inWholeMinutes} min\n" +
                     "Last request: ${h.last_request}"
             val u = dataPacket.copy(bytes = text.encodeToByteArray(), dataType = PortNum.TEXT_MESSAGE_APP.value)
             rememberDataPacket(u, myNodeNum)
-            historyManager.updateStoreForwardLastRequest("router_history", h.last_request ?: 0, transport)
+            historyManager.updateStoreForwardLastRequest("router_history", h.last_request, transport)
         } else if (s.heartbeat != null) {
-            val hb = s.heartbeat!!
-            historyLog { "rxHeartbeat $baseContext period=${hb.period} secondary=${hb.secondary}" }
+            val hb = s.heartbeat
+            if (hb != null) {
+                historyLog { "rxHeartbeat $baseContext period=${hb.period} secondary=${hb.secondary}" }
+            }
         } else if (s.text != null) {
             if (s.rr == StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
                 dataPacket.to = DataPacket.ID_BROADCAST
@@ -600,7 +598,8 @@ constructor(
             historyLog(Log.DEBUG) {
                 "rxText $baseContext id=${dataPacket.id} ts=${dataPacket.time} to=${dataPacket.to} decision=remember"
             }
-            val u = dataPacket.copy(bytes = s.text!!.toByteArray(), dataType = PortNum.TEXT_MESSAGE_APP.value)
+            val bytes = s.text?.toByteArray() ?: ByteArray(0)
+            val u = dataPacket.copy(bytes = bytes, dataType = PortNum.TEXT_MESSAGE_APP.value)
             rememberDataPacket(u, myNodeNum)
         }
     }
@@ -671,7 +670,7 @@ constructor(
         val portNum = PortNum.fromValue(dataPacket.dataType)
         when (portNum) {
             PortNum.TEXT_MESSAGE_APP -> {
-                val message = dataPacket.text!!
+                val message = dataPacket.text ?: ""
                 val channelName =
                     if (dataPacket.to == DataPacket.ID_BROADCAST) {
                         radioConfigRepository.channelSetFlow.first().settings.getOrNull(dataPacket.channel)?.name
@@ -689,12 +688,13 @@ constructor(
             }
 
             PortNum.WAYPOINT_APP -> {
-                val message = getString(Res.string.waypoint_received, dataPacket.waypoint!!.name ?: "")
+                val waypoint = dataPacket.waypoint ?: return
+                val message = getString(Res.string.waypoint_received, waypoint.name)
                 serviceNotifications.updateWaypointNotification(
                     contactKey,
                     getSenderName(dataPacket),
                     message,
-                    dataPacket.waypoint!!.id ?: 0,
+                    waypoint.id,
                     isSilent,
                 )
             }
@@ -716,13 +716,13 @@ constructor(
                 userId = fromId,
                 emoji = emoji,
                 timestamp = System.currentTimeMillis(),
-                snr = packet.rx_snr ?: 0f,
-                rssi = packet.rx_rssi ?: 0,
+                snr = packet.rx_snr,
+                rssi = packet.rx_rssi,
                 hopsAway =
-                if ((packet.hop_start ?: 0) == 0 || (packet.hop_limit ?: 0) > (packet.hop_start ?: 0)) {
+                if (packet.hop_start == 0 || packet.hop_limit > packet.hop_start) {
                     HOPS_AWAY_UNAVAILABLE
                 } else {
-                    (packet.hop_start ?: 0) - (packet.hop_limit ?: 0)
+                    packet.hop_start - packet.hop_limit
                 },
                 packetId = packet.id,
                 status = MessageStatus.RECEIVED,
@@ -741,26 +741,25 @@ constructor(
         }
 
         packetRepository.get().insertReaction(reaction)
+        updateReactionNotification(decoded.reply_id, fromId, packet, emoji)
+    }
 
+    private suspend fun updateReactionNotification(replyId: Int, fromId: String, packet: MeshPacket, emoji: String) {
         // Find the original packet to get the contactKey
-        packetRepository.get().getPacketByPacketId(decoded.reply_id ?: 0)?.let { original ->
+        packetRepository.get().getPacketByPacketId(replyId)?.let { original ->
             val contactKey = original.packet.contact_key
             val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
             val isSilent = conversationMuted || nodeMuted
             val channelName =
                 if (original.packet.data.to == DataPacket.ID_BROADCAST) {
-                    radioConfigRepository.channelSetFlow
-                        .first()
-                        .settings
-                        .getOrNull(original.packet.data.channel)
-                        ?.name
+                    radioConfigRepository.channelSetFlow.first().settings.getOrNull(original.packet.data.channel)?.name
                 } else {
                     null
                 }
             serviceNotifications.updateReactionNotification(
                 contactKey,
-                getSenderName(dataMapper.toDataPacket(packet)!!),
+                dataMapper.toDataPacket(packet)?.let { getSenderName(it) } ?: getString(Res.string.unknown_username),
                 emoji,
                 original.packet.data.to == DataPacket.ID_BROADCAST,
                 channelName,

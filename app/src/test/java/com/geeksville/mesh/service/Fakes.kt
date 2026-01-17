@@ -79,7 +79,7 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
     override fun initChannels() {}
 
     override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification =
-        null as Notification
+        TODO("Not yet implemented")
 
     override suspend fun updateMessageNotification(
         contactKey: String,

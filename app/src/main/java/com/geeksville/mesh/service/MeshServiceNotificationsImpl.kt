@@ -804,20 +804,20 @@ constructor(
 
 // Extension function to format LocalStats into a readable string.
 private fun LocalStats?.formatToString(): String? {
-    if (this == null) return null
+    val stats = this ?: return null
     val result = mutableListOf<String>()
-    uptime_seconds?.let { result.add("Uptime: ${formatUptime(it)}") }
-    channel_utilization?.let { result.add("ChUtil: %.2f%%".format(it)) }
-    air_util_tx?.let { result.add("AirUtilTX: %.2f%%".format(it)) }
-    return result.joinToString("\n")
+    if (stats.uptime_seconds > 0) result.add("Uptime: ${formatUptime(stats.uptime_seconds)}")
+    if (stats.channel_utilization > 0) result.add("ChUtil: %.2f%%".format(stats.channel_utilization))
+    if (stats.air_util_tx > 0) result.add("AirUtilTX: %.2f%%".format(stats.air_util_tx))
+    return result.takeIf { it.isNotEmpty() }?.joinToString("\n")
 }
 
 private fun DeviceMetrics?.formatToString(): String? {
-    if (this == null) return null
+    val metrics = this ?: return null
     val result = mutableListOf<String>()
-    battery_level?.let { result.add("Battery Level: $it") }
-    uptime_seconds?.let { result.add("Uptime: ${formatUptime(it)}") }
-    channel_utilization?.let { result.add("ChUtil: %.2f%%".format(it)) }
-    air_util_tx?.let { result.add("AirUtilTX: %.2f%%".format(it)) }
-    return result.joinToString("\n")
+    metrics.battery_level?.let { if (it > 0) result.add("Battery Level: $it") }
+    metrics.uptime_seconds?.let { if (it > 0) result.add("Uptime: ${formatUptime(it)}") }
+    metrics.channel_utilization?.let { if (it > 0) result.add("ChUtil: %.2f%%".format(it)) }
+    metrics.air_util_tx?.let { if (it > 0) result.add("AirUtilTX: %.2f%%".format(it)) }
+    return result.takeIf { it.isNotEmpty() }?.joinToString("\n")
 }

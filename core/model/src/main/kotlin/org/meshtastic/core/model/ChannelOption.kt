@@ -51,8 +51,7 @@ private val Config.LoRaConfig.ModemPreset.bandwidth: Float
     }
 
 private fun Config.LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
-    (modem_preset ?: Config.LoRaConfig.ModemPreset.LONG_FAST).bandwidth *
-        if (regionInfo?.wideLora == true) 3.25f else 1f
+    (modem_preset).bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
 } else {
     when (bandwidth) {
         31 -> .03125f
@@ -61,13 +60,13 @@ private fun Config.LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_prese
         400 -> .40625f
         800 -> .8125f
         1600 -> 1.6250f
-        else -> (bandwidth ?: 0) / 1000f
+        else -> (bandwidth) / 1000f
     }
 }
 
 val Config.LoRaConfig.numChannels: Int
     get() {
-        val regionInfo = RegionInfo.fromRegionCode(region ?: Config.LoRaConfig.RegionCode.UNSET)
+        val regionInfo = RegionInfo.fromRegionCode(region)
         if (regionInfo == null) return 0
 
         val bw = bandwidth(regionInfo)
@@ -80,7 +79,7 @@ val Config.LoRaConfig.numChannels: Int
     }
 
 internal fun Config.LoRaConfig.channelNum(primaryName: String): Int {
-    val cn = channel_num ?: 0
+    val cn = channel_num
     return when {
         cn != 0 -> cn
         numChannels == 0 -> 0
@@ -89,8 +88,8 @@ internal fun Config.LoRaConfig.channelNum(primaryName: String): Int {
 }
 
 internal fun Config.LoRaConfig.radioFreq(channelNum: Int): Float {
-    if ((override_frequency ?: 0f) != 0f) return (override_frequency ?: 0f) + (frequency_offset ?: 0f)
-    val regionInfo = RegionInfo.fromRegionCode(region ?: Config.LoRaConfig.RegionCode.UNSET)
+    if (override_frequency != 0f) return override_frequency + frequency_offset
+    val regionInfo = RegionInfo.fromRegionCode(region)
     return if (regionInfo != null) {
         (regionInfo.freqStart + bandwidth(regionInfo) / 2) + (channelNum - 1) * bandwidth(regionInfo)
     } else {

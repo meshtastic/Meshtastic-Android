@@ -38,20 +38,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.channel_url
+import org.meshtastic.core.strings.fixed_position
+import org.meshtastic.core.strings.long_name
+import org.meshtastic.core.strings.module_settings
+import org.meshtastic.core.strings.radio_configuration
 import org.meshtastic.core.strings.save
+import org.meshtastic.core.strings.short_name
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.proto.DeviceProfile
 
-private enum class ProfileField(val tag: Int, val label: String) {
-    LONG_NAME(1, "Long Name"),
-    SHORT_NAME(2, "Short Name"),
-    CHANNEL_URL(3, "Channel URL"),
-    CONFIG(4, "Config"),
-    MODULE_CONFIG(5, "Module Config"),
-    FIXED_POSITION(6, "Fixed Position"),
+private enum class ProfileField(val tag: Int, val labelRes: StringResource) {
+    LONG_NAME(1, Res.string.long_name),
+    SHORT_NAME(2, Res.string.short_name),
+    CHANNEL_URL(3, Res.string.channel_url),
+    CONFIG(4, Res.string.radio_configuration),
+    MODULE_CONFIG(5, Res.string.module_settings),
+    FIXED_POSITION(6, Res.string.fixed_position),
 }
 
 @Suppress("LongMethod")
@@ -107,7 +114,7 @@ fun EditDeviceProfileDialog(
                             ProfileField.FIXED_POSITION -> deviceProfile.fixed_position != null
                         }
                     SwitchPreference(
-                        title = field.label,
+                        title = stringResource(field.labelRes),
                         checked = state[field] == true,
                         enabled = isAvailable,
                         onCheckedChange = { state[field] = it },

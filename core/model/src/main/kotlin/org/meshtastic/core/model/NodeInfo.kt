@@ -24,48 +24,9 @@ import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.DeviceMetrics as ProtoDeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics as ProtoEnvironmentMetrics
 import org.meshtastic.proto.Position as ProtoPosition
-import org.meshtastic.proto.User as ProtoUser
-
-//
-// model objects that directly map to the corresponding protobufs
-//
-
-@Parcelize
-data class MeshUser(
-    val id: String,
-    val longName: String,
-    val shortName: String,
-    val hwModel: HardwareModel,
-    val isLicensed: Boolean = false,
-    val role: Int = 0,
-) : Parcelable {
-
-    override fun toString(): String = "MeshUser(id=${id.anonymize}, " +
-        "longName=${longName.anonymize}, " +
-        "shortName=${shortName.anonymize}, " +
-        "hwModel=$hwModelString, " +
-        "isLicensed=$isLicensed, " +
-        "role=$role)"
-
-    /** Create our model object from a protobuf. */
-    constructor(p: ProtoUser) : this(p.id, p.long_name, p.short_name, p.hw_model, p.is_licensed, p.role?.value ?: 0)
-
-    /**
-     * a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot or null
-     * if unset
-     */
-    val hwModelString: String?
-        get() =
-            if (hwModel == HardwareModel.UNSET) {
-                null
-            } else {
-                hwModel.name.replace('_', '-').replace('p', '.').lowercase()
-            }
-}
 
 @Parcelize
 data class Position(
