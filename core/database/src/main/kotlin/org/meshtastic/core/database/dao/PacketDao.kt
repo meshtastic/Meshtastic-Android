@@ -167,6 +167,18 @@ interface PacketDao {
     SELECT * FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact
+        AND (filtered = 0 OR :includeFiltered = 1)
+    ORDER BY received_time DESC
+    """,
+    )
+    fun getMessagesFrom(contact: String, includeFiltered: Boolean): Flow<List<PacketEntity>>
+
+    @Transaction
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND port_num = 1 AND contact_key = :contact
     ORDER BY received_time DESC
     """,
     )
