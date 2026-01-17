@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.emoji
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -37,28 +35,26 @@ fun EmojiPicker(
     onDismiss: () -> Unit = {},
     onConfirm: (String) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.Bottom) {
-        BackHandler { onDismiss() }
-        AndroidView(
-            factory = { context ->
-                androidx.emoji2.emojipicker.EmojiPickerView(context).apply {
-                    clipToOutline = true
-                    setRecentEmojiProvider(
-                        RecentEmojiProviderAdapter(
-                            CustomRecentEmojiProvider(viewModel.customEmojiFrequency) { updatedValue ->
-                                viewModel.customEmojiFrequency = updatedValue
-                            },
-                        ),
-                    )
-                    setOnEmojiPickedListener { emoji ->
-                        onDismiss()
-                        onConfirm(emoji.emoji)
-                    }
+    BackHandler { onDismiss() }
+    AndroidView(
+        factory = { context ->
+            androidx.emoji2.emojipicker.EmojiPickerView(context).apply {
+                clipToOutline = true
+                setRecentEmojiProvider(
+                    RecentEmojiProviderAdapter(
+                        CustomRecentEmojiProvider(viewModel.customEmojiFrequency) { updatedValue ->
+                            viewModel.customEmojiFrequency = updatedValue
+                        },
+                    ),
+                )
+                setOnEmojiPickedListener { emoji ->
+                    onDismiss()
+                    onConfirm(emoji.emoji)
                 }
-            },
-            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background),
-        )
-    }
+            }
+        },
+        modifier = Modifier.fillMaxWidth().wrapContentHeight().verticalScroll(rememberScrollState()),
+    )
 }
 
 @Composable
