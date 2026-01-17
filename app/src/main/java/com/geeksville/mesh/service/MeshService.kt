@@ -134,7 +134,7 @@ class MeshService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val a = radioInterfaceService.getBondedDeviceAddress()
+        val a = radioInterfaceService.getDeviceAddress()
         val wantForeground = a != null && a != NO_DEVICE_SELECTED
 
         val notification = connectionManager.updateStatusNotification()
@@ -159,12 +159,18 @@ class MeshService : Service() {
             return START_NOT_STICKY
         }
         return if (!wantForeground) {
+            Logger.i { "Stopping mesh service because no device is selected" }
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             stopSelf()
             START_NOT_STICKY
         } else {
             START_STICKY
         }
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        Logger.i { "Mesh service: onTaskRemoved" }
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
