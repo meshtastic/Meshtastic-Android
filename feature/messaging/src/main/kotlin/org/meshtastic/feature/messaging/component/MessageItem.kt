@@ -22,12 +22,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -159,15 +157,13 @@ internal fun MessageItem(
 
                 ActiveSheet.Emoji -> {
                     // Limit height of emoji picker so it doesn't look weird full screen
-                    Box(modifier = Modifier.heightIn(max = 400.dp)) {
-                        EmojiPicker(
-                            onDismiss = { activeSheet = null },
-                            onConfirm = { emoji ->
-                                activeSheet = null
-                                sendReaction(emoji)
-                            },
-                        )
-                    }
+                    EmojiPicker(
+                        onDismiss = { activeSheet = null },
+                        onConfirm = { emoji ->
+                            activeSheet = null
+                            sendReaction(emoji)
+                        },
+                    )
                 }
 
                 null -> {}
