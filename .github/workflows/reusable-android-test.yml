@@ -81,24 +81,28 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
+      - name: Determine test tasks
+        id: test-tasks
+        run: |
+          if [ "${{ inputs.test_flavors }}" = "google" ]; then
+            echo "tasks=connectedGoogleDebugAndroidTest" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.test_flavors }}" = "fdroid" ]; then
+            echo "tasks=connectedFdroidDebugAndroidTest" >> $GITHUB_OUTPUT
+          else
+            echo "tasks=connectedFdroidDebugAndroidTest connectedGoogleDebugAndroidTest" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run Android Instrumented Tests and Generate Coverage
         uses: reactivecircus/android-emulator-runner@v2
         env:
           ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
-          TEST_FLAVORS: ${{ inputs.test_flavors }}
         with:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            case "$TEST_FLAVORS" in
-              google) TASKS="connectedGoogleDebugAndroidTest" ;;
-              fdroid) TASKS="connectedFdroidDebugAndroidTest" ;;
-              *) TASKS="connectedFdroidDebugAndroidTest connectedGoogleDebugAndroidTest" ;;
-            esac
-            ./gradlew $TASKS koverXmlReport --continue --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew ${{ steps.test-tasks.outputs.tasks }} koverXmlReport --continue --scan && ( killall -INT crashpad_handler || true )
 
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}
