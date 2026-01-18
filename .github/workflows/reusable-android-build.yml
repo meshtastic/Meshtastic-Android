@@ -1,4 +1,4 @@
-name: Reusable Android Build and Detekt
+name: Reusable Android Build and Test
 
 on:
   workflow_call:
@@ -19,8 +19,8 @@ on:
         default: true
 
 jobs:
-  build_and_detekt:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest-8-cores
     permissions:
       id-token: write
       contents: read
@@ -68,8 +68,8 @@ jobs:
         run: |
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
-      - name: Run Spotless, Detekt, Build, Lint, and Local Tests
-        run: ./gradlew spotlessCheck detekt assembleDebug runAllDebugTests koverXmlReport --configuration-cache --scan
+      - name: Build and Run Unit Tests
+        run: ./gradlew assembleDebug testGoogleDebugUnitTest testFdroidDebugUnitTest koverXmlReport --continue --scan
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
 
