@@ -11,40 +11,95 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
-  build_and_detekt:
+  check-changes:
     if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
+    runs-on: ubuntu-latest
+    outputs:
+      code_changed: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - '**/*.kt'
+              - '**/*.java'
+              - '**/*.xml'
+              - '**/*.kts'
+              - '**/*.properties'
+              - 'gradle/**'
+              - 'gradlew'
+              - 'gradlew.bat'
+              - '**/src/**'
+              - '.github/workflows/**'
+
+  lint:
+    needs: check-changes
+    if: needs.check-changes.outputs.code_changed == 'true'
+    uses: ./.github/workflows/reusable-lint.yml
+    secrets:
+      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+  build:
+    needs: lint
+    if: ${{ !cancelled() && !failure() }}
     uses: ./.github/workflows/reusable-android-build.yml
     secrets: inherit
 
   androidTest:
-    # Assuming androidTest should also only run for the main repository
-    if: github.repository == 'meshtastic/Meshtastic-Android' && !( github.head_ref == 'scheduled-updates' || github.head_ref == 'l10n_main' )
+    needs: lint
+    if: ${{ !cancelled() && !failure() }}
     uses: ./.github/workflows/reusable-android-test.yml
     with:
       api_levels: '[35]' # Run only on API 35 for PRs
-      # upload_artifacts defaults to true, so no need to explicitly set
+      test_flavors: 'google' # Run only Google flavor for PRs (faster)
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          
+
+  # This job handles the case when no code changes are detected (docs-only PRs)
+  skip-notice:
+    needs: check-changes
+    if: needs.check-changes.outputs.code_changed != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip CI for non-code changes
+        run: echo "Skipping CI - no code changes detected (docs/config only)"
+
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-latest
     needs:
-      [
-        build_and_detekt,
-        androidTest
-      ]
+      - check-changes
+      - lint
+      - build
+      - androidTest
     if: always()
     steps:
       - name: Check Workflow Status
         run: |
-          exit_on_result() {
-            if [[ "$2" == "failure" || "$2" == "cancelled" ]]; then
-              echo "Job '$1' failed or was cancelled."
+          # If no code changed, all jobs are expected to be skipped - that's success
+          if [[ "${{ needs.check-changes.outputs.code_changed }}" != "true" ]]; then
+            echo "No code changes - CI jobs skipped as expected"
+            exit 0
+          fi
+
+          # Code changed - check that all jobs succeeded
+          check_result() {
+            local job_name=$1
+            local result=$2
+            if [[ "$result" == "failure" ]]; then
+              echo "::error::Job '$job_name' failed"
+              exit 1
+            elif [[ "$result" == "cancelled" ]]; then
+              echo "::error::Job '$job_name' was cancelled"
               exit 1
             fi
           }
-          exit_on_result "build_and_detekt" "${{ needs.build_and_detekt.result }}"
-          exit_on_result "androidTest" "${{ needs.androidTest.result }}"
+
+          check_result "lint" "${{ needs.lint.result }}"
+          check_result "build" "${{ needs.build.result }}"
+          check_result "androidTest" "${{ needs.androidTest.result }}"
+
+          echo "All jobs passed successfully"

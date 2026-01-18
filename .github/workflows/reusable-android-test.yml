@@ -13,6 +13,11 @@ on:
         required: false
         type: string
         default: '[26, 35]' # Default to running both if not specified by caller
+      test_flavors:
+        description: 'Which flavors to test: "google", "fdroid", or "both"'
+        required: false
+        type: string
+        default: 'both'
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
@@ -31,7 +36,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           submodules: 'recursive'
-          fetch-depth: 0
+          fetch-depth: 1  # Shallow clone - no version code calculation needed
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
@@ -76,6 +81,17 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
+      - name: Determine test tasks
+        id: test-tasks
+        run: |
+          if [ "${{ inputs.test_flavors }}" = "google" ]; then
+            echo "tasks=connectedGoogleDebugAndroidTest" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.test_flavors }}" = "fdroid" ]; then
+            echo "tasks=connectedFdroidDebugAndroidTest" >> $GITHUB_OUTPUT
+          else
+            echo "tasks=connectedFdroidDebugAndroidTest connectedGoogleDebugAndroidTest" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run Android Instrumented Tests and Generate Coverage
         uses: reactivecircus/android-emulator-runner@v2
         env:
@@ -86,7 +102,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew runAllConnectedDebugTests koverXmlReport --configuration-cache --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew ${{ steps.test-tasks.outputs.tasks }} koverXmlReport --continue --scan && ( killall -INT crashpad_handler || true )
 
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}
