@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.compass
 
 import androidx.compose.ui.graphics.Color
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config
 
 private const val DEFAULT_TARGET_COLOR_HEX = 0xFFFF9800
 
@@ -44,6 +43,6 @@ data class CompassUiState(
     val angularErrorDeg: Float? = null,
     val isAligned: Boolean = false,
     val hasTargetPosition: Boolean = true,
-    val displayUnits: DisplayUnits = DisplayUnits.METRIC,
+    val displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
     val targetAltitude: Int? = null,
 )

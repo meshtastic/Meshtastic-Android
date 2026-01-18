@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.navigation
 
 import androidx.compose.material.icons.Icons
@@ -49,87 +48,82 @@ import org.meshtastic.core.strings.remote_hardware
 import org.meshtastic.core.strings.serial
 import org.meshtastic.core.strings.store_forward
 import org.meshtastic.core.strings.telemetry
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.MeshProtos.DeviceMetadata
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.DeviceMetadata
 
 enum class ModuleRoute(val title: StringResource, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    MQTT(
-        Res.string.mqtt,
-        SettingsRoutes.MQTT,
-        Icons.Default.Cloud,
-        AdminProtos.AdminMessage.ModuleConfigType.MQTT_CONFIG_VALUE,
-    ),
+    MQTT(Res.string.mqtt, SettingsRoutes.MQTT, Icons.Default.Cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
     SERIAL(
         Res.string.serial,
         SettingsRoutes.Serial,
         Icons.Default.Usb,
-        AdminProtos.AdminMessage.ModuleConfigType.SERIAL_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.SERIAL_CONFIG.value,
     ),
     EXT_NOTIFICATION(
         Res.string.external_notification,
         SettingsRoutes.ExtNotification,
         Icons.Default.Notifications,
-        AdminProtos.AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG.value,
     ),
     STORE_FORWARD(
         Res.string.store_forward,
         SettingsRoutes.StoreForward,
         Icons.AutoMirrored.Default.Forward,
-        AdminProtos.AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG.value,
     ),
     RANGE_TEST(
         Res.string.range_test,
         SettingsRoutes.RangeTest,
         Icons.Default.Speed,
-        AdminProtos.AdminMessage.ModuleConfigType.RANGETEST_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.RANGETEST_CONFIG.value,
     ),
     TELEMETRY(
         Res.string.telemetry,
         SettingsRoutes.Telemetry,
         Icons.Default.DataUsage,
-        AdminProtos.AdminMessage.ModuleConfigType.TELEMETRY_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.TELEMETRY_CONFIG.value,
     ),
     CANNED_MESSAGE(
         Res.string.canned_message,
         SettingsRoutes.CannedMessage,
         Icons.AutoMirrored.Default.Message,
-        AdminProtos.AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG.value,
     ),
     AUDIO(
         Res.string.audio,
         SettingsRoutes.Audio,
         Icons.AutoMirrored.Default.VolumeUp,
-        AdminProtos.AdminMessage.ModuleConfigType.AUDIO_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.AUDIO_CONFIG.value,
     ),
     REMOTE_HARDWARE(
         Res.string.remote_hardware,
         SettingsRoutes.RemoteHardware,
         Icons.Default.SettingsRemote,
-        AdminProtos.AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG.value,
     ),
     NEIGHBOR_INFO(
         Res.string.neighbor_info,
         SettingsRoutes.NeighborInfo,
         Icons.Default.People,
-        AdminProtos.AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG.value,
     ),
     AMBIENT_LIGHTING(
         Res.string.ambient_lighting,
         SettingsRoutes.AmbientLighting,
         Icons.Default.LightMode,
-        AdminProtos.AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG.value,
     ),
     DETECTION_SENSOR(
         Res.string.detection_sensor,
         SettingsRoutes.DetectionSensor,
         Icons.Default.Sensors,
-        AdminProtos.AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG.value,
     ),
     PAXCOUNTER(
         Res.string.paxcounter,
         SettingsRoutes.Paxcounter,
         Icons.Default.PermScanWifi,
-        AdminProtos.AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG.value,
     ),
     ;
 
@@ -140,7 +134,7 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
         fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
             when (metadata) {
                 null -> true // Include all routes if metadata is null
-                else -> metadata.excludedModules and it.bitfield == 0
+                else -> (metadata.excluded_modules ?: 0) and it.bitfield == 0
             }
         }
     }

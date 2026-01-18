@@ -83,7 +83,7 @@ fun NodeDetailScreen(
     Scaffold(
         topBar = {
             MainAppBar(
-                title = node?.user?.longName ?: "",
+                title = node?.user?.long_name ?: "",
                 ourNode = ourNode,
                 showNodeChip = false,
                 canNavigateUp = true,

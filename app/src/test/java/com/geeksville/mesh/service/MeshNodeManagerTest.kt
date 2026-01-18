@@ -25,8 +25,8 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.user
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.User
 
 class MeshNodeManagerTest {
 
@@ -64,13 +64,7 @@ class MeshNodeManagerTest {
         val myNode =
             NodeEntity(
                 num = myNum,
-                user =
-                user {
-                    id = "!0000007b"
-                    longName = "My Node"
-                    shortName = "MY"
-                    hwModel = MeshProtos.HardwareModel.TBEAM
-                },
+                user = User(id = "!0000007b", long_name = "My Node", short_name = "MY", hw_model = HardwareModel.TBEAM),
             )
         nodeManager.nodeDBbyNodeNum[myNum] = myNode
 

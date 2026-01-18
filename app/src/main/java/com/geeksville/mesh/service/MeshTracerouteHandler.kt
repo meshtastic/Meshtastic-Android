@@ -33,7 +33,7 @@ import org.meshtastic.core.strings.traceroute_duration
 import org.meshtastic.core.strings.traceroute_route_back_to_us
 import org.meshtastic.core.strings.traceroute_route_towards_dest
 import org.meshtastic.core.strings.unknown_username
-import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshPacket
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -65,13 +65,13 @@ constructor(
                 headerBack = getString(Res.string.traceroute_route_back_to_us),
             ) ?: return
 
-        val requestId = packet.decoded.requestId
+        val requestId = packet.decoded?.request_id ?: 0
         if (logUuid != null) {
             scope.handledLaunch {
                 logInsertJob?.join()
                 val routeDiscovery = packet.fullRouteDiscovery
-                val forwardRoute = routeDiscovery?.routeList.orEmpty()
-                val returnRoute = routeDiscovery?.routeBackList.orEmpty()
+                val forwardRoute = routeDiscovery?.route.orEmpty()
+                val returnRoute = routeDiscovery?.route_back.orEmpty()
                 val routeNodeNums = (forwardRoute + returnRoute).distinct()
                 val nodeDbByNum = nodeRepository.nodeDBbyNum.value
                 val snapshotPositions =
@@ -93,15 +93,15 @@ constructor(
             }
 
         val routeDiscovery = packet.fullRouteDiscovery
-        val destination = routeDiscovery?.routeList?.firstOrNull() ?: routeDiscovery?.routeBackList?.lastOrNull() ?: 0
+        val destination = routeDiscovery?.route?.firstOrNull() ?: routeDiscovery?.route_back?.lastOrNull() ?: 0
 
         serviceRepository.setTracerouteResponse(
             TracerouteResponse(
                 message = responseText,
                 destinationNodeNum = destination,
                 requestId = requestId,
-                forwardRoute = routeDiscovery?.routeList.orEmpty(),
-                returnRoute = routeDiscovery?.routeBackList.orEmpty(),
+                forwardRoute = routeDiscovery?.route.orEmpty(),
+                returnRoute = routeDiscovery?.route_back.orEmpty(),
                 logUuid = logUuid,
             ),
         )

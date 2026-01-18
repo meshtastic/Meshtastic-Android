@@ -58,7 +58,7 @@ import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SignalInfo
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
+import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
@@ -80,9 +80,12 @@ fun NodeItem(
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
-    val longName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
+    val longName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
-    val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
+    val system =
+        remember(distanceUnits) {
+            Config.DisplayConfig.DisplayUnits.fromValue(distanceUnits) ?: Config.DisplayConfig.DisplayUnits.METRIC
+        }
     val distance =
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
 
@@ -110,7 +113,7 @@ fun NodeItem(
     val unmessageable =
         remember(thatNode) {
             when {
-                thatNode.user.hasIsUnmessagable() -> thatNode.user.isUnmessagable
+                thatNode.user.is_unmessagable != null -> thatNode.user.is_unmessagable
                 else -> thatNode.user.role.isUnmessageableRole()
             }
         }
@@ -126,7 +129,7 @@ fun NodeItem(
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
                     mismatchKey = thatNode.mismatchKey,
-                    publicKey = thatNode.user.publicKey,
+                    publicKey = thatNode.user.public_key,
                     modifier = Modifier.size(32.dp),
                 )
                 Text(
@@ -141,7 +144,7 @@ fun NodeItem(
                     isThisNode = isThisNode,
                     isFavorite = isFavorite,
                     isMuted = isMuted,
-                    isUnmessageable = unmessageable,
+                    isUnmessageable = unmessageable ?: false,
                     connectionState = connectionState,
                 )
             }
@@ -167,12 +170,12 @@ fun NodeItem(
                     }
                     thatNode.validPosition?.let { position ->
                         ElevationInfo(
-                            altitude = position.altitude,
+                            altitude = position.altitude ?: 0,
                             system = system,
                             suffix = stringResource(Res.string.elevation_suffix),
                             contentColor = contentColor,
                         )
-                        val satCount = position.satsInView
+                        val satCount = position.sats_in_view ?: 0
                         if (satCount > 0) {
                             SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
                         }
@@ -209,8 +212,8 @@ fun NodeItem(
                     } else {
                         MaterialTheme.typography.labelSmall
                     }
-                Text(text = thatNode.user.hwModel.name, style = labelStyle)
-                Text(text = thatNode.user.role.name, style = labelStyle)
+                Text(text = thatNode.user.hw_model.name, style = labelStyle)
+                Text(text = thatNode.user.role?.name ?: "", style = labelStyle)
                 Text(text = thatNode.user.id.ifEmpty { "???" }, style = labelStyle)
             }
         }

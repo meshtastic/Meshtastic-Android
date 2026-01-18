@@ -26,8 +26,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.ToRadio
+import org.meshtastic.proto.MqttClientProxyMessage
+import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,9 +48,7 @@ constructor(
         if (enabled && proxyToClientEnabled) {
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
-                    .onEach { message ->
-                        packetHandler.sendToRadio(ToRadio.newBuilder().apply { mqttClientProxyMessage = message })
-                    }
+                    .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
                     .catch { throwable -> serviceRepository.setErrorMessage("MqttClientProxy failed: $throwable") }
                     .launchIn(scope)
         }
@@ -64,14 +62,16 @@ constructor(
         }
     }
 
-    fun handleMqttProxyMessage(message: MeshProtos.MqttClientProxyMessage) {
+    fun handleMqttProxyMessage(message: MqttClientProxyMessage) {
         Logger.d { "[mqttClientProxyMessage] ${message.topic}" }
+        val text = message.text
+        val data = message.data_
         with(message) {
-            when (payloadVariantCase) {
-                MeshProtos.MqttClientProxyMessage.PayloadVariantCase.TEXT -> {
+            when {
+                text != null -> {
                     mqttRepository.publish(topic, text.encodeToByteArray(), retained)
                 }
-                MeshProtos.MqttClientProxyMessage.PayloadVariantCase.DATA -> {
+                data != null -> {
                     mqttRepository.publish(topic, data.toByteArray(), retained)
                 }
                 else -> {}

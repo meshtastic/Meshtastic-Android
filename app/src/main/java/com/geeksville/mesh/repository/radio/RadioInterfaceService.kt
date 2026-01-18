@@ -48,7 +48,8 @@ import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Heartbeat
+import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -140,9 +141,8 @@ constructor(
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             if (radioIf is SerialInterface) {
                 Logger.i { "Sending ToRadio heartbeat" }
-                val heartbeat =
-                    MeshProtos.ToRadio.newBuilder().setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
-                handleSendToRadio(heartbeat.toByteArray())
+                val heartbeat = ToRadio(heartbeat = Heartbeat())
+                handleSendToRadio(heartbeat.encode())
             } else {
                 // For BLE and TCP this will check if the connection is still alive
                 radioIf.keepAlive()

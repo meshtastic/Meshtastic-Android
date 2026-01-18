@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import android.Manifest
@@ -78,9 +77,7 @@ import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
-import org.meshtastic.proto.ConfigProtos.Config.PositionConfig
-import org.meshtastic.proto.config
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.Config
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -96,22 +93,23 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             altitude = node?.position?.altitude ?: 0,
             time = 1, // ignore time for fixed_position
         )
-    val positionConfig = state.radioConfig.position
+    val positionConfig = state.radioConfig.position ?: Config.PositionConfig()
     val sanitizedPositionConfig =
         remember(positionConfig) {
             val positionItems = IntervalConfiguration.POSITION.allowedIntervals
             val smartBroadcastItems = IntervalConfiguration.SMART_BROADCAST_MINIMUM.allowedIntervals
-            positionConfig.copy {
-                if (FixedUpdateIntervals.fromValue(positionBroadcastSecs.toLong()) == null) {
-                    positionBroadcastSecs = positionItems.first().value.toInt()
-                }
-                if (FixedUpdateIntervals.fromValue(broadcastSmartMinimumIntervalSecs.toLong()) == null) {
-                    broadcastSmartMinimumIntervalSecs = smartBroadcastItems.first().value.toInt()
-                }
-                if (FixedUpdateIntervals.fromValue(gpsUpdateInterval.toLong()) == null) {
-                    gpsUpdateInterval = positionItems.first().value.toInt()
-                }
+            var updated = positionConfig
+            if (FixedUpdateIntervals.fromValue((updated.position_broadcast_secs ?: 0).toLong()) == null) {
+                updated = updated.copy(position_broadcast_secs = positionItems.first().value.toInt())
             }
+            if (FixedUpdateIntervals.fromValue((updated.broadcast_smart_minimum_interval_secs ?: 0).toLong()) == null) {
+                updated =
+                    updated.copy(broadcast_smart_minimum_interval_secs = smartBroadcastItems.first().value.toInt())
+            }
+            if (FixedUpdateIntervals.fromValue((updated.gps_update_interval ?: 0).toLong()) == null) {
+                updated = updated.copy(gps_update_interval = positionItems.first().value.toInt())
+            }
+            updated
         }
     val formState = rememberConfigState(initialValue = sanitizedPositionConfig)
     var locationInput by rememberSaveable { mutableStateOf(currentPosition) }
@@ -152,17 +150,17 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         additionalDirtyCheck = { locationInput != currentPosition },
         onDiscard = { locationInput = currentPosition },
         onSave = {
-            if (formState.value.fixedPosition) {
+            if (formState.value.fixed_position) {
                 if (locationInput != currentPosition) {
                     viewModel.setFixedPosition(locationInput)
                 }
             } else {
-                if (positionConfig.fixedPosition) {
+                if (positionConfig.fixed_position) {
                     // fixed position changed from enabled to disabled
                     viewModel.removeFixedPosition()
                 }
             }
-            val config = config { position = it }
+            val config = Config(position = it)
             viewModel.setConfig(config)
         },
     ) {
@@ -175,20 +173,21 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     enabled = state.connected,
                     items = items.map { it to it.toDisplayString() },
                     selectedItem =
-                    FixedUpdateIntervals.fromValue(formState.value.positionBroadcastSecs.toLong()) ?: items.first(),
+                    FixedUpdateIntervals.fromValue((formState.value.position_broadcast_secs ?: 0).toLong())
+                        ?: items.first(),
                     onItemSelected = {
-                        formState.value = formState.value.copy { positionBroadcastSecs = it.value.toInt() }
+                        formState.value = formState.value.copy(position_broadcast_secs = it.value.toInt())
                     },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.smart_position),
-                    checked = formState.value.positionBroadcastSmartEnabled,
+                    checked = formState.value.position_broadcast_smart_enabled ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { positionBroadcastSmartEnabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(position_broadcast_smart_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
-                if (formState.value.positionBroadcastSmartEnabled) {
+                if (formState.value.position_broadcast_smart_enabled ?: false) {
                     HorizontalDivider()
                     val smartItems = remember { IntervalConfiguration.SMART_BROADCAST_MINIMUM.allowedIntervals }
                     DropDownPreference(
@@ -198,22 +197,23 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         enabled = state.connected,
                         items = smartItems.map { it to it.toDisplayString() },
                         selectedItem =
-                        FixedUpdateIntervals.fromValue(formState.value.broadcastSmartMinimumIntervalSecs.toLong())
-                            ?: smartItems.first(),
+                        FixedUpdateIntervals.fromValue(
+                            (formState.value.broadcast_smart_minimum_interval_secs ?: 0).toLong(),
+                        ) ?: smartItems.first(),
                         onItemSelected = {
                             formState.value =
-                                formState.value.copy { broadcastSmartMinimumIntervalSecs = it.value.toInt() }
+                                formState.value.copy(broadcast_smart_minimum_interval_secs = it.value.toInt())
                         },
                     )
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.minimum_distance),
                         summary = stringResource(Res.string.config_position_broadcast_smart_minimum_distance_summary),
-                        value = formState.value.broadcastSmartMinimumDistance,
+                        value = formState.value.broadcast_smart_minimum_distance ?: 0,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = {
-                            formState.value = formState.value.copy { broadcastSmartMinimumDistance = it }
+                            formState.value = formState.value.copy(broadcast_smart_minimum_distance = it)
                         },
                     )
                 }
@@ -223,12 +223,12 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
             TitledCard(title = stringResource(Res.string.device_gps)) {
                 SwitchPreference(
                     title = stringResource(Res.string.fixed_position),
-                    checked = formState.value.fixedPosition,
+                    checked = formState.value.fixed_position ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { fixedPosition = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(fixed_position = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
-                if (formState.value.fixedPosition) {
+                if (formState.value.fixed_position ?: false) {
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.latitude),
@@ -273,12 +273,9 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     DropDownPreference(
                         title = stringResource(Res.string.gps_mode),
                         enabled = state.connected,
-                        items =
-                        PositionConfig.GpsMode.entries
-                            .filter { it != PositionConfig.GpsMode.UNRECOGNIZED }
-                            .map { it to it.name },
-                        selectedItem = formState.value.gpsMode,
-                        onItemSelected = { formState.value = formState.value.copy { gpsMode = it } },
+                        items = Config.PositionConfig.GpsMode.entries.map { it to it.name },
+                        selectedItem = formState.value.gps_mode ?: Config.PositionConfig.GpsMode.DISABLED,
+                        onItemSelected = { formState.value = formState.value.copy(gps_mode = it) },
                     )
                     HorizontalDivider()
                     val items = remember { IntervalConfiguration.GPS_UPDATE.allowedIntervals }
@@ -288,9 +285,10 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         enabled = state.connected,
                         items = items.map { it to it.toDisplayString() },
                         selectedItem =
-                        FixedUpdateIntervals.fromValue(formState.value.gpsUpdateInterval.toLong()) ?: items.first(),
+                        FixedUpdateIntervals.fromValue((formState.value.gps_update_interval ?: 0).toLong())
+                            ?: items.first(),
                         onItemSelected = {
-                            formState.value = formState.value.copy { gpsUpdateInterval = it.value.toInt() }
+                            formState.value = formState.value.copy(gps_update_interval = it.value.toInt())
                         },
                     )
                 }
@@ -301,16 +299,13 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 BitwisePreference(
                     title = stringResource(Res.string.position_flags),
                     summary = stringResource(Res.string.config_position_flags_summary),
-                    value = formState.value.positionFlags,
+                    value = formState.value.position_flags ?: 0,
                     enabled = state.connected,
                     items =
-                    PositionConfig.PositionFlags.entries
-                        .filter {
-                            it != PositionConfig.PositionFlags.UNSET &&
-                                it != PositionConfig.PositionFlags.UNRECOGNIZED
-                        }
-                        .map { it.number to it.name },
-                    onItemSelected = { formState.value = formState.value.copy { positionFlags = it } },
+                    Config.PositionConfig.PositionFlags.entries
+                        .filter { it != Config.PositionConfig.PositionFlags.UNSET }
+                        .map { it.value to it.name },
+                    onItemSelected = { formState.value = formState.value.copy(position_flags = it) },
                 )
             }
         }
@@ -321,24 +316,24 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     title = stringResource(Res.string.gps_receive_gpio),
                     enabled = state.connected,
                     items = pins,
-                    selectedItem = formState.value.rxGpio,
-                    onItemSelected = { formState.value = formState.value.copy { rxGpio = it } },
+                    selectedItem = formState.value.rx_gpio ?: 0,
+                    onItemSelected = { formState.value = formState.value.copy(rx_gpio = it) },
                 )
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.gps_transmit_gpio),
                     enabled = state.connected,
                     items = pins,
-                    selectedItem = formState.value.txGpio,
-                    onItemSelected = { formState.value = formState.value.copy { txGpio = it } },
+                    selectedItem = formState.value.tx_gpio ?: 0,
+                    onItemSelected = { formState.value = formState.value.copy(tx_gpio = it) },
                 )
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.gps_en_gpio),
                     enabled = state.connected,
                     items = pins,
-                    selectedItem = formState.value.gpsEnGpio,
-                    onItemSelected = { formState.value = formState.value.copy { gpsEnGpio = it } },
+                    selectedItem = formState.value.gps_en_gpio ?: 0,
+                    onItemSelected = { formState.value = formState.value.copy(gps_en_gpio = it) },
                 )
             }
         }

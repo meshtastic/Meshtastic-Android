@@ -293,7 +293,7 @@ constructor(
                 try {
                     val extractingMsg = getString(Res.string.firmware_update_extracting)
                     _state.value = FirmwareUpdateState.Processing(ProgressState(extractingMsg))
-                    val extension = if (currentState.updateMethod is FirmwareUpdateMethod.Ble) ".zip" else ".uf2"
+                    val extension = currentState.updateMethod.extension
                     val extractedFile = fileHandler.extractFirmware(uri, currentState.deviceHardware, extension)
 
                     tempFirmwareFile = extractedFile
@@ -450,7 +450,7 @@ constructor(
         val isBatteryLow = level in 1..MIN_BATTERY_LEVEL
 
         if (isBatteryLow) {
-            val batteryLowMsg = getString(Res.string.firmware_update_battery_low, level)
+            val batteryLowMsg = getString(Res.string.firmware_update_battery_low, level!!)
             _state.value = FirmwareUpdateState.Error(batteryLowMsg)
         }
         return !isBatteryLow
@@ -458,10 +458,10 @@ constructor(
 
     private suspend fun getDeviceHardware(ourNode: MyNodeEntity): DeviceHardware? {
         val nodeInfo = nodeRepository.ourNodeInfo.value
-        val hwModelInt = nodeInfo?.user?.hwModel?.number
+        val hwModelInt = nodeInfo?.user?.hw_model?.value ?: 0
         val target = ourNode.pioEnv
 
-        return if (hwModelInt != null) {
+        return if (hwModelInt != 0) {
             deviceHardwareRepository.getDeviceHardwareByModel(hwModelInt, target).getOrElse {
                 _state.value =
                     FirmwareUpdateState.Error(getString(Res.string.firmware_update_unknown_hardware, hwModelInt))
@@ -493,12 +493,12 @@ private fun FirmwareReleaseRepository.getReleaseFlow(type: FirmwareReleaseType):
     FirmwareReleaseType.LOCAL -> kotlinx.coroutines.flow.flowOf(null)
 }
 
-sealed class FirmwareUpdateMethod(val description: StringResource) {
-    object Usb : FirmwareUpdateMethod(Res.string.firmware_update_method_usb)
+sealed class FirmwareUpdateMethod(val description: StringResource, val extension: String) {
+    object Usb : FirmwareUpdateMethod(Res.string.firmware_update_method_usb, ".uf2")
 
-    object Ble : FirmwareUpdateMethod(Res.string.firmware_update_method_ble)
+    object Ble : FirmwareUpdateMethod(Res.string.firmware_update_method_ble, ".zip")
 
-    object Wifi : FirmwareUpdateMethod(Res.string.firmware_update_method_wifi)
+    object Wifi : FirmwareUpdateMethod(Res.string.firmware_update_method_wifi, ".bin")
 
-    object Unknown : FirmwareUpdateMethod(Res.string.unknown)
+    object Unknown : FirmwareUpdateMethod(Res.string.unknown, "")
 }

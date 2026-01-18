@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.layout.Arrangement
@@ -71,9 +70,8 @@ import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.TelemetryProtos.Telemetry
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.Telemetry
 
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
@@ -86,15 +84,13 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     val processedTelemetries: List<Telemetry> =
         if (state.isFahrenheit) {
             data.map { telemetry ->
-                val temperatureFahrenheit = celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
-                val soilTemperatureFahrenheit = celsiusToFahrenheit(telemetry.environmentMetrics.soilTemperature)
-                telemetry.copy {
-                    environmentMetrics =
-                        telemetry.environmentMetrics.copy {
-                            temperature = temperatureFahrenheit
-                            soilTemperature = soilTemperatureFahrenheit
-                        }
-                }
+                val env = telemetry.environment_metrics ?: EnvironmentMetrics()
+                val temperatureFahrenheit = celsiusToFahrenheit(env.temperature ?: 0f)
+                val soilTemperatureFahrenheit = celsiusToFahrenheit(env.soil_temperature ?: 0f)
+                telemetry.copy(
+                    environment_metrics =
+                    env.copy(temperature = temperatureFahrenheit, soil_temperature = soilTemperatureFahrenheit),
+                )
             }
         } else {
             data
@@ -105,7 +101,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -147,23 +143,24 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
 }
 
 @Composable
-private fun TemperatureDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, environmentDisplayFahrenheit: Boolean) {
-    envMetrics.temperature?.let { temperature ->
-        if (!temperature.isNaN()) {
-            val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
-            Text(
-                text = textFormat.format(stringResource(Res.string.temperature), temperature),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-            )
-        }
+private fun TemperatureDisplay(envMetrics: EnvironmentMetrics, environmentDisplayFahrenheit: Boolean) {
+    val temperature = envMetrics.temperature
+    if (temperature != null && !temperature.isNaN()) {
+        val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
+        Text(
+            text = textFormat.format(stringResource(Res.string.temperature), temperature),
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+        )
     }
 }
 
 @Composable
-private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
-    val hasHumidity = envMetrics.relativeHumidity?.let { !it.isNaN() } == true
-    val hasPressure = envMetrics.barometricPressure?.let { !it.isNaN() && it > 0 } == true
+private fun HumidityAndBarometricPressureDisplay(envMetrics: EnvironmentMetrics) {
+    val humidityValue = envMetrics.relative_humidity ?: Float.NaN
+    val pressureValue = envMetrics.barometric_pressure ?: Float.NaN
+    val hasHumidity = !humidityValue.isNaN()
+    val hasPressure = !pressureValue.isNaN() && pressureValue > 0
 
     if (hasHumidity || hasPressure) {
         Row(
@@ -171,18 +168,16 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.Env
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             if (hasHumidity) {
-                val humidity = envMetrics.relativeHumidity!!
                 Text(
-                    text = "%s %.2f%%".format(stringResource(Res.string.humidity), humidity),
+                    text = "%s %.2f%%".format(stringResource(Res.string.humidity), humidityValue),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     modifier = Modifier.padding(vertical = 0.dp),
                 )
             }
             if (hasPressure) {
-                val pressure = envMetrics.barometricPressure!!
                 Text(
-                    text = "%.2f hPa".format(pressure),
+                    text = "%.2f hPa".format(pressureValue),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     modifier = Modifier.padding(vertical = 0.dp),
@@ -193,50 +188,42 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.Env
 }
 
 @Composable
-private fun SoilMetricsDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, environmentDisplayFahrenheit: Boolean) {
-    if (
-        envMetrics.soilTemperature != null ||
-        (envMetrics.soilMoisture != null && envMetrics.soilMoisture != Int.MIN_VALUE)
-    ) {
+private fun SoilMetricsDisplay(envMetrics: EnvironmentMetrics, environmentDisplayFahrenheit: Boolean) {
+    val soilTemperature = envMetrics.soil_temperature ?: Float.NaN
+    val soilMoistureValue = envMetrics.soil_moisture ?: Int.MIN_VALUE
+    if (!soilTemperature.isNaN() || (soilMoistureValue != Int.MIN_VALUE)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             val soilTemperatureTextFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
             val soilMoistureTextFormat = "%s %d%%"
-            envMetrics.soilMoisture?.let { soilMoistureValue ->
-                if (soilMoistureValue != Int.MIN_VALUE) {
-                    Text(
-                        text =
-                        soilMoistureTextFormat.format(stringResource(Res.string.soil_moisture), soilMoistureValue),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    )
-                }
+            if (soilMoistureValue != Int.MIN_VALUE) {
+                Text(
+                    text = soilMoistureTextFormat.format(stringResource(Res.string.soil_moisture), soilMoistureValue),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                )
             }
-            envMetrics.soilTemperature?.let { soilTemperature ->
-                if (!soilTemperature.isNaN()) {
-                    Text(
-                        text =
-                        soilTemperatureTextFormat.format(
-                            stringResource(Res.string.soil_temperature),
-                            soilTemperature,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    )
-                }
+            if (!soilTemperature.isNaN()) {
+                Text(
+                    text =
+                    soilTemperatureTextFormat.format(stringResource(Res.string.soil_temperature), soilTemperature),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun LuxUVLuxDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
-    val hasLux = envMetrics.lux != null && !envMetrics.lux.isNaN()
-    val hasUvLux = envMetrics.uvLux != null && !envMetrics.uvLux.isNaN()
+private fun LuxUVLuxDisplay(envMetrics: EnvironmentMetrics) {
+    val luxValue = envMetrics.lux ?: Float.NaN
+    val uvLuxValue = envMetrics.uv_lux ?: Float.NaN
+    val hasLux = !luxValue.isNaN()
+    val hasUvLux = !uvLuxValue.isNaN()
 
     if (hasLux || hasUvLux) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (hasLux) {
-                val luxValue = envMetrics.lux!!
                 Text(
                     text = "%s %.0f lx".format(stringResource(Res.string.lux), luxValue),
                     color = MaterialTheme.colorScheme.onSurface,
@@ -244,7 +231,6 @@ private fun LuxUVLuxDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
                 )
             }
             if (hasUvLux) {
-                val uvLuxValue = envMetrics.uvLux!!
                 Text(
                     text = "%s %.0f UVlx".format(stringResource(Res.string.uv_lux), uvLuxValue),
                     color = MaterialTheme.colorScheme.onSurface,
@@ -256,24 +242,24 @@ private fun LuxUVLuxDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
 }
 
 @Composable
-private fun VoltageCurrentDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
-    val hasVoltage = envMetrics.voltage != null && !envMetrics.voltage.isNaN()
-    val hasCurrent = envMetrics.current != null && !envMetrics.current.isNaN()
+private fun VoltageCurrentDisplay(envMetrics: EnvironmentMetrics) {
+    val voltageValue = envMetrics.voltage ?: Float.NaN
+    val currentValue = envMetrics.current ?: Float.NaN
+    val hasVoltage = !voltageValue.isNaN()
+    val hasCurrent = !currentValue.isNaN()
 
     if (hasVoltage || hasCurrent) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (hasVoltage) {
-                val voltage = envMetrics.voltage!!
                 Text(
-                    text = "%s %.2f V".format(stringResource(Res.string.voltage), voltage),
+                    text = "%s %.2f V".format(stringResource(Res.string.voltage), voltageValue),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
             }
             if (hasCurrent) {
-                val current = envMetrics.current!!
                 Text(
-                    text = "%s %.2f mA".format(stringResource(Res.string.current), current),
+                    text = "%s %.2f mA".format(stringResource(Res.string.current), currentValue),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
@@ -283,13 +269,13 @@ private fun VoltageCurrentDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
 }
 
 @Composable
-private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
-    val iaqValue = envMetrics.iaq
-    val gasResistance = envMetrics.gasResistance
+private fun GasCompositionDisplay(envMetrics: EnvironmentMetrics) {
+    val iaqValue = envMetrics.iaq ?: Int.MIN_VALUE
+    val gasResistance = envMetrics.gas_resistance ?: Float.NaN
 
-    if ((iaqValue != null && iaqValue != Int.MIN_VALUE) || (gasResistance?.isFinite() == true)) {
+    if ((iaqValue != Int.MIN_VALUE) || (gasResistance.isFinite())) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            if (iaqValue != null && iaqValue != Int.MIN_VALUE) {
+            if (iaqValue != Int.MIN_VALUE) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = stringResource(Res.string.iaq),
@@ -300,7 +286,7 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
                     IndoorAirQuality(iaq = iaqValue, displayMode = IaqDisplayMode.Dot)
                 }
             }
-            if (gasResistance != null && !gasResistance.isNaN()) {
+            if (!gasResistance.isNaN()) {
                 Text(
                     text = "%s %.2f Ohm".format(stringResource(Res.string.gas_resistance), gasResistance),
                     color = MaterialTheme.colorScheme.onSurface,
@@ -309,47 +295,25 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
             }
         }
     }
-    // These are in a differnt proto ...
-    // envMetrics.co2?.let { co2 ->
-    //         Spacer(modifier = Modifier.height(4.dp))
-    //         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-    //             Text(
-    //                 text = "%s %.0f ppm".format(stringResource(Res.string.co2), co2),
-    //                 color = MaterialTheme.colorScheme.onSurface,
-    //                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-    //             )
-    //         }
-    //     }
-    //     envMetrics.tvoc?.let { tvoc ->
-    //         Spacer(modifier = Modifier.height(4.dp))
-    //         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-    //             Text(
-    //                 text = "%s %.0f ppb".format(stringResource(Res.string.tvoc), tvoc),
-    //                 color = MaterialTheme.colorScheme.onSurface,
-    //                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-    //             )
-    //         }
-    //     }
 }
 
 @Composable
-private fun RadiationDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
-    envMetrics.radiation?.let { radiation ->
-        if (!radiation.isNaN() && radiation > 0f) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(
-                    text = "%s %.2f µR/h".format(stringResource(Res.string.radiation), radiation),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                )
-            }
+private fun RadiationDisplay(envMetrics: EnvironmentMetrics) {
+    val radiation = envMetrics.radiation ?: Float.NaN
+    if (!radiation.isNaN() && radiation > 0f) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                text = "%s %.2f µR/h".format(stringResource(Res.string.radiation), radiation),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            )
         }
     }
 }
 
 @Composable
 private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
-    val envMetrics = telemetry.environmentMetrics
+    val envMetrics = telemetry.environment_metrics ?: EnvironmentMetrics()
     val time = telemetry.time * MS_PER_SEC
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Surface { SelectionContainer { EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit) } }
@@ -358,7 +322,7 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
 
 @Composable
 private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
-    val envMetrics = telemetry.environmentMetrics
+    val envMetrics = telemetry.environment_metrics ?: EnvironmentMetrics()
     val time = telemetry.time * MS_PER_SEC
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 2.dp)) {
         /* Time and Temperature */
@@ -388,27 +352,24 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
 @Preview(showBackground = true)
 @Composable
 private fun PreviewEnvironmentMetricsContent() {
-    // Build a fake EnvironmentMetrics using the generated proto builder APIs
+    // Build a fake EnvironmentMetrics using Wire
     val fakeEnvMetrics =
-        TelemetryProtos.EnvironmentMetrics.newBuilder()
-            .setTemperature(22.5f)
-            .setRelativeHumidity(55.0f)
-            .setBarometricPressure(1013.25f)
-            .setSoilMoisture(33)
-            .setSoilTemperature(18.0f)
-            .setLux(100.0f)
-            .setUvLux(100.0f)
-            .setVoltage(3.7f)
-            .setCurrent(0.12f)
-            .setIaq(100)
-            .setRadiation(0.15f)
-            .setGasResistance(1200.0f)
-            .build()
+        EnvironmentMetrics(
+            temperature = 22.5f,
+            relative_humidity = 55.0f,
+            barometric_pressure = 1013.25f,
+            soil_moisture = 33,
+            soil_temperature = 18.0f,
+            lux = 100.0f,
+            uv_lux = 100.0f,
+            voltage = 3.7f,
+            current = 0.12f,
+            iaq = 100,
+            radiation = 0.15f,
+            gas_resistance = 1200.0f,
+        )
     val fakeTelemetry =
-        TelemetryProtos.Telemetry.newBuilder()
-            .setTime((System.currentTimeMillis() / 1000).toInt())
-            .setEnvironmentMetrics(fakeEnvMetrics)
-            .build()
+        Telemetry(time = (System.currentTimeMillis() / 1000).toInt(), environment_metrics = fakeEnvMetrics)
     MaterialTheme {
         Surface { EnvironmentMetricsContent(telemetry = fakeTelemetry, environmentDisplayFahrenheit = false) }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.model
 
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.feature.node.component.NodeMenuAction
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config
 
 sealed interface NodeDetailAction {
     data class Navigate(val route: Route) : NodeDetailAction
@@ -33,5 +32,5 @@ sealed interface NodeDetailAction {
     data object ShareContact : NodeDetailAction
 
     // Opens the compass sheet scoped to a target node and the user’s preferred units.
-    data class OpenCompass(val node: Node, val displayUnits: DisplayUnits) : NodeDetailAction
+    data class OpenCompass(val node: Node, val displayUnits: Config.DisplayConfig.DisplayUnits) : NodeDetailAction
 }

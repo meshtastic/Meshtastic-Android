@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model.util
 
 import android.net.Uri
@@ -51,7 +50,7 @@ class ChannelSetTest {
         val url = Uri.parse("https://meshtastic.org/e/#CgMSAQESBggBQANIAQ?add=true")
         val cs = url.toChannelSet()
         Assert.assertEquals("Custom", cs.primaryChannel!!.name)
-        Assert.assertFalse(cs.hasLoraConfig())
+        Assert.assertFalse(cs.lora_config != null)
     }
 
     /** properly parse channel config when `?add=true` is in the query parameters */
@@ -60,6 +59,6 @@ class ChannelSetTest {
         val url = Uri.parse("https://meshtastic.org/e/?add=true#CgMSAQESBggBQANIAQ")
         val cs = url.toChannelSet()
         Assert.assertEquals("Custom", cs.primaryChannel!!.name)
-        Assert.assertFalse(cs.hasLoraConfig())
+        Assert.assertFalse(cs.lora_config != null)
     }
 }

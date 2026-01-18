@@ -133,10 +133,8 @@ import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.proto.MeshProtos.Position
-import org.meshtastic.proto.MeshProtos.Waypoint
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.waypoint
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -340,7 +338,7 @@ fun MapView(
     LaunchedEffect(selectedWaypointId, waypoints) {
         if (selectedWaypointId != null && waypoints.containsKey(selectedWaypointId)) {
             waypoints[selectedWaypointId]?.data?.waypoint?.let { pt ->
-                val geoPoint = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
+                val geoPoint = GeoPoint((pt.latitude_i ?: 0) * 1e-7, (pt.longitude_i ?: 0) * 1e-7)
                 map.controller.setCenter(geoPoint)
                 map.controller.setZoom(WAYPOINT_ZOOM)
             }
@@ -411,7 +409,8 @@ fun MapView(
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = mapViewModel.ourNodeInfo.value
-        val displayUnits = mapViewModel.config.display.units
+        val displayUnits =
+            mapViewModel.config.display?.units ?: org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.METRIC
         val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (
@@ -425,9 +424,9 @@ fun MapView(
 
             val (p, u) = node.position to node.user
             val nodePosition = GeoPoint(node.latitude, node.longitude)
-            MarkerWithLabel(mapView = this, label = "${u.shortName} ${formatAgo(p.time)}").apply {
+            MarkerWithLabel(mapView = this, label = "${u.short_name} ${formatAgo(p.time)}").apply {
                 id = u.id
-                title = u.longName
+                title = u.long_name
                 snippet =
                     com.meshtastic.core.strings.getString(
                         Res.string.map_node_popup_details,
@@ -451,7 +450,7 @@ fun MapView(
                 if (!mapFilterStateValue.showPrecisionCircle) {
                     setPrecisionBits(0)
                 } else {
-                    setPrecisionBits(p.precisionBits)
+                    setPrecisionBits(p.precision_bits ?: 0)
                 }
                 setOnLongClickListener {
                     navigateToNodeDetails(node.num)
@@ -469,13 +468,13 @@ fun MapView(
         }
         builder.setNegativeButton(com.meshtastic.core.strings.getString(Res.string.delete_for_me)) { _, _ ->
             Logger.d { "User deleted waypoint ${waypoint.id} for me" }
-            mapViewModel.deleteWaypoint(waypoint.id)
+            mapViewModel.deleteWaypoint(waypoint.id ?: 0)
         }
-        if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
+        if (waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             builder.setPositiveButton(com.meshtastic.core.strings.getString(Res.string.delete_for_everyone)) { _, _ ->
                 Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
-                mapViewModel.sendWaypoint(waypoint.copy { expire = 1 })
-                mapViewModel.deleteWaypoint(waypoint.id)
+                mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
+                mapViewModel.deleteWaypoint(waypoint.id ?: 0)
             }
         }
         val dialog = builder.show()
@@ -499,7 +498,7 @@ fun MapView(
         Logger.d { "marker long pressed id=$id" }
         val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
-        if (waypoint.lockedTo in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
+        if (waypoint.locked_to in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             showEditWaypointDialog = waypoint
         } else {
             showDeleteMarkerDialog(waypoint)
@@ -509,7 +508,7 @@ fun MapView(
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
         com.meshtastic.core.strings.getString(Res.string.you)
     } else {
-        mapViewModel.getUser(id).longName
+        mapViewModel.getUser(id).long_name
     }
 
     @Suppress("MagicNumber")
@@ -517,7 +516,7 @@ fun MapView(
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
             if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
-            val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
+            val lock = if (pt.locked_to != 0) "\uD83D\uDD12" else ""
             val time =
                 DateUtils.formatDateTime(
                     context,
@@ -525,12 +524,12 @@ fun MapView(
                     DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
                 )
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
-            val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
+            val emoji = String(Character.toChars(if ((pt.icon ?: 0) == 0) 128205 else pt.icon ?: 0))
             val now = System.currentTimeMillis()
-            val expireTimeMillis = pt.expire * 1000L
+            val expireTimeMillis = (pt.expire ?: 0) * 1000L
             val expireTimeStr =
                 when {
-                    pt.expire == 0 || pt.expire == Int.MAX_VALUE -> "Never"
+                    (pt.expire ?: 0) == 0 || (pt.expire ?: 0) == Int.MAX_VALUE -> "Never"
                     expireTimeMillis <= now -> "Expired"
                     else ->
                         DateUtils.getRelativeTimeSpanString(
@@ -548,12 +547,12 @@ fun MapView(
                     "[$time] ${pt.description}  " +
                     com.meshtastic.core.strings.getString(Res.string.expires) +
                     ": $expireTimeStr"
-                position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
+                position = GeoPoint((pt.latitude_i ?: 0) * 1e-7, (pt.longitude_i ?: 0) * 1e-7)
                 if (selectedWaypointId == pt.id) {
                     showInfoWindow()
                 }
                 setOnLongClickListener {
-                    showMarkerLongPressDialog(pt.id)
+                    showMarkerLongPressDialog(pt.id ?: 0)
                     true
                 }
             }
@@ -572,10 +571,8 @@ fun MapView(
                 val enabled = isConnected && downloadRegionBoundingBox == null
 
                 if (enabled) {
-                    showEditWaypointDialog = waypoint {
-                        latitudeI = (p.latitude * 1e7).toInt()
-                        longitudeI = (p.longitude * 1e7).toInt()
-                    }
+                    showEditWaypointDialog =
+                        Waypoint(latitude_i = (p.latitude * 1e7).toInt(), longitude_i = (p.longitude * 1e7).toInt())
                 }
                 return true
             }
@@ -911,13 +908,18 @@ fun MapView(
                 Logger.d { "User clicked send waypoint ${waypoint.id}" }
                 showEditWaypointDialog = null
                 mapViewModel.sendWaypoint(
-                    waypoint.copy {
-                        if (id == 0) id = mapViewModel.generatePacketId() ?: return@EditWaypointDialog
-                        if (name == "") name = "Dropped Pin"
-                        if (expire == 0) expire = Int.MAX_VALUE
-                        lockedTo = if (waypoint.lockedTo != 0) mapViewModel.myNodeNum ?: 0 else 0
-                        if (waypoint.icon == 0) icon = 128205
-                    },
+                    waypoint.copy(
+                        id =
+                        if ((waypoint.id ?: 0) == 0) {
+                            mapViewModel.generatePacketId() ?: return@EditWaypointDialog
+                        } else {
+                            waypoint.id
+                        },
+                        name = if (waypoint.name == "") "Dropped Pin" else waypoint.name,
+                        expire = if ((waypoint.expire ?: 0) == 0) Int.MAX_VALUE else waypoint.expire,
+                        locked_to = if ((waypoint.locked_to ?: 0) != 0) mapViewModel.myNodeNum ?: 0 else 0,
+                        icon = if ((waypoint.icon ?: 0) == 0) 128205 else waypoint.icon,
+                    ),
                 )
             },
             onDeleteClicked = { waypoint ->

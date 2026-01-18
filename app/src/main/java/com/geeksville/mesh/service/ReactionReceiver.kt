@@ -28,7 +28,7 @@ import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.PortNum
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -75,7 +75,7 @@ class ReactionReceiver : BroadcastReceiver() {
                         to = toId,
                         channel = channelIndex,
                         bytes = emoji.toByteArray(Charsets.UTF_8),
-                        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                        dataType = PortNum.TEXT_MESSAGE_APP.value,
                         replyId = packetId,
                         wantAck = true,
                         emoji = emoji.codePointAt(0),

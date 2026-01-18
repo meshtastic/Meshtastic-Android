@@ -34,8 +34,8 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
-import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.PortNum
 import javax.inject.Inject
 
 class PacketRepository
@@ -294,7 +294,7 @@ constructor(
         }
 
     private fun org.meshtastic.core.database.dao.PacketDao.getAllWaypointsFlow(): Flow<List<Packet>> =
-        getAllPackets(PortNum.WAYPOINT_APP_VALUE)
+        getAllPackets(PortNum.WAYPOINT_APP.value)
 
     companion object {
         private const val CONTACTS_PAGE_SIZE = 30

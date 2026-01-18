@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -48,18 +47,42 @@ internal fun PowerMetrics(node: Node) {
         remember(node.powerMetrics) {
             buildList {
                 with(node.powerMetrics) {
-                    if (ch1Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_1, "%.2fV".format(ch1Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_1, "%.1fmA".format(ch1Current), Icons.Default.Power))
-                    }
-                    if (ch2Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_2, "%.2fV".format(ch2Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_2, "%.1fmA".format(ch2Current), Icons.Default.Power))
-                    }
-                    if (ch3Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_3, "%.2fV".format(ch3Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_3, "%.1fmA".format(ch3Current), Icons.Default.Power))
-                    }
+                    ch1_voltage
+                        ?.takeIf { !it.isNaN() }
+                        ?.let { v ->
+                            add(VectorMetricInfo(Res.string.channel_1, "%.2fV".format(v), Icons.Default.Bolt))
+                            add(
+                                VectorMetricInfo(
+                                    Res.string.channel_1,
+                                    "%.1fmA".format(ch1_current?.takeIf { !it.isNaN() } ?: 0f),
+                                    Icons.Default.Power,
+                                ),
+                            )
+                        }
+                    ch2_voltage
+                        ?.takeIf { !it.isNaN() }
+                        ?.let { v ->
+                            add(VectorMetricInfo(Res.string.channel_2, "%.2fV".format(v), Icons.Default.Bolt))
+                            add(
+                                VectorMetricInfo(
+                                    Res.string.channel_2,
+                                    "%.1fmA".format(ch2_current?.takeIf { !it.isNaN() } ?: 0f),
+                                    Icons.Default.Power,
+                                ),
+                            )
+                        }
+                    ch3_voltage
+                        ?.takeIf { !it.isNaN() }
+                        ?.let { v ->
+                            add(VectorMetricInfo(Res.string.channel_3, "%.2fV".format(v), Icons.Default.Bolt))
+                            add(
+                                VectorMetricInfo(
+                                    Res.string.channel_3,
+                                    "%.1fmA".format(ch3_current?.takeIf { !it.isNaN() } ?: 0f),
+                                    Icons.Default.Power,
+                                ),
+                            )
+                        }
                 }
             }
         }

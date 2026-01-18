@@ -54,7 +54,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -117,7 +116,7 @@ import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
-import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
+import org.meshtastic.proto.DeviceProfile
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -137,7 +136,7 @@ fun SettingsScreen(
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
-    val destNode by viewModel.destNode.collectAsState()
+    val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
     if (isWaiting) {
@@ -190,7 +189,7 @@ fun SettingsScreen(
                     viewModel.installProfile(it)
                 } else {
                     deviceProfile = it
-                    val nodeName = it.shortName.ifBlank { "node" }
+                    val nodeName = (it.short_name ?: "").ifBlank { "node" }
                     val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
                     val dateStr = dateFormat.format(java.util.Date())
                     val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
@@ -229,9 +228,9 @@ fun SettingsScreen(
                 title = stringResource(Res.string.bottom_nav_settings),
                 subtitle =
                 if (state.isLocal) {
-                    ourNode?.user?.longName
+                    ourNode?.user?.long_name
                 } else {
-                    val remoteName = destNode?.user?.longName ?: ""
+                    val remoteName = destNode?.user?.long_name ?: ""
                     stringResource(Res.string.remotely_administrating, remoteName)
                 },
                 ourNode = ourNode,
@@ -246,7 +245,7 @@ fun SettingsScreen(
         Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp)) {
             RadioConfigItemList(
                 state = state,
-                isManaged = localConfig.security.isManaged,
+                isManaged = localConfig.security?.is_managed ?: false,
                 node = destNode,
                 excludedModulesUnlocked = excludedModulesUnlocked,
                 isOtaCapable = isOtaCapable,
@@ -365,7 +364,7 @@ fun SettingsScreen(
                 )
 
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-                val nodeName = ourNode?.user?.shortName ?: ""
+                val nodeName = ourNode?.user?.short_name ?: ""
 
                 val exportRangeTestLauncher =
                     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {

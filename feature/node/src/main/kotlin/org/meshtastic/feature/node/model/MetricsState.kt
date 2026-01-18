@@ -30,28 +30,29 @@ import org.meshtastic.core.strings.max
 import org.meshtastic.core.strings.one_week
 import org.meshtastic.core.strings.twenty_four_hours
 import org.meshtastic.core.strings.two_weeks
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.FirmwareEdition
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.Telemetry
 import java.util.concurrent.TimeUnit
 
 data class MetricsState(
     val isLocal: Boolean = false,
     val isManaged: Boolean = true,
     val isFahrenheit: Boolean = false,
-    val displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits =
-        ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC,
+    val displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
     val node: Node? = null,
-    val deviceMetrics: List<TelemetryProtos.Telemetry> = emptyList(),
-    val signalMetrics: List<MeshProtos.MeshPacket> = emptyList(),
-    val powerMetrics: List<TelemetryProtos.Telemetry> = emptyList(),
-    val hostMetrics: List<TelemetryProtos.Telemetry> = emptyList(),
+    val deviceMetrics: List<Telemetry> = emptyList(),
+    val signalMetrics: List<MeshPacket> = emptyList(),
+    val powerMetrics: List<Telemetry> = emptyList(),
+    val hostMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshLog> = emptyList(),
-    val positionLogs: List<MeshProtos.Position> = emptyList(),
+    val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
     val isLocalDevice: Boolean = false,
-    val firmwareEdition: MeshProtos.FirmwareEdition? = null,
+    val firmwareEdition: FirmwareEdition? = null,
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
     val paxMetrics: List<MeshLog> = emptyList(),
@@ -72,19 +73,19 @@ data class MetricsState(
 
     fun hasPaxMetrics() = paxMetrics.isNotEmpty()
 
-    fun deviceMetricsFiltered(timeFrame: TimeFrame): List<TelemetryProtos.Telemetry> {
+    fun deviceMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
         val oldestTime = timeFrame.calculateOldestTime()
-        return deviceMetrics.filter { it.time >= oldestTime }
+        return deviceMetrics.filter { (it.time ?: 0) >= oldestTime }
     }
 
-    fun signalMetricsFiltered(timeFrame: TimeFrame): List<MeshProtos.MeshPacket> {
+    fun signalMetricsFiltered(timeFrame: TimeFrame): List<MeshPacket> {
         val oldestTime = timeFrame.calculateOldestTime()
-        return signalMetrics.filter { it.rxTime >= oldestTime }
+        return signalMetrics.filter { (it.rx_time ?: 0) >= oldestTime }
     }
 
-    fun powerMetricsFiltered(timeFrame: TimeFrame): List<TelemetryProtos.Telemetry> {
+    fun powerMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
         val oldestTime = timeFrame.calculateOldestTime()
-        return powerMetrics.filter { it.time >= oldestTime }
+        return powerMetrics.filter { (it.time ?: 0) >= oldestTime }
     }
 
     companion object {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -41,13 +40,12 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
+import org.meshtastic.proto.ModuleConfig
 
 @Composable
 fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val paxcounterConfig = state.moduleConfig.paxcounter
+    val paxcounterConfig = state.moduleConfig.paxcounter ?: ModuleConfig.PaxcounterConfig()
     val formState = rememberConfigState(initialValue = paxcounterConfig)
     val focusManager = LocalFocusManager.current
 
@@ -59,7 +57,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), on
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { paxcounter = it }
+            val config = ModuleConfig(paxcounter = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -67,37 +65,37 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), on
             TitledCard(title = stringResource(Res.string.paxcounter_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.paxcounter_enabled),
-                    checked = formState.value.enabled,
+                    checked = formState.value.enabled ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 val items = remember { IntervalConfiguration.PAX_COUNTER.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.update_interval_seconds),
-                    selectedItem = formState.value.paxcounterUpdateInterval.toLong(),
+                    selectedItem = (formState.value.paxcounter_update_interval ?: 0).toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = {
-                        formState.value = formState.value.copy { paxcounterUpdateInterval = it.toInt() }
+                        formState.value = formState.value.copy(paxcounter_update_interval = it.toInt())
                     },
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
                     title = stringResource(Res.string.wifi_rssi_threshold_defaults_to_80),
-                    value = formState.value.wifiThreshold,
+                    value = formState.value.wifi_threshold ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { wifiThreshold = it } },
+                    onValueChanged = { formState.value = formState.value.copy(wifi_threshold = it) },
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
                     title = stringResource(Res.string.ble_rssi_threshold_defaults_to_80),
-                    value = formState.value.bleThreshold,
+                    value = formState.value.ble_threshold ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { bleThreshold = it } },
+                    onValueChanged = { formState.value = formState.value.copy(ble_threshold = it) },
                 )
             }
         }

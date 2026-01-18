@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +26,7 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Position
 import javax.inject.Inject
 
 class TracerouteSnapshotRepository
@@ -37,14 +36,14 @@ constructor(
     private val dispatchers: CoroutineDispatchers,
 ) {
 
-    fun getSnapshotPositions(logUuid: String): Flow<Map<Int, MeshProtos.Position>> = dbManager.currentDb
+    fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>> = dbManager.currentDb
         .flatMapLatest { it.tracerouteNodePositionDao().getByLogUuid(logUuid) }
         .distinctUntilChanged()
         .mapLatest { list -> list.associate { it.nodeNum to it.position } }
         .flowOn(dispatchers.io)
         .conflate()
 
-    suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, MeshProtos.Position>) =
+    suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>) =
         withContext(dispatchers.io) {
             val dao = dbManager.currentDb.value.tracerouteNodePositionDao()
             dao.deleteByLogUuid(logUuid)

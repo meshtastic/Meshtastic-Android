@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import co.touchlab.kermit.Logger
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.HardwareModel
 
 /**
  * Safely extracts the hardware model number from a HardwareModel enum.
@@ -31,8 +30,8 @@ import org.meshtastic.proto.MeshProtos
  * @return The hardware model number, or the fallback value if the enum is unknown
  */
 @Suppress("detekt:SwallowedException")
-fun MeshProtos.HardwareModel.safeNumber(fallbackValue: Int = -1): Int = try {
-    this.number
+fun HardwareModel.safeNumber(fallbackValue: Int = -1): Int = try {
+    this.value
 } catch (e: IllegalArgumentException) {
     Logger.w { "Unknown hardware model enum value: $this, using fallback value: $fallbackValue" }
     fallbackValue

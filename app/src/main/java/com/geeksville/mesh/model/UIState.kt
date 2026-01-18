@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.model
 
 import android.app.Application
@@ -65,9 +64,9 @@ import org.meshtastic.core.strings.client_notification
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.toSharedContact
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.AppOnlyProtos
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
 // Given a human name, strip out the first letter of the first three words and return that as the
@@ -119,11 +118,11 @@ constructor(
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme
 
-    val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmwareEdition }
+    val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
 
-    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = serviceRepository.clientNotification
+    val clientNotification: StateFlow<ClientNotification?> = serviceRepository.clientNotification
 
-    fun clearClientNotification(notification: MeshProtos.ClientNotification) {
+    fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
         meshServiceNotifications.clearClientNotification(notification)
     }
@@ -215,8 +214,8 @@ constructor(
         Logger.d { "ViewModel created" }
     }
 
-    private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
-    val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
+    private val _sharedContactRequested: MutableStateFlow<SharedContact?> = MutableStateFlow(null)
+    val sharedContactRequested: StateFlow<SharedContact?>
         get() = _sharedContactRequested.asStateFlow()
 
     fun setSharedContactRequested(url: Uri, onFailure: () -> Unit) {
@@ -236,8 +235,8 @@ constructor(
     val connectionState
         get() = serviceRepository.connectionState
 
-    private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
-    val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?>
+    private val _requestChannelSet = MutableStateFlow<ChannelSet?>(null)
+    val requestChannelSet: StateFlow<ChannelSet?>
         get() = _requestChannelSet
 
     fun requestChannelUrl(url: Uri, onFailure: () -> Unit) =

@@ -18,8 +18,8 @@ package org.meshtastic.core.service
 
 import android.app.Notification
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Telemetry
 
 const val SERVICE_NOTIFY_ID = 101
 
@@ -29,7 +29,7 @@ interface MeshServiceNotifications {
 
     fun initChannels()
 
-    fun updateServiceStateNotification(summaryString: String?, telemetry: TelemetryProtos.Telemetry?): Notification
+    fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification
 
     suspend fun updateMessageNotification(
         contactKey: String,
@@ -63,11 +63,11 @@ interface MeshServiceNotifications {
 
     fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean)
 
-    fun showClientNotification(clientNotification: MeshProtos.ClientNotification)
+    fun showClientNotification(clientNotification: ClientNotification)
 
     fun cancelMessageNotification(contactKey: String)
 
     fun cancelLowBatteryNotification(node: NodeEntity)
 
-    fun clearClientNotification(notification: MeshProtos.ClientNotification)
+    fun clearClientNotification(notification: ClientNotification)
 }

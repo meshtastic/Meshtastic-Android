@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.node
 
 import androidx.lifecycle.SavedStateHandle
@@ -35,8 +34,8 @@ import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.CustomTileSource
-import org.meshtastic.proto.MeshProtos.Position
-import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Position
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,13 +60,13 @@ constructor(
 
     val positionLogs: StateFlow<List<Position>> =
         meshLogRepository
-            .getMeshPacketsFrom(destNum!!, PortNum.POSITION_APP_VALUE)
+            .getMeshPacketsFrom(destNum!!, PortNum.POSITION_APP.value)
             .map { packets ->
                 packets
                     .mapNotNull { it.toPosition() }
                     .asFlow()
                     .distinctUntilChanged { old, new ->
-                        old.time == new.time || (old.latitudeI == new.latitudeI && old.longitudeI == new.longitudeI)
+                        old.time == new.time || (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
                     }
                     .toList()
             }

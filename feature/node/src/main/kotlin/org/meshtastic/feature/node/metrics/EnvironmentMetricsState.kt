@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.ui.graphics.Color
@@ -29,40 +28,41 @@ import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.core.ui.theme.GraphColors.Yellow
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.Telemetry
 
 @Suppress("MagicNumber")
 enum class Environment(val color: Color) {
     TEMPERATURE(Red) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.temperature
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.temperature
     },
     HUMIDITY(InfantryBlue) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.relativeHumidity
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.relative_humidity
     },
     SOIL_TEMPERATURE(Pink) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.soilTemperature
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.soil_temperature
     },
     SOIL_MOISTURE(Purple) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) =
-            telemetry.environmentMetrics.soilMoisture?.toFloat()
+        override fun getValue(telemetry: Telemetry) =
+            telemetry.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE }?.toFloat()
     },
     BAROMETRIC_PRESSURE(Green) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.barometricPressure
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.barometric_pressure
     },
     GAS_RESISTANCE(Yellow) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.gasResistance
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.gas_resistance
     },
     IAQ(Magenta) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.iaq?.toFloat()
+        override fun getValue(telemetry: Telemetry) =
+            telemetry.environment_metrics?.iaq?.takeIf { it != Int.MIN_VALUE }?.toFloat()
     },
     LUX(LightGreen) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.lux
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.lux
     },
     UV_LUX(Orange) {
-        override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.uvLux
+        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.uv_lux
     }, ;
 
-    abstract fun getValue(telemetry: TelemetryProtos.Telemetry): Float?
+    abstract fun getValue(telemetry: Telemetry): Float?
 }
 
 /**
@@ -73,14 +73,14 @@ enum class Environment(val color: Color) {
  * @param times [Pair] with the oldest and newest times in that order
  */
 data class EnvironmentGraphingData(
-    val metrics: List<TelemetryProtos.Telemetry>,
+    val metrics: List<Telemetry>,
     val shouldPlot: List<Boolean>,
     val leftMinMax: Pair<Float, Float> = Pair(0f, 0f),
     val rightMinMax: Pair<Float, Float> = Pair(0f, 0f),
     val times: Pair<Int, Int> = Pair(0, 0),
 )
 
-data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.Telemetry> = emptyList()) {
+data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emptyList()) {
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
 
     /**
@@ -92,7 +92,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
     @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
     fun environmentMetricsFiltered(timeFrame: TimeFrame, useFahrenheit: Boolean = false): EnvironmentGraphingData {
         val oldestTime = timeFrame.calculateOldestTime()
-        val telemetries = environmentMetrics.filter { it.time >= oldestTime }
+        // Filter out invalid timestamps (0 or null) and check against the timeframe
+        val telemetries = environmentMetrics.filter { it.time > 0 && it.time >= oldestTime }
         val shouldPlot = BooleanArray(Environment.entries.size) { false }
         if (telemetries.isEmpty()) {
             return EnvironmentGraphingData(metrics = telemetries, shouldPlot = shouldPlot.toList())
@@ -103,7 +104,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
         val maxValues = mutableListOf<Float>()
 
         // Temperature
-        val temperatures = telemetries.mapNotNull { it.environmentMetrics.temperature?.takeIf { !it.isNaN() } }
+        val temperatures = telemetries.mapNotNull { it.environment_metrics?.temperature?.takeIf { !it.isNaN() } }
         if (temperatures.isNotEmpty()) {
             var minTempValue = temperatures.minOf { it }
             var maxTempValue = temperatures.maxOf { it }
@@ -117,8 +118,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
         }
 
         // Relative Humidity
-        val humidities =
-            telemetries.mapNotNull { it.environmentMetrics.relativeHumidity?.takeIf { !it.isNaN() && it != 0.0f } }
+        val humidities = telemetries.mapNotNull { it.environment_metrics?.relative_humidity?.takeIf { !it.isNaN() } }
         if (humidities.isNotEmpty()) {
             minValues.add(humidities.minOf { it })
             maxValues.add(humidities.maxOf { it })
@@ -126,7 +126,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
         }
 
         // Soil Temperature
-        val soilTemperatures = telemetries.mapNotNull { it.environmentMetrics.soilTemperature?.takeIf { !it.isNaN() } }
+        val soilTemperatures =
+            telemetries.mapNotNull { it.environment_metrics?.soil_temperature?.takeIf { !it.isNaN() } }
         if (soilTemperatures.isNotEmpty()) {
             var minSoilTemperatureValue = soilTemperatures.minOf { it }
             var maxSoilTemperatureValue = soilTemperatures.maxOf { it }
@@ -141,7 +142,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
 
         // Soil Moisture
         val soilMoistures =
-            telemetries.mapNotNull { it.environmentMetrics.soilMoisture?.takeIf { it != Int.MIN_VALUE } }
+            telemetries.mapNotNull { it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE } }
         if (soilMoistures.isNotEmpty()) {
             minValues.add(soilMoistures.minOf { it.toFloat() })
             maxValues.add(soilMoistures.maxOf { it.toFloat() })
@@ -149,7 +150,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
         }
 
         // IAQ
-        val iaqs = telemetries.mapNotNull { it.environmentMetrics.iaq?.takeIf { it != Int.MIN_VALUE } }
+        val iaqs = telemetries.mapNotNull { it.environment_metrics?.iaq?.takeIf { it != Int.MIN_VALUE } }
         if (iaqs.isNotEmpty()) {
             minValues.add(iaqs.minOf { it.toFloat() })
             maxValues.add(iaqs.maxOf { it.toFloat() })
@@ -157,7 +158,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
         }
 
         // Barometric Pressure
-        val pressures = telemetries.mapNotNull { it.environmentMetrics.barometricPressure?.takeIf { !it.isNaN() } }
+        val pressures = telemetries.mapNotNull { it.environment_metrics?.barometric_pressure?.takeIf { !it.isNaN() } }
         var minPressureValue = 0f
         var maxPressureValue = 0f
         if (pressures.isNotEmpty()) {
@@ -167,7 +168,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
         }
 
         // Lux
-        val luxValues = telemetries.mapNotNull { it.environmentMetrics.lux?.takeIf { !it.isNaN() } }
+        val luxValues = telemetries.mapNotNull { it.environment_metrics?.lux?.takeIf { !it.isNaN() } }
         if (luxValues.isNotEmpty()) {
             minValues.add(luxValues.minOf { it })
             maxValues.add(luxValues.maxOf { it })
@@ -175,7 +176,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
         }
 
         // UVLux
-        val uvLuxValues = telemetries.mapNotNull { it.environmentMetrics.uvLux?.takeIf { !it.isNaN() } }
+        val uvLuxValues = telemetries.mapNotNull { it.environment_metrics?.uv_lux?.takeIf { !it.isNaN() } }
         if (uvLuxValues.isNotEmpty()) {
             minValues.add(uvLuxValues.minOf { it })
             maxValues.add(uvLuxValues.maxOf { it })

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map
 
 import android.os.RemoteException
@@ -44,8 +43,10 @@ import org.meshtastic.core.strings.one_hour
 import org.meshtastic.core.strings.two_days
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.User
+import org.meshtastic.proto.Waypoint
 import java.util.concurrent.TimeUnit
+import org.meshtastic.proto.Position as ProtoPosition
 
 @Suppress("MagicNumber")
 sealed class LastHeardFilter(val seconds: Long, val label: StringResource) {
@@ -90,9 +91,10 @@ abstract class BaseMapViewModel(
             .getWaypoints()
             .mapLatest { list ->
                 list
-                    .associateBy { packet -> packet.data.waypoint!!.id }
+                    .associateBy { packet -> packet.data.waypoint?.id ?: 0 }
                     .filterValues {
-                        it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
+                        val wpt = it.data.waypoint
+                        wpt != null && ((wpt.expire ?: 0) == 0 || (wpt.expire ?: 0) > System.currentTimeMillis() / 1000)
                     }
             }
             .stateInWhileSubscribed(initialValue = emptyMap())
@@ -121,7 +123,7 @@ abstract class BaseMapViewModel(
 
     fun getNodeByNum(nodeNum: Int): Node? = nodeRepository.nodeDBbyNum.value[nodeNum]
 
-    fun getUser(nodeNum: Int): MeshProtos.User = nodeRepository.getUser(nodeNum)
+    fun getUser(nodeNum: Int): User = nodeRepository.getUser(nodeNum)
 
     fun getNodeOrFallback(nodeNum: Int): Node = getNodeByNum(nodeNum) ?: Node(num = nodeNum, user = getUser(nodeNum))
 
@@ -157,13 +159,13 @@ abstract class BaseMapViewModel(
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
 
-    fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
 
         val p = DataPacket(dest, channel ?: 0, wpt)
-        if (wpt.id != 0) sendDataPacket(p)
+        if ((wpt.id ?: 0) != 0) sendDataPacket(p)
     }
 
     private fun sendDataPacket(p: DataPacket) {
@@ -212,7 +214,7 @@ data class TracerouteNodeSelection(
 
 fun BaseMapViewModel.tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
-    tracerouteNodePositions: Map<Int, MeshProtos.Position>,
+    tracerouteNodePositions: Map<Int, ProtoPosition>,
     nodes: List<Node>,
 ): TracerouteNodeSelection {
     val overlayNodeNums = tracerouteOverlay?.relatedNodeNums ?: emptySet()

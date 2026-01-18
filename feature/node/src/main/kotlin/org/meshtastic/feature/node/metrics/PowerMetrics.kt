@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
@@ -75,7 +74,7 @@ import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.GraphUtil.createPath
 import org.meshtastic.feature.node.model.TimeFrame
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.Telemetry
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -103,12 +102,12 @@ private const val VOLTAGE_STICK_TO_ZERO_RANGE = 2f
 private val VOLTAGE_COLOR = Red
 
 fun minMaxGraphVoltage(valueMin: Float, valueMax: Float): Pair<Float, Float> {
-    val valueMin = floor(valueMin)
+    val valueMinFloor = floor(valueMin)
     val min =
-        if (valueMin == 0f || (valueMin >= 0f && valueMin - VOLTAGE_STICK_TO_ZERO_RANGE <= 0f)) {
+        if (valueMinFloor == 0f || (valueMinFloor >= 0f && valueMinFloor - VOLTAGE_STICK_TO_ZERO_RANGE <= 0f)) {
             0f
         } else {
-            valueMin - VOLTAGE_STICK_TO_ZERO_RANGE
+            valueMinFloor - VOLTAGE_STICK_TO_ZERO_RANGE
         }
     val max = ceil(valueMax)
 
@@ -130,7 +129,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -183,15 +182,12 @@ private fun PowerMetricsChart(
     }
 
     val (oldest, newest) =
-        remember(key1 = telemetries) { Pair(telemetries.minBy { it.time }, telemetries.maxBy { it.time }) }
-    val timeDiff = newest.time - oldest.time
+        remember(key1 = telemetries) { Pair(telemetries.minBy { it.time ?: 0 }, telemetries.maxBy { it.time ?: 0 }) }
+    val timeDiff = (newest.time ?: 0) - (oldest.time ?: 0)
 
     val scrollState = rememberScrollState()
     val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by
-        remember(key1 = selectedTime) {
-            mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
-        }
+    val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong())) }
 
     // Calculate visible time range based on scroll position and chart width
     val visibleTimeRange = run {
@@ -201,9 +197,9 @@ private fun PowerMetricsChart(
         val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
         val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
         val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
-        val visibleOldest = oldest.time + (timeDiff * (1f - rightRatio)).toInt()
-        val visibleNewest = oldest.time + (timeDiff * (1f - leftRatio)).toInt()
+        // With reverseScrolling = true, scrolling right shows older data (left side)
+        val visibleOldest = (oldest.time ?: 0) + (timeDiff * (1f - rightRatio)).toInt()
+        val visibleNewest = (oldest.time ?: 0) + (timeDiff * (1f - leftRatio)).toInt()
         visibleOldest to visibleNewest
     }
 
@@ -234,7 +230,12 @@ private fun PowerMetricsChart(
         ) {
             HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor })
 
-            TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())
+            TimeAxisOverlay(
+                modifier.width(dp),
+                oldest = oldest.time ?: 0,
+                newest = newest.time ?: 0,
+                selectedTime.lineInterval(),
+            )
 
             /* Plot */
             Canvas(modifier = modifier.width(dp)) {
@@ -249,7 +250,7 @@ private fun PowerMetricsChart(
                             telemetries = telemetries,
                             index = index,
                             path = path,
-                            oldestTime = oldest.time,
+                            oldestTime = oldest.time ?: 0,
                             timeRange = timeDiff,
                             width = width,
                             timeThreshold = selectedTime.timeThreshold(),
@@ -274,7 +275,7 @@ private fun PowerMetricsChart(
                             telemetries = telemetries,
                             index = index,
                             path = path,
-                            oldestTime = oldest.time,
+                            oldestTime = oldest.time ?: 0,
                             timeRange = timeDiff,
                             width = width,
                             timeThreshold = selectedTime.timeThreshold(),
@@ -309,7 +310,8 @@ private fun PowerMetricsChart(
 
 @Composable
 private fun PowerMetricsCard(telemetry: Telemetry) {
-    val time = telemetry.time * MS_PER_SEC
+    val time = (telemetry.time ?: 0) * MS_PER_SEC
+    val pm = telemetry.power_metrics
     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Surface {
             SelectionContainer {
@@ -324,26 +326,16 @@ private fun PowerMetricsCard(telemetry: Telemetry) {
                             )
                         }
                         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                            if (telemetry.powerMetrics.hasCh1Current() || telemetry.powerMetrics.hasCh1Voltage()) {
-                                PowerChannelColumn(
-                                    Res.string.channel_1,
-                                    telemetry.powerMetrics.ch1Voltage,
-                                    telemetry.powerMetrics.ch1Current,
-                                )
-                            }
-                            if (telemetry.powerMetrics.hasCh2Current() || telemetry.powerMetrics.hasCh2Voltage()) {
-                                PowerChannelColumn(
-                                    Res.string.channel_2,
-                                    telemetry.powerMetrics.ch2Voltage,
-                                    telemetry.powerMetrics.ch2Current,
-                                )
-                            }
-                            if (telemetry.powerMetrics.hasCh3Current() || telemetry.powerMetrics.hasCh3Voltage()) {
-                                PowerChannelColumn(
-                                    Res.string.channel_3,
-                                    telemetry.powerMetrics.ch3Voltage,
-                                    telemetry.powerMetrics.ch3Current,
-                                )
+                            if (pm != null) {
+                                if ((pm.ch1_current ?: 0f) != 0f || (pm.ch1_voltage ?: 0f) != 0f) {
+                                    PowerChannelColumn(Res.string.channel_1, pm.ch1_voltage ?: 0f, pm.ch1_current ?: 0f)
+                                }
+                                if ((pm.ch2_current ?: 0f) != 0f || (pm.ch2_voltage ?: 0f) != 0f) {
+                                    PowerChannelColumn(Res.string.channel_2, pm.ch2_voltage ?: 0f, pm.ch2_current ?: 0f)
+                                }
+                                if ((pm.ch3_current ?: 0f) != 0f || (pm.ch3_voltage ?: 0f) != 0f) {
+                                    PowerChannelColumn(Res.string.channel_3, pm.ch3_voltage ?: 0f, pm.ch3_current ?: 0f)
+                                }
                             }
                         }
                     }
@@ -375,15 +367,21 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
 }
 
 /** Retrieves the appropriate voltage depending on `channelSelected`. */
-private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
-    PowerChannel.ONE -> telemetry.powerMetrics.ch1Voltage
-    PowerChannel.TWO -> telemetry.powerMetrics.ch2Voltage
-    PowerChannel.THREE -> telemetry.powerMetrics.ch3Voltage
+private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float {
+    val pm = telemetry.power_metrics ?: return 0f
+    return when (channelSelected) {
+        PowerChannel.ONE -> pm.ch1_voltage ?: 0f
+        PowerChannel.TWO -> pm.ch2_voltage ?: 0f
+        PowerChannel.THREE -> pm.ch3_voltage ?: 0f
+    }
 }
 
 /** Retrieves the appropriate current depending on `channelSelected`. */
-private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
-    PowerChannel.ONE -> telemetry.powerMetrics.ch1Current
-    PowerChannel.TWO -> telemetry.powerMetrics.ch2Current
-    PowerChannel.THREE -> telemetry.powerMetrics.ch3Current
+private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float {
+    val pm = telemetry.power_metrics ?: return 0f
+    return when (channelSelected) {
+        PowerChannel.ONE -> pm.ch1_current ?: 0f
+        PowerChannel.TWO -> pm.ch2_current ?: 0f
+        PowerChannel.THREE -> pm.ch3_current ?: 0f
+    }
 }

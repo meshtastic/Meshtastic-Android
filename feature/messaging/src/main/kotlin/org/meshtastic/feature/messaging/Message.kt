@@ -133,7 +133,7 @@ import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.component.RetryConfirmationDialog
-import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.ChannelSet
 import java.nio.charset.StandardCharsets
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
@@ -216,7 +216,7 @@ fun MessageScreen(
         remember(nodeId, channelName, viewModel) {
             when (nodeId) {
                 DataPacket.ID_BROADCAST -> channelName
-                else -> viewModel.getUser(nodeId).longName
+                else -> viewModel.getUser(nodeId).long_name
             }
         }
 
@@ -514,7 +514,7 @@ private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ou
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = stringResource(Res.string.replying_to, replyingToNodeUser?.shortName ?: unknownUserText),
+                    text = stringResource(Res.string.replying_to, replyingToNodeUser?.short_name ?: unknownUserText),
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
@@ -690,7 +690,7 @@ private fun MessageTopBar(
     channelIndex: Int?,
     mismatchKey: Boolean,
     onNavigateBack: () -> Unit,
-    channels: AppOnlyProtos.ChannelSet?,
+    channels: ChannelSet?,
     channelIndexParam: Int?,
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,

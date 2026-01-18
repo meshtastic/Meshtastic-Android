@@ -48,9 +48,9 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig.Role
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.sharedContact
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -77,7 +77,7 @@ constructor(
 
     val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(channelSet {})
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
 
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
@@ -166,9 +166,9 @@ constructor(
         // if the destination is a node, we need to ensure it's a
         // favorite so it does not get removed from the on-device node database.
         if (channel == null) { // no channel specified, so we assume it's a direct message
-            val fwVersion = ourNodeInfo.value?.metadata?.firmwareVersion
+            val fwVersion = ourNodeInfo.value?.metadata?.firmware_version
             val destNode = nodeRepository.getNode(dest)
-            val isClientBase = ourNodeInfo.value?.user?.role == Role.CLIENT_BASE
+            val isClientBase = ourNodeInfo.value?.user?.role == Config.DeviceConfig.Role.CLIENT_BASE
 
             val capabilities = Capabilities(fwVersion)
 
@@ -215,11 +215,8 @@ constructor(
 
     private fun sendSharedContact(node: Node) = viewModelScope.launch {
         try {
-            val contact = sharedContact {
-                nodeNum = node.num
-                user = node.user
-                manuallyVerified = node.manuallyVerified
-            }
+            val contact =
+                SharedContact(node_num = node.num, user = node.user, manually_verified = node.manuallyVerified)
             serviceRepository.onServiceAction(ServiceAction.SendContact(contact = contact))
         } catch (ex: RemoteException) {
             Logger.e(ex) { "Send shared contact error" }

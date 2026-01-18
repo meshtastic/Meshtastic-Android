@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.datastore.di
 
 import android.content.Context
@@ -45,9 +44,9 @@ import org.meshtastic.core.datastore.KEY_THEME
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalModuleConfig
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -103,7 +102,7 @@ object DataStoreModule {
     ): DataStore<LocalConfig> = DataStoreFactory.create(
         serializer = LocalConfigSerializer,
         produceFile = { appContext.dataStoreFile("local_config.pb") },
-        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig.getDefaultInstance() }),
+        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig() }),
         scope = scope,
     )
 
@@ -115,8 +114,7 @@ object DataStoreModule {
     ): DataStore<LocalModuleConfig> = DataStoreFactory.create(
         serializer = ModuleConfigSerializer,
         produceFile = { appContext.dataStoreFile("module_config.pb") },
-        corruptionHandler =
-        ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig.getDefaultInstance() }),
+        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig() }),
         scope = scope,
     )
 
@@ -128,7 +126,7 @@ object DataStoreModule {
     ): DataStore<ChannelSet> = DataStoreFactory.create(
         serializer = ChannelSetSerializer,
         produceFile = { appContext.dataStoreFile("channel_set.pb") },
-        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet.getDefaultInstance() }),
+        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet() }),
         scope = scope,
     )
 }

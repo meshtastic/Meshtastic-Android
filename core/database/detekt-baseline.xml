@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:Node.kt$Node$private fun EnvironmentMetrics.getDisplayStrings(isFahrenheit: Boolean): List&lt;String></ID>
+    <ID>TooGenericExceptionCaught:Converters.kt$Converters$ex: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>

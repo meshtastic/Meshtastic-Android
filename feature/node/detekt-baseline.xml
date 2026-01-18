@@ -1,11 +1,18 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
-    <ID>LongMethod:EnvironmentMetrics.kt$@Composable fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -&gt; Unit)</ID>
+    <ID>ComplexCondition:EnvironmentMetrics.kt$temp != null &amp;&amp; temp != 0f &amp;&amp; rh != null &amp;&amp; rh != 0f</ID>
+    <ID>CyclomaticComplexMethod:CompassViewModel.kt$CompassViewModel$@Suppress("ReturnCount") private fun calculatePositionalAccuracyMeters(): Float?</ID>
+    <ID>CyclomaticComplexMethod:PowerMetrics.kt$@Composable private fun PowerMetricsCard(telemetry: Telemetry)</ID>
+    <ID>CyclomaticComplexMethod:PowerMetrics.kt$@Suppress("LongMethod") @Composable private fun PowerMetricsChart( modifier: Modifier = Modifier, telemetries: List&lt;Telemetry>, selectedTime: TimeFrame, selectedChannel: PowerChannel, )</ID>
+    <ID>CyclomaticComplexMethod:SignalMetrics.kt$@Suppress("LongMethod") @Composable private fun SignalMetricsChart( modifier: Modifier = Modifier, meshPackets: List&lt;MeshPacket>, selectedTime: TimeFrame, promptInfoDialog: () -> Unit, )</ID>
+    <ID>CyclomaticComplexMethod:TracerouteLog.kt$@OptIn(ExperimentalFoundationApi::class) @Suppress("LongMethod") @Composable fun TracerouteLogScreen( modifier: Modifier = Modifier, viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit, onViewOnMap: (requestId: Int, responseLogUuid: String) -> Unit = { _, _ -> }, )</ID>
+    <ID>LongMethod:EnvironmentMetrics.kt$@Composable fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit)</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1000L</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
+    <ID>TooGenericExceptionCaught:PaxMetrics.kt$e: Exception</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
@@ -6,6 +6,5 @@
     <ID>MagicNumber:ChannelSet.kt$960</ID>
     <ID>SwallowedException:ChannelSet.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:ChannelSet.kt$ex: Throwable</ID>
-    <ID>TooManyFunctions:Extensions.kt$org.meshtastic.core.model.util.Extensions.kt</ID>
   </CurrentIssues>
 </SmellBaseline>

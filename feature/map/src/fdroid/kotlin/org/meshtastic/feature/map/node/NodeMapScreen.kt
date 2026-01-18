@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.node
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,7 +38,7 @@ private const val DEG_D = 1e-7
 fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) {
     val density = LocalDensity.current
     val positionLogs by nodeMapViewModel.positionLogs.collectAsStateWithLifecycle()
-    val geoPoints = positionLogs.map { GeoPoint(it.latitudeI * DEG_D, it.longitudeI * DEG_D) }
+    val geoPoints = positionLogs.map { GeoPoint((it.latitude_i ?: 0) * DEG_D, (it.longitude_i ?: 0) * DEG_D) }
     val cameraView = remember { BoundingBox.fromGeoPoints(geoPoints) }
     val mapView =
         rememberMapViewWithLifecycle(

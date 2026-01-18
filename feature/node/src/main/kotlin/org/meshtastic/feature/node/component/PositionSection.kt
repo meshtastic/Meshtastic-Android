@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -59,7 +58,7 @@ import org.meshtastic.core.strings.position
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config
 
 /**
  * Displays node position details, last update time, distance, and related actions like requesting position and
@@ -158,7 +157,7 @@ private fun PositionMap(node: Node, distance: String?) {
 private fun PositionActionButtons(
     node: Node,
     hasValidPosition: Boolean,
-    displayUnits: DisplayUnits,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
     onAction: (NodeDetailAction) -> Unit,
 ) {
     Row(

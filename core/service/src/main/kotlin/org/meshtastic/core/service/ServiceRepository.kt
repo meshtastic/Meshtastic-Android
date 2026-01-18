@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.withTimeoutOrNull
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.MeshPacket
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -83,11 +83,11 @@ class ServiceRepository @Inject constructor() {
         _connectionState.value = connectionState
     }
 
-    private val _clientNotification = MutableStateFlow<MeshProtos.ClientNotification?>(null)
-    val clientNotification: StateFlow<MeshProtos.ClientNotification?>
+    private val _clientNotification = MutableStateFlow<ClientNotification?>(null)
+    val clientNotification: StateFlow<ClientNotification?>
         get() = _clientNotification
 
-    fun setClientNotification(notification: MeshProtos.ClientNotification?) {
+    fun setClientNotification(notification: ClientNotification?) {
         Logger.e { notification?.message.orEmpty() }
 
         _clientNotification.value = notification

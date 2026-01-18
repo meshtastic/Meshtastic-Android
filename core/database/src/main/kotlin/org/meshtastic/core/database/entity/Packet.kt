@@ -27,7 +27,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.getShortDateTime
-import org.meshtastic.proto.MeshProtos.User
+import org.meshtastic.proto.User
 
 data class PacketEntity(
     @Embedded val packet: Packet,

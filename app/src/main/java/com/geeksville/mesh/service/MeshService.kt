@@ -36,7 +36,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
@@ -79,6 +78,8 @@ class MeshService : Service() {
 
     @Inject lateinit var radioConfigRepository: RadioConfigRepository
 
+    @Inject lateinit var meshConfigHandler: MeshConfigHandler
+
     @Inject lateinit var router: MeshRouter
 
     private val serviceJob = Job()
@@ -89,7 +90,7 @@ class MeshService : Service() {
 
     companion object {
         fun actionReceived(portNum: Int): String {
-            val portType = org.meshtastic.proto.Portnums.PortNum.forNumber(portNum)
+            val portType = org.meshtastic.proto.PortNum.fromValue(portNum)
             val portStr = portType?.toString() ?: portNum.toString()
             return com.geeksville.mesh.service.actionReceived(portStr)
         }
@@ -208,7 +209,7 @@ class MeshService : Service() {
             override fun getPacketId(): Int = commandSender.generatePacketId()
 
             override fun setOwner(u: MeshUser) = toRemoteExceptions {
-                router.actionHandler.handleSetOwner(u, myNodeNum)
+                router.actionHandler.handleSetOwner(u.toProto(), myNodeNum)
             }
 
             override fun setRemoteOwner(id: Int, payload: ByteArray) = toRemoteExceptions {
@@ -222,9 +223,17 @@ class MeshService : Service() {
             override fun send(p: DataPacket) = toRemoteExceptions { router.actionHandler.handleSend(p, myNodeNum) }
 
             override fun getConfig(): ByteArray = toRemoteExceptions {
-                runBlocking {
-                    radioConfigRepository.localConfigFlow.first().toByteArray() ?: throw NoDeviceConfigException()
+                if (!meshConfigHandler.hasLoaded) {
+                    kotlinx.coroutines.runBlocking {
+                        try {
+                            kotlinx.coroutines.withTimeout(3000) { meshConfigHandler.loadedFlow.first { it } }
+                        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                            Logger.w { "Timeout waiting for config load in getConfig: ${e.message}" }
+                            error("Configuration not yet loaded from radio")
+                        }
+                    }
                 }
+                meshConfigHandler.localConfigBytes.value
             }
 
             override fun setConfig(payload: ByteArray) = toRemoteExceptions {
@@ -263,11 +272,11 @@ class MeshService : Service() {
                 router.actionHandler.handleGetCannedMessages(id, destNum)
             }
 
-            override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
+            override fun setChannel(payload: ByteArray) = toRemoteExceptions {
                 router.actionHandler.handleSetChannel(payload, myNodeNum)
             }
 
-            override fun setRemoteChannel(id: Int, num: Int, payload: ByteArray?) = toRemoteExceptions {
+            override fun setRemoteChannel(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
                 router.actionHandler.handleSetRemoteChannel(id, num, payload)
             }
 
@@ -284,7 +293,17 @@ class MeshService : Service() {
             }
 
             override fun getChannelSet(): ByteArray = toRemoteExceptions {
-                runBlocking { radioConfigRepository.channelSetFlow.first().toByteArray() }
+                if (!meshConfigHandler.hasLoaded) {
+                    kotlinx.coroutines.runBlocking {
+                        try {
+                            kotlinx.coroutines.withTimeout(3000) { meshConfigHandler.loadedFlow.first { it } }
+                        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                            Logger.w { "Timeout waiting for config load in getChannelSet: ${e.message}" }
+                            error("Channel settings not yet loaded from radio")
+                        }
+                    }
+                }
+                meshConfigHandler.channelSetBytes.value
             }
 
             override fun getNodes(): List<NodeInfo> = nodeManager.getNodes()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Column
@@ -35,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.ProtocolMessageEnum
 
 @Composable
 fun <T : Enum<T>> DropDownPreference(
@@ -49,9 +47,7 @@ fun <T : Enum<T>> DropDownPreference(
     DropDownPreference(
         title = title,
         enabled = enabled,
-        items =
-        selectedItem.declaringJavaClass.enumConstants?.filter { it.name != "UNRECOGNIZED" }?.map { it to it.name }
-            ?: emptyList(),
+        items = selectedItem.declaringJavaClass.enumConstants?.map { it to it.name } ?: emptyList(),
         selectedItem = selectedItem,
         onItemSelected = onItemSelected,
         modifier = modifier,
@@ -72,18 +68,7 @@ fun <T> DropDownPreference(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    val deprecatedItems: List<T> = remember {
-        if (selectedItem is ProtocolMessageEnum) {
-            val enum = (selectedItem as? Enum<*>)?.declaringJavaClass?.enumConstants
-            val descriptor = (selectedItem as ProtocolMessageEnum).descriptorForType
-
-            @Suppress("UNCHECKED_CAST")
-            enum?.filter { entries -> descriptor.values.any { it.name == entries.name && it.options.deprecated } }
-                as? List<T> ?: emptyList() // Safe cast to List<T> or return emptyList if cast fails
-        } else {
-            emptyList()
-        }
-    }
+    val deprecatedItems: List<T> = emptyList() // Simplified for Wire migration
     Column(modifier = modifier.fillMaxWidth().padding(8.dp)) {
         ExposedDropdownMenuBox(
             expanded = expanded,
