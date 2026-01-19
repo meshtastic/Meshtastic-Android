@@ -21,7 +21,6 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import com.meshtastic.core.strings.getString
 import org.junit.Assert
 import org.junit.Rule
@@ -44,8 +43,6 @@ import org.meshtastic.proto.copy
 class ScannedQrCodeDialogTest {
 
     @get:Rule val composeTestRule = createComposeRule()
-
-    private fun getString(id: Int): String = InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
 
     private fun getRandomKey() = Channel.getRandomKey()
 
@@ -138,7 +135,14 @@ class ScannedQrCodeDialogTest {
         }
 
         // Verify onConfirm is called with the correct ChannelSet
-        Assert.assertEquals(incoming, actualChannelSet)
+        // When replacing, certain fields from local config are preserved.
+        val expectedChannelSet = incoming.copy {
+            loraConfig = loraConfig.copy {
+                configOkToMqtt = channels.loraConfig.configOkToMqtt
+                txPower = channels.loraConfig.txPower
+            }
+        }
+        Assert.assertEquals(expectedChannelSet, actualChannelSet)
     }
 
     @Test
