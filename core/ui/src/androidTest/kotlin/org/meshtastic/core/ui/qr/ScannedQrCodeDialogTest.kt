@@ -136,12 +136,14 @@ class ScannedQrCodeDialogTest {
 
         // Verify onConfirm is called with the correct ChannelSet
         // When replacing, certain fields from local config are preserved.
-        val expectedChannelSet = incoming.copy {
-            loraConfig = loraConfig.copy {
-                configOkToMqtt = channels.loraConfig.configOkToMqtt
-                txPower = channels.loraConfig.txPower
+        val expectedChannelSet =
+            incoming.copy {
+                loraConfig =
+                    loraConfig.copy {
+                        configOkToMqtt = channels.loraConfig.configOkToMqtt
+                        txPower = channels.loraConfig.txPower
+                    }
             }
-        }
         Assert.assertEquals(expectedChannelSet, actualChannelSet)
     }
 
