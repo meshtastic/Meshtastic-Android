@@ -32,18 +32,23 @@ configure<ApplicationExtension> {
         // Force this app to use the Google variant of any modules it's using that apply AndroidLibraryConventionPlugin
         missingDimensionStrategy(FlavorDimension.marketplace.name, MeshtasticFlavor.google.name)
     }
+
+    testOptions { unitTests.isReturnDefaultValues = true }
 }
 
 dependencies {
     implementation(projects.core.model)
     implementation(projects.core.proto)
     implementation(projects.core.service)
+    implementation(projects.core.ui)
 
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.material)
 
-    // OSM
-    implementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
