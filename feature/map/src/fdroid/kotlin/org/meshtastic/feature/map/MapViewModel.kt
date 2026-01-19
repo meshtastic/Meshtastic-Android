@@ -65,5 +65,5 @@ constructor(
 
     val applicationId = buildConfigProvider.applicationId
 
-    fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+    override fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 }

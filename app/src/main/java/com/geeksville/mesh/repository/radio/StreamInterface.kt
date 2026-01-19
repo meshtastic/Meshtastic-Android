@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.radio
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP
@@ -31,6 +33,8 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : I
     }
 
     private val debugLineBuf = kotlin.text.StringBuilder()
+
+    private val writeMutex = Mutex()
 
     /** The index of the next byte we are hoping to receive */
     private var ptr = 0
@@ -74,15 +78,19 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) : I
     override fun handleSendToRadio(p: ByteArray) {
         // This method is called from a continuation and it might show up late, so check for uart being null
 
-        val header = ByteArray(4)
-        header[0] = START1
-        header[1] = START2
-        header[2] = (p.size shr 8).toByte()
-        header[3] = (p.size and 0xff).toByte()
+        service.serviceScope.launch {
+            writeMutex.withLock {
+                val header = ByteArray(4)
+                header[0] = START1
+                header[1] = START2
+                header[2] = (p.size shr 8).toByte()
+                header[3] = (p.size and 0xff).toByte()
 
-        sendBytes(header)
-        sendBytes(p)
-        flushBytes()
+                sendBytes(header)
+                sendBytes(p)
+                flushBytes()
+            }
+        }
     }
 
     /** Print device serial debug output somewhere */

@@ -495,7 +495,7 @@ private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState
 private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ourNode: Node?) {
     AnimatedVisibility(visible = originalMessage != null) {
         originalMessage?.let { message ->
-            val isFromLocalUser = message.node.user.id == DataPacket.ID_LOCAL
+            val isFromLocalUser = message.fromLocal
             val replyingToNodeUser = if (isFromLocalUser) ourNode?.user else message.node.user
             val unknownUserText = stringResource(Res.string.unknown)
 

@@ -33,6 +33,8 @@ import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.database.entity.ContactSettings
+import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
@@ -41,6 +43,7 @@ import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.channel_name
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.proto.AppOnlyProtos
 import org.meshtastic.proto.channelSet
 import javax.inject.Inject
 import kotlin.collections.map as collectionsMap
@@ -60,6 +63,10 @@ constructor(
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = channelSet {})
 
+    // Combine node info and myId to reduce argument count in subsequent combines
+    private val identityFlow: Flow<Pair<MyNodeEntity?, String?>> =
+        combine(nodeRepository.myNodeInfo, nodeRepository.myId) { info, id -> Pair(info, id) }
+
     /**
      * Non-paginated contact list.
      *
@@ -69,12 +76,13 @@ constructor(
      * @see contactListPaged for the paginated version used in ContactsScreen
      */
     val contactList =
-        combine(
-            nodeRepository.myNodeInfo,
-            packetRepository.getContacts(),
-            channels,
-            packetRepository.getContactSettings(),
-        ) { myNodeInfo, contacts, channelSet, settings ->
+        combine(identityFlow, packetRepository.getContacts(), channels, packetRepository.getContactSettings()) {
+                identity,
+                contacts,
+                channelSet,
+                settings,
+            ->
+            val (myNodeInfo, myId) = identity
             val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList()
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
             val placeholder =
@@ -89,7 +97,7 @@ constructor(
                 val contactKey = packet.contact_key
 
                 // Determine if this is my message (originated on this device)
-                val fromLocal = data.from == DataPacket.ID_LOCAL
+                val fromLocal = data.from == DataPacket.ID_LOCAL || (myId != null && data.from == myId)
                 val toBroadcast = data.to == DataPacket.ID_BROADCAST
 
                 // grab usernames from NodeInfo
@@ -126,21 +134,23 @@ constructor(
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val contactListPaged: Flow<PagingData<Contact>> =
-        combine(nodeRepository.myNodeInfo, channels, packetRepository.getContactSettings()) {
-                myNodeInfo,
-                channelSet,
-                settings,
-            ->
-            Triple(myNodeInfo?.myNodeNum, channelSet, settings)
+        combine(identityFlow, channels, packetRepository.getContactSettings()) { identity, channelSet, settings ->
+            val (myNodeInfo, myId) = identity
+            ContactsPagedParams(myNodeInfo?.myNodeNum, channelSet, settings, myId)
         }
-            .flatMapLatest { (myNodeNum, channelSet, settings) ->
+            .flatMapLatest { params ->
+                val myNodeNum = params.myNodeNum
+                val channelSet = params.channelSet
+                val settings = params.settings
+                val myId = params.myId
+
                 packetRepository.getContactsPaged().map { pagingData ->
                     pagingData.map { packet ->
                         val data = packet.data
                         val contactKey = packet.contact_key
 
                         // Determine if this is my message (originated on this device)
-                        val fromLocal = data.from == DataPacket.ID_LOCAL
+                        val fromLocal = data.from == DataPacket.ID_LOCAL || (myId != null && data.from == myId)
                         val toBroadcast = data.to == DataPacket.ID_BROADCAST
 
                         // grab usernames from NodeInfo
@@ -198,4 +208,11 @@ constructor(
     }
 
     private fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+
+    private data class ContactsPagedParams(
+        val myNodeNum: Int?,
+        val channelSet: AppOnlyProtos.ChannelSet,
+        val settings: Map<String, ContactSettings>,
+        val myId: String?,
+    )
 }

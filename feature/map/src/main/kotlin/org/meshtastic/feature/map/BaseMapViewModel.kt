@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map
 
 import android.os.RemoteException
@@ -79,6 +78,8 @@ abstract class BaseMapViewModel(
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
 
+    val myId = nodeRepository.myId
+
     val nodes: StateFlow<List<Node>> =
         nodeRepository
             .getNodes()
@@ -120,6 +121,8 @@ abstract class BaseMapViewModel(
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     fun getNodeByNum(nodeNum: Int): Node? = nodeRepository.nodeDBbyNum.value[nodeNum]
+
+    open fun getUser(userId: String?): MeshProtos.User = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 
     fun getUser(nodeNum: Int): MeshProtos.User = nodeRepository.getUser(nodeNum)
 
