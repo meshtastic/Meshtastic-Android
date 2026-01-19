@@ -111,7 +111,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: coverage
           slug: meshtastic/Meshtastic-Android
-          files: build/reports/kover/report.xml
+          files: "**/build/reports/kover/report.xml"
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
