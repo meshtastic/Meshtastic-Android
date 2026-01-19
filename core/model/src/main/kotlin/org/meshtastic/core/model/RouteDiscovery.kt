@@ -39,7 +39,9 @@ val MeshProtos.MeshPacket.fullRouteDiscovery: RouteDiscovery?
 
                         val fullRouteBack = listOf(sourceId) + routeBackList + destinationId
                         clearRouteBack()
-                        if (hopStart > 0 && snrBackCount > 0) { // otherwise back route is invalid
+                        // hopStart was not populated prior to 2.3.0. The bitfield was added in 2.5.0 and
+                        // is used to detect versions where hopStart can be trusted to have been set.
+                        if ((hopStart > 0 || hasBitfield()) && snrBackCount > 0) { // otherwise back route is invalid
                             addAllRouteBack(fullRouteBack)
                         }
                     }
