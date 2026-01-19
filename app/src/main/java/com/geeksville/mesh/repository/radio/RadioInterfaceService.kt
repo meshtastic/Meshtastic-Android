@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -225,10 +226,6 @@ constructor(
             }
         }
 
-        if (radioIf is SerialInterface) {
-            keepAlive(System.currentTimeMillis())
-        }
-
         // ignoreException { Logger.d { "FromRadio: ${MeshProtos.FromRadio.parseFrom(p }}" } }
 
         try {
@@ -277,8 +274,22 @@ constructor(
                 }
 
                 radioIf = interfaceFactory.createInterface(address)
+                startHeartbeat()
             }
         }
+    }
+
+    private var heartbeatJob: kotlinx.coroutines.Job? = null
+
+    private fun startHeartbeat() {
+        heartbeatJob?.cancel()
+        heartbeatJob =
+            serviceScope.launch {
+                while (true) {
+                    delay(HEARTBEAT_INTERVAL_MILLIS)
+                    keepAlive()
+                }
+            }
     }
 
     private fun stopInterface() {

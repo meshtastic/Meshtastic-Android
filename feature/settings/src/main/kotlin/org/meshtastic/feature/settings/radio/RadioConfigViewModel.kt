@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio
 
 import android.Manifest
@@ -216,9 +215,10 @@ constructor(
                     requestAction(service, packetId, destNum)
                     requestIds.update { it.apply { add(packetId) } }
                     _radioConfigState.update { state ->
-                        if (state.responseState is ResponseState.Loading) {
-                            val total = maxOf(requestIds.value.size, state.responseState.total)
-                            state.copy(responseState = state.responseState.copy(total = total))
+                        val currentState = state.responseState
+                        if (currentState is ResponseState.Loading) {
+                            val total = requestIds.value.size.coerceAtLeast(1)
+                            state.copy(responseState = currentState.copy(total = total))
                         } else {
                             state.copy(
                                 route = "", // setter (response is PortNum.ROUTING_APP)
@@ -233,7 +233,17 @@ constructor(
         }
 
     fun setOwner(user: MeshProtos.User) {
-        setRemoteOwner(destNode.value?.num ?: return, user)
+        val targetNode = destNode.value ?: return
+        // Ensure we are setting the owner for the intended target node
+        // This prevents accidentally updating the local node if the user object has the wrong ID
+        val fixedUser =
+            if (targetNode.user.id.isNotEmpty() && targetNode.user.id != user.id) {
+                Logger.w { "Fixing user ID mismatch in setOwner: form=${user.id} target=${targetNode.user.id}" }
+                user.toBuilder().setId(targetNode.user.id).build()
+            } else {
+                user
+            }
+        setRemoteOwner(targetNode.num, fixedUser)
     }
 
     private fun setRemoteOwner(destNum: Int, user: MeshProtos.User) = request(
@@ -604,10 +614,11 @@ constructor(
         mapConsentPrefs.setShouldReportLocation(nodeNum, shouldReportLocation)
     }
 
-    private fun setResponseStateTotal(total: Int) {
+    private fun setResponseStateTotal(newTotal: Int) {
         _radioConfigState.update { state ->
-            if (state.responseState is ResponseState.Loading) {
-                state.copy(responseState = state.responseState.copy(total = total))
+            val currentState = state.responseState
+            if (currentState is ResponseState.Loading) {
+                state.copy(responseState = currentState.copy(total = newTotal))
             } else {
                 state // Return the unchanged state for other response states
             }

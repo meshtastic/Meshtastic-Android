@@ -23,8 +23,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -56,15 +58,6 @@ constructor(
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
 ) {
-    init {
-        // Backfill denormalized name columns for existing nodes on startup
-        processLifecycle.coroutineScope.launch {
-            processLifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                withContext(dispatchers.io) { nodeInfoWriteDataSource.backfillDenormalizedNames() }
-            }
-        }
-    }
-
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?> =
         nodeInfoReadDataSource
@@ -82,22 +75,34 @@ constructor(
     val myId: StateFlow<String?>
         get() = _myId
 
-    fun getNodeDBbyNum() =
-        nodeInfoReadDataSource.nodeDBbyNumFlow().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
-
     // A map from nodeNum to Node
     val nodeDBbyNum: StateFlow<Map<Int, Node>> =
         nodeInfoReadDataSource
             .nodeDBbyNumFlow()
             .mapLatest { map -> map.mapValues { (_, it) -> it.toModel() } }
-            .onEach {
-                val ourNodeInfo = it.values.firstOrNull()
-                _ourNodeInfo.value = ourNodeInfo
-                _myId.value = ourNodeInfo?.user?.id
-            }
             .flowOn(dispatchers.io)
             .conflate()
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
+
+    init {
+        // Backfill denormalized name columns for existing nodes on startup
+        processLifecycle.coroutineScope.launch {
+            processLifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
+                withContext(dispatchers.io) { nodeInfoWriteDataSource.backfillDenormalizedNames() }
+            }
+        }
+
+        // Keep ourNodeInfo and myId correctly updated based on current connection and node DB
+        combine(nodeDBbyNum, myNodeInfo) { db, info -> info?.myNodeNum?.let { db[it] } }
+            .onEach { node ->
+                _ourNodeInfo.value = node
+                _myId.value = node?.user?.id
+            }
+            .launchIn(processLifecycle.coroutineScope)
+    }
+
+    fun getNodeDBbyNum() =
+        nodeInfoReadDataSource.nodeDBbyNumFlow().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
 
     fun getNode(userId: String): Node = nodeDBbyNum.value.values.find { it.user.id == userId }
         ?: Node(num = DataPacket.idToDefaultNodeNum(userId) ?: 0, user = getUser(userId))

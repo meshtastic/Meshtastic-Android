@@ -178,22 +178,6 @@ private fun MapView.updateMarkers(
     nodeClusterer.invalidate()
 }
 
-//    private fun addWeatherLayer() {
-//        if (map.tileProvider.tileSource.name()
-//                .equals(CustomTileSource.getTileSource("ESRI World TOPO").name())
-//        ) {
-//            val layer = TilesOverlay(
-//                MapTileProviderBasic(
-//                    activity,
-//                    CustomTileSource.OPENWEATHER_RADAR
-//                ), context
-//            )
-//            layer.loadingBackgroundColor = Color.TRANSPARENT
-//            layer.loadingLineColor = Color.TRANSPARENT
-//            map.overlayManager.add(layer)
-//        }
-//    }
-
 private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int) -> Unit) =
     object : CacheManager.CacheManagerCallback {
         override fun onTaskComplete() {
@@ -225,7 +209,7 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
  * @param navigateToNodeDetails Callback to navigate to the details screen of a selected node.
  */
 @OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
-@Suppress("CyclomaticComplexMethod", "LongMethod")
+@Suppress("CyclomaticComplexMethod", "LongParameterList", "LongMethod")
 @Composable
 fun MapView(
     mapViewModel: MapViewModel = hiltViewModel(),
@@ -336,6 +320,7 @@ fun MapView(
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
+    val myId by mapViewModel.myId.collectAsStateWithLifecycle()
 
     LaunchedEffect(selectedWaypointId, waypoints) {
         if (selectedWaypointId != null && waypoints.containsKey(selectedWaypointId)) {
@@ -506,7 +491,7 @@ fun MapView(
         }
     }
 
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
+    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL || (myId != null && id == myId)) {
         com.meshtastic.core.strings.getString(Res.string.you)
     } else {
         mapViewModel.getUser(id).longName
