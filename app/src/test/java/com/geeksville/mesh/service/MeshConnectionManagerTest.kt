@@ -17,15 +17,19 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -35,9 +39,9 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.ConfigProtos.Config
+import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
 import org.meshtastic.proto.MeshProtos.ToRadio
-import org.meshtastic.proto.localConfig
 
 class MeshConnectionManagerTest {
 
@@ -56,15 +60,18 @@ class MeshConnectionManagerTest {
     private val nodeManager: MeshNodeManager = mockk(relaxed = true)
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
     private val radioConnectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    private val localConfigFlow = MutableStateFlow(localConfig {})
+    private val localConfigFlow = MutableStateFlow(LocalConfig.getDefaultInstance())
 
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher + SupervisorJob())
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var manager: MeshConnectionManager
 
     @Before
     fun setUp() {
+        mockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
+        coEvery { org.jetbrains.compose.resources.getString(any()) } returns "Mocked String"
+        coEvery { org.jetbrains.compose.resources.getString(any(), *anyVararg()) } returns "Mocked String"
+
         every { radioInterfaceService.connectionState } returns radioConnectionState
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeEntity?>(null)
@@ -86,59 +93,89 @@ class MeshConnectionManagerTest {
                 nodeManager,
                 analytics,
             )
-        manager.start(testScope)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
     }
 
     @Test
-    fun `Connected state triggers broadcast and config start`() = testScope.runTest {
+    fun `Connected state triggers broadcast and config start`() = runTest(testDispatcher) {
+        manager.start(backgroundScope)
         radioConnectionState.value = ConnectionState.Connected
         advanceUntilIdle()
 
-        assert(connectionStateHolder.connectionState.value == ConnectionState.Connecting)
+        assertEquals(
+            "State should be Connecting after radio Connected",
+            ConnectionState.Connecting,
+            connectionStateHolder.connectionState.value,
+        )
         verify { serviceBroadcasts.broadcastConnection() }
         verify { packetHandler.sendToRadio(any<ToRadio.Builder>()) }
     }
 
     @Test
-    fun `Disconnected state stops services`() = testScope.runTest {
+    fun `Disconnected state stops services`() = runTest(testDispatcher) {
+        manager.start(backgroundScope)
+        // Transition to Connected first so that Disconnected actually does something
+        radioConnectionState.value = ConnectionState.Connected
+        advanceUntilIdle()
+
         radioConnectionState.value = ConnectionState.Disconnected
         advanceUntilIdle()
 
-        assert(connectionStateHolder.connectionState.value == ConnectionState.Disconnected)
+        assertEquals(
+            "State should be Disconnected after radio Disconnected",
+            ConnectionState.Disconnected,
+            connectionStateHolder.connectionState.value,
+        )
         verify { packetHandler.stopPacketQueue() }
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
     }
 
     @Test
-    fun `DeviceSleep behavior when power saving is off maps to Disconnected`() = testScope.runTest {
+    fun `DeviceSleep behavior when power saving is off maps to Disconnected`() = runTest(testDispatcher) {
         // Power saving disabled + Role CLIENT
-        localConfigFlow.value = localConfig {
-            power = ConfigProtos.Config.PowerConfig.newBuilder().setIsPowerSaving(false).build()
-            device =
-                ConfigProtos.Config.DeviceConfig.newBuilder()
-                    .setRole(ConfigProtos.Config.DeviceConfig.Role.CLIENT)
-                    .build()
-        }
+        val config =
+            LocalConfig.newBuilder()
+                .apply {
+                    powerBuilder.setIsPowerSaving(false)
+                    deviceBuilder.setRole(Config.DeviceConfig.Role.CLIENT)
+                }
+                .build()
+        every { radioConfigRepository.localConfigFlow } returns flowOf(config)
+
+        manager.start(backgroundScope)
         advanceUntilIdle()
 
         radioConnectionState.value = ConnectionState.DeviceSleep
         advanceUntilIdle()
 
-        assert(connectionStateHolder.connectionState.value == ConnectionState.Disconnected)
+        assertEquals(
+            "State should be Disconnected when power saving is off",
+            ConnectionState.Disconnected,
+            connectionStateHolder.connectionState.value,
+        )
     }
 
     @Test
-    fun `DeviceSleep behavior when power saving is on stays in DeviceSleep`() = testScope.runTest {
+    fun `DeviceSleep behavior when power saving is on stays in DeviceSleep`() = runTest(testDispatcher) {
         // Power saving enabled
-        localConfigFlow.value = localConfig {
-            power = ConfigProtos.Config.PowerConfig.newBuilder().setIsPowerSaving(true).build()
-        }
+        val config = LocalConfig.newBuilder().apply { powerBuilder.setIsPowerSaving(true) }.build()
+        every { radioConfigRepository.localConfigFlow } returns flowOf(config)
+
+        manager.start(backgroundScope)
         advanceUntilIdle()
 
         radioConnectionState.value = ConnectionState.DeviceSleep
         advanceUntilIdle()
 
-        assert(connectionStateHolder.connectionState.value == ConnectionState.DeviceSleep)
+        assertEquals(
+            "State should stay in DeviceSleep when power saving is on",
+            ConnectionState.DeviceSleep,
+            connectionStateHolder.connectionState.value,
+        )
     }
 }
