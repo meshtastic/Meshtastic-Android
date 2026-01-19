@@ -58,6 +58,7 @@ import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.proto.ConfigProtos.Config
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
 import org.meshtastic.proto.Portnums
@@ -240,11 +241,14 @@ constructor(
                     launch {
                         radioConfigRepository.deviceProfileFlow.collect { profile ->
                             val moduleConfig = profile.moduleConfig
+                            val displayUnits = profile.config.display.units
                             _state.update { state ->
                                 state.copy(
                                     isManaged = profile.config.security.isManaged,
-                                    isFahrenheit = moduleConfig.telemetry.environmentDisplayFahrenheit,
-                                    displayUnits = profile.config.display.units,
+                                    isFahrenheit =
+                                    moduleConfig.telemetry.environmentDisplayFahrenheit ||
+                                        (displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
+                                    displayUnits = displayUnits,
                                 )
                             }
                         }

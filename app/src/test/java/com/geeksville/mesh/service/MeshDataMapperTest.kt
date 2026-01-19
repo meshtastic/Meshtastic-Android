@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,81 +17,114 @@
 package com.geeksville.mesh.service
 
 import com.google.protobuf.ByteString
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.user
 
 class MeshDataMapperTest {
 
-    private lateinit var dataMapper: MeshDataMapper
-    private lateinit var nodeManager: MeshNodeManager
+    private val nodeManager: MeshNodeManager = mockk()
+    private lateinit var mapper: MeshDataMapper
 
     @Before
     fun setUp() {
-        nodeManager = MeshNodeManager() // Use internal testing constructor
-        dataMapper = MeshDataMapper(nodeManager)
+        mapper = MeshDataMapper(nodeManager)
     }
 
     @Test
-    fun `toNodeID returns broadcast ID for broadcast num`() {
-        assertEquals(DataPacket.ID_BROADCAST, dataMapper.toNodeID(DataPacket.NODENUM_BROADCAST))
+    fun `toNodeID resolves broadcast correctly`() {
+        assertEquals(DataPacket.ID_BROADCAST, mapper.toNodeID(DataPacket.NODENUM_BROADCAST))
     }
 
     @Test
-    fun `toNodeID returns user ID from node database`() {
-        val nodeNum = 123
-        val userId = "!0000007b" // hex for 123
-        nodeManager.nodeDBbyNodeNum[nodeNum] = NodeEntity(num = nodeNum, user = user { id = userId })
+    fun `toNodeID resolves known node correctly`() {
+        val nodeNum = 1234
+        val nodeId = "!1234abcd"
+        val nodeEntity = mockk<NodeEntity>()
+        every { nodeEntity.user.id } returns nodeId
+        every { nodeManager.nodeDBbyNodeNum[nodeNum] } returns nodeEntity
 
-        assertEquals(userId, dataMapper.toNodeID(nodeNum))
+        assertEquals(nodeId, mapper.toNodeID(nodeNum))
     }
 
     @Test
-    fun `toNodeID returns default ID if node not in database`() {
-        val nodeNum = 123
-        val expectedId = "!0000007b"
-        assertEquals(expectedId, dataMapper.toNodeID(nodeNum))
+    fun `toNodeID resolves unknown node to default ID`() {
+        val nodeNum = 1234
+        every { nodeManager.nodeDBbyNodeNum[nodeNum] } returns null
+
+        assertEquals(DataPacket.nodeNumToDefaultId(nodeNum), mapper.toNodeID(nodeNum))
     }
 
     @Test
-    fun `toDataPacket returns null if no decoded payload`() {
+    fun `toDataPacket returns null when no decoded data`() {
         val packet = MeshProtos.MeshPacket.newBuilder().build()
-        assertNull(dataMapper.toDataPacket(packet))
+        assertNull(mapper.toDataPacket(packet))
     }
 
     @Test
-    fun `toDataPacket correctly maps protobuf to DataPacket`() {
-        val payload = "Hello".encodeToByteArray()
-        val packet =
+    fun `toDataPacket maps basic fields correctly`() {
+        val nodeNum = 1234
+        val nodeId = "!1234abcd"
+        val nodeEntity = mockk<NodeEntity>()
+        every { nodeEntity.user.id } returns nodeId
+        every { nodeManager.nodeDBbyNodeNum[any()] } returns nodeEntity
+
+        val proto =
             MeshProtos.MeshPacket.newBuilder()
                 .apply {
-                    from = 1
-                    to = 2
-                    id = 12345
+                    id = 42
+                    from = nodeNum
+                    to = DataPacket.NODENUM_BROADCAST
                     rxTime = 1600000000
+                    rxSnr = 5.5f
+                    rxRssi = -100
+                    hopLimit = 3
+                    hopStart = 3
                     decoded =
                         MeshProtos.Data.newBuilder()
                             .apply {
-                                portnumValue = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
-                                setPayload(ByteString.copyFrom(payload))
+                                portnumValue = 1 // TEXT_MESSAGE_APP
+                                payload = ByteString.copyFrom("hello".toByteArray())
+                                replyId = 123
                             }
                             .build()
                 }
                 .build()
 
-        val dataPacket = dataMapper.toDataPacket(packet)
+        val result = mapper.toDataPacket(proto)
+        assertNotNull(result)
+        assertEquals(42, result!!.id)
+        assertEquals(nodeId, result.from)
+        assertEquals(DataPacket.ID_BROADCAST, result.to)
+        assertEquals(1600000000000L, result.time)
+        assertEquals(5.5f, result.snr)
+        assertEquals(-100, result.rssi)
+        assertEquals(1, result.dataType)
+        assertEquals("hello", result.bytes?.decodeToString())
+        assertEquals(123, result.replyId)
+    }
 
-        assertEquals("!00000001", dataPacket?.from)
-        assertEquals("!00000002", dataPacket?.to)
-        assertEquals(12345, dataPacket?.id)
-        assertEquals(1600000000000L, dataPacket?.time)
-        assertEquals(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE, dataPacket?.dataType)
-        assertEquals("Hello", dataPacket?.bytes?.decodeToString())
+    @Test
+    fun `toDataPacket maps PKC channel correctly for encrypted packets`() {
+        val proto =
+            MeshProtos.MeshPacket.newBuilder()
+                .apply {
+                    pkiEncrypted = true
+                    channel = 1
+                    decoded = MeshProtos.Data.getDefaultInstance()
+                }
+                .build()
+
+        every { nodeManager.nodeDBbyNodeNum[any()] } returns null
+
+        val result = mapper.toDataPacket(proto)
+        assertEquals(DataPacket.PKC_CHANNEL_INDEX, result!!.channel)
     }
 }

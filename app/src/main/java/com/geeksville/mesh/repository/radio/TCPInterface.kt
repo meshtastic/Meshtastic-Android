@@ -33,7 +33,7 @@ import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 
-class TCPInterface
+open class TCPInterface
 @AssistedInject
 constructor(
     service: RadioInterfaceService,
