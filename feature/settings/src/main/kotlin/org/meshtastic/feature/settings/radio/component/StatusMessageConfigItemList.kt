@@ -39,7 +39,7 @@ import org.meshtastic.proto.moduleConfig
 @Composable
 fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val statusMessageConfig = state.moduleConfig.statusMessage
+    val statusMessageConfig = state.moduleConfig.statusmessage
     val formState = rememberConfigState(initialValue = statusMessageConfig)
     val focusManager = LocalFocusManager.current
 
@@ -51,7 +51,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { statusMessage = it }
+            val config = moduleConfig { statusmessage = it }
             viewModel.setModuleConfig(config)
         },
     ) {
