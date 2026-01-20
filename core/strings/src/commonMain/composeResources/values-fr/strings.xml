@@ -56,7 +56,7 @@
     <string name="routing_error_timeout">Délai dépassé</string>
     <string name="routing_error_no_interface">Pas d'interface</string>
     <string name="routing_error_max_retransmit">Nombre de retransmissions atteint</string>
-    <string name="routing_error_no_channel">Pas de canal</string>
+    <string name="routing_error_no_channel">Pas de canal ou d'autorisation</string>
     <string name="routing_error_too_large">Paquet trop grand</string>
     <string name="routing_error_no_response">Aucune réponse</string>
     <string name="routing_error_bad_request">Mauvaise requête</string>
@@ -1087,4 +1087,8 @@
     <string name="compass_uncertainty_unknown">Surface estimée : précision inconnue</string>
     <string name="mark_as_read">Marquer comme lu</string>
     <string name="now">Maintenant</string>
+    <string name="add_channels_title">Ajouter des canaux</string>
+    <string name="add_channels_description">Les canaux suivants ont été trouvés dans le QR code. Sélectionnez ceux que vous souhaitez ajouter à votre appareil. Les canaux existants seront préservés.</string>
+    <string name="replace_channels_and_settings_title">Remplacer les canaux &amp; les paramètres</string>
+    <string name="replace_channels_and_settings_description">Ce code QR contient une configuration complète. Cela remplacera vos canaux et paramètres radio existants. Tous les canaux existants seront supprimés.</string>
 </resources>

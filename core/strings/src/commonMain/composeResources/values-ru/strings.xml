@@ -45,6 +45,11 @@
     <string name="message_status_sfpp_routing">Маршрутизация по SF++ цепочке…</string>
     <string name="message_status_sfpp_confirmed">Подтверждено в цепочке SF++</string>
     <string name="message_retry_count">Повторные попытки: %1$d / %2$d</string>
+    <string name="retry_dialog_title">Не удалось отправить сообщение</string>
+    <string name="retry_dialog_message">Повторная попытка через %1$d секунд… (попытка %2$d из %3$d)</string>
+    <string name="retry_dialog_reaction_message">Повторная реакция через %1$d секунд… (попытка %2$d из %3$d)</string>
+    <string name="retry_dialog_confirm">Повторить сейчас</string>
+    <string name="retry_dialog_cancel">Отменить повтор</string>
     <string name="routing_error_none">Принято</string>
     <string name="routing_error_no_route">Нет маршрута</string>
     <string name="routing_error_got_nak">Получено отрицательное подтверждение</string>
@@ -66,6 +71,8 @@
     <string name="role_client_desc">Приложение подключено или автономное устройство обмена сообщениями.</string>
     <string name="role_client_mute">Клиент без ретрансляций</string>
     <string name="role_client_mute_desc">Устройство, которое не пересылает пакеты с других устройств.</string>
+    <string name="role_client_base">Базовый клиент</string>
+    <string name="role_client_base_desc">Обрабатывает пакеты от избранных узлов как ROUTER_LATE, а все остальные пакеты - как от CLIENT.</string>
     <string name="role_router">Роутер</string>
     <string name="role_router_desc">Инфраструктурный узел для расширения охвата сети путем передачи сообщений. Видим в списке узлов.</string>
     <string name="role_router_client">Клиент маршрутизатора</string>
@@ -421,6 +428,10 @@
     <string name="view_on_map">Показать на карте</string>
     <string name="traceroute_map_no_data">В этой трассировке маршрута пока нет отображаемых узлов.</string>
     <string name="traceroute_showing_nodes">Показаны %1$d/%2$d узлов</string>
+    <string name="traceroute_duration">Продолжительность: %1$s с</string>
+    <string name="traceroute_time_and_text">%1$s - %2$s</string>
+    <string name="traceroute_route_towards_dest">Проложенный маршрут к месту назначения:\n\n</string>
+    <string name="traceroute_route_back_to_us">Маршрут, ведущий к нам:\n\n</string>
     <string name="twenty_four_hours">24ч</string>
     <string name="forty_eight_hours">48ч</string>
     <string name="one_week">1нед</string>
@@ -1095,4 +1106,8 @@
     <string name="compass_uncertainty_unknown">Предполагаемая площадь: точность неизвестна</string>
     <string name="mark_as_read">Пометить прочитанным</string>
     <string name="now">Только что</string>
+    <string name="add_channels_title">Добавить каналы</string>
+    <string name="add_channels_description">В QR-коде были найдены следующие каналы. Выберите тот, который вы хотели бы добавить на свое устройство. Существующие каналы будут сохранены.</string>
+    <string name="replace_channels_and_settings_title">Заменить каналы и настройки</string>
+    <string name="replace_channels_and_settings_description">Этот QR-код содержит полную конфигурацию. Это заменит ваши существующие каналы и настройки радио. Все существующие каналы будут удалены.</string>
 </resources>

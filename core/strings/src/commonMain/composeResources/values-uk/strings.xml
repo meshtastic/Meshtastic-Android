@@ -519,4 +519,5 @@
     <string name="interval_unset">Скинути</string>
     <!-- Compass -->
     <string name="now">Зараз</string>
+    <string name="add_channels_title">Додайте канали</string>
 </resources>

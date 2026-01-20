@@ -1090,4 +1090,5 @@
     <string name="compass_uncertainty_unknown">Geschätzte Fläche: unbekannte Genauigkeit</string>
     <string name="mark_as_read">Als gelesen markieren</string>
     <string name="now">Jetzt</string>
+    <string name="add_channels_title">Kanäle hinzufügen</string>
 </resources>
