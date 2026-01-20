@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (c) 2025 Meshtastic LLC
   ~
@@ -17,5 +18,4 @@
 
 <resources>
     <string name="app_name">MeshServiceExample</string>
-    <string name="send_hello_message">Send Hello Message</string>
 </resources>
