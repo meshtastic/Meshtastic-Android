@@ -32,12 +32,14 @@ import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ConfigKt
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.ModuleConfigProtos
 import org.meshtastic.proto.Portnums
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.channel
 import org.meshtastic.proto.config
 import org.meshtastic.proto.deviceMetadata
 import org.meshtastic.proto.fromRadio
+import org.meshtastic.proto.moduleConfig
 import org.meshtastic.proto.queueStatus
 import kotlin.random.Random
 
@@ -105,6 +107,15 @@ constructor(
                             settings = Channel.default.settings
                             role = ChannelProtos.Channel.Role.PRIMARY
                         }
+                    }
+                }
+
+            d.getModuleConfigRequest == AdminProtos.AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG ->
+                sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
+                    getModuleConfigResponse = moduleConfig {
+                        statusmessage = ModuleConfigProtos.ModuleConfig.StatusMessageConfig.newBuilder()
+                            .setNodeStatus("Going to the farm.. to grow wheat.")
+                            .build()
                     }
                 }
 
@@ -240,6 +251,29 @@ constructor(
                 .build()
     }
 
+    private fun makeNodeStatus(numIn: Int) = MeshProtos.FromRadio.newBuilder().apply {
+        packet =
+            MeshProtos.MeshPacket.newBuilder()
+                .apply {
+                    id = packetIdSequence.next()
+                    from = numIn
+                    to = 0xffffffff.toInt() // broadcast
+                    rxTime = (System.currentTimeMillis() / 1000).toInt()
+                    rxSnr = 1.5f
+                    decoded =
+                        MeshProtos.Data.newBuilder()
+                            .apply {
+                                portnum = Portnums.PortNum.NODE_STATUS_APP
+                                payload = MeshProtos.StatusMessage.newBuilder()
+                                    .setStatus("Going to the farm.. to grow wheat.")
+                                    .build()
+                                    .toByteString()
+                            }
+                            .build()
+                }
+                .build()
+    }
+
     private fun makeDataPacket(fromIn: Int, toIn: Int, data: MeshProtos.Data.Builder) =
         MeshProtos.FromRadio.newBuilder().apply {
             packet =
@@ -356,6 +390,7 @@ constructor(
                 makeNeighborInfo(MY_NODE + 1),
                 makePosition(MY_NODE + 1),
                 makeTelemetry(MY_NODE + 1),
+                makeNodeStatus(MY_NODE + 1),
             )
 
         packets.forEach { p -> service.handleFromRadio(p.build().toByteArray()) }
