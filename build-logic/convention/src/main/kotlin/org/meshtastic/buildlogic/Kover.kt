@@ -24,6 +24,14 @@ import org.gradle.kotlin.dsl.configure
 fun Project.configureKover() {
     extensions.configure<KoverProjectExtension> {
         reports {
+            total {
+                xml {
+                    onCheck.set(true)
+                }
+                html {
+                    onCheck.set(true)
+                }
+            }
             filters {
                 excludes {
                     // Exclude generated classes

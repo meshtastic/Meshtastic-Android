@@ -54,9 +54,11 @@ import org.meshtastic.core.model.Channel
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.accept
 import org.meshtastic.core.strings.add
+import org.meshtastic.core.strings.add_channels_description
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.new_channel_rcvd
 import org.meshtastic.core.strings.replace
+import org.meshtastic.core.strings.replace_channels_and_settings_description
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.proto.AppOnlyProtos.ChannelSet
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
@@ -124,7 +126,13 @@ fun ScannedQrCodeDialog(
 
     val selectedChannelSet =
         channelSet.copy {
-            val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+            // When adding (not replacing), include all previous channels + selected new channels.
+            // Since 'channelSet.settings' already contains the merged distinct list, we just filter it.
+            val result =
+                settings.filterIndexed { i, _ ->
+                    val isExisting = !shouldReplace && i < channels.settingsCount
+                    isExisting || channelSelections.getOrNull(i) == true
+                }
             settings.clear()
             settings.addAll(result)
         }
@@ -153,30 +161,6 @@ fun ScannedQrCodeDialog(
                 if (current.usePreset != new.usePreset) {
                     changes.add("Use Preset: ${current.usePreset} -> ${new.usePreset}")
                 }
-                if (current.txEnabled != new.txEnabled) {
-                    changes.add("Transmit Enabled: ${current.txEnabled} -> ${new.txEnabled}")
-                }
-                if (current.channelNum != new.channelNum) {
-                    changes.add("Channel Number: ${current.channelNum} -> ${new.channelNum}")
-                }
-                if (current.bandwidth != new.bandwidth) {
-                    changes.add("Bandwidth: ${current.bandwidth} -> ${new.bandwidth}")
-                }
-                if (current.codingRate != new.codingRate) {
-                    changes.add("Coding Rate: ${current.codingRate} -> ${new.codingRate}")
-                }
-                if (current.spreadFactor != new.spreadFactor) {
-                    changes.add("Spread Factor: ${current.spreadFactor} -> ${new.spreadFactor}")
-                }
-                if (current.sx126XRxBoostedGain != new.sx126XRxBoostedGain) {
-                    changes.add("RX Boosted Gain: ${current.sx126XRxBoostedGain} -> ${new.sx126XRxBoostedGain}")
-                }
-                if (current.overrideFrequency != new.overrideFrequency) {
-                    changes.add("Override Frequency: ${current.overrideFrequency} -> ${new.overrideFrequency}")
-                }
-                if (current.ignoreMqtt != new.ignoreMqtt) {
-                    changes.add("Ignore MQTT: ${current.ignoreMqtt} -> ${new.ignoreMqtt}")
-                }
 
                 changes
             } else {
@@ -204,13 +188,30 @@ fun ScannedQrCodeDialog(
                         style = MaterialTheme.typography.titleLarge,
                     )
                 }
+
+                item {
+                    Text(
+                        text =
+                        stringResource(
+                            if (shouldReplace) {
+                                Res.string.replace_channels_and_settings_description
+                            } else {
+                                Res.string.add_channels_description
+                            },
+                        ),
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+
                 itemsIndexed(channelSet.settingsList) { index, channel ->
+                    val isExisting = !shouldReplace && index < channels.settingsCount
                     val channelObj = Channel(channel, channelSet.loraConfig)
                     ChannelSelection(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
-                        enabled = true,
-                        isSelected = channelSelections[index],
+                        enabled = !isExisting,
+                        isSelected = if (isExisting) true else channelSelections[index],
                         onSelected = {
                             if (it || selectedChannelSet.settingsCount > 1) {
                                 channelSelections[index] = it

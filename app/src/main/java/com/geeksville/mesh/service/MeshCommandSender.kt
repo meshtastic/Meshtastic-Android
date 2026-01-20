@@ -99,7 +99,7 @@ constructor(
         sessionPasskey.set(key)
     }
 
-    private fun getHopLimit(): Int = localConfig.value.lora.hopLimit
+    private fun getHopLimit(): Int = localConfig.value.lora.hopLimit.takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
 
     private fun getAdminChannelIndex(toNum: Int): Int {
         val myNum = nodeManager?.myNodeNum ?: return 0
@@ -422,5 +422,7 @@ constructor(
         private const val NODE_ID_PREFIX = "!"
         private const val NODE_ID_START_INDEX = 1
         private const val HEX_RADIX = 16
+
+        private const val DEFAULT_HOP_LIMIT = 3
     }
 }

@@ -20,40 +20,12 @@ package org.meshtastic.buildlogic
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.dokka.gradle.DokkaExtension
-import java.io.File
 import java.net.URI
 
 fun Project.configureDokka() {
     extensions.configure<DokkaExtension> {
         // Use the full project path as the module name to ensure uniqueness
         moduleName.set(project.path.removePrefix(":").replace(":", "-").ifEmpty { project.name })
-
-        // Discover and register Android source sets (main + flavors)
-        val registerAndroidSourceSets = {
-            project.file("src").listFiles()
-                ?.filter { it.isDirectory && !it.name.contains("test", ignoreCase = true) }
-                ?.forEach { sourceDir ->
-                    val sourceSetName = sourceDir.name
-                    val ktDir = File(sourceDir, "kotlin")
-                    val javaDir = File(sourceDir, "java")
-                    if (ktDir.exists() || javaDir.exists()) {
-                        dokkaSourceSets.maybeCreate(sourceSetName).apply {
-                            if (ktDir.exists()) sourceRoots.from(ktDir)
-                            if (javaDir.exists()) sourceRoots.from(javaDir)
-                            suppress.set(false)
-                        }
-                    }
-                }
-        }
-
-        pluginManager.withPlugin("com.android.library") {
-            if (!plugins.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
-                registerAndroidSourceSets()
-            }
-        }
-        pluginManager.withPlugin("com.android.application") {
-            registerAndroidSourceSets()
-        }
 
         dokkaSourceSets.configureEach {
             perPackageOption {

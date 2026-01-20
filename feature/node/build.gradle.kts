@@ -55,6 +55,10 @@ dependencies {
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.maps.compose)
-
-    androidTestImplementation(libs.androidx.test.runner)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.robolectric)
 }
