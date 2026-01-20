@@ -182,6 +182,12 @@
   },
   "pullRequests": [
     {
+      "id": "9363",
+      "title": "Allow using Spreading Factors 5 and 6",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9363",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9350",
       "title": "Delete unused code",
       "page_url": "https://github.com/meshtastic/firmware/pull/9350",
@@ -239,6 +245,12 @@
       "id": "9196",
       "title": "Morse Code Input for Single-Button Devices",
       "page_url": "https://github.com/meshtastic/firmware/pull/9196",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9186",
+      "title": "fix: extend retransmission timeout for ROUTER_LATE broadcast window",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9186",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
