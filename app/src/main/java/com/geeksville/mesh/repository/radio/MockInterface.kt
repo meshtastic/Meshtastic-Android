@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.radio
 
 import co.touchlab.kermit.Logger
@@ -113,9 +112,10 @@ constructor(
             d.getModuleConfigRequest == AdminProtos.AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG ->
                 sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
                     getModuleConfigResponse = moduleConfig {
-                        statusmessage = ModuleConfigProtos.ModuleConfig.StatusMessageConfig.newBuilder()
-                            .setNodeStatus("Going to the farm.. to grow wheat.")
-                            .build()
+                        statusmessage =
+                            ModuleConfigProtos.ModuleConfig.StatusMessageConfig.newBuilder()
+                                .setNodeStatus("Going to the farm.. to grow wheat.")
+                                .build()
                     }
                 }
 
@@ -264,10 +264,11 @@ constructor(
                         MeshProtos.Data.newBuilder()
                             .apply {
                                 portnum = Portnums.PortNum.NODE_STATUS_APP
-                                payload = MeshProtos.StatusMessage.newBuilder()
-                                    .setStatus("Going to the farm.. to grow wheat.")
-                                    .build()
-                                    .toByteString()
+                                payload =
+                                    MeshProtos.StatusMessage.newBuilder()
+                                        .setStatus("Going to the farm.. to grow wheat.")
+                                        .build()
+                                        .toByteString()
                             }
                             .build()
                 }
