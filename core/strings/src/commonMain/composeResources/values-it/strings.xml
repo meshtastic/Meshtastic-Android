@@ -959,4 +959,5 @@
     <string name="interval_always_on">Sempre Attivo</string>
     <!-- Compass -->
     <string name="now">Adesso</string>
+    <string name="add_channels_title">Aggiungi canali</string>
 </resources>

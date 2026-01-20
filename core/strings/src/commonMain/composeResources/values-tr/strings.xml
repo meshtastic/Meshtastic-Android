@@ -582,4 +582,5 @@
     <string name="interval_unset">Ayarlanmamış</string>
     <!-- Compass -->
     <string name="now">Şimdi</string>
+    <string name="add_channels_title">Kanal Ekle</string>
 </resources>

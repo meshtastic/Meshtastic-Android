@@ -456,4 +456,5 @@
     <string name="interval_unset">Ukloni</string>
     <string name="interval_always_on">Увек укључен</string>
     <!-- Compass -->
+    <string name="add_channels_title">Додај канале</string>
 </resources>

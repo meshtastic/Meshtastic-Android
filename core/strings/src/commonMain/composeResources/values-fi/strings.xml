@@ -1091,4 +1091,8 @@
     <string name="compass_uncertainty_unknown">Arvioitu alue: tarkkuus tuntematon</string>
     <string name="mark_as_read">Merkitse luetuksi</string>
     <string name="now">Nyt</string>
+    <string name="add_channels_title">Lisää kanavia</string>
+    <string name="add_channels_description">QR-koodista löydettiin seuraavat kanavat. Valitse ne, jotka haluat lisätä laitteeseesi. Olemassa olevat kanavat säilytetään.</string>
+    <string name="replace_channels_and_settings_title">Korvaa kanavan &amp; asetukset</string>
+    <string name="replace_channels_and_settings_description">Tämä QR-koodi sisältää täydellisen määrityksen. Se KORVAA nykyiset kanava- ja radioasetuksesi. Kaikki olemassa olevat kanavat poistetaan.</string>
 </resources>

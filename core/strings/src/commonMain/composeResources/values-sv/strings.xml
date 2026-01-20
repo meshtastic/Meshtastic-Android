@@ -966,4 +966,5 @@
     <string name="compass_no_magnetometer">Denna enhet har ingen kompass. Riktning okänd.</string>
     <string name="mark_as_read">Markera som läst</string>
     <string name="now">Nu</string>
+    <string name="add_channels_title">Lägg till kanaler</string>
 </resources>
