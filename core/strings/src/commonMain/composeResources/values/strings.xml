@@ -758,6 +758,8 @@
     <string name="user_id">User ID</string>
     <string name="uptime">Uptime</string>
     <string name="load_indexed">Load %1$d</string>
+    <string name="fetching_channel_indexed">Fetching Channel %1$d/%2$d</string>
+    <string name="fetching_config">Fetching %1$s</string>
     <string name="disk_free_indexed">Disk Free %1$d</string>
     <string name="timestamp">Timestamp</string>
     <string name="heading">Heading</string>
