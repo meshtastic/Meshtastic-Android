@@ -43,6 +43,7 @@
     <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
     <string name="message_retry_count">Повторни опити: %1$d / %2$d</string>
+    <string name="retry_dialog_confirm">Опитайте отново сега</string>
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
@@ -181,6 +182,8 @@
     <string name="debug_filter_add">Добавяне на филтър</string>
     <string name="debug_filter_included">Филтъра включва</string>
     <string name="debug_filter_clear">Изчистване на всички филтри</string>
+    <string name="debug_filter_add_custom">Добавяне на персонализиран филтър</string>
+    <string name="debug_filter_preset_title">Предварително зададени филтри</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
@@ -213,6 +216,7 @@
     <string name="delete">Изтриване</string>
     <string name="delete_for_everyone">Изтриване за всички</string>
     <string name="delete_for_me">Изтриване за мен</string>
+    <string name="select">Изберете</string>
     <string name="select_all">Избери всички</string>
     <string name="close_selection">Затваряне на избраните</string>
     <string name="delete_selection">Изтриване на избраните</string>
@@ -352,6 +356,8 @@
     <string name="traceroute_return_route">Обратен маршрут</string>
     <string name="view_on_map">Вижте на картата</string>
     <string name="traceroute_showing_nodes">Показване на %1$d/%2$d възела</string>
+    <string name="traceroute_duration">Продължителност: %1$s s</string>
+    <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="twenty_four_hours">24Ч</string>
     <string name="forty_eight_hours">48Ч</string>
     <string name="one_week">1С</string>
@@ -529,6 +535,7 @@
     <string name="serial_console">Серийна конзола</string>
     <string name="serial_config">Конфигуриране на серийната връзка</string>
     <string name="serial_enabled">Серийната връзка е активирана</string>
+    <string name="echo_enabled">Echo е активирано</string>
     <string name="serial_baud_rate">Серийна скорост на предаване</string>
     <string name="serial_mode">Сериен режим</string>
     <string name="store_forward_enabled"><![CDATA[Съхраняване & препращане е активиран]]></string>
@@ -781,6 +788,10 @@
     <string name="firmware_update_success">Актуализацията е успешна!</string>
     <string name="firmware_update_done">Готово</string>
     <string name="firmware_update_starting_dfu">Стартиране на DFU...</string>
+    <string name="firmware_update_updating">Актуализиране... %1$s</string>
+    <string name="firmware_update_enabling_dfu">Активиране на режим DFU...</string>
+    <string name="firmware_update_validating">Валидиране на фърмуера...</string>
+    <string name="firmware_update_disconnecting">Прекъсване...</string>
     <string name="firmware_update_unknown_hardware">Неизвестен модел хардуер: %1$d</string>
     <string name="firmware_update_invalid_address">Свързаното устройство не е валидно BLE устройство или адресът е неизвестен (%1$s).</string>
     <string name="firmware_update_no_device">Няма свързано устройство</string>
@@ -793,6 +804,8 @@
     <string name="firmware_update_almost_there">Почти е готово...</string>
     <string name="firmware_update_taking_a_while">Това може да отнеме минута...</string>
     <string name="firmware_update_select_file">Изберете локален файл</string>
+    <string name="firmware_update_local_file">Локален файл</string>
+    <string name="firmware_update_source_local">Източник: Локален файл</string>
     <string name="firmware_update_disclaimer_title">Предупреждение за актуализация</string>
     <string name="firmware_update_disclaimer_text">Ще инсталирате нов фърмуер на устройството си. Този процес носи рискове.\n\n• Уверете се, че устройството ви е заредено.\n• Дръжте устройството близо до телефона си.\n• Не затваряйте приложението по време на актуализацията.\n\nУверете се, че сте избрали правилния фърмуер за вашия хардуер.</string>
     <string name="firmware_update_disclaimer_chirpy_says">Чирпи казва, \"Keep your ladder handy!\"</string>
@@ -803,9 +816,23 @@
     <string name="firmware_update_flashing">Програмиране на устройството, моля изчакайте...</string>
     <string name="firmware_update_method_usb">Прехвърляне на файл през USB</string>
     <string name="firmware_update_method_ble">BLE OTA</string>
+    <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_method_detail">Актуализиране чрез %1$s</string>
     <string name="firmware_update_usb_instruction_title">Изберете DFU USB устройство</string>
+    <string name="firmware_update_verifying">Проверка на актуализацията...</string>
+    <string name="firmware_update_target">Цел: %1$s</string>
+    <string name="firmware_update_release_notes">Бележки за изданието</string>
+    <string name="firmware_update_unknown_error">Неизвестна грешка</string>
+    <string name="firmware_update_battery_low">Батерията е твърде изтощена (%1$d%%). Моля, заредете устройството си преди актуализиране.</string>
+    <string name="firmware_update_loading">Зареждане на фърмуера...</string>
+    <string name="firmware_update_checking_version">Проверка на версията на устройството...</string>
+    <string name="firmware_update_starting_ota">Стартиране на OTA актуализация...</string>
+    <string name="firmware_update_uploading">Качване на фърмуера...</string>
+    <string name="firmware_update_uploading_progress">Качване на фърмуера... %1$d%% (%2$s)</string>
+    <string name="firmware_update_rebooting_device">Рестартиране на устройството...</string>
     <string name="firmware_update_channel_name">Актуализация на фърмуера</string>
+    <string name="firmware_update_channel_description">Състояние на актуализацията на фърмуера</string>
+    <string name="firmware_update_erasing">Изтриване...</string>
     <string name="back">Назад</string>
     <string name="interval_unset">Не е зададен</string>
     <string name="interval_always_on">Винаги включен</string>
