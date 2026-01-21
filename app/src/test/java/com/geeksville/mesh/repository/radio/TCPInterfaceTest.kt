@@ -58,10 +58,11 @@ class TCPInterfaceTest {
     @Test
     fun `sendBytes does not crash when outStream is null`() = runTest {
         val address = "192.168.1.1:4403"
-        val tcpInterface = object : TCPInterface(service, dispatchers, address) {
-            override fun connect() {}
-        }
-        
+        val tcpInterface =
+            object : TCPInterface(service, dispatchers, address) {
+                override fun connect() {}
+            }
+
         // This should not throw UninitializedPropertyAccessException
         tcpInterface.sendBytes(byteArrayOf(1, 2, 3))
     }
@@ -69,10 +70,11 @@ class TCPInterfaceTest {
     @Test
     fun `flushBytes does not crash when outStream is null`() = runTest {
         val address = "192.168.1.1:4403"
-        val tcpInterface = object : TCPInterface(service, dispatchers, address) {
-            override fun connect() {}
-        }
-        
+        val tcpInterface =
+            object : TCPInterface(service, dispatchers, address) {
+                override fun connect() {}
+            }
+
         // This should not throw UninitializedPropertyAccessException
         tcpInterface.flushBytes()
     }
