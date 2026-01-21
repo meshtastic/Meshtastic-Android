@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio
 
 import org.meshtastic.feature.settings.util.UiText
@@ -23,7 +22,8 @@ import org.meshtastic.feature.settings.util.UiText
 sealed class ResponseState<out T> {
     data object Empty : ResponseState<Nothing>()
 
-    data class Loading(var total: Int = 1, var completed: Int = 0) : ResponseState<Nothing>()
+    data class Loading(var total: Int = 1, var completed: Int = 0, var status: String? = null) :
+        ResponseState<Nothing>()
 
     data class Success<T>(val result: T) : ResponseState<T>()
 
