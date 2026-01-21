@@ -32,60 +32,6 @@ class FirmwareRetrieverTest {
     private val retriever = FirmwareRetriever(fileHandler)
 
     @Test
-    fun `retrieveEsp32Firmware uses mt-arch-ota bin when Unified OTA is supported and no screen`() = runTest {
-        val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/esp32.zip")
-        val hardware =
-            DeviceHardware(
-                hwModelSlug = "HELTEC_V3",
-                platformioTarget = "heltec-v3",
-                architecture = "esp32-s3",
-                supportsUnifiedOta = true,
-                hasMui = false,
-                hasInkHud = false,
-            )
-        val expectedFile = File("mt-esp32s3-ota.bin")
-
-        coEvery { fileHandler.checkUrlExists(any()) } returns true
-        coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
-
-        val result = retriever.retrieveEsp32Firmware(release, hardware) {}
-
-        assertEquals(expectedFile, result)
-        coVerify {
-            fileHandler.checkUrlExists(
-                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-2.5.0/mt-esp32s3-ota.bin",
-            )
-        }
-    }
-
-    @Test
-    fun `retrieveEsp32Firmware skips mt-arch-ota bin for devices with MUI`() = runTest {
-        val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/esp32.zip")
-        val hardware =
-            DeviceHardware(
-                hwModelSlug = "T_DECK",
-                platformioTarget = "tdeck-tft",
-                architecture = "esp32-s3",
-                supportsUnifiedOta = true,
-                hasMui = true,
-            )
-        val expectedFile = File("firmware-tdeck-tft-2.5.0.bin")
-
-        coEvery { fileHandler.checkUrlExists(any()) } returns true
-        coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
-
-        val result = retriever.retrieveEsp32Firmware(release, hardware) {}
-
-        assertEquals(expectedFile, result)
-        coVerify(exactly = 0) { fileHandler.checkUrlExists(match { it.contains("mt-esp32s3-ota.bin") }) }
-        coVerify {
-            fileHandler.checkUrlExists(
-                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-2.5.0/firmware-tdeck-tft-2.5.0.bin",
-            )
-        }
-    }
-
-    @Test
     fun `retrieveEsp32Firmware falls back to board-specific bin when mt-arch-ota bin is missing`() = runTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/esp32.zip")
         val hardware =
@@ -93,7 +39,6 @@ class FirmwareRetrieverTest {
                 hwModelSlug = "HELTEC_V3",
                 platformioTarget = "heltec-v3",
                 architecture = "esp32-s3",
-                supportsUnifiedOta = true,
                 hasMui = false,
             )
         val expectedFile = File("firmware-heltec-v3-2.5.0.bin")
@@ -122,16 +67,10 @@ class FirmwareRetrieverTest {
     }
 
     @Test
-    fun `retrieveEsp32Firmware uses legacy filename for devices without Unified OTA`() = runTest {
+    fun `retrieveEsp32Firmware uses Unified OTA path for ESP32`() = runTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/esp32.zip")
-        val hardware =
-            DeviceHardware(
-                hwModelSlug = "TLORA_V2",
-                platformioTarget = "tlora-v2",
-                architecture = "esp32",
-                supportsUnifiedOta = false,
-            )
-        val expectedFile = File("firmware-tlora-v2-2.5.0.bin")
+        val hardware = DeviceHardware(hwModelSlug = "TLORA_V2", platformioTarget = "tlora-v2", architecture = "esp32")
+        val expectedFile = File("mt-esp32-ota.bin")
 
         coEvery { fileHandler.checkUrlExists(any()) } returns true
         coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
@@ -141,23 +80,15 @@ class FirmwareRetrieverTest {
         assertEquals(expectedFile, result)
         coVerify {
             fileHandler.checkUrlExists(
-                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-2.5.0/firmware-tlora-v2-2.5.0.bin",
+                "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-2.5.0/mt-esp32-ota.bin",
             )
         }
-        // Verify we DID NOT check for mt-esp32-ota.bin
-        coVerify(exactly = 0) { fileHandler.checkUrlExists(match { it.contains("mt-esp32-ota.bin") }) }
     }
 
     @Test
     fun `retrieveOtaFirmware uses correct zip extension for NRF52`() = runTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/nrf52.zip")
-        val hardware =
-            DeviceHardware(
-                hwModelSlug = "RAK4631",
-                platformioTarget = "rak4631",
-                architecture = "nrf52840",
-                supportsUnifiedOta = false, // OTA via DFU zip
-            )
+        val hardware = DeviceHardware(hwModelSlug = "RAK4631", platformioTarget = "rak4631", architecture = "nrf52840")
         val expectedFile = File("firmware-rak4631-2.5.0-ota.zip")
 
         coEvery { fileHandler.checkUrlExists(any()) } returns true
