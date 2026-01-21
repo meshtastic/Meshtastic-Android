@@ -384,7 +384,7 @@
     <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement.</string>
     <string name="encryption_error">Non-concordance de clé publique</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d'usine ou à une autre action intentionnelle.</string>
-    <string name="exchange_userinfo">Demander les infos du nœud</string>
+    <string name="exchange_userinfo">Informations du nœud</string>
     <string name="meshtastic_new_nodes_notifications">Notifications de nouveaux nœuds</string>
     <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>
@@ -731,6 +731,8 @@
     <string name="user_id">ID utilisateur</string>
     <string name="uptime">Durée de fonctionnement</string>
     <string name="load_indexed">Charge %1$d</string>
+    <string name="fetching_channel_indexed">Récupération du canal %1$d/%2$d</string>
+    <string name="fetching_config">Récupération de %1$s</string>
     <string name="disk_free_indexed">Disque libre %1$d</string>
     <string name="timestamp">Horodatage</string>
     <string name="heading">En-tête</string>
@@ -757,7 +759,7 @@
     <string name="import_known_shared_contact_text">Avertissement : Ce contact est connu, l'importation écrasera les informations précédentes.</string>
     <string name="public_key_changed">Clé publique modifiée</string>
     <string name="import_label">Importer</string>
-    <string name="request">Requêtes</string>
+    <string name="request">Demander :</string>
     <string name="request_neighbor_info">Informations de voisinage (2.7.15+)</string>
     <string name="request_telemetry">Demander la télémétrie</string>
     <string name="request_device_metrics">Métriques de l’appareil</string>
