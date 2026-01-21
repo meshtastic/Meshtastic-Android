@@ -212,7 +212,7 @@ class MeshService : Service() {
             }
 
             override fun setRemoteOwner(id: Int, destNum: Int, payload: ByteArray) = toRemoteExceptions {
-                router.actionHandler.handleSetRemoteOwner(id, destNum, payload, myNodeNum)
+                router.actionHandler.handleSetRemoteOwner(id, destNum, payload)
             }
 
             override fun getRemoteOwner(id: Int, destNum: Int) = toRemoteExceptions {
