@@ -153,11 +153,13 @@ fun NodeItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                MaterialBatteryInfo(
-                    level = thatNode.batteryLevel,
-                    voltage = thatNode.voltage,
-                    contentColor = contentColor,
-                )
+                if (thatNode.batteryLevel > 0 || thatNode.voltage > 0f) {
+                    MaterialBatteryInfo(
+                        level = thatNode.batteryLevel,
+                        voltage = thatNode.voltage,
+                        contentColor = contentColor,
+                    )
+                }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,

@@ -96,6 +96,19 @@ class DeviceHardwareRepositoryTest {
         assertEquals("tdeck-pro", result?.platformioTarget)
     }
 
+    @Test
+    fun `getDeviceHardwareByModel correctly sets isEsp32Arc for ESP32 devices`() = runTest(testDispatcher) {
+        val hwModel = 50
+        val entities = listOf(createEntity(hwModel, "t-deck", "T-Deck").copy(architecture = "esp32-s3"))
+
+        coEvery { localDataSource.getByHwModel(hwModel) } returns entities
+        every { bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset() } returns emptyList()
+
+        val result = repository.getDeviceHardwareByModel(hwModel).getOrNull()
+
+        assertEquals(true, result?.isEsp32Arc)
+    }
+
     private fun createEntity(hwModel: Int, target: String, displayName: String) = DeviceHardwareEntity(
         activelySupported = true,
         architecture = "esp32-s3",
