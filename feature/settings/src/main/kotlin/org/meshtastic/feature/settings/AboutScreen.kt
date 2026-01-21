@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,9 +21,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import co.touchlab.kermit.Logger
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.util.withContext
@@ -49,16 +50,26 @@ fun AboutScreen(onNavigateUp: () -> Unit) {
         },
     ) { paddingValues ->
         val context = LocalContext.current
-        val libraries = Libs.Builder().withContext(context).build()
-        LibrariesContainer(
-            showAuthor = true,
-            showVersion = true,
-            showDescription = true,
-            showLicenseBadges = true,
-            showFundingBadges = true,
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            libraries = libraries,
-        )
+        val libraries = remember {
+            try {
+                Libs.Builder().withContext(context).build()
+            } catch (e: IllegalStateException) {
+                Logger.w("${e.message}")
+                null
+            }
+        }
+
+        if (libraries != null) {
+            LibrariesContainer(
+                showAuthor = true,
+                showVersion = true,
+                showDescription = true,
+                showLicenseBadges = true,
+                showFundingBadges = true,
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                libraries = libraries,
+            )
+        }
     }
 }
 
