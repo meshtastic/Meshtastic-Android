@@ -63,7 +63,12 @@ constructor(
     fun dfuProgressFlow(): Flow<DfuInternalState> = nordicDfuHandler.progressFlow()
 
     private fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
-        radioPrefs.isSerial() -> usbUpdateHandler
+        radioPrefs.isSerial() -> {
+            if (isEsp32Architecture(hardware.architecture)) {
+                error("Serial/USB firmware update not supported for ESP32 devices from the app")
+            }
+            usbUpdateHandler
+        }
         radioPrefs.isBle() -> {
             if (isEsp32Architecture(hardware.architecture)) {
                 esp32OtaUpdateHandler
