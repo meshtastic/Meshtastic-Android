@@ -497,6 +497,7 @@
     <string name="username">Nazwa użytkownika</string>
     <string name="password">Hasło</string>
     <string name="encryption_enabled">Szyfrowanie włączone</string>
+    <string name="neighbor_info_config">Konfiguracja Info o sąsiedzie</string>
     <string name="update_interval_seconds">Częstotliwość aktualizacji (w sekundach)</string>
     <string name="transmit_over_lora">Nadaj przez LoRa</string>
     <string name="network_config">Sieć</string>
@@ -549,6 +550,7 @@
     <string name="secondary">Wtórny</string>
     <string name="scan_qr_code">Skanuj kod QR </string>
     <string name="import_label">Import</string>
+    <string name="request_neighbor_info">Informacje o sąsiadach (2.7.15+)</string>
     <string name="firmware">Oprogramowanie</string>
     <string name="connections">Połączenie</string>
     <string name="map">Mapa Sieci</string>

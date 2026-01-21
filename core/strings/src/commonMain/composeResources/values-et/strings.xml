@@ -1090,4 +1090,8 @@
     <string name="compass_uncertainty_unknown">Hinnanguline piirkond: täpsus teadmata</string>
     <string name="mark_as_read">Märgi loetuks</string>
     <string name="now">Kohe</string>
+    <string name="add_channels_title">Lisa kanaleid</string>
+    <string name="add_channels_description">QR-koodist leiti järgmised kanalid. Valige millised soovite oma seadmesse lisada. Olemasolevad kanalid säilivad.</string>
+    <string name="replace_channels_and_settings_title">Kanali &amp; sätete asendamine</string>
+    <string name="replace_channels_and_settings_description">See QR-kood sisaldab täielikku konfiguratsiooni. See ASENDAB olemasolevad kanalid ja raadioseaded. Kõik olemasolevad kanalid eemaldatakse.</string>
 </resources>
