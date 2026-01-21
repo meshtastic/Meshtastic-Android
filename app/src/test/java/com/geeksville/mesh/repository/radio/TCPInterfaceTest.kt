@@ -55,6 +55,25 @@ class TCPInterfaceTest {
         assertArrayEquals("Heartbeat bytes should match", expectedHeartbeat, tcpInterface.capturedBytes)
     }
 
-    // Since startConnect is private, we'd normally need reflection or to make a internal method.
-    // For now, testing keepAlive is a good first step for stability.
+    @Test
+    fun `sendBytes does not crash when outStream is null`() = runTest {
+        val address = "192.168.1.1:4403"
+        val tcpInterface = object : TCPInterface(service, dispatchers, address) {
+            override fun connect() {}
+        }
+        
+        // This should not throw UninitializedPropertyAccessException
+        tcpInterface.sendBytes(byteArrayOf(1, 2, 3))
+    }
+
+    @Test
+    fun `flushBytes does not crash when outStream is null`() = runTest {
+        val address = "192.168.1.1:4403"
+        val tcpInterface = object : TCPInterface(service, dispatchers, address) {
+            override fun connect() {}
+        }
+        
+        // This should not throw UninitializedPropertyAccessException
+        tcpInterface.flushBytes()
+    }
 }
