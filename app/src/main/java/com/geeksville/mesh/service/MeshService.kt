@@ -211,8 +211,8 @@ class MeshService : Service() {
                 router.actionHandler.handleSetOwner(u, myNodeNum)
             }
 
-            override fun setRemoteOwner(id: Int, payload: ByteArray) = toRemoteExceptions {
-                router.actionHandler.handleSetRemoteOwner(id, payload, myNodeNum)
+            override fun setRemoteOwner(id: Int, destNum: Int, payload: ByteArray) = toRemoteExceptions {
+                router.actionHandler.handleSetRemoteOwner(id, destNum, payload, myNodeNum)
             }
 
             override fun getRemoteOwner(id: Int, destNum: Int) = toRemoteExceptions {
@@ -275,12 +275,12 @@ class MeshService : Service() {
                 router.actionHandler.handleGetRemoteChannel(id, destNum, index)
             }
 
-            override fun beginEditSettings() = toRemoteExceptions {
-                router.actionHandler.handleBeginEditSettings(myNodeNum)
+            override fun beginEditSettings(destNum: Int) = toRemoteExceptions {
+                router.actionHandler.handleBeginEditSettings(destNum)
             }
 
-            override fun commitEditSettings() = toRemoteExceptions {
-                router.actionHandler.handleCommitEditSettings(myNodeNum)
+            override fun commitEditSettings(destNum: Int) = toRemoteExceptions {
+                router.actionHandler.handleCommitEditSettings(destNum)
             }
 
             override fun getChannelSet(): ByteArray = toRemoteExceptions {
@@ -333,7 +333,9 @@ class MeshService : Service() {
                 router.actionHandler.handleRequestReboot(requestId, destNum)
             }
 
-            override fun rebootToDfu() = toRemoteExceptions { router.actionHandler.handleRebootToDfu(myNodeNum) }
+            override fun rebootToDfu(destNum: Int) = toRemoteExceptions {
+                router.actionHandler.handleRebootToDfu(destNum)
+            }
 
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
                 router.actionHandler.handleRequestFactoryReset(requestId, destNum)

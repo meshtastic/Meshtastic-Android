@@ -35,7 +35,7 @@ open class FakeIMeshService : IMeshService.Stub() {
 
     override fun setOwner(user: MeshUser?) {}
 
-    override fun setRemoteOwner(requestId: Int, payload: ByteArray?) {}
+    override fun setRemoteOwner(requestId: Int, destNum: Int, payload: ByteArray?) {}
 
     override fun getRemoteOwner(requestId: Int, destNum: Int) {}
 
@@ -73,9 +73,9 @@ open class FakeIMeshService : IMeshService.Stub() {
 
     override fun getRemoteChannel(requestId: Int, destNum: Int, channelIndex: Int) {}
 
-    override fun beginEditSettings() {}
+    override fun beginEditSettings(destNum: Int) {}
 
-    override fun commitEditSettings() {}
+    override fun commitEditSettings(destNum: Int) {}
 
     override fun removeByNodenum(requestID: Int, nodeNum: Int) {}
 
@@ -93,7 +93,7 @@ open class FakeIMeshService : IMeshService.Stub() {
 
     override fun requestFactoryReset(requestId: Int, destNum: Int) {}
 
-    override fun rebootToDfu() {}
+    override fun rebootToDfu(destNum: Int) {}
 
     override fun requestNodedbReset(requestId: Int, destNum: Int, preserveFavorites: Boolean) {}
 

@@ -250,7 +250,7 @@ constructor(
         destNum,
         { service, packetId, _ ->
             _radioConfigState.update { it.copy(userConfig = user) }
-            service.setRemoteOwner(packetId, user.toByteArray())
+            service.setRemoteOwner(packetId, destNum, user.toByteArray())
         },
         "Request setOwner error",
     )
@@ -506,50 +506,54 @@ constructor(
             }
         }
 
-    fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
-        meshService?.beginEditSettings()
-        if (hasLongName() || hasShortName()) {
-            destNode.value?.user?.let {
-                val user =
-                    MeshProtos.User.newBuilder()
-                        .setId(it.id)
-                        .setLongName(if (hasLongName()) longName else it.longName)
-                        .setShortName(if (hasShortName()) shortName else it.shortName)
-                        .setIsLicensed(it.isLicensed)
-                        .build()
-                setOwner(user)
+    @Suppress("CyclomaticComplexMethod")
+    fun installProfile(protobuf: DeviceProfile) {
+        val destNum = destNode.value?.num ?: return
+        with(protobuf) {
+            meshService?.beginEditSettings(destNum)
+            if (hasLongName() || hasShortName()) {
+                destNode.value?.user?.let {
+                    val user =
+                        MeshProtos.User.newBuilder()
+                            .setId(it.id)
+                            .setLongName(if (hasLongName()) longName else it.longName)
+                            .setShortName(if (hasShortName()) shortName else it.shortName)
+                            .setIsLicensed(it.isLicensed)
+                            .build()
+                    setOwner(user)
+                }
             }
-        }
-        if (hasChannelUrl()) {
-            try {
-                setChannels(channelUrl)
-            } catch (ex: Exception) {
-                Logger.e(ex) { "DeviceProfile channel import error" }
-                sendError(ex.customMessage)
+            if (hasChannelUrl()) {
+                try {
+                    setChannels(channelUrl)
+                } catch (ex: Exception) {
+                    Logger.e(ex) { "DeviceProfile channel import error" }
+                    sendError(ex.customMessage)
+                }
             }
-        }
-        if (hasConfig()) {
-            val descriptor = ConfigProtos.Config.getDescriptor()
-            config.allFields.forEach { (field, value) ->
-                val newConfig =
-                    ConfigProtos.Config.newBuilder().setField(descriptor.findFieldByName(field.name), value).build()
-                setConfig(newConfig)
+            if (hasConfig()) {
+                val descriptor = ConfigProtos.Config.getDescriptor()
+                config.allFields.forEach { (field, value) ->
+                    val newConfig =
+                        ConfigProtos.Config.newBuilder().setField(descriptor.findFieldByName(field.name), value).build()
+                    setConfig(newConfig)
+                }
             }
-        }
-        if (hasFixedPosition()) {
-            setFixedPosition(Position(fixedPosition))
-        }
-        if (hasModuleConfig()) {
-            val descriptor = ModuleConfigProtos.ModuleConfig.getDescriptor()
-            moduleConfig.allFields.forEach { (field, value) ->
-                val newConfig =
-                    ModuleConfigProtos.ModuleConfig.newBuilder()
-                        .setField(descriptor.findFieldByName(field.name), value)
-                        .build()
-                setModuleConfig(newConfig)
+            if (hasFixedPosition()) {
+                setFixedPosition(Position(fixedPosition))
             }
+            if (hasModuleConfig()) {
+                val descriptor = ModuleConfigProtos.ModuleConfig.getDescriptor()
+                moduleConfig.allFields.forEach { (field, value) ->
+                    val newConfig =
+                        ModuleConfigProtos.ModuleConfig.newBuilder()
+                            .setField(descriptor.findFieldByName(field.name), value)
+                            .build()
+                    setModuleConfig(newConfig)
+                }
+            }
+            meshService?.commitEditSettings(destNum)
         }
-        meshService?.commitEditSettings()
     }
 
     fun clearPacketResponse() {

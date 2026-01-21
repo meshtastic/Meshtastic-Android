@@ -52,7 +52,7 @@ interface IMeshService {
     */
     void setOwner(in MeshUser user);
 
-    void setRemoteOwner(in int requestId, in byte []payload);
+    void setRemoteOwner(in int requestId, in int destNum, in byte []payload);
     void getRemoteOwner(in int requestId, in int destNum);
 
     /// Return my unique user ID string
@@ -109,10 +109,10 @@ interface IMeshService {
     void getRemoteChannel(in int requestId, in int destNum, in int channelIndex);
 
     /// Send beginEditSettings admin packet to nodeNum
-    void beginEditSettings();
+    void beginEditSettings(in int destNum);
 
     /// Send commitEditSettings admin packet to nodeNum
-    void commitEditSettings();
+    void commitEditSettings(in int destNum);
 
     /// delete a specific nodeNum from nodeDB
     void removeByNodenum(in int requestID, in int nodeNum);
@@ -139,7 +139,7 @@ interface IMeshService {
     void requestFactoryReset(in int requestId, in int destNum);
 
     /// Send reboot to DFU admin packet
-    void rebootToDfu();
+    void rebootToDfu(in int destNum);
 
     /// Send NodedbReset admin packet to nodeNum
     void requestNodedbReset(in int requestId, in int destNum, in boolean preserveFavorites);
