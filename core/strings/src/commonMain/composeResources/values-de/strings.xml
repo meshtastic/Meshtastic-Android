@@ -731,6 +731,8 @@
     <string name="user_id">Benutzer ID</string>
     <string name="uptime">Laufzeit</string>
     <string name="load_indexed">Last %1$d</string>
+    <string name="fetching_channel_indexed">Abrufen von Kanal %1$d/%2$d</string>
+    <string name="fetching_config">Abrufen %1$s</string>
     <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
     <string name="timestamp">Zeitstempel</string>
     <string name="heading">Überschrift</string>
@@ -1091,4 +1093,7 @@
     <string name="mark_as_read">Als gelesen markieren</string>
     <string name="now">Jetzt</string>
     <string name="add_channels_title">Kanäle hinzufügen</string>
+    <string name="add_channels_description">Die folgenden Kanäle wurden im QR-Code gefunden. Wählen Sie, welche Sie Ihrem Gerät hinzufügen möchten. Vorhandene Kanäle werden beibehalten.</string>
+    <string name="replace_channels_and_settings_title">Kanaleinstellungen für &amp; ersetzen</string>
+    <string name="replace_channels_and_settings_description">Dieser QR-Code enthält eine komplette Konfiguration. Hierdurch werden Ihre bestehenden Kanäle und Funkeinstellungen ersetzt. Alle vorhandenen Kanäle werden entfernt.</string>
 </resources>

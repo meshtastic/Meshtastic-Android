@@ -75,7 +75,7 @@
     <string name="role_client_base_desc">Обрабатывает пакеты от избранных узлов как ROUTER_LATE, а все остальные пакеты - как от CLIENT.</string>
     <string name="role_router">Роутер</string>
     <string name="role_router_desc">Инфраструктурный узел для расширения охвата сети путем передачи сообщений. Видим в списке узлов.</string>
-    <string name="role_router_client">Клиент маршрутизатора</string>
+    <string name="role_router_client">Клиент маршрутизатор</string>
     <string name="role_router_client_desc">Сочетание ROUTER и CLIENT. Не для переносных устройств.</string>
     <string name="role_repeater">Ретранслятор</string>
     <string name="role_repeater_desc">Инфраструктурный узел для расширения покрытия сети путем передачи сообщений с минимальными накладными расходами. Не виден в списке узлов.</string>
@@ -89,7 +89,7 @@
     <string name="role_client_hidden_desc">Устройство, которое передает сигнал только при необходимости для скрытности или экономии энергии.</string>
     <string name="role_lost_and_found">Потерянные и Найдены</string>
     <string name="role_lost_and_found_desc">Регулярно передает местоположение в виде сообщения на канал по умолчанию для помощи в восстановлении устройства.</string>
-    <string name="role_tak_tracker">Трекер тактический</string>
+    <string name="role_tak_tracker">TAK трекер</string>
     <string name="role_tak_tracker_desc">Включает автоматические трансляции TAK PLI и сокращает рутинные трансляции.</string>
     <string name="role_router_late">Роутер последнего слота</string>
     <string name="role_router_late_desc">Инфраструктурный узел, который всегда ретранслирует пакеты один раз, но только после всех остальных режимов, обеспечивая дополнительное покрытие для локальных кластеров. Видим в списке.</string>
@@ -739,6 +739,8 @@
     <string name="user_id">ID пользователя</string>
     <string name="uptime">Аптайм</string>
     <string name="load_indexed">Нагрузка %1$d</string>
+    <string name="fetching_channel_indexed">Получен канал %1$d/%2$d</string>
+    <string name="fetching_config">Получен %1$s</string>
     <string name="disk_free_indexed">Свободно на диске %1$d</string>
     <string name="timestamp">Отметка времени</string>
     <string name="heading">Курс</string>
@@ -766,7 +768,7 @@
     <string name="public_key_changed">Публичный ключ изменён</string>
     <string name="import_label">Импортировать</string>
     <string name="request">Запрос</string>
-    <string name="request_neighbor_info">Информация о ближайших соседях (2.7.15+)</string>
+    <string name="request_neighbor_info">Информация о соседях (2.7.15+)</string>
     <string name="request_telemetry">Запрос телеметрии</string>
     <string name="request_device_metrics">Метрики устройства</string>
     <string name="request_environment_metrics">Метрики окружения</string>
