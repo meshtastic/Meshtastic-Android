@@ -38,7 +38,10 @@ data class DeviceHardware(
     val requiresBootloaderUpgradeForOta: Boolean? = null,
     /** Optional URL pointing to documentation for upgrading the bootloader. */
     val bootloaderInfoUrl: String? = null,
-    val supportsUnifiedOta: Boolean = false,
     val supportLevel: Int? = null,
     val tags: List<String>? = null,
-)
+) {
+    /** Returns true if the device architecture is ESP32-based. */
+    val isEsp32Arc: Boolean
+        get() = architecture.startsWith("esp32", ignoreCase = true)
+}

@@ -53,25 +53,19 @@ class FirmwareRetriever @Inject constructor(private val fileHandler: FirmwareFil
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
     ): File? {
-        // Try MCU-generic Unified OTA binary first, as it's the fastest and newest standard.
-        // However, we skip the generic binary for devices with specialized UI requirements (MUI/TFT/E-Ink)
-        // because the generic binary often lacks the necessary drivers.
-        val hasSpecificUi = hardware.hasMui == true || hardware.hasInkHud == true
-        if (hardware.supportsUnifiedOta && !hasSpecificUi) {
-            val mcu = hardware.architecture.replace("-", "")
-            val otaFilename = "mt-$mcu-ota.bin"
-            retrieve(
-                release = release,
-                hardware = hardware,
-                onProgress = onProgress,
-                fileSuffix = ".bin",
-                internalFileExtension = ".bin",
-                preferredFilename = otaFilename,
-            )
-                ?.let {
-                    return it
-                }
-        }
+        val mcu = hardware.architecture.replace("-", "")
+        val otaFilename = "mt-$mcu-ota.bin"
+        retrieve(
+            release = release,
+            hardware = hardware,
+            onProgress = onProgress,
+            fileSuffix = ".bin",
+            internalFileExtension = ".bin",
+            preferredFilename = otaFilename,
+        )
+            ?.let {
+                return it
+            }
 
         // Fallback to board-specific binary using the now-accurate platformioTarget.
         return retrieve(

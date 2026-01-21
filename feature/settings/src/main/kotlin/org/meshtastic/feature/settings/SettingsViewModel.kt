@@ -133,7 +133,7 @@ constructor(
 
                     // ESP32 Unified OTA is only supported via BLE or WiFi (TCP), not USB Serial.
                     val isEsp32OtaSupported =
-                        hw?.supportsUnifiedOta == true && capabilities.supportsEsp32Ota && !radioPrefs.isSerial()
+                        hw?.isEsp32Arc == true && capabilities.supportsEsp32Ota && !radioPrefs.isSerial()
 
                     flow { emit(hw?.requiresDfu == true || isEsp32OtaSupported) }
                 } else {
