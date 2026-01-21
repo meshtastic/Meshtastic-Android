@@ -25,6 +25,7 @@ import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.copy
 
 @RunWith(AndroidJUnit4::class)
 class ChannelTest {
