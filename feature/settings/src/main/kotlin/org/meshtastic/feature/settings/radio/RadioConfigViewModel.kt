@@ -32,6 +32,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
 import com.google.protobuf.MessageLite
+import com.meshtastic.core.strings.getString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,6 +65,8 @@ import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cant_shutdown
+import org.meshtastic.core.strings.fetching_channel_indexed
+import org.meshtastic.core.strings.fetching_config
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -131,7 +134,7 @@ constructor(
     val destNode: StateFlow<Node?>
         get() = _destNode
 
-    private val requestIds = MutableStateFlow(hashSetOf<Int>())
+    private val requestIds = MutableStateFlow(emptySet<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
@@ -213,11 +216,11 @@ constructor(
                 val packetId = service.packetId
                 try {
                     requestAction(service, packetId, destNum)
-                    requestIds.update { it.apply { add(packetId) } }
+                    requestIds.update { it + packetId }
                     _radioConfigState.update { state ->
                         val currentState = state.responseState
                         if (currentState is ResponseState.Loading) {
-                            val total = requestIds.value.size.coerceAtLeast(1)
+                            val total = maxOf(currentState.total, requestIds.value.size)
                             state.copy(responseState = currentState.copy(total = total))
                         } else {
                             state.copy(
@@ -553,12 +556,22 @@ constructor(
     }
 
     fun clearPacketResponse() {
-        requestIds.value = hashSetOf()
+        requestIds.value = emptySet()
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
 
+    private fun getTitleForRoute(route: Enum<*>) = when (route) {
+        is ConfigRoute -> route.title
+        is ModuleRoute -> route.title
+        is AdminRoute -> route.title
+        else -> null
+    }
+
+    @Suppress("CyclomaticComplexMethod")
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNode.value?.num ?: return
+
+        val title = getTitleForRoute(route)
 
         _radioConfigState.update {
             RadioConfigState(
@@ -567,7 +580,10 @@ constructor(
                 route = route.name,
                 metadata = it.metadata,
                 nodeDbResetPreserveFavorites = it.nodeDbResetPreserveFavorites,
-                responseState = ResponseState.Loading(),
+                responseState =
+                ResponseState.Loading(
+                    status = title?.let { t -> getString(Res.string.fetching_config, getString(t)) },
+                ),
             )
         }
 
@@ -646,11 +662,14 @@ constructor(
         _radioConfigState.update { it.copy(responseState = ResponseState.Error(error)) }
     }
 
-    private fun incrementCompleted() {
+    private fun incrementCompleted(status: String? = null) {
         _radioConfigState.update { state ->
             if (state.responseState is ResponseState.Loading) {
                 val increment = state.responseState.completed + 1
-                state.copy(responseState = state.responseState.copy(completed = increment))
+                state.copy(
+                    responseState =
+                    state.responseState.copy(completed = increment, status = status ?: state.responseState.status),
+                )
             } else {
                 state // Return the unchanged state for other response states
             }
@@ -671,7 +690,7 @@ constructor(
             if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
                 sendError(getStringResFrom(parsed.errorReasonValue))
             } else if (packet.from == destNum && route.isEmpty()) {
-                requestIds.update { it.apply { remove(data.requestId) } }
+                requestIds.update { it - data.requestId }
                 if (requestIds.value.isEmpty()) {
                     setResponseStateSuccess()
                 } else {
@@ -702,7 +721,9 @@ constructor(
                                 state.channelList.toMutableList().apply { add(response.index, response.settings) },
                             )
                         }
-                        incrementCompleted()
+                        incrementCompleted(
+                            getString(Res.string.fetching_channel_indexed, response.index + 1, maxChannels),
+                        )
                         if (response.index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                             // Not done yet, request next channel
                             getChannel(destNum, response.index + 1)
@@ -761,7 +782,7 @@ constructor(
             if (AdminRoute.entries.any { it.name == route }) {
                 sendAdminRequest(destNum)
             }
-            requestIds.update { it.apply { remove(data.requestId) } }
+            requestIds.update { it - data.requestId }
         }
     }
 }
