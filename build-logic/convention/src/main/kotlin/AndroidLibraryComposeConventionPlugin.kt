@@ -18,16 +18,14 @@
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.meshtastic.buildlogic.configureAndroidCompose
-import org.meshtastic.buildlogic.libs
-import org.meshtastic.buildlogic.plugin
 
 class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            apply(plugin = libs.plugin("compose-compiler").get().pluginId)
+            // Note: compose-compiler plugin doesn't exist for Kotlin 1.9.x (only in Kotlin 2.0+)
+            // Using old-style kotlinCompilerExtensionVersion instead in AndroidCompose.kt
             extensions.configure<CommonExtension> {
                 configureAndroidCompose(this)
             }
