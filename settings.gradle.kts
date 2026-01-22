@@ -47,10 +47,18 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 pluginManagement {
     includeBuild("build-logic")
     repositories {
+        maven { url = uri("https://dl.google.com/dl/android/maven2/") }
         google()
         mavenCentral()
         gradlePluginPortal()
         maven { url = uri("https://jitpack.io") }
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == "com.android") {
+                useModule("com.android.tools.build:gradle:${requested.version}")
+            }
+        }
     }
 }
 

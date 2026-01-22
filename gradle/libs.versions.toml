@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "8.3.2"
+agp = "8.1.2"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -16,7 +16,7 @@ paging = "3.3.6"
 room = "2.8.4"
 
 # Kotlin
-kotlin = "2.0.21"
+kotlin = "1.9.25"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.9.0"
 ktlint = "1.7.1"
@@ -38,7 +38,7 @@ aboutlibraries = "13.2.1"
 coil = "3.3.0"
 dd-sdk-android = "3.5.0"
 detekt = "1.23.8"
-devtools-ksp = "2.0.21-1.0.28"
+devtools-ksp = "1.9.25-1.0.20"
 markdownRenderer = "0.39.1"
 osmdroid-android = "6.1.20"
 protobuf = "4.33.4"
