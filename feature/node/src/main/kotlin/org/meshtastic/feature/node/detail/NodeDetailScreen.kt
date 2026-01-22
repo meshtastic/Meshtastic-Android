@@ -25,6 +25,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,7 +44,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +57,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SharedContactDialog
@@ -72,9 +71,6 @@ import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.NotesSection
 import org.meshtastic.feature.node.component.PositionSection
-import org.meshtastic.feature.node.metrics.MetricsViewModel
-import org.meshtastic.feature.node.model.LogsType
-import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 private sealed interface NodeDetailOverlay {
@@ -89,20 +85,16 @@ private sealed interface NodeDetailOverlay {
 fun NodeDetailScreen(
     nodeId: Int,
     modifier: Modifier = Modifier,
-    metricsViewModel: MetricsViewModel = hiltViewModel(),
-    nodeDetailViewModel: NodeDetailViewModel = hiltViewModel(),
+    viewModel: NodeDetailViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
 ) {
-    LaunchedEffect(nodeId) {
-        metricsViewModel.setNodeId(nodeId)
-        nodeDetailViewModel.start(nodeId)
-    }
+    viewModel.start(nodeId)
 
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
-        nodeDetailViewModel.effects.collect { effect ->
+        viewModel.effects.collect { effect ->
             if (effect is NodeRequestEffect.ShowFeedback) {
                 @Suppress("SpreadOperator")
                 snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
@@ -110,20 +102,13 @@ fun NodeDetailScreen(
         }
     }
 
-    val metricsState by metricsViewModel.state.collectAsStateWithLifecycle()
-    val envState by metricsViewModel.environmentState.collectAsStateWithLifecycle()
-    val ourNode by nodeDetailViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val availableLogs by
-        remember(metricsState, envState) { derivedStateOf { getAvailableLogs(metricsState, envState) } }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     NodeDetailScaffold(
         modifier = modifier,
-        metricsState = metricsState,
-        ourNode = ourNode,
-        availableLogs = availableLogs,
+        uiState = uiState,
         snackbarHostState = snackbarHostState,
-        metricsViewModel = metricsViewModel,
-        nodeDetailViewModel = nodeDetailViewModel,
+        viewModel = viewModel,
         navigateToMessages = navigateToMessages,
         onNavigate = onNavigate,
         onNavigateUp = onNavigateUp,
@@ -134,12 +119,9 @@ fun NodeDetailScreen(
 @Suppress("LongParameterList")
 private fun NodeDetailScaffold(
     modifier: Modifier,
-    metricsState: MetricsState,
-    ourNode: Node?,
-    availableLogs: Set<LogsType>,
+    uiState: NodeDetailUiState,
     snackbarHostState: SnackbarHostState,
-    metricsViewModel: MetricsViewModel,
-    nodeDetailViewModel: NodeDetailViewModel,
+    viewModel: NodeDetailViewModel,
     navigateToMessages: (String) -> Unit,
     onNavigate: (Route) -> Unit,
     onNavigateUp: () -> Unit,
@@ -150,13 +132,15 @@ private fun NodeDetailScaffold(
     val compassUiState by
         compassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
 
-    val node = metricsState.node
+    val node = uiState.node
+    val scrollState = rememberScrollState()
+
     Scaffold(
         modifier = modifier,
         topBar = {
             MainAppBar(
                 title = node?.user?.longName ?: "",
-                ourNode = ourNode,
+                ourNode = uiState.ourNode,
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
@@ -167,11 +151,9 @@ private fun NodeDetailScaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         NodeDetailContent(
-            node = node,
-            metricsState = metricsState,
-            ourNode = ourNode,
-            availableLogs = availableLogs,
-            nodeDetailViewModel = nodeDetailViewModel,
+            uiState = uiState,
+            viewModel = viewModel,
+            scrollState = scrollState,
             onAction = { action ->
                 when (action) {
                     is NodeDetailAction.ShareContact -> activeOverlay = NodeDetailOverlay.SharedContact
@@ -182,13 +164,11 @@ private fun NodeDetailScaffold(
                     else ->
                         handleNodeAction(
                             action = action,
-                            ourNode = ourNode,
-                            node = node!!,
+                            uiState = uiState,
                             navigateToMessages = navigateToMessages,
                             onNavigateUp = onNavigateUp,
                             onNavigate = onNavigate,
-                            metricsViewModel = metricsViewModel,
-                            nodeDetailViewModel = nodeDetailViewModel,
+                            viewModel = viewModel,
                         )
                 }
             },
@@ -198,63 +178,39 @@ private fun NodeDetailScaffold(
     }
 
     NodeDetailOverlays(activeOverlay, node, compassUiState, compassViewModel, { activeOverlay = null }) {
-        nodeDetailViewModel.handleNodeMenuAction(NodeMenuAction.RequestPosition(it))
+        viewModel.handleNodeMenuAction(NodeMenuAction.RequestPosition(it))
     }
 }
 
 @Composable
 private fun NodeDetailContent(
-    node: Node?,
-    metricsState: MetricsState,
-    ourNode: Node?,
-    availableLogs: Set<LogsType>,
-    nodeDetailViewModel: NodeDetailViewModel,
+    uiState: NodeDetailUiState,
+    viewModel: NodeDetailViewModel,
+    scrollState: ScrollState,
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val lastTracerouteTime by nodeDetailViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
-    val lastRequestNeighborsTime by nodeDetailViewModel.lastRequestNeighborsTime.collectAsStateWithLifecycle()
-
     AnimatedContent(
-        targetState = node,
+        targetState = uiState.node != null,
         transitionSpec = { fadeIn().togetherWith(fadeOut()) },
         label = "NodeDetailContent",
         modifier = modifier,
-    ) { targetNode ->
-        if (targetNode != null) {
+    ) { isNodePresent ->
+        if (isNodePresent && uiState.node != null) {
             NodeDetailList(
-                node = targetNode,
-                ourNode = ourNode,
-                metricsState = metricsState,
-                lastTracerouteTime = lastTracerouteTime,
-                lastRequestNeighborsTime = lastRequestNeighborsTime,
-                availableLogs = availableLogs,
+                node = uiState.node,
+                ourNode = uiState.ourNode,
+                uiState = uiState,
+                scrollState = scrollState,
                 onAction = onAction,
                 onFirmwareSelect = onFirmwareSelect,
-                onSaveNotes = { num, notes -> nodeDetailViewModel.setNodeNotes(num, notes) },
+                onSaveNotes = { num, notes -> viewModel.setNodeNotes(num, notes) },
             )
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         }
     }
-}
-
-private fun getAvailableLogs(
-    metricsState: MetricsState,
-    envState: org.meshtastic.feature.node.metrics.EnvironmentMetricsState,
-): Set<LogsType> = buildSet {
-    if (metricsState.hasDeviceMetrics()) add(LogsType.DEVICE)
-    if (metricsState.hasPositionLogs()) {
-        add(LogsType.NODE_MAP)
-        add(LogsType.POSITIONS)
-    }
-    if (envState.hasEnvironmentMetrics()) add(LogsType.ENVIRONMENT)
-    if (metricsState.hasSignalMetrics()) add(LogsType.SIGNAL)
-    if (metricsState.hasPowerMetrics()) add(LogsType.POWER)
-    if (metricsState.hasTracerouteLogs()) add(LogsType.TRACEROUTE)
-    if (metricsState.hasHostMetrics()) add(LogsType.HOST)
-    if (metricsState.hasPaxMetrics()) add(LogsType.PAX)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -317,63 +273,58 @@ private fun NodeDetailBottomSheet(onDismiss: () -> Unit, content: @Composable ()
 private fun NodeDetailList(
     node: Node,
     ourNode: Node?,
-    metricsState: MetricsState,
-    lastTracerouteTime: Long?,
-    lastRequestNeighborsTime: Long?,
-    availableLogs: Set<LogsType>,
+    uiState: NodeDetailUiState,
+    scrollState: ScrollState,
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     onSaveNotes: (Int, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).focusable(),
+        modifier = modifier.fillMaxSize().verticalScroll(scrollState).padding(16.dp).focusable(),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         NodeDetailsSection(node)
         DeviceActions(
             node = node,
-            lastTracerouteTime = lastTracerouteTime,
-            lastRequestNeighborsTime = lastRequestNeighborsTime,
-            availableLogs = availableLogs,
+            lastTracerouteTime = uiState.lastTracerouteTime,
+            lastRequestNeighborsTime = uiState.lastRequestNeighborsTime,
+            availableLogs = uiState.availableLogs,
             onAction = onAction,
-            metricsState = metricsState,
-            isLocal = metricsState.isLocal,
+            metricsState = uiState.metricsState,
+            isLocal = uiState.metricsState.isLocal,
         )
-        PositionSection(node, ourNode, metricsState, availableLogs, onAction)
-        if (metricsState.deviceHardware != null) DeviceDetailsSection(metricsState)
+        PositionSection(node, ourNode, uiState.metricsState, uiState.availableLogs, onAction)
+        if (uiState.metricsState.deviceHardware != null) DeviceDetailsSection(uiState.metricsState)
         NotesSection(node = node, onSaveNotes = onSaveNotes)
-        if (!metricsState.isManaged) {
-            AdministrationSection(node, metricsState, onAction, onFirmwareSelect)
+        if (!uiState.metricsState.isManaged) {
+            AdministrationSection(node, uiState.metricsState, onAction, onFirmwareSelect)
         }
     }
 }
 
 private fun handleNodeAction(
     action: NodeDetailAction,
-    ourNode: Node?,
-    node: Node,
+    uiState: NodeDetailUiState,
     navigateToMessages: (String) -> Unit,
     onNavigateUp: () -> Unit,
     onNavigate: (Route) -> Unit,
-    metricsViewModel: MetricsViewModel,
-    nodeDetailViewModel: NodeDetailViewModel,
+    viewModel: NodeDetailViewModel,
 ) {
     when (action) {
         is NodeDetailAction.Navigate -> onNavigate(action.route)
-        is NodeDetailAction.TriggerServiceAction -> metricsViewModel.onServiceAction(action.action)
+        is NodeDetailAction.TriggerServiceAction -> viewModel.onServiceAction(action.action)
         is NodeDetailAction.HandleNodeMenuAction -> {
             when (val menuAction = action.action) {
                 is NodeMenuAction.DirectMessage -> {
-                    val hasPKC = ourNode?.hasPKC == true
-                    val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
-                    navigateToMessages("${channel}${node.user.id}")
+                    val route = viewModel.getDirectMessageRoute(menuAction.node, uiState.ourNode)
+                    navigateToMessages(route)
                 }
                 is NodeMenuAction.Remove -> {
-                    nodeDetailViewModel.handleNodeMenuAction(menuAction)
+                    viewModel.handleNodeMenuAction(menuAction)
                     onNavigateUp()
                 }
-                else -> nodeDetailViewModel.handleNodeMenuAction(menuAction)
+                else -> viewModel.handleNodeMenuAction(menuAction)
             }
         }
         else -> {}
