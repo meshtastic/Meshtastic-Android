@@ -38,8 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.theme.AppTheme
 
-const val COOL_DOWN_TIME_MS = 30000L
-const val REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS = 180000L // 3 minutes
+internal const val COOL_DOWN_TIME_MS = 30000L
+internal const val REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS = 180000L // 3 minutes
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

@@ -52,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
@@ -190,9 +189,9 @@ private fun rememberTelemetricFeatures(
 @Composable
 private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean, onAction: (NodeDetailAction) -> Unit) {
     val showContent = feature.content != null && feature.hasContent(node)
-    val description = getString(feature.titleRes)
-    val logsDescription = description + " " + getString(Res.string.logs)
-    val requestDescription = description + " " + getString(Res.string.request_telemetry)
+    val description = stringResource(feature.titleRes)
+    val logsDescription = description + " " + stringResource(Res.string.logs)
+    val requestDescription = description + " " + stringResource(Res.string.request_telemetry)
 
     Column {
         ListItem(
