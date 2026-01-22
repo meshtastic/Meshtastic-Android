@@ -19,11 +19,12 @@ package org.meshtastic.feature.node.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.component.NodeMenuAction
 import javax.inject.Inject
 
@@ -36,18 +37,28 @@ constructor(
     private val nodeRequestActions: NodeRequestActions,
 ) : ViewModel() {
 
+    fun start(nodeId: Int) {
+        nodeManagementActions.start(viewModelScope, nodeId)
+        nodeRequestActions.start(viewModelScope)
+    }
+
     init {
+        // Initial start if no nodeId provided yet (though Screen calls start(nodeId))
         nodeManagementActions.start(viewModelScope)
         nodeRequestActions.start(viewModelScope)
     }
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
-    private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
-    val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
+    val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 
-    private val _lastRequestNeighborsTime = MutableStateFlow<Long?>(null)
-    val lastRequestNeighborsTime: StateFlow<Long?> = _lastRequestNeighborsTime.asStateFlow()
+    val lastTraceRouteTime: StateFlow<Long?> =
+        nodeRequestActions.lastTracerouteTimes.map { it[nodeManagementActions.nodeId] }.stateInWhileSubscribed(null)
+
+    val lastRequestNeighborsTime: StateFlow<Long?> =
+        nodeRequestActions.lastRequestNeighborTimes
+            .map { it[nodeManagementActions.nodeId] }
+            .stateInWhileSubscribed(null)
 
     fun handleNodeMenuAction(action: NodeMenuAction) {
         when (action) {
@@ -55,16 +66,17 @@ constructor(
             is NodeMenuAction.Ignore -> nodeManagementActions.ignoreNode(action.node)
             is NodeMenuAction.Mute -> nodeManagementActions.muteNode(action.node)
             is NodeMenuAction.Favorite -> nodeManagementActions.favoriteNode(action.node)
-            is NodeMenuAction.RequestUserInfo -> nodeRequestActions.requestUserInfo(action.node.num)
+            is NodeMenuAction.RequestUserInfo ->
+                nodeRequestActions.requestUserInfo(action.node.num, action.node.user.longName)
             is NodeMenuAction.RequestNeighborInfo -> {
-                nodeRequestActions.requestNeighborInfo(action.node.num)
-                _lastRequestNeighborsTime.value = System.currentTimeMillis()
+                nodeRequestActions.requestNeighborInfo(action.node.num, action.node.user.longName)
             }
-            is NodeMenuAction.RequestPosition -> nodeRequestActions.requestPosition(action.node.num)
-            is NodeMenuAction.RequestTelemetry -> nodeRequestActions.requestTelemetry(action.node.num, action.type)
+            is NodeMenuAction.RequestPosition ->
+                nodeRequestActions.requestPosition(action.node.num, action.node.user.longName)
+            is NodeMenuAction.RequestTelemetry ->
+                nodeRequestActions.requestTelemetry(action.node.num, action.node.user.longName, action.type)
             is NodeMenuAction.TraceRoute -> {
-                nodeRequestActions.requestTraceroute(action.node.num)
-                _lastTraceRouteTime.value = System.currentTimeMillis()
+                nodeRequestActions.requestTraceroute(action.node.num, action.node.user.longName)
             }
             else -> {}
         }

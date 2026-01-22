@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -30,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.Route
@@ -50,7 +53,23 @@ fun NodeDetailScreen(
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
 ) {
-    LaunchedEffect(nodeId) { metricsViewModel.setNodeId(nodeId) }
+    LaunchedEffect(nodeId) {
+        metricsViewModel.setNodeId(nodeId)
+        nodeDetailViewModel.start(nodeId)
+    }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        nodeDetailViewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                }
+            }
+        }
+    }
 
     val metricsState by metricsViewModel.state.collectAsStateWithLifecycle()
     val environmentMetricsState by metricsViewModel.environmentState.collectAsStateWithLifecycle()
@@ -92,6 +111,7 @@ fun NodeDetailScreen(
                 onClickChip = {},
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         if (node != null) {
             NodeDetailContent(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.animation.core.Animatable
@@ -57,7 +56,11 @@ fun TracerouteButton(
     val progress = remember { Animatable(0f) }
 
     LaunchedEffect(lastTracerouteTime) {
-        val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
+        if (lastTracerouteTime == null) {
+            progress.snapTo(0f)
+            return@LaunchedEffect
+        }
+        val timeSinceLast = System.currentTimeMillis() - lastTracerouteTime
         if (timeSinceLast < COOL_DOWN_TIME_MS) {
             val remainingTime = COOL_DOWN_TIME_MS - timeSinceLast
             progress.snapTo(remainingTime / COOL_DOWN_TIME_MS.toFloat())
@@ -65,6 +68,8 @@ fun TracerouteButton(
                 targetValue = 0f,
                 animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
             )
+        } else {
+            progress.snapTo(0f)
         }
     }
 
@@ -76,7 +81,11 @@ fun TracerouteChip(lastTracerouteTime: Long?, onClick: () -> Unit) {
     val progress = remember { Animatable(0f) }
 
     LaunchedEffect(lastTracerouteTime) {
-        val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
+        if (lastTracerouteTime == null) {
+            progress.snapTo(0f)
+            return@LaunchedEffect
+        }
+        val timeSinceLast = System.currentTimeMillis() - lastTracerouteTime
         if (timeSinceLast < COOL_DOWN_TIME_MS) {
             val remainingTime = COOL_DOWN_TIME_MS - timeSinceLast
             progress.snapTo(remainingTime / COOL_DOWN_TIME_MS.toFloat())
@@ -84,6 +93,8 @@ fun TracerouteChip(lastTracerouteTime: Long?, onClick: () -> Unit) {
                 targetValue = 0f,
                 animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
             )
+        } else {
+            progress.snapTo(0f)
         }
     }
 
@@ -104,7 +115,11 @@ fun RequestNeighborsButton(
     val progress = remember { Animatable(0f) }
 
     LaunchedEffect(lastRequestNeighborsTime) {
-        val timeSinceLast = System.currentTimeMillis() - (lastRequestNeighborsTime ?: 0)
+        if (lastRequestNeighborsTime == null) {
+            progress.snapTo(0f)
+            return@LaunchedEffect
+        }
+        val timeSinceLast = System.currentTimeMillis() - lastRequestNeighborsTime
         if (timeSinceLast < REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS) {
             val remainingTime = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS - timeSinceLast
             progress.snapTo(remainingTime / REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS.toFloat())
@@ -112,6 +127,8 @@ fun RequestNeighborsButton(
                 targetValue = 0f,
                 animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
             )
+        } else {
+            progress.snapTo(0f)
         }
     }
 
@@ -123,7 +140,11 @@ fun RequestNeighborsChip(lastRequestNeighborsTime: Long?, onClick: () -> Unit) {
     val progress = remember { Animatable(0f) }
 
     LaunchedEffect(lastRequestNeighborsTime) {
-        val timeSinceLast = System.currentTimeMillis() - (lastRequestNeighborsTime ?: 0)
+        if (lastRequestNeighborsTime == null) {
+            progress.snapTo(0f)
+            return@LaunchedEffect
+        }
+        val timeSinceLast = System.currentTimeMillis() - lastRequestNeighborsTime
         if (timeSinceLast < REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS) {
             val remainingTime = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS - timeSinceLast
             progress.snapTo(remainingTime / REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS.toFloat())
@@ -131,6 +152,8 @@ fun RequestNeighborsChip(lastRequestNeighborsTime: Long?, onClick: () -> Unit) {
                 targetValue = 0f,
                 animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
             )
+        } else {
+            progress.snapTo(0f)
         }
     }
 

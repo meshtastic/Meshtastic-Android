@@ -44,11 +44,16 @@ constructor(
             is NodeMenuAction.Ignore -> nodeManagementActions.ignoreNode(action.node)
             is NodeMenuAction.Mute -> nodeManagementActions.muteNode(action.node)
             is NodeMenuAction.Favorite -> nodeManagementActions.favoriteNode(action.node)
-            is NodeMenuAction.RequestUserInfo -> nodeRequestActions.requestUserInfo(action.node.num)
-            is NodeMenuAction.RequestNeighborInfo -> nodeRequestActions.requestNeighborInfo(action.node.num)
-            is NodeMenuAction.RequestPosition -> nodeRequestActions.requestPosition(action.node.num)
-            is NodeMenuAction.RequestTelemetry -> nodeRequestActions.requestTelemetry(action.node.num, action.type)
-            is NodeMenuAction.TraceRoute -> nodeRequestActions.requestTraceroute(action.node.num)
+            is NodeMenuAction.RequestUserInfo ->
+                nodeRequestActions.requestUserInfo(action.node.num, action.node.user.longName)
+            is NodeMenuAction.RequestNeighborInfo ->
+                nodeRequestActions.requestNeighborInfo(action.node.num, action.node.user.longName)
+            is NodeMenuAction.RequestPosition ->
+                nodeRequestActions.requestPosition(action.node.num, action.node.user.longName)
+            is NodeMenuAction.RequestTelemetry ->
+                nodeRequestActions.requestTelemetry(action.node.num, action.node.user.longName, action.type)
+            is NodeMenuAction.TraceRoute ->
+                nodeRequestActions.requestTraceroute(action.node.num, action.node.user.longName)
             else -> {}
         }
     }
@@ -57,23 +62,23 @@ constructor(
         nodeManagementActions.setNodeNotes(nodeNum, notes)
     }
 
-    fun requestPosition(destNum: Int, position: Position) {
-        nodeRequestActions.requestPosition(destNum, position)
+    fun requestPosition(destNum: Int, longName: String, position: Position) {
+        nodeRequestActions.requestPosition(destNum, longName, position)
     }
 
-    fun requestUserInfo(destNum: Int) {
-        nodeRequestActions.requestUserInfo(destNum)
+    fun requestUserInfo(destNum: Int, longName: String) {
+        nodeRequestActions.requestUserInfo(destNum, longName)
     }
 
-    fun requestNeighborInfo(destNum: Int) {
-        nodeRequestActions.requestNeighborInfo(destNum)
+    fun requestNeighborInfo(destNum: Int, longName: String) {
+        nodeRequestActions.requestNeighborInfo(destNum, longName)
     }
 
-    fun requestTelemetry(destNum: Int, type: TelemetryType) {
-        nodeRequestActions.requestTelemetry(destNum, type)
+    fun requestTelemetry(destNum: Int, longName: String, type: TelemetryType) {
+        nodeRequestActions.requestTelemetry(destNum, longName, type)
     }
 
-    fun requestTraceroute(destNum: Int) {
-        nodeRequestActions.requestTraceroute(destNum)
+    fun requestTraceroute(destNum: Int, longName: String) {
+        nodeRequestActions.requestTraceroute(destNum, longName)
     }
 }

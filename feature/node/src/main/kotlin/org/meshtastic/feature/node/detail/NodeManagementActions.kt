@@ -36,9 +36,12 @@ constructor(
     private val serviceRepository: ServiceRepository,
 ) {
     private var scope: CoroutineScope? = null
+    var nodeId: Int = 0
+        private set
 
-    fun start(coroutineScope: CoroutineScope) {
+    fun start(coroutineScope: CoroutineScope, nodeId: Int = 0) {
         scope = coroutineScope
+        this.nodeId = nodeId
     }
 
     fun removeNode(nodeNum: Int) {
